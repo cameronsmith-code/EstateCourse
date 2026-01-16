@@ -59,9 +59,10 @@ export const generatePDF = (formData: FormData) => {
   doc.addField(hasChildrenField);
 
   if (formData.hasChildren === 'yes' && formData.childrenData && formData.childrenData.length > 0) {
-    const childrenData = formData.childrenData;
+    const childCount = formData.numberOfChildren === '6+' ? 6 : parseInt(formData.numberOfChildren || '0');
+    const childrenToProcess = formData.childrenData.slice(0, childCount);
 
-    childrenData.forEach((child, index) => {
+    childrenToProcess.forEach((child, index) => {
       yPosition += 13;
 
       if (yPosition > 270) {

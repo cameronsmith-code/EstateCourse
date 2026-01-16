@@ -4,6 +4,11 @@ interface ChildData {
   name?: string;
   dateOfBirth?: string;
   disabled?: string;
+  disabilityTaxCredit?: string;
+  disabilityNature?: string;
+  disabilityCare?: string;
+  disabilityContacts?: string;
+  disabilityOther?: string;
   independent?: string;
   medications?: string;
   allergies?: string;
@@ -82,6 +87,14 @@ export const generatePDF = (formData: FormData) => {
       doc.setFontSize(9);
       doc.text(`Disabled: ${child.disabled === 'yes' ? 'Yes' : child.disabled === 'no' ? 'No' : ''}`, margin, yPosition);
       yPosition += 4;
+
+      if (child.disabled === 'yes' && child.disabilityTaxCredit === 'yes') {
+        doc.setFont(undefined, 'bold');
+        doc.text(`${child.name} is disabled and qualifies for the disability tax credit`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 4;
+      }
+
       doc.text(`Financially Independent: ${child.independent === 'yes' ? 'Yes' : child.independent === 'no' ? 'No' : ''}`, margin, yPosition);
       yPosition += 4;
       doc.text(`Long-term Medications: ${child.medications === 'yes' ? 'Yes' : child.medications === 'no' ? 'No' : ''}`, margin, yPosition);
@@ -141,6 +154,63 @@ export const generatePDF = (formData: FormData) => {
           issuesField.textColor = [0, 0, 0];
           doc.addField(issuesField);
           yPosition += 12;
+        }
+
+        if (child.disabilityTaxCredit === 'yes') {
+          yPosition += 3;
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'bold');
+          doc.text('Disability Information', margin, yPosition);
+          doc.setFont(undefined, 'normal');
+          yPosition += 6;
+
+          doc.setFontSize(8);
+          doc.text('Nature of the disability and severity:', margin, yPosition);
+          yPosition += 2;
+          const natureField = new doc.AcroFormTextField();
+          natureField.fieldName = `child${index + 1}_disabilityNature`;
+          natureField.Rect = [margin, yPosition, fieldWidth - 15, 10];
+          natureField.multiline = true;
+          natureField.fontSize = 8;
+          natureField.textColor = [0, 0, 0];
+          doc.addField(natureField);
+          yPosition += 14;
+
+          doc.setFontSize(8);
+          doc.text('Care and assistance provided:', margin, yPosition);
+          yPosition += 2;
+          const careField = new doc.AcroFormTextField();
+          careField.fieldName = `child${index + 1}_disabilityCare`;
+          careField.Rect = [margin, yPosition, fieldWidth - 15, 10];
+          careField.multiline = true;
+          careField.fontSize = 8;
+          careField.textColor = [0, 0, 0];
+          doc.addField(careField);
+          yPosition += 14;
+
+          doc.setFontSize(8);
+          doc.text('Key contacts and support including a description of their roles:', margin, yPosition);
+          yPosition += 2;
+          const contactsField = new doc.AcroFormTextField();
+          contactsField.fieldName = `child${index + 1}_disabilityContacts`;
+          contactsField.Rect = [margin, yPosition, fieldWidth - 15, 10];
+          contactsField.multiline = true;
+          contactsField.fontSize = 8;
+          contactsField.textColor = [0, 0, 0];
+          doc.addField(contactsField);
+          yPosition += 14;
+
+          doc.setFontSize(8);
+          doc.text('Other information that would assist a potential guardian:', margin, yPosition);
+          yPosition += 2;
+          const otherField = new doc.AcroFormTextField();
+          otherField.fieldName = `child${index + 1}_disabilityOther`;
+          otherField.Rect = [margin, yPosition, fieldWidth - 15, 10];
+          otherField.multiline = true;
+          otherField.fontSize = 8;
+          otherField.textColor = [0, 0, 0];
+          doc.addField(otherField);
+          yPosition += 14;
         }
       }
 

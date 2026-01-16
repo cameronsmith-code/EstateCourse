@@ -182,6 +182,91 @@ export default function StepForm({
                       </div>
                     </div>
 
+                    {childrenData[index]?.disabled === 'yes' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Do they qualify for the disability tax credit?
+                        </label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`disabilityTaxCredit-${index}`}
+                              value="yes"
+                              checked={childrenData[index]?.disabilityTaxCredit === 'yes'}
+                              onChange={(e) => handleChildChange(index, 'disabilityTaxCredit', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">Yes</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`disabilityTaxCredit-${index}`}
+                              value="no"
+                              checked={childrenData[index]?.disabilityTaxCredit === 'no'}
+                              onChange={(e) => handleChildChange(index, 'disabilityTaxCredit', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">No</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    {childrenData[index]?.disabilityTaxCredit === 'yes' && (
+                      <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Nature of the disability and severity
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityNature || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityNature', e.target.value)}
+                            placeholder="Describe the nature and severity of the disability"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={3}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Care and assistance provided
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityCare || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityCare', e.target.value)}
+                            placeholder="Describe the care and assistance provided"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={3}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Key contacts and support including a description of their roles
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityContacts || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityContacts', e.target.value)}
+                            placeholder="Describe key contacts and their roles"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={3}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Other information that would assist a potential guardian
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityOther || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityOther', e.target.value)}
+                            placeholder="Any other information that would be helpful"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         Are they financially independent?

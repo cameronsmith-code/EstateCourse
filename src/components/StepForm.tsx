@@ -1,0 +1,262 @@
+import { useState, FormEvent } from 'react';
+import { Step } from '../lib/steps';
+import FormField from './FormField';
+import VideoPlayer from './VideoPlayer';
+import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+
+type StepFormProps = {
+  step: Step;
+  answers: Record<string, unknown>;
+  allAnswers?: Map<number, Record<string, unknown>>;
+  isFirstStep: boolean;
+  isLastStep: boolean;
+  onNext: () => void;
+  onPrevious: () => void;
+  onAnswerChange: (key: string, value: unknown) => void;
+};
+
+export default function StepForm({
+  step,
+  answers,
+  allAnswers,
+  isFirstStep,
+  isLastStep,
+  onNext,
+  onPrevious,
+  onAnswerChange,
+}: StepFormProps) {
+  const [validationError, setValidationError] = useState('');
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setValidationError('');
+
+    const basicAnswers = allAnswers?.get(1) || {};
+    const numberOfChildren = basicAnswers['numberOfChildren'];
+
+    if (step.id === 2) {
+      if (!numberOfChildren) {
+        setValidationError('Please go back and specify number of children.');
+        return;
+      }
+
+      const childCount = numberOfChildren === '6+' ? 6 : parseInt(numberOfChildren as string);
+      const childrenData = answers['childrenData'] as Array<Record<string, string>> | undefined;
+
+      if (!childrenData || childrenData.length < childCount) {
+        setValidationError('Please fill in details for all children.');
+        return;
+      }
+
+      for (let i = 0; i < childCount; i++) {
+        const child = childrenData[i];
+        if (!child?.name || !child?.dateOfBirth) {
+          setValidationError(`Please fill in name and date of birth for child ${i + 1}.`);
+          return;
+        }
+      }
+    } else {
+      const requiredQuestions = step.questions.filter((q) => q.required);
+      const missingAnswers = requiredQuestions.filter((q) => !answers[q.key]);
+
+      if (missingAnswers.length > 0) {
+        setValidationError('Please answer all required questions before continuing.');
+        return;
+      }
+    }
+
+    onNext();
+  };
+
+  const numberOfChildren = allAnswers?.get(1)?.['numberOfChildren'];
+  const childCount = numberOfChildren ? (numberOfChildren === '6+' ? 6 : parseInt(numberOfChildren as string)) : 0;
+  const childrenData = (answers['childrenData'] as Array<Record<string, string>>) || Array(childCount).fill(null).map(() => ({}));
+
+  const handleChildChange = (index: number, field: string, value: string) => {
+    const updated = [...childrenData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('childrenData', updated);
+  };
+
+  return (
+    <div>
+      {step.videoUrl && (
+        <VideoPlayer url={step.videoUrl} title={`${step.title} - Overview`} />
+      )}
+
+      <div className="bg-white rounded-lg shadow-md p-8 mb-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">{step.title}</h2>
+        {step.description && (
+          <p className="text-gray-600 mb-6">{step.description}</p>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          {step.id === 1 && (
+            <>
+              {step.questions.map((question) => {
+                if (question.key === 'numberOfChildren' && answers['hasChildren'] !== 'yes') {
+                  return null;
+                }
+                if (
+                  (question.key === 'sameMedicalDoctor' ||
+                    question.key === 'sameDentist' ||
+                    question.key === 'sameOrthodontist') &&
+                  answers['hasChildren'] !== 'yes'
+                ) {
+                  return null;
+                }
+                return (
+                  <FormField
+                    key={question.key}
+                    question={question}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                  />
+                );
+              })}
+            </>
+          )}
+
+          {step.id === 2 && childCount > 0 && (
+            <div className="space-y-8">
+              {Array.from({ length: childCount }).map((_, index) => (
+                <div key={index} className="border rounded-lg p-6 bg-gray-50">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Child {index + 1}</h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Child's Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={childrenData[index]?.name || ''}
+                        onChange={(e) => handleChildChange(index, 'name', e.target.value)}
+                        placeholder="Enter full name"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Date of Birth *
+                      </label>
+                      <input
+                        type="date"
+                        value={childrenData[index]?.dateOfBirth || ''}
+                        onChange={(e) => handleChildChange(index, 'dateOfBirth', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Are they disabled?
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`disabled-${index}`}
+                            value="yes"
+                            checked={childrenData[index]?.disabled === 'yes'}
+                            onChange={(e) => handleChildChange(index, 'disabled', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-700">Yes</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`disabled-${index}`}
+                            value="no"
+                            checked={childrenData[index]?.disabled === 'no'}
+                            onChange={(e) => handleChildChange(index, 'disabled', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-700">No</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Are they financially independent?
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`independent-${index}`}
+                            value="yes"
+                            checked={childrenData[index]?.independent === 'yes'}
+                            onChange={(e) => handleChildChange(index, 'independent', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-700">Yes</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`independent-${index}`}
+                            value="no"
+                            checked={childrenData[index]?.independent === 'no'}
+                            onChange={(e) => handleChildChange(index, 'independent', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-700">No</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {validationError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 text-sm">{validationError}</p>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center pt-6 border-t">
+            <button
+              type="button"
+              onClick={onPrevious}
+              disabled={isFirstStep}
+              className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
+                isFirstStep
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
+              Previous
+            </button>
+
+            <button
+              type="submit"
+              className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            >
+              {isLastStep ? (
+                <>
+                  Complete
+                  <Check className="w-5 h-5 ml-2" />
+                </>
+              ) : (
+                <>
+                  Next
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

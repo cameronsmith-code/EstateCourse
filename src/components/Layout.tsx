@@ -9,11 +9,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <nav className="bg-white shadow-md">
+    <div className="min-h-screen bg-gray-900 flex flex-col">
+      <nav className="bg-gray-800 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center text-2xl font-bold text-blue-600">
+            <Link to="/" className="flex items-center text-2xl font-bold text-blue-400">
               <FileText className="w-7 h-7 mr-2" />
               Estate Planner
             </Link>
@@ -23,8 +23,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 to="/"
                 className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
                   isActive('/')
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-700'
                 }`}
               >
                 <Home className="w-4 h-4 mr-2" />
@@ -34,8 +34,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 to="/about"
                 className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
                   isActive('/about')
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-700'
                 }`}
               >
                 <Info className="w-4 h-4 mr-2" />
@@ -45,8 +45,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 to="/contact"
                 className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
                   isActive('/contact')
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-700'
                 }`}
               >
                 <Mail className="w-4 h-4 mr-2" />
@@ -61,9 +61,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <footer className="bg-white border-t">
+      <footer className="bg-gray-800 border-t border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <p className="text-center text-gray-600">
+          <p className="text-center text-gray-400">
             Simple estate planning tools to help you organize important information
           </p>
         </div>

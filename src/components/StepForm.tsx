@@ -87,10 +87,10 @@ export default function StepForm({
         <VideoPlayer url={step.videoUrl} title={`${step.title} - Overview`} />
       )}
 
-      <div className="bg-white rounded-lg shadow-md p-8 mb-6">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">{step.title}</h2>
+      <div className="bg-gray-800 rounded-lg shadow-md p-8 mb-6 border border-gray-700">
+        <h2 className="text-3xl font-bold text-white mb-2">{step.title}</h2>
         {step.description && (
-          <p className="text-gray-600 mb-6">{step.description}</p>
+          <p className="text-gray-400 mb-6">{step.description}</p>
         )}
 
         <form onSubmit={handleSubmit}>
@@ -123,12 +123,12 @@ export default function StepForm({
           {step.id === 2 && childCount > 0 && (
             <div className="space-y-8">
               {Array.from({ length: childCount }).map((_, index) => (
-                <div key={index} className="border rounded-lg p-6 bg-gray-50">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Child {index + 1}</h3>
+                <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                  <h3 className="text-lg font-semibold text-white mb-4">Child {index + 1}</h3>
 
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
                         Child's Full Name *
                       </label>
                       <input
@@ -136,24 +136,24 @@ export default function StepForm({
                         value={childrenData[index]?.name || ''}
                         onChange={(e) => handleChildChange(index, 'name', e.target.value)}
                         placeholder="Enter full name"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
                         Date of Birth *
                       </label>
                       <input
                         type="date"
                         value={childrenData[index]?.dateOfBirth || ''}
                         onChange={(e) => handleChildChange(index, 'dateOfBirth', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
                         Are they disabled?
                       </label>
                       <div className="flex gap-4">
@@ -166,7 +166,7 @@ export default function StepForm({
                             onChange={(e) => handleChildChange(index, 'disabled', e.target.value)}
                             className="mr-2"
                           />
-                          <span className="text-gray-700">Yes</span>
+                          <span className="text-gray-300">Yes</span>
                         </label>
                         <label className="flex items-center">
                           <input
@@ -177,13 +177,13 @@ export default function StepForm({
                             onChange={(e) => handleChildChange(index, 'disabled', e.target.value)}
                             className="mr-2"
                           />
-                          <span className="text-gray-700">No</span>
+                          <span className="text-gray-300">No</span>
                         </label>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
                         Are they financially independent?
                       </label>
                       <div className="flex gap-4">
@@ -196,7 +196,7 @@ export default function StepForm({
                             onChange={(e) => handleChildChange(index, 'independent', e.target.value)}
                             className="mr-2"
                           />
-                          <span className="text-gray-700">Yes</span>
+                          <span className="text-gray-300">Yes</span>
                         </label>
                         <label className="flex items-center">
                           <input
@@ -207,7 +207,7 @@ export default function StepForm({
                             onChange={(e) => handleChildChange(index, 'independent', e.target.value)}
                             className="mr-2"
                           />
-                          <span className="text-gray-700">No</span>
+                          <span className="text-gray-300">No</span>
                         </label>
                       </div>
                     </div>
@@ -218,20 +218,20 @@ export default function StepForm({
           )}
 
           {validationError && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700 text-sm">{validationError}</p>
+            <div className="mb-6 p-4 bg-red-900 border border-red-700 rounded-lg">
+              <p className="text-red-200 text-sm">{validationError}</p>
             </div>
           )}
 
-          <div className="flex justify-between items-center pt-6 border-t">
+          <div className="flex justify-between items-center pt-6 border-t border-gray-600">
             <button
               type="button"
               onClick={onPrevious}
               disabled={isFirstStep}
               className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
                 isFirstStep
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
               <ChevronLeft className="w-5 h-5 mr-2" />

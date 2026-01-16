@@ -211,6 +211,96 @@ export default function StepForm({
                         </label>
                       </div>
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Are they on any long-term medications?
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`medications-${index}`}
+                            value="yes"
+                            checked={childrenData[index]?.medications === 'yes'}
+                            onChange={(e) => handleChildChange(index, 'medications', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">Yes</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`medications-${index}`}
+                            value="no"
+                            checked={childrenData[index]?.medications === 'no'}
+                            onChange={(e) => handleChildChange(index, 'medications', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">No</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Do they have any allergies?
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`allergies-${index}`}
+                            value="yes"
+                            checked={childrenData[index]?.allergies === 'yes'}
+                            onChange={(e) => handleChildChange(index, 'allergies', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">Yes</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`allergies-${index}`}
+                            value="no"
+                            checked={childrenData[index]?.allergies === 'no'}
+                            onChange={(e) => handleChildChange(index, 'allergies', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">No</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Do they have any past or current medical issues or needs?
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`medicalIssues-${index}`}
+                            value="yes"
+                            checked={childrenData[index]?.medicalIssues === 'yes'}
+                            onChange={(e) => handleChildChange(index, 'medicalIssues', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">Yes</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`medicalIssues-${index}`}
+                            value="no"
+                            checked={childrenData[index]?.medicalIssues === 'no'}
+                            onChange={(e) => handleChildChange(index, 'medicalIssues', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">No</span>
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

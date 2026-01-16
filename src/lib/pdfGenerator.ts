@@ -5,6 +5,9 @@ interface ChildData {
   dateOfBirth?: string;
   disabled?: string;
   independent?: string;
+  medications?: string;
+  allergies?: string;
+  medicalIssues?: string;
   [key: string]: string | undefined;
 }
 
@@ -80,8 +83,66 @@ export const generatePDF = (formData: FormData) => {
       doc.text(`Disabled: ${child.disabled === 'yes' ? 'Yes' : child.disabled === 'no' ? 'No' : ''}`, margin, yPosition);
       yPosition += 4;
       doc.text(`Financially Independent: ${child.independent === 'yes' ? 'Yes' : child.independent === 'no' ? 'No' : ''}`, margin, yPosition);
+      yPosition += 4;
+      doc.text(`Long-term Medications: ${child.medications === 'yes' ? 'Yes' : child.medications === 'no' ? 'No' : ''}`, margin, yPosition);
+      yPosition += 4;
+      doc.text(`Allergies: ${child.allergies === 'yes' ? 'Yes' : child.allergies === 'no' ? 'No' : ''}`, margin, yPosition);
+      yPosition += 4;
+      doc.text(`Medical Issues/Needs: ${child.medicalIssues === 'yes' ? 'Yes' : child.medicalIssues === 'no' ? 'No' : ''}`, margin, yPosition);
 
       yPosition += 10;
+
+      if (child.medications === 'yes' || child.allergies === 'yes' || child.medicalIssues === 'yes') {
+        yPosition += 3;
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('Medical Information', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+
+        yPosition += 6;
+
+        if (child.medications === 'yes') {
+          doc.setFontSize(8);
+          doc.text('Long-term Medications:', margin, yPosition);
+          yPosition += 2;
+          const medField = new doc.AcroFormTextField();
+          medField.fieldName = `child${index + 1}_medications`;
+          medField.Rect = [margin, yPosition, fieldWidth - 15, 8];
+          medField.multiline = true;
+          medField.fontSize = 8;
+          medField.textColor = [0, 0, 0];
+          doc.addField(medField);
+          yPosition += 12;
+        }
+
+        if (child.allergies === 'yes') {
+          doc.setFontSize(8);
+          doc.text('Allergies:', margin, yPosition);
+          yPosition += 2;
+          const allergiesField = new doc.AcroFormTextField();
+          allergiesField.fieldName = `child${index + 1}_allergies`;
+          allergiesField.Rect = [margin, yPosition, fieldWidth - 15, 8];
+          allergiesField.multiline = true;
+          allergiesField.fontSize = 8;
+          allergiesField.textColor = [0, 0, 0];
+          doc.addField(allergiesField);
+          yPosition += 12;
+        }
+
+        if (child.medicalIssues === 'yes') {
+          doc.setFontSize(8);
+          doc.text('Medical Issues/Needs:', margin, yPosition);
+          yPosition += 2;
+          const issuesField = new doc.AcroFormTextField();
+          issuesField.fieldName = `child${index + 1}_medicalIssues`;
+          issuesField.Rect = [margin, yPosition, fieldWidth - 15, 8];
+          issuesField.multiline = true;
+          issuesField.fontSize = 8;
+          issuesField.textColor = [0, 0, 0];
+          doc.addField(issuesField);
+          yPosition += 12;
+        }
+      }
 
       const cellHeight = 6;
       const colWidths = [fieldWidth * 0.27, fieldWidth * 0.24, fieldWidth * 0.24, fieldWidth * 0.25];

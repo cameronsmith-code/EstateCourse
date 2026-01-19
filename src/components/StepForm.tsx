@@ -97,6 +97,30 @@ export default function StepForm({
           {step.id === 1 && (
             <>
               {step.questions.map((question) => {
+                if (question.key === 'spouseName' && answers['hasSpouse'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'spouseSameAddress' && answers['hasSpouse'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'spouseDateOfBirth' && answers['hasSpouse'] !== 'yes') {
+                  return null;
+                }
+                if (
+                  (question.key === 'spouseAddress' ||
+                    question.key === 'spouseCity' ||
+                    question.key === 'spouseProvince' ||
+                    question.key === 'spousePostalCode') &&
+                  (answers['hasSpouse'] !== 'yes' || answers['spouseSameAddress'] === 'yes')
+                ) {
+                  return null;
+                }
+                if (question.key === 'spouseEmail' && answers['hasSpouse'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'spousePhone' && answers['hasSpouse'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'numberOfChildren' && answers['hasChildren'] !== 'yes') {
                   return null;
                 }

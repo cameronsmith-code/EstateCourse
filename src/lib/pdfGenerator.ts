@@ -18,6 +18,23 @@ interface ChildData {
 
 interface FormData {
   fullName?: string;
+  dateOfBirth?: string;
+  address?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+  email?: string;
+  phone?: string;
+  hasSpouse?: string;
+  spouseName?: string;
+  spouseSameAddress?: string;
+  spouseDateOfBirth?: string;
+  spouseAddress?: string;
+  spouseCity?: string;
+  spouseProvince?: string;
+  spousePostalCode?: string;
+  spouseEmail?: string;
+  spousePhone?: string;
   hasChildren?: string;
   numberOfChildren?: string;
   sameMedicalDoctor?: string;
@@ -45,28 +62,68 @@ export const generatePDF = (formData: FormData) => {
   doc.setTextColor(0);
   doc.setFontSize(10);
 
-  doc.text('Full Name:', margin, yPosition);
-  yPosition += 2;
-  const fullNameField = new doc.AcroFormTextField();
-  fullNameField.fieldName = 'fullName';
-  fullNameField.Rect = [margin, yPosition, fieldWidth - 15, 7];
-  fullNameField.value = formData.fullName || '';
-  fullNameField.fontSize = 10;
-  fullNameField.textColor = [0, 0, 0];
-  doc.addField(fullNameField);
+  const addField = (label: string, fieldName: string, value: string, height: number = 7) => {
+    doc.setFontSize(10);
+    doc.text(label, margin, yPosition);
+    yPosition += 2;
+    const field = new doc.AcroFormTextField();
+    field.fieldName = fieldName;
+    field.Rect = [margin, yPosition, fieldWidth - 15, height];
+    field.value = value;
+    field.fontSize = 10;
+    field.textColor = [0, 0, 0];
+    doc.addField(field);
+    yPosition += height + 4;
+  };
 
-  yPosition += 11;
-  doc.text('Do you have children?', margin, yPosition);
-  yPosition += 2;
-  const hasChildrenField = new doc.AcroFormTextField();
-  hasChildrenField.fieldName = 'hasChildren';
-  hasChildrenField.Rect = [margin, yPosition, fieldWidth - 15, 7];
-  hasChildrenField.value = formData.hasChildren === 'yes' ? 'Yes' : formData.hasChildren === 'no' ? 'No' : '';
-  hasChildrenField.fontSize = 10;
-  hasChildrenField.textColor = [0, 0, 0];
-  doc.addField(hasChildrenField);
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('Contact Information', margin, yPosition);
+  doc.setFont(undefined, 'normal');
+  yPosition += 8;
+
+  addField('Full Name:', 'fullName', formData.fullName || '');
+  addField('Date of Birth:', 'dateOfBirth', formData.dateOfBirth || '');
+  addField('Address:', 'address', formData.address || '');
+  addField('City:', 'city', formData.city || '');
+  addField('Province:', 'province', formData.province || '');
+  addField('Postal Code:', 'postalCode', formData.postalCode || '');
+  addField('Email Address:', 'email', formData.email || '');
+  addField('Phone Number:', 'phone', formData.phone || '');
+
+  if (formData.hasSpouse === 'yes') {
+    yPosition += 6;
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Spouse/Partner Information', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 8;
+
+    addField('Spouse/Partner Name:', 'spouseName', formData.spouseName || '');
+    addField('Date of Birth:', 'spouseDateOfBirth', formData.spouseDateOfBirth || '');
+
+    if (formData.spouseSameAddress === 'yes') {
+      addField('Address:', 'spouseAddress', formData.address || '');
+      addField('City:', 'spouseCity', formData.city || '');
+      addField('Province:', 'spouseProvince', formData.province || '');
+      addField('Postal Code:', 'spousePostalCode', formData.postalCode || '');
+    } else {
+      addField('Address:', 'spouseAddress', formData.spouseAddress || '');
+      addField('City:', 'spouseCity', formData.spouseCity || '');
+      addField('Province:', 'spouseProvince', formData.spouseProvince || '');
+      addField('Postal Code:', 'spousePostalCode', formData.spousePostalCode || '');
+    }
+
+    addField('Email Address:', 'spouseEmail', formData.spouseEmail || '');
+    addField('Phone Number:', 'spousePhone', formData.spousePhone || '');
+  }
 
   if (formData.hasChildren === 'yes' && formData.childrenData && formData.childrenData.length > 0) {
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
     const childCount = formData.numberOfChildren === '6+' ? 6 : parseInt(formData.numberOfChildren || '0');
     const childrenToProcess = formData.childrenData.slice(0, childCount);
 

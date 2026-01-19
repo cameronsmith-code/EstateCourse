@@ -41,6 +41,12 @@ interface FormData {
   sameDentist?: string;
   sameOrthodontist?: string;
   childrenData?: ChildData[];
+  client1HasWill?: string;
+  client2HasWill?: string;
+  willsSameLawyer?: string;
+  client1UsesAccountant?: string;
+  client2UsesAccountant?: string;
+  accountantSamePerson?: string;
 }
 
 export const generatePDF = (formData: FormData) => {
@@ -582,6 +588,525 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition = digitalTableY + 10;
     });
+  }
+
+  yPosition += 12;
+  if (yPosition > 270) {
+    doc.addPage();
+    yPosition = 12;
+  }
+
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('Who is on your Team?', margin, yPosition);
+  doc.setFont(undefined, 'normal');
+  yPosition += 6;
+  doc.setFontSize(9);
+  doc.text('Your Power(s) of Attorney and Estate Trustees should not act in a vacuum.', margin, yPosition);
+  yPosition += 4;
+  doc.text('This section lists the core professionals who already know your history.', margin, yPosition);
+  yPosition += 10;
+
+  const client1Name = formData.fullName || 'Client 1';
+  const client2Name = formData.spouseName || 'Client 2';
+  const hasSpouse = formData.hasSpouse === 'yes';
+
+  if (formData.client1HasWill === 'no' && (!hasSpouse || formData.client2HasWill === 'no')) {
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Estate Lawyer / Notary:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 6;
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'italic');
+    doc.text('It is recommended that you have a will done', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 12;
+  } else if (formData.client1HasWill === 'yes' || formData.client2HasWill === 'yes') {
+    const bothHaveWills = formData.client1HasWill === 'yes' && formData.client2HasWill === 'yes';
+    const sameLawyer = formData.willsSameLawyer === 'yes';
+
+    if (bothHaveWills && sameLawyer) {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Estate Lawyer / Notary:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      const lawyerRows = [
+        { label: 'Estate Lawyer/Notary:', col2: 'Information:', col3: 'Other Details (If Applicable)' },
+        { label: 'Name:' },
+        { label: 'Firm:' },
+        { label: 'City, Province:' },
+        { label: 'Email Address:' },
+        { label: 'Date of last Will update:' },
+        { label: 'Will Location:' },
+        { label: '' },
+      ];
+
+      const lawyerCellHeight = 6;
+      const lawyerColWidths = [fieldWidth * 0.30, fieldWidth * 0.35, fieldWidth * 0.35];
+      let lawyerTableY = yPosition;
+
+      lawyerRows.forEach((row, rowIndex) => {
+        if (lawyerTableY > 275) {
+          doc.addPage();
+          lawyerTableY = 12;
+        }
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+        doc.setFontSize(8);
+
+        const lawyerCol1X = margin;
+        const lawyerCol2X = margin + lawyerColWidths[0];
+        const lawyerCol3X = margin + lawyerColWidths[0] + lawyerColWidths[1];
+
+        doc.rect(lawyerCol1X, lawyerTableY, lawyerColWidths[0], lawyerCellHeight);
+        doc.rect(lawyerCol2X, lawyerTableY, lawyerColWidths[1], lawyerCellHeight);
+        doc.rect(lawyerCol3X, lawyerTableY, lawyerColWidths[2], lawyerCellHeight);
+
+        if (rowIndex === 0) {
+          doc.text('Estate Lawyer/Notary:', lawyerCol1X + 0.5, lawyerTableY + 4);
+          doc.text('Information:', lawyerCol2X + 0.5, lawyerTableY + 4);
+          doc.text('Other Details (If Applicable):', lawyerCol3X + 0.5, lawyerTableY + 4);
+        } else {
+          doc.setFont(undefined, 'normal');
+          doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
+
+          const lawyerField1 = new doc.AcroFormTextField();
+          lawyerField1.fieldName = `lawyer_shared_${rowIndex}_col2`;
+          lawyerField1.Rect = [lawyerCol2X + 0.3, lawyerTableY + 0.3, lawyerColWidths[1] - 0.6, lawyerCellHeight - 0.6];
+          lawyerField1.fontSize = 7;
+          lawyerField1.textColor = [0, 0, 0];
+          lawyerField1.borderStyle = 'none';
+          doc.addField(lawyerField1);
+
+          const lawyerField2 = new doc.AcroFormTextField();
+          lawyerField2.fieldName = `lawyer_shared_${rowIndex}_col3`;
+          lawyerField2.Rect = [lawyerCol3X + 0.3, lawyerTableY + 0.3, lawyerColWidths[2] - 0.6, lawyerCellHeight - 0.6];
+          lawyerField2.fontSize = 7;
+          lawyerField2.textColor = [0, 0, 0];
+          lawyerField2.borderStyle = 'none';
+          doc.addField(lawyerField2);
+        }
+
+        lawyerTableY += lawyerCellHeight;
+      });
+
+      yPosition = lawyerTableY + 10;
+    } else if (bothHaveWills && !sameLawyer) {
+      [client1Name, client2Name].forEach((clientName, clientIndex) => {
+        if (yPosition > 230) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Estate Lawyer / Notary - ${clientName}:`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const lawyerRows = [
+          { label: 'Estate Lawyer/Notary:', col2: 'Information:', col3: 'Other Details (If Applicable)' },
+          { label: 'Name:' },
+          { label: 'Firm:' },
+          { label: 'City, Province:' },
+          { label: 'Email Address:' },
+          { label: 'Date of last Will update:' },
+          { label: 'Will Location:' },
+          { label: '' },
+        ];
+
+        const lawyerCellHeight = 6;
+        const lawyerColWidths = [fieldWidth * 0.30, fieldWidth * 0.35, fieldWidth * 0.35];
+        let lawyerTableY = yPosition;
+
+        lawyerRows.forEach((row, rowIndex) => {
+          if (lawyerTableY > 275) {
+            doc.addPage();
+            lawyerTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const lawyerCol1X = margin;
+          const lawyerCol2X = margin + lawyerColWidths[0];
+          const lawyerCol3X = margin + lawyerColWidths[0] + lawyerColWidths[1];
+
+          doc.rect(lawyerCol1X, lawyerTableY, lawyerColWidths[0], lawyerCellHeight);
+          doc.rect(lawyerCol2X, lawyerTableY, lawyerColWidths[1], lawyerCellHeight);
+          doc.rect(lawyerCol3X, lawyerTableY, lawyerColWidths[2], lawyerCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Estate Lawyer/Notary:', lawyerCol1X + 0.5, lawyerTableY + 4);
+            doc.text('Information:', lawyerCol2X + 0.5, lawyerTableY + 4);
+            doc.text('Other Details (If Applicable):', lawyerCol3X + 0.5, lawyerTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
+
+            const lawyerField1 = new doc.AcroFormTextField();
+            lawyerField1.fieldName = `lawyer_client${clientIndex + 1}_${rowIndex}_col2`;
+            lawyerField1.Rect = [lawyerCol2X + 0.3, lawyerTableY + 0.3, lawyerColWidths[1] - 0.6, lawyerCellHeight - 0.6];
+            lawyerField1.fontSize = 7;
+            lawyerField1.textColor = [0, 0, 0];
+            lawyerField1.borderStyle = 'none';
+            doc.addField(lawyerField1);
+
+            const lawyerField2 = new doc.AcroFormTextField();
+            lawyerField2.fieldName = `lawyer_client${clientIndex + 1}_${rowIndex}_col3`;
+            lawyerField2.Rect = [lawyerCol3X + 0.3, lawyerTableY + 0.3, lawyerColWidths[2] - 0.6, lawyerCellHeight - 0.6];
+            lawyerField2.fontSize = 7;
+            lawyerField2.textColor = [0, 0, 0];
+            lawyerField2.borderStyle = 'none';
+            doc.addField(lawyerField2);
+          }
+
+          lawyerTableY += lawyerCellHeight;
+        });
+
+        yPosition = lawyerTableY + 10;
+      });
+    } else {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      const clientWithWill = formData.client1HasWill === 'yes' ? client1Name : client2Name;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Estate Lawyer / Notary - ${clientWithWill}:`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      const lawyerRows = [
+        { label: 'Estate Lawyer/Notary:', col2: 'Information:', col3: 'Other Details (If Applicable)' },
+        { label: 'Name:' },
+        { label: 'Firm:' },
+        { label: 'City, Province:' },
+        { label: 'Email Address:' },
+        { label: 'Date of last Will update:' },
+        { label: 'Will Location:' },
+        { label: '' },
+      ];
+
+      const lawyerCellHeight = 6;
+      const lawyerColWidths = [fieldWidth * 0.30, fieldWidth * 0.35, fieldWidth * 0.35];
+      let lawyerTableY = yPosition;
+
+      lawyerRows.forEach((row, rowIndex) => {
+        if (lawyerTableY > 275) {
+          doc.addPage();
+          lawyerTableY = 12;
+        }
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+        doc.setFontSize(8);
+
+        const lawyerCol1X = margin;
+        const lawyerCol2X = margin + lawyerColWidths[0];
+        const lawyerCol3X = margin + lawyerColWidths[0] + lawyerColWidths[1];
+
+        doc.rect(lawyerCol1X, lawyerTableY, lawyerColWidths[0], lawyerCellHeight);
+        doc.rect(lawyerCol2X, lawyerTableY, lawyerColWidths[1], lawyerCellHeight);
+        doc.rect(lawyerCol3X, lawyerTableY, lawyerColWidths[2], lawyerCellHeight);
+
+        if (rowIndex === 0) {
+          doc.text('Estate Lawyer/Notary:', lawyerCol1X + 0.5, lawyerTableY + 4);
+          doc.text('Information:', lawyerCol2X + 0.5, lawyerTableY + 4);
+          doc.text('Other Details (If Applicable):', lawyerCol3X + 0.5, lawyerTableY + 4);
+        } else {
+          doc.setFont(undefined, 'normal');
+          doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
+
+          const lawyerField1 = new doc.AcroFormTextField();
+          lawyerField1.fieldName = `lawyer_single_${rowIndex}_col2`;
+          lawyerField1.Rect = [lawyerCol2X + 0.3, lawyerTableY + 0.3, lawyerColWidths[1] - 0.6, lawyerCellHeight - 0.6];
+          lawyerField1.fontSize = 7;
+          lawyerField1.textColor = [0, 0, 0];
+          lawyerField1.borderStyle = 'none';
+          doc.addField(lawyerField1);
+
+          const lawyerField2 = new doc.AcroFormTextField();
+          lawyerField2.fieldName = `lawyer_single_${rowIndex}_col3`;
+          lawyerField2.Rect = [lawyerCol3X + 0.3, lawyerTableY + 0.3, lawyerColWidths[2] - 0.6, lawyerCellHeight - 0.6];
+          lawyerField2.fontSize = 7;
+          lawyerField2.textColor = [0, 0, 0];
+          lawyerField2.borderStyle = 'none';
+          doc.addField(lawyerField2);
+        }
+
+        lawyerTableY += lawyerCellHeight;
+      });
+
+      yPosition = lawyerTableY + 10;
+    }
+  }
+
+  if (formData.client1UsesAccountant === 'yes' || formData.client2UsesAccountant === 'yes') {
+    const bothUseAccountant = formData.client1UsesAccountant === 'yes' && formData.client2UsesAccountant === 'yes';
+    const sameAccountant = formData.accountantSamePerson === 'yes';
+
+    if (bothUseAccountant && sameAccountant) {
+      if (yPosition > 210) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Accountant/Tax Professional:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 4;
+      doc.setFontSize(8);
+      doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
+      yPosition += 6;
+
+      const accountantRows = [
+        { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
+        { label: 'Name:' },
+        { label: 'Firm:' },
+        { label: 'Phone Number:' },
+        { label: 'Email Address:' },
+        { label: 'City, Province:' },
+        { label: 'What Year did you begin working with this person?' },
+        { label: 'Other Details:' },
+        { label: 'Other Details:' },
+        { label: 'Other Details:' },
+      ];
+
+      const accountantCellHeight = 6;
+      const accountantColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+      let accountantTableY = yPosition;
+
+      accountantRows.forEach((row, rowIndex) => {
+        if (accountantTableY > 275) {
+          doc.addPage();
+          accountantTableY = 12;
+        }
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+        doc.setFontSize(8);
+
+        const accountantCol1X = margin;
+        const accountantCol2X = margin + accountantColWidths[0];
+        const accountantCol3X = margin + accountantColWidths[0] + accountantColWidths[1];
+
+        doc.rect(accountantCol1X, accountantTableY, accountantColWidths[0], accountantCellHeight);
+        doc.rect(accountantCol2X, accountantTableY, accountantColWidths[1], accountantCellHeight);
+        doc.rect(accountantCol3X, accountantTableY, accountantColWidths[2], accountantCellHeight);
+
+        if (rowIndex === 0) {
+          doc.text('Name:', accountantCol1X + 0.5, accountantTableY + 4);
+          doc.text('Information:', accountantCol2X + 0.5, accountantTableY + 4);
+          doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
+        } else {
+          doc.setFont(undefined, 'normal');
+          doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
+
+          const accountantField1 = new doc.AcroFormTextField();
+          accountantField1.fieldName = `accountant_shared_${rowIndex}_col2`;
+          accountantField1.Rect = [accountantCol2X + 0.3, accountantTableY + 0.3, accountantColWidths[1] - 0.6, accountantCellHeight - 0.6];
+          accountantField1.fontSize = 7;
+          accountantField1.textColor = [0, 0, 0];
+          accountantField1.borderStyle = 'none';
+          doc.addField(accountantField1);
+
+          const accountantField2 = new doc.AcroFormTextField();
+          accountantField2.fieldName = `accountant_shared_${rowIndex}_col3`;
+          accountantField2.Rect = [accountantCol3X + 0.3, accountantTableY + 0.3, accountantColWidths[2] - 0.6, accountantCellHeight - 0.6];
+          accountantField2.fontSize = 7;
+          accountantField2.textColor = [0, 0, 0];
+          accountantField2.borderStyle = 'none';
+          doc.addField(accountantField2);
+        }
+
+        accountantTableY += accountantCellHeight;
+      });
+
+      yPosition = accountantTableY + 10;
+    } else if (bothUseAccountant && !sameAccountant) {
+      [client1Name, client2Name].forEach((clientName, clientIndex) => {
+        if (yPosition > 200) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Accountant/Tax Professional - ${clientName}:`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 4;
+        doc.setFontSize(8);
+        doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
+        yPosition += 6;
+
+        const accountantRows = [
+          { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Name:' },
+          { label: 'Firm:' },
+          { label: 'Phone Number:' },
+          { label: 'Email Address:' },
+          { label: 'City, Province:' },
+          { label: 'What Year did you begin working with this person?' },
+          { label: 'Other Details:' },
+          { label: 'Other Details:' },
+          { label: 'Other Details:' },
+        ];
+
+        const accountantCellHeight = 6;
+        const accountantColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let accountantTableY = yPosition;
+
+        accountantRows.forEach((row, rowIndex) => {
+          if (accountantTableY > 275) {
+            doc.addPage();
+            accountantTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const accountantCol1X = margin;
+          const accountantCol2X = margin + accountantColWidths[0];
+          const accountantCol3X = margin + accountantColWidths[0] + accountantColWidths[1];
+
+          doc.rect(accountantCol1X, accountantTableY, accountantColWidths[0], accountantCellHeight);
+          doc.rect(accountantCol2X, accountantTableY, accountantColWidths[1], accountantCellHeight);
+          doc.rect(accountantCol3X, accountantTableY, accountantColWidths[2], accountantCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Name:', accountantCol1X + 0.5, accountantTableY + 4);
+            doc.text('Information:', accountantCol2X + 0.5, accountantTableY + 4);
+            doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
+
+            const accountantField1 = new doc.AcroFormTextField();
+            accountantField1.fieldName = `accountant_client${clientIndex + 1}_${rowIndex}_col2`;
+            accountantField1.Rect = [accountantCol2X + 0.3, accountantTableY + 0.3, accountantColWidths[1] - 0.6, accountantCellHeight - 0.6];
+            accountantField1.fontSize = 7;
+            accountantField1.textColor = [0, 0, 0];
+            accountantField1.borderStyle = 'none';
+            doc.addField(accountantField1);
+
+            const accountantField2 = new doc.AcroFormTextField();
+            accountantField2.fieldName = `accountant_client${clientIndex + 1}_${rowIndex}_col3`;
+            accountantField2.Rect = [accountantCol3X + 0.3, accountantTableY + 0.3, accountantColWidths[2] - 0.6, accountantCellHeight - 0.6];
+            accountantField2.fontSize = 7;
+            accountantField2.textColor = [0, 0, 0];
+            accountantField2.borderStyle = 'none';
+            doc.addField(accountantField2);
+          }
+
+          accountantTableY += accountantCellHeight;
+        });
+
+        yPosition = accountantTableY + 10;
+      });
+    } else {
+      if (yPosition > 210) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      const clientWithAccountant = formData.client1UsesAccountant === 'yes' ? client1Name : client2Name;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Accountant/Tax Professional - ${clientWithAccountant}:`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 4;
+      doc.setFontSize(8);
+      doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
+      yPosition += 6;
+
+      const accountantRows = [
+        { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
+        { label: 'Name:' },
+        { label: 'Firm:' },
+        { label: 'Phone Number:' },
+        { label: 'Email Address:' },
+        { label: 'City, Province:' },
+        { label: 'What Year did you begin working with this person?' },
+        { label: 'Other Details:' },
+        { label: 'Other Details:' },
+        { label: 'Other Details:' },
+      ];
+
+      const accountantCellHeight = 6;
+      const accountantColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+      let accountantTableY = yPosition;
+
+      accountantRows.forEach((row, rowIndex) => {
+        if (accountantTableY > 275) {
+          doc.addPage();
+          accountantTableY = 12;
+        }
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+        doc.setFontSize(8);
+
+        const accountantCol1X = margin;
+        const accountantCol2X = margin + accountantColWidths[0];
+        const accountantCol3X = margin + accountantColWidths[0] + accountantColWidths[1];
+
+        doc.rect(accountantCol1X, accountantTableY, accountantColWidths[0], accountantCellHeight);
+        doc.rect(accountantCol2X, accountantTableY, accountantColWidths[1], accountantCellHeight);
+        doc.rect(accountantCol3X, accountantTableY, accountantColWidths[2], accountantCellHeight);
+
+        if (rowIndex === 0) {
+          doc.text('Name:', accountantCol1X + 0.5, accountantTableY + 4);
+          doc.text('Information:', accountantCol2X + 0.5, accountantTableY + 4);
+          doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
+        } else {
+          doc.setFont(undefined, 'normal');
+          doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
+
+          const accountantField1 = new doc.AcroFormTextField();
+          accountantField1.fieldName = `accountant_single_${rowIndex}_col2`;
+          accountantField1.Rect = [accountantCol2X + 0.3, accountantTableY + 0.3, accountantColWidths[1] - 0.6, accountantCellHeight - 0.6];
+          accountantField1.fontSize = 7;
+          accountantField1.textColor = [0, 0, 0];
+          accountantField1.borderStyle = 'none';
+          doc.addField(accountantField1);
+
+          const accountantField2 = new doc.AcroFormTextField();
+          accountantField2.fieldName = `accountant_single_${rowIndex}_col3`;
+          accountantField2.Rect = [accountantCol3X + 0.3, accountantTableY + 0.3, accountantColWidths[2] - 0.6, accountantCellHeight - 0.6];
+          accountantField2.fontSize = 7;
+          accountantField2.textColor = [0, 0, 0];
+          accountantField2.borderStyle = 'none';
+          doc.addField(accountantField2);
+        }
+
+        accountantTableY += accountantCellHeight;
+      });
+
+      yPosition = accountantTableY + 10;
+    }
   }
 
   yPosition += 12;

@@ -144,6 +144,53 @@ export default function StepForm({
             </>
           )}
 
+          {step.id === 3 && (
+            <>
+              {step.questions.map((question) => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const client1Name = basicAnswers['fullName'] as string || 'you';
+                const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
+
+                if (question.key === 'client2HasWill' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2UsesAccountant' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'willsSameLawyer' && !(answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
+                  return null;
+                }
+                if (question.key === 'accountantSamePerson' && !(answers['client1UsesAccountant'] === 'yes' && answers['client2UsesAccountant'] === 'yes')) {
+                  return null;
+                }
+
+                let customLabel = question.label;
+                if (question.key === 'client1HasWill') {
+                  customLabel = `Do you (${client1Name}) have a Will?`;
+                }
+                if (question.key === 'client2HasWill') {
+                  customLabel = `Does ${client2Name} have a Will?`;
+                }
+                if (question.key === 'client1UsesAccountant') {
+                  customLabel = `Do you (${client1Name}) use a professional accountant?`;
+                }
+                if (question.key === 'client2UsesAccountant') {
+                  customLabel = `Does ${client2Name} use a professional accountant?`;
+                }
+
+                return (
+                  <FormField
+                    key={question.key}
+                    question={{ ...question, label: customLabel }}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                  />
+                );
+              })}
+            </>
+          )}
+
           {step.id === 2 && childCount > 0 && (
             <div className="space-y-8">
               {Array.from({ length: childCount }).map((_, index) => (

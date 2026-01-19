@@ -11,15 +11,12 @@ export default function Completion() {
   useEffect(() => {
     const step1 = answers.get(1) || {};
     const step2 = answers.get(2) || {};
+    const step3 = answers.get(3) || {};
 
     const data = {
-      fullName: step1.fullName,
-      hasChildren: step1.hasChildren,
-      numberOfChildren: step1.numberOfChildren,
-      sameMedicalDoctor: step1.sameMedicalDoctor,
-      sameDentist: step1.sameDentist,
-      sameOrthodontist: step1.sameOrthodontist,
+      ...step1,
       childrenData: step2.childrenData,
+      ...step3,
     };
 
     setFormData(data);

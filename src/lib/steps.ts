@@ -208,4 +208,71 @@ export const STEPS: Step[] = [
     description: 'Please provide details about each of your children',
     questions: [],
   },
+  {
+    id: 3,
+    title: 'Who is on your Team?',
+    description: 'Your Power(s) of Attorney and Estate Trustees should not act in a vacuum. This section lists the core professionals who already know your history.',
+    questions: [
+      {
+        key: 'client1HasWill',
+        label: 'Do you have a Will?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client2HasWill',
+        label: 'Does your spouse have a Will?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'willsSameLawyer',
+        label: 'Were they prepared at the same time/by the same lawyer?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client1UsesAccountant',
+        label: 'Do you use a professional accountant?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client2UsesAccountant',
+        label: 'Does your spouse use a professional accountant?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'accountantSamePerson',
+        label: 'Do you use the same accountant?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+    ],
+  },
 ];

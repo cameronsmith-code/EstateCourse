@@ -1195,6 +1195,105 @@ export const generatePDF = (formData: FormData) => {
       });
 
       yPosition = advisorTableY + 10;
+
+      if (yPosition > 150) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Institution ${advisorIndex + 1} Accounts Held`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      const accountRows = [
+        { label: 'Account Type:', col2: 'Institution:', col3: 'Last 4 Digits of the Account Number:', col4: 'Beneficiary on File (if applicable):' },
+        { label: 'RRSP' },
+        { label: 'Spousal RRSP' },
+        { label: 'Locked In RRSP/LIRA' },
+        { label: 'RRIF' },
+        { label: 'Spousal RRIF' },
+        { label: 'Life Income Fund (LIF)' },
+        { label: 'TFSA' },
+        { label: 'Non-Registered Account' },
+        { label: 'RESP' },
+        { label: 'RDSP' },
+        { label: 'FHSA' },
+        { label: 'In Trust For:' },
+        { label: 'Group RRSP:' },
+        { label: 'Deferred Profit-Sharing Plan:' },
+        { label: 'Joint with _____:' },
+        { label: 'Other:' },
+        { label: 'Other:' },
+        { label: 'Other:' },
+      ];
+
+      const accountCellHeight = 6;
+      const accountColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+      let accountTableY = yPosition;
+
+      accountRows.forEach((row, rowIndex) => {
+        if (accountTableY > 275) {
+          doc.addPage();
+          accountTableY = 12;
+        }
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+        doc.setFontSize(7);
+
+        const accountCol1X = margin;
+        const accountCol2X = margin + accountColWidths[0];
+        const accountCol3X = margin + accountColWidths[0] + accountColWidths[1];
+        const accountCol4X = margin + accountColWidths[0] + accountColWidths[1] + accountColWidths[2];
+
+        doc.rect(accountCol1X, accountTableY, accountColWidths[0], accountCellHeight);
+        doc.rect(accountCol2X, accountTableY, accountColWidths[1], accountCellHeight);
+        doc.rect(accountCol3X, accountTableY, accountColWidths[2], accountCellHeight);
+        doc.rect(accountCol4X, accountTableY, accountColWidths[3], accountCellHeight);
+
+        if (rowIndex === 0) {
+          doc.text('Account Type:', accountCol1X + 0.5, accountTableY + 4);
+          doc.text('Institution:', accountCol2X + 0.5, accountTableY + 4);
+          doc.text('Last 4 Digits of the', accountCol3X + 0.5, accountTableY + 2.5);
+          doc.text('Account Number:', accountCol3X + 0.5, accountTableY + 4.5);
+          doc.text('Beneficiary on File (if', accountCol4X + 0.5, accountTableY + 2.5);
+          doc.text('applicable):', accountCol4X + 0.5, accountTableY + 4.5);
+        } else {
+          doc.setFont(undefined, 'normal');
+          doc.text(row.label, accountCol1X + 0.5, accountTableY + 4);
+
+          const accountField1 = new doc.AcroFormTextField();
+          accountField1.fieldName = `accounts_client1_advisor${advisorIndex + 1}_${rowIndex}_col2`;
+          accountField1.Rect = [accountCol2X + 0.3, accountTableY + 0.3, accountColWidths[1] - 0.6, accountCellHeight - 0.6];
+          accountField1.fontSize = 7;
+          accountField1.textColor = [0, 0, 0];
+          accountField1.borderStyle = 'none';
+          doc.addField(accountField1);
+
+          const accountField2 = new doc.AcroFormTextField();
+          accountField2.fieldName = `accounts_client1_advisor${advisorIndex + 1}_${rowIndex}_col3`;
+          accountField2.Rect = [accountCol3X + 0.3, accountTableY + 0.3, accountColWidths[2] - 0.6, accountCellHeight - 0.6];
+          accountField2.fontSize = 7;
+          accountField2.textColor = [0, 0, 0];
+          accountField2.borderStyle = 'none';
+          doc.addField(accountField2);
+
+          const accountField3 = new doc.AcroFormTextField();
+          accountField3.fieldName = `accounts_client1_advisor${advisorIndex + 1}_${rowIndex}_col4`;
+          accountField3.Rect = [accountCol4X + 0.3, accountTableY + 0.3, accountColWidths[3] - 0.6, accountCellHeight - 0.6];
+          accountField3.fontSize = 7;
+          accountField3.textColor = [0, 0, 0];
+          accountField3.borderStyle = 'none';
+          doc.addField(accountField3);
+        }
+
+        accountTableY += accountCellHeight;
+      });
+
+      yPosition = accountTableY + 10;
     }
   }
 
@@ -1279,6 +1378,105 @@ export const generatePDF = (formData: FormData) => {
       });
 
       yPosition = advisorTableY + 10;
+
+      if (yPosition > 150) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Institution ${advisorIndex + 1} Accounts Held`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      const accountRows = [
+        { label: 'Account Type:', col2: 'Institution:', col3: 'Last 4 Digits of the Account Number:', col4: 'Beneficiary on File (if applicable):' },
+        { label: 'RRSP' },
+        { label: 'Spousal RRSP' },
+        { label: 'Locked In RRSP/LIRA' },
+        { label: 'RRIF' },
+        { label: 'Spousal RRIF' },
+        { label: 'Life Income Fund (LIF)' },
+        { label: 'TFSA' },
+        { label: 'Non-Registered Account' },
+        { label: 'RESP' },
+        { label: 'RDSP' },
+        { label: 'FHSA' },
+        { label: 'In Trust For:' },
+        { label: 'Group RRSP:' },
+        { label: 'Deferred Profit-Sharing Plan:' },
+        { label: 'Joint with _____:' },
+        { label: 'Other:' },
+        { label: 'Other:' },
+        { label: 'Other:' },
+      ];
+
+      const accountCellHeight = 6;
+      const accountColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+      let accountTableY = yPosition;
+
+      accountRows.forEach((row, rowIndex) => {
+        if (accountTableY > 275) {
+          doc.addPage();
+          accountTableY = 12;
+        }
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+        doc.setFontSize(7);
+
+        const accountCol1X = margin;
+        const accountCol2X = margin + accountColWidths[0];
+        const accountCol3X = margin + accountColWidths[0] + accountColWidths[1];
+        const accountCol4X = margin + accountColWidths[0] + accountColWidths[1] + accountColWidths[2];
+
+        doc.rect(accountCol1X, accountTableY, accountColWidths[0], accountCellHeight);
+        doc.rect(accountCol2X, accountTableY, accountColWidths[1], accountCellHeight);
+        doc.rect(accountCol3X, accountTableY, accountColWidths[2], accountCellHeight);
+        doc.rect(accountCol4X, accountTableY, accountColWidths[3], accountCellHeight);
+
+        if (rowIndex === 0) {
+          doc.text('Account Type:', accountCol1X + 0.5, accountTableY + 4);
+          doc.text('Institution:', accountCol2X + 0.5, accountTableY + 4);
+          doc.text('Last 4 Digits of the', accountCol3X + 0.5, accountTableY + 2.5);
+          doc.text('Account Number:', accountCol3X + 0.5, accountTableY + 4.5);
+          doc.text('Beneficiary on File (if', accountCol4X + 0.5, accountTableY + 2.5);
+          doc.text('applicable):', accountCol4X + 0.5, accountTableY + 4.5);
+        } else {
+          doc.setFont(undefined, 'normal');
+          doc.text(row.label, accountCol1X + 0.5, accountTableY + 4);
+
+          const accountField1 = new doc.AcroFormTextField();
+          accountField1.fieldName = `accounts_client2_advisor${advisorIndex + 1}_${rowIndex}_col2`;
+          accountField1.Rect = [accountCol2X + 0.3, accountTableY + 0.3, accountColWidths[1] - 0.6, accountCellHeight - 0.6];
+          accountField1.fontSize = 7;
+          accountField1.textColor = [0, 0, 0];
+          accountField1.borderStyle = 'none';
+          doc.addField(accountField1);
+
+          const accountField2 = new doc.AcroFormTextField();
+          accountField2.fieldName = `accounts_client2_advisor${advisorIndex + 1}_${rowIndex}_col3`;
+          accountField2.Rect = [accountCol3X + 0.3, accountTableY + 0.3, accountColWidths[2] - 0.6, accountCellHeight - 0.6];
+          accountField2.fontSize = 7;
+          accountField2.textColor = [0, 0, 0];
+          accountField2.borderStyle = 'none';
+          doc.addField(accountField2);
+
+          const accountField3 = new doc.AcroFormTextField();
+          accountField3.fieldName = `accounts_client2_advisor${advisorIndex + 1}_${rowIndex}_col4`;
+          accountField3.Rect = [accountCol4X + 0.3, accountTableY + 0.3, accountColWidths[3] - 0.6, accountCellHeight - 0.6];
+          accountField3.fontSize = 7;
+          accountField3.textColor = [0, 0, 0];
+          accountField3.borderStyle = 'none';
+          doc.addField(accountField3);
+        }
+
+        accountTableY += accountCellHeight;
+      });
+
+      yPosition = accountTableY + 10;
     }
   }
 

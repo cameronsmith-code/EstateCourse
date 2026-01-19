@@ -366,4 +366,113 @@ export const STEPS: Step[] = [
       },
     ],
   },
+  {
+    id: 6,
+    title: 'Life Insurance',
+    description: 'Information about life insurance, disability insurance, and critical illness policies',
+    questions: [
+      {
+        key: 'client1HasLifeInsurance',
+        label: 'Outside of benefits through your company, do you have any Life Insurance policies?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1LifeInsuranceCount',
+        label: 'How many Life Insurance policies do you have?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'client2HasLifeInsurance',
+        label: 'Outside of benefits through your company, do you have any Life Insurance policies?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2LifeInsuranceCount',
+        label: 'How many Life Insurance policies do you have?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'client1HasDisabilityInsurance',
+        label: 'Do you have any Disability Insurance policies?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1DisabilityInsuranceCount',
+        label: 'How many Disability Insurance policies do you have?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'client2HasDisabilityInsurance',
+        label: 'Do you have any Disability Insurance policies?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2DisabilityInsuranceCount',
+        label: 'How many Disability Insurance policies do you have?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'client1HasCriticalIllness',
+        label: 'Do you have any Critical Illness policies?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1CriticalIllnessCount',
+        label: 'How many Critical Illness policies do you have?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'client2HasCriticalIllness',
+        label: 'Do you have any Critical Illness policies?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2CriticalIllnessCount',
+        label: 'How many Critical Illness policies do you have?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+    ],
+  },
 ];

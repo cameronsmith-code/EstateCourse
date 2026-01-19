@@ -64,6 +64,18 @@ interface FormData {
     otherPersonName?: string;
     otherPersonPhone?: string;
   }>;
+  client1HasLifeInsurance?: string;
+  client1LifeInsuranceCount?: string;
+  client2HasLifeInsurance?: string;
+  client2LifeInsuranceCount?: string;
+  client1HasDisabilityInsurance?: string;
+  client1DisabilityInsuranceCount?: string;
+  client2HasDisabilityInsurance?: string;
+  client2DisabilityInsuranceCount?: string;
+  client1HasCriticalIllness?: string;
+  client1CriticalIllnessCount?: string;
+  client2HasCriticalIllness?: string;
+  client2CriticalIllnessCount?: string;
 }
 
 export const generatePDF = (formData: FormData) => {
@@ -2233,6 +2245,121 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition = debtTableY + 15;
       debtStartIndex += 3;
+    }
+  }
+
+  const generateInsuranceChart = (
+    policyType: string,
+    policyCount: number,
+    clientName: string
+  ) => {
+    if (policyCount <= 0) return;
+
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text(`${clientName}'s ${policyType}`, margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 10;
+
+    const insuranceRows = [
+      'Life Insured:',
+      'Insurance Company:',
+      'Insurance Policy Number (last 4 digits):',
+      'Beneficiary:',
+      'Policy Maturity Date:',
+      'Premium Amount:',
+      'Premium Payment Frequency:',
+      'Benefit Amount:',
+      'Benefit Frequency:',
+      'Benefit Ends:',
+      'Waiting Period:',
+      'Where is the Policy Document Stored?',
+      'Other Details:',
+    ];
+
+    const cellHeight = 7;
+    const labelColWidth = fieldWidth * 0.28;
+    const valueColWidth = (fieldWidth - labelColWidth) / policyCount;
+    let insuranceTableY = yPosition;
+
+    insuranceRows.forEach((rowLabel, rowIndex) => {
+      if (insuranceTableY > 275) {
+        doc.addPage();
+        insuranceTableY = 12;
+      }
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8);
+
+      const labelColX = margin;
+      doc.rect(labelColX, insuranceTableY, labelColWidth, cellHeight);
+      doc.text(rowLabel, labelColX + 0.5, insuranceTableY + 4.5);
+
+      for (let i = 0; i < policyCount; i++) {
+        const valueColX = margin + labelColWidth + (i * valueColWidth);
+        doc.rect(valueColX, insuranceTableY, valueColWidth, cellHeight);
+
+        const insuranceField = new doc.AcroFormTextField();
+        insuranceField.fieldName = `${policyType.replace(/\s+/g, '_').toLowerCase()}_${clientName.replace(/\s+/g, '_').toLowerCase()}_${i + 1}_row_${rowIndex}`;
+        insuranceField.Rect = [valueColX + 0.3, insuranceTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+        insuranceField.fontSize = 7;
+        insuranceField.textColor = [0, 0, 0];
+        insuranceField.borderStyle = 'none';
+        doc.addField(insuranceField);
+      }
+
+      insuranceTableY += cellHeight;
+    });
+
+    yPosition = insuranceTableY + 15;
+  };
+
+  if (formData.client1HasLifeInsurance === 'yes' && formData.client1LifeInsuranceCount) {
+    const count = parseInt(formData.client1LifeInsuranceCount);
+    if (count > 0) {
+      generateInsuranceChart('Life Insurance Policies', count, formData.fullName || 'Client 1');
+    }
+  }
+
+  if (formData.client2HasLifeInsurance === 'yes' && formData.client2LifeInsuranceCount) {
+    const count = parseInt(formData.client2LifeInsuranceCount);
+    if (count > 0) {
+      generateInsuranceChart('Life Insurance Policies', count, formData.spouseName || 'Client 2');
+    }
+  }
+
+  if (formData.client1HasDisabilityInsurance === 'yes' && formData.client1DisabilityInsuranceCount) {
+    const count = parseInt(formData.client1DisabilityInsuranceCount);
+    if (count > 0) {
+      generateInsuranceChart('Disability Insurance Policies', count, formData.fullName || 'Client 1');
+    }
+  }
+
+  if (formData.client2HasDisabilityInsurance === 'yes' && formData.client2DisabilityInsuranceCount) {
+    const count = parseInt(formData.client2DisabilityInsuranceCount);
+    if (count > 0) {
+      generateInsuranceChart('Disability Insurance Policies', count, formData.spouseName || 'Client 2');
+    }
+  }
+
+  if (formData.client1HasCriticalIllness === 'yes' && formData.client1CriticalIllnessCount) {
+    const count = parseInt(formData.client1CriticalIllnessCount);
+    if (count > 0) {
+      generateInsuranceChart('Critical Illness Policies', count, formData.fullName || 'Client 1');
+    }
+  }
+
+  if (formData.client2HasCriticalIllness === 'yes' && formData.client2CriticalIllnessCount) {
+    const count = parseInt(formData.client2CriticalIllnessCount);
+    if (count > 0) {
+      generateInsuranceChart('Critical Illness Policies', count, formData.spouseName || 'Client 2');
     }
   }
 

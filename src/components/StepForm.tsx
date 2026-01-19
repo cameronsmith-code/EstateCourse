@@ -764,6 +764,74 @@ export default function StepForm({
             </>
           )}
 
+          {step.id === 6 && (
+            <>
+              {step.questions.map((question) => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const client1Name = basicAnswers['fullName'] as string || 'you';
+                const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
+
+                if (question.key === 'client2HasLifeInsurance' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2LifeInsuranceCount' && (!hasSpouse || answers['client2HasLifeInsurance'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client1LifeInsuranceCount' && answers['client1HasLifeInsurance'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasDisabilityInsurance' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2DisabilityInsuranceCount' && (!hasSpouse || answers['client2HasDisabilityInsurance'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client1DisabilityInsuranceCount' && answers['client1HasDisabilityInsurance'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasCriticalIllness' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2CriticalIllnessCount' && (!hasSpouse || answers['client2HasCriticalIllness'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client1CriticalIllnessCount' && answers['client1HasCriticalIllness'] !== 'yes') {
+                  return null;
+                }
+
+                let customLabel = question.label;
+                if (question.key === 'client1HasLifeInsurance') {
+                  customLabel = `${client1Name}, outside of benefits through your company, do you have any Life Insurance policies?`;
+                }
+                if (question.key === 'client2HasLifeInsurance') {
+                  customLabel = `${client2Name}, outside of benefits through your company, do you have any Life Insurance policies?`;
+                }
+                if (question.key === 'client1HasDisabilityInsurance') {
+                  customLabel = `${client1Name}, do you have any Disability Insurance policies?`;
+                }
+                if (question.key === 'client2HasDisabilityInsurance') {
+                  customLabel = `${client2Name}, do you have any Disability Insurance policies?`;
+                }
+                if (question.key === 'client1HasCriticalIllness') {
+                  customLabel = `${client1Name}, do you have any Critical Illness policies?`;
+                }
+                if (question.key === 'client2HasCriticalIllness') {
+                  customLabel = `${client2Name}, do you have any Critical Illness policies?`;
+                }
+
+                return (
+                  <FormField
+                    key={question.key}
+                    question={{ ...question, label: customLabel }}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                  />
+                );
+              })}
+            </>
+          )}
+
           {validationError && (
             <div className="mb-6 p-4 bg-red-900 border border-red-700 rounded-lg">
               <p className="text-red-200 text-sm">{validationError}</p>

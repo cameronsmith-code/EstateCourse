@@ -410,6 +410,16 @@ export default function StepForm({
                         </label>
                       </div>
                     </div>
+
+                    <div className="mt-6 pt-6 border-t border-gray-600">
+                      <h4 className="text-md font-semibold text-white mb-2">Digital Identity and Access</h4>
+                      <p className="text-sm text-gray-400 mb-4">
+                        Modern parenting includes school portals, social accounts and gaming platforms that guardians must manage. Provide the information that you believe would best assist a potential guardian:
+                      </p>
+                      <div className="text-xs text-gray-400 italic mb-2">
+                        Note: Detailed access information will be captured in the PDF form
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

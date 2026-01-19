@@ -135,9 +135,10 @@ export const generatePDF = (formData: FormData) => {
         yPosition = 12;
       }
 
+      const childName = child.name || `Child ${index + 1}`;
       doc.setFontSize(11);
       doc.setFont(undefined, 'bold');
-      doc.text(`Child ${index + 1}: ${child.name || ''} (DOB: ${child.dateOfBirth || ''})`, margin, yPosition);
+      doc.text(`${childName} (DOB: ${child.dateOfBirth || ''})`, margin, yPosition);
       doc.setFont(undefined, 'normal');
 
       yPosition += 6;
@@ -147,7 +148,7 @@ export const generatePDF = (formData: FormData) => {
 
       if (child.disabled === 'yes' && child.disabilityTaxCredit === 'yes') {
         doc.setFont(undefined, 'bold');
-        doc.text(`${child.name} is disabled and qualifies for the disability tax credit`, margin, yPosition);
+        doc.text(`${childName} is disabled and qualifies for the disability tax credit`, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 4;
       }
@@ -336,7 +337,8 @@ export const generatePDF = (formData: FormData) => {
           };
 
           if (skipFieldsForShared(row.label)) {
-            doc.text('(See Child 1)', col2X + 0.5, tableY + 4);
+            const firstChildName = formData.childrenData?.[0]?.name || 'Child 1';
+            doc.text(`(See ${firstChildName})`, col2X + 0.5, tableY + 4);
           } else {
             const field1 = new doc.AcroFormTextField();
             field1.fieldName = `child${index + 1}_health_${rowIndex}_col2`;
@@ -376,7 +378,7 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      doc.text('Educational and Extra Curricular Activities', margin, yPosition);
+      doc.text(`${childName} - Educational and Extra Curricular Activities`, margin, yPosition);
       doc.setFont(undefined, 'normal');
 
       yPosition += 6;
@@ -486,6 +488,99 @@ export const generatePDF = (formData: FormData) => {
       });
 
       yPosition = eduTableY + 10;
+
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${childName} - Digital Identity and Access`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+
+      yPosition += 4;
+      doc.setFontSize(8);
+      doc.text('Modern parenting includes school portals, social accounts and gaming platforms that guardians must', margin, yPosition);
+      yPosition += 3;
+      doc.text('manage. Provide the information that you believe would best assist a potential guardian:', margin, yPosition);
+
+      yPosition += 6;
+
+      const digitalColWidths = [fieldWidth * 0.22, fieldWidth * 0.26, fieldWidth * 0.26, fieldWidth * 0.26];
+      const digitalCellHeight = 5;
+      let digitalTableY = yPosition;
+
+      const digitalRows = [
+        { label: 'Digital Asset:', col2: 'Login/Portal URL:', col3: 'Username:', col4: 'Password/PIN:' },
+        { label: 'School Portal:' },
+        { label: 'Child\'s Smartphone / Tablet:' },
+        { label: 'Gaming Accounts (Steam/Epic):' },
+        { label: 'Social Media (Private/Public):' },
+        { label: 'Cloud Photo Storage:' },
+        { label: 'Other:' },
+        { label: 'Other:' },
+        { label: 'Other:' },
+      ];
+
+      digitalRows.forEach((row, rowIndex) => {
+        if (digitalTableY > 275) {
+          doc.addPage();
+          digitalTableY = 12;
+        }
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+        doc.setFontSize(7);
+
+        const digitalCol1X = margin;
+        const digitalCol2X = margin + digitalColWidths[0];
+        const digitalCol3X = margin + digitalColWidths[0] + digitalColWidths[1];
+        const digitalCol4X = margin + digitalColWidths[0] + digitalColWidths[1] + digitalColWidths[2];
+
+        doc.rect(digitalCol1X, digitalTableY, digitalColWidths[0], digitalCellHeight);
+        doc.rect(digitalCol2X, digitalTableY, digitalColWidths[1], digitalCellHeight);
+        doc.rect(digitalCol3X, digitalTableY, digitalColWidths[2], digitalCellHeight);
+        doc.rect(digitalCol4X, digitalTableY, digitalColWidths[3], digitalCellHeight);
+
+        if (rowIndex === 0) {
+          doc.text('Digital Asset:', digitalCol1X + 0.3, digitalTableY + 3.5);
+          doc.text('Login/Portal URL:', digitalCol2X + 0.3, digitalTableY + 3.5);
+          doc.text('Username:', digitalCol3X + 0.3, digitalTableY + 3.5);
+          doc.text('Password/PIN:', digitalCol4X + 0.3, digitalTableY + 3.5);
+        } else {
+          doc.text(row.label, digitalCol1X + 0.3, digitalTableY + 3.5);
+
+          const digitalField1 = new doc.AcroFormTextField();
+          digitalField1.fieldName = `child${index + 1}_digital_${rowIndex}_col2`;
+          digitalField1.Rect = [digitalCol2X + 0.2, digitalTableY + 0.2, digitalColWidths[1] - 0.4, digitalCellHeight - 0.4];
+          digitalField1.fontSize = 6;
+          digitalField1.textColor = [0, 0, 0];
+          digitalField1.borderStyle = 'none';
+          doc.addField(digitalField1);
+
+          const digitalField2 = new doc.AcroFormTextField();
+          digitalField2.fieldName = `child${index + 1}_digital_${rowIndex}_col3`;
+          digitalField2.Rect = [digitalCol3X + 0.2, digitalTableY + 0.2, digitalColWidths[2] - 0.4, digitalCellHeight - 0.4];
+          digitalField2.fontSize = 6;
+          digitalField2.textColor = [0, 0, 0];
+          digitalField2.borderStyle = 'none';
+          doc.addField(digitalField2);
+
+          const digitalField3 = new doc.AcroFormTextField();
+          digitalField3.fieldName = `child${index + 1}_digital_${rowIndex}_col4`;
+          digitalField3.Rect = [digitalCol4X + 0.2, digitalTableY + 0.2, digitalColWidths[3] - 0.4, digitalCellHeight - 0.4];
+          digitalField3.fontSize = 6;
+          digitalField3.textColor = [0, 0, 0];
+          digitalField3.borderStyle = 'none';
+          doc.addField(digitalField3);
+        }
+
+        digitalTableY += digitalCellHeight;
+      });
+
+      yPosition = digitalTableY + 10;
     });
   }
 

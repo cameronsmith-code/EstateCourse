@@ -349,4 +349,21 @@ export const STEPS: Step[] = [
       },
     ],
   },
+  {
+    id: 5,
+    title: 'Outstanding Debts',
+    description: 'Information about any outstanding debts (not including credit cards)',
+    questions: [
+      {
+        key: 'hasDebts',
+        label: 'Do you have any outstanding Debts not including credit cards?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+    ],
+  },
 ];

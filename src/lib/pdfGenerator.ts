@@ -56,6 +56,14 @@ interface FormData {
   mixedJointBankCount?: string;
   mixedClient1BankCount?: string;
   mixedClient2BankCount?: string;
+  hasDebts?: string;
+  debtsData?: Array<{
+    debtType?: string;
+    debtOwner?: string;
+    hasOtherOnLoan?: string;
+    otherPersonName?: string;
+    otherPersonPhone?: string;
+  }>;
 }
 
 export const generatePDF = (formData: FormData) => {
@@ -2062,6 +2070,169 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = bankTableY + 10;
       }
+    }
+  }
+
+  if (formData.hasDebts === 'yes' && formData.debtsData && formData.debtsData.length > 0) {
+    yPosition += 12;
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Outstanding Debts', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 6;
+    doc.setFontSize(9);
+    doc.text('Information about outstanding debts (not including credit cards)', margin, yPosition);
+    yPosition += 10;
+
+    const debtsToProcess = formData.debtsData;
+    let debtStartIndex = 0;
+
+    while (debtStartIndex < debtsToProcess.length) {
+      const debtsInThisChart = debtsToProcess.slice(debtStartIndex, debtStartIndex + 3);
+
+      if (debtStartIndex > 0) {
+        if (yPosition > 150) {
+          doc.addPage();
+          yPosition = 12;
+        }
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('Outstanding Debts (continued)', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 10;
+      }
+
+      const numDebts = debtsInThisChart.length;
+      const debtRows = [
+        'Lender Name:',
+        'Loan Type:',
+        'Interest Rate:',
+        'Loan Maturity:',
+        'Payment Amount:',
+        'Payment Frequency:',
+        'Contact Name:',
+        'Contact Phone:',
+        'Where is the Contract Stored:',
+        'Other Details:',
+      ];
+
+      const cellHeight = 7;
+      const labelColWidth = fieldWidth * 0.28;
+      const valueColWidth = (fieldWidth - labelColWidth) / numDebts;
+      let debtTableY = yPosition;
+
+      debtRows.forEach((rowLabel, rowIndex) => {
+        if (debtTableY > 275) {
+          doc.addPage();
+          debtTableY = 12;
+        }
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8);
+
+        const labelColX = margin;
+        doc.rect(labelColX, debtTableY, labelColWidth, cellHeight);
+        doc.text(rowLabel, labelColX + 0.5, debtTableY + 4.5);
+
+        for (let i = 0; i < numDebts; i++) {
+          const debt = debtsInThisChart[i];
+          const valueColX = margin + labelColWidth + (i * valueColWidth);
+          doc.rect(valueColX, debtTableY, valueColWidth, cellHeight);
+
+          if (rowIndex === 1 && debt.debtType) {
+            doc.setFontSize(7);
+            doc.text(debt.debtType, valueColX + 0.5, debtTableY + 4.5);
+            doc.setFontSize(8);
+          } else {
+            const debtField = new doc.AcroFormTextField();
+            const globalDebtIndex = debtStartIndex + i;
+            debtField.fieldName = `debt_${globalDebtIndex + 1}_row_${rowIndex}_col`;
+            debtField.Rect = [valueColX + 0.3, debtTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+            debtField.fontSize = 7;
+            debtField.textColor = [0, 0, 0];
+            debtField.borderStyle = 'none';
+            doc.addField(debtField);
+          }
+        }
+
+        debtTableY += cellHeight;
+      });
+
+      debtsInThisChart.forEach((debt, i) => {
+        if (debt.hasOtherOnLoan === 'yes') {
+          if (debtTableY > 270) {
+            doc.addPage();
+            debtTableY = 12;
+          }
+
+          const valueColX = margin + labelColWidth + (i * valueColWidth);
+
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin, debtTableY, labelColWidth, cellHeight);
+          doc.setFillColor(255, 255, 255);
+          doc.text('Other on Loan:', margin + 0.5, debtTableY + 4.5);
+
+          doc.rect(valueColX, debtTableY, valueColWidth, cellHeight);
+          const otherNameField = new doc.AcroFormTextField();
+          const globalDebtIndex = debtStartIndex + i;
+          otherNameField.fieldName = `debt_${globalDebtIndex + 1}_other_name`;
+          otherNameField.Rect = [valueColX + 0.3, debtTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+          otherNameField.fontSize = 7;
+          otherNameField.textColor = [0, 0, 0];
+          otherNameField.borderStyle = 'none';
+          if (debt.otherPersonName) {
+            otherNameField.value = debt.otherPersonName;
+          }
+          doc.addField(otherNameField);
+        }
+      });
+
+      if (debtsInThisChart.some(debt => debt.hasOtherOnLoan === 'yes')) {
+        debtTableY += cellHeight;
+      }
+
+      debtsInThisChart.forEach((debt, i) => {
+        if (debt.hasOtherOnLoan === 'yes') {
+          const valueColX = margin + labelColWidth + (i * valueColWidth);
+
+          if (debtTableY > 270) {
+            doc.addPage();
+            debtTableY = 12;
+          }
+
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin, debtTableY, labelColWidth, cellHeight);
+          doc.setFillColor(255, 255, 255);
+          doc.text('Other Phone:', margin + 0.5, debtTableY + 4.5);
+
+          doc.rect(valueColX, debtTableY, valueColWidth, cellHeight);
+          const otherPhoneField = new doc.AcroFormTextField();
+          const globalDebtIndex = debtStartIndex + i;
+          otherPhoneField.fieldName = `debt_${globalDebtIndex + 1}_other_phone`;
+          otherPhoneField.Rect = [valueColX + 0.3, debtTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+          otherPhoneField.fontSize = 7;
+          otherPhoneField.textColor = [0, 0, 0];
+          otherPhoneField.borderStyle = 'none';
+          if (debt.otherPersonPhone) {
+            otherPhoneField.value = debt.otherPersonPhone;
+          }
+          doc.addField(otherPhoneField);
+        }
+      });
+
+      if (debtsInThisChart.some(debt => debt.hasOtherOnLoan === 'yes')) {
+        debtTableY += cellHeight;
+      }
+
+      yPosition = debtTableY + 15;
+      debtStartIndex += 3;
     }
   }
 

@@ -584,6 +584,186 @@ export default function StepForm({
             </div>
           )}
 
+          {step.id === 5 && (
+            <>
+              {step.questions.map((question) => (
+                <FormField
+                  key={question.key}
+                  question={question}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                />
+              ))}
+
+              {answers['hasDebts'] === 'yes' && (() => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+
+                const debtsData = (answers['debtsData'] as Array<Record<string, string>>) || [{}];
+
+                const handleDebtChange = (index: number, field: string, value: string) => {
+                  const updated = [...debtsData];
+                  if (!updated[index]) {
+                    updated[index] = {};
+                  }
+                  updated[index][field] = value;
+                  onAnswerChange('debtsData', updated);
+                };
+
+                const addDebt = () => {
+                  const updated = [...debtsData, {}];
+                  onAnswerChange('debtsData', updated);
+                };
+
+                const removeDebt = (index: number) => {
+                  const updated = debtsData.filter((_, i) => i !== index);
+                  onAnswerChange('debtsData', updated.length > 0 ? updated : [{}]);
+                };
+
+                return (
+                  <div className="space-y-8 mt-6">
+                    {debtsData.map((debt, index) => (
+                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-lg font-semibold text-white">Debt {index + 1}</h3>
+                          {debtsData.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeDebt(index)}
+                              className="text-red-400 hover:text-red-300 text-sm"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What type of debt?
+                            </label>
+                            <select
+                              value={debt.debtType || ''}
+                              onChange={(e) => handleDebtChange(index, 'debtType', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Select debt type</option>
+                              <option value="Personal Loan">Personal Loan</option>
+                              <option value="Mortgage">Mortgage</option>
+                              <option value="Reverse Mortgage">Reverse Mortgage</option>
+                              <option value="Business Loan">Business Loan</option>
+                              <option value="Line of Credit">Line of Credit</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Is this debt owned by {client1Name}, {hasSpouse ? `${client2Name}, or Jointly` : 'or someone else'}?
+                            </label>
+                            <select
+                              value={debt.debtOwner || ''}
+                              onChange={(e) => handleDebtChange(index, 'debtOwner', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Select owner</option>
+                              <option value={client1Name}>{client1Name}</option>
+                              {hasSpouse && <option value={client2Name}>{client2Name}</option>}
+                              {hasSpouse && <option value="Jointly">Jointly</option>}
+                              {!hasSpouse && <option value="Other">Other</option>}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Is there anyone else named on the loan?
+                            </label>
+                            <div className="flex gap-4">
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`hasOtherOnLoan-${index}`}
+                                  value="yes"
+                                  checked={debt.hasOtherOnLoan === 'yes'}
+                                  onChange={(e) => handleDebtChange(index, 'hasOtherOnLoan', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">Yes</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`hasOtherOnLoan-${index}`}
+                                  value="no"
+                                  checked={debt.hasOtherOnLoan === 'no'}
+                                  onChange={(e) => handleDebtChange(index, 'hasOtherOnLoan', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">No</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {debt.hasOtherOnLoan === 'yes' && (
+                            <>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Other Person's Name
+                                </label>
+                                <input
+                                  type="text"
+                                  value={debt.otherPersonName || ''}
+                                  onChange={(e) => handleDebtChange(index, 'otherPersonName', e.target.value)}
+                                  placeholder="Enter name"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Other Person's Phone Number
+                                </label>
+                                <input
+                                  type="text"
+                                  value={debt.otherPersonPhone || ''}
+                                  onChange={(e) => handleDebtChange(index, 'otherPersonPhone', e.target.value)}
+                                  placeholder="Enter phone number"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {index === debtsData.length - 1 && (
+                          <div className="mt-6 pt-6 border-t border-gray-600">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Do you have any other outstanding debts or credit cards?
+                            </label>
+                            <div className="flex gap-4">
+                              <button
+                                type="button"
+                                onClick={addDebt}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                              >
+                                Yes, add another debt
+                              </button>
+                              <span className="px-4 py-2 text-gray-300">
+                                No (continue to next step)
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </>
+          )}
+
           {validationError && (
             <div className="mb-6 p-4 bg-red-900 border border-red-700 rounded-lg">
               <p className="text-red-200 text-sm">{validationError}</p>

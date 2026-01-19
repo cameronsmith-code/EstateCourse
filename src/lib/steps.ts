@@ -273,6 +273,20 @@ export const STEPS: Step[] = [
         ],
         required: false,
       },
+      {
+        key: 'client1FinancialAdvisors',
+        label: 'How many Financial Advisors do you work with?',
+        type: 'number',
+        placeholder: '0',
+        required: true,
+      },
+      {
+        key: 'client2FinancialAdvisors',
+        label: 'How many Financial Advisors does your spouse work with?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
     ],
   },
 ];

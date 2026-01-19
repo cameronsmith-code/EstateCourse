@@ -164,6 +164,9 @@ export default function StepForm({
                 if (question.key === 'accountantSamePerson' && !(answers['client1UsesAccountant'] === 'yes' && answers['client2UsesAccountant'] === 'yes')) {
                   return null;
                 }
+                if (question.key === 'client2FinancialAdvisors' && !hasSpouse) {
+                  return null;
+                }
 
                 let customLabel = question.label;
                 if (question.key === 'client1HasWill') {
@@ -177,6 +180,12 @@ export default function StepForm({
                 }
                 if (question.key === 'client2UsesAccountant') {
                   customLabel = `Does ${client2Name} use a professional accountant?`;
+                }
+                if (question.key === 'client1FinancialAdvisors') {
+                  customLabel = `${client1Name}, how many Financial Advisors do you work with?`;
+                }
+                if (question.key === 'client2FinancialAdvisors') {
+                  customLabel = `${client2Name}, how many Financial Advisors do you work with?`;
                 }
 
                 return (

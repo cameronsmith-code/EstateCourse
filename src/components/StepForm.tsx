@@ -200,6 +200,108 @@ export default function StepForm({
             </>
           )}
 
+          {step.id === 4 && (
+            <>
+              {step.questions.map((question) => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const client1Name = basicAnswers['fullName'] as string || 'you';
+                const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
+                const bankingStructure = answers['bankingStructure'];
+
+                if (question.key === 'bankingStructure' && !hasSpouse) {
+                  return null;
+                }
+
+                if (question.key === 'jointBankCount' && bankingStructure !== 'joint') {
+                  return null;
+                }
+
+                if (question.key === 'client1BankCount') {
+                  if (hasSpouse && bankingStructure !== 'individual') {
+                    return null;
+                  }
+                  if (!hasSpouse) {
+                    return (
+                      <FormField
+                        key={question.key}
+                        question={question}
+                        value={answers[question.key]}
+                        onChange={(value) => onAnswerChange(question.key, value)}
+                      />
+                    );
+                  }
+                  if (bankingStructure === 'individual') {
+                    return (
+                      <FormField
+                        key={question.key}
+                        question={{ ...question, label: `${client1Name}, how many banks, trust companies or credit unions do you have accounts with?` }}
+                        value={answers[question.key]}
+                        onChange={(value) => onAnswerChange(question.key, value)}
+                      />
+                    );
+                  }
+                  return null;
+                }
+
+                if (question.key === 'client2BankCount') {
+                  if (!hasSpouse || bankingStructure !== 'individual') {
+                    return null;
+                  }
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={{ ...question, label: `${client2Name}, how many banks, trust companies or credit unions do you have accounts with?` }}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  );
+                }
+
+                if (question.key === 'mixedJointBankCount' && bankingStructure !== 'mixed') {
+                  return null;
+                }
+
+                if (question.key === 'mixedClient1BankCount') {
+                  if (bankingStructure !== 'mixed') {
+                    return null;
+                  }
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={{ ...question, label: `${client1Name}, how many individually held accounts do you have?` }}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  );
+                }
+
+                if (question.key === 'mixedClient2BankCount') {
+                  if (bankingStructure !== 'mixed') {
+                    return null;
+                  }
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={{ ...question, label: `${client2Name}, how many individually held accounts do you have?` }}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  );
+                }
+
+                return (
+                  <FormField
+                    key={question.key}
+                    question={question}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                  />
+                );
+              })}
+            </>
+          )}
+
           {step.id === 2 && childCount > 0 && (
             <div className="space-y-8">
               {Array.from({ length: childCount }).map((_, index) => (

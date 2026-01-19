@@ -49,6 +49,13 @@ interface FormData {
   accountantSamePerson?: string;
   client1FinancialAdvisors?: string;
   client2FinancialAdvisors?: string;
+  bankingStructure?: string;
+  jointBankCount?: string;
+  client1BankCount?: string;
+  client2BankCount?: string;
+  mixedJointBankCount?: string;
+  mixedClient1BankCount?: string;
+  mixedClient2BankCount?: string;
 }
 
 export const generatePDF = (formData: FormData) => {
@@ -1477,6 +1484,584 @@ export const generatePDF = (formData: FormData) => {
       });
 
       yPosition = accountTableY + 10;
+    }
+  }
+
+  const bankingStructure = formData.bankingStructure;
+  let totalBankCount = 0;
+
+  if (!hasSpouse) {
+    totalBankCount = parseInt(formData.client1BankCount || '0');
+  } else if (bankingStructure === 'joint') {
+    totalBankCount = parseInt(formData.jointBankCount || '0');
+  } else if (bankingStructure === 'individual') {
+    totalBankCount = parseInt(formData.client1BankCount || '0') + parseInt(formData.client2BankCount || '0');
+  } else if (bankingStructure === 'mixed') {
+    totalBankCount = parseInt(formData.mixedJointBankCount || '0') + parseInt(formData.mixedClient1BankCount || '0') + parseInt(formData.mixedClient2BankCount || '0');
+  }
+
+  if (totalBankCount > 0) {
+    yPosition += 12;
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Your Financial Footprint', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 6;
+    doc.setFontSize(9);
+    doc.text('Banking and financial account information', margin, yPosition);
+    yPosition += 10;
+
+    if (bankingStructure === 'joint') {
+      const jointCount = parseInt(formData.jointBankCount || '0');
+      for (let i = 0; i < jointCount; i++) {
+        if (yPosition > 180) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Joint Banking Account ${i + 1}`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const bankRows = [
+          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Institution Name:' },
+          { label: 'Branch/Location:' },
+          { label: 'Account Type:' },
+          { label: 'Last 4 Digits of Account Number:' },
+          { label: 'Primary Contact Person:' },
+          { label: 'Online Banking Access:' },
+          { label: 'Other Details:' },
+        ];
+
+        const bankCellHeight = 6;
+        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let bankTableY = yPosition;
+
+        bankRows.forEach((row, rowIndex) => {
+          if (bankTableY > 275) {
+            doc.addPage();
+            bankTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const bankCol1X = margin;
+          const bankCol2X = margin + bankColWidths[0];
+          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
+
+          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
+          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
+          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
+            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
+            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            const bankField1 = new doc.AcroFormTextField();
+            bankField1.fieldName = `bank_joint_${i + 1}_${rowIndex}_col2`;
+            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
+            bankField1.fontSize = 7;
+            bankField1.textColor = [0, 0, 0];
+            bankField1.borderStyle = 'none';
+            doc.addField(bankField1);
+
+            const bankField2 = new doc.AcroFormTextField();
+            bankField2.fieldName = `bank_joint_${i + 1}_${rowIndex}_col3`;
+            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
+            bankField2.fontSize = 7;
+            bankField2.textColor = [0, 0, 0];
+            bankField2.borderStyle = 'none';
+            doc.addField(bankField2);
+          }
+
+          bankTableY += bankCellHeight;
+        });
+
+        yPosition = bankTableY + 10;
+      }
+    } else if (bankingStructure === 'individual') {
+      const client1Count = parseInt(formData.client1BankCount || '0');
+      for (let i = 0; i < client1Count; i++) {
+        if (yPosition > 180) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${client1Name} - Banking Account ${i + 1}`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const bankRows = [
+          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Institution Name:' },
+          { label: 'Branch/Location:' },
+          { label: 'Account Type:' },
+          { label: 'Last 4 Digits of Account Number:' },
+          { label: 'Primary Contact Person:' },
+          { label: 'Online Banking Access:' },
+          { label: 'Other Details:' },
+        ];
+
+        const bankCellHeight = 6;
+        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let bankTableY = yPosition;
+
+        bankRows.forEach((row, rowIndex) => {
+          if (bankTableY > 275) {
+            doc.addPage();
+            bankTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const bankCol1X = margin;
+          const bankCol2X = margin + bankColWidths[0];
+          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
+
+          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
+          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
+          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
+            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
+            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            const bankField1 = new doc.AcroFormTextField();
+            bankField1.fieldName = `bank_client1_${i + 1}_${rowIndex}_col2`;
+            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
+            bankField1.fontSize = 7;
+            bankField1.textColor = [0, 0, 0];
+            bankField1.borderStyle = 'none';
+            doc.addField(bankField1);
+
+            const bankField2 = new doc.AcroFormTextField();
+            bankField2.fieldName = `bank_client1_${i + 1}_${rowIndex}_col3`;
+            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
+            bankField2.fontSize = 7;
+            bankField2.textColor = [0, 0, 0];
+            bankField2.borderStyle = 'none';
+            doc.addField(bankField2);
+          }
+
+          bankTableY += bankCellHeight;
+        });
+
+        yPosition = bankTableY + 10;
+      }
+
+      const client2Count = parseInt(formData.client2BankCount || '0');
+      for (let i = 0; i < client2Count; i++) {
+        if (yPosition > 180) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${client2Name} - Banking Account ${i + 1}`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const bankRows = [
+          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Institution Name:' },
+          { label: 'Branch/Location:' },
+          { label: 'Account Type:' },
+          { label: 'Last 4 Digits of Account Number:' },
+          { label: 'Primary Contact Person:' },
+          { label: 'Online Banking Access:' },
+          { label: 'Other Details:' },
+        ];
+
+        const bankCellHeight = 6;
+        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let bankTableY = yPosition;
+
+        bankRows.forEach((row, rowIndex) => {
+          if (bankTableY > 275) {
+            doc.addPage();
+            bankTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const bankCol1X = margin;
+          const bankCol2X = margin + bankColWidths[0];
+          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
+
+          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
+          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
+          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
+            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
+            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            const bankField1 = new doc.AcroFormTextField();
+            bankField1.fieldName = `bank_client2_${i + 1}_${rowIndex}_col2`;
+            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
+            bankField1.fontSize = 7;
+            bankField1.textColor = [0, 0, 0];
+            bankField1.borderStyle = 'none';
+            doc.addField(bankField1);
+
+            const bankField2 = new doc.AcroFormTextField();
+            bankField2.fieldName = `bank_client2_${i + 1}_${rowIndex}_col3`;
+            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
+            bankField2.fontSize = 7;
+            bankField2.textColor = [0, 0, 0];
+            bankField2.borderStyle = 'none';
+            doc.addField(bankField2);
+          }
+
+          bankTableY += bankCellHeight;
+        });
+
+        yPosition = bankTableY + 10;
+      }
+    } else if (bankingStructure === 'mixed') {
+      const jointCount = parseInt(formData.mixedJointBankCount || '0');
+      for (let i = 0; i < jointCount; i++) {
+        if (yPosition > 180) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Joint Banking Account ${i + 1}`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const bankRows = [
+          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Institution Name:' },
+          { label: 'Branch/Location:' },
+          { label: 'Account Type:' },
+          { label: 'Last 4 Digits of Account Number:' },
+          { label: 'Primary Contact Person:' },
+          { label: 'Online Banking Access:' },
+          { label: 'Other Details:' },
+        ];
+
+        const bankCellHeight = 6;
+        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let bankTableY = yPosition;
+
+        bankRows.forEach((row, rowIndex) => {
+          if (bankTableY > 275) {
+            doc.addPage();
+            bankTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const bankCol1X = margin;
+          const bankCol2X = margin + bankColWidths[0];
+          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
+
+          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
+          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
+          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
+            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
+            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            const bankField1 = new doc.AcroFormTextField();
+            bankField1.fieldName = `bank_mixed_joint_${i + 1}_${rowIndex}_col2`;
+            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
+            bankField1.fontSize = 7;
+            bankField1.textColor = [0, 0, 0];
+            bankField1.borderStyle = 'none';
+            doc.addField(bankField1);
+
+            const bankField2 = new doc.AcroFormTextField();
+            bankField2.fieldName = `bank_mixed_joint_${i + 1}_${rowIndex}_col3`;
+            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
+            bankField2.fontSize = 7;
+            bankField2.textColor = [0, 0, 0];
+            bankField2.borderStyle = 'none';
+            doc.addField(bankField2);
+          }
+
+          bankTableY += bankCellHeight;
+        });
+
+        yPosition = bankTableY + 10;
+      }
+
+      const client1Count = parseInt(formData.mixedClient1BankCount || '0');
+      for (let i = 0; i < client1Count; i++) {
+        if (yPosition > 180) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${client1Name} - Individual Banking Account ${i + 1}`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const bankRows = [
+          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Institution Name:' },
+          { label: 'Branch/Location:' },
+          { label: 'Account Type:' },
+          { label: 'Last 4 Digits of Account Number:' },
+          { label: 'Primary Contact Person:' },
+          { label: 'Online Banking Access:' },
+          { label: 'Other Details:' },
+        ];
+
+        const bankCellHeight = 6;
+        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let bankTableY = yPosition;
+
+        bankRows.forEach((row, rowIndex) => {
+          if (bankTableY > 275) {
+            doc.addPage();
+            bankTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const bankCol1X = margin;
+          const bankCol2X = margin + bankColWidths[0];
+          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
+
+          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
+          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
+          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
+            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
+            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            const bankField1 = new doc.AcroFormTextField();
+            bankField1.fieldName = `bank_mixed_client1_${i + 1}_${rowIndex}_col2`;
+            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
+            bankField1.fontSize = 7;
+            bankField1.textColor = [0, 0, 0];
+            bankField1.borderStyle = 'none';
+            doc.addField(bankField1);
+
+            const bankField2 = new doc.AcroFormTextField();
+            bankField2.fieldName = `bank_mixed_client1_${i + 1}_${rowIndex}_col3`;
+            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
+            bankField2.fontSize = 7;
+            bankField2.textColor = [0, 0, 0];
+            bankField2.borderStyle = 'none';
+            doc.addField(bankField2);
+          }
+
+          bankTableY += bankCellHeight;
+        });
+
+        yPosition = bankTableY + 10;
+      }
+
+      const client2Count = parseInt(formData.mixedClient2BankCount || '0');
+      for (let i = 0; i < client2Count; i++) {
+        if (yPosition > 180) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${client2Name} - Individual Banking Account ${i + 1}`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const bankRows = [
+          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Institution Name:' },
+          { label: 'Branch/Location:' },
+          { label: 'Account Type:' },
+          { label: 'Last 4 Digits of Account Number:' },
+          { label: 'Primary Contact Person:' },
+          { label: 'Online Banking Access:' },
+          { label: 'Other Details:' },
+        ];
+
+        const bankCellHeight = 6;
+        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let bankTableY = yPosition;
+
+        bankRows.forEach((row, rowIndex) => {
+          if (bankTableY > 275) {
+            doc.addPage();
+            bankTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const bankCol1X = margin;
+          const bankCol2X = margin + bankColWidths[0];
+          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
+
+          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
+          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
+          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
+            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
+            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            const bankField1 = new doc.AcroFormTextField();
+            bankField1.fieldName = `bank_mixed_client2_${i + 1}_${rowIndex}_col3`;
+            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
+            bankField1.fontSize = 7;
+            bankField1.textColor = [0, 0, 0];
+            bankField1.borderStyle = 'none';
+            doc.addField(bankField1);
+
+            const bankField2 = new doc.AcroFormTextField();
+            bankField2.fieldName = `bank_mixed_client2_${i + 1}_${rowIndex}_col3`;
+            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
+            bankField2.fontSize = 7;
+            bankField2.textColor = [0, 0, 0];
+            bankField2.borderStyle = 'none';
+            doc.addField(bankField2);
+          }
+
+          bankTableY += bankCellHeight;
+        });
+
+        yPosition = bankTableY + 10;
+      }
+    } else if (!hasSpouse) {
+      const bankCount = parseInt(formData.client1BankCount || '0');
+      for (let i = 0; i < bankCount; i++) {
+        if (yPosition > 180) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Banking Account ${i + 1}`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const bankRows = [
+          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Institution Name:' },
+          { label: 'Branch/Location:' },
+          { label: 'Account Type:' },
+          { label: 'Last 4 Digits of Account Number:' },
+          { label: 'Primary Contact Person:' },
+          { label: 'Online Banking Access:' },
+          { label: 'Other Details:' },
+        ];
+
+        const bankCellHeight = 6;
+        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let bankTableY = yPosition;
+
+        bankRows.forEach((row, rowIndex) => {
+          if (bankTableY > 275) {
+            doc.addPage();
+            bankTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const bankCol1X = margin;
+          const bankCol2X = margin + bankColWidths[0];
+          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
+
+          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
+          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
+          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
+            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
+            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            const bankField1 = new doc.AcroFormTextField();
+            bankField1.fieldName = `bank_single_${i + 1}_${rowIndex}_col2`;
+            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
+            bankField1.fontSize = 7;
+            bankField1.textColor = [0, 0, 0];
+            bankField1.borderStyle = 'none';
+            doc.addField(bankField1);
+
+            const bankField2 = new doc.AcroFormTextField();
+            bankField2.fieldName = `bank_single_${i + 1}_${rowIndex}_col3`;
+            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
+            bankField2.fontSize = 7;
+            bankField2.textColor = [0, 0, 0];
+            bankField2.borderStyle = 'none';
+            doc.addField(bankField2);
+          }
+
+          bankTableY += bankCellHeight;
+        });
+
+        yPosition = bankTableY + 10;
+      }
     }
   }
 

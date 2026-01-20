@@ -64,6 +64,8 @@ interface FormData {
     otherPersonName?: string;
     otherPersonPhone?: string;
   }>;
+  client1HasWorkBenefits?: string;
+  client2HasWorkBenefits?: string;
   client1HasLifeInsurance?: string;
   client1LifeInsuranceCount?: string;
   client2HasLifeInsurance?: string;
@@ -2320,6 +2322,79 @@ export const generatePDF = (formData: FormData) => {
 
     yPosition = insuranceTableY + 15;
   };
+
+  const generateWorkBenefitsChart = (clientName: string, hasWorkBenefits: string) => {
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text(`${clientName}'s Work Benefits`, margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 10;
+
+    if (hasWorkBenefits === 'no') {
+      doc.setFontSize(10);
+      doc.text(`${clientName} indicated that they have no life, disability, or critical illness insurance through their work.`, margin, yPosition);
+      yPosition += 15;
+      return;
+    }
+
+    const workBenefitsRows = [
+      "Employer's Name:",
+      'Insurance Provider:',
+      'Life Insurance Death Benefit:',
+      'Disability Benefit:',
+      'Critical Illness Benefit:',
+      'Location of a copy of your benefits package:',
+    ];
+
+    const cellHeight = 7;
+    const labelColWidth = fieldWidth * 0.45;
+    const valueColWidth = fieldWidth - labelColWidth;
+    let workBenefitsTableY = yPosition;
+
+    workBenefitsRows.forEach((rowLabel, rowIndex) => {
+      if (workBenefitsTableY > 275) {
+        doc.addPage();
+        workBenefitsTableY = 12;
+      }
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8);
+
+      const labelColX = margin;
+      doc.rect(labelColX, workBenefitsTableY, labelColWidth, cellHeight);
+      doc.text(rowLabel, labelColX + 0.5, workBenefitsTableY + 4.5);
+
+      const valueColX = margin + labelColWidth;
+      doc.rect(valueColX, workBenefitsTableY, valueColWidth, cellHeight);
+
+      const workBenefitsField = new doc.AcroFormTextField();
+      workBenefitsField.fieldName = `work_benefits_${clientName.replace(/\s+/g, '_').toLowerCase()}_row_${rowIndex}`;
+      workBenefitsField.Rect = [valueColX + 0.3, workBenefitsTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+      workBenefitsField.fontSize = 7;
+      workBenefitsField.textColor = [0, 0, 0];
+      workBenefitsField.borderStyle = 'none';
+      doc.addField(workBenefitsField);
+
+      workBenefitsTableY += cellHeight;
+    });
+
+    yPosition = workBenefitsTableY + 15;
+  };
+
+  if (formData.client1HasWorkBenefits) {
+    generateWorkBenefitsChart(formData.fullName || 'Client 1', formData.client1HasWorkBenefits);
+  }
+
+  if (formData.client2HasWorkBenefits) {
+    generateWorkBenefitsChart(formData.spouseName || 'Client 2', formData.client2HasWorkBenefits);
+  }
 
   if (formData.client1HasLifeInsurance === 'yes' && formData.client1LifeInsuranceCount) {
     const count = parseInt(formData.client1LifeInsuranceCount);

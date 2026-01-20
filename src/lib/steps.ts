@@ -372,6 +372,26 @@ export const STEPS: Step[] = [
     description: 'Information about life insurance, disability insurance, and critical illness policies',
     questions: [
       {
+        key: 'client1HasWorkBenefits',
+        label: 'Do you have life, disability, or critical illness insurance through your work?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client2HasWorkBenefits',
+        label: 'Do you have life, disability, or critical illness insurance through your work?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
         key: 'client1HasLifeInsurance',
         label: 'Outside of benefits through your company, do you have any Life Insurance policies?',
         type: 'radio',

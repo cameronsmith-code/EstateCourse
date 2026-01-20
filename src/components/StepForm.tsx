@@ -772,6 +772,9 @@ export default function StepForm({
                 const client1Name = basicAnswers['fullName'] as string || 'you';
                 const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
+                if (question.key === 'client2HasWorkBenefits' && !hasSpouse) {
+                  return null;
+                }
                 if (question.key === 'client2HasLifeInsurance' && !hasSpouse) {
                   return null;
                 }
@@ -801,6 +804,12 @@ export default function StepForm({
                 }
 
                 let customLabel = question.label;
+                if (question.key === 'client1HasWorkBenefits') {
+                  customLabel = `${client1Name}, do you have life, disability, or critical illness insurance through your work?`;
+                }
+                if (question.key === 'client2HasWorkBenefits') {
+                  customLabel = `${client2Name}, do you have life, disability, or critical illness insurance through your work?`;
+                }
                 if (question.key === 'client1HasLifeInsurance') {
                   customLabel = `${client1Name}, outside of benefits through your company, do you have any Life Insurance policies?`;
                 }

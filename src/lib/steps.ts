@@ -495,4 +495,38 @@ export const STEPS: Step[] = [
       },
     ],
   },
+  {
+    id: 7,
+    title: 'Property and Casualty Insurance',
+    description: 'Information about home and property insurance',
+    questions: [
+      {
+        key: 'hasHomeInsurance',
+        label: 'Do you have home insurance?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'hasAdditionalProperties',
+        label: 'Do you have additional properties?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'additionalPropertiesCount',
+        label: 'How many additional properties do you have?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+    ],
+  },
 ];

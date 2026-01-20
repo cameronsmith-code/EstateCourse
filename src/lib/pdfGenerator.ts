@@ -78,6 +78,9 @@ interface FormData {
   client1CriticalIllnessCount?: string;
   client2HasCriticalIllness?: string;
   client2CriticalIllnessCount?: string;
+  hasHomeInsurance?: string;
+  hasAdditionalProperties?: string;
+  additionalPropertiesCount?: string;
 }
 
 export const generatePDF = (formData: FormData) => {
@@ -2435,6 +2438,92 @@ export const generatePDF = (formData: FormData) => {
     const count = parseInt(formData.client2CriticalIllnessCount);
     if (count > 0) {
       generateInsuranceChart('Critical Illness Policies', count, formData.spouseName || 'Client 2');
+    }
+  }
+
+  const generatePropertyInsuranceChart = (propertyLabel: string) => {
+    if (yPosition > 230) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text(propertyLabel, margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 10;
+
+    const propertyRows = [
+      'Property Address:',
+      'Insurance Provider:',
+      'Property Type:',
+      'Coverage Amount:',
+      'Document Location:',
+      'Other Details:',
+    ];
+
+    const cellHeight = 7;
+    const labelColWidth = fieldWidth * 0.35;
+    const valueColWidth = fieldWidth - labelColWidth;
+    let propertyTableY = yPosition;
+
+    propertyRows.forEach((rowLabel, rowIndex) => {
+      if (propertyTableY > 275) {
+        doc.addPage();
+        propertyTableY = 12;
+      }
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8);
+
+      const labelColX = margin;
+      doc.rect(labelColX, propertyTableY, labelColWidth, cellHeight);
+      doc.text(rowLabel, labelColX + 0.5, propertyTableY + 4.5);
+
+      const valueColX = margin + labelColWidth;
+      doc.rect(valueColX, propertyTableY, valueColWidth, cellHeight);
+
+      const propertyField = new doc.AcroFormTextField();
+      propertyField.fieldName = `property_${propertyLabel.replace(/\s+/g, '_').toLowerCase()}_row_${rowIndex}`;
+      propertyField.Rect = [valueColX + 0.3, propertyTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+      propertyField.fontSize = 7;
+      propertyField.textColor = [0, 0, 0];
+      propertyField.borderStyle = 'none';
+      doc.addField(propertyField);
+
+      propertyTableY += cellHeight;
+    });
+
+    yPosition = propertyTableY + 15;
+  };
+
+  if (formData.hasHomeInsurance) {
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Property and Casualty Insurance', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 10;
+
+    if (formData.hasHomeInsurance === 'no') {
+      doc.setFontSize(10);
+      doc.text('Client(s) indicated that they have no property insurance.', margin, yPosition);
+      yPosition += 15;
+    } else if (formData.hasHomeInsurance === 'yes') {
+      generatePropertyInsuranceChart('Primary Home Insurance');
+
+      if (formData.hasAdditionalProperties === 'yes' && formData.additionalPropertiesCount) {
+        const additionalCount = parseInt(formData.additionalPropertiesCount);
+        for (let i = 1; i <= additionalCount; i++) {
+          generatePropertyInsuranceChart(`Additional Property ${i} Insurance`);
+        }
+      }
     }
   }
 

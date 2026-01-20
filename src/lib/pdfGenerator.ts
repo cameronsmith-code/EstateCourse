@@ -2403,6 +2403,23 @@ export const generatePDF = (formData: FormData) => {
     generateWorkBenefitsChart(formData.spouseName || 'Client 2', formData.client2HasWorkBenefits);
   }
 
+  const hasAnyLifeInsurance =
+    (formData.client1HasLifeInsurance === 'yes' && formData.client1LifeInsuranceCount && parseInt(formData.client1LifeInsuranceCount) > 0) ||
+    (formData.client2HasLifeInsurance === 'yes' && formData.client2LifeInsuranceCount && parseInt(formData.client2LifeInsuranceCount) > 0);
+
+  if (hasAnyLifeInsurance) {
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('Life Insurance', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 15;
+  }
+
   if (formData.client1HasLifeInsurance === 'yes' && formData.client1LifeInsuranceCount) {
     const count = parseInt(formData.client1LifeInsuranceCount);
     if (count > 0) {
@@ -2417,6 +2434,23 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
+  const hasAnyDisabilityInsurance =
+    (formData.client1HasDisabilityInsurance === 'yes' && formData.client1DisabilityInsuranceCount && parseInt(formData.client1DisabilityInsuranceCount) > 0) ||
+    (formData.client2HasDisabilityInsurance === 'yes' && formData.client2DisabilityInsuranceCount && parseInt(formData.client2DisabilityInsuranceCount) > 0);
+
+  if (hasAnyDisabilityInsurance) {
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('Disability Insurance', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 15;
+  }
+
   if (formData.client1HasDisabilityInsurance === 'yes' && formData.client1DisabilityInsuranceCount) {
     const count = parseInt(formData.client1DisabilityInsuranceCount);
     if (count > 0) {
@@ -2429,6 +2463,23 @@ export const generatePDF = (formData: FormData) => {
     if (count > 0) {
       generateInsuranceChart('Disability Insurance Policies', count, formData.spouseName || 'Client 2');
     }
+  }
+
+  const hasAnyCriticalIllness =
+    (formData.client1HasCriticalIllness === 'yes' && formData.client1CriticalIllnessCount && parseInt(formData.client1CriticalIllnessCount) > 0) ||
+    (formData.client2HasCriticalIllness === 'yes' && formData.client2CriticalIllnessCount && parseInt(formData.client2CriticalIllnessCount) > 0);
+
+  if (hasAnyCriticalIllness) {
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('Critical Illness Insurance', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 15;
   }
 
   if (formData.client1HasCriticalIllness === 'yes' && formData.client1CriticalIllnessCount) {
@@ -2509,11 +2560,11 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
-    doc.setFontSize(12);
+    doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Property and Casualty Insurance', margin, yPosition);
     doc.setFont(undefined, 'normal');
-    yPosition += 10;
+    yPosition += 15;
 
     if (formData.hasHomeInsurance === 'no') {
       doc.setFontSize(10);
@@ -2594,11 +2645,11 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
-    doc.setFontSize(12);
+    doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Vehicle Insurance', margin, yPosition);
     doc.setFont(undefined, 'normal');
-    yPosition += 10;
+    yPosition += 15;
 
     let vehicleNumber = 1;
 
@@ -2628,11 +2679,11 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
-    doc.setFontSize(12);
+    doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Vehicle Insurance', margin, yPosition);
     doc.setFont(undefined, 'normal');
-    yPosition += 10;
+    yPosition += 15;
 
     doc.setFontSize(10);
     doc.text('Client(s) indicated that they have no vehicle insurance.', margin, yPosition);

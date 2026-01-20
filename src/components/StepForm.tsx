@@ -844,17 +844,41 @@ export default function StepForm({
           {step.id === 7 && (
             <>
               {step.questions.map((question) => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const client1Name = basicAnswers['fullName'] as string || 'you';
+                const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
+
                 if (question.key === 'hasAdditionalProperties' && answers['hasHomeInsurance'] !== 'yes') {
                   return null;
                 }
                 if (question.key === 'additionalPropertiesCount' && answers['hasAdditionalProperties'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client2HasVehicleInsurance' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'hasAdditionalVehicles' &&
+                    answers['client1HasVehicleInsurance'] !== 'yes' &&
+                    answers['client2HasVehicleInsurance'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'additionalVehiclesCount' && answers['hasAdditionalVehicles'] !== 'yes') {
+                  return null;
+                }
+
+                let customLabel = question.label;
+                if (question.key === 'client1HasVehicleInsurance') {
+                  customLabel = `${client1Name}, do you have vehicle insurance?`;
+                }
+                if (question.key === 'client2HasVehicleInsurance') {
+                  customLabel = `${client2Name}, do you have vehicle insurance?`;
+                }
 
                 return (
                   <FormField
                     key={question.key}
-                    question={question}
+                    question={{ ...question, label: customLabel }}
                     value={answers[question.key]}
                     onChange={(value) => onAnswerChange(question.key, value)}
                   />

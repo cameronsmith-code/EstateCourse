@@ -527,6 +527,43 @@ export const STEPS: Step[] = [
         placeholder: '0',
         required: false,
       },
+      {
+        key: 'client1HasVehicleInsurance',
+        label: 'Do you have vehicle insurance?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client2HasVehicleInsurance',
+        label: 'Do you have vehicle insurance?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'hasAdditionalVehicles',
+        label: 'Do you have additional vehicles?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'additionalVehiclesCount',
+        label: 'How many additional vehicles do you have?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
     ],
   },
 ];

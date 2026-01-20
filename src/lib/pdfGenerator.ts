@@ -81,6 +81,10 @@ interface FormData {
   hasHomeInsurance?: string;
   hasAdditionalProperties?: string;
   additionalPropertiesCount?: string;
+  client1HasVehicleInsurance?: string;
+  client2HasVehicleInsurance?: string;
+  hasAdditionalVehicles?: string;
+  additionalVehiclesCount?: string;
 }
 
 export const generatePDF = (formData: FormData) => {
@@ -2525,6 +2529,114 @@ export const generatePDF = (formData: FormData) => {
         }
       }
     }
+  }
+
+  const generateVehicleInsuranceChart = (vehicleLabel: string, clientName: string) => {
+    if (yPosition > 230) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text(`${vehicleLabel} - ${clientName}`, margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 10;
+
+    const vehicleRows = [
+      'Vehicle Insured:',
+      'Vehicle Owner:',
+      'Insurance Provider:',
+      'Coverage Amount:',
+      'Document Location:',
+    ];
+
+    const cellHeight = 7;
+    const labelColWidth = fieldWidth * 0.35;
+    const valueColWidth = fieldWidth - labelColWidth;
+    let vehicleTableY = yPosition;
+
+    vehicleRows.forEach((rowLabel, rowIndex) => {
+      if (vehicleTableY > 275) {
+        doc.addPage();
+        vehicleTableY = 12;
+      }
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8);
+
+      const labelColX = margin;
+      doc.rect(labelColX, vehicleTableY, labelColWidth, cellHeight);
+      doc.text(rowLabel, labelColX + 0.5, vehicleTableY + 4.5);
+
+      const valueColX = margin + labelColWidth;
+      doc.rect(valueColX, vehicleTableY, valueColWidth, cellHeight);
+
+      const vehicleField = new doc.AcroFormTextField();
+      vehicleField.fieldName = `vehicle_${vehicleLabel.replace(/\s+/g, '_').toLowerCase()}_${clientName.replace(/\s+/g, '_').toLowerCase()}_row_${rowIndex}`;
+      vehicleField.Rect = [valueColX + 0.3, vehicleTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+      vehicleField.fontSize = 7;
+      vehicleField.textColor = [0, 0, 0];
+      vehicleField.borderStyle = 'none';
+      doc.addField(vehicleField);
+
+      vehicleTableY += cellHeight;
+    });
+
+    yPosition = vehicleTableY + 15;
+  };
+
+  if (formData.client1HasVehicleInsurance === 'yes' || formData.client2HasVehicleInsurance === 'yes') {
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Vehicle Insurance', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 10;
+
+    let vehicleNumber = 1;
+
+    if (formData.client1HasVehicleInsurance === 'yes') {
+      generateVehicleInsuranceChart(`Vehicle ${vehicleNumber}`, formData.fullName || 'Client 1');
+      vehicleNumber++;
+    }
+
+    if (formData.client2HasVehicleInsurance === 'yes') {
+      generateVehicleInsuranceChart(`Vehicle ${vehicleNumber}`, formData.spouseName || 'Client 2');
+      vehicleNumber++;
+    }
+
+    if (formData.hasAdditionalVehicles === 'yes' && formData.additionalVehiclesCount) {
+      const additionalCount = parseInt(formData.additionalVehiclesCount);
+      for (let i = 0; i < additionalCount; i++) {
+        generateVehicleInsuranceChart(`Vehicle ${vehicleNumber}`, 'Additional Vehicle');
+        vehicleNumber++;
+      }
+    }
+  }
+
+  if (formData.client1HasVehicleInsurance === 'no' &&
+      (formData.client2HasVehicleInsurance === 'no' || !formData.client2HasVehicleInsurance)) {
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Vehicle Insurance', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.text('Client(s) indicated that they have no vehicle insurance.', margin, yPosition);
+    yPosition += 15;
   }
 
   yPosition += 12;

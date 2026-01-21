@@ -12,11 +12,19 @@ export default function Completion() {
     const step1 = answers.get(1) || {};
     const step2 = answers.get(2) || {};
     const step3 = answers.get(3) || {};
+    const step4 = answers.get(4) || {};
+    const step5 = answers.get(5) || {};
+    const step6 = answers.get(6) || {};
+    const step7 = answers.get(7) || {};
 
     const data = {
       ...step1,
       childrenData: step2.childrenData,
       ...step3,
+      ...step4,
+      ...step5,
+      ...step6,
+      ...step7,
     };
 
     setFormData(data);

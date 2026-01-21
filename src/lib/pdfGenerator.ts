@@ -2327,6 +2327,297 @@ export const generatePDF = (formData: FormData) => {
         yPosition = propertyTableY + 10;
       });
     }
+
+    yPosition += 12;
+    if (yPosition > 220) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Vehicles and Major Personal Property', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 10;
+
+    const vehicleItems = [
+      'Automobiles:',
+      'Recreational Vehicles\n(RVs, ATVs,\nMotorcycles):',
+      'Major Home\nFurnishings:',
+      'Other:',
+      'Other:',
+      'Other:',
+      'Other:'
+    ];
+
+    const vehicleCellHeight = 10;
+    const col1Width = fieldWidth * 0.25;
+    const col2Width = fieldWidth * 0.25;
+    const col3Width = fieldWidth * 0.25;
+    const col4Width = fieldWidth * 0.25;
+    let vehicleTableY = yPosition;
+
+    doc.setDrawColor(0, 0, 0);
+    doc.setFillColor(255, 255, 255);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8);
+
+    doc.rect(margin, vehicleTableY, col1Width, vehicleCellHeight);
+    doc.text('Item Description:', margin + 0.5, vehicleTableY + 4.5);
+
+    doc.rect(margin + col1Width, vehicleTableY, col2Width, vehicleCellHeight);
+    doc.text('Physical Location:', margin + col1Width + 0.5, vehicleTableY + 4.5);
+
+    doc.rect(margin + col1Width + col2Width, vehicleTableY, col3Width, vehicleCellHeight);
+    doc.text('Ownership\n(Sole/Joint):', margin + col1Width + col2Width + 0.5, vehicleTableY + 3);
+
+    doc.rect(margin + col1Width + col2Width + col3Width, vehicleTableY, col4Width, vehicleCellHeight);
+    doc.text('Insurance Provider:', margin + col1Width + col2Width + col3Width + 0.5, vehicleTableY + 4.5);
+
+    vehicleTableY += vehicleCellHeight;
+
+    vehicleItems.forEach((item, index) => {
+      if (vehicleTableY > 275) {
+        doc.addPage();
+        vehicleTableY = 12;
+      }
+
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(7);
+
+      doc.rect(margin, vehicleTableY, col1Width, vehicleCellHeight);
+      const lines = item.split('\n');
+      lines.forEach((line, lineIndex) => {
+        doc.text(line, margin + 0.5, vehicleTableY + 3.5 + (lineIndex * 3));
+      });
+
+      doc.rect(margin + col1Width, vehicleTableY, col2Width, vehicleCellHeight);
+      doc.rect(margin + col1Width + col2Width, vehicleTableY, col3Width, vehicleCellHeight);
+      doc.rect(margin + col1Width + col2Width + col3Width, vehicleTableY, col4Width, vehicleCellHeight);
+
+      const field1 = new doc.AcroFormTextField();
+      field1.fieldName = `vehicle_location_${index}`;
+      field1.Rect = [margin + col1Width + 0.3, vehicleTableY + 0.3, col2Width - 0.6, vehicleCellHeight - 0.6];
+      field1.fontSize = 7;
+      field1.textColor = [0, 0, 0];
+      field1.borderStyle = 'none';
+      doc.addField(field1);
+
+      const field2 = new doc.AcroFormTextField();
+      field2.fieldName = `vehicle_ownership_${index}`;
+      field2.Rect = [margin + col1Width + col2Width + 0.3, vehicleTableY + 0.3, col3Width - 0.6, vehicleCellHeight - 0.6];
+      field2.fontSize = 7;
+      field2.textColor = [0, 0, 0];
+      field2.borderStyle = 'none';
+      doc.addField(field2);
+
+      const field3 = new doc.AcroFormTextField();
+      field3.fieldName = `vehicle_insurance_${index}`;
+      field3.Rect = [margin + col1Width + col2Width + col3Width + 0.3, vehicleTableY + 0.3, col4Width - 0.6, vehicleCellHeight - 0.6];
+      field3.fontSize = 7;
+      field3.textColor = [0, 0, 0];
+      field3.borderStyle = 'none';
+      doc.addField(field3);
+
+      vehicleTableY += vehicleCellHeight;
+    });
+
+    yPosition = vehicleTableY + 15;
+
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('High-Value Effects and Sentimental Heirlooms:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 8;
+
+    doc.setFontSize(8);
+    const heirloomText = "Listing these items here creates a 'Memorandum of Personal Effects' which allows for distribution outside the formal Will and can reduce probate complexity and family disputes. Keep in mind things like art and collections are subjective and your heirs might not know the true value of what you have as they are going through your belongings:";
+    const splitText = doc.splitTextToSize(heirloomText, fieldWidth);
+    splitText.forEach((line: string) => {
+      doc.text(line, margin, yPosition);
+      yPosition += 4;
+    });
+    yPosition += 4;
+
+    const heirloomCellHeight = 10;
+    const hCol1Width = fieldWidth * 0.25;
+    const hCol2Width = fieldWidth * 0.25;
+    const hCol3Width = fieldWidth * 0.25;
+    const hCol4Width = fieldWidth * 0.25;
+    let heirloomTableY = yPosition;
+
+    doc.setDrawColor(0, 0, 0);
+    doc.setFillColor(255, 255, 255);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8);
+
+    doc.rect(margin, heirloomTableY, hCol1Width, heirloomCellHeight);
+    doc.text('Item (Art, Jewelry,\nCollectibles)', margin + 0.5, heirloomTableY + 3.5);
+
+    doc.rect(margin + hCol1Width, heirloomTableY, hCol2Width, heirloomCellHeight);
+    doc.text('Location (e.g., Safe,\nDisplay)', margin + hCol1Width + 0.5, heirloomTableY + 3.5);
+
+    doc.rect(margin + hCol1Width + hCol2Width, heirloomTableY, hCol3Width, heirloomCellHeight);
+    doc.text('Estimated\nValue/Appraisal:', margin + hCol1Width + hCol2Width + 0.5, heirloomTableY + 3.5);
+
+    doc.rect(margin + hCol1Width + hCol2Width + hCol3Width, heirloomTableY, hCol4Width, heirloomCellHeight);
+    doc.text('Intended Beneficiary:', margin + hCol1Width + hCol2Width + hCol3Width + 0.5, heirloomTableY + 4.5);
+
+    heirloomTableY += heirloomCellHeight;
+
+    for (let i = 0; i < 3; i++) {
+      if (heirloomTableY > 275) {
+        doc.addPage();
+        heirloomTableY = 12;
+      }
+
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin, heirloomTableY, hCol1Width, heirloomCellHeight);
+      doc.rect(margin + hCol1Width, heirloomTableY, hCol2Width, heirloomCellHeight);
+      doc.rect(margin + hCol1Width + hCol2Width, heirloomTableY, hCol3Width, heirloomCellHeight);
+      doc.rect(margin + hCol1Width + hCol2Width + hCol3Width, heirloomTableY, hCol4Width, heirloomCellHeight);
+
+      const hField1 = new doc.AcroFormTextField();
+      hField1.fieldName = `heirloom_item_${i}`;
+      hField1.Rect = [margin + 0.3, heirloomTableY + 0.3, hCol1Width - 0.6, heirloomCellHeight - 0.6];
+      hField1.fontSize = 7;
+      hField1.textColor = [0, 0, 0];
+      hField1.borderStyle = 'none';
+      doc.addField(hField1);
+
+      const hField2 = new doc.AcroFormTextField();
+      hField2.fieldName = `heirloom_location_${i}`;
+      hField2.Rect = [margin + hCol1Width + 0.3, heirloomTableY + 0.3, hCol2Width - 0.6, heirloomCellHeight - 0.6];
+      hField2.fontSize = 7;
+      hField2.textColor = [0, 0, 0];
+      hField2.borderStyle = 'none';
+      doc.addField(hField2);
+
+      const hField3 = new doc.AcroFormTextField();
+      hField3.fieldName = `heirloom_value_${i}`;
+      hField3.Rect = [margin + hCol1Width + hCol2Width + 0.3, heirloomTableY + 0.3, hCol3Width - 0.6, heirloomCellHeight - 0.6];
+      hField3.fontSize = 7;
+      hField3.textColor = [0, 0, 0];
+      hField3.borderStyle = 'none';
+      doc.addField(hField3);
+
+      const hField4 = new doc.AcroFormTextField();
+      hField4.fieldName = `heirloom_beneficiary_${i}`;
+      hField4.Rect = [margin + hCol1Width + hCol2Width + hCol3Width + 0.3, heirloomTableY + 0.3, hCol4Width - 0.6, heirloomCellHeight - 0.6];
+      hField4.fontSize = 7;
+      hField4.textColor = [0, 0, 0];
+      hField4.borderStyle = 'none';
+      doc.addField(hField4);
+
+      heirloomTableY += heirloomCellHeight;
+    }
+
+    yPosition = heirloomTableY + 15;
+
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Secure Access and Storage:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 8;
+
+    doc.setFontSize(8);
+    const storageText = "Your representatives cannot protect what they cannot reach. This table identifies the physical 'gateways' to your assets:";
+    const splitStorageText = doc.splitTextToSize(storageText, fieldWidth);
+    splitStorageText.forEach((line: string) => {
+      doc.text(line, margin, yPosition);
+      yPosition += 4;
+    });
+    yPosition += 4;
+
+    const storageItems = [
+      'Safety Deposit Box',
+      'Home Safe',
+      'Storage Locker',
+      'Post Office Box',
+      'Other:'
+    ];
+
+    const storageCellHeight = 10;
+    const sCol1Width = fieldWidth * 0.25;
+    const sCol2Width = fieldWidth * 0.25;
+    const sCol3Width = fieldWidth * 0.25;
+    const sCol4Width = fieldWidth * 0.25;
+    let storageTableY = yPosition;
+
+    doc.setDrawColor(0, 0, 0);
+    doc.setFillColor(255, 255, 255);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8);
+
+    doc.rect(margin, storageTableY, sCol1Width, storageCellHeight);
+    doc.text('Storage Type:', margin + 0.5, storageTableY + 4.5);
+
+    doc.rect(margin + sCol1Width, storageTableY, sCol2Width, storageCellHeight);
+    doc.text('Physical Location:', margin + sCol1Width + 0.5, storageTableY + 4.5);
+
+    doc.rect(margin + sCol1Width + sCol2Width, storageTableY, sCol3Width, storageCellHeight);
+    doc.text('Key/Combination\nLocation:', margin + sCol1Width + sCol2Width + 0.5, storageTableY + 3.5);
+
+    doc.rect(margin + sCol1Width + sCol2Width + sCol3Width, storageTableY, sCol4Width, storageCellHeight);
+    doc.text('Box/Locker Number:', margin + sCol1Width + sCol2Width + sCol3Width + 0.5, storageTableY + 4.5);
+
+    storageTableY += storageCellHeight;
+
+    storageItems.forEach((item, index) => {
+      if (storageTableY > 275) {
+        doc.addPage();
+        storageTableY = 12;
+      }
+
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(7);
+
+      doc.rect(margin, storageTableY, sCol1Width, storageCellHeight);
+      doc.text(item, margin + 0.5, storageTableY + 4.5);
+
+      doc.rect(margin + sCol1Width, storageTableY, sCol2Width, storageCellHeight);
+      doc.rect(margin + sCol1Width + sCol2Width, storageTableY, sCol3Width, storageCellHeight);
+      doc.rect(margin + sCol1Width + sCol2Width + sCol3Width, storageTableY, sCol4Width, storageCellHeight);
+
+      const sField1 = new doc.AcroFormTextField();
+      sField1.fieldName = `storage_location_${index}`;
+      sField1.Rect = [margin + sCol1Width + 0.3, storageTableY + 0.3, sCol2Width - 0.6, storageCellHeight - 0.6];
+      sField1.fontSize = 7;
+      sField1.textColor = [0, 0, 0];
+      sField1.borderStyle = 'none';
+      doc.addField(sField1);
+
+      const sField2 = new doc.AcroFormTextField();
+      sField2.fieldName = `storage_key_location_${index}`;
+      sField2.Rect = [margin + sCol1Width + sCol2Width + 0.3, storageTableY + 0.3, sCol3Width - 0.6, storageCellHeight - 0.6];
+      sField2.fontSize = 7;
+      sField2.textColor = [0, 0, 0];
+      sField2.borderStyle = 'none';
+      doc.addField(sField2);
+
+      const sField3 = new doc.AcroFormTextField();
+      sField3.fieldName = `storage_box_number_${index}`;
+      sField3.Rect = [margin + sCol1Width + sCol2Width + sCol3Width + 0.3, storageTableY + 0.3, sCol4Width - 0.6, storageCellHeight - 0.6];
+      sField3.fontSize = 7;
+      sField3.textColor = [0, 0, 0];
+      sField3.borderStyle = 'none';
+      doc.addField(sField3);
+
+      storageTableY += storageCellHeight;
+    });
+
+    yPosition = storageTableY + 10;
   }
 
   if (formData.hasDebts === 'yes' && formData.debtsData && formData.debtsData.length > 0) {

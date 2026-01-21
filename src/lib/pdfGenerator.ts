@@ -3982,7 +3982,7 @@ export const generatePDF = (formData: FormData) => {
 
       const profItems = [
         'Lawyer(s):',
-        'Accountant/Tax\nPrep(s):',
+        'Accountant/Tax Prep(s):',
         'Other:'
       ];
 
@@ -4022,10 +4022,7 @@ export const generatePDF = (formData: FormData) => {
         doc.setFontSize(7);
 
         doc.rect(margin, profTableY, pCol1Width, profCellHeight);
-        const lines = item.split('\n');
-        lines.forEach((line, lineIndex) => {
-          doc.text(line, margin + 0.5, profTableY + 3.5 + (lineIndex * 3));
-        });
+        doc.text(item, margin + 0.5, profTableY + 5);
 
         doc.rect(margin + pCol1Width, profTableY, pCol2Width, profCellHeight);
         doc.rect(margin + pCol1Width + pCol2Width, profTableY, pCol3Width, profCellHeight);
@@ -4149,24 +4146,32 @@ export const generatePDF = (formData: FormData) => {
 
       const beneficiaryRows = 4;
       const beneficiaryCellHeight = 10;
-      const bCol1Width = fieldWidth * 0.35;
-      const bCol2Width = fieldWidth * 0.3;
-      const bCol3Width = fieldWidth * 0.35;
+      const bCol1Width = fieldWidth * 0.25;
+      const bCol2Width = fieldWidth * 0.25;
+      const bCol3Width = fieldWidth * 0.25;
+      const bCol4Width = fieldWidth * 0.25;
       let beneficiaryTableY = yPosition;
 
       doc.setDrawColor(0, 0, 0);
       doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
-      doc.setFontSize(8);
+      doc.setFontSize(7);
 
       doc.rect(margin, beneficiaryTableY, bCol1Width, beneficiaryCellHeight);
       doc.text('Beneficiary Name:', margin + 0.5, beneficiaryTableY + 5);
 
       doc.rect(margin + bCol1Width, beneficiaryTableY, bCol2Width, beneficiaryCellHeight);
-      doc.text('Phone Number:', margin + bCol1Width + 0.5, beneficiaryTableY + 5);
+      const countryText = 'Country of\nResidence (for tax\npurposes):';
+      const countryLines = countryText.split('\n');
+      countryLines.forEach((line, idx) => {
+        doc.text(line, margin + bCol1Width + 0.5, beneficiaryTableY + 2.5 + (idx * 2.5));
+      });
 
       doc.rect(margin + bCol1Width + bCol2Width, beneficiaryTableY, bCol3Width, beneficiaryCellHeight);
-      doc.text('Email Address:', margin + bCol1Width + bCol2Width + 0.5, beneficiaryTableY + 5);
+      doc.text('Phone Number:', margin + bCol1Width + bCol2Width + 0.5, beneficiaryTableY + 5);
+
+      doc.rect(margin + bCol1Width + bCol2Width + bCol3Width, beneficiaryTableY, bCol4Width, beneficiaryCellHeight);
+      doc.text('Email Address:', margin + bCol1Width + bCol2Width + bCol3Width + 0.5, beneficiaryTableY + 5);
 
       beneficiaryTableY += beneficiaryCellHeight;
 
@@ -4182,6 +4187,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin, beneficiaryTableY, bCol1Width, beneficiaryCellHeight);
         doc.rect(margin + bCol1Width, beneficiaryTableY, bCol2Width, beneficiaryCellHeight);
         doc.rect(margin + bCol1Width + bCol2Width, beneficiaryTableY, bCol3Width, beneficiaryCellHeight);
+        doc.rect(margin + bCol1Width + bCol2Width + bCol3Width, beneficiaryTableY, bCol4Width, beneficiaryCellHeight);
 
         const bField1 = new doc.AcroFormTextField();
         bField1.fieldName = `trust_${trustIndex}_beneficiary_name_${i}`;
@@ -4192,7 +4198,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(bField1);
 
         const bField2 = new doc.AcroFormTextField();
-        bField2.fieldName = `trust_${trustIndex}_beneficiary_phone_${i}`;
+        bField2.fieldName = `trust_${trustIndex}_beneficiary_country_${i}`;
         bField2.Rect = [margin + bCol1Width + 0.3, beneficiaryTableY + 0.3, bCol2Width - 0.6, beneficiaryCellHeight - 0.6];
         bField2.fontSize = 7;
         bField2.textColor = [0, 0, 0];
@@ -4200,17 +4206,114 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(bField2);
 
         const bField3 = new doc.AcroFormTextField();
-        bField3.fieldName = `trust_${trustIndex}_beneficiary_email_${i}`;
+        bField3.fieldName = `trust_${trustIndex}_beneficiary_phone_${i}`;
         bField3.Rect = [margin + bCol1Width + bCol2Width + 0.3, beneficiaryTableY + 0.3, bCol3Width - 0.6, beneficiaryCellHeight - 0.6];
         bField3.fontSize = 7;
         bField3.textColor = [0, 0, 0];
         bField3.borderStyle = 'none';
         doc.addField(bField3);
 
+        const bField4 = new doc.AcroFormTextField();
+        bField4.fieldName = `trust_${trustIndex}_beneficiary_email_${i}`;
+        bField4.Rect = [margin + bCol1Width + bCol2Width + bCol3Width + 0.3, beneficiaryTableY + 0.3, bCol4Width - 0.6, beneficiaryCellHeight - 0.6];
+        bField4.fontSize = 7;
+        bField4.textColor = [0, 0, 0];
+        bField4.borderStyle = 'none';
+        doc.addField(bField4);
+
         beneficiaryTableY += beneficiaryCellHeight;
       }
 
       yPosition = beneficiaryTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Trust Contents:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      const contentsRows = 4;
+      const contentsCellHeight = 10;
+      const cCol1Width = fieldWidth * 0.25;
+      const cCol2Width = fieldWidth * 0.25;
+      const cCol3Width = fieldWidth * 0.25;
+      const cCol4Width = fieldWidth * 0.25;
+      let contentsTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, contentsTableY, cCol1Width, contentsCellHeight);
+      doc.text('Asset Type:', margin + 0.5, contentsTableY + 5);
+
+      doc.rect(margin + cCol1Width, contentsTableY, cCol2Width, contentsCellHeight);
+      doc.text('Estimated Value:', margin + cCol1Width + 0.5, contentsTableY + 5);
+
+      doc.rect(margin + cCol1Width + cCol2Width, contentsTableY, cCol3Width, contentsCellHeight);
+      doc.text('Book Value/Cost Base:', margin + cCol1Width + cCol2Width + 0.5, contentsTableY + 3.5);
+
+      doc.rect(margin + cCol1Width + cCol2Width + cCol3Width, contentsTableY, cCol4Width, contentsCellHeight);
+      doc.text('Other Information:', margin + cCol1Width + cCol2Width + cCol3Width + 0.5, contentsTableY + 5);
+
+      contentsTableY += contentsCellHeight;
+
+      for (let i = 0; i < contentsRows; i++) {
+        if (contentsTableY > 275) {
+          doc.addPage();
+          contentsTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, contentsTableY, cCol1Width, contentsCellHeight);
+        doc.rect(margin + cCol1Width, contentsTableY, cCol2Width, contentsCellHeight);
+        doc.rect(margin + cCol1Width + cCol2Width, contentsTableY, cCol3Width, contentsCellHeight);
+        doc.rect(margin + cCol1Width + cCol2Width + cCol3Width, contentsTableY, cCol4Width, contentsCellHeight);
+
+        const cField1 = new doc.AcroFormTextField();
+        cField1.fieldName = `trust_${trustIndex}_contents_asset_type_${i}`;
+        cField1.Rect = [margin + 0.3, contentsTableY + 0.3, cCol1Width - 0.6, contentsCellHeight - 0.6];
+        cField1.fontSize = 7;
+        cField1.textColor = [0, 0, 0];
+        cField1.borderStyle = 'none';
+        doc.addField(cField1);
+
+        const cField2 = new doc.AcroFormTextField();
+        cField2.fieldName = `trust_${trustIndex}_contents_estimated_value_${i}`;
+        cField2.Rect = [margin + cCol1Width + 0.3, contentsTableY + 0.3, cCol2Width - 0.6, contentsCellHeight - 0.6];
+        cField2.fontSize = 7;
+        cField2.textColor = [0, 0, 0];
+        cField2.borderStyle = 'none';
+        doc.addField(cField2);
+
+        const cField3 = new doc.AcroFormTextField();
+        cField3.fieldName = `trust_${trustIndex}_contents_book_value_${i}`;
+        cField3.Rect = [margin + cCol1Width + cCol2Width + 0.3, contentsTableY + 0.3, cCol3Width - 0.6, contentsCellHeight - 0.6];
+        cField3.fontSize = 7;
+        cField3.textColor = [0, 0, 0];
+        cField3.borderStyle = 'none';
+        doc.addField(cField3);
+
+        const cField4 = new doc.AcroFormTextField();
+        cField4.fieldName = `trust_${trustIndex}_contents_other_info_${i}`;
+        cField4.Rect = [margin + cCol1Width + cCol2Width + cCol3Width + 0.3, contentsTableY + 0.3, cCol4Width - 0.6, contentsCellHeight - 0.6];
+        cField4.fontSize = 7;
+        cField4.textColor = [0, 0, 0];
+        cField4.borderStyle = 'none';
+        doc.addField(cField4);
+
+        contentsTableY += contentsCellHeight;
+      }
+
+      yPosition = contentsTableY + 15;
     }
   }
 

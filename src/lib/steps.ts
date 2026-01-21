@@ -639,4 +639,28 @@ export const STEPS: Step[] = [
       },
     ],
   },
+  {
+    id: 9,
+    title: 'Family Trusts',
+    description: 'Information about your family trusts',
+    questions: [
+      {
+        key: 'hasFamilyTrust',
+        label: 'Have you established a family trust?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'familyTrustCount',
+        label: 'How many family trusts have you established?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+    ],
+  },
 ];

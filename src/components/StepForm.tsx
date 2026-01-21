@@ -1119,6 +1119,77 @@ export default function StepForm({
             </>
           )}
 
+          {step.id === 9 && (
+            <>
+              {step.questions.map((question) => {
+                if (question.key === 'familyTrustCount' && answers['hasFamilyTrust'] !== 'yes') {
+                  return null;
+                }
+
+                return (
+                  <FormField
+                    key={question.key}
+                    question={question}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                  />
+                );
+              })}
+
+              {answers['hasFamilyTrust'] === 'yes' && (() => {
+                const trustCount = parseInt(answers['familyTrustCount'] as string) || 0;
+                const trustsData = (answers['trustsData'] as Array<Record<string, string>>) || Array(trustCount).fill(null).map(() => ({}));
+
+                const handleTrustChange = (index: number, field: string, value: string) => {
+                  const updated = [...trustsData];
+                  if (!updated[index]) {
+                    updated[index] = {};
+                  }
+                  updated[index][field] = value;
+                  onAnswerChange('trustsData', updated);
+                };
+
+                return (
+                  <div className="space-y-8 mt-6">
+                    {Array.from({ length: trustCount }).map((_, index) => (
+                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <h3 className="text-lg font-semibold text-white mb-4">Trust {index + 1}</h3>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What is the trust's legal name? *
+                            </label>
+                            <input
+                              type="text"
+                              value={trustsData[index]?.trustName || ''}
+                              onChange={(e) => handleTrustChange(index, 'trustName', e.target.value)}
+                              placeholder="Enter trust's legal name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Where is the Trust Deed Located? *
+                            </label>
+                            <input
+                              type="text"
+                              value={trustsData[index]?.deedLocation || ''}
+                              onChange={(e) => handleTrustChange(index, 'deedLocation', e.target.value)}
+                              placeholder="Enter trust deed location"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </>
+          )}
+
           {validationError && (
             <div className="mb-6 p-4 bg-red-900 border border-red-700 rounded-lg">
               <p className="text-red-200 text-sm">{validationError}</p>

@@ -170,6 +170,13 @@ export const STEPS: Step[] = [
         placeholder: 'Enter number of children',
         required: false,
       },
+    ],
+  },
+  {
+    id: 2,
+    title: 'Children Information',
+    description: 'Please provide details about each of your children',
+    questions: [
       {
         key: 'sameMedicalDoctor',
         label: 'Do all children use the same medical doctor?',
@@ -201,12 +208,6 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },
-  {
-    id: 2,
-    title: 'Children Information',
-    description: 'Please provide details about each of your children',
-    questions: [],
   },
   {
     id: 3,

@@ -615,4 +615,28 @@ export const STEPS: Step[] = [
       },
     ],
   },
+  {
+    id: 8,
+    title: 'Corporate Information',
+    description: 'Information about your corporations',
+    questions: [
+      {
+        key: 'hasCorporation',
+        label: 'Do you have a corporation?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'corporationCount',
+        label: 'How many corporations do you own?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+    ],
+  },
 ];

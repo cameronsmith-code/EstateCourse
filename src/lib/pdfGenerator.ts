@@ -99,6 +99,8 @@ interface FormData {
   client2HasVehicleInsurance?: string;
   hasAdditionalVehicles?: string;
   additionalVehiclesCount?: string;
+  hasCorporation?: string;
+  corporationCount?: string;
 }
 
 export const generatePDF = (formData: FormData) => {
@@ -3252,6 +3254,536 @@ export const generatePDF = (formData: FormData) => {
     doc.setFontSize(10);
     doc.text('Client(s) indicated that they have no vehicle insurance.', margin, yPosition);
     yPosition += 15;
+  }
+
+  if (formData.hasCorporation === 'yes' && formData.corporationCount) {
+    const corpCount = parseInt(formData.corporationCount);
+    for (let corpIndex = 1; corpIndex <= corpCount; corpIndex++) {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text('Corporate Information', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 12;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Corporation ${corpIndex}`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      const corpNameCellHeight = 8;
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFontSize(8);
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, corpNameCellHeight);
+      doc.text("Corporation's Name:", margin + 0.5, yPosition + 5);
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, corpNameCellHeight);
+      const corpNameField = new doc.AcroFormTextField();
+      corpNameField.fieldName = `corporation_${corpIndex}_name`;
+      corpNameField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, corpNameCellHeight - 0.6];
+      corpNameField.fontSize = 8;
+      corpNameField.textColor = [0, 0, 0];
+      corpNameField.borderStyle = 'none';
+      doc.addField(corpNameField);
+
+      yPosition += corpNameCellHeight + 12;
+
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Business and Professional Contracts:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      doc.setFontSize(8);
+      const contractText = "For clients with corporations, your trustee must know your 'Quarterback Team' to manage transitions or wind-ups effectively.";
+      const splitContractText = doc.splitTextToSize(contractText, fieldWidth);
+      splitContractText.forEach((line: string) => {
+        doc.text(line, margin, yPosition);
+        yPosition += 4;
+      });
+      yPosition += 4;
+
+      const contractItems = [
+        'Lawyer(s):',
+        'Accountant/Tax\nPrep(s):',
+        'Trustee(s):',
+        'Life/Disability/Critical\nIllness Provider(s)'
+      ];
+
+      const contractCellHeight = 10;
+      const cCol1Width = fieldWidth * 0.25;
+      const cCol2Width = fieldWidth * 0.25;
+      const cCol3Width = fieldWidth * 0.25;
+      const cCol4Width = fieldWidth * 0.25;
+      let contractTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, contractTableY, cCol1Width, contractCellHeight);
+      doc.text('Professional:', margin + 0.5, contractTableY + 5);
+
+      doc.rect(margin + cCol1Width, contractTableY, cCol2Width, contractCellHeight);
+      doc.text('Name:', margin + cCol1Width + 0.5, contractTableY + 5);
+
+      doc.rect(margin + cCol1Width + cCol2Width, contractTableY, cCol3Width, contractCellHeight);
+      doc.text('Firm/Contact Info:', margin + cCol1Width + cCol2Width + 0.5, contractTableY + 5);
+
+      doc.rect(margin + cCol1Width + cCol2Width + cCol3Width, contractTableY, cCol4Width, contractCellHeight);
+      doc.text('Role in the Estate:', margin + cCol1Width + cCol2Width + cCol3Width + 0.5, contractTableY + 5);
+
+      contractTableY += contractCellHeight;
+
+      contractItems.forEach((item, index) => {
+        if (contractTableY > 275) {
+          doc.addPage();
+          contractTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, contractTableY, cCol1Width, contractCellHeight);
+        const lines = item.split('\n');
+        lines.forEach((line, lineIndex) => {
+          doc.text(line, margin + 0.5, contractTableY + 3.5 + (lineIndex * 3));
+        });
+
+        doc.rect(margin + cCol1Width, contractTableY, cCol2Width, contractCellHeight);
+        doc.rect(margin + cCol1Width + cCol2Width, contractTableY, cCol3Width, contractCellHeight);
+        doc.rect(margin + cCol1Width + cCol2Width + cCol3Width, contractTableY, cCol4Width, contractCellHeight);
+
+        const cField1 = new doc.AcroFormTextField();
+        cField1.fieldName = `corp_${corpIndex}_contract_name_${index}`;
+        cField1.Rect = [margin + cCol1Width + 0.3, contractTableY + 0.3, cCol2Width - 0.6, contractCellHeight - 0.6];
+        cField1.fontSize = 7;
+        cField1.textColor = [0, 0, 0];
+        cField1.borderStyle = 'none';
+        doc.addField(cField1);
+
+        const cField2 = new doc.AcroFormTextField();
+        cField2.fieldName = `corp_${corpIndex}_contract_firm_${index}`;
+        cField2.Rect = [margin + cCol1Width + cCol2Width + 0.3, contractTableY + 0.3, cCol3Width - 0.6, contractCellHeight - 0.6];
+        cField2.fontSize = 7;
+        cField2.textColor = [0, 0, 0];
+        cField2.borderStyle = 'none';
+        doc.addField(cField2);
+
+        const cField3 = new doc.AcroFormTextField();
+        cField3.fieldName = `corp_${corpIndex}_contract_role_${index}`;
+        cField3.Rect = [margin + cCol1Width + cCol2Width + cCol3Width + 0.3, contractTableY + 0.3, cCol4Width - 0.6, contractCellHeight - 0.6];
+        cField3.fontSize = 7;
+        cField3.textColor = [0, 0, 0];
+        cField3.borderStyle = 'none';
+        doc.addField(cField3);
+
+        contractTableY += contractCellHeight;
+      });
+
+      yPosition = contractTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Corporate Governance and Legal Structure:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      doc.setFontSize(8);
+      const govText = 'This table identifies the fundamental legal identity of your enterprise(s):';
+      doc.text(govText, margin, yPosition);
+      yPosition += 8;
+
+      const govCellHeight = 10;
+      const gCol1Width = fieldWidth * 0.25;
+      const gCol2Width = fieldWidth * 0.25;
+      const gCol3Width = fieldWidth * 0.25;
+      const gCol4Width = fieldWidth * 0.25;
+      let govTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, govTableY, gCol1Width, govCellHeight);
+      doc.text('Entity Legal Name:', margin + 0.5, govTableY + 5);
+
+      doc.rect(margin + gCol1Width, govTableY, gCol2Width, govCellHeight);
+      doc.text('Structure (CCPC, PC,\nPartnership, Sole\nProprietorship):', margin + gCol1Width + 0.5, govTableY + 3);
+
+      doc.rect(margin + gCol1Width + gCol2Width, govTableY, gCol3Width, govCellHeight);
+      doc.text('Percent Owned:', margin + gCol1Width + gCol2Width + 0.5, govTableY + 5);
+
+      doc.rect(margin + gCol1Width + gCol2Width + gCol3Width, govTableY, gCol4Width, govCellHeight);
+      doc.text('Location of Minute\nBooks/Articles of\nIncorporation:', margin + gCol1Width + gCol2Width + gCol3Width + 0.5, govTableY + 2.5);
+
+      govTableY += govCellHeight;
+
+      for (let i = 0; i < 3; i++) {
+        if (govTableY > 275) {
+          doc.addPage();
+          govTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+
+        doc.rect(margin, govTableY, gCol1Width, govCellHeight);
+        doc.rect(margin + gCol1Width, govTableY, gCol2Width, govCellHeight);
+        doc.rect(margin + gCol1Width + gCol2Width, govTableY, gCol3Width, govCellHeight);
+        doc.rect(margin + gCol1Width + gCol2Width + gCol3Width, govTableY, gCol4Width, govCellHeight);
+
+        const gField1 = new doc.AcroFormTextField();
+        gField1.fieldName = `corp_${corpIndex}_gov_entity_${i}`;
+        gField1.Rect = [margin + 0.3, govTableY + 0.3, gCol1Width - 0.6, govCellHeight - 0.6];
+        gField1.fontSize = 7;
+        gField1.textColor = [0, 0, 0];
+        gField1.borderStyle = 'none';
+        doc.addField(gField1);
+
+        const gField2 = new doc.AcroFormTextField();
+        gField2.fieldName = `corp_${corpIndex}_gov_structure_${i}`;
+        gField2.Rect = [margin + gCol1Width + 0.3, govTableY + 0.3, gCol2Width - 0.6, govCellHeight - 0.6];
+        gField2.fontSize = 7;
+        gField2.textColor = [0, 0, 0];
+        gField2.borderStyle = 'none';
+        doc.addField(gField2);
+
+        const gField3 = new doc.AcroFormTextField();
+        gField3.fieldName = `corp_${corpIndex}_gov_percent_${i}`;
+        gField3.Rect = [margin + gCol1Width + gCol2Width + 0.3, govTableY + 0.3, gCol3Width - 0.6, govCellHeight - 0.6];
+        gField3.fontSize = 7;
+        gField3.textColor = [0, 0, 0];
+        gField3.borderStyle = 'none';
+        doc.addField(gField3);
+
+        const gField4 = new doc.AcroFormTextField();
+        gField4.fieldName = `corp_${corpIndex}_gov_location_${i}`;
+        gField4.Rect = [margin + gCol1Width + gCol2Width + gCol3Width + 0.3, govTableY + 0.3, gCol4Width - 0.6, govCellHeight - 0.6];
+        gField4.fontSize = 7;
+        gField4.textColor = [0, 0, 0];
+        gField4.borderStyle = 'none';
+        doc.addField(gField4);
+
+        govTableY += govCellHeight;
+      }
+
+      yPosition = govTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Professional Team:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      doc.setFontSize(8);
+      const profText = 'These are the professionals that are related to your corporate needs:';
+      doc.text(profText, margin, yPosition);
+      yPosition += 8;
+
+      const profItems = [
+        'Corporate Accountant:',
+        'Commercial Banker:',
+        'Business Valuator:',
+        'Other:',
+        'Other:'
+      ];
+
+      const profCellHeight = 10;
+      const pCol1Width = fieldWidth * 0.25;
+      const pCol2Width = fieldWidth * 0.25;
+      const pCol3Width = fieldWidth * 0.25;
+      const pCol4Width = fieldWidth * 0.25;
+      let profTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, profTableY, pCol1Width, profCellHeight);
+      doc.text('Professional:', margin + 0.5, profTableY + 5);
+
+      doc.rect(margin + pCol1Width, profTableY, pCol2Width, profCellHeight);
+      doc.text('Name:', margin + pCol1Width + 0.5, profTableY + 5);
+
+      doc.rect(margin + pCol1Width + pCol2Width, profTableY, pCol3Width, profCellHeight);
+      doc.text('Firm & Contact Info:', margin + pCol1Width + pCol2Width + 0.5, profTableY + 5);
+
+      doc.rect(margin + pCol1Width + pCol2Width + pCol3Width, profTableY, pCol4Width, profCellHeight);
+      doc.text('Primary Role:', margin + pCol1Width + pCol2Width + pCol3Width + 0.5, profTableY + 5);
+
+      profTableY += profCellHeight;
+
+      profItems.forEach((item, index) => {
+        if (profTableY > 275) {
+          doc.addPage();
+          profTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, profTableY, pCol1Width, profCellHeight);
+        doc.text(item, margin + 0.5, profTableY + 5);
+
+        doc.rect(margin + pCol1Width, profTableY, pCol2Width, profCellHeight);
+        doc.rect(margin + pCol1Width + pCol2Width, profTableY, pCol3Width, profCellHeight);
+        doc.rect(margin + pCol1Width + pCol2Width + pCol3Width, profTableY, pCol4Width, profCellHeight);
+
+        const pField1 = new doc.AcroFormTextField();
+        pField1.fieldName = `corp_${corpIndex}_prof_name_${index}`;
+        pField1.Rect = [margin + pCol1Width + 0.3, profTableY + 0.3, pCol2Width - 0.6, profCellHeight - 0.6];
+        pField1.fontSize = 7;
+        pField1.textColor = [0, 0, 0];
+        pField1.borderStyle = 'none';
+        doc.addField(pField1);
+
+        const pField2 = new doc.AcroFormTextField();
+        pField2.fieldName = `corp_${corpIndex}_prof_firm_${index}`;
+        pField2.Rect = [margin + pCol1Width + pCol2Width + 0.3, profTableY + 0.3, pCol3Width - 0.6, profCellHeight - 0.6];
+        pField2.fontSize = 7;
+        pField2.textColor = [0, 0, 0];
+        pField2.borderStyle = 'none';
+        doc.addField(pField2);
+
+        const pField3 = new doc.AcroFormTextField();
+        pField3.fieldName = `corp_${corpIndex}_prof_role_${index}`;
+        pField3.Rect = [margin + pCol1Width + pCol2Width + pCol3Width + 0.3, profTableY + 0.3, pCol4Width - 0.6, profCellHeight - 0.6];
+        pField3.fontSize = 7;
+        pField3.textColor = [0, 0, 0];
+        pField3.borderStyle = 'none';
+        doc.addField(pField3);
+
+        profTableY += profCellHeight;
+      });
+
+      yPosition = profTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Financial Obligations and Personal Guarantees:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 10;
+
+      const finCellHeight = 10;
+      const fCol1Width = fieldWidth * 0.25;
+      const fCol2Width = fieldWidth * 0.25;
+      const fCol3Width = fieldWidth * 0.25;
+      const fCol4Width = fieldWidth * 0.25;
+      let finTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, finTableY, fCol1Width, finCellHeight);
+      doc.text('Creditor/Bank:', margin + 0.5, finTableY + 5);
+
+      doc.rect(margin + fCol1Width, finTableY, fCol2Width, finCellHeight);
+      doc.text('Loan Type (term, LOC,\nMortgage):', margin + fCol1Width + 0.5, finTableY + 3.5);
+
+      doc.rect(margin + fCol1Width + fCol2Width, finTableY, fCol3Width, finCellHeight);
+      doc.text('Account Number:', margin + fCol1Width + fCol2Width + 0.5, finTableY + 5);
+
+      doc.rect(margin + fCol1Width + fCol2Width + fCol3Width, finTableY, fCol4Width, finCellHeight);
+      doc.text('Personal Guarantee?\n(Y/N)', margin + fCol1Width + fCol2Width + fCol3Width + 0.5, finTableY + 3.5);
+
+      finTableY += finCellHeight;
+
+      for (let i = 0; i < 4; i++) {
+        if (finTableY > 275) {
+          doc.addPage();
+          finTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+
+        doc.rect(margin, finTableY, fCol1Width, finCellHeight);
+        doc.rect(margin + fCol1Width, finTableY, fCol2Width, finCellHeight);
+        doc.rect(margin + fCol1Width + fCol2Width, finTableY, fCol3Width, finCellHeight);
+        doc.rect(margin + fCol1Width + fCol2Width + fCol3Width, finTableY, fCol4Width, finCellHeight);
+
+        const fField1 = new doc.AcroFormTextField();
+        fField1.fieldName = `corp_${corpIndex}_fin_creditor_${i}`;
+        fField1.Rect = [margin + 0.3, finTableY + 0.3, fCol1Width - 0.6, finCellHeight - 0.6];
+        fField1.fontSize = 7;
+        fField1.textColor = [0, 0, 0];
+        fField1.borderStyle = 'none';
+        doc.addField(fField1);
+
+        const fField2 = new doc.AcroFormTextField();
+        fField2.fieldName = `corp_${corpIndex}_fin_loantype_${i}`;
+        fField2.Rect = [margin + fCol1Width + 0.3, finTableY + 0.3, fCol2Width - 0.6, finCellHeight - 0.6];
+        fField2.fontSize = 7;
+        fField2.textColor = [0, 0, 0];
+        fField2.borderStyle = 'none';
+        doc.addField(fField2);
+
+        const fField3 = new doc.AcroFormTextField();
+        fField3.fieldName = `corp_${corpIndex}_fin_account_${i}`;
+        fField3.Rect = [margin + fCol1Width + fCol2Width + 0.3, finTableY + 0.3, fCol3Width - 0.6, finCellHeight - 0.6];
+        fField3.fontSize = 7;
+        fField3.textColor = [0, 0, 0];
+        fField3.borderStyle = 'none';
+        doc.addField(fField3);
+
+        const fField4 = new doc.AcroFormTextField();
+        fField4.fieldName = `corp_${corpIndex}_fin_guarantee_${i}`;
+        fField4.Rect = [margin + fCol1Width + fCol2Width + fCol3Width + 0.3, finTableY + 0.3, fCol4Width - 0.6, finCellHeight - 0.6];
+        fField4.fontSize = 7;
+        fField4.textColor = [0, 0, 0];
+        fField4.borderStyle = 'none';
+        doc.addField(fField4);
+
+        finTableY += finCellHeight;
+      }
+
+      yPosition = finTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Business Continuity and Risk Management:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      doc.setFontSize(8);
+      const riskText = 'Insurance is often the primary source of liquidity for funding buy/sell agreements or paying terminal taxes.';
+      const splitRiskText = doc.splitTextToSize(riskText, fieldWidth);
+      splitRiskText.forEach((line: string) => {
+        doc.text(line, margin, yPosition);
+        yPosition += 4;
+      });
+      yPosition += 4;
+
+      const riskItems = [
+        'Key Person',
+        'Buy-Sell Funding',
+        'Overhead\nExpense',
+        'Commercial\nGeneral Liability'
+      ];
+
+      const riskCellHeight = 10;
+      const rCol1Width = fieldWidth * 0.2;
+      const rCol2Width = fieldWidth * 0.2;
+      const rCol3Width = fieldWidth * 0.2;
+      const rCol4Width = fieldWidth * 0.2;
+      const rCol5Width = fieldWidth * 0.2;
+      let riskTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, riskTableY, rCol1Width, riskCellHeight);
+      doc.text('Policy Type:', margin + 0.5, riskTableY + 5);
+
+      doc.rect(margin + rCol1Width, riskTableY, rCol2Width, riskCellHeight);
+      doc.text('Insurance Carrier:', margin + rCol1Width + 0.5, riskTableY + 5);
+
+      doc.rect(margin + rCol1Width + rCol2Width, riskTableY, rCol3Width, riskCellHeight);
+      doc.text('Key Contact:', margin + rCol1Width + rCol2Width + 0.5, riskTableY + 5);
+
+      doc.rect(margin + rCol1Width + rCol2Width + rCol3Width, riskTableY, rCol4Width, riskCellHeight);
+      doc.text('Policy Number:', margin + rCol1Width + rCol2Width + rCol3Width + 0.5, riskTableY + 5);
+
+      doc.rect(margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width, riskTableY, rCol5Width, riskCellHeight);
+      doc.text('Beneficiary/Purpose', margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width + 0.5, riskTableY + 5);
+
+      riskTableY += riskCellHeight;
+
+      riskItems.forEach((item, index) => {
+        if (riskTableY > 275) {
+          doc.addPage();
+          riskTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, riskTableY, rCol1Width, riskCellHeight);
+        const lines = item.split('\n');
+        lines.forEach((line, lineIndex) => {
+          doc.text(line, margin + 0.5, riskTableY + 3.5 + (lineIndex * 3));
+        });
+
+        doc.rect(margin + rCol1Width, riskTableY, rCol2Width, riskCellHeight);
+        doc.rect(margin + rCol1Width + rCol2Width, riskTableY, rCol3Width, riskCellHeight);
+        doc.rect(margin + rCol1Width + rCol2Width + rCol3Width, riskTableY, rCol4Width, riskCellHeight);
+        doc.rect(margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width, riskTableY, rCol5Width, riskCellHeight);
+
+        const rField1 = new doc.AcroFormTextField();
+        rField1.fieldName = `corp_${corpIndex}_risk_carrier_${index}`;
+        rField1.Rect = [margin + rCol1Width + 0.3, riskTableY + 0.3, rCol2Width - 0.6, riskCellHeight - 0.6];
+        rField1.fontSize = 7;
+        rField1.textColor = [0, 0, 0];
+        rField1.borderStyle = 'none';
+        doc.addField(rField1);
+
+        const rField2 = new doc.AcroFormTextField();
+        rField2.fieldName = `corp_${corpIndex}_risk_contact_${index}`;
+        rField2.Rect = [margin + rCol1Width + rCol2Width + 0.3, riskTableY + 0.3, rCol3Width - 0.6, riskCellHeight - 0.6];
+        rField2.fontSize = 7;
+        rField2.textColor = [0, 0, 0];
+        rField2.borderStyle = 'none';
+        doc.addField(rField2);
+
+        const rField3 = new doc.AcroFormTextField();
+        rField3.fieldName = `corp_${corpIndex}_risk_policy_${index}`;
+        rField3.Rect = [margin + rCol1Width + rCol2Width + rCol3Width + 0.3, riskTableY + 0.3, rCol4Width - 0.6, riskCellHeight - 0.6];
+        rField3.fontSize = 7;
+        rField3.textColor = [0, 0, 0];
+        rField3.borderStyle = 'none';
+        doc.addField(rField3);
+
+        const rField4 = new doc.AcroFormTextField();
+        rField4.fieldName = `corp_${corpIndex}_risk_beneficiary_${index}`;
+        rField4.Rect = [margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width + 0.3, riskTableY + 0.3, rCol5Width - 0.6, riskCellHeight - 0.6];
+        rField4.fontSize = 7;
+        rField4.textColor = [0, 0, 0];
+        rField4.borderStyle = 'none';
+        doc.addField(rField4);
+
+        riskTableY += riskCellHeight;
+      });
+
+      yPosition = riskTableY + 15;
+    }
   }
 
   yPosition += 12;

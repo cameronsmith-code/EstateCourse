@@ -347,6 +347,55 @@ export const STEPS: Step[] = [
         placeholder: '0',
         required: false,
       },
+      {
+        key: 'ownsRealEstate',
+        label: 'Do you own any real estate?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'primaryResidenceOwner',
+        label: 'Who is it owned by?',
+        type: 'select',
+        options: [
+          { value: 'joint_survivorship', label: 'Jointly with right of survivorship' },
+          { value: 'joint_tenants', label: 'Jointly as tenants in common' },
+          { value: 'client1', label: 'Client 1' },
+          { value: 'client2', label: 'Client 2' },
+        ],
+        required: false,
+      },
+      {
+        key: 'isPrimaryResidence',
+        label: 'Is this your primary residence?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'hasAdditionalRealEstate',
+        label: 'Do you own additional properties?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'additionalPropertiesCount',
+        label: 'How many additional properties do you own?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
     ],
   },
   {

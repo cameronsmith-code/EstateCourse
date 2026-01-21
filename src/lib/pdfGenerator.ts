@@ -56,6 +56,17 @@ interface FormData {
   mixedJointBankCount?: string;
   mixedClient1BankCount?: string;
   mixedClient2BankCount?: string;
+  ownsRealEstate?: string;
+  primaryResidenceOwner?: string;
+  isPrimaryResidence?: string;
+  hasAdditionalRealEstate?: string;
+  propertiesData?: Array<{
+    propertyType?: string;
+    propertyOwner?: string;
+    trustName?: string;
+    corporationName?: string;
+    otherDetails?: string;
+  }>;
   hasDebts?: string;
   debtsData?: Array<{
     debtType?: string;
@@ -2091,6 +2102,148 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = bankTableY + 10;
       }
+    }
+  }
+
+  if (formData.ownsRealEstate === 'yes') {
+    yPosition += 12;
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Real Estate', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 6;
+    doc.setFontSize(9);
+    doc.text('Information about owned properties', margin, yPosition);
+    yPosition += 10;
+
+    if (formData.isPrimaryResidence === 'yes') {
+      const ownerMap: Record<string, string> = {
+        'joint_survivorship': 'Jointly with right of survivorship',
+        'joint_tenants': 'Jointly as tenants in common',
+        'client1': formData.fullName || 'Client 1',
+        'client2': formData.spouseName || 'Client 2',
+      };
+      const ownerLabel = ownerMap[formData.primaryResidenceOwner || ''] || formData.primaryResidenceOwner || '';
+
+      if (yPosition > 220) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Primary Residence, owned by ${ownerLabel}`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      const primaryResRows = [
+        'Primary Residence:',
+        'Physical Address:',
+        'Deed/Title Location:',
+        'Mortgage Holder (if applicable):',
+        'Line of Credit (if applicable):',
+      ];
+
+      const primaryCellHeight = 7;
+      let primaryTableY = yPosition;
+
+      primaryResRows.forEach((rowLabel, rowIndex) => {
+        if (primaryTableY > 275) {
+          doc.addPage();
+          primaryTableY = 12;
+        }
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8);
+
+        doc.rect(margin, primaryTableY, fieldWidth, primaryCellHeight);
+        doc.text(rowLabel, margin + 0.5, primaryTableY + 4.5);
+
+        if (rowIndex > 0) {
+          const primaryField = new doc.AcroFormTextField();
+          primaryField.fieldName = `primary_residence_row_${rowIndex}`;
+          primaryField.Rect = [margin + fieldWidth * 0.35, primaryTableY + 0.3, fieldWidth * 0.65 - 0.6, primaryCellHeight - 0.6];
+          primaryField.fontSize = 7;
+          primaryField.textColor = [0, 0, 0];
+          primaryField.borderStyle = 'none';
+          doc.addField(primaryField);
+        }
+
+        primaryTableY += primaryCellHeight;
+      });
+
+      yPosition = primaryTableY + 10;
+    }
+
+    if (formData.propertiesData && formData.propertiesData.length > 0) {
+      formData.propertiesData.forEach((property, propIndex) => {
+        if (yPosition > 220) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        const ownerMap: Record<string, string> = {
+          'joint_survivorship': 'Jointly with right of survivorship',
+          'joint_tenants': 'Jointly as tenants in common',
+          'client1': formData.fullName || 'Client 1',
+          'client2': formData.spouseName || 'Client 2',
+          'trust': property.trustName ? `Trust: ${property.trustName}` : 'a Trust',
+          'corporation': property.corporationName ? `Corporation: ${property.corporationName}` : 'a Corporation',
+          'other': property.otherDetails || 'Other',
+        };
+        const ownerLabel = ownerMap[property.propertyOwner || ''] || property.propertyOwner || '';
+        const propertyTypeLabel = property.propertyType || 'Additional Property';
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${propertyTypeLabel}, owned by ${ownerLabel}`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const propertyRows = [
+          'Physical Address',
+          'Deed/Title Location:',
+          'Mortgage/Lein Holder (if applicable):',
+          'Line of Credit (if applicable):',
+        ];
+
+        const propertyCellHeight = 7;
+        let propertyTableY = yPosition;
+
+        propertyRows.forEach((rowLabel, rowIndex) => {
+          if (propertyTableY > 275) {
+            doc.addPage();
+            propertyTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(255, 255, 255);
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(8);
+
+          doc.rect(margin, propertyTableY, fieldWidth, propertyCellHeight);
+          doc.text(rowLabel, margin + 0.5, propertyTableY + 4.5);
+
+          const propertyField = new doc.AcroFormTextField();
+          propertyField.fieldName = `property_${propIndex + 1}_row_${rowIndex}`;
+          propertyField.Rect = [margin + fieldWidth * 0.35, propertyTableY + 0.3, fieldWidth * 0.65 - 0.6, propertyCellHeight - 0.6];
+          propertyField.fontSize = 7;
+          propertyField.textColor = [0, 0, 0];
+          propertyField.borderStyle = 'none';
+          doc.addField(propertyField);
+
+          propertyTableY += propertyCellHeight;
+        });
+
+        yPosition = propertyTableY + 10;
+      });
     }
   }
 

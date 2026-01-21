@@ -205,9 +205,11 @@ export default function StepForm({
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
                 const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
-                const client1Name = basicAnswers['fullName'] as string || 'you';
-                const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
+                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
                 const bankingStructure = answers['bankingStructure'];
+                const ownsRealEstate = answers['ownsRealEstate'];
+                const isPrimaryResidence = answers['isPrimaryResidence'];
 
                 if (question.key === 'bankingStructure' && !hasSpouse) {
                   return null;
@@ -290,6 +292,38 @@ export default function StepForm({
                   );
                 }
 
+                if (question.key === 'primaryResidenceOwner' && ownsRealEstate !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'isPrimaryResidence' && ownsRealEstate !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'hasAdditionalRealEstate' && (ownsRealEstate !== 'yes' || isPrimaryResidence !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'additionalPropertiesCount' && answers['hasAdditionalRealEstate'] !== 'yes') {
+                  return null;
+                }
+
+                if (question.key === 'primaryResidenceOwner') {
+                  const ownerOptions = [
+                    { value: 'joint_survivorship', label: 'Jointly with right of survivorship' },
+                    { value: 'joint_tenants', label: 'Jointly as tenants in common' },
+                    { value: 'client1', label: client1Name },
+                  ];
+                  if (hasSpouse) {
+                    ownerOptions.push({ value: 'client2', label: client2Name });
+                  }
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={{ ...question, options: ownerOptions }}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  );
+                }
+
                 return (
                   <FormField
                     key={question.key}
@@ -299,6 +333,126 @@ export default function StepForm({
                   />
                 );
               })}
+
+              {answers['hasAdditionalRealEstate'] === 'yes' && (() => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+
+                const propertyCount = parseInt(answers['additionalPropertiesCount'] as string) || 0;
+                const propertiesData = (answers['propertiesData'] as Array<Record<string, string>>) || Array(propertyCount).fill(null).map(() => ({}));
+
+                const handlePropertyChange = (index: number, field: string, value: string) => {
+                  const updated = [...propertiesData];
+                  if (!updated[index]) {
+                    updated[index] = {};
+                  }
+                  updated[index][field] = value;
+                  onAnswerChange('propertiesData', updated);
+                };
+
+                const ownerOptions = [
+                  { value: 'joint_survivorship', label: 'Jointly with right of survivorship' },
+                  { value: 'joint_tenants', label: 'Jointly as tenants in common' },
+                  { value: 'client1', label: client1Name },
+                  { value: 'trust', label: 'a Trust' },
+                  { value: 'corporation', label: 'a Corporation' },
+                  { value: 'other', label: 'Other' },
+                ];
+                if (hasSpouse) {
+                  ownerOptions.splice(3, 0, { value: 'client2', label: client2Name });
+                }
+
+                return (
+                  <div className="space-y-8 mt-6">
+                    {Array.from({ length: propertyCount }).map((_, index) => (
+                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <h3 className="text-lg font-semibold text-white mb-4">Additional Property {index + 1}</h3>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What type of property do you own?
+                            </label>
+                            <select
+                              value={propertiesData[index]?.propertyType || ''}
+                              onChange={(e) => handlePropertyChange(index, 'propertyType', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Select property type</option>
+                              <option value="Vacation Home">Vacation Home</option>
+                              <option value="Rental Property">Rental Property</option>
+                              <option value="Business/Commercial Property">Business/Commercial Property</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Who is it owned by?
+                            </label>
+                            <select
+                              value={propertiesData[index]?.propertyOwner || ''}
+                              onChange={(e) => handlePropertyChange(index, 'propertyOwner', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Select owner</option>
+                              {ownerOptions.map(option => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {propertiesData[index]?.propertyOwner === 'trust' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Trust Name
+                              </label>
+                              <input
+                                type="text"
+                                value={propertiesData[index]?.trustName || ''}
+                                onChange={(e) => handlePropertyChange(index, 'trustName', e.target.value)}
+                                placeholder="Enter trust name"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          )}
+
+                          {propertiesData[index]?.propertyOwner === 'corporation' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Corporation Name
+                              </label>
+                              <input
+                                type="text"
+                                value={propertiesData[index]?.corporationName || ''}
+                                onChange={(e) => handlePropertyChange(index, 'corporationName', e.target.value)}
+                                placeholder="Enter corporation name"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          )}
+
+                          {propertiesData[index]?.propertyOwner === 'other' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Additional Details
+                              </label>
+                              <input
+                                type="text"
+                                value={propertiesData[index]?.otherDetails || ''}
+                                onChange={(e) => handlePropertyChange(index, 'otherDetails', e.target.value)}
+                                placeholder="Enter additional details"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </>
           )}
 

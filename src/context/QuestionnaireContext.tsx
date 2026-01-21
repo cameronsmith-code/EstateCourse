@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
 
 type Answer = Record<string, unknown>;
 
 type Questionnaire = {
   id: string;
+  session_id?: string;
   current_step: number;
   status: 'in_progress' | 'completed';
   created_at: string;
@@ -28,6 +30,7 @@ const QuestionnaireContext = createContext<QuestionnaireContextType | undefined>
 
 const STORAGE_KEY = 'willprep_questionnaire';
 const ANSWERS_KEY = 'willprep_answers';
+const SESSION_KEY = 'willprep_session_id';
 
 export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   const [questionnaire, setQuestionnaire] = useState<Questionnaire | null>(null);
@@ -40,30 +43,91 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const storedAnswers = localStorage.getItem(ANSWERS_KEY);
+      let sessionId = localStorage.getItem(SESSION_KEY);
+      if (!sessionId) {
+        sessionId = crypto.randomUUID();
+        localStorage.setItem(SESSION_KEY, sessionId);
+      }
 
-      if (stored) {
-        const q: Questionnaire = JSON.parse(stored);
-        setQuestionnaire(q);
-        setCurrentStep(q.current_step);
+      let loadedQuestionnaire: Questionnaire | null = null;
+      let loadedAnswers: Map<number, Answer> = new Map();
 
-        if (storedAnswers) {
-          const answersData = JSON.parse(storedAnswers);
-          const answersMap = new Map<number, Answer>();
-          Object.entries(answersData).forEach(([step, stepAnswers]) => {
-            answersMap.set(parseInt(step), stepAnswers as Answer);
-          });
-          setAnswers(answersMap);
+      try {
+        const { data: dbQuestionnaire } = await supabase
+          .from('questionnaires')
+          .select('*')
+          .eq('session_id', sessionId)
+          .maybeSingle();
+
+        if (dbQuestionnaire) {
+          loadedQuestionnaire = dbQuestionnaire as Questionnaire;
+
+          const { data: dbAnswers } = await supabase
+            .from('questionnaire_answers')
+            .select('*')
+            .eq('questionnaire_id', dbQuestionnaire.id);
+
+          if (dbAnswers && dbAnswers.length > 0) {
+            dbAnswers.forEach((ans) => {
+              const step = ans.step;
+              if (!loadedAnswers.has(step)) {
+                loadedAnswers.set(step, {});
+              }
+              loadedAnswers.get(step)![ans.question_key] = ans.answer;
+            });
+          }
         }
+      } catch (dbErr) {
+        console.warn('Failed to load from database, using localStorage:', dbErr);
+      }
+
+      if (!loadedQuestionnaire) {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        const storedAnswers = localStorage.getItem(ANSWERS_KEY);
+
+        if (stored) {
+          loadedQuestionnaire = JSON.parse(stored);
+
+          if (storedAnswers) {
+            const answersData = JSON.parse(storedAnswers);
+            Object.entries(answersData).forEach(([step, stepAnswers]) => {
+              loadedAnswers.set(parseInt(step), stepAnswers as Answer);
+            });
+          }
+        }
+      }
+
+      if (loadedQuestionnaire) {
+        setQuestionnaire(loadedQuestionnaire);
+        setCurrentStep(loadedQuestionnaire.current_step);
+        setAnswers(loadedAnswers);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedQuestionnaire));
+        const answersObj: Record<number, Answer> = {};
+        loadedAnswers.forEach((value, key) => {
+          answersObj[key] = value;
+        });
+        localStorage.setItem(ANSWERS_KEY, JSON.stringify(answersObj));
       } else {
         const newQuestionnaire: Questionnaire = {
           id: crypto.randomUUID(),
+          session_id: sessionId,
           current_step: 1,
           status: 'in_progress',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
+
+        try {
+          await supabase.from('questionnaires').insert([{
+            id: newQuestionnaire.id,
+            session_id: sessionId,
+            current_step: 1,
+            status: 'in_progress',
+          }]);
+        } catch (dbErr) {
+          console.warn('Failed to save to database:', dbErr);
+        }
+
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newQuestionnaire));
         setQuestionnaire(newQuestionnaire);
         setCurrentStep(1);
@@ -98,6 +162,37 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
           answersObj[key] = value;
         });
         localStorage.setItem(ANSWERS_KEY, JSON.stringify(answersObj));
+
+        try {
+          const stepAnswers = answers.get(step);
+          if (stepAnswers) {
+            for (const [key, value] of Object.entries(stepAnswers)) {
+              const { data: existing } = await supabase
+                .from('questionnaire_answers')
+                .select('id')
+                .eq('questionnaire_id', questionnaire.id)
+                .eq('step', step)
+                .eq('question_key', key)
+                .maybeSingle();
+
+              if (existing) {
+                await supabase
+                  .from('questionnaire_answers')
+                  .update({ answer: value, updated_at: new Date().toISOString() })
+                  .eq('id', existing.id);
+              } else {
+                await supabase.from('questionnaire_answers').insert([{
+                  questionnaire_id: questionnaire.id,
+                  step,
+                  question_key: key,
+                  answer: value,
+                }]);
+              }
+            }
+          }
+        } catch (dbErr) {
+          console.warn('Failed to save answers to database:', dbErr);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to save answers');
         throw err;
@@ -123,6 +218,15 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     };
     setQuestionnaire(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+    try {
+      await supabase
+        .from('questionnaires')
+        .update({ current_step: newStep, updated_at: new Date().toISOString() })
+        .eq('id', questionnaire.id);
+    } catch (dbErr) {
+      console.warn('Failed to update questionnaire step in database:', dbErr);
+    }
   }, [questionnaire, currentStep, saveAnswers]);
 
   const previousStep = useCallback(() => {
@@ -142,6 +246,15 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     };
     setQuestionnaire(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+    try {
+      await supabase
+        .from('questionnaires')
+        .update({ status: 'completed', updated_at: new Date().toISOString() })
+        .eq('id', questionnaire.id);
+    } catch (dbErr) {
+      console.warn('Failed to mark questionnaire complete in database:', dbErr);
+    }
   }, [questionnaire, currentStep, saveAnswers]);
 
   return (

@@ -103,6 +103,11 @@ interface FormData {
   corporationCount?: string;
 }
 
+const getOrdinalLabel = (num: number): string => {
+  const ordinals = ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth'];
+  return ordinals[num - 1] || `${num}th`;
+};
+
 export const generatePDF = (formData: FormData) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -3270,19 +3275,15 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       yPosition += 12;
 
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text(`Corporation ${corpIndex}`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
-
       const corpNameCellHeight = 8;
       doc.setDrawColor(0, 0, 0);
       doc.setFillColor(255, 255, 255);
       doc.setFontSize(8);
 
       doc.rect(margin, yPosition, fieldWidth * 0.35, corpNameCellHeight);
-      doc.text("Corporation's Name:", margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${getOrdinalLabel(corpIndex)} Corporation's Name:`, margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
 
       doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, corpNameCellHeight);
       const corpNameField = new doc.AcroFormTextField();

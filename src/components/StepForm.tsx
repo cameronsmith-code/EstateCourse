@@ -1100,6 +1100,25 @@ export default function StepForm({
             </>
           )}
 
+          {step.id === 8 && (
+            <>
+              {step.questions.map((question) => {
+                if (question.key === 'corporationCount' && answers['hasCorporation'] !== 'yes') {
+                  return null;
+                }
+
+                return (
+                  <FormField
+                    key={question.key}
+                    question={question}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                  />
+                );
+              })}
+            </>
+          )}
+
           {validationError && (
             <div className="mb-6 p-4 bg-red-900 border border-red-700 rounded-lg">
               <p className="text-red-200 text-sm">{validationError}</p>

@@ -1204,7 +1204,7 @@ export default function StepForm({
                   return null;
                 }
 
-                if (question.key === 'client2IsTrustBeneficiary' && (!hasSpouse || client1IsBeneficiary === 'yes')) {
+                if (question.key === 'client2IsTrustBeneficiary' && !hasSpouse) {
                   return null;
                 }
 

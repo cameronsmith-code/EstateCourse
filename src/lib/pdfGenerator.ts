@@ -3784,6 +3784,117 @@ export const generatePDF = (formData: FormData) => {
       });
 
       yPosition = riskTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Succession and Buy-Sell Triggers:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      doc.setFontSize(8);
+      const successionText = 'Identify the roadmap for who takes control and how they are supposed to pay for it.';
+      doc.text(successionText, margin, yPosition);
+      yPosition += 8;
+
+      const successionDetails = [
+        { label: 'Chosen Successor:', example: '' },
+        { label: 'Buy-Sell Trigger Events:', example: 'e.g. Death, Disability, Divorce.' },
+        { label: 'Valuation Method:', example: 'e.g. Formula vs. Independent Valuator' },
+        { label: 'Other Scenario:', example: '' },
+        { label: 'Other Scenario:', example: '' }
+      ];
+
+      const succCellHeight = 10;
+      const sCol1Width = fieldWidth * 0.23;
+      const sCol2Width = fieldWidth * 0.26;
+      const sCol3Width = fieldWidth * 0.26;
+      const sCol4Width = fieldWidth * 0.25;
+      let succTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, succTableY, sCol1Width, succCellHeight);
+      doc.text('Succession Detail:', margin + 0.5, succTableY + 5);
+
+      doc.rect(margin + sCol1Width, succTableY, sCol2Width, succCellHeight);
+      doc.text('Response/Instruction:', margin + sCol1Width + 0.5, succTableY + 5);
+
+      doc.rect(margin + sCol1Width + sCol2Width, succTableY, sCol3Width, succCellHeight);
+      doc.text('Location of Governing\nAgreement:', margin + sCol1Width + sCol2Width + 0.5, succTableY + 3.5);
+
+      doc.rect(margin + sCol1Width + sCol2Width + sCol3Width, succTableY, sCol4Width, succCellHeight);
+      doc.text('Other Information:', margin + sCol1Width + sCol2Width + sCol3Width + 0.5, succTableY + 5);
+
+      succTableY += succCellHeight;
+
+      successionDetails.forEach((detail, index) => {
+        if (succTableY > 275) {
+          doc.addPage();
+          succTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, succTableY, sCol1Width, succCellHeight);
+        doc.text(detail.label, margin + 0.5, succTableY + 5);
+
+        doc.rect(margin + sCol1Width, succTableY, sCol2Width, succCellHeight);
+        if (detail.example) {
+          doc.setTextColor(100, 100, 100);
+          const exampleLines = detail.example.split('\n');
+          exampleLines.forEach((line, lineIdx) => {
+            doc.text(line, margin + sCol1Width + 0.5, succTableY + 3 + (lineIdx * 3));
+          });
+          doc.setTextColor(0, 0, 0);
+        }
+
+        doc.rect(margin + sCol1Width + sCol2Width, succTableY, sCol3Width, succCellHeight);
+        if (index === 0) {
+          doc.setTextColor(100, 100, 100);
+          doc.text('e.g. Shareholder', margin + sCol1Width + sCol2Width + 0.5, succTableY + 4);
+          doc.text('Agreement', margin + sCol1Width + sCol2Width + 0.5, succTableY + 7);
+          doc.setTextColor(0, 0, 0);
+        }
+
+        doc.rect(margin + sCol1Width + sCol2Width + sCol3Width, succTableY, sCol4Width, succCellHeight);
+
+        const sField1 = new doc.AcroFormTextField();
+        sField1.fieldName = `corp_${corpIndex}_succession_response_${index}`;
+        sField1.Rect = [margin + sCol1Width + 0.3, succTableY + 0.3, sCol2Width - 0.6, succCellHeight - 0.6];
+        sField1.fontSize = 7;
+        sField1.textColor = [0, 0, 0];
+        sField1.borderStyle = 'none';
+        doc.addField(sField1);
+
+        const sField2 = new doc.AcroFormTextField();
+        sField2.fieldName = `corp_${corpIndex}_succession_location_${index}`;
+        sField2.Rect = [margin + sCol1Width + sCol2Width + 0.3, succTableY + 0.3, sCol3Width - 0.6, succCellHeight - 0.6];
+        sField2.fontSize = 7;
+        sField2.textColor = [0, 0, 0];
+        sField2.borderStyle = 'none';
+        doc.addField(sField2);
+
+        const sField3 = new doc.AcroFormTextField();
+        sField3.fieldName = `corp_${corpIndex}_succession_other_${index}`;
+        sField3.Rect = [margin + sCol1Width + sCol2Width + sCol3Width + 0.3, succTableY + 0.3, sCol4Width - 0.6, succCellHeight - 0.6];
+        sField3.fontSize = 7;
+        sField3.textColor = [0, 0, 0];
+        sField3.borderStyle = 'none';
+        doc.addField(sField3);
+
+        succTableY += succCellHeight;
+      });
+
+      yPosition = succTableY + 15;
     }
   }
 

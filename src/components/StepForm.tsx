@@ -373,6 +373,19 @@ export default function StepForm({
                         <div className="space-y-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What is the name of this property?
+                            </label>
+                            <input
+                              type="text"
+                              value={propertiesData[index]?.propertyName || ''}
+                              onChange={(e) => handlePropertyChange(index, 'propertyName', e.target.value)}
+                              placeholder="Enter property name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
                               What type of property do you own?
                             </label>
                             <select
@@ -443,6 +456,52 @@ export default function StepForm({
                                 value={propertiesData[index]?.otherDetails || ''}
                                 onChange={(e) => handlePropertyChange(index, 'otherDetails', e.target.value)}
                                 placeholder="Enter additional details"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          )}
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Does anyone outside of {client1Name} or {client2Name} have ownership in this property?
+                            </label>
+                            <div className="flex gap-4">
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`hasAdditionalOwners-${index}`}
+                                  value="yes"
+                                  checked={propertiesData[index]?.hasAdditionalOwners === 'yes'}
+                                  onChange={(e) => handlePropertyChange(index, 'hasAdditionalOwners', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">Yes</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`hasAdditionalOwners-${index}`}
+                                  value="no"
+                                  checked={propertiesData[index]?.hasAdditionalOwners === 'no'}
+                                  onChange={(e) => handlePropertyChange(index, 'hasAdditionalOwners', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">No</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {propertiesData[index]?.hasAdditionalOwners === 'yes' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                How many people have an ownership share in this property?
+                              </label>
+                              <input
+                                type="number"
+                                value={propertiesData[index]?.additionalOwnersCount || ''}
+                                onChange={(e) => handlePropertyChange(index, 'additionalOwnersCount', e.target.value)}
+                                placeholder="0"
+                                min="0"
                                 className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>

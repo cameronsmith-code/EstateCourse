@@ -61,11 +61,14 @@ interface FormData {
   isPrimaryResidence?: string;
   hasAdditionalRealEstate?: string;
   propertiesData?: Array<{
+    propertyName?: string;
     propertyType?: string;
     propertyOwner?: string;
     trustName?: string;
     corporationName?: string;
     otherDetails?: string;
+    hasAdditionalOwners?: string;
+    additionalOwnersCount?: string;
   }>;
   hasDebts?: string;
   debtsData?: Array<{
@@ -2184,7 +2187,7 @@ export const generatePDF = (formData: FormData) => {
 
     if (formData.propertiesData && formData.propertiesData.length > 0) {
       formData.propertiesData.forEach((property, propIndex) => {
-        if (yPosition > 220) {
+        if (yPosition > 200) {
           doc.addPage();
           yPosition = 12;
         }
@@ -2199,13 +2202,92 @@ export const generatePDF = (formData: FormData) => {
           'other': property.otherDetails || 'Other',
         };
         const ownerLabel = ownerMap[property.propertyOwner || ''] || property.propertyOwner || '';
-        const propertyTypeLabel = property.propertyType || 'Additional Property';
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text(`${propertyTypeLabel}, owned by ${ownerLabel}`, margin, yPosition);
+        doc.text('Property Name:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(9);
+        if (property.propertyName) {
+          doc.text(property.propertyName, margin + 30, yPosition);
+        }
+        yPosition += 6;
+
+        doc.setFont(undefined, 'bold');
+        doc.text('Property Type:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        if (property.propertyType) {
+          doc.text(property.propertyType, margin + 30, yPosition);
+        }
+        yPosition += 6;
+
+        doc.setFont(undefined, 'bold');
+        doc.text('Ownership Structure:', margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
+
+        if (property.hasAdditionalOwners === 'yes' && property.additionalOwnersCount) {
+          const ownerCount = parseInt(property.additionalOwnersCount) || 0;
+          const totalRows = ownerCount + 1;
+
+          const ownershipCellHeight = 7;
+          const ownerNameColWidth = fieldWidth * 0.5;
+          const ownershipPercentColWidth = fieldWidth * 0.5;
+          let ownershipTableY = yPosition;
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(255, 255, 255);
+          doc.setFont(undefined, 'bold');
+          doc.setFontSize(8);
+
+          doc.rect(margin, ownershipTableY, ownerNameColWidth, ownershipCellHeight);
+          doc.text('Owner Name:', margin + 0.5, ownershipTableY + 4.5);
+
+          doc.rect(margin + ownerNameColWidth, ownershipTableY, ownershipPercentColWidth, ownershipCellHeight);
+          doc.text('Ownership %:', margin + ownerNameColWidth + 0.5, ownershipTableY + 4.5);
+
+          ownershipTableY += ownershipCellHeight;
+
+          for (let i = 0; i < totalRows; i++) {
+            if (ownershipTableY > 275) {
+              doc.addPage();
+              ownershipTableY = 12;
+            }
+
+            doc.setFont(undefined, 'normal');
+            doc.rect(margin, ownershipTableY, ownerNameColWidth, ownershipCellHeight);
+            doc.rect(margin + ownerNameColWidth, ownershipTableY, ownershipPercentColWidth, ownershipCellHeight);
+
+            const ownerNameField = new doc.AcroFormTextField();
+            ownerNameField.fieldName = `property_${propIndex + 1}_owner_name_${i + 1}`;
+            ownerNameField.Rect = [margin + 0.3, ownershipTableY + 0.3, ownerNameColWidth - 0.6, ownershipCellHeight - 0.6];
+            ownerNameField.fontSize = 7;
+            ownerNameField.textColor = [0, 0, 0];
+            ownerNameField.borderStyle = 'none';
+            doc.addField(ownerNameField);
+
+            const ownerPercentField = new doc.AcroFormTextField();
+            ownerPercentField.fieldName = `property_${propIndex + 1}_owner_percent_${i + 1}`;
+            ownerPercentField.Rect = [margin + ownerNameColWidth + 0.3, ownershipTableY + 0.3, ownershipPercentColWidth - 0.6, ownershipCellHeight - 0.6];
+            ownerPercentField.fontSize = 7;
+            ownerPercentField.textColor = [0, 0, 0];
+            ownerPercentField.borderStyle = 'none';
+            doc.addField(ownerPercentField);
+
+            ownershipTableY += ownershipCellHeight;
+          }
+
+          yPosition = ownershipTableY + 10;
+        } else {
+          doc.setFontSize(8);
+          doc.text(`Owned by ${ownerLabel}`, margin, yPosition);
+          yPosition += 10;
+        }
+
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 12;
+        }
 
         const propertyRows = [
           'Physical Address',

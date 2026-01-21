@@ -18,6 +18,7 @@ export default function Completion() {
     const step7 = answers.get(7) || {};
     const step8 = answers.get(8) || {};
     const step9 = answers.get(9) || {};
+    const step10 = answers.get(10) || {};
 
     const data = {
       ...step1,
@@ -29,6 +30,7 @@ export default function Completion() {
       ...step7,
       ...step8,
       ...step9,
+      ...step10,
     };
 
     setFormData(data);

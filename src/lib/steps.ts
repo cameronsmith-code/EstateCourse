@@ -663,4 +663,45 @@ export const STEPS: Step[] = [
       },
     ],
   },
+  {
+    id: 10,
+    title: 'Family Trusts Continued',
+    description: 'Information about trusts you are a beneficiary of',
+    questions: [
+      {
+        key: 'client1IsTrustBeneficiary',
+        label: 'Are you the beneficiary of a Trust?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1BeneficiaryTrustCount',
+        label: 'How many trusts are you the beneficiary of?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'client2IsTrustBeneficiary',
+        label: 'Are you the beneficiary of a Trust?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2BeneficiaryTrustCount',
+        label: 'How many trusts are you the beneficiary of?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+    ],
+  },
 ];

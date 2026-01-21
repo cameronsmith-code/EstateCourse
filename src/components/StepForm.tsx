@@ -1190,6 +1190,164 @@ export default function StepForm({
             </>
           )}
 
+          {step.id === 10 && (
+            <>
+              {step.questions.map((question) => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+                const client1IsBeneficiary = answers['client1IsTrustBeneficiary'];
+                const client2IsBeneficiary = answers['client2IsTrustBeneficiary'];
+
+                if (question.key === 'client1BeneficiaryTrustCount' && client1IsBeneficiary !== 'yes') {
+                  return null;
+                }
+
+                if (question.key === 'client2IsTrustBeneficiary' && (!hasSpouse || client1IsBeneficiary === 'yes')) {
+                  return null;
+                }
+
+                if (question.key === 'client2BeneficiaryTrustCount' && client2IsBeneficiary !== 'yes') {
+                  return null;
+                }
+
+                let customLabel = question.label;
+                if (question.key === 'client1IsTrustBeneficiary') {
+                  customLabel = `${client1Name}, are you the beneficiary of a Trust?`;
+                }
+                if (question.key === 'client1BeneficiaryTrustCount') {
+                  customLabel = `${client1Name}, how many trusts are you the beneficiary of?`;
+                }
+                if (question.key === 'client2IsTrustBeneficiary') {
+                  customLabel = `${client2Name}, are you the beneficiary of a Trust?`;
+                }
+                if (question.key === 'client2BeneficiaryTrustCount') {
+                  customLabel = `${client2Name}, how many trusts are you the beneficiary of?`;
+                }
+
+                return (
+                  <FormField
+                    key={question.key}
+                    question={{ ...question, label: customLabel }}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                  />
+                );
+              })}
+
+              {answers['client1IsTrustBeneficiary'] === 'yes' && (() => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+                const trustCount = parseInt(answers['client1BeneficiaryTrustCount'] as string) || 0;
+                const trustsData = (answers['client1BeneficiaryTrustsData'] as Array<Record<string, string>>) || Array(trustCount).fill(null).map(() => ({}));
+
+                const handleTrustChange = (index: number, field: string, value: string) => {
+                  const updated = [...trustsData];
+                  if (!updated[index]) {
+                    updated[index] = {};
+                  }
+                  updated[index][field] = value;
+                  onAnswerChange('client1BeneficiaryTrustsData', updated);
+                };
+
+                return (
+                  <div className="space-y-8 mt-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">{client1Name} - Beneficiary Trusts</h3>
+                    {Array.from({ length: trustCount }).map((_, index) => (
+                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <h4 className="text-md font-semibold text-white mb-4">Trust {index + 1}</h4>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What is the legal name of the trust? *
+                            </label>
+                            <input
+                              type="text"
+                              value={trustsData[index]?.trustName || ''}
+                              onChange={(e) => handleTrustChange(index, 'trustName', e.target.value)}
+                              placeholder="Enter trust's legal name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Location of the Trust Deed *
+                            </label>
+                            <input
+                              type="text"
+                              value={trustsData[index]?.deedLocation || ''}
+                              onChange={(e) => handleTrustChange(index, 'deedLocation', e.target.value)}
+                              placeholder="Enter trust deed location"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {answers['client2IsTrustBeneficiary'] === 'yes' && (() => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+                const trustCount = parseInt(answers['client2BeneficiaryTrustCount'] as string) || 0;
+                const trustsData = (answers['client2BeneficiaryTrustsData'] as Array<Record<string, string>>) || Array(trustCount).fill(null).map(() => ({}));
+
+                const handleTrustChange = (index: number, field: string, value: string) => {
+                  const updated = [...trustsData];
+                  if (!updated[index]) {
+                    updated[index] = {};
+                  }
+                  updated[index][field] = value;
+                  onAnswerChange('client2BeneficiaryTrustsData', updated);
+                };
+
+                return (
+                  <div className="space-y-8 mt-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">{client2Name} - Beneficiary Trusts</h3>
+                    {Array.from({ length: trustCount }).map((_, index) => (
+                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <h4 className="text-md font-semibold text-white mb-4">Trust {index + 1}</h4>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What is the legal name of the trust? *
+                            </label>
+                            <input
+                              type="text"
+                              value={trustsData[index]?.trustName || ''}
+                              onChange={(e) => handleTrustChange(index, 'trustName', e.target.value)}
+                              placeholder="Enter trust's legal name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Location of the Trust Deed *
+                            </label>
+                            <input
+                              type="text"
+                              value={trustsData[index]?.deedLocation || ''}
+                              onChange={(e) => handleTrustChange(index, 'deedLocation', e.target.value)}
+                              placeholder="Enter trust deed location"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </>
+          )}
+
           {validationError && (
             <div className="mb-6 p-4 bg-red-900 border border-red-700 rounded-lg">
               <p className="text-red-200 text-sm">{validationError}</p>

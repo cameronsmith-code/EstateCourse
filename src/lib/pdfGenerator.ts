@@ -4317,6 +4317,708 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
+  if (formData.client1IsTrustBeneficiary === 'yes' && formData.client1BeneficiaryTrustCount) {
+    const trustCount = parseInt(formData.client1BeneficiaryTrustCount as string);
+    const trustsData = formData.client1BeneficiaryTrustsData as Array<Record<string, string>> | undefined;
+    const client1Name = formData.fullName as string || 'Client 1';
+
+    for (let trustIndex = 1; trustIndex <= trustCount; trustIndex++) {
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${client1Name} - Beneficiary Trust Information`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 12;
+
+      const trustData = trustsData ? trustsData[trustIndex - 1] : {};
+      const trustName = trustData?.trustName || '';
+
+      const trustNameCellHeight = 8;
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFontSize(8);
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, trustNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Trust ${trustIndex} - Legal Name:`, margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, trustNameCellHeight);
+      if (trustName) {
+        doc.setFontSize(8);
+        doc.text(trustName, margin + fieldWidth * 0.35 + 0.5, yPosition + 5);
+      }
+
+      yPosition += trustNameCellHeight + 4;
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, trustNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text('Trust Deed Location:', margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, trustNameCellHeight);
+      if (trustData?.deedLocation) {
+        doc.setFontSize(8);
+        doc.text(trustData.deedLocation, margin + fieldWidth * 0.35 + 0.5, yPosition + 5);
+      }
+
+      yPosition += trustNameCellHeight + 4;
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, trustNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text('Year Established:', margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, trustNameCellHeight);
+      const yearField = new doc.AcroFormTextField();
+      yearField.fieldName = `client1_ben_trust_${trustIndex}_year_established`;
+      yearField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, trustNameCellHeight - 0.6];
+      yearField.fontSize = 8;
+      yearField.textColor = [0, 0, 0];
+      yearField.borderStyle = 'none';
+      doc.addField(yearField);
+
+      yPosition += trustNameCellHeight + 4;
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, trustNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text('Trust Duration/Windup:', margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, trustNameCellHeight);
+      const durationField = new doc.AcroFormTextField();
+      durationField.fieldName = `client1_ben_trust_${trustIndex}_duration`;
+      durationField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, trustNameCellHeight - 0.6];
+      durationField.fontSize = 8;
+      durationField.textColor = [0, 0, 0];
+      durationField.borderStyle = 'none';
+      doc.addField(durationField);
+
+      yPosition += trustNameCellHeight + 12;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Key Contacts:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      doc.setFontSize(9);
+      doc.text('Trustee(s):', margin, yPosition);
+      yPosition += 6;
+
+      const keyContactRows = 3;
+      const kcCellHeight = 10;
+      const kcCol1Width = fieldWidth * 0.4;
+      const kcCol2Width = fieldWidth * 0.3;
+      const kcCol3Width = fieldWidth * 0.3;
+      let kcTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, kcTableY, kcCol1Width, kcCellHeight);
+      doc.text('Name:', margin + 0.5, kcTableY + 5);
+
+      doc.rect(margin + kcCol1Width, kcTableY, kcCol2Width, kcCellHeight);
+      doc.text('Phone:', margin + kcCol1Width + 0.5, kcTableY + 5);
+
+      doc.rect(margin + kcCol1Width + kcCol2Width, kcTableY, kcCol3Width, kcCellHeight);
+      doc.text('Email:', margin + kcCol1Width + kcCol2Width + 0.5, kcTableY + 5);
+
+      kcTableY += kcCellHeight;
+
+      for (let i = 0; i < keyContactRows; i++) {
+        if (kcTableY > 275) {
+          doc.addPage();
+          kcTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, kcTableY, kcCol1Width, kcCellHeight);
+        doc.rect(margin + kcCol1Width, kcTableY, kcCol2Width, kcCellHeight);
+        doc.rect(margin + kcCol1Width + kcCol2Width, kcTableY, kcCol3Width, kcCellHeight);
+
+        const kcField1 = new doc.AcroFormTextField();
+        kcField1.fieldName = `client1_ben_trust_${trustIndex}_key_contact_name_${i}`;
+        kcField1.Rect = [margin + 0.3, kcTableY + 0.3, kcCol1Width - 0.6, kcCellHeight - 0.6];
+        kcField1.fontSize = 7;
+        kcField1.textColor = [0, 0, 0];
+        kcField1.borderStyle = 'none';
+        doc.addField(kcField1);
+
+        const kcField2 = new doc.AcroFormTextField();
+        kcField2.fieldName = `client1_ben_trust_${trustIndex}_key_contact_phone_${i}`;
+        kcField2.Rect = [margin + kcCol1Width + 0.3, kcTableY + 0.3, kcCol2Width - 0.6, kcCellHeight - 0.6];
+        kcField2.fontSize = 7;
+        kcField2.textColor = [0, 0, 0];
+        kcField2.borderStyle = 'none';
+        doc.addField(kcField2);
+
+        const kcField3 = new doc.AcroFormTextField();
+        kcField3.fieldName = `client1_ben_trust_${trustIndex}_key_contact_email_${i}`;
+        kcField3.Rect = [margin + kcCol1Width + kcCol2Width + 0.3, kcTableY + 0.3, kcCol3Width - 0.6, kcCellHeight - 0.6];
+        kcField3.fontSize = 7;
+        kcField3.textColor = [0, 0, 0];
+        kcField3.borderStyle = 'none';
+        doc.addField(kcField3);
+
+        kcTableY += kcCellHeight;
+      }
+
+      yPosition = kcTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Beneficiaries:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      const benRows = 3;
+      const benCellHeight = 10;
+      const benCol1Width = fieldWidth * 0.4;
+      const benCol2Width = fieldWidth * 0.3;
+      const benCol3Width = fieldWidth * 0.3;
+      let benTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, benTableY, benCol1Width, benCellHeight);
+      doc.text('Name:', margin + 0.5, benTableY + 5);
+
+      doc.rect(margin + benCol1Width, benTableY, benCol2Width, benCellHeight);
+      doc.text('Phone:', margin + benCol1Width + 0.5, benTableY + 5);
+
+      doc.rect(margin + benCol1Width + benCol2Width, benTableY, benCol3Width, benCellHeight);
+      doc.text('Email:', margin + benCol1Width + benCol2Width + 0.5, benTableY + 5);
+
+      benTableY += benCellHeight;
+
+      for (let i = 0; i < benRows; i++) {
+        if (benTableY > 275) {
+          doc.addPage();
+          benTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, benTableY, benCol1Width, benCellHeight);
+        doc.rect(margin + benCol1Width, benTableY, benCol2Width, benCellHeight);
+        doc.rect(margin + benCol1Width + benCol2Width, benTableY, benCol3Width, benCellHeight);
+
+        const benField1 = new doc.AcroFormTextField();
+        benField1.fieldName = `client1_ben_trust_${trustIndex}_beneficiary_name_${i}`;
+        benField1.Rect = [margin + 0.3, benTableY + 0.3, benCol1Width - 0.6, benCellHeight - 0.6];
+        benField1.fontSize = 7;
+        benField1.textColor = [0, 0, 0];
+        benField1.borderStyle = 'none';
+        doc.addField(benField1);
+
+        const benField2 = new doc.AcroFormTextField();
+        benField2.fieldName = `client1_ben_trust_${trustIndex}_beneficiary_phone_${i}`;
+        benField2.Rect = [margin + benCol1Width + 0.3, benTableY + 0.3, benCol2Width - 0.6, benCellHeight - 0.6];
+        benField2.fontSize = 7;
+        benField2.textColor = [0, 0, 0];
+        benField2.borderStyle = 'none';
+        doc.addField(benField2);
+
+        const benField3 = new doc.AcroFormTextField();
+        benField3.fieldName = `client1_ben_trust_${trustIndex}_beneficiary_email_${i}`;
+        benField3.Rect = [margin + benCol1Width + benCol2Width + 0.3, benTableY + 0.3, benCol3Width - 0.6, benCellHeight - 0.6];
+        benField3.fontSize = 7;
+        benField3.textColor = [0, 0, 0];
+        benField3.borderStyle = 'none';
+        doc.addField(benField3);
+
+        benTableY += benCellHeight;
+      }
+
+      yPosition = benTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Trust Property:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      const propRows = 4;
+      const propCellHeight = 10;
+      const propCol1Width = fieldWidth * 0.25;
+      const propCol2Width = fieldWidth * 0.25;
+      const propCol3Width = fieldWidth * 0.25;
+      const propCol4Width = fieldWidth * 0.25;
+      let propTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, propTableY, propCol1Width, propCellHeight);
+      doc.text('Asset Type:', margin + 0.5, propTableY + 5);
+
+      doc.rect(margin + propCol1Width, propTableY, propCol2Width, propCellHeight);
+      doc.text('Estimated Value:', margin + propCol1Width + 0.5, propTableY + 5);
+
+      doc.rect(margin + propCol1Width + propCol2Width, propTableY, propCol3Width, propCellHeight);
+      doc.text('Book Value/Cost Base:', margin + propCol1Width + propCol2Width + 0.5, propTableY + 3.5);
+
+      doc.rect(margin + propCol1Width + propCol2Width + propCol3Width, propTableY, propCol4Width, propCellHeight);
+      doc.text('Other Information:', margin + propCol1Width + propCol2Width + propCol3Width + 0.5, propTableY + 5);
+
+      propTableY += propCellHeight;
+
+      for (let i = 0; i < propRows; i++) {
+        if (propTableY > 275) {
+          doc.addPage();
+          propTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, propTableY, propCol1Width, propCellHeight);
+        doc.rect(margin + propCol1Width, propTableY, propCol2Width, propCellHeight);
+        doc.rect(margin + propCol1Width + propCol2Width, propTableY, propCol3Width, propCellHeight);
+        doc.rect(margin + propCol1Width + propCol2Width + propCol3Width, propTableY, propCol4Width, propCellHeight);
+
+        const propField1 = new doc.AcroFormTextField();
+        propField1.fieldName = `client1_ben_trust_${trustIndex}_property_asset_type_${i}`;
+        propField1.Rect = [margin + 0.3, propTableY + 0.3, propCol1Width - 0.6, propCellHeight - 0.6];
+        propField1.fontSize = 7;
+        propField1.textColor = [0, 0, 0];
+        propField1.borderStyle = 'none';
+        doc.addField(propField1);
+
+        const propField2 = new doc.AcroFormTextField();
+        propField2.fieldName = `client1_ben_trust_${trustIndex}_property_estimated_value_${i}`;
+        propField2.Rect = [margin + propCol1Width + 0.3, propTableY + 0.3, propCol2Width - 0.6, propCellHeight - 0.6];
+        propField2.fontSize = 7;
+        propField2.textColor = [0, 0, 0];
+        propField2.borderStyle = 'none';
+        doc.addField(propField2);
+
+        const propField3 = new doc.AcroFormTextField();
+        propField3.fieldName = `client1_ben_trust_${trustIndex}_property_book_value_${i}`;
+        propField3.Rect = [margin + propCol1Width + propCol2Width + 0.3, propTableY + 0.3, propCol3Width - 0.6, propCellHeight - 0.6];
+        propField3.fontSize = 7;
+        propField3.textColor = [0, 0, 0];
+        propField3.borderStyle = 'none';
+        doc.addField(propField3);
+
+        const propField4 = new doc.AcroFormTextField();
+        propField4.fieldName = `client1_ben_trust_${trustIndex}_property_other_info_${i}`;
+        propField4.Rect = [margin + propCol1Width + propCol2Width + propCol3Width + 0.3, propTableY + 0.3, propCol4Width - 0.6, propCellHeight - 0.6];
+        propField4.fontSize = 7;
+        propField4.textColor = [0, 0, 0];
+        propField4.borderStyle = 'none';
+        doc.addField(propField4);
+
+        propTableY += propCellHeight;
+      }
+
+      yPosition = propTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Distribution Rules:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      const distField = new doc.AcroFormTextField();
+      distField.fieldName = `client1_ben_trust_${trustIndex}_distribution_rules`;
+      distField.Rect = [margin, yPosition, fieldWidth, 25];
+      distField.multiline = true;
+      distField.fontSize = 9;
+      distField.textColor = [0, 0, 0];
+      doc.addField(distField);
+
+      yPosition += 30;
+    }
+  }
+
+  if (formData.client2IsTrustBeneficiary === 'yes' && formData.client2BeneficiaryTrustCount) {
+    const trustCount = parseInt(formData.client2BeneficiaryTrustCount as string);
+    const trustsData = formData.client2BeneficiaryTrustsData as Array<Record<string, string>> | undefined;
+    const client2Name = formData.spouseName as string || 'Client 2';
+
+    for (let trustIndex = 1; trustIndex <= trustCount; trustIndex++) {
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${client2Name} - Beneficiary Trust Information`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 12;
+
+      const trustData = trustsData ? trustsData[trustIndex - 1] : {};
+      const trustName = trustData?.trustName || '';
+
+      const trustNameCellHeight = 8;
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFontSize(8);
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, trustNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Trust ${trustIndex} - Legal Name:`, margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, trustNameCellHeight);
+      if (trustName) {
+        doc.setFontSize(8);
+        doc.text(trustName, margin + fieldWidth * 0.35 + 0.5, yPosition + 5);
+      }
+
+      yPosition += trustNameCellHeight + 4;
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, trustNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text('Trust Deed Location:', margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, trustNameCellHeight);
+      if (trustData?.deedLocation) {
+        doc.setFontSize(8);
+        doc.text(trustData.deedLocation, margin + fieldWidth * 0.35 + 0.5, yPosition + 5);
+      }
+
+      yPosition += trustNameCellHeight + 4;
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, trustNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text('Year Established:', margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, trustNameCellHeight);
+      const yearField = new doc.AcroFormTextField();
+      yearField.fieldName = `client2_ben_trust_${trustIndex}_year_established`;
+      yearField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, trustNameCellHeight - 0.6];
+      yearField.fontSize = 8;
+      yearField.textColor = [0, 0, 0];
+      yearField.borderStyle = 'none';
+      doc.addField(yearField);
+
+      yPosition += trustNameCellHeight + 4;
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, trustNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text('Trust Duration/Windup:', margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, trustNameCellHeight);
+      const durationField = new doc.AcroFormTextField();
+      durationField.fieldName = `client2_ben_trust_${trustIndex}_duration`;
+      durationField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, trustNameCellHeight - 0.6];
+      durationField.fontSize = 8;
+      durationField.textColor = [0, 0, 0];
+      durationField.borderStyle = 'none';
+      doc.addField(durationField);
+
+      yPosition += trustNameCellHeight + 12;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Key Contacts:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      doc.setFontSize(9);
+      doc.text('Trustee(s):', margin, yPosition);
+      yPosition += 6;
+
+      const keyContactRows = 3;
+      const kcCellHeight = 10;
+      const kcCol1Width = fieldWidth * 0.4;
+      const kcCol2Width = fieldWidth * 0.3;
+      const kcCol3Width = fieldWidth * 0.3;
+      let kcTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, kcTableY, kcCol1Width, kcCellHeight);
+      doc.text('Name:', margin + 0.5, kcTableY + 5);
+
+      doc.rect(margin + kcCol1Width, kcTableY, kcCol2Width, kcCellHeight);
+      doc.text('Phone:', margin + kcCol1Width + 0.5, kcTableY + 5);
+
+      doc.rect(margin + kcCol1Width + kcCol2Width, kcTableY, kcCol3Width, kcCellHeight);
+      doc.text('Email:', margin + kcCol1Width + kcCol2Width + 0.5, kcTableY + 5);
+
+      kcTableY += kcCellHeight;
+
+      for (let i = 0; i < keyContactRows; i++) {
+        if (kcTableY > 275) {
+          doc.addPage();
+          kcTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, kcTableY, kcCol1Width, kcCellHeight);
+        doc.rect(margin + kcCol1Width, kcTableY, kcCol2Width, kcCellHeight);
+        doc.rect(margin + kcCol1Width + kcCol2Width, kcTableY, kcCol3Width, kcCellHeight);
+
+        const kcField1 = new doc.AcroFormTextField();
+        kcField1.fieldName = `client2_ben_trust_${trustIndex}_key_contact_name_${i}`;
+        kcField1.Rect = [margin + 0.3, kcTableY + 0.3, kcCol1Width - 0.6, kcCellHeight - 0.6];
+        kcField1.fontSize = 7;
+        kcField1.textColor = [0, 0, 0];
+        kcField1.borderStyle = 'none';
+        doc.addField(kcField1);
+
+        const kcField2 = new doc.AcroFormTextField();
+        kcField2.fieldName = `client2_ben_trust_${trustIndex}_key_contact_phone_${i}`;
+        kcField2.Rect = [margin + kcCol1Width + 0.3, kcTableY + 0.3, kcCol2Width - 0.6, kcCellHeight - 0.6];
+        kcField2.fontSize = 7;
+        kcField2.textColor = [0, 0, 0];
+        kcField2.borderStyle = 'none';
+        doc.addField(kcField2);
+
+        const kcField3 = new doc.AcroFormTextField();
+        kcField3.fieldName = `client2_ben_trust_${trustIndex}_key_contact_email_${i}`;
+        kcField3.Rect = [margin + kcCol1Width + kcCol2Width + 0.3, kcTableY + 0.3, kcCol3Width - 0.6, kcCellHeight - 0.6];
+        kcField3.fontSize = 7;
+        kcField3.textColor = [0, 0, 0];
+        kcField3.borderStyle = 'none';
+        doc.addField(kcField3);
+
+        kcTableY += kcCellHeight;
+      }
+
+      yPosition = kcTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Beneficiaries:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      const benRows = 3;
+      const benCellHeight = 10;
+      const benCol1Width = fieldWidth * 0.4;
+      const benCol2Width = fieldWidth * 0.3;
+      const benCol3Width = fieldWidth * 0.3;
+      let benTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, benTableY, benCol1Width, benCellHeight);
+      doc.text('Name:', margin + 0.5, benTableY + 5);
+
+      doc.rect(margin + benCol1Width, benTableY, benCol2Width, benCellHeight);
+      doc.text('Phone:', margin + benCol1Width + 0.5, benTableY + 5);
+
+      doc.rect(margin + benCol1Width + benCol2Width, benTableY, benCol3Width, benCellHeight);
+      doc.text('Email:', margin + benCol1Width + benCol2Width + 0.5, benTableY + 5);
+
+      benTableY += benCellHeight;
+
+      for (let i = 0; i < benRows; i++) {
+        if (benTableY > 275) {
+          doc.addPage();
+          benTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, benTableY, benCol1Width, benCellHeight);
+        doc.rect(margin + benCol1Width, benTableY, benCol2Width, benCellHeight);
+        doc.rect(margin + benCol1Width + benCol2Width, benTableY, benCol3Width, benCellHeight);
+
+        const benField1 = new doc.AcroFormTextField();
+        benField1.fieldName = `client2_ben_trust_${trustIndex}_beneficiary_name_${i}`;
+        benField1.Rect = [margin + 0.3, benTableY + 0.3, benCol1Width - 0.6, benCellHeight - 0.6];
+        benField1.fontSize = 7;
+        benField1.textColor = [0, 0, 0];
+        benField1.borderStyle = 'none';
+        doc.addField(benField1);
+
+        const benField2 = new doc.AcroFormTextField();
+        benField2.fieldName = `client2_ben_trust_${trustIndex}_beneficiary_phone_${i}`;
+        benField2.Rect = [margin + benCol1Width + 0.3, benTableY + 0.3, benCol2Width - 0.6, benCellHeight - 0.6];
+        benField2.fontSize = 7;
+        benField2.textColor = [0, 0, 0];
+        benField2.borderStyle = 'none';
+        doc.addField(benField2);
+
+        const benField3 = new doc.AcroFormTextField();
+        benField3.fieldName = `client2_ben_trust_${trustIndex}_beneficiary_email_${i}`;
+        benField3.Rect = [margin + benCol1Width + benCol2Width + 0.3, benTableY + 0.3, benCol3Width - 0.6, benCellHeight - 0.6];
+        benField3.fontSize = 7;
+        benField3.textColor = [0, 0, 0];
+        benField3.borderStyle = 'none';
+        doc.addField(benField3);
+
+        benTableY += benCellHeight;
+      }
+
+      yPosition = benTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Trust Property:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      const propRows = 4;
+      const propCellHeight = 10;
+      const propCol1Width = fieldWidth * 0.25;
+      const propCol2Width = fieldWidth * 0.25;
+      const propCol3Width = fieldWidth * 0.25;
+      const propCol4Width = fieldWidth * 0.25;
+      let propTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, propTableY, propCol1Width, propCellHeight);
+      doc.text('Asset Type:', margin + 0.5, propTableY + 5);
+
+      doc.rect(margin + propCol1Width, propTableY, propCol2Width, propCellHeight);
+      doc.text('Estimated Value:', margin + propCol1Width + 0.5, propTableY + 5);
+
+      doc.rect(margin + propCol1Width + propCol2Width, propTableY, propCol3Width, propCellHeight);
+      doc.text('Book Value/Cost Base:', margin + propCol1Width + propCol2Width + 0.5, propTableY + 3.5);
+
+      doc.rect(margin + propCol1Width + propCol2Width + propCol3Width, propTableY, propCol4Width, propCellHeight);
+      doc.text('Other Information:', margin + propCol1Width + propCol2Width + propCol3Width + 0.5, propTableY + 5);
+
+      propTableY += propCellHeight;
+
+      for (let i = 0; i < propRows; i++) {
+        if (propTableY > 275) {
+          doc.addPage();
+          propTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, propTableY, propCol1Width, propCellHeight);
+        doc.rect(margin + propCol1Width, propTableY, propCol2Width, propCellHeight);
+        doc.rect(margin + propCol1Width + propCol2Width, propTableY, propCol3Width, propCellHeight);
+        doc.rect(margin + propCol1Width + propCol2Width + propCol3Width, propTableY, propCol4Width, propCellHeight);
+
+        const propField1 = new doc.AcroFormTextField();
+        propField1.fieldName = `client2_ben_trust_${trustIndex}_property_asset_type_${i}`;
+        propField1.Rect = [margin + 0.3, propTableY + 0.3, propCol1Width - 0.6, propCellHeight - 0.6];
+        propField1.fontSize = 7;
+        propField1.textColor = [0, 0, 0];
+        propField1.borderStyle = 'none';
+        doc.addField(propField1);
+
+        const propField2 = new doc.AcroFormTextField();
+        propField2.fieldName = `client2_ben_trust_${trustIndex}_property_estimated_value_${i}`;
+        propField2.Rect = [margin + propCol1Width + 0.3, propTableY + 0.3, propCol2Width - 0.6, propCellHeight - 0.6];
+        propField2.fontSize = 7;
+        propField2.textColor = [0, 0, 0];
+        propField2.borderStyle = 'none';
+        doc.addField(propField2);
+
+        const propField3 = new doc.AcroFormTextField();
+        propField3.fieldName = `client2_ben_trust_${trustIndex}_property_book_value_${i}`;
+        propField3.Rect = [margin + propCol1Width + propCol2Width + 0.3, propTableY + 0.3, propCol3Width - 0.6, propCellHeight - 0.6];
+        propField3.fontSize = 7;
+        propField3.textColor = [0, 0, 0];
+        propField3.borderStyle = 'none';
+        doc.addField(propField3);
+
+        const propField4 = new doc.AcroFormTextField();
+        propField4.fieldName = `client2_ben_trust_${trustIndex}_property_other_info_${i}`;
+        propField4.Rect = [margin + propCol1Width + propCol2Width + propCol3Width + 0.3, propTableY + 0.3, propCol4Width - 0.6, propCellHeight - 0.6];
+        propField4.fontSize = 7;
+        propField4.textColor = [0, 0, 0];
+        propField4.borderStyle = 'none';
+        doc.addField(propField4);
+
+        propTableY += propCellHeight;
+      }
+
+      yPosition = propTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Distribution Rules:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      const distField = new doc.AcroFormTextField();
+      distField.fieldName = `client2_ben_trust_${trustIndex}_distribution_rules`;
+      distField.Rect = [margin, yPosition, fieldWidth, 25];
+      distField.multiline = true;
+      distField.fontSize = 9;
+      distField.textColor = [0, 0, 0];
+      doc.addField(distField);
+
+      yPosition += 30;
+    }
+  }
+
   yPosition += 12;
   if (yPosition > 270) {
     doc.addPage();

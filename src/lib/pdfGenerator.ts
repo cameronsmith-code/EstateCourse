@@ -220,15 +220,20 @@ export const generatePDF = (formData: FormData) => {
 
       doc.text(`Financially Independent: ${child.independent === 'yes' ? 'Yes' : child.independent === 'no' ? 'No' : ''}`, margin, yPosition);
       yPosition += 4;
-      doc.text(`Long-term Medications: ${child.medications === 'yes' ? 'Yes' : child.medications === 'no' ? 'No' : ''}`, margin, yPosition);
-      yPosition += 4;
-      doc.text(`Allergies: ${child.allergies === 'yes' ? 'Yes' : child.allergies === 'no' ? 'No' : ''}`, margin, yPosition);
-      yPosition += 4;
-      doc.text(`Medical Issues/Needs: ${child.medicalIssues === 'yes' ? 'Yes' : child.medicalIssues === 'no' ? 'No' : ''}`, margin, yPosition);
 
-      yPosition += 10;
+      if (child.independent !== 'yes') {
+        doc.text(`Long-term Medications: ${child.medications === 'yes' ? 'Yes' : child.medications === 'no' ? 'No' : ''}`, margin, yPosition);
+        yPosition += 4;
+        doc.text(`Allergies: ${child.allergies === 'yes' ? 'Yes' : child.allergies === 'no' ? 'No' : ''}`, margin, yPosition);
+        yPosition += 4;
+        doc.text(`Medical Issues/Needs: ${child.medicalIssues === 'yes' ? 'Yes' : child.medicalIssues === 'no' ? 'No' : ''}`, margin, yPosition);
 
-      if (child.medications === 'yes' || child.allergies === 'yes' || child.medicalIssues === 'yes') {
+        yPosition += 10;
+      } else {
+        yPosition += 6;
+      }
+
+      if (child.independent !== 'yes' && (child.medications === 'yes' || child.allergies === 'yes' || child.medicalIssues === 'yes')) {
         yPosition += 3;
         doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
@@ -554,98 +559,100 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition = eduTableY + 10;
 
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${childName} - Digital Identity and Access`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-
-      yPosition += 4;
-      doc.setFontSize(8);
-      doc.text('Modern parenting includes school portals, social accounts and gaming platforms that guardians must', margin, yPosition);
-      yPosition += 3;
-      doc.text('manage. Provide the information that you believe would best assist a potential guardian:', margin, yPosition);
-
-      yPosition += 6;
-
-      const digitalColWidths = [fieldWidth * 0.22, fieldWidth * 0.26, fieldWidth * 0.26, fieldWidth * 0.26];
-      const digitalCellHeight = 5;
-      let digitalTableY = yPosition;
-
-      const digitalRows = [
-        { label: 'Digital Asset:', col2: 'Login/Portal URL:', col3: 'Username:', col4: 'Password/PIN:' },
-        { label: 'School Portal:' },
-        { label: 'Child\'s Smartphone / Tablet:' },
-        { label: 'Gaming Accounts (Steam/Epic):' },
-        { label: 'Social Media (Private/Public):' },
-        { label: 'Cloud Photo Storage:' },
-        { label: 'Other:' },
-        { label: 'Other:' },
-        { label: 'Other:' },
-      ];
-
-      digitalRows.forEach((row, rowIndex) => {
-        if (digitalTableY > 275) {
+      if (child.independent !== 'yes') {
+        if (yPosition > 250) {
           doc.addPage();
-          digitalTableY = 12;
+          yPosition = 12;
         }
 
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-        doc.setFontSize(7);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${childName} - Digital Identity and Access`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
 
-        const digitalCol1X = margin;
-        const digitalCol2X = margin + digitalColWidths[0];
-        const digitalCol3X = margin + digitalColWidths[0] + digitalColWidths[1];
-        const digitalCol4X = margin + digitalColWidths[0] + digitalColWidths[1] + digitalColWidths[2];
+        yPosition += 4;
+        doc.setFontSize(8);
+        doc.text('Modern parenting includes school portals, social accounts and gaming platforms that guardians must', margin, yPosition);
+        yPosition += 3;
+        doc.text('manage. Provide the information that you believe would best assist a potential guardian:', margin, yPosition);
 
-        doc.rect(digitalCol1X, digitalTableY, digitalColWidths[0], digitalCellHeight);
-        doc.rect(digitalCol2X, digitalTableY, digitalColWidths[1], digitalCellHeight);
-        doc.rect(digitalCol3X, digitalTableY, digitalColWidths[2], digitalCellHeight);
-        doc.rect(digitalCol4X, digitalTableY, digitalColWidths[3], digitalCellHeight);
+        yPosition += 6;
 
-        if (rowIndex === 0) {
-          doc.text('Digital Asset:', digitalCol1X + 0.3, digitalTableY + 3.5);
-          doc.text('Login/Portal URL:', digitalCol2X + 0.3, digitalTableY + 3.5);
-          doc.text('Username:', digitalCol3X + 0.3, digitalTableY + 3.5);
-          doc.text('Password/PIN:', digitalCol4X + 0.3, digitalTableY + 3.5);
-        } else {
-          doc.text(row.label, digitalCol1X + 0.3, digitalTableY + 3.5);
+        const digitalColWidths = [fieldWidth * 0.22, fieldWidth * 0.26, fieldWidth * 0.26, fieldWidth * 0.26];
+        const digitalCellHeight = 5;
+        let digitalTableY = yPosition;
 
-          const digitalField1 = new doc.AcroFormTextField();
-          digitalField1.fieldName = `child${index + 1}_digital_${rowIndex}_col2`;
-          digitalField1.Rect = [digitalCol2X + 0.2, digitalTableY + 0.2, digitalColWidths[1] - 0.4, digitalCellHeight - 0.4];
-          digitalField1.fontSize = 6;
-          digitalField1.textColor = [0, 0, 0];
-          digitalField1.borderStyle = 'none';
-          doc.addField(digitalField1);
+        const digitalRows = [
+          { label: 'Digital Asset:', col2: 'Login/Portal URL:', col3: 'Username:', col4: 'Password/PIN:' },
+          { label: 'School Portal:' },
+          { label: 'Child\'s Smartphone / Tablet:' },
+          { label: 'Gaming Accounts (Steam/Epic):' },
+          { label: 'Social Media (Private/Public):' },
+          { label: 'Cloud Photo Storage:' },
+          { label: 'Other:' },
+          { label: 'Other:' },
+          { label: 'Other:' },
+        ];
 
-          const digitalField2 = new doc.AcroFormTextField();
-          digitalField2.fieldName = `child${index + 1}_digital_${rowIndex}_col3`;
-          digitalField2.Rect = [digitalCol3X + 0.2, digitalTableY + 0.2, digitalColWidths[2] - 0.4, digitalCellHeight - 0.4];
-          digitalField2.fontSize = 6;
-          digitalField2.textColor = [0, 0, 0];
-          digitalField2.borderStyle = 'none';
-          doc.addField(digitalField2);
+        digitalRows.forEach((row, rowIndex) => {
+          if (digitalTableY > 275) {
+            doc.addPage();
+            digitalTableY = 12;
+          }
 
-          const digitalField3 = new doc.AcroFormTextField();
-          digitalField3.fieldName = `child${index + 1}_digital_${rowIndex}_col4`;
-          digitalField3.Rect = [digitalCol4X + 0.2, digitalTableY + 0.2, digitalColWidths[3] - 0.4, digitalCellHeight - 0.4];
-          digitalField3.fontSize = 6;
-          digitalField3.textColor = [0, 0, 0];
-          digitalField3.borderStyle = 'none';
-          doc.addField(digitalField3);
-        }
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(7);
 
-        digitalTableY += digitalCellHeight;
-      });
+          const digitalCol1X = margin;
+          const digitalCol2X = margin + digitalColWidths[0];
+          const digitalCol3X = margin + digitalColWidths[0] + digitalColWidths[1];
+          const digitalCol4X = margin + digitalColWidths[0] + digitalColWidths[1] + digitalColWidths[2];
 
-      yPosition = digitalTableY + 10;
+          doc.rect(digitalCol1X, digitalTableY, digitalColWidths[0], digitalCellHeight);
+          doc.rect(digitalCol2X, digitalTableY, digitalColWidths[1], digitalCellHeight);
+          doc.rect(digitalCol3X, digitalTableY, digitalColWidths[2], digitalCellHeight);
+          doc.rect(digitalCol4X, digitalTableY, digitalColWidths[3], digitalCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Digital Asset:', digitalCol1X + 0.3, digitalTableY + 3.5);
+            doc.text('Login/Portal URL:', digitalCol2X + 0.3, digitalTableY + 3.5);
+            doc.text('Username:', digitalCol3X + 0.3, digitalTableY + 3.5);
+            doc.text('Password/PIN:', digitalCol4X + 0.3, digitalTableY + 3.5);
+          } else {
+            doc.text(row.label, digitalCol1X + 0.3, digitalTableY + 3.5);
+
+            const digitalField1 = new doc.AcroFormTextField();
+            digitalField1.fieldName = `child${index + 1}_digital_${rowIndex}_col2`;
+            digitalField1.Rect = [digitalCol2X + 0.2, digitalTableY + 0.2, digitalColWidths[1] - 0.4, digitalCellHeight - 0.4];
+            digitalField1.fontSize = 6;
+            digitalField1.textColor = [0, 0, 0];
+            digitalField1.borderStyle = 'none';
+            doc.addField(digitalField1);
+
+            const digitalField2 = new doc.AcroFormTextField();
+            digitalField2.fieldName = `child${index + 1}_digital_${rowIndex}_col3`;
+            digitalField2.Rect = [digitalCol3X + 0.2, digitalTableY + 0.2, digitalColWidths[2] - 0.4, digitalCellHeight - 0.4];
+            digitalField2.fontSize = 6;
+            digitalField2.textColor = [0, 0, 0];
+            digitalField2.borderStyle = 'none';
+            doc.addField(digitalField2);
+
+            const digitalField3 = new doc.AcroFormTextField();
+            digitalField3.fieldName = `child${index + 1}_digital_${rowIndex}_col4`;
+            digitalField3.Rect = [digitalCol4X + 0.2, digitalTableY + 0.2, digitalColWidths[3] - 0.4, digitalCellHeight - 0.4];
+            digitalField3.fontSize = 6;
+            digitalField3.textColor = [0, 0, 0];
+            digitalField3.borderStyle = 'none';
+            doc.addField(digitalField3);
+          }
+
+          digitalTableY += digitalCellHeight;
+        });
+
+        yPosition = digitalTableY + 10;
+      }
     });
   }
 

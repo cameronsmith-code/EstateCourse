@@ -342,222 +342,226 @@ export const generatePDF = (formData: FormData) => {
         }
       }
 
-      const cellHeight = 6;
-      const colWidths = [fieldWidth * 0.27, fieldWidth * 0.24, fieldWidth * 0.24, fieldWidth * 0.25];
+      if (child.independent !== 'yes') {
+        const cellHeight = 6;
+        const colWidths = [fieldWidth * 0.27, fieldWidth * 0.24, fieldWidth * 0.24, fieldWidth * 0.25];
 
-      if (yPosition > 270) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
-      const healthRows = [
-        { label: 'Detail', value: 'Information/Provider' },
-        { label: 'Family Doctor:', value: '' },
-        { label: 'Dentist:', value: '' },
-        { label: 'Orthodontist:', value: '' },
-        ...(child.medications === 'yes' ? [{ label: 'Current Medications/Dosage:', value: '' }] : []),
-        { label: 'Blood Type:', value: '' },
-        { label: 'Psychologist/Therapist:', value: '' },
-        { label: 'Health Card Number:', value: '' },
-        ...(child.allergies === 'yes' ? [{ label: 'Allergies:', value: '' }] : []),
-        ...(child.medicalIssues === 'yes' ? [{ label: 'Past Health Issues/Concerns:', value: '' }] : []),
-        { label: 'Health Insurance Policy Number (if applicable):', value: '' },
-        { label: 'Insurance Policies:', value: '' },
-      ];
-
-      let tableY = yPosition;
-
-      healthRows.forEach((row, rowIndex) => {
-        if (tableY > 275) {
+        if (yPosition > 270) {
           doc.addPage();
-          tableY = 12;
+          yPosition = 12;
         }
 
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-        doc.setFontSize(8);
+        const healthRows = [
+          { label: 'Detail', value: 'Information/Provider' },
+          { label: 'Family Doctor:', value: '' },
+          { label: 'Dentist:', value: '' },
+          { label: 'Orthodontist:', value: '' },
+          ...(child.medications === 'yes' ? [{ label: 'Current Medications/Dosage:', value: '' }] : []),
+          { label: 'Blood Type:', value: '' },
+          { label: 'Psychologist/Therapist:', value: '' },
+          { label: 'Health Card Number:', value: '' },
+          ...(child.allergies === 'yes' ? [{ label: 'Allergies:', value: '' }] : []),
+          ...(child.medicalIssues === 'yes' ? [{ label: 'Past Health Issues/Concerns:', value: '' }] : []),
+          { label: 'Health Insurance Policy Number (if applicable):', value: '' },
+          { label: 'Insurance Policies:', value: '' },
+        ];
 
-        const col1X = margin;
-        const col2X = margin + colWidths[0];
-        const col3X = margin + colWidths[0] + colWidths[1];
-        const col4X = margin + colWidths[0] + colWidths[1] + colWidths[2];
+        let tableY = yPosition;
 
-        doc.rect(col1X, tableY, colWidths[0], cellHeight);
-        doc.rect(col2X, tableY, colWidths[1], cellHeight);
-        doc.rect(col3X, tableY, colWidths[2], cellHeight);
-        doc.rect(col4X, tableY, colWidths[3], cellHeight);
-
-        if (rowIndex === 0) {
-          doc.text('Detail:', col1X + 0.5, tableY + 4);
-          doc.text('Information/Provider:', col2X + 0.5, tableY + 4);
-          doc.text('Location of Records:', col3X + 0.5, tableY + 4);
-          doc.text('Other Details:', col4X + 0.5, tableY + 4);
-        } else {
-          doc.setFont(undefined, 'normal');
-          doc.text(row.label, col1X + 0.5, tableY + 4);
-
-          const skipFieldsForShared = (fieldRow: string) => {
-            if (index > 0) {
-              if (fieldRow === 'Family Doctor:' && formData.sameMedicalDoctor === 'yes') return true;
-              if (fieldRow === 'Dentist:' && formData.sameDentist === 'yes') return true;
-              if (fieldRow === 'Orthodontist:' && formData.sameOrthodontist === 'yes') return true;
-            }
-            return false;
-          };
-
-          if (skipFieldsForShared(row.label)) {
-            const firstChildName = formData.childrenData?.[0]?.name || 'Child 1';
-            doc.text(`(See ${firstChildName})`, col2X + 0.5, tableY + 4);
-          } else {
-            const field1 = new doc.AcroFormTextField();
-            field1.fieldName = `child${index + 1}_health_${rowIndex}_col2`;
-            field1.Rect = [col2X + 0.3, tableY + 0.3, colWidths[1] - 0.6, cellHeight - 0.6];
-            field1.fontSize = 7;
-            field1.textColor = [0, 0, 0];
-            field1.borderStyle = 'none';
-            doc.addField(field1);
+        healthRows.forEach((row, rowIndex) => {
+          if (tableY > 275) {
+            doc.addPage();
+            tableY = 12;
           }
 
-          const field2 = new doc.AcroFormTextField();
-          field2.fieldName = `child${index + 1}_health_${rowIndex}_col3`;
-          field2.Rect = [col3X + 0.3, tableY + 0.3, colWidths[2] - 0.6, cellHeight - 0.6];
-          field2.fontSize = 7;
-          field2.textColor = [0, 0, 0];
-          field2.borderStyle = 'none';
-          doc.addField(field2);
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
 
-          const field3 = new doc.AcroFormTextField();
-          field3.fieldName = `child${index + 1}_health_${rowIndex}_col4`;
-          field3.Rect = [col4X + 0.3, tableY + 0.3, colWidths[3] - 0.6, cellHeight - 0.6];
-          field3.fontSize = 7;
-          field3.textColor = [0, 0, 0];
-          field3.borderStyle = 'none';
-          doc.addField(field3);
+          const col1X = margin;
+          const col2X = margin + colWidths[0];
+          const col3X = margin + colWidths[0] + colWidths[1];
+          const col4X = margin + colWidths[0] + colWidths[1] + colWidths[2];
+
+          doc.rect(col1X, tableY, colWidths[0], cellHeight);
+          doc.rect(col2X, tableY, colWidths[1], cellHeight);
+          doc.rect(col3X, tableY, colWidths[2], cellHeight);
+          doc.rect(col4X, tableY, colWidths[3], cellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Detail:', col1X + 0.5, tableY + 4);
+            doc.text('Information/Provider:', col2X + 0.5, tableY + 4);
+            doc.text('Location of Records:', col3X + 0.5, tableY + 4);
+            doc.text('Other Details:', col4X + 0.5, tableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, col1X + 0.5, tableY + 4);
+
+            const skipFieldsForShared = (fieldRow: string) => {
+              if (index > 0) {
+                if (fieldRow === 'Family Doctor:' && formData.sameMedicalDoctor === 'yes') return true;
+                if (fieldRow === 'Dentist:' && formData.sameDentist === 'yes') return true;
+                if (fieldRow === 'Orthodontist:' && formData.sameOrthodontist === 'yes') return true;
+              }
+              return false;
+            };
+
+            if (skipFieldsForShared(row.label)) {
+              const firstChildName = formData.childrenData?.[0]?.name || 'Child 1';
+              doc.text(`(See ${firstChildName})`, col2X + 0.5, tableY + 4);
+            } else {
+              const field1 = new doc.AcroFormTextField();
+              field1.fieldName = `child${index + 1}_health_${rowIndex}_col2`;
+              field1.Rect = [col2X + 0.3, tableY + 0.3, colWidths[1] - 0.6, cellHeight - 0.6];
+              field1.fontSize = 7;
+              field1.textColor = [0, 0, 0];
+              field1.borderStyle = 'none';
+              doc.addField(field1);
+            }
+
+            const field2 = new doc.AcroFormTextField();
+            field2.fieldName = `child${index + 1}_health_${rowIndex}_col3`;
+            field2.Rect = [col3X + 0.3, tableY + 0.3, colWidths[2] - 0.6, cellHeight - 0.6];
+            field2.fontSize = 7;
+            field2.textColor = [0, 0, 0];
+            field2.borderStyle = 'none';
+            doc.addField(field2);
+
+            const field3 = new doc.AcroFormTextField();
+            field3.fieldName = `child${index + 1}_health_${rowIndex}_col4`;
+            field3.Rect = [col4X + 0.3, tableY + 0.3, colWidths[3] - 0.6, cellHeight - 0.6];
+            field3.fontSize = 7;
+            field3.textColor = [0, 0, 0];
+            field3.borderStyle = 'none';
+            doc.addField(field3);
+          }
+
+          tableY += cellHeight;
+        });
+
+        yPosition = tableY + 8;
+
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 12;
         }
-
-        tableY += cellHeight;
-      });
-
-      yPosition = tableY + 8;
-
-      if (yPosition > 270) {
-        doc.addPage();
-        yPosition = 12;
       }
 
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${childName} - Educational and Extra Curricular Activities`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
+      if (child.independent !== 'yes') {
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${childName} - Educational and Extra Curricular Activities`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
 
-      yPosition += 6;
+        yPosition += 6;
 
-      const eduColWidths = [fieldWidth * 0.22, fieldWidth * 0.26, fieldWidth * 0.26, fieldWidth * 0.26];
-      const eduCellHeight = 5;
-      let eduTableY = yPosition;
+        const eduColWidths = [fieldWidth * 0.22, fieldWidth * 0.26, fieldWidth * 0.26, fieldWidth * 0.26];
+        const eduCellHeight = 5;
+        let eduTableY = yPosition;
 
-      const eduRows = [
-        { label: 'Category:', col2: 'Institution/Instructor/Club', col3: 'Notes/Preferences', col4: 'Other' },
-        { label: 'School:' },
-        { label: '' },
-        { label: '' },
-        { label: '' },
-        { label: 'Special Education Needs:' },
-        { label: '' },
-        { label: '' },
-        { label: '' },
-        { label: 'Sports Clubs/Lessons:' },
-        { label: '' },
-        { label: '' },
-        { label: '' },
-        { label: 'Music Clubs/Lessons:' },
-        { label: '' },
-        { label: '' },
-        { label: '' },
-        { label: 'Tutoring:' },
-        { label: '' },
-        { label: '' },
-        { label: '' },
-        { label: 'Summer Camps:' },
-        { label: '' },
-        { label: '' },
-        { label: '' },
-        { label: 'Other:' },
-        { label: '' },
-        { label: '' },
-        { label: '' },
-      ];
+        const eduRows = [
+          { label: 'Category:', col2: 'Institution/Instructor/Club', col3: 'Notes/Preferences', col4: 'Other' },
+          { label: 'School:' },
+          { label: '' },
+          { label: '' },
+          { label: '' },
+          { label: 'Special Education Needs:' },
+          { label: '' },
+          { label: '' },
+          { label: '' },
+          { label: 'Sports Clubs/Lessons:' },
+          { label: '' },
+          { label: '' },
+          { label: '' },
+          { label: 'Music Clubs/Lessons:' },
+          { label: '' },
+          { label: '' },
+          { label: '' },
+          { label: 'Tutoring:' },
+          { label: '' },
+          { label: '' },
+          { label: '' },
+          { label: 'Summer Camps:' },
+          { label: '' },
+          { label: '' },
+          { label: '' },
+          { label: 'Other:' },
+          { label: '' },
+          { label: '' },
+          { label: '' },
+        ];
 
-      eduRows.forEach((row, rowIndex) => {
-        if (eduTableY > 275) {
-          doc.addPage();
-          eduTableY = 12;
-        }
+        eduRows.forEach((row, rowIndex) => {
+          if (eduTableY > 275) {
+            doc.addPage();
+            eduTableY = 12;
+          }
 
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-        doc.setFontSize(7);
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(7);
 
-        const eduCol1X = margin;
-        const eduCol2X = margin + eduColWidths[0];
-        const eduCol3X = margin + eduColWidths[0] + eduColWidths[1];
-        const eduCol4X = margin + eduColWidths[0] + eduColWidths[1] + eduColWidths[2];
+          const eduCol1X = margin;
+          const eduCol2X = margin + eduColWidths[0];
+          const eduCol3X = margin + eduColWidths[0] + eduColWidths[1];
+          const eduCol4X = margin + eduColWidths[0] + eduColWidths[1] + eduColWidths[2];
 
-        doc.rect(eduCol1X, eduTableY, eduColWidths[0], eduCellHeight);
-        doc.rect(eduCol2X, eduTableY, eduColWidths[1], eduCellHeight);
-        doc.rect(eduCol3X, eduTableY, eduColWidths[2], eduCellHeight);
-        doc.rect(eduCol4X, eduTableY, eduColWidths[3], eduCellHeight);
+          doc.rect(eduCol1X, eduTableY, eduColWidths[0], eduCellHeight);
+          doc.rect(eduCol2X, eduTableY, eduColWidths[1], eduCellHeight);
+          doc.rect(eduCol3X, eduTableY, eduColWidths[2], eduCellHeight);
+          doc.rect(eduCol4X, eduTableY, eduColWidths[3], eduCellHeight);
 
-        if (rowIndex === 0) {
-          doc.text('Category:', eduCol1X + 0.3, eduTableY + 3.5);
-          doc.text('Institution/Instructor/Club:', eduCol2X + 0.3, eduTableY + 3.5);
-          doc.text('Notes/Preferences:', eduCol3X + 0.3, eduTableY + 3.5);
-          doc.text('Other:', eduCol4X + 0.3, eduTableY + 3.5);
-        } else {
-          doc.text(row.label, eduCol1X + 0.3, eduTableY + 3.5);
+          if (rowIndex === 0) {
+            doc.text('Category:', eduCol1X + 0.3, eduTableY + 3.5);
+            doc.text('Institution/Instructor/Club:', eduCol2X + 0.3, eduTableY + 3.5);
+            doc.text('Notes/Preferences:', eduCol3X + 0.3, eduTableY + 3.5);
+            doc.text('Other:', eduCol4X + 0.3, eduTableY + 3.5);
+          } else {
+            doc.text(row.label, eduCol1X + 0.3, eduTableY + 3.5);
 
-          const activityKey = [
-            'school',
-            'specialEd',
-            'sports',
-            'music',
-            'tutoring',
-            'camps',
-            'other1',
-            'other2',
-          ][rowIndex - 1];
+            const activityKey = [
+              'school',
+              'specialEd',
+              'sports',
+              'music',
+              'tutoring',
+              'camps',
+              'other1',
+              'other2',
+            ][rowIndex - 1];
 
-          const eduField1 = new doc.AcroFormTextField();
-          eduField1.fieldName = `child${index + 1}_edu_${rowIndex}_col2`;
-          eduField1.Rect = [eduCol2X + 0.2, eduTableY + 0.2, eduColWidths[1] - 0.4, eduCellHeight - 0.4];
-          eduField1.fontSize = 6;
-          eduField1.textColor = [0, 0, 0];
-          eduField1.borderStyle = 'none';
-          doc.addField(eduField1);
+            const eduField1 = new doc.AcroFormTextField();
+            eduField1.fieldName = `child${index + 1}_edu_${rowIndex}_col2`;
+            eduField1.Rect = [eduCol2X + 0.2, eduTableY + 0.2, eduColWidths[1] - 0.4, eduCellHeight - 0.4];
+            eduField1.fontSize = 6;
+            eduField1.textColor = [0, 0, 0];
+            eduField1.borderStyle = 'none';
+            doc.addField(eduField1);
 
-          const eduField2 = new doc.AcroFormTextField();
-          eduField2.fieldName = `child${index + 1}_edu_${rowIndex}_col3`;
-          eduField2.Rect = [eduCol3X + 0.2, eduTableY + 0.2, eduColWidths[2] - 0.4, eduCellHeight - 0.4];
-          eduField2.fontSize = 6;
-          eduField2.textColor = [0, 0, 0];
-          eduField2.borderStyle = 'none';
-          doc.addField(eduField2);
+            const eduField2 = new doc.AcroFormTextField();
+            eduField2.fieldName = `child${index + 1}_edu_${rowIndex}_col3`;
+            eduField2.Rect = [eduCol3X + 0.2, eduTableY + 0.2, eduColWidths[2] - 0.4, eduCellHeight - 0.4];
+            eduField2.fontSize = 6;
+            eduField2.textColor = [0, 0, 0];
+            eduField2.borderStyle = 'none';
+            doc.addField(eduField2);
 
-          const eduField3 = new doc.AcroFormTextField();
-          eduField3.fieldName = `child${index + 1}_edu_${rowIndex}_col4`;
-          eduField3.Rect = [eduCol4X + 0.2, eduTableY + 0.2, eduColWidths[3] - 0.4, eduCellHeight - 0.4];
-          eduField3.fontSize = 6;
-          eduField3.textColor = [0, 0, 0];
-          eduField3.borderStyle = 'none';
-          doc.addField(eduField3);
-        }
+            const eduField3 = new doc.AcroFormTextField();
+            eduField3.fieldName = `child${index + 1}_edu_${rowIndex}_col4`;
+            eduField3.Rect = [eduCol4X + 0.2, eduTableY + 0.2, eduColWidths[3] - 0.4, eduCellHeight - 0.4];
+            eduField3.fontSize = 6;
+            eduField3.textColor = [0, 0, 0];
+            eduField3.borderStyle = 'none';
+            doc.addField(eduField3);
+          }
 
-        eduTableY += eduCellHeight;
-      });
+          eduTableY += eduCellHeight;
+        });
 
-      yPosition = eduTableY + 10;
+        yPosition = eduTableY + 10;
+      }
 
       if (child.independent !== 'yes') {
         if (yPosition > 250) {

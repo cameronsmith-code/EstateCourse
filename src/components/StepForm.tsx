@@ -1002,7 +1002,7 @@ export default function StepForm({
                         {index === debtsData.length - 1 && (
                           <div className="mt-6 pt-6 border-t border-gray-600">
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Do you have any other outstanding debts or credit cards?
+                              Do you have any other outstanding debts, not including credit cards?
                             </label>
                             <div className="flex gap-4">
                               <button
@@ -1150,6 +1150,150 @@ export default function StepForm({
                                       type="text"
                                       value={card.otherParties || ''}
                                       onChange={(e) => handleCreditCardChange(index, 'otherParties', e.target.value)}
+                                      placeholder="Optional"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {(() => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+
+                if (!hasSpouse) return null;
+
+                const hasClient2CreditCards = answers['client2HasCreditCards'];
+                const client2CreditCardCount = answers['client2CreditCardCount'] || '0';
+                const client2CreditCardsData = (answers['client2CreditCardsData'] as Array<Record<string, string>>) || [];
+
+                const handleClient2CreditCardChange = (index: number, field: string, value: string) => {
+                  const updated = [...client2CreditCardsData];
+                  if (!updated[index]) {
+                    updated[index] = {};
+                  }
+                  updated[index][field] = value;
+                  onAnswerChange('client2CreditCardsData', updated);
+                };
+
+                return (
+                  <div className="space-y-6 mt-8 pt-8 border-t border-gray-600">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {client2Name}, do you have any credit cards?
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="client2HasCreditCards"
+                            value="yes"
+                            checked={hasClient2CreditCards === 'yes'}
+                            onChange={(e) => onAnswerChange('client2HasCreditCards', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">Yes</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="client2HasCreditCards"
+                            value="no"
+                            checked={hasClient2CreditCards === 'no'}
+                            onChange={(e) => {
+                              onAnswerChange('client2HasCreditCards', e.target.value);
+                              onAnswerChange('client2CreditCardCount', '0');
+                              onAnswerChange('client2CreditCardsData', []);
+                            }}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">No</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {hasClient2CreditCards === 'yes' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            How many credit cards do you have?
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={client2CreditCardCount}
+                            onChange={(e) => {
+                              const count = parseInt(e.target.value) || 0;
+                              onAnswerChange('client2CreditCardCount', e.target.value);
+                              const newData = Array(count).fill(null).map((_, i) => client2CreditCardsData[i] || {});
+                              onAnswerChange('client2CreditCardsData', newData);
+                            }}
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        {parseInt(client2CreditCardCount) > 0 && client2CreditCardsData.length > 0 && (
+                          <div className="space-y-4 mt-6">
+                            <h3 className="text-lg font-semibold text-white">Credit Card Details</h3>
+                            {client2CreditCardsData.map((card, index) => (
+                              <div key={index} className="border border-gray-600 rounded-lg p-4 bg-gray-700">
+                                <h4 className="text-md font-semibold text-white mb-4">Credit Card {index + 1}</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Credit Card Company
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={card.company || ''}
+                                      onChange={(e) => handleClient2CreditCardChange(index, 'company', e.target.value)}
+                                      placeholder="e.g., Visa, MasterCard, Amex"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Last 4 Digits of the Card
+                                    </label>
+                                    <input
+                                      type="text"
+                                      maxLength={4}
+                                      value={card.lastFourDigits || ''}
+                                      onChange={(e) => handleClient2CreditCardChange(index, 'lastFourDigits', e.target.value)}
+                                      placeholder="1234"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Expiry Date
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={card.expiryDate || ''}
+                                      onChange={(e) => handleClient2CreditCardChange(index, 'expiryDate', e.target.value)}
+                                      placeholder="MM/YY"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Other parties on this card (if applicable)
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={card.otherParties || ''}
+                                      onChange={(e) => handleClient2CreditCardChange(index, 'otherParties', e.target.value)}
                                       placeholder="Optional"
                                       className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />

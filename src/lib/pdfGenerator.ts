@@ -88,6 +88,14 @@ interface FormData {
     expiryDate?: string;
     otherParties?: string;
   }>;
+  client2HasCreditCards?: string;
+  client2CreditCardCount?: string;
+  client2CreditCardsData?: Array<{
+    company?: string;
+    lastFourDigits?: string;
+    expiryDate?: string;
+    otherParties?: string;
+  }>;
   client1HasWorkBenefits?: string;
   client2HasWorkBenefits?: string;
   client1HasLifeInsurance?: string;
@@ -3048,6 +3056,139 @@ export const generatePDF = (formData: FormData) => {
     doc.setFontSize(10);
     doc.text(`${client1Name} indicated that they have no credit cards.`, margin, yPosition);
     yPosition += 15;
+  }
+
+  if (formData.hasSpouse === 'yes') {
+    if (formData.client2HasCreditCards === 'yes' && formData.client2CreditCardsData && formData.client2CreditCardsData.length > 0) {
+      yPosition += 12;
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      const client2Name = formData.spouseName || 'Client 2';
+
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${client2Name}'s Credit Cards`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 10;
+
+      const cellHeight = 6;
+      const colWidths = [
+        fieldWidth * 0.28,
+        fieldWidth * 0.22,
+        fieldWidth * 0.18,
+        fieldWidth * 0.32
+      ];
+
+      let ccTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(200, 200, 200);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      const col1X = margin;
+      const col2X = margin + colWidths[0];
+      const col3X = margin + colWidths[0] + colWidths[1];
+      const col4X = margin + colWidths[0] + colWidths[1] + colWidths[2];
+
+      doc.rect(col1X, ccTableY, colWidths[0], cellHeight);
+      doc.rect(col2X, ccTableY, colWidths[1], cellHeight);
+      doc.rect(col3X, ccTableY, colWidths[2], cellHeight);
+      doc.rect(col4X, ccTableY, colWidths[3], cellHeight);
+
+      doc.text('Credit Card Company:', col1X + 0.5, ccTableY + 4);
+      doc.text('Last 4 Digits of the Card:', col2X + 0.5, ccTableY + 4);
+      doc.text('Expiry Date:', col3X + 0.5, ccTableY + 4);
+      doc.text('Other parties on this card (if applicable):', col4X + 0.5, ccTableY + 4);
+
+      ccTableY += cellHeight;
+
+      formData.client2CreditCardsData.forEach((card, index) => {
+        if (ccTableY > 275) {
+          doc.addPage();
+          ccTableY = 12;
+        }
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8);
+
+        doc.rect(col1X, ccTableY, colWidths[0], cellHeight);
+        doc.rect(col2X, ccTableY, colWidths[1], cellHeight);
+        doc.rect(col3X, ccTableY, colWidths[2], cellHeight);
+        doc.rect(col4X, ccTableY, colWidths[3], cellHeight);
+
+        const ccField1 = new doc.AcroFormTextField();
+        ccField1.fieldName = `client2_credit_card_${index + 1}_company`;
+        ccField1.Rect = [col1X + 0.3, ccTableY + 0.3, colWidths[0] - 0.6, cellHeight - 0.6];
+        ccField1.fontSize = 7;
+        ccField1.textColor = [0, 0, 0];
+        ccField1.borderStyle = 'none';
+        if (card.company) {
+          ccField1.value = card.company;
+        }
+        doc.addField(ccField1);
+
+        const ccField2 = new doc.AcroFormTextField();
+        ccField2.fieldName = `client2_credit_card_${index + 1}_last_four`;
+        ccField2.Rect = [col2X + 0.3, ccTableY + 0.3, colWidths[1] - 0.6, cellHeight - 0.6];
+        ccField2.fontSize = 7;
+        ccField2.textColor = [0, 0, 0];
+        ccField2.borderStyle = 'none';
+        if (card.lastFourDigits) {
+          ccField2.value = card.lastFourDigits;
+        }
+        doc.addField(ccField2);
+
+        const ccField3 = new doc.AcroFormTextField();
+        ccField3.fieldName = `client2_credit_card_${index + 1}_expiry`;
+        ccField3.Rect = [col3X + 0.3, ccTableY + 0.3, colWidths[2] - 0.6, cellHeight - 0.6];
+        ccField3.fontSize = 7;
+        ccField3.textColor = [0, 0, 0];
+        ccField3.borderStyle = 'none';
+        if (card.expiryDate) {
+          ccField3.value = card.expiryDate;
+        }
+        doc.addField(ccField3);
+
+        const ccField4 = new doc.AcroFormTextField();
+        ccField4.fieldName = `client2_credit_card_${index + 1}_other_parties`;
+        ccField4.Rect = [col4X + 0.3, ccTableY + 0.3, colWidths[3] - 0.6, cellHeight - 0.6];
+        ccField4.fontSize = 7;
+        ccField4.textColor = [0, 0, 0];
+        ccField4.borderStyle = 'none';
+        if (card.otherParties) {
+          ccField4.value = card.otherParties;
+        }
+        doc.addField(ccField4);
+
+        ccTableY += cellHeight;
+      });
+
+      yPosition = ccTableY + 15;
+    } else if (formData.client2HasCreditCards === 'no') {
+      yPosition += 12;
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      const client2Name = formData.spouseName || 'Client 2';
+
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${client2Name}'s Credit Cards`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.text(`${client2Name} indicated that they have no credit cards.`, margin, yPosition);
+      yPosition += 15;
+    }
   }
 
   const generateInsuranceChart = (

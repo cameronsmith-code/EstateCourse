@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { Step } from '../lib/steps';
 import FormField from './FormField';
 import VideoPlayer from './VideoPlayer';
@@ -189,61 +189,43 @@ export default function StepForm({
                 }
 
                 return (
-                  <FormField
-                    key={question.key}
-                    question={{ ...question, label: customLabel }}
-                    value={answers[question.key]}
-                    onChange={(value) => onAnswerChange(question.key, value)}
-                  />
+                  <React.Fragment key={question.key}>
+                    <FormField
+                      question={{ ...question, label: customLabel }}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                    {question.key === 'client1HasWill' && answers['client1HasWill'] === 'yes' && (
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          In what jurisdiction was {client1Name}'s will prepared?
+                        </label>
+                        <input
+                          type="text"
+                          value={answers['client1WillJurisdiction'] || ''}
+                          onChange={(e) => onAnswerChange('client1WillJurisdiction', e.target.value)}
+                          placeholder="e.g., Ontario, British Columbia, etc."
+                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    )}
+                    {question.key === 'client2HasWill' && answers['client2HasWill'] === 'yes' && (
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          In what jurisdiction was {client2Name}'s will prepared?
+                        </label>
+                        <input
+                          type="text"
+                          value={answers['client2WillJurisdiction'] || ''}
+                          onChange={(e) => onAnswerChange('client2WillJurisdiction', e.target.value)}
+                          placeholder="e.g., Ontario, British Columbia, etc."
+                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    )}
+                  </React.Fragment>
                 );
               })}
-
-              {(() => {
-                const basicAnswers = allAnswers?.get(1) || {};
-                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
-
-                if (answers['client1HasWill'] === 'yes') {
-                  return (
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        In what jurisdiction was {client1Name}'s will prepared?
-                      </label>
-                      <input
-                        type="text"
-                        value={answers['client1WillJurisdiction'] || ''}
-                        onChange={(e) => onAnswerChange('client1WillJurisdiction', e.target.value)}
-                        placeholder="e.g., Ontario, British Columbia, etc."
-                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-
-              {(() => {
-                const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
-                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
-
-                if (hasSpouse && answers['client2HasWill'] === 'yes') {
-                  return (
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        In what jurisdiction was {client2Name}'s will prepared?
-                      </label>
-                      <input
-                        type="text"
-                        value={answers['client2WillJurisdiction'] || ''}
-                        onChange={(e) => onAnswerChange('client2WillJurisdiction', e.target.value)}
-                        placeholder="e.g., Ontario, British Columbia, etc."
-                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  );
-                }
-                return null;
-              })()}
             </>
           )}
 

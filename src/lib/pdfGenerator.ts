@@ -42,7 +42,9 @@ interface FormData {
   sameOrthodontist?: string;
   childrenData?: ChildData[];
   client1HasWill?: string;
+  client1WillJurisdiction?: string;
   client2HasWill?: string;
+  client2WillJurisdiction?: string;
   willsSameLawyer?: string;
   client1UsesAccountant?: string;
   client2UsesAccountant?: string;
@@ -713,6 +715,25 @@ export const generatePDF = (formData: FormData) => {
   } else if (formData.client1HasWill === 'yes' || formData.client2HasWill === 'yes') {
     const bothHaveWills = formData.client1HasWill === 'yes' && formData.client2HasWill === 'yes';
     const sameLawyer = formData.willsSameLawyer === 'yes';
+
+    if (formData.client1HasWill === 'yes' && formData.client1WillJurisdiction) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`The will was prepared in ${formData.client1WillJurisdiction}.`, margin, yPosition);
+      yPosition += 6;
+    }
+
+    if (formData.client2HasWill === 'yes' && formData.client2WillJurisdiction && hasSpouse) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client2Name}'s will was prepared in ${formData.client2WillJurisdiction}.`, margin, yPosition);
+      yPosition += 6;
+    }
+
+    if ((formData.client1HasWill === 'yes' && formData.client1WillJurisdiction) ||
+        (formData.client2HasWill === 'yes' && formData.client2WillJurisdiction && hasSpouse)) {
+      yPosition += 4;
+    }
 
     if (bothHaveWills && sameLawyer) {
       if (yPosition > 240) {

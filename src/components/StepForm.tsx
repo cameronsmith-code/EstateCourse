@@ -197,6 +197,45 @@ export default function StepForm({
                   />
                 );
               })}
+
+              {answers['client1HasWill'] === 'yes' && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    In what jurisdiction was your will prepared?
+                  </label>
+                  <input
+                    type="text"
+                    value={answers['client1WillJurisdiction'] || ''}
+                    onChange={(e) => onAnswerChange('client1WillJurisdiction', e.target.value)}
+                    placeholder="e.g., Ontario, British Columbia, etc."
+                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+
+              {(() => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
+
+                if (hasSpouse && answers['client2HasWill'] === 'yes') {
+                  return (
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        In what jurisdiction was {client2Name}'s will prepared?
+                      </label>
+                      <input
+                        type="text"
+                        value={answers['client2WillJurisdiction'] || ''}
+                        onChange={(e) => onAnswerChange('client2WillJurisdiction', e.target.value)}
+                        placeholder="e.g., Ontario, British Columbia, etc."
+                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </>
           )}
 

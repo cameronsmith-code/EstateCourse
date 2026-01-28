@@ -906,30 +906,71 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 3 && childCount > 0 && (
-            <div className="space-y-8">
-              {Array.from({ length: childCount }).map((_, index) => (
-                <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                  <h3 className="text-lg font-semibold text-white mb-4">Child {index + 1}</h3>
+          {step.id === 3 && childCount > 0 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+            const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+            const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Child's Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        value={childrenData[index]?.name || ''}
-                        onChange={(e) => handleChildChange(index, 'name', e.target.value)}
-                        placeholder="Enter full name"
-                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
+            return (
+              <div className="space-y-8">
+                {Array.from({ length: childCount }).map((_, index) => (
+                  <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                    <h3 className="text-lg font-semibold text-white mb-4">Child {index + 1}</h3>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Date of Birth *
-                      </label>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Child's Full Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={childrenData[index]?.name || ''}
+                          onChange={(e) => handleChildChange(index, 'name', e.target.value)}
+                          placeholder="Enter full name"
+                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Child's parents names?
+                        </label>
+                        <select
+                          value={childrenData[index]?.parentsOption || ''}
+                          onChange={(e) => handleChildChange(index, 'parentsOption', e.target.value)}
+                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                          <option value="">Select parents</option>
+                          {hasSpouse && (
+                            <option value="both">{client1Name} and {client2Name}</option>
+                          )}
+                          <option value="client1-other">{client1Name} and other</option>
+                          {hasSpouse && (
+                            <option value="client2-other">{client2Name} and other</option>
+                          )}
+                        </select>
+                      </div>
+
+                      {(childrenData[index]?.parentsOption === 'client1-other' || childrenData[index]?.parentsOption === 'client2-other') && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Other parent's name:
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.otherParentName || ''}
+                            onChange={(e) => handleChildChange(index, 'otherParentName', e.target.value)}
+                            placeholder="Enter other parent's name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Date of Birth *
+                        </label>
                       <input
                         type="date"
                         value={childrenData[index]?.dateOfBirth || ''}
@@ -1331,7 +1372,8 @@ export default function StepForm({
                 </div>
               ))}
             </div>
-          )}
+            );
+          })()}
 
           {step.id === 6 && (
             <>

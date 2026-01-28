@@ -3,6 +3,8 @@ import { jsPDF } from 'jspdf';
 interface ChildData {
   name?: string;
   dateOfBirth?: string;
+  parentsOption?: string;
+  otherParentName?: string;
   disabled?: string;
   disabilityTaxCredit?: string;
   disabilityNature?: string;
@@ -366,6 +368,22 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition += 6;
       doc.setFontSize(9);
+
+      if (child.parentsOption) {
+        let parentsText = '';
+        if (child.parentsOption === 'both') {
+          parentsText = `Parents: ${client1Name} and ${client2Name}`;
+        } else if (child.parentsOption === 'client1-other') {
+          parentsText = `Parents: ${client1Name} and ${child.otherParentName || 'Other'}`;
+        } else if (child.parentsOption === 'client2-other') {
+          parentsText = `Parents: ${client2Name} and ${child.otherParentName || 'Other'}`;
+        }
+        if (parentsText) {
+          doc.text(parentsText, margin, yPosition);
+          yPosition += 4;
+        }
+      }
+
       doc.text(`Disabled: ${child.disabled === 'yes' ? 'Yes' : child.disabled === 'no' ? 'No' : ''}`, margin, yPosition);
       yPosition += 4;
 

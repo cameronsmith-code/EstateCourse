@@ -113,6 +113,23 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client1HasPreviousRelationship',
+        label: 'Have you previously been married or in a common law relationship?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1NumberOfPreviousRelationships',
+        label: 'How many previous marriages or common law relationships have you had?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
         key: 'spouseSameAddress',
         label: 'Do they live at the same address?',
         type: 'radio',
@@ -171,6 +188,23 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client2HasPreviousRelationship',
+        label: 'Has your spouse previously been married or in a common law relationship?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2NumberOfPreviousRelationships',
+        label: 'How many previous marriages or common law relationships has your spouse had?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
         key: 'hasChildren',
         label: 'Do you have children?',
         type: 'radio',
@@ -191,6 +225,12 @@ export const STEPS: Step[] = [
   },
   {
     id: 2,
+    title: 'Previous Relationships',
+    description: 'Please provide details about previous marriages or common law relationships',
+    questions: [],
+  },
+  {
+    id: 3,
     title: 'Children Information',
     description: 'Please provide details about each of your children',
     questions: [
@@ -227,7 +267,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 3,
+    id: 4,
     title: 'Who is on your Team?',
     description: 'Your Power(s) of Attorney and Estate Trustees should not act in a vacuum. This section lists the core professionals who already know your history.',
     questions: [
@@ -308,7 +348,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 4,
+    id: 5,
     title: 'Your Financial Footprint',
     description: 'Banking and financial account information',
     questions: [
@@ -417,7 +457,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 5,
+    id: 6,
     title: 'Outstanding Debts',
     description: 'Information about any outstanding debts (not including credit cards)',
     questions: [
@@ -434,7 +474,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     title: 'Life Insurance',
     description: 'Information about life insurance, disability insurance, and critical illness policies',
     questions: [
@@ -563,7 +603,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 7,
+    id: 8,
     title: 'Property and Casualty Insurance',
     description: 'Information about home and property insurance',
     questions: [
@@ -634,7 +674,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 8,
+    id: 9,
     title: 'Corporate Information',
     description: 'Information about your corporations',
     questions: [
@@ -658,7 +698,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 9,
+    id: 10,
     title: 'Family Trusts',
     description: 'Information about your family trusts',
     questions: [
@@ -682,7 +722,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 10,
+    id: 11,
     title: 'Family Trusts Continued',
     description: 'Information about trusts you are a beneficiary of',
     questions: [

@@ -33,6 +33,12 @@ interface FormData {
   spouseName?: string;
   hasMarriageContract?: string;
   marriageContractLocation?: string;
+  client1HasPreviousRelationship?: string;
+  client1NumberOfPreviousRelationships?: string;
+  client1PreviousRelationshipsData?: Array<Record<string, string>>;
+  client2HasPreviousRelationship?: string;
+  client2NumberOfPreviousRelationships?: string;
+  client2PreviousRelationshipsData?: Array<Record<string, string>>;
   spouseSameAddress?: string;
   spouseDateOfBirth?: string;
   spouseAddress?: string;
@@ -234,6 +240,105 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition += 10;
     }
+  }
+
+  const client1Name = formData.fullName || 'Client 1';
+  const client2Name = formData.spouseName || 'Client 2';
+
+  if (formData.client1HasPreviousRelationship === 'yes' && formData.client1PreviousRelationshipsData) {
+    const prevRelCount = parseInt(formData.client1NumberOfPreviousRelationships || '0');
+    const prevRelData = formData.client1PreviousRelationshipsData.slice(0, prevRelCount);
+
+    prevRelData.forEach((relationship, index) => {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      yPosition += 6;
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${client1Name}'s Previous Relationship ${index + 1}`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      doc.setFontSize(9);
+      addField('Previous Partner Name:', `client1PrevRel${index}Name`, relationship.name || '');
+      addField('Email:', `client1PrevRel${index}Email`, relationship.email || '');
+      addField('Phone:', `client1PrevRel${index}Phone`, relationship.phone || '');
+
+      yPosition += 5;
+
+      if (relationship.hasSpousalSupport === 'no') {
+        const labelText = `${client1Name} is not paying or receiving spousal support from a previous marriage or common law relationship with ${relationship.name || 'the indicated person'}.`;
+        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
+        yPosition += 10;
+      } else if (relationship.hasSpousalSupport === 'yes' && relationship.spousalSupportType) {
+        const supportAction = relationship.spousalSupportType === 'paying' ? 'paying' : 'receiving';
+        const preposition = relationship.spousalSupportType === 'paying' ? 'to' : 'from';
+        const labelText = `${client1Name} is ${supportAction} spousal support ${preposition} ${relationship.name || 'the indicated person'}. This document outlining this arrangement is located:`;
+        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
+        yPosition += 10;
+
+        const supportDocField = new doc.AcroFormTextField();
+        supportDocField.fieldName = `client1PrevRel${index}SupportDocLocation`;
+        supportDocField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+        supportDocField.fontSize = 9;
+        supportDocField.textColor = [0, 0, 0];
+        supportDocField.value = relationship.supportDocumentLocation || '';
+        doc.addField(supportDocField);
+
+        yPosition += 12;
+      }
+    });
+  }
+
+  if (formData.hasSpouse === 'yes' && formData.client2HasPreviousRelationship === 'yes' && formData.client2PreviousRelationshipsData) {
+    const prevRelCount = parseInt(formData.client2NumberOfPreviousRelationships || '0');
+    const prevRelData = formData.client2PreviousRelationshipsData.slice(0, prevRelCount);
+
+    prevRelData.forEach((relationship, index) => {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      yPosition += 6;
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${client2Name}'s Previous Relationship ${index + 1}`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      doc.setFontSize(9);
+      addField('Previous Partner Name:', `client2PrevRel${index}Name`, relationship.name || '');
+      addField('Email:', `client2PrevRel${index}Email`, relationship.email || '');
+      addField('Phone:', `client2PrevRel${index}Phone`, relationship.phone || '');
+
+      yPosition += 5;
+
+      if (relationship.hasSpousalSupport === 'no') {
+        const labelText = `${client2Name} is not paying or receiving spousal support from a previous marriage or common law relationship with ${relationship.name || 'the indicated person'}.`;
+        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
+        yPosition += 10;
+      } else if (relationship.hasSpousalSupport === 'yes' && relationship.spousalSupportType) {
+        const supportAction = relationship.spousalSupportType === 'paying' ? 'paying' : 'receiving';
+        const preposition = relationship.spousalSupportType === 'paying' ? 'to' : 'from';
+        const labelText = `${client2Name} is ${supportAction} spousal support ${preposition} ${relationship.name || 'the indicated person'}. This document outlining this arrangement is located:`;
+        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
+        yPosition += 10;
+
+        const supportDocField = new doc.AcroFormTextField();
+        supportDocField.fieldName = `client2PrevRel${index}SupportDocLocation`;
+        supportDocField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+        supportDocField.fontSize = 9;
+        supportDocField.textColor = [0, 0, 0];
+        supportDocField.value = relationship.supportDocumentLocation || '';
+        doc.addField(supportDocField);
+
+        yPosition += 12;
+      }
+    });
   }
 
   if (formData.hasChildren === 'yes' && formData.childrenData && formData.childrenData.length > 0) {
@@ -794,8 +899,6 @@ export const generatePDF = (formData: FormData) => {
   doc.text('This section lists the core professionals who already know your history.', margin, yPosition);
   yPosition += 10;
 
-  const client1Name = formData.fullName || 'Client 1';
-  const client2Name = formData.spouseName || 'Client 2';
   const hasSpouse = formData.hasSpouse === 'yes';
 
   if (formData.client1HasWill === 'no' && (!hasSpouse || formData.client2HasWill === 'no')) {

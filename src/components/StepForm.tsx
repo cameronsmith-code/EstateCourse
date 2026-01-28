@@ -33,8 +33,57 @@ export default function StepForm({
 
     const basicAnswers = allAnswers?.get(1) || {};
     const numberOfChildren = basicAnswers['numberOfChildren'];
+    const client1NumberOfPreviousRelationships = basicAnswers['client1NumberOfPreviousRelationships'];
+    const client2NumberOfPreviousRelationships = basicAnswers['client2NumberOfPreviousRelationships'];
 
     if (step.id === 2) {
+      const client1Count = client1NumberOfPreviousRelationships ? parseInt(client1NumberOfPreviousRelationships as string) : 0;
+      const client2Count = client2NumberOfPreviousRelationships ? parseInt(client2NumberOfPreviousRelationships as string) : 0;
+      const totalCount = client1Count + client2Count;
+
+      if (totalCount > 0) {
+        const client1PreviousRelationshipsData = answers['client1PreviousRelationshipsData'] as Array<Record<string, string>> | undefined;
+        const client2PreviousRelationshipsData = answers['client2PreviousRelationshipsData'] as Array<Record<string, string>> | undefined;
+
+        if (client1Count > 0) {
+          if (!client1PreviousRelationshipsData || client1PreviousRelationshipsData.length < client1Count) {
+            setValidationError('Please fill in details for all previous relationships.');
+            return;
+          }
+
+          for (let i = 0; i < client1Count; i++) {
+            const relationship = client1PreviousRelationshipsData[i];
+            if (!relationship?.name) {
+              setValidationError(`Please fill in the name for previous relationship ${i + 1}.`);
+              return;
+            }
+            if (relationship?.hasSpousalSupport === 'yes' && !relationship?.spousalSupportType) {
+              setValidationError(`Please specify if you are paying or receiving spousal support for relationship ${i + 1}.`);
+              return;
+            }
+          }
+        }
+
+        if (client2Count > 0) {
+          if (!client2PreviousRelationshipsData || client2PreviousRelationshipsData.length < client2Count) {
+            setValidationError('Please fill in details for all previous relationships.');
+            return;
+          }
+
+          for (let i = 0; i < client2Count; i++) {
+            const relationship = client2PreviousRelationshipsData[i];
+            if (!relationship?.name) {
+              setValidationError(`Please fill in the name for previous relationship ${i + 1}.`);
+              return;
+            }
+            if (relationship?.hasSpousalSupport === 'yes' && !relationship?.spousalSupportType) {
+              setValidationError(`Please specify if paying or receiving spousal support for relationship ${i + 1}.`);
+              return;
+            }
+          }
+        }
+      }
+    } else if (step.id === 3) {
       if (!numberOfChildren) {
         setValidationError('Please go back and specify number of children.');
         return;
@@ -72,6 +121,14 @@ export default function StepForm({
   const childCount = numberOfChildren ? (numberOfChildren === '6+' ? 6 : parseInt(numberOfChildren as string)) : 0;
   const childrenData = (answers['childrenData'] as Array<Record<string, string>>) || Array(childCount).fill(null).map(() => ({}));
 
+  const client1NumberOfPreviousRelationships = allAnswers?.get(1)?.['client1NumberOfPreviousRelationships'];
+  const client1PrevRelCount = client1NumberOfPreviousRelationships ? parseInt(client1NumberOfPreviousRelationships as string) : 0;
+  const client1PreviousRelationshipsData = (answers['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || Array(client1PrevRelCount).fill(null).map(() => ({}));
+
+  const client2NumberOfPreviousRelationships = allAnswers?.get(1)?.['client2NumberOfPreviousRelationships'];
+  const client2PrevRelCount = client2NumberOfPreviousRelationships ? parseInt(client2NumberOfPreviousRelationships as string) : 0;
+  const client2PreviousRelationshipsData = (answers['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || Array(client2PrevRelCount).fill(null).map(() => ({}));
+
   const handleChildChange = (index: number, field: string, value: string) => {
     const updated = [...childrenData];
     if (!updated[index]) {
@@ -79,6 +136,24 @@ export default function StepForm({
     }
     updated[index][field] = value;
     onAnswerChange('childrenData', updated);
+  };
+
+  const handleClient1PrevRelChange = (index: number, field: string, value: string) => {
+    const updated = [...client1PreviousRelationshipsData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1PreviousRelationshipsData', updated);
+  };
+
+  const handleClient2PrevRelChange = (index: number, field: string, value: string) => {
+    const updated = [...client2PreviousRelationshipsData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2PreviousRelationshipsData', updated);
   };
 
   return (
@@ -127,6 +202,15 @@ export default function StepForm({
                 if (question.key === 'spousePhone' && answers['hasSpouse'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1NumberOfPreviousRelationships' && answers['client1HasPreviousRelationship'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasPreviousRelationship' && answers['hasSpouse'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2NumberOfPreviousRelationships' && (answers['hasSpouse'] !== 'yes' || answers['client2HasPreviousRelationship'] !== 'yes')) {
+                  return null;
+                }
                 if (question.key === 'numberOfChildren' && answers['hasChildren'] !== 'yes') {
                   return null;
                 }
@@ -150,7 +234,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 3 && (
+          {step.id === 4 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -235,7 +319,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 4 && (
+          {step.id === 5 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -550,7 +634,279 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 2 && childCount > 0 && (
+          {step.id === 2 && (client1PrevRelCount > 0 || client2PrevRelCount > 0) && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+            const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+
+            return (
+              <div className="space-y-8">
+                {client1PrevRelCount > 0 && (
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-semibold text-white border-b border-gray-600 pb-2">
+                      {client1Name}'s Previous Relationships
+                    </h3>
+                    {Array.from({ length: client1PrevRelCount }).map((_, index) => (
+                      <div key={`client1-prev-${index}`} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <h4 className="text-lg font-semibold text-white mb-4">Previous Relationship {index + 1}</h4>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What is the name of the person you previously had a marriage or common law relationship with? *
+                            </label>
+                            <input
+                              type="text"
+                              value={client1PreviousRelationshipsData[index]?.name || ''}
+                              onChange={(e) => handleClient1PrevRelChange(index, 'name', e.target.value)}
+                              placeholder="Enter name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Email Address
+                            </label>
+                            <input
+                              type="email"
+                              value={client1PreviousRelationshipsData[index]?.email || ''}
+                              onChange={(e) => handleClient1PrevRelChange(index, 'email', e.target.value)}
+                              placeholder="Enter email address"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Phone Number
+                            </label>
+                            <input
+                              type="text"
+                              value={client1PreviousRelationshipsData[index]?.phone || ''}
+                              onChange={(e) => handleClient1PrevRelChange(index, 'phone', e.target.value)}
+                              placeholder="Enter phone number"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Are you paying or receiving spousal support?
+                            </label>
+                            <div className="flex gap-4">
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`client1-spousal-support-${index}`}
+                                  value="yes"
+                                  checked={client1PreviousRelationshipsData[index]?.hasSpousalSupport === 'yes'}
+                                  onChange={(e) => handleClient1PrevRelChange(index, 'hasSpousalSupport', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">Yes</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`client1-spousal-support-${index}`}
+                                  value="no"
+                                  checked={client1PreviousRelationshipsData[index]?.hasSpousalSupport === 'no'}
+                                  onChange={(e) => handleClient1PrevRelChange(index, 'hasSpousalSupport', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">No</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {client1PreviousRelationshipsData[index]?.hasSpousalSupport === 'yes' && (
+                            <>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Are you paying or receiving spousal support? *
+                                </label>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`client1-support-type-${index}`}
+                                      value="paying"
+                                      checked={client1PreviousRelationshipsData[index]?.spousalSupportType === 'paying'}
+                                      onChange={(e) => handleClient1PrevRelChange(index, 'spousalSupportType', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">Paying</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`client1-support-type-${index}`}
+                                      value="receiving"
+                                      checked={client1PreviousRelationshipsData[index]?.spousalSupportType === 'receiving'}
+                                      onChange={(e) => handleClient1PrevRelChange(index, 'spousalSupportType', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">Receiving</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Where is the document outlining this arrangement located?
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PreviousRelationshipsData[index]?.supportDocumentLocation || ''}
+                                  onChange={(e) => handleClient1PrevRelChange(index, 'supportDocumentLocation', e.target.value)}
+                                  placeholder="Enter document location"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {client2PrevRelCount > 0 && (
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-semibold text-white border-b border-gray-600 pb-2">
+                      {client2Name}'s Previous Relationships
+                    </h3>
+                    {Array.from({ length: client2PrevRelCount }).map((_, index) => (
+                      <div key={`client2-prev-${index}`} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <h4 className="text-lg font-semibold text-white mb-4">Previous Relationship {index + 1}</h4>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What is the name of the person they previously had a marriage or common law relationship with? *
+                            </label>
+                            <input
+                              type="text"
+                              value={client2PreviousRelationshipsData[index]?.name || ''}
+                              onChange={(e) => handleClient2PrevRelChange(index, 'name', e.target.value)}
+                              placeholder="Enter name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Email Address
+                            </label>
+                            <input
+                              type="email"
+                              value={client2PreviousRelationshipsData[index]?.email || ''}
+                              onChange={(e) => handleClient2PrevRelChange(index, 'email', e.target.value)}
+                              placeholder="Enter email address"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Phone Number
+                            </label>
+                            <input
+                              type="text"
+                              value={client2PreviousRelationshipsData[index]?.phone || ''}
+                              onChange={(e) => handleClient2PrevRelChange(index, 'phone', e.target.value)}
+                              placeholder="Enter phone number"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Are they paying or receiving spousal support?
+                            </label>
+                            <div className="flex gap-4">
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`client2-spousal-support-${index}`}
+                                  value="yes"
+                                  checked={client2PreviousRelationshipsData[index]?.hasSpousalSupport === 'yes'}
+                                  onChange={(e) => handleClient2PrevRelChange(index, 'hasSpousalSupport', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">Yes</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`client2-spousal-support-${index}`}
+                                  value="no"
+                                  checked={client2PreviousRelationshipsData[index]?.hasSpousalSupport === 'no'}
+                                  onChange={(e) => handleClient2PrevRelChange(index, 'hasSpousalSupport', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">No</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {client2PreviousRelationshipsData[index]?.hasSpousalSupport === 'yes' && (
+                            <>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Are they paying or receiving spousal support? *
+                                </label>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`client2-support-type-${index}`}
+                                      value="paying"
+                                      checked={client2PreviousRelationshipsData[index]?.spousalSupportType === 'paying'}
+                                      onChange={(e) => handleClient2PrevRelChange(index, 'spousalSupportType', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">Paying</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`client2-support-type-${index}`}
+                                      value="receiving"
+                                      checked={client2PreviousRelationshipsData[index]?.spousalSupportType === 'receiving'}
+                                      onChange={(e) => handleClient2PrevRelChange(index, 'spousalSupportType', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">Receiving</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Where is the document outlining this arrangement located?
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2PreviousRelationshipsData[index]?.supportDocumentLocation || ''}
+                                  onChange={(e) => handleClient2PrevRelChange(index, 'supportDocumentLocation', e.target.value)}
+                                  placeholder="Enter document location"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {step.id === 3 && childCount > 0 && (
             <div className="space-y-8">
               {Array.from({ length: childCount }).map((_, index) => (
                 <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
@@ -977,7 +1333,7 @@ export default function StepForm({
             </div>
           )}
 
-          {step.id === 5 && (
+          {step.id === 6 && (
             <>
               {step.questions.map((question) => (
                 <FormField
@@ -1487,7 +1843,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 6 && (
+          {step.id === 7 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -1564,7 +1920,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 7 && (
+          {step.id === 8 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -1610,7 +1966,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 8 && (
+          {step.id === 9 && (
             <>
               {step.questions.map((question) => {
                 if (question.key === 'corporationCount' && answers['hasCorporation'] !== 'yes') {
@@ -1629,7 +1985,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 9 && (
+          {step.id === 10 && (
             <>
               {step.questions.map((question) => {
                 if (question.key === 'familyTrustCount' && answers['hasFamilyTrust'] !== 'yes') {
@@ -1700,7 +2056,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 10 && (() => {
+          {step.id === 11 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';

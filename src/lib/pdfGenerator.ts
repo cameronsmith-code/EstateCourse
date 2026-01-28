@@ -292,10 +292,42 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(9);
       addField('Previous Partner Name:', `client1PrevRel${index}Name`, relationship.name || '');
-      addField('Email:', `client1PrevRel${index}Email`, relationship.email || '');
-      addField('Phone:', `client1PrevRel${index}Phone`, relationship.phone || '');
 
-      yPosition += 5;
+      const labelColumnWidth = 40;
+      const tableWidth = fieldWidth - 15;
+      const valueColumnWidth = tableWidth - labelColumnWidth;
+
+      doc.setFontSize(9);
+      doc.text('Email Address:', margin, yPosition);
+      const emailField = new doc.AcroFormTextField();
+      emailField.fieldName = `client1PrevRel${index}Email`;
+      emailField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 6];
+      emailField.value = relationship.email || '';
+      emailField.fontSize = 9;
+      emailField.textColor = [0, 0, 0];
+      doc.addField(emailField);
+      yPosition += 8;
+
+      doc.text('Phone Number:', margin, yPosition);
+      const phoneField = new doc.AcroFormTextField();
+      phoneField.fieldName = `client1PrevRel${index}Phone`;
+      phoneField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 6];
+      phoneField.value = relationship.phone || '';
+      phoneField.fontSize = 9;
+      phoneField.textColor = [0, 0, 0];
+      doc.addField(phoneField);
+      yPosition += 8;
+
+      doc.text('Other Information:', margin, yPosition);
+      const otherInfoField = new doc.AcroFormTextField();
+      otherInfoField.fieldName = `client1PrevRel${index}OtherInfo`;
+      otherInfoField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 20];
+      otherInfoField.value = relationship.otherInfo || '';
+      otherInfoField.fontSize = 9;
+      otherInfoField.textColor = [0, 0, 0];
+      otherInfoField.multiline = true;
+      doc.addField(otherInfoField);
+      yPosition += 25;
 
       if (relationship.hasSpousalSupport === 'no') {
         const labelText = `${client1Name} is not paying or receiving spousal support from a previous marriage or common law relationship with ${relationship.name || 'the indicated person'}.`;
@@ -352,10 +384,42 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(9);
       addField('Previous Partner Name:', `client2PrevRel${index}Name`, relationship.name || '');
-      addField('Email:', `client2PrevRel${index}Email`, relationship.email || '');
-      addField('Phone:', `client2PrevRel${index}Phone`, relationship.phone || '');
 
-      yPosition += 5;
+      const labelColumnWidth = 40;
+      const tableWidth = fieldWidth - 15;
+      const valueColumnWidth = tableWidth - labelColumnWidth;
+
+      doc.setFontSize(9);
+      doc.text('Email Address:', margin, yPosition);
+      const emailField = new doc.AcroFormTextField();
+      emailField.fieldName = `client2PrevRel${index}Email`;
+      emailField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 6];
+      emailField.value = relationship.email || '';
+      emailField.fontSize = 9;
+      emailField.textColor = [0, 0, 0];
+      doc.addField(emailField);
+      yPosition += 8;
+
+      doc.text('Phone Number:', margin, yPosition);
+      const phoneField = new doc.AcroFormTextField();
+      phoneField.fieldName = `client2PrevRel${index}Phone`;
+      phoneField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 6];
+      phoneField.value = relationship.phone || '';
+      phoneField.fontSize = 9;
+      phoneField.textColor = [0, 0, 0];
+      doc.addField(phoneField);
+      yPosition += 8;
+
+      doc.text('Other Information:', margin, yPosition);
+      const otherInfoField = new doc.AcroFormTextField();
+      otherInfoField.fieldName = `client2PrevRel${index}OtherInfo`;
+      otherInfoField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 20];
+      otherInfoField.value = relationship.otherInfo || '';
+      otherInfoField.fontSize = 9;
+      otherInfoField.textColor = [0, 0, 0];
+      otherInfoField.multiline = true;
+      doc.addField(otherInfoField);
+      yPosition += 25;
 
       if (relationship.hasSpousalSupport === 'no') {
         const labelText = `${client2Name} is not paying or receiving spousal support from a previous marriage or common law relationship with ${relationship.name || 'the indicated person'}.`;

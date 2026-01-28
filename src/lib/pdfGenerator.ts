@@ -247,6 +247,20 @@ export const generatePDF = (formData: FormData) => {
   const client1Name = formData.fullName || 'Client 1';
   const client2Name = formData.spouseName || 'Client 2';
 
+  if (formData.client1HasPreviousRelationship === 'no') {
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    yPosition += 6;
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    const labelText = `${client1Name} has not previously been in a marriage or common law relationship.`;
+    doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
+    yPosition += 10;
+  }
+
   if (formData.client1HasPreviousRelationship === 'yes' && formData.client1PreviousRelationshipsData) {
     const prevRelCount = parseInt(formData.client1NumberOfPreviousRelationships || '0');
     const prevRelData = formData.client1PreviousRelationshipsData.slice(0, prevRelCount);
@@ -293,6 +307,20 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 12;
       }
     });
+  }
+
+  if (formData.hasSpouse === 'yes' && formData.client2HasPreviousRelationship === 'no') {
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    yPosition += 6;
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    const labelText = `${client2Name} has not previously been in a marriage or common law relationship.`;
+    doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
+    yPosition += 10;
   }
 
   if (formData.hasSpouse === 'yes' && formData.client2HasPreviousRelationship === 'yes' && formData.client2PreviousRelationshipsData) {

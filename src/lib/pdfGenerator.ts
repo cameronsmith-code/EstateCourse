@@ -16,6 +16,7 @@ interface ChildData {
   canadianResident?: string;
   provinceTerritory?: string;
   overAgeMajority?: string;
+  countryOfResidence?: string;
   [key: string]: string | undefined;
 }
 
@@ -719,6 +720,30 @@ export const generatePDF = (formData: FormData) => {
           }
           yPosition += 6;
         }
+      }
+
+      if (child.canadianResident === 'no') {
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        yPosition += 6;
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('Country of Residence:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 5;
+
+        const countryField = new doc.AcroFormTextField();
+        countryField.fieldName = `child${index + 1}_countryOfResidence`;
+        countryField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+        countryField.fontSize = 9;
+        countryField.textColor = [0, 0, 0];
+        countryField.value = child.countryOfResidence || '';
+        doc.addField(countryField);
+
+        yPosition += 10;
       }
     });
   }

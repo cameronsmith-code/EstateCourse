@@ -949,6 +949,21 @@ export default function StepForm({
                           )}
                         </>
                       )}
+
+                      {childrenData[index]?.canadianResident === 'no' && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            In what country is this child a resident of?
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.countryOfResidence || ''}
+                            onChange={(e) => handleChildChange(index, 'countryOfResidence', e.target.value)}
+                            placeholder="Enter country of residence"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

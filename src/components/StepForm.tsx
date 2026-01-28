@@ -100,6 +100,12 @@ export default function StepForm({
                 if (question.key === 'spouseName' && answers['hasSpouse'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'hasMarriageContract' && answers['hasSpouse'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'marriageContractLocation' && (answers['hasSpouse'] !== 'yes' || answers['hasMarriageContract'] !== 'yes')) {
+                  return null;
+                }
                 if (question.key === 'spouseSameAddress' && answers['hasSpouse'] !== 'yes') {
                   return null;
                 }

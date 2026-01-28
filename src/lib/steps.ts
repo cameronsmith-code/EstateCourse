@@ -96,6 +96,23 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'hasMarriageContract',
+        label: 'Do you have a marriage contract (prenuptial agreement)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'marriageContractLocation',
+        label: 'Where is the marriage contract located?',
+        type: 'text',
+        placeholder: 'Enter location of marriage contract',
+        required: false,
+      },
+      {
         key: 'spouseSameAddress',
         label: 'Do they live at the same address?',
         type: 'radio',

@@ -31,6 +31,8 @@ interface FormData {
   phone?: string;
   hasSpouse?: string;
   spouseName?: string;
+  hasMarriageContract?: string;
+  marriageContractLocation?: string;
   spouseSameAddress?: string;
   spouseDateOfBirth?: string;
   spouseAddress?: string;
@@ -205,6 +207,33 @@ export const generatePDF = (formData: FormData) => {
 
     addField('Email Address:', 'spouseEmail', formData.spouseEmail || '');
     addField('Phone Number:', 'spousePhone', formData.spousePhone || '');
+
+    if (formData.hasMarriageContract === 'yes') {
+      yPosition += 6;
+
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const client1Name = formData.fullName || 'Client 1';
+      const client2Name = formData.spouseName || 'Client 2';
+      const labelText = `${client1Name} and ${client2Name} have a marriage contract, and the document is located:`;
+      doc.text(labelText, margin, yPosition);
+      yPosition += 5;
+
+      const marriageContractField = new doc.AcroFormTextField();
+      marriageContractField.fieldName = 'marriageContractLocation';
+      marriageContractField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+      marriageContractField.fontSize = 9;
+      marriageContractField.textColor = [0, 0, 0];
+      marriageContractField.value = formData.marriageContractLocation || '';
+      doc.addField(marriageContractField);
+
+      yPosition += 10;
+    }
   }
 
   if (formData.hasChildren === 'yes' && formData.childrenData && formData.childrenData.length > 0) {

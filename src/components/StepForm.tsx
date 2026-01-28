@@ -214,14 +214,6 @@ export default function StepForm({
                 if (question.key === 'numberOfChildren' && answers['hasChildren'] !== 'yes') {
                   return null;
                 }
-                if (
-                  (question.key === 'sameMedicalDoctor' ||
-                    question.key === 'sameDentist' ||
-                    question.key === 'sameOrthodontist') &&
-                  answers['hasChildren'] !== 'yes'
-                ) {
-                  return null;
-                }
                 return (
                   <FormField
                     key={question.key}

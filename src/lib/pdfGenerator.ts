@@ -51,9 +51,6 @@ interface FormData {
   spousePhone?: string;
   hasChildren?: string;
   numberOfChildren?: string;
-  sameMedicalDoctor?: string;
-  sameDentist?: string;
-  sameOrthodontist?: string;
   childrenData?: ChildData[];
   client1HasWill?: string;
   client1WillJurisdiction?: string;
@@ -724,27 +721,13 @@ export const generatePDF = (formData: FormData) => {
             doc.setFont(undefined, 'normal');
             doc.text(row.label, col1X + 0.5, tableY + 4);
 
-            const skipFieldsForShared = (fieldRow: string) => {
-              if (index > 0) {
-                if (fieldRow === 'Family Doctor:' && formData.sameMedicalDoctor === 'yes') return true;
-                if (fieldRow === 'Dentist:' && formData.sameDentist === 'yes') return true;
-                if (fieldRow === 'Orthodontist:' && formData.sameOrthodontist === 'yes') return true;
-              }
-              return false;
-            };
-
-            if (skipFieldsForShared(row.label)) {
-              const firstChildName = formData.childrenData?.[0]?.name || 'Child 1';
-              doc.text(`(See ${firstChildName})`, col2X + 0.5, tableY + 4);
-            } else {
-              const field1 = new doc.AcroFormTextField();
-              field1.fieldName = `child${index + 1}_health_${rowIndex}_col2`;
-              field1.Rect = [col2X + 0.3, tableY + 0.3, colWidths[1] - 0.6, cellHeight - 0.6];
-              field1.fontSize = 7;
-              field1.textColor = [0, 0, 0];
-              field1.borderStyle = 'none';
-              doc.addField(field1);
-            }
+            const field1 = new doc.AcroFormTextField();
+            field1.fieldName = `child${index + 1}_health_${rowIndex}_col2`;
+            field1.Rect = [col2X + 0.3, tableY + 0.3, colWidths[1] - 0.6, cellHeight - 0.6];
+            field1.fontSize = 7;
+            field1.textColor = [0, 0, 0];
+            field1.borderStyle = 'none';
+            doc.addField(field1);
 
             const field2 = new doc.AcroFormTextField();
             field2.fieldName = `child${index + 1}_health_${rowIndex}_col3`;

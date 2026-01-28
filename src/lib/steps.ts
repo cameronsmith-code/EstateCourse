@@ -233,38 +233,7 @@ export const STEPS: Step[] = [
     id: 3,
     title: 'Children Information',
     description: 'Please provide details about each of your children',
-    questions: [
-      {
-        key: 'sameMedicalDoctor',
-        label: 'Do all children use the same medical doctor?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'sameDentist',
-        label: 'Do all children use the same dentist?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'sameOrthodontist',
-        label: 'Do all children use the same orthodontist?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-    ],
+    questions: [],
   },
   {
     id: 4,

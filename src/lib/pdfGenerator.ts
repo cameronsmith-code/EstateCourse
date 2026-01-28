@@ -13,6 +13,9 @@ interface ChildData {
   medications?: string;
   allergies?: string;
   medicalIssues?: string;
+  canadianResident?: string;
+  provinceTerritory?: string;
+  overAgeMajority?: string;
   [key: string]: string | undefined;
 }
 
@@ -676,6 +679,46 @@ export const generatePDF = (formData: FormData) => {
         });
 
         yPosition = digitalTableY + 10;
+      }
+
+      if (child.canadianResident === 'yes' && child.provinceTerritory && child.dateOfBirth) {
+        const provinces18 = ['Alberta', 'Manitoba', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'];
+        const provinces19 = ['British Columbia', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Northwest Territories', 'Nunavut', 'Yukon'];
+
+        const ageOfMajority = provinces18.includes(child.provinceTerritory) ? 18 : provinces19.includes(child.provinceTerritory) ? 19 : null;
+
+        if (ageOfMajority) {
+          if (yPosition > 270) {
+            doc.addPage();
+            yPosition = 12;
+          }
+
+          yPosition += 6;
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'bold');
+          doc.text('Age of Majority:', margin, yPosition);
+          doc.setFont(undefined, 'normal');
+          yPosition += 5;
+
+          if (child.overAgeMajority === 'yes') {
+            doc.setFontSize(9);
+            doc.text(`${childName} has reached the age of majority in their province.`, margin, yPosition);
+          } else if (child.overAgeMajority === 'no') {
+            const dob = new Date(child.dateOfBirth);
+            const majorityDate = new Date(dob);
+            majorityDate.setFullYear(dob.getFullYear() + ageOfMajority);
+
+            const formattedDate = majorityDate.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+
+            doc.setFontSize(9);
+            doc.text(`The child will reach the age of majority on ${formattedDate}.`, margin, yPosition);
+          }
+          yPosition += 6;
+        }
       }
     });
   }

@@ -824,6 +824,132 @@ export default function StepForm({
                         </div>
                       </>
                     )}
+
+                    <div className="mt-6 pt-6 border-t border-gray-600">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Are they a resident of Canada?
+                        </label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`canadianResident-${index}`}
+                              value="yes"
+                              checked={childrenData[index]?.canadianResident === 'yes'}
+                              onChange={(e) => handleChildChange(index, 'canadianResident', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">Yes</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`canadianResident-${index}`}
+                              value="no"
+                              checked={childrenData[index]?.canadianResident === 'no'}
+                              onChange={(e) => handleChildChange(index, 'canadianResident', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">No</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {childrenData[index]?.canadianResident === 'yes' && (
+                        <>
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Province/Territory of Residence
+                            </label>
+                            <select
+                              value={childrenData[index]?.provinceTerritory || ''}
+                              onChange={(e) => handleChildChange(index, 'provinceTerritory', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Select province/territory</option>
+                              <option value="Alberta">Alberta</option>
+                              <option value="British Columbia">British Columbia</option>
+                              <option value="Manitoba">Manitoba</option>
+                              <option value="New Brunswick">New Brunswick</option>
+                              <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                              <option value="Northwest Territories">Northwest Territories</option>
+                              <option value="Nova Scotia">Nova Scotia</option>
+                              <option value="Nunavut">Nunavut</option>
+                              <option value="Ontario">Ontario</option>
+                              <option value="Prince Edward Island">Prince Edward Island</option>
+                              <option value="Quebec">Quebec</option>
+                              <option value="Saskatchewan">Saskatchewan</option>
+                              <option value="Yukon">Yukon</option>
+                            </select>
+                          </div>
+
+                          {childrenData[index]?.provinceTerritory && ['Alberta', 'Manitoba', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'].includes(childrenData[index]?.provinceTerritory) && (
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Is this child over the age of 18?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`overAgeMajority-${index}`}
+                                    value="yes"
+                                    checked={childrenData[index]?.overAgeMajority === 'yes'}
+                                    onChange={(e) => handleChildChange(index, 'overAgeMajority', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`overAgeMajority-${index}`}
+                                    value="no"
+                                    checked={childrenData[index]?.overAgeMajority === 'no'}
+                                    onChange={(e) => handleChildChange(index, 'overAgeMajority', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+
+                          {childrenData[index]?.provinceTerritory && ['British Columbia', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Northwest Territories', 'Nunavut', 'Yukon'].includes(childrenData[index]?.provinceTerritory) && (
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Is this child over the age of 19?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`overAgeMajority-${index}`}
+                                    value="yes"
+                                    checked={childrenData[index]?.overAgeMajority === 'yes'}
+                                    onChange={(e) => handleChildChange(index, 'overAgeMajority', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`overAgeMajority-${index}`}
+                                    value="no"
+                                    checked={childrenData[index]?.overAgeMajority === 'no'}
+                                    onChange={(e) => handleChildChange(index, 'overAgeMajority', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

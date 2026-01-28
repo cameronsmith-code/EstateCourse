@@ -2428,6 +2428,8 @@ export const generatePDF = (formData: FormData) => {
       ];
 
       const primaryCellHeight = 7;
+      const primaryLabelWidth = fieldWidth * 0.35;
+      const primaryFieldWidth = fieldWidth * 0.65;
       let primaryTableY = yPosition;
 
       primaryResRows.forEach((rowLabel, rowIndex) => {
@@ -2441,13 +2443,14 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'normal');
         doc.setFontSize(8);
 
-        doc.rect(margin, primaryTableY, fieldWidth, primaryCellHeight);
+        doc.rect(margin, primaryTableY, primaryLabelWidth, primaryCellHeight);
+        doc.rect(margin + primaryLabelWidth, primaryTableY, primaryFieldWidth, primaryCellHeight);
         doc.text(rowLabel, margin + 0.5, primaryTableY + 4.5);
 
         if (rowIndex > 0) {
           const primaryField = new doc.AcroFormTextField();
           primaryField.fieldName = `primary_residence_row_${rowIndex}`;
-          primaryField.Rect = [margin + fieldWidth * 0.35, primaryTableY + 0.3, fieldWidth * 0.65 - 0.6, primaryCellHeight - 0.6];
+          primaryField.Rect = [margin + primaryLabelWidth + 0.3, primaryTableY + 0.3, primaryFieldWidth - 0.6, primaryCellHeight - 0.6];
           primaryField.fontSize = 7;
           primaryField.textColor = [0, 0, 0];
           primaryField.borderStyle = 'none';
@@ -2499,7 +2502,9 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'bold');
         doc.text('Ownership Structure:', margin, yPosition);
         doc.setFont(undefined, 'normal');
-        yPosition += 6;
+        doc.setFontSize(8);
+        doc.text(`Owned by ${ownerLabel}`, margin, yPosition + 4);
+        yPosition += 8;
 
         if (property.hasAdditionalOwners === 'yes' && property.additionalOwnersCount) {
           const ownerCount = parseInt(property.additionalOwnersCount) || 0;
@@ -2572,6 +2577,8 @@ export const generatePDF = (formData: FormData) => {
         ];
 
         const propertyCellHeight = 7;
+        const propertyLabelWidth = fieldWidth * 0.35;
+        const propertyFieldWidth = fieldWidth * 0.65;
         let propertyTableY = yPosition;
 
         propertyRows.forEach((rowLabel, rowIndex) => {
@@ -2585,12 +2592,13 @@ export const generatePDF = (formData: FormData) => {
           doc.setFont(undefined, 'normal');
           doc.setFontSize(8);
 
-          doc.rect(margin, propertyTableY, fieldWidth, propertyCellHeight);
+          doc.rect(margin, propertyTableY, propertyLabelWidth, propertyCellHeight);
+          doc.rect(margin + propertyLabelWidth, propertyTableY, propertyFieldWidth, propertyCellHeight);
           doc.text(rowLabel, margin + 0.5, propertyTableY + 4.5);
 
           const propertyField = new doc.AcroFormTextField();
           propertyField.fieldName = `property_${propIndex + 1}_row_${rowIndex}`;
-          propertyField.Rect = [margin + fieldWidth * 0.35, propertyTableY + 0.3, fieldWidth * 0.65 - 0.6, propertyCellHeight - 0.6];
+          propertyField.Rect = [margin + propertyLabelWidth + 0.3, propertyTableY + 0.3, propertyFieldWidth - 0.6, propertyCellHeight - 0.6];
           propertyField.fontSize = 7;
           propertyField.textColor = [0, 0, 0];
           propertyField.borderStyle = 'none';

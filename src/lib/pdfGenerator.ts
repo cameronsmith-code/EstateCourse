@@ -247,15 +247,27 @@ export const generatePDF = (formData: FormData) => {
   const client1Name = formData.fullName || 'Client 1';
   const client2Name = formData.spouseName || 'Client 2';
 
-  if (formData.client1HasPreviousRelationship === 'no') {
-    if (yPosition > 270) {
+  const hasAnyPreviousRelationships =
+    formData.client1HasPreviousRelationship === 'yes' ||
+    formData.client1HasPreviousRelationship === 'no' ||
+    (formData.hasSpouse === 'yes' && (formData.client2HasPreviousRelationship === 'yes' || formData.client2HasPreviousRelationship === 'no'));
+
+  if (hasAnyPreviousRelationships) {
+    if (yPosition > 260) {
       doc.addPage();
       yPosition = 12;
     }
 
     yPosition += 6;
-    doc.setFontSize(10);
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Previous Relationships', margin, yPosition);
     doc.setFont(undefined, 'normal');
+    yPosition += 8;
+  }
+
+  if (formData.client1HasPreviousRelationship === 'no') {
+    doc.setFontSize(10);
     const labelText = `${client1Name} has not previously been in a marriage or common law relationship.`;
     doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
     yPosition += 10;
@@ -315,9 +327,7 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
-    yPosition += 6;
     doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
     const labelText = `${client2Name} has not previously been in a marriage or common law relationship.`;
     doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
     yPosition += 10;

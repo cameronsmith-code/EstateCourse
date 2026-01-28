@@ -152,41 +152,165 @@ export const generatePDF = (formData: FormData) => {
 
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 12;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 18; // Increased margin for premium feel
   const fieldWidth = pageWidth - margin * 2;
-  let yPosition = 12;
+  let yPosition = margin;
+  let pageNumber = 1;
 
-  doc.setFontSize(20);
-  doc.text('Estate Planning Questionnaire', margin, yPosition);
-
-  yPosition += 10;
-  doc.setFontSize(9);
-  doc.setTextColor(100);
-  doc.text('This is a fillable PDF - click on the fields to type your information', margin, yPosition);
-
-  yPosition += 12;
-  doc.setTextColor(0);
-  doc.setFontSize(10);
-
-  const addField = (label: string, fieldName: string, value: string, height: number = 7) => {
-    doc.setFontSize(10);
-    doc.text(label, margin, yPosition);
-    yPosition += 2;
-    const field = new doc.AcroFormTextField();
-    field.fieldName = fieldName;
-    field.Rect = [margin, yPosition, fieldWidth - 15, height];
-    field.value = value;
-    field.fontSize = 10;
-    field.textColor = [0, 0, 0];
-    doc.addField(field);
-    yPosition += height + 4;
+  // Professional Color Palette
+  const colors = {
+    navyBlue: [30, 58, 95] as [number, number, number],
+    mediumGray: [100, 100, 100] as [number, number, number],
+    lightGray: [240, 240, 240] as [number, number, number],
+    darkText: [40, 40, 40] as [number, number, number],
+    black: [0, 0, 0] as [number, number, number],
+    borderGray: [200, 200, 200] as [number, number, number],
   };
 
-  doc.setFontSize(12);
+  // Helper function: Add page header (for pages after the first)
+  const addPageHeader = () => {
+    const currentY = yPosition;
+    doc.setFontSize(8);
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('Estate Planning Questionnaire', margin, 12);
+    doc.setTextColor(...colors.mediumGray);
+    doc.text(`Page ${pageNumber}`, pageWidth - margin, 12, { align: 'right' });
+    doc.setDrawColor(...colors.borderGray);
+    doc.setLineWidth(0.3);
+    doc.line(margin, 14, pageWidth - margin, 14);
+    yPosition = currentY;
+  };
+
+  // Helper function: Add page footer
+  const addPageFooter = () => {
+    doc.setFontSize(8);
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('Confidential & Proprietary', pageWidth / 2, pageHeight - 10, { align: 'center' });
+  };
+
+  // Helper function: Check if new page is needed
+  const checkPageBreak = (spaceNeeded: number) => {
+    if (yPosition + spaceNeeded > pageHeight - 20) {
+      addPageFooter();
+      doc.addPage();
+      pageNumber++;
+      yPosition = 22;
+      addPageHeader();
+      yPosition = 25;
+      return true;
+    }
+    return false;
+  };
+
+  // Helper function: Draw section header
+  const addSectionHeader = (title: string) => {
+    checkPageBreak(20);
+    yPosition += 14;
+
+    // Background box for section header
+    doc.setFillColor(...colors.lightGray);
+    doc.rect(margin, yPosition - 4, fieldWidth, 10, 'F');
+
+    // Section title
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.navyBlue);
+    doc.text(title, margin + 3, yPosition + 3);
+
+    // Accent line
+    doc.setDrawColor(...colors.navyBlue);
+    doc.setLineWidth(0.8);
+    doc.line(margin, yPosition + 6.5, pageWidth - margin, yPosition + 6.5);
+
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.darkText);
+    yPosition += 14;
+  };
+
+  // Helper function: Draw subsection header
+  const addSubsectionHeader = (title: string) => {
+    checkPageBreak(15);
+    yPosition += 10;
+
+    // Left accent bar
+    doc.setFillColor(...colors.navyBlue);
+    doc.rect(margin, yPosition - 3, 2, 8, 'F');
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.mediumGray);
+    doc.text(title, margin + 5, yPosition + 3);
+
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.darkText);
+    yPosition += 10;
+  };
+
+  // Title Page Design
+  yPosition = 35;
+
+  // Title background box
+  doc.setFillColor(...colors.lightGray);
+  doc.rect(margin - 3, yPosition - 8, fieldWidth + 6, 28, 'F');
+
+  // Main title
+  doc.setFontSize(24);
   doc.setFont(undefined, 'bold');
-  doc.text('Contact Information', margin, yPosition);
+  doc.setTextColor(...colors.navyBlue);
+  doc.text('Estate Planning Questionnaire', pageWidth / 2, yPosition, { align: 'center' });
+
+  // Subtitle
+  yPosition += 10;
+  doc.setFontSize(11);
   doc.setFont(undefined, 'normal');
+  doc.setTextColor(...colors.mediumGray);
+  doc.text('Comprehensive Estate & Financial Planning Document', pageWidth / 2, yPosition, { align: 'center' });
+
+  // Decorative line
   yPosition += 8;
+  doc.setDrawColor(...colors.navyBlue);
+  doc.setLineWidth(1);
+  doc.line(margin + 20, yPosition, pageWidth - margin - 20, yPosition);
+
+  // Instructions
+  yPosition += 12;
+  doc.setFontSize(9);
+  doc.setTextColor(...colors.mediumGray);
+  doc.text('This is a fillable PDF document - click on the fields to enter your information', pageWidth / 2, yPosition, { align: 'center' });
+
+  yPosition += 15;
+  doc.setTextColor(...colors.darkText);
+  doc.setFontSize(10);
+
+  // Helper function: Add form field
+  const addField = (label: string, fieldName: string, value: string, height: number = 7) => {
+    checkPageBreak(height + 8);
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.mediumGray);
+    doc.text(label, margin, yPosition);
+    yPosition += 3;
+
+    // Field border
+    doc.setDrawColor(...colors.borderGray);
+    doc.setLineWidth(0.3);
+    doc.rect(margin, yPosition, fieldWidth, height);
+
+    const field = new doc.AcroFormTextField();
+    field.fieldName = fieldName;
+    field.Rect = [margin, yPosition, fieldWidth, height];
+    field.value = value;
+    field.fontSize = 10;
+    field.textColor = colors.darkText;
+    doc.addField(field);
+
+    yPosition += height + 5;
+    doc.setTextColor(...colors.darkText);
+  };
+
+  addSectionHeader('Contact Information');
 
   addField('Full Name:', 'fullName', formData.fullName || '');
   addField('Date of Birth:', 'dateOfBirth', formData.dateOfBirth || '');
@@ -198,12 +322,7 @@ export const generatePDF = (formData: FormData) => {
   addField('Phone Number:', 'phone', formData.phone || '');
 
   if (formData.hasSpouse === 'yes') {
-    yPosition += 6;
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('Spouse/Partner Information', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+    addSectionHeader('Spouse/Partner Information');
 
     addField('Spouse/Partner Name:', 'spouseName', formData.spouseName || '');
     addField('Date of Birth:', 'spouseDateOfBirth', formData.spouseDateOfBirth || '');
@@ -224,32 +343,33 @@ export const generatePDF = (formData: FormData) => {
     addField('Phone Number:', 'spousePhone', formData.spousePhone || '');
 
     if (formData.hasMarriageContract === 'yes') {
+      checkPageBreak(25);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.mediumGray);
+      doc.text('Marriage Contract:', margin, yPosition);
       yPosition += 6;
 
-      if (yPosition > 270) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
-      doc.text('Marriage Contract:', margin, yPosition);
-      yPosition += 5;
-
       doc.setFont(undefined, 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...colors.darkText);
       const client1Name = formData.fullName || 'Client 1';
       const client2Name = formData.spouseName || 'Client 2';
       const labelText = `${client1Name} and ${client2Name} have a marriage contract, and the document is located:`;
       doc.text(labelText, margin, yPosition);
-      yPosition += 5;
+      yPosition += 6;
 
-      doc.rect(margin, yPosition, fieldWidth - 15, 6);
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, yPosition, fieldWidth, 6);
 
       const marriageContractField = new doc.AcroFormTextField();
       marriageContractField.fieldName = 'marriageContractLocation';
-      marriageContractField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+      marriageContractField.Rect = [margin, yPosition, fieldWidth, 6];
       marriageContractField.fontSize = 9;
-      marriageContractField.textColor = [0, 0, 0];
+      marriageContractField.textColor = colors.darkText;
       marriageContractField.value = formData.marriageContractLocation || '';
       doc.addField(marriageContractField);
 
@@ -266,24 +386,16 @@ export const generatePDF = (formData: FormData) => {
     (formData.hasSpouse === 'yes' && (formData.client2HasPreviousRelationship === 'yes' || formData.client2HasPreviousRelationship === 'no'));
 
   if (hasAnyPreviousRelationships) {
-    if (yPosition > 260) {
-      doc.addPage();
-      yPosition = 12;
-    }
-
-    yPosition += 6;
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('Previous Relationships', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+    addSectionHeader('Previous Relationships');
   }
 
   if (formData.client1HasPreviousRelationship === 'no') {
+    checkPageBreak(12);
     doc.setFontSize(10);
+    doc.setTextColor(...colors.darkText);
     const labelText = `${client1Name} has not previously been in a marriage or common law relationship.`;
-    doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
-    yPosition += 10;
+    doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
+    yPosition += 12;
   }
 
   if (formData.client1HasPreviousRelationship === 'yes' && formData.client1PreviousRelationshipsData) {
@@ -294,32 +406,31 @@ export const generatePDF = (formData: FormData) => {
 
     prevRelData.forEach((relationship, index) => {
       console.log(`Client 1 Relationship ${index}:`, relationship);
-      if (yPosition > 240) {
-        doc.addPage();
-        yPosition = 12;
-      }
 
-      yPosition += 6;
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${client1Name}'s Previous Relationship ${index + 1}`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
+      addSubsectionHeader(`${client1Name}'s Previous Relationship ${index + 1}`);
 
       doc.setFontSize(9);
       addField('Previous Partner Name:', `client1PrevRel${index}Name`, relationship.name || '');
 
-      const labelColumnWidth = 40;
-      const tableWidth = fieldWidth - 15;
+      const labelColumnWidth = 45;
+      const tableWidth = fieldWidth;
       const valueColumnWidth = tableWidth - labelColumnWidth;
       const rowHeight = 6;
       const largeRowHeight = 20;
 
+      checkPageBreak(rowHeight * 2 + largeRowHeight + 10);
       yPosition += 2;
 
+      // Professional table styling
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.3);
       doc.setFontSize(9);
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight);
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight);
+
+      // Email row
+      doc.setFillColor(...colors.lightGray);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
+      doc.setTextColor(...colors.darkText);
       doc.text('Email Address:', margin + 2, yPosition + 4);
 
       const emailField = new doc.AcroFormTextField();
@@ -327,12 +438,14 @@ export const generatePDF = (formData: FormData) => {
       emailField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
       emailField.value = relationship.email || '';
       emailField.fontSize = 9;
-      emailField.textColor = [0, 0, 0];
+      emailField.textColor = colors.darkText;
       doc.addField(emailField);
       yPosition += rowHeight;
 
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight);
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight);
+      // Phone row
+      doc.setFillColor(...colors.lightGray);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
       doc.text('Phone Number:', margin + 2, yPosition + 4);
 
       const phoneField = new doc.AcroFormTextField();
@@ -340,12 +453,14 @@ export const generatePDF = (formData: FormData) => {
       phoneField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
       phoneField.value = relationship.phone || '';
       phoneField.fontSize = 9;
-      phoneField.textColor = [0, 0, 0];
+      phoneField.textColor = colors.darkText;
       doc.addField(phoneField);
       yPosition += rowHeight;
 
-      doc.rect(margin, yPosition, labelColumnWidth, largeRowHeight);
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight);
+      // Other information row
+      doc.setFillColor(...colors.lightGray);
+      doc.rect(margin, yPosition, labelColumnWidth, largeRowHeight, 'FD');
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight, 'D');
       doc.text('Other Information:', margin + 2, yPosition + 4);
 
       const otherInfoField = new doc.AcroFormTextField();
@@ -353,45 +468,52 @@ export const generatePDF = (formData: FormData) => {
       otherInfoField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight];
       otherInfoField.value = relationship.otherInfo || '';
       otherInfoField.fontSize = 9;
-      otherInfoField.textColor = [0, 0, 0];
+      otherInfoField.textColor = colors.darkText;
       otherInfoField.multiline = true;
       doc.addField(otherInfoField);
-      yPosition += largeRowHeight + 8;
+      yPosition += largeRowHeight + 10;
 
       if (relationship.hasSpousalSupport === 'no') {
+        checkPageBreak(15);
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.darkText);
         const labelText = `${client1Name} is not paying or receiving spousal support from a previous marriage or common law relationship with ${relationship.name || 'the indicated person'}.`;
-        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
-        yPosition += 10;
+        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
+        yPosition += 12;
       } else if (relationship.hasSpousalSupport === 'yes' && relationship.spousalSupportType) {
+        checkPageBreak(20);
         const supportAction = relationship.spousalSupportType === 'paying' ? 'paying' : 'receiving';
         const preposition = relationship.spousalSupportType === 'paying' ? 'to' : 'from';
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.darkText);
         const labelText = `${client1Name} is ${supportAction} spousal support ${preposition} ${relationship.name || 'the indicated person'}. This document outlining this arrangement is located:`;
-        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
+        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
         yPosition += 10;
+
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.3);
+        doc.rect(margin, yPosition, fieldWidth, 6);
 
         const supportDocField = new doc.AcroFormTextField();
         supportDocField.fieldName = `client1PrevRel${index}SupportDocLocation`;
-        supportDocField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+        supportDocField.Rect = [margin, yPosition, fieldWidth, 6];
         supportDocField.fontSize = 9;
-        supportDocField.textColor = [0, 0, 0];
+        supportDocField.textColor = colors.darkText;
         supportDocField.value = relationship.supportDocumentLocation || '';
         doc.addField(supportDocField);
 
-        yPosition += 12;
+        yPosition += 14;
       }
     });
   }
 
   if (formData.hasSpouse === 'yes' && formData.client2HasPreviousRelationship === 'no') {
-    if (yPosition > 270) {
-      doc.addPage();
-      yPosition = 12;
-    }
-
+    checkPageBreak(12);
     doc.setFontSize(10);
+    doc.setTextColor(...colors.darkText);
     const labelText = `${client2Name} has not previously been in a marriage or common law relationship.`;
-    doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
-    yPosition += 10;
+    doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
+    yPosition += 12;
   }
 
   if (formData.hasSpouse === 'yes' && formData.client2HasPreviousRelationship === 'yes' && formData.client2PreviousRelationshipsData) {
@@ -402,32 +524,31 @@ export const generatePDF = (formData: FormData) => {
 
     prevRelData.forEach((relationship, index) => {
       console.log(`Client 2 Relationship ${index}:`, relationship);
-      if (yPosition > 240) {
-        doc.addPage();
-        yPosition = 12;
-      }
 
-      yPosition += 6;
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${client2Name}'s Previous Relationship ${index + 1}`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
+      addSubsectionHeader(`${client2Name}'s Previous Relationship ${index + 1}`);
 
       doc.setFontSize(9);
       addField('Previous Partner Name:', `client2PrevRel${index}Name`, relationship.name || '');
 
-      const labelColumnWidth = 40;
-      const tableWidth = fieldWidth - 15;
+      const labelColumnWidth = 45;
+      const tableWidth = fieldWidth;
       const valueColumnWidth = tableWidth - labelColumnWidth;
       const rowHeight = 6;
       const largeRowHeight = 20;
 
+      checkPageBreak(rowHeight * 2 + largeRowHeight + 10);
       yPosition += 2;
 
+      // Professional table styling
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.3);
       doc.setFontSize(9);
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight);
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight);
+
+      // Email row
+      doc.setFillColor(...colors.lightGray);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
+      doc.setTextColor(...colors.darkText);
       doc.text('Email Address:', margin + 2, yPosition + 4);
 
       const emailField = new doc.AcroFormTextField();
@@ -435,12 +556,14 @@ export const generatePDF = (formData: FormData) => {
       emailField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
       emailField.value = relationship.email || '';
       emailField.fontSize = 9;
-      emailField.textColor = [0, 0, 0];
+      emailField.textColor = colors.darkText;
       doc.addField(emailField);
       yPosition += rowHeight;
 
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight);
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight);
+      // Phone row
+      doc.setFillColor(...colors.lightGray);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
       doc.text('Phone Number:', margin + 2, yPosition + 4);
 
       const phoneField = new doc.AcroFormTextField();
@@ -448,12 +571,14 @@ export const generatePDF = (formData: FormData) => {
       phoneField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
       phoneField.value = relationship.phone || '';
       phoneField.fontSize = 9;
-      phoneField.textColor = [0, 0, 0];
+      phoneField.textColor = colors.darkText;
       doc.addField(phoneField);
       yPosition += rowHeight;
 
-      doc.rect(margin, yPosition, labelColumnWidth, largeRowHeight);
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight);
+      // Other information row
+      doc.setFillColor(...colors.lightGray);
+      doc.rect(margin, yPosition, labelColumnWidth, largeRowHeight, 'FD');
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight, 'D');
       doc.text('Other Information:', margin + 2, yPosition + 4);
 
       const otherInfoField = new doc.AcroFormTextField();
@@ -461,60 +586,57 @@ export const generatePDF = (formData: FormData) => {
       otherInfoField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight];
       otherInfoField.value = relationship.otherInfo || '';
       otherInfoField.fontSize = 9;
-      otherInfoField.textColor = [0, 0, 0];
+      otherInfoField.textColor = colors.darkText;
       otherInfoField.multiline = true;
       doc.addField(otherInfoField);
-      yPosition += largeRowHeight + 8;
+      yPosition += largeRowHeight + 10;
 
       if (relationship.hasSpousalSupport === 'no') {
+        checkPageBreak(15);
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.darkText);
         const labelText = `${client2Name} is not paying or receiving spousal support from a previous marriage or common law relationship with ${relationship.name || 'the indicated person'}.`;
-        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
-        yPosition += 10;
+        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
+        yPosition += 12;
       } else if (relationship.hasSpousalSupport === 'yes' && relationship.spousalSupportType) {
+        checkPageBreak(20);
         const supportAction = relationship.spousalSupportType === 'paying' ? 'paying' : 'receiving';
         const preposition = relationship.spousalSupportType === 'paying' ? 'to' : 'from';
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.darkText);
         const labelText = `${client2Name} is ${supportAction} spousal support ${preposition} ${relationship.name || 'the indicated person'}. This document outlining this arrangement is located:`;
-        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth - 20 });
+        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
         yPosition += 10;
+
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.3);
+        doc.rect(margin, yPosition, fieldWidth, 6);
 
         const supportDocField = new doc.AcroFormTextField();
         supportDocField.fieldName = `client2PrevRel${index}SupportDocLocation`;
-        supportDocField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+        supportDocField.Rect = [margin, yPosition, fieldWidth, 6];
         supportDocField.fontSize = 9;
-        supportDocField.textColor = [0, 0, 0];
+        supportDocField.textColor = colors.darkText;
         supportDocField.value = relationship.supportDocumentLocation || '';
         doc.addField(supportDocField);
 
-        yPosition += 12;
+        yPosition += 14;
       }
     });
   }
 
   if (formData.hasChildren === 'yes' && formData.childrenData && formData.childrenData.length > 0) {
-    if (yPosition > 240) {
-      doc.addPage();
-      yPosition = 12;
-    }
+    addSectionHeader('Children Information');
 
     const childCount = formData.numberOfChildren === '6+' ? 6 : parseInt(formData.numberOfChildren || '0');
     const childrenToProcess = formData.childrenData.slice(0, childCount);
 
     childrenToProcess.forEach((child, index) => {
-      yPosition += 13;
-
-      if (yPosition > 270) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
       const childName = child.name || `Child ${index + 1}`;
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${childName} (DOB: ${child.dateOfBirth || ''})`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
+      addSubsectionHeader(`${childName} (DOB: ${child.dateOfBirth || ''})`);
 
-      yPosition += 6;
       doc.setFontSize(9);
+      doc.setTextColor(...colors.darkText);
 
       if (child.parentsOption) {
         let parentsText = '';
@@ -611,8 +733,10 @@ export const generatePDF = (formData: FormData) => {
           yPosition += 3;
           doc.setFontSize(9);
           doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.mediumGray);
           doc.text('Disability Information', margin, yPosition);
           doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
           yPosition += 6;
 
           doc.setFontSize(8);
@@ -1033,20 +1157,15 @@ export const generatePDF = (formData: FormData) => {
   }
 
   yPosition += 12;
-  if (yPosition > 270) {
-    doc.addPage();
-    yPosition = 12;
-  }
+  addSectionHeader('Who is on your Team?');
 
-  doc.setFontSize(12);
-  doc.setFont(undefined, 'bold');
-  doc.text('Who is on your Team?', margin, yPosition);
-  doc.setFont(undefined, 'normal');
-  yPosition += 6;
   doc.setFontSize(9);
+  doc.setTextColor(...colors.mediumGray);
   doc.text('Your Power(s) of Attorney and Estate Trustees should not act in a vacuum.', margin, yPosition);
-  yPosition += 4;
+  yPosition += 5;
   doc.text('This section lists the core professionals who already know your history.', margin, yPosition);
+  yPosition += 8;
+  doc.setTextColor(...colors.darkText);
   yPosition += 10;
 
   const hasSpouse = formData.hasSpouse === 'yes';
@@ -1951,20 +2070,13 @@ export const generatePDF = (formData: FormData) => {
   }
 
   if (totalBankCount > 0) {
-    yPosition += 12;
-    if (yPosition > 240) {
-      doc.addPage();
-      yPosition = 12;
-    }
+    addSectionHeader('Your Financial Footprint');
 
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('Your Financial Footprint', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 6;
     doc.setFontSize(9);
+    doc.setTextColor(...colors.mediumGray);
     doc.text('Banking and financial account information', margin, yPosition);
-    yPosition += 10;
+    yPosition += 12;
+    doc.setTextColor(...colors.darkText);
 
     if (bankingStructure === 'joint') {
       const jointCount = parseInt(formData.jointBankCount || '0');
@@ -2517,19 +2629,13 @@ export const generatePDF = (formData: FormData) => {
 
   if (formData.ownsRealEstate === 'yes') {
     yPosition += 12;
-    if (yPosition > 240) {
-      doc.addPage();
-      yPosition = 12;
-    }
+    addSectionHeader('Real Estate');
 
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('Real Estate', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 6;
     doc.setFontSize(9);
+    doc.setTextColor(...colors.mediumGray);
     doc.text('Information about owned properties', margin, yPosition);
-    yPosition += 10;
+    yPosition += 12;
+    doc.setTextColor(...colors.darkText);
 
     if (formData.isPrimaryResidence === 'yes') {
       const ownerMap: Record<string, string> = {
@@ -2743,17 +2849,7 @@ export const generatePDF = (formData: FormData) => {
       });
     }
 
-    yPosition += 12;
-    if (yPosition > 220) {
-      doc.addPage();
-      yPosition = 12;
-    }
-
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('Vehicles and Major Personal Property', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 10;
+    addSectionHeader('Vehicles and Major Personal Property');
 
     const vehicleItems = [
       'Automobiles:',
@@ -2844,11 +2940,8 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('High-Value Effects and Sentimental Heirlooms:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+    checkPageBreak(30);
+    addSectionHeader('High-Value Effects and Sentimental Heirlooms');
 
     doc.setFontSize(8);
     const heirloomText = "Listing these items here creates a 'Memorandum of Personal Effects' which allows for distribution outside the formal Will and can reduce probate complexity and family disputes. Keep in mind things like art and collections are subjective and your heirs might not know the true value of what you have as they are going through your belongings:";
@@ -2940,11 +3033,8 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('Secure Access and Storage:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+    checkPageBreak(30);
+    addSectionHeader('Secure Access and Storage');
 
     doc.setFontSize(8);
     const storageText = "Your representatives cannot protect what they cannot reach. This table identifies the physical 'gateways' to your assets:";
@@ -3036,20 +3126,13 @@ export const generatePDF = (formData: FormData) => {
   }
 
   if (formData.hasDebts === 'yes' && formData.debtsData && formData.debtsData.length > 0) {
-    yPosition += 12;
-    if (yPosition > 240) {
-      doc.addPage();
-      yPosition = 12;
-    }
+    addSectionHeader('Outstanding Debts');
 
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('Outstanding Debts', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 6;
     doc.setFontSize(9);
+    doc.setTextColor(...colors.mediumGray);
     doc.text('Information about outstanding debts (not including credit cards)', margin, yPosition);
-    yPosition += 10;
+    yPosition += 12;
+    doc.setTextColor(...colors.darkText);
 
     const client1Name = formData.fullName || 'Client 1';
     const client2Name = formData.spouseName || 'Client 2';
@@ -3308,16 +3391,7 @@ export const generatePDF = (formData: FormData) => {
 
   if (formData.client1HasCreditCards === 'yes' && formData.creditCardsData && formData.creditCardsData.length > 0) {
     yPosition += 12;
-    if (yPosition > 240) {
-      doc.addPage();
-      yPosition = 12;
-    }
-
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('Credit Cards', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 10;
+    addSectionHeader('Credit Cards');
 
     const client1Name = formData.fullName || 'Client 1';
 
@@ -5761,16 +5835,7 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  yPosition += 12;
-  if (yPosition > 270) {
-    doc.addPage();
-    yPosition = 12;
-  }
-
-  doc.setFontSize(10);
-  doc.setFont(undefined, 'bold');
-  doc.text('Additional Estate Planning Information', margin, yPosition);
-  doc.setFont(undefined, 'normal');
+  addSectionHeader('Additional Estate Planning Information');
 
   const sections = [
     { title: 'Assets & Properties', fieldName: 'assets' },
@@ -5785,27 +5850,34 @@ export const generatePDF = (formData: FormData) => {
   sections.forEach((section) => {
     yPosition += 11;
 
-    if (yPosition > 245) {
-      doc.addPage();
-      yPosition = 12;
-    }
+    checkPageBreak(28);
 
+    yPosition += 6;
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.mediumGray);
     doc.text(section.title, margin, yPosition);
     doc.setFont(undefined, 'normal');
 
-    yPosition += 4;
+    yPosition += 5;
+    doc.setDrawColor(...colors.borderGray);
+    doc.setLineWidth(0.3);
+    doc.rect(margin, yPosition, fieldWidth, 18);
+
     const textField = new doc.AcroFormTextField();
     textField.fieldName = section.fieldName;
-    textField.Rect = [margin, yPosition, fieldWidth - 5, 18];
+    textField.Rect = [margin, yPosition, fieldWidth, 18];
     textField.multiline = true;
     textField.fontSize = 9;
-    textField.textColor = [0, 0, 0];
+    textField.textColor = colors.darkText;
     doc.addField(textField);
 
-    yPosition += 20;
+    yPosition += 22;
+    doc.setTextColor(...colors.darkText);
   });
+
+  // Add footer to final page
+  addPageFooter();
 
   const fileName = `estate-planning-${formData.fullName?.replace(/\s+/g, '-').toLowerCase() || 'form'}.pdf`;
   doc.save(fileName);

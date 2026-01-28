@@ -143,6 +143,16 @@ const getOrdinalLabel = (num: number): string => {
 };
 
 export const generatePDF = (formData: FormData) => {
+  console.log('PDF Generator - Full FormData:', formData);
+  console.log('PDF Generator - Previous Relationships Check:', {
+    client1HasPreviousRelationship: formData.client1HasPreviousRelationship,
+    client1NumberOfPreviousRelationships: formData.client1NumberOfPreviousRelationships,
+    client1PreviousRelationshipsData: formData.client1PreviousRelationshipsData,
+    client2HasPreviousRelationship: formData.client2HasPreviousRelationship,
+    client2NumberOfPreviousRelationships: formData.client2NumberOfPreviousRelationships,
+    client2PreviousRelationshipsData: formData.client2PreviousRelationshipsData,
+  });
+
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 12;
@@ -283,7 +293,10 @@ export const generatePDF = (formData: FormData) => {
     const prevRelCount = parseInt(formData.client1NumberOfPreviousRelationships || '0');
     const prevRelData = formData.client1PreviousRelationshipsData.slice(0, prevRelCount);
 
+    console.log('Client 1 Previous Relationships Data:', prevRelData);
+
     prevRelData.forEach((relationship, index) => {
+      console.log(`Client 1 Relationship ${index}:`, relationship);
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 12;
@@ -388,7 +401,10 @@ export const generatePDF = (formData: FormData) => {
     const prevRelCount = parseInt(formData.client2NumberOfPreviousRelationships || '0');
     const prevRelData = formData.client2PreviousRelationshipsData.slice(0, prevRelCount);
 
+    console.log('Client 2 Previous Relationships Data:', prevRelData);
+
     prevRelData.forEach((relationship, index) => {
+      console.log(`Client 2 Relationship ${index}:`, relationship);
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 12;

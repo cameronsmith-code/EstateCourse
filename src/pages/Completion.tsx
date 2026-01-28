@@ -22,7 +22,9 @@ export default function Completion() {
 
     const data = {
       ...step1,
-      childrenData: step2.childrenData,
+      client1PreviousRelationshipsData: step2.client1PreviousRelationshipsData,
+      client2PreviousRelationshipsData: step2.client2PreviousRelationshipsData,
+      childrenData: step3.childrenData,
       ...step3,
       ...step4,
       ...step5,

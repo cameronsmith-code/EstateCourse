@@ -225,12 +225,18 @@ export const generatePDF = (formData: FormData) => {
       }
 
       doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text('Marriage Contract:', margin, yPosition);
+      yPosition += 5;
+
       doc.setFont(undefined, 'normal');
       const client1Name = formData.fullName || 'Client 1';
       const client2Name = formData.spouseName || 'Client 2';
       const labelText = `${client1Name} and ${client2Name} have a marriage contract, and the document is located:`;
       doc.text(labelText, margin, yPosition);
       yPosition += 5;
+
+      doc.rect(margin, yPosition, fieldWidth - 15, 6);
 
       const marriageContractField = new doc.AcroFormTextField();
       marriageContractField.fieldName = 'marriageContractLocation';
@@ -959,9 +965,8 @@ export const generatePDF = (formData: FormData) => {
             doc.setFontSize(9);
             doc.text(`${childName} has reached the age of majority in their province.`, margin, yPosition);
           } else if (child.overAgeMajority === 'no') {
-            const dob = new Date(child.dateOfBirth);
-            const majorityDate = new Date(dob);
-            majorityDate.setFullYear(dob.getFullYear() + ageOfMajority);
+            const [year, month, day] = child.dateOfBirth.split('-').map(Number);
+            const majorityDate = new Date(year + ageOfMajority, month - 1, day);
 
             const formattedDate = majorityDate.toLocaleDateString('en-US', {
               year: 'numeric',
@@ -970,7 +975,7 @@ export const generatePDF = (formData: FormData) => {
             });
 
             doc.setFontSize(9);
-            doc.text(`The child will reach the age of majority on ${formattedDate}.`, margin, yPosition);
+            doc.text(`${childName} will reach the age of majority in ${child.provinceTerritory} on ${formattedDate}.`, margin, yPosition);
           }
           yPosition += 6;
         }

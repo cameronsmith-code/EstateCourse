@@ -302,38 +302,51 @@ export const generatePDF = (formData: FormData) => {
       const labelColumnWidth = 40;
       const tableWidth = fieldWidth - 15;
       const valueColumnWidth = tableWidth - labelColumnWidth;
+      const rowHeight = 6;
+      const largeRowHeight = 20;
+
+      yPosition += 2;
 
       doc.setFontSize(9);
-      doc.text('Email Address:', margin, yPosition);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight);
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight);
+      doc.text('Email Address:', margin + 2, yPosition + 4);
+
       const emailField = new doc.AcroFormTextField();
       emailField.fieldName = `client1PrevRel${index}Email`;
-      emailField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 6];
+      emailField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
       emailField.value = relationship.email || '';
       emailField.fontSize = 9;
       emailField.textColor = [0, 0, 0];
       doc.addField(emailField);
-      yPosition += 8;
+      yPosition += rowHeight;
 
-      doc.text('Phone Number:', margin, yPosition);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight);
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight);
+      doc.text('Phone Number:', margin + 2, yPosition + 4);
+
       const phoneField = new doc.AcroFormTextField();
       phoneField.fieldName = `client1PrevRel${index}Phone`;
-      phoneField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 6];
+      phoneField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
       phoneField.value = relationship.phone || '';
       phoneField.fontSize = 9;
       phoneField.textColor = [0, 0, 0];
       doc.addField(phoneField);
-      yPosition += 8;
+      yPosition += rowHeight;
 
-      doc.text('Other Information:', margin, yPosition);
+      doc.rect(margin, yPosition, labelColumnWidth, largeRowHeight);
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight);
+      doc.text('Other Information:', margin + 2, yPosition + 4);
+
       const otherInfoField = new doc.AcroFormTextField();
       otherInfoField.fieldName = `client1PrevRel${index}OtherInfo`;
-      otherInfoField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 20];
+      otherInfoField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight];
       otherInfoField.value = relationship.otherInfo || '';
       otherInfoField.fontSize = 9;
       otherInfoField.textColor = [0, 0, 0];
       otherInfoField.multiline = true;
       doc.addField(otherInfoField);
-      yPosition += 25;
+      yPosition += largeRowHeight + 8;
 
       if (relationship.hasSpousalSupport === 'no') {
         const labelText = `${client1Name} is not paying or receiving spousal support from a previous marriage or common law relationship with ${relationship.name || 'the indicated person'}.`;
@@ -394,38 +407,51 @@ export const generatePDF = (formData: FormData) => {
       const labelColumnWidth = 40;
       const tableWidth = fieldWidth - 15;
       const valueColumnWidth = tableWidth - labelColumnWidth;
+      const rowHeight = 6;
+      const largeRowHeight = 20;
+
+      yPosition += 2;
 
       doc.setFontSize(9);
-      doc.text('Email Address:', margin, yPosition);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight);
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight);
+      doc.text('Email Address:', margin + 2, yPosition + 4);
+
       const emailField = new doc.AcroFormTextField();
       emailField.fieldName = `client2PrevRel${index}Email`;
-      emailField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 6];
+      emailField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
       emailField.value = relationship.email || '';
       emailField.fontSize = 9;
       emailField.textColor = [0, 0, 0];
       doc.addField(emailField);
-      yPosition += 8;
+      yPosition += rowHeight;
 
-      doc.text('Phone Number:', margin, yPosition);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight);
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight);
+      doc.text('Phone Number:', margin + 2, yPosition + 4);
+
       const phoneField = new doc.AcroFormTextField();
       phoneField.fieldName = `client2PrevRel${index}Phone`;
-      phoneField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 6];
+      phoneField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
       phoneField.value = relationship.phone || '';
       phoneField.fontSize = 9;
       phoneField.textColor = [0, 0, 0];
       doc.addField(phoneField);
-      yPosition += 8;
+      yPosition += rowHeight;
 
-      doc.text('Other Information:', margin, yPosition);
+      doc.rect(margin, yPosition, labelColumnWidth, largeRowHeight);
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight);
+      doc.text('Other Information:', margin + 2, yPosition + 4);
+
       const otherInfoField = new doc.AcroFormTextField();
       otherInfoField.fieldName = `client2PrevRel${index}OtherInfo`;
-      otherInfoField.Rect = [margin + labelColumnWidth, yPosition - 3, valueColumnWidth, 20];
+      otherInfoField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight];
       otherInfoField.value = relationship.otherInfo || '';
       otherInfoField.fontSize = 9;
       otherInfoField.textColor = [0, 0, 0];
       otherInfoField.multiline = true;
       doc.addField(otherInfoField);
-      yPosition += 25;
+      yPosition += largeRowHeight + 8;
 
       if (relationship.hasSpousalSupport === 'no') {
         const labelText = `${client2Name} is not paying or receiving spousal support from a previous marriage or common law relationship with ${relationship.name || 'the indicated person'}.`;

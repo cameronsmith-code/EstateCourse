@@ -666,6 +666,19 @@ export default function StepForm({
 
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Other Information
+                            </label>
+                            <textarea
+                              value={client1PreviousRelationshipsData[index]?.otherInfo || ''}
+                              onChange={(e) => handleClient1PrevRelChange(index, 'otherInfo', e.target.value)}
+                              placeholder="Enter any other relevant information"
+                              rows={4}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
                               Are you paying or receiving spousal support?
                             </label>
                             <div className="flex gap-4">
@@ -765,6 +778,19 @@ export default function StepForm({
                               value={client2PreviousRelationshipsData[index]?.name || ''}
                               onChange={(e) => handleClient2PrevRelChange(index, 'name', e.target.value)}
                               placeholder="Enter name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Other Information
+                            </label>
+                            <textarea
+                              value={client2PreviousRelationshipsData[index]?.otherInfo || ''}
+                              onChange={(e) => handleClient2PrevRelChange(index, 'otherInfo', e.target.value)}
+                              placeholder="Enter any other relevant information"
+                              rows={4}
                               className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                           </div>

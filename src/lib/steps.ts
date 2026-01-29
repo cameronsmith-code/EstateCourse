@@ -771,6 +771,12 @@ export const STEPS: Step[] = [
         placeholder: '0',
         required: false,
       },
+      {
+        key: 'corporationsData',
+        label: 'Corporation Details',
+        type: 'dynamic',
+        required: false,
+      },
     ],
   },
   {

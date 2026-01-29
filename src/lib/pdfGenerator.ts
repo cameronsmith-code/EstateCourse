@@ -5992,6 +5992,27 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(11);
       doc.setFont(undefined, 'bold');
+      doc.text('Beneficiaries if Client Predeceases:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      const benField = new doc.AcroFormTextField();
+      benField.fieldName = `client1_ben_trust_${trustIndex}_beneficiaries`;
+      benField.Rect = [margin, yPosition, fieldWidth, 25];
+      benField.multiline = true;
+      benField.fontSize = 9;
+      benField.textColor = [0, 0, 0];
+      doc.addField(benField);
+
+      yPosition += 30;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
       doc.text('Distribution Rules:', margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 6;
@@ -6348,6 +6369,27 @@ export const generatePDF = (formData: FormData) => {
       }
 
       yPosition = propTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Beneficiaries if Client Predeceases:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      const benField = new doc.AcroFormTextField();
+      benField.fieldName = `client2_ben_trust_${trustIndex}_beneficiaries`;
+      benField.Rect = [margin, yPosition, fieldWidth, 25];
+      benField.multiline = true;
+      benField.fontSize = 9;
+      benField.textColor = [0, 0, 0];
+      doc.addField(benField);
+
+      yPosition += 30;
 
       if (yPosition > 200) {
         doc.addPage();

@@ -1333,6 +1333,120 @@ export default function StepForm({
                           />
                         </div>
                       )}
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Do they have a spouse or common law partner?
+                        </label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`hasSpouse-${index}`}
+                              value="yes"
+                              checked={childrenData[index]?.hasSpouse === 'yes'}
+                              onChange={(e) => handleChildChange(index, 'hasSpouse', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">Yes</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`hasSpouse-${index}`}
+                              value="no"
+                              checked={childrenData[index]?.hasSpouse === 'no'}
+                              onChange={(e) => handleChildChange(index, 'hasSpouse', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">No</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {childrenData[index]?.hasSpouse === 'yes' && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Enter the spouse or common law partner's name:
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.spouseName || ''}
+                            onChange={(e) => handleChildChange(index, 'spouseName', e.target.value)}
+                            placeholder="Enter spouse/partner's name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Does {childrenData[index]?.name || 'this child'} have any children?
+                        </label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`hasChildren-${index}`}
+                              value="yes"
+                              checked={childrenData[index]?.hasChildren === 'yes'}
+                              onChange={(e) => handleChildChange(index, 'hasChildren', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">Yes</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`hasChildren-${index}`}
+                              value="no"
+                              checked={childrenData[index]?.hasChildren === 'no'}
+                              onChange={(e) => handleChildChange(index, 'hasChildren', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">No</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {childrenData[index]?.hasChildren === 'yes' && (
+                        <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              How many?
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="20"
+                              value={childrenData[index]?.numberOfGrandchildren || ''}
+                              onChange={(e) => handleChildChange(index, 'numberOfGrandchildren', e.target.value)}
+                              placeholder="Enter number of grandchildren"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          {childrenData[index]?.numberOfGrandchildren && parseInt(childrenData[index]?.numberOfGrandchildren || '0') > 0 && (
+                            <div className="space-y-3">
+                              <p className="text-sm font-medium text-gray-300">Grandchildren's Names:</p>
+                              {Array.from({ length: Math.min(parseInt(childrenData[index]?.numberOfGrandchildren || '0'), 20) }).map((_, gcIndex) => (
+                                <div key={gcIndex}>
+                                  <label className="block text-xs text-gray-400 mb-1">
+                                    Grandchild {gcIndex + 1}:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={childrenData[index]?.[`grandchild${gcIndex + 1}Name`] || ''}
+                                    onChange={(e) => handleChildChange(index, `grandchild${gcIndex + 1}Name`, e.target.value)}
+                                    placeholder={`Enter grandchild ${gcIndex + 1}'s name`}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

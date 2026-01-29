@@ -19,6 +19,10 @@ interface ChildData {
   provinceTerritory?: string;
   overAgeMajority?: string;
   countryOfResidence?: string;
+  hasSpouse?: string;
+  spouseName?: string;
+  hasChildren?: string;
+  numberOfGrandchildren?: string;
   [key: string]: string | undefined;
 }
 
@@ -1153,6 +1157,118 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition += 10;
       }
+
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      yPosition += 6;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.mediumGray);
+      doc.text('Spouse/Partner:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
+      yPosition += 5;
+
+      const hasSpouseField = new doc.AcroFormTextField();
+      hasSpouseField.fieldName = `child${index + 1}_hasSpouse`;
+      hasSpouseField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+      hasSpouseField.fontSize = 9;
+      hasSpouseField.textColor = colors.darkText;
+      hasSpouseField.value = child.hasSpouse === 'yes' ? 'Yes' : child.hasSpouse === 'no' ? 'No' : '';
+      doc.addField(hasSpouseField);
+
+      yPosition += 10;
+
+      if (child.hasSpouse === 'yes') {
+        doc.setFontSize(8);
+        doc.text('Spouse/Partner Name:', margin, yPosition);
+        yPosition += 2;
+
+        const spouseNameField = new doc.AcroFormTextField();
+        spouseNameField.fieldName = `child${index + 1}_spouseName`;
+        spouseNameField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+        spouseNameField.fontSize = 9;
+        spouseNameField.textColor = colors.darkText;
+        spouseNameField.value = child.spouseName || '';
+        doc.addField(spouseNameField);
+
+        yPosition += 10;
+      }
+
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      yPosition += 6;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.mediumGray);
+      doc.text(`Does ${childName} have any children:`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
+      yPosition += 5;
+
+      const hasChildrenField = new doc.AcroFormTextField();
+      hasChildrenField.fieldName = `child${index + 1}_hasChildren`;
+      hasChildrenField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+      hasChildrenField.fontSize = 9;
+      hasChildrenField.textColor = colors.darkText;
+      hasChildrenField.value = child.hasChildren === 'yes' ? 'Yes' : child.hasChildren === 'no' ? 'No' : '';
+      doc.addField(hasChildrenField);
+
+      yPosition += 10;
+
+      if (child.hasChildren === 'yes') {
+        doc.setFontSize(8);
+        doc.text('Number of Grandchildren:', margin, yPosition);
+        yPosition += 2;
+
+        const numGrandchildrenField = new doc.AcroFormTextField();
+        numGrandchildrenField.fieldName = `child${index + 1}_numberOfGrandchildren`;
+        numGrandchildrenField.Rect = [margin, yPosition, 30, 6];
+        numGrandchildrenField.fontSize = 9;
+        numGrandchildrenField.textColor = colors.darkText;
+        numGrandchildrenField.value = child.numberOfGrandchildren || '';
+        doc.addField(numGrandchildrenField);
+
+        yPosition += 10;
+
+        const gcCount = parseInt(child.numberOfGrandchildren || '0');
+        if (gcCount > 0) {
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.text('Grandchildren Names:', margin, yPosition);
+          doc.setFont(undefined, 'normal');
+          yPosition += 5;
+
+          for (let gc = 1; gc <= Math.min(gcCount, 20); gc++) {
+            if (yPosition > 270) {
+              doc.addPage();
+              yPosition = 12;
+            }
+
+            doc.setFontSize(8);
+            doc.text(`Grandchild ${gc}:`, margin, yPosition);
+            yPosition += 2;
+
+            const gcNameField = new doc.AcroFormTextField();
+            gcNameField.fieldName = `child${index + 1}_grandchild${gc}Name`;
+            gcNameField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+            gcNameField.fontSize = 9;
+            gcNameField.textColor = colors.darkText;
+            gcNameField.value = child[`grandchild${gc}Name`] || '';
+            doc.addField(gcNameField);
+
+            yPosition += 10;
+          }
+        }
+      }
+
+      yPosition += 8;
     });
   }
 

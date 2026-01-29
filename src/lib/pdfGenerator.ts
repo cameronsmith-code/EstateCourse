@@ -1924,6 +1924,191 @@ export const generatePDF = (formData: FormData) => {
     yPosition = poaPropertyTableY + 10;
   }
 
+  // Additional Reading for Powers of Attorney for Property
+  if (formData.client1HasWill === 'yes') {
+    if (yPosition > 150) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(11);
+    doc.text('Additional Reading - Powers of Attorney for Property', margin, yPosition);
+    yPosition += 8;
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+
+    const poaPropertyReadingText = [
+      'A Power of Attorney for Property (POAP) is a legal document in which one person (the "donor" or "grantor") grants',
+      'another person or trust company (the "attorney") the authority to make decisions regarding their finances,',
+      'property, and assets. Unlike a personal care directive which handles healthcare, the POAP is a fiduciary tool',
+      'focused on maintaining the grantor\'s economic well-being.',
+      '',
+      'To position the attorney to successfully fulfil their role, the following breakdown outlines the legal requirements',
+      'and best practices in Ontario:',
+      ''
+    ];
+
+    poaPropertyReadingText.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 1: How a POA Comes into Force
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(9);
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('How a POA Comes into Force:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const poaPropSection1Text = [
+      'An attorney must understand precisely when their authority begins to avoid legal liability or administrative delays.',
+      '',
+      '• Immediate Effect: Unless the document specifies otherwise, the POADP takes effect immediately upon being',
+      '  signed and witnessed. However, while the grantor remains capable, their decisions take precedence over the',
+      '  attorney\'s.',
+      '• Springing POA: A grantor may choose to have the power to "spring" into effect only upon a triggering event,',
+      '  such as a formal finding of mental incapacity by a physician or a qualified capacity assessor.',
+      '• Enduring (Continuing) Status: For a POA to be useful during a grantor\'s most vulnerable moments, it must be',
+      '  "enduring" or "continuing." This requires a specific clause stating the power continues notwithstanding the',
+      '  donor\'s loss of mental capacity. Without this clause, the attorney\'s power is extinguished exactly when it is',
+      '  often needed most.',
+      ''
+    ];
+
+    poaPropSection1Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 2: Responsibilities and Fiduciary Duties
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Responsibilities and Fiduciary Duties:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const poaPropSection2Text = [
+      'The attorney is a fiduciary, meaning they are legally and ethically bound to act with utmost good faith and always',
+      'in the best interests of the grantor.',
+      '',
+      '• Asset Management: The attorney is responsible for paying bills, managing investment accounts, collecting',
+      '  income, and protecting the value of real property.',
+      '• Standard of Care: The attorney must exercise a degree of care and skill that a "person of ordinary prudence"',
+      '  would use. If the attorney is a professional (like an accountant or lawyer), they may be held to a higher',
+      '  standard of care based on their expertise.',
+      '• Recordkeeping: Attorneys have a strict duty to keep complete and accurate accounts of all transactions,',
+      '  including receipts, disbursements, and investment statements.',
+      ''
+    ];
+
+    poaPropSection2Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 3: Revocation and Termination
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Revocation and Termination:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const poaPropSection3Text = [
+      'A Power of Attorney for Property remains valid until one of the following occurs:',
+      '',
+      '• Revocation: While the grantor is mentally capable, they may revoke the POA at any time by providing written',
+      '  notice to the attorney and relevant third parties, such as banks.',
+      '• Automatic Termination: The power terminates upon the death of the grantor (at which point the Will takes',
+      '  over) or the death/incapacity of the attorney.',
+      '• Relationship Breakdown: In most cases, separation or divorce does not automatically revoke a POA in favor of',
+      '  a spouse; it must be explicitly rescinded or replaced by the grantor.',
+      ''
+    ];
+
+    poaPropSection3Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 4: Best Practices for an Effective POA
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Best Practices for an Effective POA:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const poaPropSection4Text = [
+      'To ensure the attorney is in the best position to care for the grantor, the following strategies should be',
+      'implemented during the drafting phase:',
+      '',
+      '• Express Authority for Specific Tasks: Statutory law limits an attorney\'s power. If the grantor wants the',
+      '  attorney to have the authority to delegate investment decisions to a professional manager, make charitable gifts,',
+      '  or implement estate planning strategies (like an estate freeze), these powers must be explicitly granted in the',
+      '  document.',
+      '• Naming Contingents: To avoid a total loss of authority if the primary attorney is unable to act, grantors should',
+      '  always name a substitute or alternate attorney.',
+      '• Jurisdictional Residency: Ideally, the attorney should live in the same jurisdiction as the grantor. A',
+      '  non-resident attorney may face compliance hurdles, such as an Ontario financial advisor being legally unable to',
+      '  take investment instructions from an attorney residing in the U.S.',
+      '• Avoiding Sham Situations: The grantor must genuinely understand that they are transferring control. If the',
+      '  grantor retains informal control or has no real intention of losing control of the property, the trust or POA',
+      '  arrangement could be ruled a "sham" and invalidated by a court.',
+      '• Corporate Considerations: A POA allows an attorney to manage shares of a corporation but does not',
+      '  automatically grant them a seat as a director. The attorney must use their voting power as a shareholder to elect',
+      '  themselves (or another person) to the board.'
+    ];
+
+    poaPropSection4Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 12;
+  }
+
   if (formData.client1HasEstateTrustee === 'yes' && formData.client1EstateTrusteeCount) {
     const estateTrusteeCount = parseInt(formData.client1EstateTrusteeCount, 10);
 

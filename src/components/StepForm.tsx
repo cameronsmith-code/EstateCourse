@@ -605,7 +605,7 @@ export default function StepForm({
                           {propertiesData[index]?.hasAdditionalOwners === 'yes' && (
                             <div>
                               <label className="block text-sm font-medium text-gray-300 mb-2">
-                                How many people in total share ownership in this property?
+                                How many other people share ownership in this property?
                               </label>
                               <input
                                 type="number"

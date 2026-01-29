@@ -2861,8 +2861,8 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 8;
 
         if (property.hasAdditionalOwners === 'yes' && property.additionalOwnersCount) {
-          const ownerCount = parseInt(property.additionalOwnersCount) || 0;
-          const totalRows = ownerCount + 1;
+          const additionalOwnerCount = parseInt(property.additionalOwnersCount) || 0;
+          const totalRows = 2 + additionalOwnerCount;
 
           const ownershipCellHeight = 7;
           const ownerNameColWidth = fieldWidth * 0.5;

@@ -2201,6 +2201,209 @@ export const generatePDF = (formData: FormData) => {
     yPosition = etTableY + 10;
   }
 
+  // Additional Reading for Estate Trustees
+  if (formData.client1HasWill === 'yes') {
+    if (yPosition > 150) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(11);
+    doc.text('Additional Reading: Estate Trustees, Executors/Executrix, or Liquidators', margin, yPosition);
+    yPosition += 8;
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(9);
+    doc.text('Estate Trustee (in Ontario, Executor/Executrix or Liquidator in other jurisdictions):', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const estateTrusteeIntroText = [
+      'In Ontario, the term Estate Trustee is the specific designation of the individual or institution responsible for',
+      'administering a deceased person\'s estate. If named in a Will, the role is officially called Estate Trustee with a',
+      'Will. If the person died without a Will, the person appointed by the court is an Estate Trustee without a Will',
+      '(formerly \'administrator\').',
+      '',
+      'The role is a significant fiduciary responsibility that requires settling the estate according to the deceased\'s wishes',
+      'and provincial law.',
+      ''
+    ];
+
+    estateTrusteeIntroText.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 1: Preliminary Duties and Probate
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Preliminary Duties and Probate:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const etSection1Text = [
+      'The Estate Trustee\'s work begins immediately following the death.',
+      '',
+      '• Funeral and Proof of Death: They are responsible for arranging the funeral (unless family members have',
+      '  already done so) and obtaining multiple original copies of the proof-of-death certificate from the funeral director',
+      '  to provide to various institutions.',
+      '• Obtaining a Certificate of Appointment: In Ontario, the process of \'probating\' a Will involves applying to the',
+      '  court for a Certificate of Appointment of the Trustee with a Will. This document confirms the trustee\'s legal',
+      '  authority to deal with assets like bank accounts and real estate.',
+      '• Ontario Probate Taxes: Trustees must pay the Estate Administration Tax (probate tax) to the provincial',
+      '  government. In Ontario, this is currently calculated as $15 for every $1,000 (or 1.5%) of the estate\'s value that',
+      '  exceeds $50,000.',
+      ''
+    ];
+
+    etSection1Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 2: Safeguarding and Valuing Assets
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Safeguarding and Valuing Assets:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const etSection2Text = [
+      'The Trustee must act as a \'prudent investor\' to protect the estate\'s value.',
+      '',
+      '• Inventory: They must locate and prepare a comprehensive inventory of all assets (bank accounts, investments,',
+      '  real estate and digital assets) and liabilities (debts, loans, and credit cards).',
+      '• Protection: This includes changing locks on property, ensuring adequate insurance is in place for vacant homes',
+      '  or stored vehicles, and sometimes managing a business for a period to prevent loss of value.',
+      '• Estate Account: They should open a specific bank account to manage all incoming funds and pay the estate\'s',
+      '  expenses and debts.',
+      ''
+    ];
+
+    etSection2Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 3: Tax and Legal Obligations
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Tax and Legal Obligations:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const etSection3Text = [
+      'Tax compliance is one of the most critical aspects of the role:',
+      '',
+      '• Filing Returns: The trustee must file the deceased\'s final (terminal) income tax return and potentially an',
+      '  optional \'rights or things\' return. They may also need to file annual T3 Trust Returns for any income earned by',
+      '  the estate after the date of death.',
+      '• Clearance Certificate: Before distributing assets, the trustee should obtain a tax clearance certificate from the',
+      '  CRA. This confirms all taxes are paid and relieves the trustee of personal liability for future tax claims.',
+      ''
+    ];
+
+    etSection3Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 4: Distribution and Final Accounting
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Distribution and Final Accounting:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const etSection4Text = [
+      '• Settling Claims: The trustee must advertise for creditors to identify potential claims and ensure all legitimate',
+      '  debts are paid before beneficiaries receive anything.',
+      '• Distribution: Once debts and taxes are satisfied, the trustee distributes specific bequests and the remaining',
+      '  \'residue\' of the estate to the beneficiaries instructed by the Will.',
+      '• Accounting and Releases: The final tax is providing an accounting of the estate to the beneficiaries, showing all',
+      '  money received and spend. They should obtain signed releases from adult beneficiaries to waive their right to',
+      '  sue the trustee in the future.',
+      ''
+    ];
+
+    etSection4Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 5: Compensation
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Compensation:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const etSection5Text = [
+      'In Ontario, Estate Trustees are entitled to a \'fair and reasonable\' fee for their work, which typically ranges from',
+      '3% to 5% of the gross value of the estate, depending on the complexity and time involved.',
+      '',
+      'Given the number of tasks involved, it is recommended that you select a person(s) or a professional trust company',
+      'who is/are geographically close to where you currently reside.'
+    ];
+
+    etSection5Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 12;
+  }
+
   // Funeral Arrangements Section
   if (formData.client1HasFuneralArrangements === 'yes' || formData.client2HasFuneralArrangements === 'yes') {
     if (yPosition > 210) {

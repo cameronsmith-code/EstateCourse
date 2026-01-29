@@ -5608,13 +5608,13 @@ export const generatePDF = (formData: FormData) => {
 
   // Headers
   doc.setDrawColor(0, 0, 0);
-  doc.setFillColor(240, 240, 240);
+  doc.setFillColor(255, 255, 255);
   doc.setFont(undefined, 'bold');
   doc.setFontSize(7);
 
   hardwareHeaders.forEach((header, colIndex) => {
     const colX = margin + (colIndex * hardwareColWidth);
-    doc.rect(colX, hardwareTableY, hardwareColWidth, hardwareCellHeight, 'FD');
+    doc.rect(colX, hardwareTableY, hardwareColWidth, hardwareCellHeight);
     doc.text(header, colX + 0.5, hardwareTableY + 4.5);
   });
   hardwareTableY += hardwareCellHeight;
@@ -5714,13 +5714,13 @@ export const generatePDF = (formData: FormData) => {
   let socialTableY = yPosition;
 
   // Headers
-  doc.setFillColor(240, 240, 240);
+  doc.setFillColor(255, 255, 255);
   doc.setFont(undefined, 'bold');
   doc.setFontSize(7);
 
   socialHeaders.forEach((header, colIndex) => {
     const colX = margin + (colIndex * socialColWidth);
-    doc.rect(colX, socialTableY, socialColWidth, socialCellHeight, 'FD');
+    doc.rect(colX, socialTableY, socialColWidth, socialCellHeight);
     doc.text(header, colX + 0.5, socialTableY + 4.5);
   });
   socialTableY += socialCellHeight;
@@ -5820,13 +5820,13 @@ export const generatePDF = (formData: FormData) => {
   let financialTableY = yPosition;
 
   // Headers
-  doc.setFillColor(240, 240, 240);
+  doc.setFillColor(255, 255, 255);
   doc.setFont(undefined, 'bold');
   doc.setFontSize(7);
 
   financialHeaders.forEach((header, colIndex) => {
     const colX = margin + (colIndex * financialColWidth);
-    doc.rect(colX, financialTableY, financialColWidth, financialCellHeight, 'FD');
+    doc.rect(colX, financialTableY, financialColWidth, financialCellHeight);
     doc.text(header, colX + 0.5, financialTableY + 4.5);
   });
   financialTableY += financialCellHeight;

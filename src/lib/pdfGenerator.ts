@@ -86,6 +86,8 @@ interface FormData {
     otherDetails?: string;
     hasAdditionalOwners?: string;
     additionalOwnersCount?: string;
+    hasSuccessionPlan?: string;
+    successionPlanLocation?: string;
   }>;
   hasDebts?: string;
   debtsData?: Array<{
@@ -2962,7 +2964,286 @@ export const generatePDF = (formData: FormData) => {
         });
 
         yPosition = propertyTableY + 10;
+
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(9);
+        doc.text('Succession Planning', margin, yPosition);
+        yPosition += 6;
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8);
+        const successionQuestion = `Is there a written plan for what to do with this property should ${formData.fullName || 'Client 1'}${formData.spouseName ? ` and ${formData.spouseName}` : ''} pass away?`;
+        const successionAnswer = property.hasSuccessionPlan === 'yes' ? 'Yes' : property.hasSuccessionPlan === 'no' ? 'No' : 'Not answered';
+        doc.text(successionQuestion, margin, yPosition);
+        yPosition += 5;
+        doc.setFont(undefined, 'bold');
+        doc.text(`Answer: ${successionAnswer}`, margin, yPosition);
+        yPosition += 6;
+
+        if (property.hasSuccessionPlan === 'yes') {
+          doc.setFont(undefined, 'normal');
+          const successionCellHeight = 7;
+          const successionLabelWidth = fieldWidth * 0.35;
+          const successionFieldWidth = fieldWidth * 0.65;
+
+          if (yPosition > 275) {
+            doc.addPage();
+            yPosition = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, successionLabelWidth, successionCellHeight);
+          doc.rect(margin + successionLabelWidth, yPosition, successionFieldWidth, successionCellHeight);
+          doc.text('Document Location:', margin + 0.5, yPosition + 4.5);
+
+          const successionField = new doc.AcroFormTextField();
+          successionField.fieldName = `property_${propIndex + 1}_succession_plan_location`;
+          successionField.Rect = [margin + successionLabelWidth + 0.3, yPosition + 0.3, successionFieldWidth - 0.6, successionCellHeight - 0.6];
+          successionField.fontSize = 7;
+          successionField.textColor = [0, 0, 0];
+          successionField.borderStyle = 'none';
+          if (property.successionPlanLocation) {
+            successionField.value = property.successionPlanLocation;
+          }
+          doc.addField(successionField);
+
+          yPosition += successionCellHeight + 10;
+        } else {
+          yPosition += 5;
+        }
       });
+    }
+
+    const hasPropertyWithoutPlan = formData.propertiesData?.some(
+      (property) => property.hasSuccessionPlan === 'no'
+    );
+
+    if (hasPropertyWithoutPlan) {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(12);
+      doc.text('Additional Reading', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(9);
+
+      const introText = [
+        'Julia Chung, CFP®, FEA, TEP is a Financial Planning and Family Enterprise Consultant based in',
+        'Vancouver, and one of the leading minds in multigenerational financial planning.',
+        '',
+        'She wrote the following which is a great way to introduce the idea of planning for what may come up',
+        'should properties like vacation homes pass to the next generation. A similar logic would still apply',
+        'with rental properties. I have included her work for educational purposes as you indicated that one or',
+        'more properties do not have a written plan in place:'
+      ];
+
+      introText.forEach(line => {
+        if (yPosition > 280) {
+          doc.addPage();
+          yPosition = 12;
+        }
+        doc.text(line, margin, yPosition);
+        yPosition += 5;
+      });
+
+      yPosition += 5;
+
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(11);
+      const articleTitle = 'Planning for the Family Cottage, Cabin, or Camp';
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(articleTitle, margin, yPosition);
+      yPosition += 8;
+
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8);
+
+      const articleParagraphs = [
+        'Summer is sacred in Canada, and for many families, summers include a family cottage, cabin, or camp, stuffed with memories and nostalgic knickknacks. No matter what name you gave the place where your clan gets together to enjoy the outdoors - and each other - it\'s often an important part of who you are, and how your family connects.',
+        '',
+        'Many of these kinds of properties were purchased at a time when land, even waterfront land, was relatively inexpensive. Back when the founding family members were young, the options were endless, and capital gains taxes were a strange idea that only existed in foreign lands*.',
+        '',
+        'Today, many founding family members are grandparents or great-grandparents. The children are grown, with children, and even grandchildren of their own. The summer getaway might feel a little tighter with so many family members arriving each season, or may be organized under a strict schedule. Perhaps you\'ve added another lot here, and an additional building there.',
+        '',
+        'If your family has a summer hideaway, it\'s likely that determining how best to deal with this legacy might weigh a little heavy on your mind. Perhaps you\'ve talked to your professional advisors, or even searched the internet for ideas on how to move ahead.',
+        '',
+        'You may find that the differences in opinions about the "best" way to approach this varies widely. An advisor might tell you that second generations of owners never get along, and it\'s best to sell now before the fist fights begin. An article might advise you that the best approach is a trust, or a corporation, because tax planning is the only possible concern. Yet another resource might advise you to leave just one family member "in charge", or that the whole thing isn\'t even your problem to manage, because you\'ll be dead when the trouble starts.',
+        '',
+        'There are many people who have "been there, done that", who have strong opinions and strategies built on that experience. The important thing to remember is that they haven\'t "been there, done that" with your family. There isn\'t one right way to do... anything.',
+        '',
+        'There\'s might be the "right" way for your family, with your particular holiday home, your family culture, your specific way of communicating (or not communicating), your rules (usually, unwritten), and your aspirations.',
+        '',
+        'Here\'s how we find out what that is:',
+      ];
+
+      articleParagraphs.forEach(para => {
+        if (para === '') {
+          yPosition += 3;
+          return;
+        }
+
+        if (yPosition > 275) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        const lines = doc.splitTextToSize(para, fieldWidth);
+        lines.forEach((line: string) => {
+          if (yPosition > 280) {
+            doc.addPage();
+            yPosition = 12;
+          }
+          doc.text(line, margin, yPosition);
+          yPosition += 4;
+        });
+        yPosition += 2;
+      });
+
+      const sections = [
+        {
+          title: 'Start with an exploration... with the current legal owners...',
+          content: [
+            '• How does the ongoing management of this property impact our lives? What parts of it, whether financial, physical, or emotional, would we want to see change before the ends of our lives. Tip: This may involve a financial planning exercise.',
+            '',
+            '• What hopes or dreams do we have about this property? When we envision the last few decades of our own lives, and then the continuing lives of the generations that follow us, what do we wish to see?',
+            '',
+            '• If we do want the property passed down to the preceding generations, what concerns do we have about ongoing management?'
+          ]
+        },
+        {
+          title: 'Next... let\'s have a conversation...',
+          content: [
+            'Of course, whatever the current owners decide to do with the property is legally their own concern. From a family perspective, however, it might be everyone\'s concern. If maintaining family harmony is important, the next best step is a conversation with the generations who have grown up in, contributed to, and loved that family home.',
+            '',
+            'It might be best to start with each individual, and then later, have a family meeting where everyone is working with the same information. Tip: A professional facilitator could help make these conversations easier.',
+            '',
+            'For each individual, you may want to learn directly from them:',
+            '',
+            '• What does the family property mean to you?',
+            '• What would you like to see happen with, or what are your hopes regarding, this property?',
+            '• What are your concerns about the property, both now and in the future?',
+            '• Do you intend to make regular use of the property?',
+            '• How would you envision sharing this property with your family members?',
+            '• How much would you be willing to commit, whether in time or money or both, to routine costs?',
+            '• How would you want to approach decision making around things like regular repairs and upgrades?',
+            '• How would you see major decisions being made, such as whether to sell, when to make capital improvements, who gets to be on title, and more?',
+            '• What approach would you want to take to solving disagreements?',
+            '',
+            'From this conversation, you\'ll hopefully uncover whether or not each individual is emotionally connected to the property, and what kind of commitments they\'d make to it. You\'ll also find out what their biggest concerns are, and if they feel they have an interest in the property that comes ahead of, or after, another family member.',
+            '',
+            'This could be a great time to discuss the realities of the property, from maintenance and costs involved in keeping it going, to agreements with family members if ownership became shared. Of course, there\'s always that capital gains tax concern when the property ownership changes hands. It\'s best to come to these conversations equipped with that information, so everyone understands the level of responsibility required. Your professional advisors (financial planner and accountant) should be able to help you get quite a bit of that together.',
+            '',
+            'From there, you may find that there are just a few people who really want to keep the property. Or perhaps there are none and it\'s time for you to sell. Or perhaps everyone wants in. If more than one person definitely wants to maintain the property, then you know it\'s time for a family meeting.',
+            '',
+            'These conversations can be emotionally trying for some families, and incredibly easy for others. You may want assistance with these conversations, whether to on the finance side for technical information, or experts in facilitation and family therapy for wrangling through the more emotional aspects. If you find that the conversations feel tough, that doesn\'t mean they won\'t work. It usually means that the depth of feeling is enormous, which might mean that the tough conversations are very much worth it.'
+          ]
+        },
+        {
+          title: 'From there... create a plan',
+          content: [
+            'Yes, I skipped over the hardest part. It\'s not that I don\'t want to get into - I do. But the way your family meeting goes is going to be determined by your family and the information you learn in those deep discussions.',
+            '',
+            'Once you\'ve had these discussions and that (hopefully, professionally facilitated) family meeting, you\'ll find you can direct your professional advisors in the technical stuff - taxes, finances, legal documents - far more effectively. You\'ll know why you\'re taking the next steps that you\'re taking, and you\'ll feel confident that the "right" path for your family is the one you\'re already on.'
+          ]
+        }
+      ];
+
+      sections.forEach(section => {
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(9);
+        doc.text(section.title, margin, yPosition);
+        yPosition += 6;
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8);
+
+        section.content.forEach(para => {
+          if (para === '') {
+            yPosition += 3;
+            return;
+          }
+
+          if (yPosition > 275) {
+            doc.addPage();
+            yPosition = 12;
+          }
+
+          const lines = doc.splitTextToSize(para, fieldWidth);
+          lines.forEach((line: string) => {
+            if (yPosition > 280) {
+              doc.addPage();
+              yPosition = 12;
+            }
+            doc.text(line, margin, yPosition);
+            yPosition += 4;
+          });
+          yPosition += 2;
+        });
+
+        yPosition += 3;
+      });
+
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+      doc.text('*The History of Canada\'s Capital Gains Tax', margin, yPosition);
+      yPosition += 5;
+
+      doc.setFont(undefined, 'normal');
+      const historyText = [
+        'Prior to 1972, Canada did not have a capital gains tax. In 1972, the tax was introduced as a way of equalizing the tax system, removing inheritance tax, and funding our social security system. A capital gain is the difference between the purchase price and the sale price of an asset. Only a portion of that gain is considered taxable. Over the decades since the capital gains tax was introduced, the inclusion rate - the taxable amount of the gain - has changed several times.',
+        '',
+        '1972-1988: 50%',
+        '1988-1990: 66.67%',
+        '1990-1999: 75%',
+        'February 2000: 66.67%',
+        'October 2000: 50%'
+      ];
+
+      historyText.forEach(line => {
+        if (yPosition > 280) {
+          doc.addPage();
+          yPosition = 12;
+        }
+        if (line === '') {
+          yPosition += 3;
+        } else {
+          const lines = doc.splitTextToSize(line, fieldWidth);
+          lines.forEach((textLine: string) => {
+            if (yPosition > 280) {
+              doc.addPage();
+              yPosition = 12;
+            }
+            doc.text(textLine, margin, yPosition);
+            yPosition += 4;
+          });
+        }
+      });
+
+      yPosition += 10;
     }
 
     addSectionHeader('Vehicles and Major Personal Property');

@@ -617,6 +617,51 @@ export default function StepForm({
                               />
                             </div>
                           )}
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Is there a written plan for what to do with this property should {client1Name}{client2Name ? ` and ${client2Name}` : ''} pass away?
+                            </label>
+                            <div className="flex gap-4">
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`hasSuccessionPlan-${index}`}
+                                  value="yes"
+                                  checked={propertiesData[index]?.hasSuccessionPlan === 'yes'}
+                                  onChange={(e) => handlePropertyChange(index, 'hasSuccessionPlan', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">Yes</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`hasSuccessionPlan-${index}`}
+                                  value="no"
+                                  checked={propertiesData[index]?.hasSuccessionPlan === 'no'}
+                                  onChange={(e) => handlePropertyChange(index, 'hasSuccessionPlan', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">No</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {propertiesData[index]?.hasSuccessionPlan === 'yes' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Where is this document stored?
+                              </label>
+                              <input
+                                type="text"
+                                value={propertiesData[index]?.successionPlanLocation || ''}
+                                onChange={(e) => handlePropertyChange(index, 'successionPlanLocation', e.target.value)}
+                                placeholder="Enter document location"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

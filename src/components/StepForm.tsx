@@ -2372,13 +2372,7 @@ export default function StepForm({
                   if (question.key === 'corporationsData') {
                     return null;
                   }
-                  if (question.key === 'trustHasCorporation' && !hasFamilyTrust) {
-                    return null;
-                  }
-                  if (question.key === 'trustCorporationCount' && (answers['trustHasCorporation'] !== 'yes' || !hasFamilyTrust)) {
-                    return null;
-                  }
-                  if (question.key === 'trustCorporationsData') {
+                  if (question.key === 'trustHasCorporation' || question.key === 'trustCorporationCount' || question.key === 'trustCorporationsData') {
                     return null;
                   }
 
@@ -2503,6 +2497,28 @@ export default function StepForm({
                   </div>
                 );
               })()}
+
+              {hasFamilyTrust && (
+                <>
+                  {step.questions.map((question) => {
+                    if (question.key !== 'trustHasCorporation' && question.key !== 'trustCorporationCount') {
+                      return null;
+                    }
+                    if (question.key === 'trustCorporationCount' && answers['trustHasCorporation'] !== 'yes') {
+                      return null;
+                    }
+
+                    return (
+                      <FormField
+                        key={question.key}
+                        question={question}
+                        value={answers[question.key]}
+                        onChange={(value) => onAnswerChange(question.key, value)}
+                      />
+                    );
+                  })}
+                </>
+              )}
 
               {hasFamilyTrust && answers['trustHasCorporation'] === 'yes' && (() => {
                 const trustCorpCount = parseInt(answers['trustCorporationCount'] as string) || 0;

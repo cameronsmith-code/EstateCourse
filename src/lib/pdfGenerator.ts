@@ -1650,6 +1650,188 @@ export const generatePDF = (formData: FormData) => {
     yPosition = poaTableY + 10;
   }
 
+  // Additional Reading for Powers of Attorney for Personal Care
+  if (formData.client1HasWill === 'yes') {
+    if (yPosition > 150) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(11);
+    doc.text('Additional Reading - Powers of Attorney for Personal Care', margin, yPosition);
+    yPosition += 8;
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+
+    const poaReadingText = [
+      'In Ontario, a Power of Attorney for Personal Care is a legal document that allows a person (the "grantor" or',
+      '"Donor") to appoint someone they trust (the "attorney") to make decisions about their personal life and healthcare',
+      'if they become mentally incapable of doing so themselves.',
+      '',
+      'The following outline details the legal framework in Ontario, responsibilities, and best practices for creating an',
+      'effective plan.',
+      ''
+    ];
+
+    poaReadingText.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 1
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(9);
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('1. How does a Power of Attorney for Personal Care Come into Force?', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const section1Text = [
+      'Unlike a Power of Attorney for Property, which can be effective immediately, a Power of Attorney for Personal',
+      'Care is typically "springing" or "enduring"',
+      '',
+      '• Capacity Trigger: It generally only comes into effect when the grantor is determined to be mentally incapable',
+      '  of making their own personal care decisions.',
+      '• Defining Incapacity: A person is considered "incapable" if they can no longer understand information relevant',
+      '  to making a personal care decision or appreciate the foreseeable consequences of a decision (or lack thereof).',
+      '• Activation Mechanisms: To avoid ambiguity, the document can specify a triggering event, such as a functional',
+      '  capacity assessment performed by a physician or another qualified person.',
+      ''
+    ];
+
+    section1Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 2
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Responsibilities and Duties of the Attorney:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const section2Text = [
+      'An attorney for personal care acts as a fiduciary, meaning they must act with the utmost good faith and always in',
+      'the best interests of the grantor. Their specific responsibilities in Ontario include:',
+      '',
+      '• Healthcare and Treatment: Consenting to or refusing medical treatments, diagnostic tests, and surgical',
+      '  procedures.',
+      '• Living Arrangements: Deciding where the grantor lives, such as moving them into an assisted living facility or',
+      '  nursing home.',
+      '• Daily Quality of Life: Managing decisions regarding diet and nutrition, clothing, hygiene, and general safety.',
+      '• Following Wishes: The attorney must follow any specific instructions or known wishes the grantor has expressed',
+      '  while capable. If wishes are unknown, the attorney must act based on the grantor\'s known values and beliefs to',
+      '  determine their best interests.',
+      ''
+    ];
+
+    section2Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 3
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Revocation and Rescinding of the POA:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const section3Text = [
+      'As long as the grantor remains mentally capable, they maintain full control over the status of their POA:',
+      '',
+      '• Revocation: The grantor can revoke a POA at any time by providing written notice to the attorney and any',
+      '  relevant parties (such as doctors or financial institutions).',
+      '• New Documents: Executing a new POA typically revokes any previous version unless the document explicitly',
+      '  states that multiple POAs are intended to coexist.',
+      '• Death: A POA automatically terminates upon the death of the grantor, at which point the Will becomes the',
+      '  governing document.',
+      '• Marital Status: In most jurisdictions, including Ontario, a POA in favour of a spouse is not automatically',
+      '  revoked by separation or divorce, it must be explicitly rescinded by the grantor.',
+      ''
+    ];
+
+    section3Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 2;
+
+    // Section 4
+    doc.setFont(undefined, 'bold');
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text('Best Practices for an Effective POA:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    const section4Text = [
+      'To ensure the attorney is in the best position to provide seamless care, the following practices are',
+      'recommended:',
+      '',
+      '• Include a "Living Will": Also known as a personal directive, this document provides specific guidance on',
+      '  end-of-life care, such as Do Not Resuscitate (DNR) orders or instructions regarding life support. This takes the',
+      '  emotion burden off the attorney by documenting exactly what the grantor wants.',
+      '• Choose a Competent Succession: Grantors should name a contingent or alternate attorney in case the primary',
+      '  choice dies, becomes incapable, or is otherwise unable to act.',
+      '• Address Residency and Availability: The attorney should ideally live in the same jurisdiction as the grantor to',
+      '  avoid practical and regulatory challenges in giving instructions to local healthcare providers.',
+      '• Selection and Communication: The attorney should be someone trustworthy and organized. It is essential to',
+      '  discuss these roles with the intended attorney beforehand so they are not surprised by their responsibilities',
+      '  during a crisis.',
+      '• Strict Witnessing Rules: In Ontario, a POA is only valid if witnessed by people who do not have a conflict of',
+      '  interest. A witness cannot be the attorney (or their spouse), the grantor\'s spouse, or a child of the grantor.'
+    ];
+
+    section4Text.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 4.5;
+    });
+
+    yPosition += 12;
+  }
+
   if (formData.client1HasPoaProperty === 'yes' && formData.client1PoaPropertyCount) {
     const poaPropertyCount = parseInt(formData.client1PoaPropertyCount, 10);
 

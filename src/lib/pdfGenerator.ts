@@ -853,7 +853,19 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Other Details:', col4X + 0.5, tableY + 4);
           } else {
             doc.setFont(undefined, 'normal');
-            doc.text(row.label, col1X + 0.5, tableY + 4);
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `child${index + 1}_health_${rowIndex}_col1`;
+              labelField.Rect = [col1X + 0.3, tableY + 0.3, colWidths[0] - 0.6, cellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, col1X + 0.5, tableY + 4);
+            }
 
             const field1 = new doc.AcroFormTextField();
             field1.fieldName = `child${index + 1}_health_${rowIndex}_col2`;
@@ -962,7 +974,18 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Notes/Preferences:', eduCol3X + 0.3, eduTableY + 3.5);
             doc.text('Other:', eduCol4X + 0.3, eduTableY + 3.5);
           } else {
-            doc.text(row.label, eduCol1X + 0.3, eduTableY + 3.5);
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `child${index + 1}_edu_${rowIndex}_col1`;
+              labelField.Rect = [eduCol1X + 0.3, eduTableY + 0.3, eduColWidths[0] - 0.6, eduCellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, eduCol1X + 0.3, eduTableY + 3.5);
+            }
 
             const activityKey = [
               'school',
@@ -1068,7 +1091,18 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Username:', digitalCol3X + 0.3, digitalTableY + 3.5);
             doc.text('Password/PIN:', digitalCol4X + 0.3, digitalTableY + 3.5);
           } else {
-            doc.text(row.label, digitalCol1X + 0.3, digitalTableY + 3.5);
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `child${index + 1}_digital_${rowIndex}_col1`;
+              labelField.Rect = [digitalCol1X + 0.3, digitalTableY + 0.3, digitalColWidths[0] - 0.6, digitalCellHeight - 0.6];
+              labelField.fontSize = 6;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, digitalCol1X + 0.3, digitalTableY + 3.5);
+            }
 
             const digitalField1 = new doc.AcroFormTextField();
             digitalField1.fieldName = `child${index + 1}_digital_${rowIndex}_col2`;
@@ -1378,7 +1412,19 @@ export const generatePDF = (formData: FormData) => {
           doc.text('Other Details (If Applicable):', lawyerCol3X + 0.5, lawyerTableY + 4);
         } else {
           doc.setFont(undefined, 'normal');
-          doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
+
+          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+            const labelField = new doc.AcroFormTextField();
+            labelField.fieldName = `lawyer_shared_${rowIndex}_col1`;
+            labelField.Rect = [lawyerCol1X + 0.3, lawyerTableY + 0.3, lawyerColWidths[0] - 0.6, lawyerCellHeight - 0.6];
+            labelField.fontSize = 8;
+            labelField.textColor = [0, 0, 0];
+            labelField.borderStyle = 'none';
+            labelField.value = row.label;
+            doc.addField(labelField);
+          } else {
+            doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
+          }
 
           const lawyerField1 = new doc.AcroFormTextField();
           lawyerField1.fieldName = `lawyer_shared_${rowIndex}_col2`;
@@ -1454,7 +1500,19 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Other Details (If Applicable):', lawyerCol3X + 0.5, lawyerTableY + 4);
           } else {
             doc.setFont(undefined, 'normal');
-            doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `lawyer_client${clientIndex + 1}_${rowIndex}_col1`;
+              labelField.Rect = [lawyerCol1X + 0.3, lawyerTableY + 0.3, lawyerColWidths[0] - 0.6, lawyerCellHeight - 0.6];
+              labelField.fontSize = 8;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
+            }
 
             const lawyerField1 = new doc.AcroFormTextField();
             lawyerField1.fieldName = `lawyer_client${clientIndex + 1}_${rowIndex}_col2`;
@@ -2613,7 +2671,19 @@ export const generatePDF = (formData: FormData) => {
           doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
         } else {
           doc.setFont(undefined, 'normal');
-          doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
+
+          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+            const labelField = new doc.AcroFormTextField();
+            labelField.fieldName = `accountant_shared_${rowIndex}_col1`;
+            labelField.Rect = [accountantCol1X + 0.3, accountantTableY + 0.3, accountantColWidths[0] - 0.6, accountantCellHeight - 0.6];
+            labelField.fontSize = 8;
+            labelField.textColor = [0, 0, 0];
+            labelField.borderStyle = 'none';
+            labelField.value = row.label;
+            doc.addField(labelField);
+          } else {
+            doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
+          }
 
           const accountantField1 = new doc.AcroFormTextField();
           accountantField1.fieldName = `accountant_shared_${rowIndex}_col2`;
@@ -2694,7 +2764,19 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
           } else {
             doc.setFont(undefined, 'normal');
-            doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `accountant_client${clientIndex + 1}_${rowIndex}_col1`;
+              labelField.Rect = [accountantCol1X + 0.3, accountantTableY + 0.3, accountantColWidths[0] - 0.6, accountantCellHeight - 0.6];
+              labelField.fontSize = 8;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
+            }
 
             const accountantField1 = new doc.AcroFormTextField();
             accountantField1.fieldName = `accountant_client${clientIndex + 1}_${rowIndex}_col2`;
@@ -2864,7 +2946,19 @@ export const generatePDF = (formData: FormData) => {
           doc.text('Other Details:', advisorCol3X + 0.5, advisorTableY + 4);
         } else {
           doc.setFont(undefined, 'normal');
-          doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
+
+          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+            const labelField = new doc.AcroFormTextField();
+            labelField.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col1`;
+            labelField.Rect = [advisorCol1X + 0.3, advisorTableY + 0.3, advisorColWidths[0] - 0.6, advisorCellHeight - 0.6];
+            labelField.fontSize = 8;
+            labelField.textColor = [0, 0, 0];
+            labelField.borderStyle = 'none';
+            labelField.value = row.label;
+            doc.addField(labelField);
+          } else {
+            doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
+          }
 
           const advisorField1 = new doc.AcroFormTextField();
           advisorField1.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col2`;
@@ -2955,7 +3049,19 @@ export const generatePDF = (formData: FormData) => {
           doc.text('applicable):', accountCol4X + 0.5, accountTableY + 4.5);
         } else {
           doc.setFont(undefined, 'normal');
-          doc.text(row.label, accountCol1X + 0.5, accountTableY + 4);
+
+          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+            const labelField = new doc.AcroFormTextField();
+            labelField.fieldName = `accounts_client1_advisor${advisorIndex + 1}_${rowIndex}_col1`;
+            labelField.Rect = [accountCol1X + 0.3, accountTableY + 0.3, accountColWidths[0] - 0.6, accountCellHeight - 0.6];
+            labelField.fontSize = 7;
+            labelField.textColor = [0, 0, 0];
+            labelField.borderStyle = 'none';
+            labelField.value = row.label;
+            doc.addField(labelField);
+          } else {
+            doc.text(row.label, accountCol1X + 0.5, accountTableY + 4);
+          }
 
           const accountField1 = new doc.AcroFormTextField();
           accountField1.fieldName = `accounts_client1_advisor${advisorIndex + 1}_${rowIndex}_col2`;
@@ -3047,7 +3153,19 @@ export const generatePDF = (formData: FormData) => {
           doc.text('Other Details:', advisorCol3X + 0.5, advisorTableY + 4);
         } else {
           doc.setFont(undefined, 'normal');
-          doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
+
+          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+            const labelField = new doc.AcroFormTextField();
+            labelField.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col1`;
+            labelField.Rect = [advisorCol1X + 0.3, advisorTableY + 0.3, advisorColWidths[0] - 0.6, advisorCellHeight - 0.6];
+            labelField.fontSize = 8;
+            labelField.textColor = [0, 0, 0];
+            labelField.borderStyle = 'none';
+            labelField.value = row.label;
+            doc.addField(labelField);
+          } else {
+            doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
+          }
 
           const advisorField1 = new doc.AcroFormTextField();
           advisorField1.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col2`;
@@ -3138,7 +3256,19 @@ export const generatePDF = (formData: FormData) => {
           doc.text('applicable):', accountCol4X + 0.5, accountTableY + 4.5);
         } else {
           doc.setFont(undefined, 'normal');
-          doc.text(row.label, accountCol1X + 0.5, accountTableY + 4);
+
+          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+            const labelField = new doc.AcroFormTextField();
+            labelField.fieldName = `accounts_client2_advisor${advisorIndex + 1}_${rowIndex}_col1`;
+            labelField.Rect = [accountCol1X + 0.3, accountTableY + 0.3, accountColWidths[0] - 0.6, accountCellHeight - 0.6];
+            labelField.fontSize = 7;
+            labelField.textColor = [0, 0, 0];
+            labelField.borderStyle = 'none';
+            labelField.value = row.label;
+            doc.addField(labelField);
+          } else {
+            doc.text(row.label, accountCol1X + 0.5, accountTableY + 4);
+          }
 
           const accountField1 = new doc.AcroFormTextField();
           accountField1.fieldName = `accounts_client2_advisor${advisorIndex + 1}_${rowIndex}_col2`;
@@ -3288,7 +3418,19 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
           } else {
             doc.setFont(undefined, 'normal');
-            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `bank_joint_${i + 1}_${rowIndex}_col1`;
+              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+            }
 
             const bankField1 = new doc.AcroFormTextField();
             bankField1.fieldName = `bank_joint_${i + 1}_${rowIndex}_col2`;
@@ -3366,7 +3508,19 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
           } else {
             doc.setFont(undefined, 'normal');
-            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `bank_client1_${i + 1}_${rowIndex}_col1`;
+              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+            }
 
             const bankField1 = new doc.AcroFormTextField();
             bankField1.fieldName = `bank_client1_${i + 1}_${rowIndex}_col2`;
@@ -3444,7 +3598,19 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
           } else {
             doc.setFont(undefined, 'normal');
-            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `bank_client2_${i + 1}_${rowIndex}_col1`;
+              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+            }
 
             const bankField1 = new doc.AcroFormTextField();
             bankField1.fieldName = `bank_client2_${i + 1}_${rowIndex}_col2`;
@@ -3522,7 +3688,19 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
           } else {
             doc.setFont(undefined, 'normal');
-            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `bank_mixed_joint_${i + 1}_${rowIndex}_col1`;
+              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+            }
 
             const bankField1 = new doc.AcroFormTextField();
             bankField1.fieldName = `bank_mixed_joint_${i + 1}_${rowIndex}_col2`;
@@ -3600,7 +3778,19 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
           } else {
             doc.setFont(undefined, 'normal');
-            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `bank_mixed_client1_${i + 1}_${rowIndex}_col1`;
+              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+            }
 
             const bankField1 = new doc.AcroFormTextField();
             bankField1.fieldName = `bank_mixed_client1_${i + 1}_${rowIndex}_col2`;
@@ -3678,7 +3868,19 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
           } else {
             doc.setFont(undefined, 'normal');
-            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `bank_mixed_client2_${i + 1}_${rowIndex}_col1`;
+              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+            }
 
             const bankField1 = new doc.AcroFormTextField();
             bankField1.fieldName = `bank_mixed_client2_${i + 1}_${rowIndex}_col3`;
@@ -3756,7 +3958,19 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
           } else {
             doc.setFont(undefined, 'normal');
-            doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `bank_single_${i + 1}_${rowIndex}_col1`;
+              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
+            }
 
             const bankField1 = new doc.AcroFormTextField();
             bankField1.fieldName = `bank_single_${i + 1}_${rowIndex}_col2`;

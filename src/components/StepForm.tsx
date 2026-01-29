@@ -336,10 +336,16 @@ export default function StepForm({
                 if (question.key === 'numberOfChildren' && answers['hasChildren'] !== 'yes') {
                   return null;
                 }
+
+                let customLabel = question.label;
+                if (question.key === 'client1HasPreviousRelationship' && answers['maritalStatus'] === 'widowed') {
+                  customLabel = 'Aside from your former spouse or common law partner\'s passing, have you previously been married or in a common law relationship with another person?';
+                }
+
                 return (
                   <FormField
                     key={question.key}
-                    question={question}
+                    question={{...question, label: customLabel}}
                     value={answers[question.key]}
                     onChange={(value) => onAnswerChange(question.key, value)}
                   />

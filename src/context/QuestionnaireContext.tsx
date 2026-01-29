@@ -124,9 +124,12 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
           session_id: sessionId,
           current_step: 1,
           status: 'in_progress',
-        }]).catch((err) => {
-          console.warn('Failed to save to database:', err);
-        });
+        }]).then(
+          () => {},
+          (err) => {
+            console.warn('Failed to save to database:', err);
+          }
+        );
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -244,9 +247,12 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
       .from('questionnaires')
       .update({ current_step: newStep, updated_at: new Date().toISOString() })
       .eq('id', questionnaire.id)
-      .catch((err) => {
-        console.warn('Failed to update questionnaire step in database:', err);
-      });
+      .then(
+        () => {},
+        (err) => {
+          console.warn('Failed to update questionnaire step in database:', err);
+        }
+      );
   }, [questionnaire, currentStep, answers, saveAnswers]);
 
   const previousStep = useCallback(() => {
@@ -279,9 +285,12 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
       .from('questionnaires')
       .update({ status: 'completed', updated_at: new Date().toISOString() })
       .eq('id', questionnaire.id)
-      .catch((err) => {
-        console.warn('Failed to mark questionnaire complete in database:', err);
-      });
+      .then(
+        () => {},
+        (err) => {
+          console.warn('Failed to mark questionnaire complete in database:', err);
+        }
+      );
   }, [questionnaire, currentStep, answers, saveAnswers]);
 
   const clearAllAnswers = useCallback(async () => {
@@ -309,9 +318,12 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
         .from('questionnaires')
         .update({ current_step: 1, updated_at: new Date().toISOString() })
         .eq('id', questionnaire.id)
-    ]).catch((err) => {
-      console.warn('Failed to clear answers in database:', err);
-    });
+    ]).then(
+      () => {},
+      (err) => {
+        console.warn('Failed to clear answers in database:', err);
+      }
+    );
   }, [questionnaire]);
 
   return (

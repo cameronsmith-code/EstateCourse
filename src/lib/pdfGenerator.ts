@@ -67,8 +67,10 @@ interface FormData {
   childrenData?: ChildData[];
   client1HasWill?: string;
   client1WillJurisdiction?: string;
+  client1WillLocation?: string;
   client2HasWill?: string;
   client2WillJurisdiction?: string;
+  client2WillLocation?: string;
   willsSameLawyer?: string;
   client1UsesAccountant?: string;
   client2UsesAccountant?: string;
@@ -1338,6 +1340,13 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
     }
 
+    if (formData.client1HasWill === 'yes' && formData.client1WillLocation) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`The will is located at: ${formData.client1WillLocation}`, margin, yPosition);
+      yPosition += 6;
+    }
+
     if (formData.client2HasWill === 'yes' && formData.client2WillJurisdiction && hasSpouse) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
@@ -1345,8 +1354,15 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
     }
 
-    if ((formData.client1HasWill === 'yes' && formData.client1WillJurisdiction) ||
-        (formData.client2HasWill === 'yes' && formData.client2WillJurisdiction && hasSpouse)) {
+    if (formData.client2HasWill === 'yes' && formData.client2WillLocation && hasSpouse) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client2Name}'s will is located at: ${formData.client2WillLocation}`, margin, yPosition);
+      yPosition += 6;
+    }
+
+    if ((formData.client1HasWill === 'yes' && (formData.client1WillJurisdiction || formData.client1WillLocation)) ||
+        (formData.client2HasWill === 'yes' && (formData.client2WillJurisdiction || formData.client2WillLocation) && hasSpouse)) {
       yPosition += 4;
     }
 
@@ -1422,6 +1438,9 @@ export const generatePDF = (formData: FormData) => {
           lawyerField1.fontSize = 7;
           lawyerField1.textColor = [0, 0, 0];
           lawyerField1.borderStyle = 'none';
+          if (row.label === 'Will Location:' && formData.client1WillLocation) {
+            lawyerField1.value = formData.client1WillLocation;
+          }
           doc.addField(lawyerField1);
 
           const lawyerField2 = new doc.AcroFormTextField();
@@ -1510,6 +1529,12 @@ export const generatePDF = (formData: FormData) => {
             lawyerField1.fontSize = 7;
             lawyerField1.textColor = [0, 0, 0];
             lawyerField1.borderStyle = 'none';
+            if (row.label === 'Will Location:') {
+              const willLocation = clientIndex === 0 ? formData.client1WillLocation : formData.client2WillLocation;
+              if (willLocation) {
+                lawyerField1.value = willLocation;
+              }
+            }
             doc.addField(lawyerField1);
 
             const lawyerField2 = new doc.AcroFormTextField();
@@ -1588,6 +1613,12 @@ export const generatePDF = (formData: FormData) => {
           lawyerField1.fontSize = 7;
           lawyerField1.textColor = [0, 0, 0];
           lawyerField1.borderStyle = 'none';
+          if (row.label === 'Will Location:') {
+            const willLocation = formData.client1HasWill === 'yes' ? formData.client1WillLocation : formData.client2WillLocation;
+            if (willLocation) {
+              lawyerField1.value = willLocation;
+            }
+          }
           doc.addField(lawyerField1);
 
           const lawyerField2 = new doc.AcroFormTextField();

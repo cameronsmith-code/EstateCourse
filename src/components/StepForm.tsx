@@ -362,7 +362,13 @@ export default function StepForm({
                 const client1Name = basicAnswers['fullName'] as string || 'you';
                 const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
+                if (question.key === 'client1WillLocation' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client2HasWill' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2WillLocation' && (answers['client2HasWill'] !== 'yes' || !hasSpouse)) {
                   return null;
                 }
                 if (question.key === 'client2UsesAccountant' && !hasSpouse) {
@@ -409,8 +415,14 @@ export default function StepForm({
                 if (question.key === 'client1HasWill') {
                   customLabel = `Do you (${client1Name}) have a Will?`;
                 }
+                if (question.key === 'client1WillLocation') {
+                  customLabel = `${client1Name}, where is the Will located?`;
+                }
                 if (question.key === 'client2HasWill') {
                   customLabel = `Does ${client2Name} have a Will?`;
+                }
+                if (question.key === 'client2WillLocation') {
+                  customLabel = `${client2Name}, where is the Will located?`;
                 }
                 if (question.key === 'client1UsesAccountant') {
                   customLabel = `Do you (${client1Name}) use a professional accountant?`;

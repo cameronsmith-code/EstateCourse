@@ -390,6 +390,13 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
+        key: 'client1WillLocation',
+        label: 'Where is the Will located?',
+        type: 'text',
+        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
+        required: false,
+      },
+      {
         key: 'client2HasWill',
         label: 'Does your spouse have a Will?',
         type: 'radio',
@@ -397,6 +404,13 @@ export const STEPS: Step[] = [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
         ],
+        required: false,
+      },
+      {
+        key: 'client2WillLocation',
+        label: 'Where is the Will located?',
+        type: 'text',
+        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
         required: false,
       },
       {

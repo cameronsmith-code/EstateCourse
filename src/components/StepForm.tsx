@@ -592,7 +592,10 @@ export default function StepForm({
 
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Does anyone outside of {client1Name} or {client2Name} have ownership in this property?
+                              {hasSpouse
+                                ? `Does anyone outside of ${client1Name} or ${client2Name} have ownership in this property?`
+                                : `Does anyone outside of ${client1Name} have ownership in this property?`
+                              }
                             </label>
                             <div className="flex gap-4">
                               <label className="flex items-center">

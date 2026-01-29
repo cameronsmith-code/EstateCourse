@@ -27,6 +27,17 @@ export default function Wizard() {
     initQuestionnaire();
   }, [initQuestionnaire]);
 
+  useEffect(() => {
+    if (!loading && currentStep > 1 && !isStepVisible(currentStep)) {
+      const nextVisible = getNextVisibleStep(currentStep - 1);
+      if (nextVisible !== null && nextVisible !== currentStep) {
+        for (let i = 0; i < nextVisible - currentStep; i++) {
+          nextStep();
+        }
+      }
+    }
+  }, [currentStep, loading]);
+
   if (!STEPS || STEPS.length === 0) {
     return (
       <div className="max-w-2xl mx-auto">
@@ -38,16 +49,69 @@ export default function Wizard() {
     );
   }
 
+  const isStepVisible = (stepId: number) => {
+    const basicAnswers = answers.get(1) || {};
+    const client1HasPreviousRelationship = basicAnswers['client1HasPreviousRelationship'];
+    const client2HasPreviousRelationship = basicAnswers['client2HasPreviousRelationship'];
+    const hasChildren = basicAnswers['hasChildren'];
+
+    if (stepId === 2) {
+      return client1HasPreviousRelationship === 'yes' || client2HasPreviousRelationship === 'yes';
+    }
+    if (stepId === 3) {
+      return hasChildren === 'yes';
+    }
+    return true;
+  };
+
+  const getNextVisibleStep = (fromStep: number): number | null => {
+    for (let i = fromStep + 1; i <= STEPS.length; i++) {
+      if (isStepVisible(i)) {
+        return i;
+      }
+    }
+    return null;
+  };
+
+  const getPreviousVisibleStep = (fromStep: number): number | null => {
+    for (let i = fromStep - 1; i >= 1; i--) {
+      if (isStepVisible(i)) {
+        return i;
+      }
+    }
+    return null;
+  };
+
   const validCurrentStep = Math.min(Math.max(1, currentStep), STEPS.length);
   const currentStepData = STEPS.find((s) => s.id === validCurrentStep);
   const currentAnswers = answers.get(validCurrentStep) || {};
 
   const handleNext = async () => {
-    if (validCurrentStep === STEPS.length) {
+    const nextVisible = getNextVisibleStep(validCurrentStep);
+
+    if (nextVisible === null) {
       await completeQuestionnaire();
       navigate('/completion');
-    } else {
+    } else if (nextVisible === validCurrentStep + 1) {
       await nextStep();
+    } else {
+      for (let i = validCurrentStep + 1; i <= nextVisible; i++) {
+        await nextStep();
+      }
+    }
+  };
+
+  const handlePrevious = async () => {
+    const prevVisible = getPreviousVisibleStep(validCurrentStep);
+
+    if (prevVisible !== null) {
+      if (prevVisible === validCurrentStep - 1) {
+        await previousStep();
+      } else {
+        for (let i = validCurrentStep - 1; i >= prevVisible; i--) {
+          await previousStep();
+        }
+      }
     }
   };
 
@@ -115,16 +179,19 @@ export default function Wizard() {
         </p>
       </div>
 
-      <ProgressBar currentStep={validCurrentStep} totalSteps={STEPS.length} />
+      <ProgressBar
+        currentStep={STEPS.filter(s => s.id <= validCurrentStep && isStepVisible(s.id)).length}
+        totalSteps={STEPS.filter(s => isStepVisible(s.id)).length}
+      />
 
       <StepForm
         step={currentStepData}
         answers={currentAnswers}
         allAnswers={answers}
         isFirstStep={validCurrentStep === 1}
-        isLastStep={validCurrentStep === STEPS.length}
+        isLastStep={getNextVisibleStep(validCurrentStep) === null}
         onNext={handleNext}
-        onPrevious={previousStep}
+        onPrevious={handlePrevious}
         onAnswerChange={(key, value) => updateAnswer(validCurrentStep, key, value)}
       />
 

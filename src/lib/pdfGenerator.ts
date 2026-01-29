@@ -390,24 +390,12 @@ export const generatePDF = (formData: FormData) => {
   const client1Name = formData.fullName || 'Client 1';
   const client2Name = formData.spouseName || 'Client 2';
 
-  const isWidowedWithNoOtherRelationships = formData.maritalStatus === 'widowed' && formData.client1HasPreviousRelationship === 'no';
-
   const hasAnyPreviousRelationships =
-    (formData.client1HasPreviousRelationship === 'yes' ||
-    (formData.client1HasPreviousRelationship === 'no' && !isWidowedWithNoOtherRelationships)) ||
-    ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law') && (formData.client2HasPreviousRelationship === 'yes' || formData.client2HasPreviousRelationship === 'no'));
+    formData.client1HasPreviousRelationship === 'yes' ||
+    formData.client2HasPreviousRelationship === 'yes';
 
   if (hasAnyPreviousRelationships) {
     addSectionHeader('Previous Relationships');
-  }
-
-  if (formData.client1HasPreviousRelationship === 'no' && !isWidowedWithNoOtherRelationships) {
-    checkPageBreak(12);
-    doc.setFontSize(10);
-    doc.setTextColor(...colors.darkText);
-    const labelText = `${client1Name} has not previously been in a marriage or common law relationship.`;
-    doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
-    yPosition += 12;
   }
 
   if (formData.client1HasPreviousRelationship === 'yes' && formData.client1PreviousRelationshipsData) {
@@ -517,15 +505,6 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 14;
       }
     });
-  }
-
-  if ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law') && formData.client2HasPreviousRelationship === 'no') {
-    checkPageBreak(12);
-    doc.setFontSize(10);
-    doc.setTextColor(...colors.darkText);
-    const labelText = `${client2Name} has not previously been in a marriage or common law relationship.`;
-    doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
-    yPosition += 12;
   }
 
   if ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law') && formData.client2HasPreviousRelationship === 'yes' && formData.client2PreviousRelationshipsData) {

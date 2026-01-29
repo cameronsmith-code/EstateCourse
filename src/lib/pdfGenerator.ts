@@ -1748,6 +1748,21 @@ export const generatePDF = (formData: FormData) => {
       doc.text(docCopyLines, margin, yPosition);
       yPosition += docCopyLines.length * 5 + 5;
     }
+
+    if (formData.client1HasLivingWill === 'yes') {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const clientName = formData.fullName || 'The client';
+      const livingWillText = `Note that ${clientName}'s Power of Attorney(ies) for Personal Care also have Living Will instructions.`;
+      const livingWillLines = doc.splitTextToSize(livingWillText, fieldWidth);
+      doc.text(livingWillLines, margin, yPosition);
+      yPosition += livingWillLines.length * 5 + 5;
+    }
   }
 
   // Additional Reading for Powers of Attorney for Personal Care

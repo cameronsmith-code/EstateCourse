@@ -380,6 +380,9 @@ export default function StepForm({
                 if (question.key === 'client1HasPoaPersonalCare' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1HasLivingWill' && answers['client1HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client1PoaPersonalCareCount' && answers['client1HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }

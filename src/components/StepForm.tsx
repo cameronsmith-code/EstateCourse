@@ -137,7 +137,18 @@ export default function StepForm({
         }
       }
     } else {
-      const requiredQuestions = step.questions.filter((q) => q.required);
+      const requiredQuestions = step.questions.filter((q) => {
+        if (!q.required) return false;
+        if (q.condition && typeof q.condition === 'function') {
+          const allFormData = Object.fromEntries(
+            Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+              Object.entries(stepAnswers)
+            )
+          );
+          return q.condition(allFormData);
+        }
+        return true;
+      });
       const missingAnswers = requiredQuestions.filter((q) => !answers[q.key]);
 
       if (missingAnswers.length > 0) {

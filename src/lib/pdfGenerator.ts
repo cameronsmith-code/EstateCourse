@@ -6273,6 +6273,7 @@ export const generatePDF = (formData: FormData) => {
 
   if (formData.hasCorporation === 'yes' && formData.corporationCount) {
     const corpCount = parseInt(formData.corporationCount);
+    if (corpCount > 0) {
     for (let corpIndex = 1; corpIndex <= corpCount; corpIndex++) {
       if (yPosition > 240) {
         doc.addPage();
@@ -6944,10 +6945,12 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition = succTableY + 15;
     }
+    }
   }
 
   if (formData.hasFamilyTrust === 'yes' && formData.familyTrustCount) {
     const trustCount = parseInt(formData.familyTrustCount as string);
+    if (trustCount > 0) {
     const trustsData = formData.trustsData as Array<Record<string, string>> | undefined;
 
     for (let trustIndex = 0; trustIndex < trustCount; trustIndex++) {
@@ -7199,10 +7202,12 @@ export const generatePDF = (formData: FormData) => {
         }
       }
     }
+    }
   }
 
   if (formData.hasFamilyTrust === 'yes' && formData.familyTrustCount) {
     const trustCount = parseInt(formData.familyTrustCount as string);
+    if (trustCount > 0) {
     const trustsData = formData.trustsData as Array<Record<string, string>> | undefined;
 
     for (let trustIndex = 1; trustIndex <= trustCount; trustIndex++) {
@@ -7701,6 +7706,7 @@ export const generatePDF = (formData: FormData) => {
       }
 
       yPosition = contentsTableY + 15;
+    }
     }
   }
 

@@ -426,6 +426,16 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client1PoaPropertyHasDocCopy',
+        label: 'Do they have a copy of the most recent document in their files?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
         key: 'client1HasEstateTrustee',
         label: 'Have you named an Estate Trustee in your Will?',
         type: 'radio',

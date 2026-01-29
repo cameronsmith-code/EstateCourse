@@ -1937,6 +1937,21 @@ export const generatePDF = (formData: FormData) => {
     }
 
     yPosition = poaPropertyTableY + 10;
+
+    if (formData.client1PoaPropertyHasDocCopy === 'yes') {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const clientName = formData.fullName || 'The client';
+      const docCopyText = `${clientName} indicated that the Power(s) of Attorney for Property have a copy of the most recent documentation in their files.`;
+      const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
+      doc.text(docCopyLines, margin, yPosition);
+      yPosition += docCopyLines.length * 5 + 5;
+    }
   }
 
   // Additional Reading for Powers of Attorney for Property

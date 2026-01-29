@@ -5448,22 +5448,16 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      doc.setTextColor(...colors.mediumGray);
-      const claimText = `Should ${client1Name} who is the beneficiary of ${trustName || 'this trust'} predecease, the beneficiary(ies) would be:`;
-      doc.text(claimText, margin, yPosition);
-      yPosition += 6;
-
-      const claimField = new doc.AcroFormTextField();
-      claimField.fieldName = `client1_ben_trust_${trustIndex}_claim_on_predecease`;
-      claimField.Rect = [margin, yPosition, fieldWidth, 8];
-      claimField.multiline = true;
-      claimField.fontSize = 8;
-      claimField.textColor = colors.darkText;
-      claimField.value = trustData?.claimOnPredecease || '';
-      doc.addField(claimField);
-
-      yPosition += 12;
       doc.setTextColor(...colors.darkText);
+      const claimAnswer = trustData?.claimOnPredecease || '';
+      const claimText = `Should ${client1Name} who is the beneficiary of ${trustName || 'this trust'} predecease, the beneficiary(ies) would be: ${claimAnswer}`;
+      const wrappedClaimText = doc.splitTextToSize(claimText, fieldWidth);
+      wrappedClaimText.forEach((line: string) => {
+        doc.text(line, margin, yPosition);
+        yPosition += 4;
+      });
+
+      yPosition += 8;
 
       if (yPosition > 200) {
         doc.addPage();
@@ -5818,22 +5812,16 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      doc.setTextColor(...colors.mediumGray);
-      const claimText2 = `Should ${client2Name} who is the beneficiary of ${trustName || 'this trust'} predecease, the beneficiary(ies) would be:`;
-      doc.text(claimText2, margin, yPosition);
-      yPosition += 6;
-
-      const claimField2 = new doc.AcroFormTextField();
-      claimField2.fieldName = `client2_ben_trust_${trustIndex}_claim_on_predecease`;
-      claimField2.Rect = [margin, yPosition, fieldWidth, 8];
-      claimField2.multiline = true;
-      claimField2.fontSize = 8;
-      claimField2.textColor = colors.darkText;
-      claimField2.value = trustData?.claimOnPredecease || '';
-      doc.addField(claimField2);
-
-      yPosition += 12;
       doc.setTextColor(...colors.darkText);
+      const claimAnswer2 = trustData?.claimOnPredecease || '';
+      const claimText2 = `Should ${client2Name} who is the beneficiary of ${trustName || 'this trust'} predecease, the beneficiary(ies) would be: ${claimAnswer2}`;
+      const wrappedClaimText2 = doc.splitTextToSize(claimText2, fieldWidth);
+      wrappedClaimText2.forEach((line: string) => {
+        doc.text(line, margin, yPosition);
+        yPosition += 4;
+      });
+
+      yPosition += 8;
 
       if (yPosition > 200) {
         doc.addPage();

@@ -6271,9 +6271,8 @@ export const generatePDF = (formData: FormData) => {
 
   yPosition = financialTableY + 15;
 
-  if (formData.hasCorporation === 'yes' && formData.corporationCount) {
+  if (formData.hasCorporation === 'yes' && formData.corporationCount && parseInt(formData.corporationCount) > 0) {
     const corpCount = parseInt(formData.corporationCount);
-    if (corpCount > 0) {
     for (let corpIndex = 1; corpIndex <= corpCount; corpIndex++) {
       if (yPosition > 240) {
         doc.addPage();
@@ -6945,12 +6944,10 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition = succTableY + 15;
     }
-    }
   }
 
-  if (formData.hasFamilyTrust === 'yes' && formData.familyTrustCount) {
+  if (formData.hasFamilyTrust === 'yes' && formData.familyTrustCount && parseInt(formData.familyTrustCount as string) > 0) {
     const trustCount = parseInt(formData.familyTrustCount as string);
-    if (trustCount > 0) {
     const trustsData = formData.trustsData as Array<Record<string, string>> | undefined;
 
     for (let trustIndex = 0; trustIndex < trustCount; trustIndex++) {
@@ -7202,12 +7199,10 @@ export const generatePDF = (formData: FormData) => {
         }
       }
     }
-    }
   }
 
-  if (formData.hasFamilyTrust === 'yes' && formData.familyTrustCount) {
+  if (formData.hasFamilyTrust === 'yes' && formData.familyTrustCount && parseInt(formData.familyTrustCount as string) > 0) {
     const trustCount = parseInt(formData.familyTrustCount as string);
-    if (trustCount > 0) {
     const trustsData = formData.trustsData as Array<Record<string, string>> | undefined;
 
     for (let trustIndex = 1; trustIndex <= trustCount; trustIndex++) {
@@ -7707,10 +7702,9 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition = contentsTableY + 15;
     }
-    }
   }
 
-  if (formData.client1IsTrustBeneficiary === 'yes' && formData.client1BeneficiaryTrustCount) {
+  if (formData.client1IsTrustBeneficiary === 'yes' && formData.client1BeneficiaryTrustCount && parseInt(formData.client1BeneficiaryTrustCount as string) > 0) {
     const trustCount = parseInt(formData.client1BeneficiaryTrustCount as string);
     const trustsData = formData.client1BeneficiaryTrustsData as Array<Record<string, string>> | undefined;
     const client1Name = formData.fullName as string || 'Client 1';
@@ -8142,7 +8136,7 @@ export const generatePDF = (formData: FormData) => {
     yPosition += trustNameCellHeight + 15;
   }
 
-  if (formData.client2IsTrustBeneficiary === 'yes' && formData.client2BeneficiaryTrustCount) {
+  if (formData.client2IsTrustBeneficiary === 'yes' && formData.client2BeneficiaryTrustCount && parseInt(formData.client2BeneficiaryTrustCount as string) > 0) {
     const trustCount = parseInt(formData.client2BeneficiaryTrustCount as string);
     const trustsData = formData.client2BeneficiaryTrustsData as Array<Record<string, string>> | undefined;
     const client2Name = formData.spouseName as string || 'Client 2';

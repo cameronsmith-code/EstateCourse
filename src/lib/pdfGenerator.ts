@@ -390,16 +390,18 @@ export const generatePDF = (formData: FormData) => {
   const client1Name = formData.fullName || 'Client 1';
   const client2Name = formData.spouseName || 'Client 2';
 
+  const isWidowedWithNoOtherRelationships = formData.maritalStatus === 'widowed' && formData.client1HasPreviousRelationship === 'no';
+
   const hasAnyPreviousRelationships =
-    formData.client1HasPreviousRelationship === 'yes' ||
-    formData.client1HasPreviousRelationship === 'no' ||
+    (formData.client1HasPreviousRelationship === 'yes' ||
+    (formData.client1HasPreviousRelationship === 'no' && !isWidowedWithNoOtherRelationships)) ||
     ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law') && (formData.client2HasPreviousRelationship === 'yes' || formData.client2HasPreviousRelationship === 'no'));
 
   if (hasAnyPreviousRelationships) {
     addSectionHeader('Previous Relationships');
   }
 
-  if (formData.client1HasPreviousRelationship === 'no') {
+  if (formData.client1HasPreviousRelationship === 'no' && !isWidowedWithNoOtherRelationships) {
     checkPageBreak(12);
     doc.setFontSize(10);
     doc.setTextColor(...colors.darkText);

@@ -7,6 +7,7 @@ export type StepQuestion = {
   required?: boolean;
   videoUrl?: string;
   description?: string;
+  condition?: (formData: Record<string, string>) => boolean;
 };
 
 export type Step = {
@@ -260,6 +261,7 @@ export const STEPS: Step[] = [
         type: 'number',
         placeholder: '0',
         required: false,
+        condition: (formData: Record<string, string>) => formData.hasFamilyTrust === 'yes',
       },
     ],
   },
@@ -284,12 +286,14 @@ export const STEPS: Step[] = [
         type: 'number',
         placeholder: '0',
         required: false,
+        condition: (formData: Record<string, string>) => formData.hasCorporation === 'yes',
       },
       {
         key: 'corporationsData',
         label: 'Corporation Details',
         type: 'dynamic',
         required: false,
+        condition: (formData: Record<string, string>) => formData.hasCorporation === 'yes',
       },
       {
         key: 'trustHasCorporation',
@@ -300,6 +304,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.hasFamilyTrust === 'yes',
       },
       {
         key: 'trustCorporationCount',
@@ -307,12 +312,14 @@ export const STEPS: Step[] = [
         type: 'number',
         placeholder: '0',
         required: false,
+        condition: (formData: Record<string, string>) => formData.hasFamilyTrust === 'yes' && formData.trustHasCorporation === 'yes',
       },
       {
         key: 'trustCorporationsData',
         label: 'Trust Corporation Details',
         type: 'dynamic',
         required: false,
+        condition: (formData: Record<string, string>) => formData.hasFamilyTrust === 'yes' && formData.trustHasCorporation === 'yes',
       },
     ],
   },
@@ -337,6 +344,7 @@ export const STEPS: Step[] = [
         type: 'number',
         placeholder: '0',
         required: false,
+        condition: (formData: Record<string, string>) => formData.client1IsTrustBeneficiary === 'yes',
       },
       {
         key: 'client1IsSpousalTrustBeneficiary',
@@ -347,6 +355,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.client1IsTrustBeneficiary === 'yes',
       },
       {
         key: 'client1SpousalTrustDocumentLocation',
@@ -354,6 +363,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'e.g., Safe deposit box, home office filing cabinet',
         required: false,
+        condition: (formData: Record<string, string>) => formData.client1IsTrustBeneficiary === 'yes' && formData.client1IsSpousalTrustBeneficiary === 'yes',
       },
       {
         key: 'client2IsTrustBeneficiary',
@@ -371,6 +381,7 @@ export const STEPS: Step[] = [
         type: 'number',
         placeholder: '0',
         required: false,
+        condition: (formData: Record<string, string>) => formData.client2IsTrustBeneficiary === 'yes',
       },
     ],
   },

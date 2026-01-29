@@ -241,6 +241,30 @@ export const STEPS: Step[] = [
   },
   {
     id: 4,
+    title: 'Family Trusts',
+    description: 'Information about your family trusts',
+    questions: [
+      {
+        key: 'hasFamilyTrust',
+        label: 'Have you established a family trust?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'familyTrustCount',
+        label: 'How many family trusts have you established?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 5,
     title: 'Corporate Information',
     description: 'Information about your corporations',
     questions: [
@@ -265,30 +289,6 @@ export const STEPS: Step[] = [
         key: 'corporationsData',
         label: 'Corporation Details',
         type: 'dynamic',
-        required: false,
-      },
-    ],
-  },
-  {
-    id: 5,
-    title: 'Family Trusts',
-    description: 'Information about your family trusts',
-    questions: [
-      {
-        key: 'hasFamilyTrust',
-        label: 'Have you established a family trust?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'familyTrustCount',
-        label: 'How many family trusts have you established?',
-        type: 'number',
-        placeholder: '0',
         required: false,
       },
     ],

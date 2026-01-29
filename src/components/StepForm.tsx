@@ -641,7 +641,7 @@ export default function StepForm({
 
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Is there a written plan for what to do with this property should {client1Name}{client2Name ? ` and ${client2Name}` : ''} pass away?
+                              Is there a written plan for what to do with this property should {client1Name}{hasSpouse ? ` and ${client2Name}` : ''} pass away?
                             </label>
                             <div className="flex gap-4">
                               <label className="flex items-center">

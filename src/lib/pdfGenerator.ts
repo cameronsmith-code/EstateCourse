@@ -634,6 +634,8 @@ export const generatePDF = (formData: FormData) => {
   }
 
   if (formData.hasChildren === 'yes' && formData.childrenData && formData.childrenData.length > 0) {
+    doc.addPage();
+    yPosition = 12;
     addSectionHeader('Children Information');
 
     const childCount = formData.numberOfChildren === '6+' ? 6 : parseInt(formData.numberOfChildren || '0');
@@ -1311,6 +1313,8 @@ export const generatePDF = (formData: FormData) => {
   }
 
   yPosition += 12;
+  doc.addPage();
+  yPosition = 12;
   addSectionHeader('Who is on your Team?');
 
   doc.setFontSize(9);
@@ -3398,6 +3402,8 @@ export const generatePDF = (formData: FormData) => {
   }
 
   if (totalBankCount > 0) {
+    doc.addPage();
+    yPosition = 12;
     addSectionHeader('Your Financial Footprint');
 
     doc.setFontSize(9);
@@ -5422,10 +5428,14 @@ export const generatePDF = (formData: FormData) => {
     yPosition = insuranceTableY + 15;
   };
 
-  const generateWorkBenefitsChart = (clientName: string, hasWorkBenefits: string) => {
+  const generateWorkBenefitsChart = (clientName: string, hasWorkBenefits: string, isFirst: boolean = false) => {
     if (yPosition > 240) {
       doc.addPage();
       yPosition = 12;
+    }
+
+    if (isFirst) {
+      addSectionHeader('Insurance Summary');
     }
 
     doc.setFontSize(12);
@@ -5487,12 +5497,25 @@ export const generatePDF = (formData: FormData) => {
     yPosition = workBenefitsTableY + 15;
   };
 
+  const hasAnyInsurance = formData.client1HasWorkBenefits || formData.client2HasWorkBenefits ||
+    (formData.client1HasLifeInsurance === 'yes' && formData.client1LifeInsuranceCount && parseInt(formData.client1LifeInsuranceCount) > 0) ||
+    (formData.client2HasLifeInsurance === 'yes' && formData.client2LifeInsuranceCount && parseInt(formData.client2LifeInsuranceCount) > 0) ||
+    (formData.client1HasDisabilityInsurance === 'yes' && formData.client1DisabilityInsuranceCount && parseInt(formData.client1DisabilityInsuranceCount) > 0) ||
+    (formData.client2HasDisabilityInsurance === 'yes' && formData.client2DisabilityInsuranceCount && parseInt(formData.client2DisabilityInsuranceCount) > 0) ||
+    (formData.client1HasCriticalIllness === 'yes' && formData.client1CriticalIllnessCount && parseInt(formData.client1CriticalIllnessCount) > 0) ||
+    (formData.client2HasCriticalIllness === 'yes' && formData.client2CriticalIllnessCount && parseInt(formData.client2CriticalIllnessCount) > 0) ||
+    formData.hasHomeInsurance === 'yes' || formData.client1HasVehicleInsurance === 'yes' || formData.client2HasVehicleInsurance === 'yes';
+
+  let isFirstInsuranceSection = hasAnyInsurance;
+
   if (formData.client1HasWorkBenefits) {
-    generateWorkBenefitsChart(formData.fullName || 'Client 1', formData.client1HasWorkBenefits);
+    generateWorkBenefitsChart(formData.fullName || 'Client 1', formData.client1HasWorkBenefits, isFirstInsuranceSection);
+    isFirstInsuranceSection = false;
   }
 
   if (formData.client2HasWorkBenefits) {
-    generateWorkBenefitsChart(formData.spouseName || 'Client 2', formData.client2HasWorkBenefits);
+    generateWorkBenefitsChart(formData.spouseName || 'Client 2', formData.client2HasWorkBenefits, isFirstInsuranceSection);
+    isFirstInsuranceSection = false;
   }
 
   const hasAnyLifeInsurance =
@@ -5503,6 +5526,11 @@ export const generatePDF = (formData: FormData) => {
     if (yPosition > 240) {
       doc.addPage();
       yPosition = 12;
+    }
+
+    if (isFirstInsuranceSection) {
+      addSectionHeader('Insurance Summary');
+      isFirstInsuranceSection = false;
     }
 
     doc.setFontSize(14);
@@ -5536,6 +5564,11 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
+    if (isFirstInsuranceSection) {
+      addSectionHeader('Insurance Summary');
+      isFirstInsuranceSection = false;
+    }
+
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Disability Insurance', margin, yPosition);
@@ -5565,6 +5598,11 @@ export const generatePDF = (formData: FormData) => {
     if (yPosition > 240) {
       doc.addPage();
       yPosition = 12;
+    }
+
+    if (isFirstInsuranceSection) {
+      addSectionHeader('Insurance Summary');
+      isFirstInsuranceSection = false;
     }
 
     doc.setFontSize(14);
@@ -5652,6 +5690,11 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
+    if (isFirstInsuranceSection) {
+      addSectionHeader('Insurance Summary');
+      isFirstInsuranceSection = false;
+    }
+
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Property and Casualty Insurance', margin, yPosition);
@@ -5737,6 +5780,11 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
+    if (isFirstInsuranceSection) {
+      addSectionHeader('Insurance Summary');
+      isFirstInsuranceSection = false;
+    }
+
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Vehicle Insurance', margin, yPosition);
@@ -5771,6 +5819,11 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
+    if (isFirstInsuranceSection) {
+      addSectionHeader('Insurance Summary');
+      isFirstInsuranceSection = false;
+    }
+
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Vehicle Insurance', margin, yPosition);
@@ -5788,11 +5841,7 @@ export const generatePDF = (formData: FormData) => {
     yPosition = 12;
   }
 
-  doc.setFontSize(14);
-  doc.setFont(undefined, 'bold');
-  doc.text('Your Virtual Footprint', margin, yPosition);
-  doc.setFont(undefined, 'normal');
-  yPosition += 10;
+  addSectionHeader('Your Virtual Footprint');
 
   // Digital Assets & Subscriptions heading
   doc.setFontSize(12);
@@ -6230,11 +6279,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition = 12;
       }
 
-      doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
-      doc.text('Corporate Information', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 12;
+      addSectionHeader('Corporate Information');
 
       const corpNameCellHeight = 8;
       doc.setDrawColor(0, 0, 0);
@@ -7166,11 +7211,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition = 12;
       }
 
-      doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
-      doc.text('Family Trust Information', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 12;
+      addSectionHeader('Family Trust Information');
 
       const trustData = trustsData ? trustsData[trustIndex - 1] : {};
       const trustName = trustData?.trustName || '';

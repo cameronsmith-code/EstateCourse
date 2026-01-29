@@ -261,6 +261,15 @@ export default function StepForm({
                 if (question.key === 'client1EstateTrusteeCount' && answers['client1HasEstateTrustee'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1FuneralDocLocation' && answers['client1HasFuneralArrangements'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasFuneralArrangements' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2FuneralDocLocation' && (answers['client2HasFuneralArrangements'] !== 'yes' || !hasSpouse)) {
+                  return null;
+                }
                 if (question.key === 'accountantSamePerson' && !(answers['client1UsesAccountant'] === 'yes' && answers['client2UsesAccountant'] === 'yes')) {
                   return null;
                 }
@@ -286,6 +295,12 @@ export default function StepForm({
                 }
                 if (question.key === 'client2FinancialAdvisors') {
                   customLabel = `${client2Name}, how many Financial Advisors do you work with?`;
+                }
+                if (question.key === 'client1HasFuneralArrangements') {
+                  customLabel = `${client1Name}, have you made arrangements for Funeral or Cemetery services?`;
+                }
+                if (question.key === 'client2HasFuneralArrangements') {
+                  customLabel = `${client2Name}, have you made arrangements for Funeral or Cemetery services?`;
                 }
 
                 return (

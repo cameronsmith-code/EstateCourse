@@ -138,6 +138,10 @@ interface FormData {
   additionalVehiclesCount?: string;
   hasCorporation?: string;
   corporationCount?: string;
+  client1HasFuneralArrangements?: string;
+  client1FuneralDocLocation?: string;
+  client2HasFuneralArrangements?: string;
+  client2FuneralDocLocation?: string;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -1830,6 +1834,79 @@ export const generatePDF = (formData: FormData) => {
     yPosition = etTableY + 10;
   }
 
+  // Funeral Arrangements Section
+  if (formData.client1HasFuneralArrangements === 'yes' || formData.client2HasFuneralArrangements === 'yes') {
+    if (yPosition > 210) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Funeral and Cemetery Arrangements:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 8;
+
+    if (formData.client1HasFuneralArrangements === 'yes') {
+      doc.setFontSize(9);
+      doc.text(`${client1Name} has made arrangements for Funeral and Cemetery services,`, margin, yPosition);
+      yPosition += 5;
+      doc.text('and the supporting document is located:', margin, yPosition);
+      yPosition += 6;
+
+      const boxHeight = 8;
+      const boxY = yPosition;
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, boxY, fieldWidth, boxHeight);
+
+      const field = new doc.AcroFormTextField();
+      field.fieldName = 'client1_funeral_doc_location';
+      field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+      field.fontSize = 8;
+      field.textColor = [0, 0, 0];
+      field.borderStyle = 'none';
+      if (formData.client1FuneralDocLocation) {
+        field.value = formData.client1FuneralDocLocation;
+      }
+      doc.addField(field);
+
+      yPosition = boxY + boxHeight + 8;
+    }
+
+    if (formData.client2HasFuneralArrangements === 'yes' && hasSpouse) {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.text(`${client2Name} has made arrangements for Funeral and Cemetery services,`, margin, yPosition);
+      yPosition += 5;
+      doc.text('and the supporting document is located:', margin, yPosition);
+      yPosition += 6;
+
+      const boxHeight = 8;
+      const boxY = yPosition;
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, boxY, fieldWidth, boxHeight);
+
+      const field = new doc.AcroFormTextField();
+      field.fieldName = 'client2_funeral_doc_location';
+      field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+      field.fontSize = 8;
+      field.textColor = [0, 0, 0];
+      field.borderStyle = 'none';
+      if (formData.client2FuneralDocLocation) {
+        field.value = formData.client2FuneralDocLocation;
+      }
+      doc.addField(field);
+
+      yPosition = boxY + boxHeight + 8;
+    }
+  }
+
   if (formData.client1UsesAccountant === 'yes' || formData.client2UsesAccountant === 'yes') {
     const bothUseAccountant = formData.client1UsesAccountant === 'yes' && formData.client2UsesAccountant === 'yes';
     const sameAccountant = formData.accountantSamePerson === 'yes';
@@ -2448,6 +2525,46 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition = accountTableY + 10;
     }
+  }
+
+  // Additional Reading Section for Funeral Arrangements
+  const needsFuneralReading = formData.client1HasFuneralArrangements === 'no' ||
+                               (hasSpouse && formData.client2HasFuneralArrangements === 'no');
+
+  if (needsFuneralReading) {
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(12);
+    doc.text('Additional Reading', margin, yPosition);
+    yPosition += 8;
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+
+    const funeralText = [
+      'Prepaying for burial and funeral costs in Canada typically involves establishing an eligible funeral',
+      'arrangement (EFA), which is a formal agreement designed to fund these services for one or more',
+      'individuals. Prepayment covers "funeral services" (memorials, cremation, or burial arrangements) and',
+      '"cemetery services" (property and items like markers, urns, shrubs, and interment vaults).',
+      '',
+      'If you would like to know more about prepaying funeral services, please reach out to Cameron Smith',
+      'to discuss further.'
+    ];
+
+    funeralText.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 5;
+    });
+
+    yPosition += 12;
   }
 
   const bankingStructure = formData.bankingStructure;

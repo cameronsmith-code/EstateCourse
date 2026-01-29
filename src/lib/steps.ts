@@ -344,6 +344,40 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client1HasFuneralArrangements',
+        label: 'Have you made arrangements for Funeral or Cemetery services?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1FuneralDocLocation',
+        label: 'Where is the supporting document located?',
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+      },
+      {
+        key: 'client2HasFuneralArrangements',
+        label: 'Has your spouse made arrangements for Funeral or Cemetery services?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2FuneralDocLocation',
+        label: 'Where is the supporting document located?',
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+      },
+      {
         key: 'client1UsesAccountant',
         label: 'Do you use a professional accountant?',
         type: 'radio',

@@ -2169,6 +2169,21 @@ export default function StepForm({
                               className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                           </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              How many beneficiaries are there to this trust? *
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="50"
+                              value={trustsData[index]?.beneficiaryCount || ''}
+                              onChange={(e) => handleTrustChange(index, 'beneficiaryCount', e.target.value)}
+                              placeholder="Enter number of beneficiaries"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -2256,6 +2271,19 @@ export default function StepForm({
                                     className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                   />
                                 </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Who would have claim on the trust should you predecease? *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={trustsData[index]?.claimOnPredecease || ''}
+                                    onChange={(e) => handleTrustChange(index, 'claimOnPredecease', e.target.value)}
+                                    placeholder="Enter beneficiary(ies) who would have claim"
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -2332,6 +2360,19 @@ export default function StepForm({
                                         value={trustsData[index]?.deedLocation || ''}
                                         onChange={(e) => handleTrustChange(index, 'deedLocation', e.target.value)}
                                         placeholder="Enter trust deed location"
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Who would have claim on the trust should you predecease? *
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={trustsData[index]?.claimOnPredecease || ''}
+                                        onChange={(e) => handleTrustChange(index, 'claimOnPredecease', e.target.value)}
+                                        placeholder="Enter beneficiary(ies) who would have claim"
                                         className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                       />
                                     </div>

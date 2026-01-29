@@ -4528,10 +4528,11 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 10;
 
       const finCellHeight = 10;
-      const fCol1Width = fieldWidth * 0.25;
-      const fCol2Width = fieldWidth * 0.25;
-      const fCol3Width = fieldWidth * 0.25;
-      const fCol4Width = fieldWidth * 0.25;
+      const fCol1Width = fieldWidth * 0.20;
+      const fCol2Width = fieldWidth * 0.20;
+      const fCol3Width = fieldWidth * 0.20;
+      const fCol4Width = fieldWidth * 0.20;
+      const fCol5Width = fieldWidth * 0.20;
       let finTableY = yPosition;
 
       doc.setDrawColor(0, 0, 0);
@@ -4551,6 +4552,9 @@ export const generatePDF = (formData: FormData) => {
       doc.rect(margin + fCol1Width + fCol2Width + fCol3Width, finTableY, fCol4Width, finCellHeight);
       doc.text('Personal Guarantee?\n(Y/N)', margin + fCol1Width + fCol2Width + fCol3Width + 0.5, finTableY + 3.5);
 
+      doc.rect(margin + fCol1Width + fCol2Width + fCol3Width + fCol4Width, finTableY, fCol5Width, finCellHeight);
+      doc.text('Location of\nSupporting Documents', margin + fCol1Width + fCol2Width + fCol3Width + fCol4Width + 0.5, finTableY + 3.5);
+
       finTableY += finCellHeight;
 
       for (let i = 0; i < 4; i++) {
@@ -4565,6 +4569,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin + fCol1Width, finTableY, fCol2Width, finCellHeight);
         doc.rect(margin + fCol1Width + fCol2Width, finTableY, fCol3Width, finCellHeight);
         doc.rect(margin + fCol1Width + fCol2Width + fCol3Width, finTableY, fCol4Width, finCellHeight);
+        doc.rect(margin + fCol1Width + fCol2Width + fCol3Width + fCol4Width, finTableY, fCol5Width, finCellHeight);
 
         const fField1 = new doc.AcroFormTextField();
         fField1.fieldName = `corp_${corpIndex}_fin_creditor_${i}`;
@@ -4597,6 +4602,14 @@ export const generatePDF = (formData: FormData) => {
         fField4.textColor = [0, 0, 0];
         fField4.borderStyle = 'none';
         doc.addField(fField4);
+
+        const fField5 = new doc.AcroFormTextField();
+        fField5.fieldName = `corp_${corpIndex}_fin_location_${i}`;
+        fField5.Rect = [margin + fCol1Width + fCol2Width + fCol3Width + fCol4Width + 0.3, finTableY + 0.3, fCol5Width - 0.6, finCellHeight - 0.6];
+        fField5.fontSize = 7;
+        fField5.textColor = [0, 0, 0];
+        fField5.borderStyle = 'none';
+        doc.addField(fField5);
 
         finTableY += finCellHeight;
       }
@@ -4631,11 +4644,12 @@ export const generatePDF = (formData: FormData) => {
       ];
 
       const riskCellHeight = 10;
-      const rCol1Width = fieldWidth * 0.2;
-      const rCol2Width = fieldWidth * 0.2;
-      const rCol3Width = fieldWidth * 0.2;
-      const rCol4Width = fieldWidth * 0.2;
-      const rCol5Width = fieldWidth * 0.2;
+      const rCol1Width = fieldWidth * 0.17;
+      const rCol2Width = fieldWidth * 0.17;
+      const rCol3Width = fieldWidth * 0.16;
+      const rCol4Width = fieldWidth * 0.17;
+      const rCol5Width = fieldWidth * 0.16;
+      const rCol6Width = fieldWidth * 0.17;
       let riskTableY = yPosition;
 
       doc.setDrawColor(0, 0, 0);
@@ -4658,6 +4672,9 @@ export const generatePDF = (formData: FormData) => {
       doc.rect(margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width, riskTableY, rCol5Width, riskCellHeight);
       doc.text('Beneficiary/Purpose', margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width + 0.5, riskTableY + 5);
 
+      doc.rect(margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width + rCol5Width, riskTableY, rCol6Width, riskCellHeight);
+      doc.text('Location of\nSupporting Documents', margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width + rCol5Width + 0.5, riskTableY + 3.5);
+
       riskTableY += riskCellHeight;
 
       riskItems.forEach((item, index) => {
@@ -4679,6 +4696,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin + rCol1Width + rCol2Width, riskTableY, rCol3Width, riskCellHeight);
         doc.rect(margin + rCol1Width + rCol2Width + rCol3Width, riskTableY, rCol4Width, riskCellHeight);
         doc.rect(margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width, riskTableY, rCol5Width, riskCellHeight);
+        doc.rect(margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width + rCol5Width, riskTableY, rCol6Width, riskCellHeight);
 
         const rField1 = new doc.AcroFormTextField();
         rField1.fieldName = `corp_${corpIndex}_risk_carrier_${index}`;
@@ -4711,6 +4729,14 @@ export const generatePDF = (formData: FormData) => {
         rField4.textColor = [0, 0, 0];
         rField4.borderStyle = 'none';
         doc.addField(rField4);
+
+        const rField5 = new doc.AcroFormTextField();
+        rField5.fieldName = `corp_${corpIndex}_risk_location_${index}`;
+        rField5.Rect = [margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width + rCol5Width + 0.3, riskTableY + 0.3, rCol6Width - 0.6, riskCellHeight - 0.6];
+        rField5.fontSize = 7;
+        rField5.textColor = [0, 0, 0];
+        rField5.borderStyle = 'none';
+        doc.addField(rField5);
 
         riskTableY += riskCellHeight;
       });
@@ -4894,7 +4920,95 @@ export const generatePDF = (formData: FormData) => {
       yearField.borderStyle = 'none';
       doc.addField(yearField);
 
-      yPosition += trustNameCellHeight + 12;
+      yPosition += trustNameCellHeight + 4;
+
+      const beneficiaryCount = parseInt(trustData?.beneficiaryCount || '0');
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, trustNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text('Number of Beneficiaries:', margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, trustNameCellHeight);
+      const benefCountField = new doc.AcroFormTextField();
+      benefCountField.fieldName = `trust_${trustIndex}_beneficiary_count`;
+      benefCountField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, trustNameCellHeight - 0.6];
+      benefCountField.fontSize = 8;
+      benefCountField.textColor = [0, 0, 0];
+      benefCountField.borderStyle = 'none';
+      benefCountField.value = trustData?.beneficiaryCount || '';
+      doc.addField(benefCountField);
+
+      yPosition += trustNameCellHeight + 8;
+
+      if (beneficiaryCount > 0) {
+        if (yPosition > 240) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text('Trust Beneficiaries:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const benCellHeight = 8;
+        const benCol1Width = fieldWidth * 0.1;
+        const benCol2Width = fieldWidth * 0.45;
+        const benCol3Width = fieldWidth * 0.45;
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(200, 200, 200);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(8);
+
+        doc.rect(margin, yPosition, benCol1Width, benCellHeight);
+        doc.text('#', margin + 0.5, yPosition + 5);
+
+        doc.rect(margin + benCol1Width, yPosition, benCol2Width, benCellHeight);
+        doc.text('Beneficiary Name:', margin + benCol1Width + 0.5, yPosition + 5);
+
+        doc.rect(margin + benCol1Width + benCol2Width, yPosition, benCol3Width, benCellHeight);
+        doc.text('Relationship to Settlor:', margin + benCol1Width + benCol2Width + 0.5, yPosition + 5);
+
+        yPosition += benCellHeight;
+
+        for (let b = 1; b <= Math.min(beneficiaryCount, 20); b++) {
+          if (yPosition > 275) {
+            doc.addPage();
+            yPosition = 12;
+          }
+
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(7);
+
+          doc.rect(margin, yPosition, benCol1Width, benCellHeight);
+          doc.text(b.toString(), margin + 0.5, yPosition + 5);
+
+          doc.rect(margin + benCol1Width, yPosition, benCol2Width, benCellHeight);
+          const benNameField = new doc.AcroFormTextField();
+          benNameField.fieldName = `trust_${trustIndex}_beneficiary_${b}_name`;
+          benNameField.Rect = [margin + benCol1Width + 0.3, yPosition + 0.3, benCol2Width - 0.6, benCellHeight - 0.6];
+          benNameField.fontSize = 7;
+          benNameField.textColor = [0, 0, 0];
+          benNameField.borderStyle = 'none';
+          doc.addField(benNameField);
+
+          doc.rect(margin + benCol1Width + benCol2Width, yPosition, benCol3Width, benCellHeight);
+          const benRelField = new doc.AcroFormTextField();
+          benRelField.fieldName = `trust_${trustIndex}_beneficiary_${b}_relationship`;
+          benRelField.Rect = [margin + benCol1Width + benCol2Width + 0.3, yPosition + 0.3, benCol3Width - 0.6, benCellHeight - 0.6];
+          benRelField.fontSize = 7;
+          benRelField.textColor = [0, 0, 0];
+          benRelField.borderStyle = 'none';
+          doc.addField(benRelField);
+
+          yPosition += benCellHeight;
+        }
+
+        yPosition += 8;
+      }
 
       if (yPosition > 200) {
         doc.addPage();
@@ -5330,7 +5444,26 @@ export const generatePDF = (formData: FormData) => {
       durationField.borderStyle = 'none';
       doc.addField(durationField);
 
-      yPosition += trustNameCellHeight + 12;
+      yPosition += trustNameCellHeight + 4;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.mediumGray);
+      const claimText = `Should ${client1Name} who is the beneficiary of ${trustName || 'this trust'} predecease, the beneficiary(ies) would be:`;
+      doc.text(claimText, margin, yPosition);
+      yPosition += 6;
+
+      const claimField = new doc.AcroFormTextField();
+      claimField.fieldName = `client1_ben_trust_${trustIndex}_claim_on_predecease`;
+      claimField.Rect = [margin, yPosition, fieldWidth, 8];
+      claimField.multiline = true;
+      claimField.fontSize = 8;
+      claimField.textColor = colors.darkText;
+      claimField.value = trustData?.claimOnPredecease || '';
+      doc.addField(claimField);
+
+      yPosition += 12;
+      doc.setTextColor(...colors.darkText);
 
       if (yPosition > 200) {
         doc.addPage();
@@ -5681,7 +5814,26 @@ export const generatePDF = (formData: FormData) => {
       durationField.borderStyle = 'none';
       doc.addField(durationField);
 
-      yPosition += trustNameCellHeight + 12;
+      yPosition += trustNameCellHeight + 4;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.mediumGray);
+      const claimText2 = `Should ${client2Name} who is the beneficiary of ${trustName || 'this trust'} predecease, the beneficiary(ies) would be:`;
+      doc.text(claimText2, margin, yPosition);
+      yPosition += 6;
+
+      const claimField2 = new doc.AcroFormTextField();
+      claimField2.fieldName = `client2_ben_trust_${trustIndex}_claim_on_predecease`;
+      claimField2.Rect = [margin, yPosition, fieldWidth, 8];
+      claimField2.multiline = true;
+      claimField2.fontSize = 8;
+      claimField2.textColor = colors.darkText;
+      claimField2.value = trustData?.claimOnPredecease || '';
+      doc.addField(claimField2);
+
+      yPosition += 12;
+      doc.setTextColor(...colors.darkText);
 
       if (yPosition > 200) {
         doc.addPage();

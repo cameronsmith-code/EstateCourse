@@ -339,6 +339,23 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client1IsSpousalTrustBeneficiary',
+        label: 'Are you the beneficiary of a Spousal Trust?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client1SpousalTrustDocumentLocation',
+        label: 'Where is the Spousal Trust document located?',
+        type: 'text',
+        placeholder: 'e.g., Safe deposit box, home office filing cabinet',
+        required: false,
+      },
+      {
         key: 'client2IsTrustBeneficiary',
         label: 'Are you the beneficiary of a Trust?',
         type: 'radio',

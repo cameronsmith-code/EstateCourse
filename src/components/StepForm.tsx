@@ -2833,12 +2833,38 @@ export default function StepForm({
                   </>
                 )}
 
+                {basicAnswers['maritalStatus'] === 'widowed' && (
+                  <>
+                    <FormField
+                      key="client1IsSpousalTrustBeneficiary"
+                      question={{
+                        ...step.questions[2],
+                        label: `${client1Name}, are you the beneficiary of a Spousal Trust?`
+                      }}
+                      value={answers['client1IsSpousalTrustBeneficiary']}
+                      onChange={(value) => onAnswerChange('client1IsSpousalTrustBeneficiary', value)}
+                    />
+
+                    {answers['client1IsSpousalTrustBeneficiary'] === 'yes' && (
+                      <FormField
+                        key="client1SpousalTrustDocumentLocation"
+                        question={{
+                          ...step.questions[3],
+                          label: `${client1Name}, where is the Spousal Trust document located?`
+                        }}
+                        value={answers['client1SpousalTrustDocumentLocation']}
+                        onChange={(value) => onAnswerChange('client1SpousalTrustDocumentLocation', value)}
+                      />
+                    )}
+                  </>
+                )}
+
                 {hasSpouse && (
                   <>
                     <FormField
                       key="client2IsTrustBeneficiary"
                       question={{
-                        ...step.questions[2],
+                        ...step.questions[4],
                         label: `${client2Name}, are you the beneficiary of a Trust?`
                       }}
                       value={answers['client2IsTrustBeneficiary']}
@@ -2850,7 +2876,7 @@ export default function StepForm({
                         <FormField
                           key="client2BeneficiaryTrustCount"
                           question={{
-                            ...step.questions[3],
+                            ...step.questions[5],
                             label: `${client2Name}, how many trusts are you the beneficiary of?`
                           }}
                           value={answers['client2BeneficiaryTrustCount']}

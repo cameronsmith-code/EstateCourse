@@ -37,6 +37,7 @@ interface FormData {
   phone?: string;
   hasSpouse?: string;
   spouseName?: string;
+  maritalStatus?: string;
   hasMarriageContract?: string;
   marriageContractLocation?: string;
   client1HasPreviousRelationship?: string;
@@ -45,6 +46,14 @@ interface FormData {
   client2HasPreviousRelationship?: string;
   client2NumberOfPreviousRelationships?: string;
   client2PreviousRelationshipsData?: Array<Record<string, string>>;
+  client1IsTrustBeneficiary?: string;
+  client1BeneficiaryTrustCount?: string;
+  client1BeneficiaryTrustsData?: Array<Record<string, string>>;
+  client1IsSpousalTrustBeneficiary?: string;
+  client1SpousalTrustDocumentLocation?: string;
+  client2IsTrustBeneficiary?: string;
+  client2BeneficiaryTrustCount?: string;
+  client2BeneficiaryTrustsData?: Array<Record<string, string>>;
   spouseSameAddress?: string;
   spouseDateOfBirth?: string;
   spouseAddress?: string;
@@ -7971,6 +7980,53 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition += 30;
     }
+  }
+
+  if (formData.maritalStatus === 'widowed' && formData.client1IsSpousalTrustBeneficiary === 'yes') {
+    const client1Name = formData.fullName as string || 'Client 1';
+
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text(`${client1Name} - Spousal Trust Information`, margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 12;
+
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.darkText);
+    doc.text(`${client1Name} is the beneficiary of a Spousal Trust.`, margin, yPosition);
+    yPosition += 10;
+
+    const trustNameCellHeight = 10;
+
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.setFontSize(9);
+
+    doc.rect(margin, yPosition, fieldWidth * 0.35, trustNameCellHeight);
+    doc.setFont(undefined, 'bold');
+    doc.text('Document Location:', margin + 0.5, yPosition + 5);
+    doc.setFont(undefined, 'normal');
+
+    doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, trustNameCellHeight);
+    if (formData.client1SpousalTrustDocumentLocation) {
+      doc.setFontSize(8);
+      doc.text(formData.client1SpousalTrustDocumentLocation as string, margin + fieldWidth * 0.35 + 0.5, yPosition + 5);
+    } else {
+      const locationField = new doc.AcroFormTextField();
+      locationField.fieldName = 'client1_spousal_trust_location';
+      locationField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, trustNameCellHeight - 0.6];
+      locationField.fontSize = 8;
+      locationField.textColor = [0, 0, 0];
+      locationField.borderStyle = 'none';
+      doc.addField(locationField);
+    }
+
+    yPosition += trustNameCellHeight + 15;
   }
 
   if (formData.client2IsTrustBeneficiary === 'yes' && formData.client2BeneficiaryTrustCount) {

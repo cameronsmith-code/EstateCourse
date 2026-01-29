@@ -24,6 +24,7 @@ type QuestionnaireContextType = {
   nextStep: () => Promise<void>;
   previousStep: () => void;
   completeQuestionnaire: () => Promise<void>;
+  clearAllAnswers: () => Promise<void>;
 };
 
 const QuestionnaireContext = createContext<QuestionnaireContextType | undefined>(undefined);
@@ -257,6 +258,46 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     }
   }, [questionnaire, currentStep, saveAnswers]);
 
+  const clearAllAnswers = useCallback(async () => {
+    if (!questionnaire) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      setAnswers(new Map());
+      setCurrentStep(1);
+
+      const updated = {
+        ...questionnaire,
+        current_step: 1,
+        updated_at: new Date().toISOString(),
+      };
+      setQuestionnaire(updated);
+
+      localStorage.removeItem(ANSWERS_KEY);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+      try {
+        await supabase
+          .from('questionnaire_answers')
+          .delete()
+          .eq('questionnaire_id', questionnaire.id);
+
+        await supabase
+          .from('questionnaires')
+          .update({ current_step: 1, updated_at: new Date().toISOString() })
+          .eq('id', questionnaire.id);
+      } catch (dbErr) {
+        console.warn('Failed to clear answers in database:', dbErr);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clear answers');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [questionnaire]);
+
   return (
     <QuestionnaireContext.Provider
       value={{
@@ -271,6 +312,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
         nextStep,
         previousStep,
         completeQuestionnaire,
+        clearAllAnswers,
       }}
     >
       {children}

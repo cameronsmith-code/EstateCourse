@@ -172,19 +172,19 @@ export default function StepForm({
           {step.id === 1 && (
             <>
               {step.questions.map((question) => {
-                if (question.key === 'spouseName' && answers['hasSpouse'] !== 'yes') {
+                if (question.key === 'spouseName' && (answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law')) {
                   return null;
                 }
-                if (question.key === 'hasMarriageContract' && answers['hasSpouse'] !== 'yes') {
+                if (question.key === 'hasMarriageContract' && (answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law')) {
                   return null;
                 }
-                if (question.key === 'marriageContractLocation' && (answers['hasSpouse'] !== 'yes' || answers['hasMarriageContract'] !== 'yes')) {
+                if (question.key === 'marriageContractLocation' && ((answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law') || answers['hasMarriageContract'] !== 'yes')) {
                   return null;
                 }
-                if (question.key === 'spouseSameAddress' && answers['hasSpouse'] !== 'yes') {
+                if (question.key === 'spouseSameAddress' && (answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law')) {
                   return null;
                 }
-                if (question.key === 'spouseDateOfBirth' && answers['hasSpouse'] !== 'yes') {
+                if (question.key === 'spouseDateOfBirth' && (answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law')) {
                   return null;
                 }
                 if (
@@ -192,23 +192,23 @@ export default function StepForm({
                     question.key === 'spouseCity' ||
                     question.key === 'spouseProvince' ||
                     question.key === 'spousePostalCode') &&
-                  (answers['hasSpouse'] !== 'yes' || answers['spouseSameAddress'] === 'yes')
+                  ((answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law') || answers['spouseSameAddress'] === 'yes')
                 ) {
                   return null;
                 }
-                if (question.key === 'spouseEmail' && answers['hasSpouse'] !== 'yes') {
+                if (question.key === 'spouseEmail' && (answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law')) {
                   return null;
                 }
-                if (question.key === 'spousePhone' && answers['hasSpouse'] !== 'yes') {
+                if (question.key === 'spousePhone' && (answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law')) {
                   return null;
                 }
                 if (question.key === 'client1NumberOfPreviousRelationships' && answers['client1HasPreviousRelationship'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'client2HasPreviousRelationship' && answers['hasSpouse'] !== 'yes') {
+                if (question.key === 'client2HasPreviousRelationship' && (answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law')) {
                   return null;
                 }
-                if (question.key === 'client2NumberOfPreviousRelationships' && (answers['hasSpouse'] !== 'yes' || answers['client2HasPreviousRelationship'] !== 'yes')) {
+                if (question.key === 'client2NumberOfPreviousRelationships' && ((answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law') || answers['client2HasPreviousRelationship'] !== 'yes')) {
                   return null;
                 }
                 if (question.key === 'numberOfChildren' && answers['hasChildren'] !== 'yes') {
@@ -230,7 +230,7 @@ export default function StepForm({
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
                 const client1Name = basicAnswers['fullName'] as string || 'you';
                 const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
@@ -241,6 +241,24 @@ export default function StepForm({
                   return null;
                 }
                 if (question.key === 'willsSameLawyer' && !(answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client1HasPoaPersonalCare' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1PoaPersonalCareCount' && answers['client1HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1HasPoaProperty' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1PoaPropertyCount' && answers['client1HasPoaProperty'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1HasEstateTrustee' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1EstateTrusteeCount' && answers['client1HasEstateTrustee'] !== 'yes') {
                   return null;
                 }
                 if (question.key === 'accountantSamePerson' && !(answers['client1UsesAccountant'] === 'yes' && answers['client2UsesAccountant'] === 'yes')) {
@@ -315,7 +333,7 @@ export default function StepForm({
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
                 const client1Name = basicAnswers['fullName'] as string || 'Client 1';
                 const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
                 const bankingStructure = answers['bankingStructure'];
@@ -447,7 +465,7 @@ export default function StepForm({
 
               {answers['hasAdditionalRealEstate'] === 'yes' && (() => {
                 const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
                 const client1Name = basicAnswers['fullName'] as string || 'Client 1';
                 const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
 
@@ -921,7 +939,7 @@ export default function StepForm({
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
-            const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+            const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
 
             return (
               <div className="space-y-8">
@@ -1513,7 +1531,7 @@ export default function StepForm({
 
               {answers['hasDebts'] === 'yes' && (() => {
                 const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
                 const client1Name = basicAnswers['fullName'] as string || 'Client 1';
                 const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
 
@@ -1866,7 +1884,7 @@ export default function StepForm({
 
               {(() => {
                 const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
                 const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
 
                 if (!hasSpouse) return null;
@@ -2014,7 +2032,7 @@ export default function StepForm({
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
                 const client1Name = basicAnswers['fullName'] as string || 'you';
                 const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
@@ -2091,7 +2109,7 @@ export default function StepForm({
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
                 const client1Name = basicAnswers['fullName'] as string || 'you';
                 const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
@@ -2240,7 +2258,7 @@ export default function StepForm({
 
           {step.id === 11 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
-            const hasSpouse = basicAnswers['hasSpouse'] === 'yes';
+            const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
             const client1IsBeneficiary = answers['client1IsTrustBeneficiary'];

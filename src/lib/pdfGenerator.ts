@@ -327,7 +327,7 @@ export const generatePDF = (formData: FormData) => {
   addField('Email Address:', 'email', formData.email || '');
   addField('Phone Number:', 'phone', formData.phone || '');
 
-  if (formData.hasSpouse === 'yes') {
+  if ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law')) {
     addSectionHeader('Spouse/Partner Information');
 
     addField('Spouse/Partner Name:', 'spouseName', formData.spouseName || '');
@@ -389,7 +389,7 @@ export const generatePDF = (formData: FormData) => {
   const hasAnyPreviousRelationships =
     formData.client1HasPreviousRelationship === 'yes' ||
     formData.client1HasPreviousRelationship === 'no' ||
-    (formData.hasSpouse === 'yes' && (formData.client2HasPreviousRelationship === 'yes' || formData.client2HasPreviousRelationship === 'no'));
+    ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law') && (formData.client2HasPreviousRelationship === 'yes' || formData.client2HasPreviousRelationship === 'no'));
 
   if (hasAnyPreviousRelationships) {
     addSectionHeader('Previous Relationships');
@@ -513,7 +513,7 @@ export const generatePDF = (formData: FormData) => {
     });
   }
 
-  if (formData.hasSpouse === 'yes' && formData.client2HasPreviousRelationship === 'no') {
+  if ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law') && formData.client2HasPreviousRelationship === 'no') {
     checkPageBreak(12);
     doc.setFontSize(10);
     doc.setTextColor(...colors.darkText);
@@ -522,7 +522,7 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 12;
   }
 
-  if (formData.hasSpouse === 'yes' && formData.client2HasPreviousRelationship === 'yes' && formData.client2PreviousRelationshipsData) {
+  if ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law') && formData.client2HasPreviousRelationship === 'yes' && formData.client2PreviousRelationshipsData) {
     const prevRelCount = parseInt(formData.client2NumberOfPreviousRelationships || '0');
     const prevRelData = formData.client2PreviousRelationshipsData.slice(0, prevRelCount);
 
@@ -1286,7 +1286,7 @@ export const generatePDF = (formData: FormData) => {
   doc.setTextColor(...colors.darkText);
   yPosition += 10;
 
-  const hasSpouse = formData.hasSpouse === 'yes';
+  const hasSpouse = (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law');
 
   if (formData.client1HasWill === 'no' && (!hasSpouse || formData.client2HasWill === 'no')) {
     doc.setFontSize(10);
@@ -1552,6 +1552,282 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition = lawyerTableY + 10;
     }
+  }
+
+  if (formData.client1HasPoaPersonalCare === 'yes' && formData.client1PoaPersonalCareCount) {
+    const poaCount = parseInt(formData.client1PoaPersonalCareCount, 10);
+
+    if (yPosition > 210) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 8;
+
+    const poaCellHeight = 6;
+    const poaColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+    let poaTableY = yPosition;
+
+    doc.setDrawColor(0, 0, 0);
+    doc.setFillColor(200, 200, 200);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8);
+
+    const poaCol1X = margin;
+    const poaCol2X = margin + poaColWidths[0];
+    const poaCol3X = margin + poaColWidths[0] + poaColWidths[1];
+    const poaCol4X = margin + poaColWidths[0] + poaColWidths[1] + poaColWidths[2];
+
+    doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
+    doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
+    doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
+    doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
+
+    doc.text('Name:', poaCol1X + 0.5, poaTableY + 4);
+    doc.text('Phone Number:', poaCol2X + 0.5, poaTableY + 4);
+    doc.text('Email Address:', poaCol3X + 0.5, poaTableY + 4);
+    doc.text('Relationship to You:', poaCol4X + 0.5, poaTableY + 4);
+
+    poaTableY += poaCellHeight;
+
+    for (let i = 0; i < poaCount; i++) {
+      if (poaTableY > 275) {
+        doc.addPage();
+        poaTableY = 12;
+      }
+
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
+      doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
+      doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
+      doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
+
+      const field1 = new doc.AcroFormTextField();
+      field1.fieldName = `poa_personal_care_${i}_name`;
+      field1.Rect = [poaCol1X + 0.3, poaTableY + 0.3, poaColWidths[0] - 0.6, poaCellHeight - 0.6];
+      field1.fontSize = 7;
+      field1.textColor = [0, 0, 0];
+      field1.borderStyle = 'none';
+      doc.addField(field1);
+
+      const field2 = new doc.AcroFormTextField();
+      field2.fieldName = `poa_personal_care_${i}_phone`;
+      field2.Rect = [poaCol2X + 0.3, poaTableY + 0.3, poaColWidths[1] - 0.6, poaCellHeight - 0.6];
+      field2.fontSize = 7;
+      field2.textColor = [0, 0, 0];
+      field2.borderStyle = 'none';
+      doc.addField(field2);
+
+      const field3 = new doc.AcroFormTextField();
+      field3.fieldName = `poa_personal_care_${i}_email`;
+      field3.Rect = [poaCol3X + 0.3, poaTableY + 0.3, poaColWidths[2] - 0.6, poaCellHeight - 0.6];
+      field3.fontSize = 7;
+      field3.textColor = [0, 0, 0];
+      field3.borderStyle = 'none';
+      doc.addField(field3);
+
+      const field4 = new doc.AcroFormTextField();
+      field4.fieldName = `poa_personal_care_${i}_relationship`;
+      field4.Rect = [poaCol4X + 0.3, poaTableY + 0.3, poaColWidths[3] - 0.6, poaCellHeight - 0.6];
+      field4.fontSize = 7;
+      field4.textColor = [0, 0, 0];
+      field4.borderStyle = 'none';
+      doc.addField(field4);
+
+      poaTableY += poaCellHeight;
+    }
+
+    yPosition = poaTableY + 10;
+  }
+
+  if (formData.client1HasPoaProperty === 'yes' && formData.client1PoaPropertyCount) {
+    const poaPropertyCount = parseInt(formData.client1PoaPropertyCount, 10);
+
+    if (yPosition > 210) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Powers of Attorney for Property:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 8;
+
+    const poaPropertyCellHeight = 6;
+    const poaPropertyColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+    let poaPropertyTableY = yPosition;
+
+    doc.setDrawColor(0, 0, 0);
+    doc.setFillColor(200, 200, 200);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8);
+
+    const poaPropertyCol1X = margin;
+    const poaPropertyCol2X = margin + poaPropertyColWidths[0];
+    const poaPropertyCol3X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1];
+    const poaPropertyCol4X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1] + poaPropertyColWidths[2];
+
+    doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight);
+    doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
+    doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
+    doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+
+    doc.text('Name:', poaPropertyCol1X + 0.5, poaPropertyTableY + 4);
+    doc.text('Phone Number:', poaPropertyCol2X + 0.5, poaPropertyTableY + 4);
+    doc.text('Email Address:', poaPropertyCol3X + 0.5, poaPropertyTableY + 4);
+    doc.text('Relationship to You:', poaPropertyCol4X + 0.5, poaPropertyTableY + 4);
+
+    poaPropertyTableY += poaPropertyCellHeight;
+
+    for (let i = 0; i < poaPropertyCount; i++) {
+      if (poaPropertyTableY > 275) {
+        doc.addPage();
+        poaPropertyTableY = 12;
+      }
+
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+
+      const field1 = new doc.AcroFormTextField();
+      field1.fieldName = `poa_property_${i}_name`;
+      field1.Rect = [poaPropertyCol1X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[0] - 0.6, poaPropertyCellHeight - 0.6];
+      field1.fontSize = 7;
+      field1.textColor = [0, 0, 0];
+      field1.borderStyle = 'none';
+      doc.addField(field1);
+
+      const field2 = new doc.AcroFormTextField();
+      field2.fieldName = `poa_property_${i}_phone`;
+      field2.Rect = [poaPropertyCol2X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[1] - 0.6, poaPropertyCellHeight - 0.6];
+      field2.fontSize = 7;
+      field2.textColor = [0, 0, 0];
+      field2.borderStyle = 'none';
+      doc.addField(field2);
+
+      const field3 = new doc.AcroFormTextField();
+      field3.fieldName = `poa_property_${i}_email`;
+      field3.Rect = [poaPropertyCol3X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[2] - 0.6, poaPropertyCellHeight - 0.6];
+      field3.fontSize = 7;
+      field3.textColor = [0, 0, 0];
+      field3.borderStyle = 'none';
+      doc.addField(field3);
+
+      const field4 = new doc.AcroFormTextField();
+      field4.fieldName = `poa_property_${i}_relationship`;
+      field4.Rect = [poaPropertyCol4X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[3] - 0.6, poaPropertyCellHeight - 0.6];
+      field4.fontSize = 7;
+      field4.textColor = [0, 0, 0];
+      field4.borderStyle = 'none';
+      doc.addField(field4);
+
+      poaPropertyTableY += poaPropertyCellHeight;
+    }
+
+    yPosition = poaPropertyTableY + 10;
+  }
+
+  if (formData.client1HasEstateTrustee === 'yes' && formData.client1EstateTrusteeCount) {
+    const estateTrusteeCount = parseInt(formData.client1EstateTrusteeCount, 10);
+
+    if (yPosition > 210) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Estate Trustees:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 8;
+
+    const etCellHeight = 6;
+    const etColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+    let etTableY = yPosition;
+
+    doc.setDrawColor(0, 0, 0);
+    doc.setFillColor(200, 200, 200);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8);
+
+    const etCol1X = margin;
+    const etCol2X = margin + etColWidths[0];
+    const etCol3X = margin + etColWidths[0] + etColWidths[1];
+    const etCol4X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2];
+
+    doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
+    doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
+    doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
+    doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+
+    doc.text('Name:', etCol1X + 0.5, etTableY + 4);
+    doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
+    doc.text('Email Address:', etCol3X + 0.5, etTableY + 4);
+    doc.text('Relationship to You:', etCol4X + 0.5, etTableY + 4);
+
+    etTableY += etCellHeight;
+
+    for (let i = 0; i < estateTrusteeCount; i++) {
+      if (etTableY > 275) {
+        doc.addPage();
+        etTableY = 12;
+      }
+
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
+      doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
+      doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
+      doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+
+      const field1 = new doc.AcroFormTextField();
+      field1.fieldName = `estate_trustee_${i}_name`;
+      field1.Rect = [etCol1X + 0.3, etTableY + 0.3, etColWidths[0] - 0.6, etCellHeight - 0.6];
+      field1.fontSize = 7;
+      field1.textColor = [0, 0, 0];
+      field1.borderStyle = 'none';
+      doc.addField(field1);
+
+      const field2 = new doc.AcroFormTextField();
+      field2.fieldName = `estate_trustee_${i}_phone`;
+      field2.Rect = [etCol2X + 0.3, etTableY + 0.3, etColWidths[1] - 0.6, etCellHeight - 0.6];
+      field2.fontSize = 7;
+      field2.textColor = [0, 0, 0];
+      field2.borderStyle = 'none';
+      doc.addField(field2);
+
+      const field3 = new doc.AcroFormTextField();
+      field3.fieldName = `estate_trustee_${i}_email`;
+      field3.Rect = [etCol3X + 0.3, etTableY + 0.3, etColWidths[2] - 0.6, etCellHeight - 0.6];
+      field3.fontSize = 7;
+      field3.textColor = [0, 0, 0];
+      field3.borderStyle = 'none';
+      doc.addField(field3);
+
+      const field4 = new doc.AcroFormTextField();
+      field4.fieldName = `estate_trustee_${i}_relationship`;
+      field4.Rect = [etCol4X + 0.3, etTableY + 0.3, etColWidths[3] - 0.6, etCellHeight - 0.6];
+      field4.fontSize = 7;
+      field4.textColor = [0, 0, 0];
+      field4.borderStyle = 'none';
+      doc.addField(field4);
+
+      etTableY += etCellHeight;
+    }
+
+    yPosition = etTableY + 10;
   }
 
   if (formData.client1UsesAccountant === 'yes' || formData.client2UsesAccountant === 'yes') {
@@ -3908,7 +4184,7 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 15;
   }
 
-  if (formData.hasSpouse === 'yes') {
+  if ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law')) {
     if (formData.client2HasCreditCards === 'yes' && formData.client2CreditCardsData && formData.client2CreditCardsData.length > 0) {
       yPosition += 12;
       if (yPosition > 240) {

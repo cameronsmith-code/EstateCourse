@@ -6271,7 +6271,12 @@ export const generatePDF = (formData: FormData) => {
 
   yPosition = financialTableY + 15;
 
-  if (formData.hasCorporation === 'yes' && formData.corporationCount && parseInt(formData.corporationCount) > 0) {
+  // Only show corporation section if explicitly answered 'yes' AND has a count > 0
+  const shouldShowCorporations = formData.hasCorporation === 'yes' &&
+                                  formData.corporationCount &&
+                                  parseInt(formData.corporationCount) > 0;
+
+  if (shouldShowCorporations) {
     const corpCount = parseInt(formData.corporationCount);
     for (let corpIndex = 1; corpIndex <= corpCount; corpIndex++) {
       if (yPosition > 240) {
@@ -6946,7 +6951,12 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  if (formData.hasFamilyTrust === 'yes' && formData.familyTrustCount && parseInt(formData.familyTrustCount as string) > 0) {
+  // Only show trust corporation section if family trust exists AND trust has corporations
+  const shouldShowTrustCorporations = formData.hasFamilyTrust === 'yes' &&
+                                       formData.familyTrustCount &&
+                                       parseInt(formData.familyTrustCount as string) > 0;
+
+  if (shouldShowTrustCorporations) {
     const trustCount = parseInt(formData.familyTrustCount as string);
     const trustsData = formData.trustsData as Array<Record<string, string>> | undefined;
 
@@ -7201,7 +7211,12 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  if (formData.hasFamilyTrust === 'yes' && formData.familyTrustCount && parseInt(formData.familyTrustCount as string) > 0) {
+  // Only show family trust information section if explicitly answered 'yes' AND has a count > 0
+  const shouldShowFamilyTrusts = formData.hasFamilyTrust === 'yes' &&
+                                  formData.familyTrustCount &&
+                                  parseInt(formData.familyTrustCount as string) > 0;
+
+  if (shouldShowFamilyTrusts) {
     const trustCount = parseInt(formData.familyTrustCount as string);
     const trustsData = formData.trustsData as Array<Record<string, string>> | undefined;
 
@@ -7704,7 +7719,12 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  if (formData.client1IsTrustBeneficiary === 'yes' && formData.client1BeneficiaryTrustCount && parseInt(formData.client1BeneficiaryTrustCount as string) > 0) {
+  // Only show client 1 beneficiary trust section if explicitly answered 'yes' AND has a count > 0
+  const shouldShowClient1BeneficiaryTrusts = formData.client1IsTrustBeneficiary === 'yes' &&
+                                               formData.client1BeneficiaryTrustCount &&
+                                               parseInt(formData.client1BeneficiaryTrustCount as string) > 0;
+
+  if (shouldShowClient1BeneficiaryTrusts) {
     const trustCount = parseInt(formData.client1BeneficiaryTrustCount as string);
     const trustsData = formData.client1BeneficiaryTrustsData as Array<Record<string, string>> | undefined;
     const client1Name = formData.fullName as string || 'Client 1';
@@ -8136,7 +8156,12 @@ export const generatePDF = (formData: FormData) => {
     yPosition += trustNameCellHeight + 15;
   }
 
-  if (formData.client2IsTrustBeneficiary === 'yes' && formData.client2BeneficiaryTrustCount && parseInt(formData.client2BeneficiaryTrustCount as string) > 0) {
+  // Only show client 2 beneficiary trust section if explicitly answered 'yes' AND has a count > 0
+  const shouldShowClient2BeneficiaryTrusts = formData.client2IsTrustBeneficiary === 'yes' &&
+                                               formData.client2BeneficiaryTrustCount &&
+                                               parseInt(formData.client2BeneficiaryTrustCount as string) > 0;
+
+  if (shouldShowClient2BeneficiaryTrusts) {
     const trustCount = parseInt(formData.client2BeneficiaryTrustCount as string);
     const trustsData = formData.client2BeneficiaryTrustsData as Array<Record<string, string>> | undefined;
     const client2Name = formData.spouseName as string || 'Client 2';

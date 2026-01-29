@@ -215,20 +215,24 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
 
         try {
           const stepAnswers = answers.get(step);
+
+          // Get all existing answers for this step
+          const { data: existingAnswers } = await supabase
+            .from('questionnaire_answers')
+            .select('id, question_key')
+            .eq('questionnaire_id', questionnaire.id)
+            .eq('step', step);
+
+          const existingMap = new Map(
+            (existingAnswers || []).map(a => [a.question_key, a.id])
+          );
+
+          const toInsert = [];
+          const toUpdate = [];
+          const toDelete = [];
+
+          // Handle current answers
           if (stepAnswers && Object.keys(stepAnswers).length > 0) {
-            const { data: existingAnswers } = await supabase
-              .from('questionnaire_answers')
-              .select('id, question_key')
-              .eq('questionnaire_id', questionnaire.id)
-              .eq('step', step);
-
-            const existingMap = new Map(
-              (existingAnswers || []).map(a => [a.question_key, a.id])
-            );
-
-            const toInsert = [];
-            const toUpdate = [];
-
             for (const [key, value] of Object.entries(stepAnswers)) {
               const existingId = existingMap.get(key);
               if (existingId) {
@@ -237,6 +241,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
                   answer: value,
                   updated_at: new Date().toISOString()
                 });
+                existingMap.delete(key); // Remove from map
               } else {
                 toInsert.push({
                   questionnaire_id: questionnaire.id,
@@ -246,17 +251,30 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
                 });
               }
             }
+          }
 
-            if (toInsert.length > 0) {
-              await supabase.from('questionnaire_answers').insert(toInsert);
-            }
+          // Any remaining items in existingMap should be deleted
+          for (const [key, id] of existingMap.entries()) {
+            toDelete.push(id);
+          }
 
-            for (const update of toUpdate) {
-              await supabase
-                .from('questionnaire_answers')
-                .update({ answer: update.answer, updated_at: update.updated_at })
-                .eq('id', update.id);
-            }
+          // Execute database operations
+          if (toInsert.length > 0) {
+            await supabase.from('questionnaire_answers').insert(toInsert);
+          }
+
+          for (const update of toUpdate) {
+            await supabase
+              .from('questionnaire_answers')
+              .update({ answer: update.answer, updated_at: update.updated_at })
+              .eq('id', update.id);
+          }
+
+          if (toDelete.length > 0) {
+            await supabase
+              .from('questionnaire_answers')
+              .delete()
+              .in('id', toDelete);
           }
         } catch (dbErr) {
           console.warn('Failed to save answers to database:', dbErr);

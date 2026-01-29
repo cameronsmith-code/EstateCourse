@@ -6829,6 +6829,236 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
+  if (formData.hasFamilyTrust === 'yes' && formData.trustHasCorporation === 'yes' && formData.trustCorporationCount) {
+    const trustCorpCount = parseInt(formData.trustCorporationCount);
+    for (let trustCorpIndex = 1; trustCorpIndex <= trustCorpCount; trustCorpIndex++) {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text('Family Trust Corporate Information', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 12;
+
+      const corpNameCellHeight = 8;
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFontSize(8);
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, corpNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${getOrdinalLabel(trustCorpIndex)} Trust Corporation's Name:`, margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, corpNameCellHeight);
+      const trustCorpNameField = new doc.AcroFormTextField();
+      trustCorpNameField.fieldName = `trust_corporation_${trustCorpIndex}_name`;
+      trustCorpNameField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, corpNameCellHeight - 0.6];
+      trustCorpNameField.fontSize = 8;
+      trustCorpNameField.textColor = [0, 0, 0];
+      trustCorpNameField.borderStyle = 'none';
+      doc.addField(trustCorpNameField);
+
+      yPosition += corpNameCellHeight + 12;
+
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Business and Professional Contracts:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      doc.setFontSize(8);
+      const contractText = "For trusts with corporations, your trustee must know your 'Quarterback Team' to manage transitions or wind-ups effectively.";
+      const splitContractText = doc.splitTextToSize(contractText, fieldWidth);
+      splitContractText.forEach((line: string) => {
+        doc.text(line, margin, yPosition);
+        yPosition += 4;
+      });
+      yPosition += 4;
+
+      const contractItems = [
+        'Lawyer(s):',
+        'Accountant/Tax\nPrep(s):',
+        'Trustee(s):',
+        'Life/Disability/Critical\nIllness Provider(s)'
+      ];
+
+      const contractCellHeight = 10;
+      const cCol1Width = fieldWidth * 0.25;
+      const cCol2Width = fieldWidth * 0.25;
+      const cCol3Width = fieldWidth * 0.25;
+      const cCol4Width = fieldWidth * 0.25;
+      let contractTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, contractTableY, cCol1Width, contractCellHeight);
+      doc.text('Professional:', margin + 0.5, contractTableY + 5);
+
+      doc.rect(margin + cCol1Width, contractTableY, cCol2Width, contractCellHeight);
+      doc.text('Name:', margin + cCol1Width + 0.5, contractTableY + 5);
+
+      doc.rect(margin + cCol1Width + cCol2Width, contractTableY, cCol3Width, contractCellHeight);
+      doc.text('Firm/Contact Info:', margin + cCol1Width + cCol2Width + 0.5, contractTableY + 5);
+
+      doc.rect(margin + cCol1Width + cCol2Width + cCol3Width, contractTableY, cCol4Width, contractCellHeight);
+      doc.text('Role in the Estate:', margin + cCol1Width + cCol2Width + cCol3Width + 0.5, contractTableY + 5);
+
+      contractTableY += contractCellHeight;
+
+      contractItems.forEach((item, index) => {
+        if (contractTableY > 275) {
+          doc.addPage();
+          contractTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+
+        doc.rect(margin, contractTableY, cCol1Width, contractCellHeight);
+        const lines = item.split('\n');
+        lines.forEach((line, lineIndex) => {
+          doc.text(line, margin + 0.5, contractTableY + 3.5 + (lineIndex * 3));
+        });
+
+        doc.rect(margin + cCol1Width, contractTableY, cCol2Width, contractCellHeight);
+        doc.rect(margin + cCol1Width + cCol2Width, contractTableY, cCol3Width, contractCellHeight);
+        doc.rect(margin + cCol1Width + cCol2Width + cCol3Width, contractTableY, cCol4Width, contractCellHeight);
+
+        const cField1 = new doc.AcroFormTextField();
+        cField1.fieldName = `trust_corp_${trustCorpIndex}_contract_name_${index}`;
+        cField1.Rect = [margin + cCol1Width + 0.3, contractTableY + 0.3, cCol2Width - 0.6, contractCellHeight - 0.6];
+        cField1.fontSize = 7;
+        cField1.textColor = [0, 0, 0];
+        cField1.borderStyle = 'none';
+        doc.addField(cField1);
+
+        const cField2 = new doc.AcroFormTextField();
+        cField2.fieldName = `trust_corp_${trustCorpIndex}_contract_firm_${index}`;
+        cField2.Rect = [margin + cCol1Width + cCol2Width + 0.3, contractTableY + 0.3, cCol3Width - 0.6, contractCellHeight - 0.6];
+        cField2.fontSize = 7;
+        cField2.textColor = [0, 0, 0];
+        cField2.borderStyle = 'none';
+        doc.addField(cField2);
+
+        const cField3 = new doc.AcroFormTextField();
+        cField3.fieldName = `trust_corp_${trustCorpIndex}_contract_role_${index}`;
+        cField3.Rect = [margin + cCol1Width + cCol2Width + cCol3Width + 0.3, contractTableY + 0.3, cCol4Width - 0.6, contractCellHeight - 0.6];
+        cField3.fontSize = 7;
+        cField3.textColor = [0, 0, 0];
+        cField3.borderStyle = 'none';
+        doc.addField(cField3);
+
+        contractTableY += contractCellHeight;
+      });
+
+      yPosition = contractTableY + 15;
+
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Corporate Governance and Legal Structure:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 6;
+
+      doc.setFontSize(8);
+      const govText = 'This table identifies the fundamental legal identity of your trust enterprise(s):';
+      doc.text(govText, margin, yPosition);
+      yPosition += 8;
+
+      const govCellHeight = 10;
+      const gCol1Width = fieldWidth * 0.25;
+      const gCol2Width = fieldWidth * 0.25;
+      const gCol3Width = fieldWidth * 0.25;
+      const gCol4Width = fieldWidth * 0.25;
+      let govTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      doc.rect(margin, govTableY, gCol1Width, govCellHeight);
+      doc.text('Entity Legal Name:', margin + 0.5, govTableY + 5);
+
+      doc.rect(margin + gCol1Width, govTableY, gCol2Width, govCellHeight);
+      doc.text('Structure (CCPC, PC,\nPartnership, Sole\nProprietorship):', margin + gCol1Width + 0.5, govTableY + 3);
+
+      doc.rect(margin + gCol1Width + gCol2Width, govTableY, gCol3Width, govCellHeight);
+      doc.text('Percent Owned:', margin + gCol1Width + gCol2Width + 0.5, govTableY + 5);
+
+      doc.rect(margin + gCol1Width + gCol2Width + gCol3Width, govTableY, gCol4Width, govCellHeight);
+      doc.text('Location of Minute\nBooks/Articles of\nIncorporation:', margin + gCol1Width + gCol2Width + gCol3Width + 0.5, govTableY + 2.5);
+
+      govTableY += govCellHeight;
+
+      for (let i = 0; i < 3; i++) {
+        if (govTableY > 275) {
+          doc.addPage();
+          govTableY = 12;
+        }
+
+        doc.setFont(undefined, 'normal');
+
+        doc.rect(margin, govTableY, gCol1Width, govCellHeight);
+        doc.rect(margin + gCol1Width, govTableY, gCol2Width, govCellHeight);
+        doc.rect(margin + gCol1Width + gCol2Width, govTableY, gCol3Width, govCellHeight);
+        doc.rect(margin + gCol1Width + gCol2Width + gCol3Width, govTableY, gCol4Width, govCellHeight);
+
+        const gField1 = new doc.AcroFormTextField();
+        gField1.fieldName = `trust_corp_${trustCorpIndex}_gov_entity_${i}`;
+        gField1.Rect = [margin + 0.3, govTableY + 0.3, gCol1Width - 0.6, govCellHeight - 0.6];
+        gField1.fontSize = 7;
+        gField1.textColor = [0, 0, 0];
+        gField1.borderStyle = 'none';
+        doc.addField(gField1);
+
+        const gField2 = new doc.AcroFormTextField();
+        gField2.fieldName = `trust_corp_${trustCorpIndex}_gov_structure_${i}`;
+        gField2.Rect = [margin + gCol1Width + 0.3, govTableY + 0.3, gCol2Width - 0.6, govCellHeight - 0.6];
+        gField2.fontSize = 7;
+        gField2.textColor = [0, 0, 0];
+        gField2.borderStyle = 'none';
+        doc.addField(gField2);
+
+        const gField3 = new doc.AcroFormTextField();
+        gField3.fieldName = `trust_corp_${trustCorpIndex}_gov_percent_${i}`;
+        gField3.Rect = [margin + gCol1Width + gCol2Width + 0.3, govTableY + 0.3, gCol3Width - 0.6, govCellHeight - 0.6];
+        gField3.fontSize = 7;
+        gField3.textColor = [0, 0, 0];
+        gField3.borderStyle = 'none';
+        doc.addField(gField3);
+
+        const gField4 = new doc.AcroFormTextField();
+        gField4.fieldName = `trust_corp_${trustCorpIndex}_gov_location_${i}`;
+        gField4.Rect = [margin + gCol1Width + gCol2Width + gCol3Width + 0.3, govTableY + 0.3, gCol4Width - 0.6, govCellHeight - 0.6];
+        gField4.fontSize = 7;
+        gField4.textColor = [0, 0, 0];
+        gField4.borderStyle = 'none';
+        doc.addField(gField4);
+
+        govTableY += govCellHeight;
+      }
+
+      yPosition = govTableY + 15;
+    }
+  }
+
   if (formData.hasFamilyTrust === 'yes' && formData.familyTrustCount) {
     const trustCount = parseInt(formData.familyTrustCount as string);
     const trustsData = formData.trustsData as Array<Record<string, string>> | undefined;

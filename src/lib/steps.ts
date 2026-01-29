@@ -291,6 +291,29 @@ export const STEPS: Step[] = [
         type: 'dynamic',
         required: false,
       },
+      {
+        key: 'trustHasCorporation',
+        label: 'Does the Family Trust own a Corporation?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'trustCorporationCount',
+        label: 'How many corporations does the Family Trust own?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'trustCorporationsData',
+        label: 'Trust Corporation Details',
+        type: 'dynamic',
+        required: false,
+      },
     ],
   },
   {

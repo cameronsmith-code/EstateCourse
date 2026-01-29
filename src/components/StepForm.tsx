@@ -105,6 +105,34 @@ export default function StepForm({
         }
       }
     } else if (step.id === 4) {
+      if (answers['hasFamilyTrust'] === 'yes') {
+        const trustCount = parseInt(answers['familyTrustCount'] as string) || 0;
+        if (trustCount > 0) {
+          const trustsData = answers['trustsData'] as Array<Record<string, string>> | undefined;
+
+          if (!trustsData || trustsData.length < trustCount) {
+            setValidationError('Please fill in details for all family trusts.');
+            return;
+          }
+
+          for (let i = 0; i < trustCount; i++) {
+            const trust = trustsData[i];
+            if (!trust?.trustName) {
+              setValidationError(`Please fill in the trust name for trust ${i + 1}.`);
+              return;
+            }
+            if (!trust?.deedLocation) {
+              setValidationError(`Please specify the deed location for trust ${i + 1}.`);
+              return;
+            }
+            if (!trust?.beneficiaryCount) {
+              setValidationError(`Please specify the number of beneficiaries for trust ${i + 1}.`);
+              return;
+            }
+          }
+        }
+      }
+    } else if (step.id === 5) {
       if (answers['hasCorporation'] === 'yes') {
         const corpCount = parseInt(answers['corporationCount'] as string) || 0;
         if (corpCount > 0) {
@@ -131,6 +159,39 @@ export default function StepForm({
             }
             if (corp?.incorporatedInCanada === 'yes' && !corp?.province) {
               setValidationError(`Please select the province/jurisdiction for corporation ${i + 1}.`);
+              return;
+            }
+          }
+        }
+      }
+
+      const familyTrustAnswers = allAnswers?.get(4) || {};
+      if (familyTrustAnswers['hasFamilyTrust'] === 'yes' && answers['trustHasCorporation'] === 'yes') {
+        const trustCorpCount = parseInt(answers['trustCorporationCount'] as string) || 0;
+        if (trustCorpCount > 0) {
+          const trustCorporationsData = answers['trustCorporationsData'] as Array<Record<string, string>> | undefined;
+
+          if (!trustCorporationsData || trustCorporationsData.length < trustCorpCount) {
+            setValidationError('Please fill in details for all trust corporations.');
+            return;
+          }
+
+          for (let i = 0; i < trustCorpCount; i++) {
+            const corp = trustCorporationsData[i];
+            if (!corp?.legalName) {
+              setValidationError(`Please fill in the legal name for trust corporation ${i + 1}.`);
+              return;
+            }
+            if (!corp?.nature) {
+              setValidationError(`Please select the nature for trust corporation ${i + 1}.`);
+              return;
+            }
+            if (!corp?.incorporatedInCanada) {
+              setValidationError(`Please specify if trust corporation ${i + 1} was incorporated in Canada.`);
+              return;
+            }
+            if (corp?.incorporatedInCanada === 'yes' && !corp?.province) {
+              setValidationError(`Please select the province/jurisdiction for trust corporation ${i + 1}.`);
               return;
             }
           }
@@ -2215,10 +2276,7 @@ export default function StepForm({
           {step.id === 4 && (
             <>
               {step.questions.map((question) => {
-                if (question.key === 'corporationCount' && answers['hasCorporation'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'corporationsData') {
+                if (question.key === 'familyTrustCount' && answers['hasFamilyTrust'] !== 'yes') {
                   return null;
                 }
 
@@ -2231,6 +2289,108 @@ export default function StepForm({
                   />
                 );
               })}
+
+              {answers['hasFamilyTrust'] === 'yes' && (() => {
+                const trustCount = parseInt(answers['familyTrustCount'] as string) || 0;
+                const trustsData = (answers['trustsData'] as Array<Record<string, string>>) || Array(trustCount).fill(null).map(() => ({}));
+
+                const handleTrustChange = (index: number, field: string, value: string) => {
+                  const updated = [...trustsData];
+                  if (!updated[index]) {
+                    updated[index] = {};
+                  }
+                  updated[index][field] = value;
+                  onAnswerChange('trustsData', updated);
+                };
+
+                return (
+                  <div className="space-y-8 mt-6">
+                    {Array.from({ length: trustCount }).map((_, index) => (
+                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <h3 className="text-lg font-semibold text-white mb-4">Trust {index + 1}</h3>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What is the trust's legal name? *
+                            </label>
+                            <input
+                              type="text"
+                              value={trustsData[index]?.trustName || ''}
+                              onChange={(e) => handleTrustChange(index, 'trustName', e.target.value)}
+                              placeholder="Enter trust's legal name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Where is the Trust Deed Located? *
+                            </label>
+                            <input
+                              type="text"
+                              value={trustsData[index]?.deedLocation || ''}
+                              onChange={(e) => handleTrustChange(index, 'deedLocation', e.target.value)}
+                              placeholder="Enter trust deed location"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              How many beneficiaries are there to this trust? *
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="50"
+                              value={trustsData[index]?.beneficiaryCount || ''}
+                              onChange={(e) => handleTrustChange(index, 'beneficiaryCount', e.target.value)}
+                              placeholder="Enter number of beneficiaries"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </>
+          )}
+
+          {step.id === 5 && (() => {
+            const familyTrustAnswers = allAnswers?.get(4) || {};
+            const hasFamilyTrust = familyTrustAnswers['hasFamilyTrust'] === 'yes';
+
+            return (
+              <>
+                {step.questions.map((question) => {
+                  if (question.key === 'corporationCount' && answers['hasCorporation'] !== 'yes') {
+                    return null;
+                  }
+                  if (question.key === 'corporationsData') {
+                    return null;
+                  }
+                  if (question.key === 'trustHasCorporation' && !hasFamilyTrust) {
+                    return null;
+                  }
+                  if (question.key === 'trustCorporationCount' && (answers['trustHasCorporation'] !== 'yes' || !hasFamilyTrust)) {
+                    return null;
+                  }
+                  if (question.key === 'trustCorporationsData') {
+                    return null;
+                  }
+
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={question}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  );
+                })}
 
               {answers['hasCorporation'] === 'yes' && (() => {
                 const corpCount = parseInt(answers['corporationCount'] as string) || 0;
@@ -2343,94 +2503,122 @@ export default function StepForm({
                   </div>
                 );
               })()}
-            </>
-          )}
 
-          {step.id === 5 && (
-            <>
-              {step.questions.map((question) => {
-                if (question.key === 'familyTrustCount' && answers['hasFamilyTrust'] !== 'yes') {
-                  return null;
-                }
+              {hasFamilyTrust && answers['trustHasCorporation'] === 'yes' && (() => {
+                const trustCorpCount = parseInt(answers['trustCorporationCount'] as string) || 0;
+                const trustCorporationsData = (answers['trustCorporationsData'] as Array<Record<string, string>>) || Array(trustCorpCount).fill(null).map(() => ({}));
 
-                return (
-                  <FormField
-                    key={question.key}
-                    question={question}
-                    value={answers[question.key]}
-                    onChange={(value) => onAnswerChange(question.key, value)}
-                  />
-                );
-              })}
-
-              {answers['hasFamilyTrust'] === 'yes' && (() => {
-                const trustCount = parseInt(answers['familyTrustCount'] as string) || 0;
-                const trustsData = (answers['trustsData'] as Array<Record<string, string>>) || Array(trustCount).fill(null).map(() => ({}));
-
-                const handleTrustChange = (index: number, field: string, value: string) => {
-                  const updated = [...trustsData];
+                const handleTrustCorpChange = (index: number, field: string, value: string) => {
+                  const updated = [...trustCorporationsData];
                   if (!updated[index]) {
                     updated[index] = {};
                   }
                   updated[index][field] = value;
-                  onAnswerChange('trustsData', updated);
+                  onAnswerChange('trustCorporationsData', updated);
                 };
 
                 return (
                   <div className="space-y-8 mt-6">
-                    {Array.from({ length: trustCount }).map((_, index) => (
-                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                        <h3 className="text-lg font-semibold text-white mb-4">Trust {index + 1}</h3>
+                    <h3 className="text-xl font-semibold text-white mb-4">Family Trust Corporations</h3>
+                    {Array.from({ length: trustCorpCount }).map((_, index) => (
+                      <div key={index} className="border border-blue-600 rounded-lg p-6 bg-gray-700">
+                        <h3 className="text-lg font-semibold text-white mb-4">Trust Corporation {index + 1}</h3>
 
                         <div className="space-y-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              What is the trust's legal name? *
+                              What is the legal name of the corporation? *
                             </label>
                             <input
                               type="text"
-                              value={trustsData[index]?.trustName || ''}
-                              onChange={(e) => handleTrustChange(index, 'trustName', e.target.value)}
-                              placeholder="Enter trust's legal name"
+                              value={trustCorporationsData[index]?.legalName || ''}
+                              onChange={(e) => handleTrustCorpChange(index, 'legalName', e.target.value)}
+                              placeholder="Enter legal name"
                               className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                           </div>
 
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Where is the Trust Deed Located? *
+                              What is the nature of the corporation? *
                             </label>
-                            <input
-                              type="text"
-                              value={trustsData[index]?.deedLocation || ''}
-                              onChange={(e) => handleTrustChange(index, 'deedLocation', e.target.value)}
-                              placeholder="Enter trust deed location"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                            <select
+                              value={trustCorporationsData[index]?.nature || ''}
+                              onChange={(e) => handleTrustCorpChange(index, 'nature', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Select nature of corporation</option>
+                              <option value="Professional Corporation">Professional Corporation</option>
+                              <option value="Operating Company">Operating Company</option>
+                              <option value="Holding Corporation">Holding Corporation</option>
+                            </select>
                           </div>
 
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              How many beneficiaries are there to this trust? *
+                              Was it incorporated in Canada? *
                             </label>
-                            <input
-                              type="number"
-                              min="0"
-                              max="50"
-                              value={trustsData[index]?.beneficiaryCount || ''}
-                              onChange={(e) => handleTrustChange(index, 'beneficiaryCount', e.target.value)}
-                              placeholder="Enter number of beneficiaries"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                            <div className="flex gap-4">
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  value="yes"
+                                  checked={trustCorporationsData[index]?.incorporatedInCanada === 'yes'}
+                                  onChange={(e) => handleTrustCorpChange(index, 'incorporatedInCanada', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-white">Yes</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  value="no"
+                                  checked={trustCorporationsData[index]?.incorporatedInCanada === 'no'}
+                                  onChange={(e) => handleTrustCorpChange(index, 'incorporatedInCanada', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-white">No</span>
+                              </label>
+                            </div>
                           </div>
+
+                          {trustCorporationsData[index]?.incorporatedInCanada === 'yes' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                In which province/jurisdiction was it incorporated? *
+                              </label>
+                              <select
+                                value={trustCorporationsData[index]?.province || ''}
+                                onChange={(e) => handleTrustCorpChange(index, 'province', e.target.value)}
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              >
+                                <option value="">Select province/jurisdiction</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Ontario">Ontario</option>
+                                <option value="Quebec">Quebec</option>
+                                <option value="British Columbia">British Columbia</option>
+                                <option value="Alberta">Alberta</option>
+                                <option value="Manitoba">Manitoba</option>
+                                <option value="Saskatchewan">Saskatchewan</option>
+                                <option value="Nova Scotia">Nova Scotia</option>
+                                <option value="New Brunswick">New Brunswick</option>
+                                <option value="Prince Edward Island">Prince Edward Island</option>
+                                <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                                <option value="Northwest Territories">Northwest Territories</option>
+                                <option value="Yukon">Yukon</option>
+                                <option value="Nunavut">Nunavut</option>
+                              </select>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
                   </div>
                 );
               })()}
-            </>
-          )}
+              </>
+            );
+          })()}
 
           {step.id === 6 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};

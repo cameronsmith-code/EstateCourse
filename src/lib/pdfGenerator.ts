@@ -79,11 +79,17 @@ interface FormData {
   client2FinancialAdvisors?: string;
   bankingStructure?: string;
   jointBankCount?: string;
+  jointInstitutionsData?: Array<{ name?: string }>;
   client1BankCount?: string;
+  client1InstitutionsData?: Array<{ name?: string }>;
   client2BankCount?: string;
+  client2InstitutionsData?: Array<{ name?: string }>;
   mixedJointBankCount?: string;
+  mixedJointInstitutionsData?: Array<{ name?: string }>;
   mixedClient1BankCount?: string;
+  mixedClient1InstitutionsData?: Array<{ name?: string }>;
   mixedClient2BankCount?: string;
+  mixedClient2InstitutionsData?: Array<{ name?: string }>;
   ownsRealEstate?: string;
   primaryResidenceOwner?: string;
   isPrimaryResidence?: string;
@@ -3387,6 +3393,7 @@ export const generatePDF = (formData: FormData) => {
 
     if (bankingStructure === 'joint') {
       const jointCount = parseInt(formData.jointBankCount || '0');
+      const jointInstitutions = formData.jointInstitutionsData || [];
       for (let i = 0; i < jointCount; i++) {
         if (yPosition > 180) {
           doc.addPage();
@@ -3395,7 +3402,8 @@ export const generatePDF = (formData: FormData) => {
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text(`Joint Banking Account ${i + 1}`, margin, yPosition);
+        const institutionName = jointInstitutions[i]?.name || `Institution ${i + 1}`;
+        doc.text(`${institutionName} - Joint Banking Account`, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 
@@ -3477,6 +3485,7 @@ export const generatePDF = (formData: FormData) => {
       }
     } else if (bankingStructure === 'individual') {
       const client1Count = parseInt(formData.client1BankCount || '0');
+      const client1Institutions = formData.client1InstitutionsData || [];
       for (let i = 0; i < client1Count; i++) {
         if (yPosition > 180) {
           doc.addPage();
@@ -3485,7 +3494,8 @@ export const generatePDF = (formData: FormData) => {
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text(`${client1Name} - Banking Account ${i + 1}`, margin, yPosition);
+        const institutionName = client1Institutions[i]?.name || `Institution ${i + 1}`;
+        doc.text(`${client1Name} - ${institutionName}`, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 
@@ -3567,6 +3577,7 @@ export const generatePDF = (formData: FormData) => {
       }
 
       const client2Count = parseInt(formData.client2BankCount || '0');
+      const client2Institutions = formData.client2InstitutionsData || [];
       for (let i = 0; i < client2Count; i++) {
         if (yPosition > 180) {
           doc.addPage();
@@ -3575,7 +3586,8 @@ export const generatePDF = (formData: FormData) => {
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text(`${client2Name} - Banking Account ${i + 1}`, margin, yPosition);
+        const institutionName = client2Institutions[i]?.name || `Institution ${i + 1}`;
+        doc.text(`${client2Name} - ${institutionName}`, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 
@@ -3657,6 +3669,7 @@ export const generatePDF = (formData: FormData) => {
       }
     } else if (bankingStructure === 'mixed') {
       const jointCount = parseInt(formData.mixedJointBankCount || '0');
+      const mixedJointInstitutions = formData.mixedJointInstitutionsData || [];
       for (let i = 0; i < jointCount; i++) {
         if (yPosition > 180) {
           doc.addPage();
@@ -3665,7 +3678,8 @@ export const generatePDF = (formData: FormData) => {
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text(`Joint Banking Account ${i + 1}`, margin, yPosition);
+        const institutionName = mixedJointInstitutions[i]?.name || `Institution ${i + 1}`;
+        doc.text(`${institutionName} - Joint Banking Account`, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 
@@ -3747,6 +3761,7 @@ export const generatePDF = (formData: FormData) => {
       }
 
       const client1Count = parseInt(formData.mixedClient1BankCount || '0');
+      const mixedClient1Institutions = formData.mixedClient1InstitutionsData || [];
       for (let i = 0; i < client1Count; i++) {
         if (yPosition > 180) {
           doc.addPage();
@@ -3755,7 +3770,8 @@ export const generatePDF = (formData: FormData) => {
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text(`${client1Name} - Individual Banking Account ${i + 1}`, margin, yPosition);
+        const institutionName = mixedClient1Institutions[i]?.name || `Institution ${i + 1}`;
+        doc.text(`${client1Name} - ${institutionName}`, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 
@@ -3837,6 +3853,7 @@ export const generatePDF = (formData: FormData) => {
       }
 
       const client2Count = parseInt(formData.mixedClient2BankCount || '0');
+      const mixedClient2Institutions = formData.mixedClient2InstitutionsData || [];
       for (let i = 0; i < client2Count; i++) {
         if (yPosition > 180) {
           doc.addPage();
@@ -3845,7 +3862,8 @@ export const generatePDF = (formData: FormData) => {
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text(`${client2Name} - Individual Banking Account ${i + 1}`, margin, yPosition);
+        const institutionName = mixedClient2Institutions[i]?.name || `Institution ${i + 1}`;
+        doc.text(`${client2Name} - ${institutionName}`, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 
@@ -3927,6 +3945,7 @@ export const generatePDF = (formData: FormData) => {
       }
     } else if (!hasSpouse) {
       const bankCount = parseInt(formData.client1BankCount || '0');
+      const client1Institutions = formData.client1InstitutionsData || [];
       for (let i = 0; i < bankCount; i++) {
         if (yPosition > 180) {
           doc.addPage();
@@ -3935,7 +3954,8 @@ export const generatePDF = (formData: FormData) => {
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text(`Banking Account ${i + 1}`, margin, yPosition);
+        const institutionName = client1Institutions[i]?.name || `Institution ${i + 1}`;
+        doc.text(`${institutionName} - Banking Account`, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 

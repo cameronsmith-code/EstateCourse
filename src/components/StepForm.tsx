@@ -503,6 +503,10 @@ export default function StepForm({
                   return null;
                 }
 
+                if (question.key === 'jointInstitutionsData') {
+                  return null;
+                }
+
                 if (question.key === 'client1BankCount') {
                   if (hasSpouse && bankingStructure !== 'individual') {
                     return null;
@@ -530,6 +534,10 @@ export default function StepForm({
                   return null;
                 }
 
+                if (question.key === 'client1InstitutionsData') {
+                  return null;
+                }
+
                 if (question.key === 'client2BankCount') {
                   if (!hasSpouse || bankingStructure !== 'individual') {
                     return null;
@@ -544,7 +552,15 @@ export default function StepForm({
                   );
                 }
 
+                if (question.key === 'client2InstitutionsData') {
+                  return null;
+                }
+
                 if (question.key === 'mixedJointBankCount' && bankingStructure !== 'mixed') {
+                  return null;
+                }
+
+                if (question.key === 'mixedJointInstitutionsData') {
                   return null;
                 }
 
@@ -562,6 +578,10 @@ export default function StepForm({
                   );
                 }
 
+                if (question.key === 'mixedClient1InstitutionsData') {
+                  return null;
+                }
+
                 if (question.key === 'mixedClient2BankCount') {
                   if (bankingStructure !== 'mixed') {
                     return null;
@@ -574,6 +594,10 @@ export default function StepForm({
                       onChange={(value) => onAnswerChange(question.key, value)}
                     />
                   );
+                }
+
+                if (question.key === 'mixedClient2InstitutionsData') {
+                  return null;
                 }
 
                 if (question.key === 'primaryResidenceOwner' && ownsRealEstate !== 'yes') {
@@ -617,6 +641,73 @@ export default function StepForm({
                   />
                 );
               })}
+
+              {(() => {
+                const basicAnswers = allAnswers?.get(1) || {};
+                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
+                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+                const bankingStructure = answers['bankingStructure'];
+
+                const renderInstitutions = (key: string, count: string, label: string) => {
+                  const institutionCount = parseInt(answers[count] as string) || 0;
+                  if (institutionCount === 0) return null;
+
+                  const institutionsData = (answers[key] as Array<Record<string, string>>) || Array(institutionCount).fill(null).map(() => ({}));
+
+                  const handleInstitutionChange = (index: number, value: string) => {
+                    const updated = [...institutionsData];
+                    if (!updated[index]) {
+                      updated[index] = {};
+                    }
+                    updated[index].name = value;
+                    onAnswerChange(key, updated);
+                  };
+
+                  return (
+                    <div className="space-y-4 mt-6">
+                      <h3 className="text-md font-semibold text-white">{label}</h3>
+                      {Array.from({ length: institutionCount }).map((_, index) => (
+                        <div key={index}>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Institution {index + 1} Name:
+                          </label>
+                          <input
+                            type="text"
+                            value={institutionsData[index]?.name || ''}
+                            onChange={(e) => handleInstitutionChange(index, e.target.value)}
+                            placeholder="e.g., TD Bank, RBC, Scotiabank"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  );
+                };
+
+                if (!hasSpouse) {
+                  return renderInstitutions('client1InstitutionsData', 'client1BankCount', 'Your Banking Institutions');
+                } else if (bankingStructure === 'joint') {
+                  return renderInstitutions('jointInstitutionsData', 'jointBankCount', 'Joint Banking Institutions');
+                } else if (bankingStructure === 'individual') {
+                  return (
+                    <>
+                      {renderInstitutions('client1InstitutionsData', 'client1BankCount', `${client1Name}'s Banking Institutions`)}
+                      {renderInstitutions('client2InstitutionsData', 'client2BankCount', `${client2Name}'s Banking Institutions`)}
+                    </>
+                  );
+                } else if (bankingStructure === 'mixed') {
+                  return (
+                    <>
+                      {renderInstitutions('mixedJointInstitutionsData', 'mixedJointBankCount', 'Joint Banking Institutions')}
+                      {renderInstitutions('mixedClient1InstitutionsData', 'mixedClient1BankCount', `${client1Name}'s Individual Banking Institutions`)}
+                      {renderInstitutions('mixedClient2InstitutionsData', 'mixedClient2BankCount', `${client2Name}'s Individual Banking Institutions`)}
+                    </>
+                  );
+                }
+
+                return null;
+              })()}
 
               {answers['hasAdditionalRealEstate'] === 'yes' && (() => {
                 const basicAnswers = allAnswers?.get(1) || {};

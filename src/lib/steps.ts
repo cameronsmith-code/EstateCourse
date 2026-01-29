@@ -637,10 +637,22 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'jointInstitutionsData',
+        label: 'Joint Institution Names',
+        type: 'dynamic',
+        required: false,
+      },
+      {
         key: 'client1BankCount',
         label: 'How many banks, trust companies or credit unions do you have accounts with?',
         type: 'number',
         placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'client1InstitutionsData',
+        label: 'Your Institution Names',
+        type: 'dynamic',
         required: false,
       },
       {
@@ -651,10 +663,22 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client2InstitutionsData',
+        label: 'Spouse Institution Names',
+        type: 'dynamic',
+        required: false,
+      },
+      {
         key: 'mixedJointBankCount',
         label: 'How many joint accounts are held?',
         type: 'number',
         placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'mixedJointInstitutionsData',
+        label: 'Joint Institution Names',
+        type: 'dynamic',
         required: false,
       },
       {
@@ -665,10 +689,22 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'mixedClient1InstitutionsData',
+        label: 'Your Institution Names',
+        type: 'dynamic',
+        required: false,
+      },
+      {
         key: 'mixedClient2BankCount',
         label: 'How many individually held accounts does your spouse have?',
         type: 'number',
         placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'mixedClient2InstitutionsData',
+        label: 'Spouse Institution Names',
+        type: 'dynamic',
         required: false,
       },
       {

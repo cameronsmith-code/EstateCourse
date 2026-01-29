@@ -226,21 +226,116 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },
+  },,
   {
     id: 2,
     title: 'Previous Relationships',
     description: 'Please provide details about previous marriages or common law relationships',
     questions: [],
-  },
+  },,
   {
     id: 3,
     title: 'Children Information',
     description: 'Please provide details about each of your children',
     questions: [],
-  },
+  },,
   {
     id: 4,
+    title: 'Corporate Information',
+    description: 'Information about your corporations',
+    questions: [
+      {
+        key: 'hasCorporation',
+        label: 'Do you have a corporation?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'corporationCount',
+        label: 'How many corporations do you own?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'corporationsData',
+        label: 'Corporation Details',
+        type: 'dynamic',
+        required: false,
+      },
+    ],
+  },,
+  {
+    id: 5,
+    title: 'Family Trusts',
+    description: 'Information about your family trusts',
+    questions: [
+      {
+        key: 'hasFamilyTrust',
+        label: 'Have you established a family trust?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'familyTrustCount',
+        label: 'How many family trusts have you established?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+    ],
+  },,
+  {
+    id: 6,
+    title: 'Family Trusts Continued',
+    description: 'Information about trusts you are a beneficiary of',
+    questions: [
+      {
+        key: 'client1IsTrustBeneficiary',
+        label: 'Are you the beneficiary of a Trust?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1BeneficiaryTrustCount',
+        label: 'How many trusts are you the beneficiary of?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+      {
+        key: 'client2IsTrustBeneficiary',
+        label: 'Are you the beneficiary of a Trust?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2BeneficiaryTrustCount',
+        label: 'How many trusts are you the beneficiary of?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+      },
+    ],
+  },,
+  {
+    id: 7,
     title: 'Who is on your Team?',
     description: 'Your Power(s) of Attorney and Estate Trustees should not act in a vacuum. This section lists the core professionals who already know your history.',
     questions: [
@@ -422,9 +517,9 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },
+  },,
   {
-    id: 5,
+    id: 8,
     title: 'Your Financial Footprint',
     description: 'Banking and financial account information',
     questions: [
@@ -500,6 +595,9 @@ export const STEPS: Step[] = [
           { value: 'joint_tenants', label: 'Jointly as tenants in common' },
           { value: 'client1', label: 'Client 1' },
           { value: 'client2', label: 'Client 2' },
+          { value: 'trust', label: 'a Trust' },
+          { value: 'corporation', label: 'a Corporation' },
+          { value: 'other', label: 'Other' },
         ],
         required: false,
       },
@@ -531,9 +629,9 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },
+  },,
   {
-    id: 6,
+    id: 9,
     title: 'Outstanding Debts',
     description: 'Information about any outstanding debts (not including credit cards)',
     questions: [
@@ -548,9 +646,9 @@ export const STEPS: Step[] = [
         required: true,
       },
     ],
-  },
+  },,
   {
-    id: 7,
+    id: 10,
     title: 'Life Insurance',
     description: 'Information about life insurance, disability insurance, and critical illness policies',
     questions: [
@@ -677,9 +775,9 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },
+  },,
   {
-    id: 8,
+    id: 11,
     title: 'Property and Casualty Insurance',
     description: 'Information about home and property insurance',
     questions: [
@@ -743,101 +841,6 @@ export const STEPS: Step[] = [
       {
         key: 'additionalVehiclesCount',
         label: 'How many additional vehicles do you have?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-      },
-    ],
-  },
-  {
-    id: 9,
-    title: 'Corporate Information',
-    description: 'Information about your corporations',
-    questions: [
-      {
-        key: 'hasCorporation',
-        label: 'Do you have a corporation?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'corporationCount',
-        label: 'How many corporations do you own?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-      },
-      {
-        key: 'corporationsData',
-        label: 'Corporation Details',
-        type: 'dynamic',
-        required: false,
-      },
-    ],
-  },
-  {
-    id: 10,
-    title: 'Family Trusts',
-    description: 'Information about your family trusts',
-    questions: [
-      {
-        key: 'hasFamilyTrust',
-        label: 'Have you established a family trust?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'familyTrustCount',
-        label: 'How many family trusts have you established?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-      },
-    ],
-  },
-  {
-    id: 11,
-    title: 'Family Trusts Continued',
-    description: 'Information about trusts you are a beneficiary of',
-    questions: [
-      {
-        key: 'client1IsTrustBeneficiary',
-        label: 'Are you the beneficiary of a Trust?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'client1BeneficiaryTrustCount',
-        label: 'How many trusts are you the beneficiary of?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-      },
-      {
-        key: 'client2IsTrustBeneficiary',
-        label: 'Are you the beneficiary of a Trust?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2BeneficiaryTrustCount',
-        label: 'How many trusts are you the beneficiary of?',
         type: 'number',
         placeholder: '0',
         required: false,

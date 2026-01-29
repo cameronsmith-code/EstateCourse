@@ -104,7 +104,7 @@ export default function StepForm({
           return;
         }
       }
-    } else if (step.id === 9) {
+    } else if (step.id === 4) {
       if (answers['hasCorporation'] === 'yes') {
         const corpCount = parseInt(answers['corporationCount'] as string) || 0;
         if (corpCount > 0) {
@@ -258,7 +258,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 4 && (
+          {step.id === 7 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -376,7 +376,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 5 && (
+          {step.id === 8 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -1568,7 +1568,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 6 && (
+          {step.id === 9 && (
             <>
               {step.questions.map((question) => (
                 <FormField
@@ -2078,7 +2078,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 7 && (
+          {step.id === 10 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -2155,7 +2155,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 8 && (
+          {step.id === 11 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -2201,7 +2201,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 9 && (
+          {step.id === 4 && (
             <>
               {step.questions.map((question) => {
                 if (question.key === 'corporationCount' && answers['hasCorporation'] !== 'yes') {
@@ -2335,7 +2335,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 10 && (
+          {step.id === 5 && (
             <>
               {step.questions.map((question) => {
                 if (question.key === 'familyTrustCount' && answers['hasFamilyTrust'] !== 'yes') {
@@ -2421,7 +2421,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 11 && (() => {
+          {step.id === 6 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';

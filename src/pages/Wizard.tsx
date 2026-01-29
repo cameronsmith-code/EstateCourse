@@ -27,11 +27,23 @@ export default function Wizard() {
     initQuestionnaire();
   }, [initQuestionnaire]);
 
-  const currentStepData = STEPS.find((s) => s.id === currentStep);
-  const currentAnswers = answers.get(currentStep) || {};
+  if (!STEPS || STEPS.length === 0) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-red-900 border border-red-700 rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-red-300 mb-2">Configuration Error</h2>
+          <p className="text-red-200">The questionnaire steps could not be loaded. Please refresh the page.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const validCurrentStep = Math.min(Math.max(1, currentStep), STEPS.length);
+  const currentStepData = STEPS.find((s) => s.id === validCurrentStep);
+  const currentAnswers = answers.get(validCurrentStep) || {};
 
   const handleNext = async () => {
-    if (currentStep === STEPS.length) {
+    if (validCurrentStep === STEPS.length) {
       await completeQuestionnaire();
       navigate('/completion');
     } else {
@@ -103,17 +115,17 @@ export default function Wizard() {
         </p>
       </div>
 
-      <ProgressBar currentStep={currentStep} totalSteps={STEPS.length} />
+      <ProgressBar currentStep={validCurrentStep} totalSteps={STEPS.length} />
 
       <StepForm
         step={currentStepData}
         answers={currentAnswers}
         allAnswers={answers}
-        isFirstStep={currentStep === 1}
-        isLastStep={currentStep === STEPS.length}
+        isFirstStep={validCurrentStep === 1}
+        isLastStep={validCurrentStep === STEPS.length}
         onNext={handleNext}
         onPrevious={previousStep}
-        onAnswerChange={(key, value) => updateAnswer(currentStep, key, value)}
+        onAnswerChange={(key, value) => updateAnswer(validCurrentStep, key, value)}
       />
 
       {questionnaire?.status === 'completed' && (

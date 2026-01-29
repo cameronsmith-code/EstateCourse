@@ -2229,6 +2229,51 @@ export const generatePDF = (formData: FormData) => {
     }
 
     yPosition = etTableY + 10;
+
+    const clientName = formData.fullName || 'The client';
+
+    if (formData.client1EstateTrusteeHasWillCopy === 'yes') {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const willCopyText = `${clientName} indicated that their chosen Estate Trustee(s) have a copy of their Will on file.`;
+      const willCopyLines = doc.splitTextToSize(willCopyText, fieldWidth);
+      doc.text(willCopyLines, margin, yPosition);
+      yPosition += willCopyLines.length * 5 + 5;
+    } else if (formData.client1EstateTrusteeKnowsWillLocation === 'yes') {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const knowsLocationText = `${clientName} indicated that their Estate Trustees know where to find/access the most recent copy of their Will.`;
+      const knowsLocationLines = doc.splitTextToSize(knowsLocationText, fieldWidth);
+      doc.text(knowsLocationLines, margin, yPosition);
+      yPosition += knowsLocationLines.length * 5 + 5;
+    } else if (formData.client1EstateTrusteeKnowsWillLocation === 'no') {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Recommended Action:', margin, yPosition);
+      yPosition += 6;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const recommendedActionText = `${clientName} is advised to speak with their named Estate Trustees to show them the location of their most recent Will. Sharing this completed document with them is also advisable to make their jobs easier.`;
+      const recommendedActionLines = doc.splitTextToSize(recommendedActionText, fieldWidth);
+      doc.text(recommendedActionLines, margin, yPosition);
+      yPosition += recommendedActionLines.length * 5 + 10;
+    }
   }
 
   // Additional Reading for Estate Trustees

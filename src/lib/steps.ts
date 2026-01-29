@@ -459,6 +459,27 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client1EstateTrusteeHasWillCopy',
+        label: 'Do the named Estate Trustees have a copy of your most recent Will in their files?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client1EstateTrusteeKnowsWillLocation',
+        label: 'Do your Estate Trustees know where to find a copy of your Will?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1EstateTrusteeHasWillCopy === 'no',
+      },
+      {
         key: 'client1HasFuneralArrangements',
         label: 'Have you made arrangements for Funeral or Cemetery services?',
         type: 'radio',

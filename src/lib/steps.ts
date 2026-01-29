@@ -226,19 +226,19 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },,
+  },
   {
     id: 2,
     title: 'Previous Relationships',
     description: 'Please provide details about previous marriages or common law relationships',
     questions: [],
-  },,
+  },
   {
     id: 3,
     title: 'Children Information',
     description: 'Please provide details about each of your children',
     questions: [],
-  },,
+  },
   {
     id: 4,
     title: 'Corporate Information',
@@ -268,7 +268,7 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },,
+  },
   {
     id: 5,
     title: 'Family Trusts',
@@ -292,7 +292,7 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },,
+  },
   {
     id: 6,
     title: 'Family Trusts Continued',
@@ -333,7 +333,7 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },,
+  },
   {
     id: 7,
     title: 'Who is on your Team?',
@@ -517,7 +517,7 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },,
+  },
   {
     id: 8,
     title: 'Your Financial Footprint',
@@ -629,7 +629,7 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },,
+  },
   {
     id: 9,
     title: 'Outstanding Debts',
@@ -646,7 +646,7 @@ export const STEPS: Step[] = [
         required: true,
       },
     ],
-  },,
+  },
   {
     id: 10,
     title: 'Life Insurance',
@@ -775,7 +775,7 @@ export const STEPS: Step[] = [
         required: false,
       },
     ],
-  },,
+  },
   {
     id: 11,
     title: 'Property and Casualty Insurance',

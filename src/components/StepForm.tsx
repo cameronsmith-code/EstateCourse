@@ -161,6 +161,10 @@ export default function StepForm({
               setValidationError(`Please select the province/jurisdiction for corporation ${i + 1}.`);
               return;
             }
+            if (corp?.incorporatedInCanada === 'no' && !corp?.foreignJurisdiction) {
+              setValidationError(`Please specify where corporation ${i + 1} was incorporated.`);
+              return;
+            }
           }
         }
       }
@@ -200,6 +204,10 @@ export default function StepForm({
                 }
                 if (corp?.incorporatedInCanada === 'yes' && !corp?.province) {
                   setValidationError(`Please select the province/jurisdiction for ${trustName} corporation ${i + 1}.`);
+                  return;
+                }
+                if (corp?.incorporatedInCanada === 'no' && !corp?.foreignJurisdiction) {
+                  setValidationError(`Please specify where ${trustName} corporation ${i + 1} was incorporated.`);
                   return;
                 }
               }
@@ -2501,6 +2509,21 @@ export default function StepForm({
                               </select>
                             </div>
                           )}
+
+                          {corporationsData[index]?.incorporatedInCanada === 'no' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Where was it incorporated? *
+                              </label>
+                              <input
+                                type="text"
+                                value={corporationsData[index]?.foreignJurisdiction || ''}
+                                onChange={(e) => handleCorpChange(index, 'foreignJurisdiction', e.target.value)}
+                                placeholder="Enter country/jurisdiction"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -2670,6 +2693,21 @@ export default function StepForm({
                                               <option value="Yukon">Yukon</option>
                                               <option value="Nunavut">Nunavut</option>
                                             </select>
+                                          </div>
+                                        )}
+
+                                        {trustCorporationsData[corpIndex]?.incorporatedInCanada === 'no' && (
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                              Where was it incorporated? *
+                                            </label>
+                                            <input
+                                              type="text"
+                                              value={trustCorporationsData[corpIndex]?.foreignJurisdiction || ''}
+                                              onChange={(e) => handleTrustCorpChange(corpIndex, 'foreignJurisdiction', e.target.value)}
+                                              placeholder="Enter country/jurisdiction"
+                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
                                           </div>
                                         )}
                                       </div>

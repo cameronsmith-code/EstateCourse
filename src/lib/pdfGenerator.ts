@@ -6199,6 +6199,22 @@ export const generatePDF = (formData: FormData) => {
       corpNameField.borderStyle = 'none';
       doc.addField(corpNameField);
 
+      yPosition += corpNameCellHeight + 4;
+
+      doc.rect(margin, yPosition, fieldWidth * 0.35, corpNameCellHeight);
+      doc.setFont(undefined, 'bold');
+      doc.text('This company was incorporated in:', margin + 0.5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, corpNameCellHeight);
+      const corpJurisdictionField = new doc.AcroFormTextField();
+      corpJurisdictionField.fieldName = `corporation_${corpIndex}_jurisdiction`;
+      corpJurisdictionField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, corpNameCellHeight - 0.6];
+      corpJurisdictionField.fontSize = 8;
+      corpJurisdictionField.textColor = [0, 0, 0];
+      corpJurisdictionField.borderStyle = 'none';
+      doc.addField(corpJurisdictionField);
+
       yPosition += corpNameCellHeight + 12;
 
       if (yPosition > 240) {
@@ -6869,6 +6885,20 @@ export const generatePDF = (formData: FormData) => {
           if (corpData.legalName) {
             doc.setFontSize(8);
             doc.text(corpData.legalName, margin + fieldWidth * 0.35 + 0.5, yPosition + 5);
+          }
+
+          yPosition += corpNameCellHeight + 4;
+
+          doc.rect(margin, yPosition, fieldWidth * 0.35, corpNameCellHeight);
+          doc.setFont(undefined, 'bold');
+          doc.text('This company was incorporated in:', margin + 0.5, yPosition + 5);
+          doc.setFont(undefined, 'normal');
+
+          doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, corpNameCellHeight);
+          const jurisdiction = corpData.incorporatedInCanada === 'yes' ? (corpData.province || '') : (corpData.foreignJurisdiction || '');
+          if (jurisdiction) {
+            doc.setFontSize(8);
+            doc.text(jurisdiction, margin + fieldWidth * 0.35 + 0.5, yPosition + 5);
           }
 
           yPosition += corpNameCellHeight + 12;

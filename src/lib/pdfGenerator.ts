@@ -5437,6 +5437,446 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 15;
   }
 
+  // Your Virtual Footprint Section
+  if (yPosition > 240) {
+    doc.addPage();
+    yPosition = 12;
+  }
+
+  doc.setFontSize(14);
+  doc.setFont(undefined, 'bold');
+  doc.text('Your Virtual Footprint', margin, yPosition);
+  doc.setFont(undefined, 'normal');
+  yPosition += 10;
+
+  // Digital Assets & Subscriptions heading
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('Digital Assets & Subscriptions', margin, yPosition);
+  doc.setFont(undefined, 'normal');
+  yPosition += 8;
+
+  // Introductory paragraph
+  doc.setFontSize(8);
+  const introText1 = "In a digital age, an executor's greatest challenge is often access. Digital assets are highly advised to be explicitly addressed in the Will or a memorandum to ensure they are managed or closed according to your wishes.";
+  const splitIntro1 = doc.splitTextToSize(introText1, fieldWidth);
+  splitIntro1.forEach((line: string) => {
+    if (yPosition > 275) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text(line, margin, yPosition);
+    yPosition += 4;
+  });
+  yPosition += 2;
+
+  const introText2 = "Subscriptions that require payment are generally easier to locate/terminate as they have a credit card or a bank account attached to them, leaving a paper trail, and upon cancelling those accounts, the service is terminated.";
+  const splitIntro2 = doc.splitTextToSize(introText2, fieldWidth);
+  splitIntro2.forEach((line: string) => {
+    if (yPosition > 275) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text(line, margin, yPosition);
+    yPosition += 4;
+  });
+  yPosition += 2;
+
+  const introText3 = "The bigger challenge to Powers of Attorney and Estate Trustees are the things that do not require payments and would otherwise continue indefinitely if not addressed.";
+  const splitIntro3 = doc.splitTextToSize(introText3, fieldWidth);
+  splitIntro3.forEach((line: string) => {
+    if (yPosition > 275) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text(line, margin, yPosition);
+    yPosition += 4;
+  });
+  yPosition += 6;
+
+  // Warning - Social Media Scams
+  if (yPosition > 240) {
+    doc.addPage();
+    yPosition = 12;
+  }
+
+  doc.setFont(undefined, 'bold');
+  doc.text('Warning – Social Media Scams:', margin, yPosition);
+  doc.setFont(undefined, 'normal');
+  yPosition += 5;
+
+  const warningText = "A growing fraud is 'Obituaries Fraud' where scammers will gain access to deceased people's emails and social media accounts and begin posting, posing as the deceased.";
+  const splitWarning = doc.splitTextToSize(warningText, fieldWidth);
+  splitWarning.forEach((line: string) => {
+    if (yPosition > 275) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text(line, margin, yPosition);
+    yPosition += 4;
+  });
+  yPosition += 4;
+
+  doc.text('These include:', margin, yPosition);
+  yPosition += 5;
+
+  const scamItems = [
+    "Posing as the deceased – sending messages to their contacts saying they're in trouble, stranded in another country, needing emergency money etc…",
+    "Running fake promotions – posting links with 'too good to be true' investment opportunities that are designed to steal peoples money.",
+    "Selling fake goods.",
+    "Phishing for personal information.",
+    '"Memorial" scams – posting links to fake charities soliciting donations for a cause related to the deceased.'
+  ];
+
+  scamItems.forEach((item) => {
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    const bulletText = `•  ${item}`;
+    const splitBullet = doc.splitTextToSize(bulletText, fieldWidth - 3);
+    splitBullet.forEach((line: string, idx: number) => {
+      if (yPosition > 275) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin + (idx === 0 ? 0 : 3), yPosition);
+      yPosition += 4;
+    });
+  });
+  yPosition += 4;
+
+  const closingText = "This proactive step ensures that recurring subscriptions are cancelled to preserve estate cash flow and that your online personas are managed or memorialized according to your specific wishes. Because this information is highly sensitive, you must store this document securely, perhaps in a fireproof safe or a password-protected digital file, ensuring your designated representatives are the only ones who know how to access it.";
+  const splitClosing = doc.splitTextToSize(closingText, fieldWidth);
+  splitClosing.forEach((line: string) => {
+    if (yPosition > 275) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text(line, margin, yPosition);
+    yPosition += 4;
+  });
+  yPosition += 8;
+
+  // Key things to Prepare
+  if (yPosition > 240) {
+    doc.addPage();
+    yPosition = 12;
+  }
+
+  doc.setFont(undefined, 'bold');
+  doc.text('Key things to Prepare:', margin, yPosition);
+  doc.setFont(undefined, 'normal');
+  yPosition += 8;
+
+  // Digital Hardware Access Table
+  doc.setFont(undefined, 'bold');
+  doc.text('Digital Hardware Access:', margin, yPosition);
+  doc.setFont(undefined, 'normal');
+  yPosition += 5;
+
+  const hardwareText = "Use this table to list the devices that contain your personal information or act as gateways to your accounts:";
+  const splitHardware = doc.splitTextToSize(hardwareText, fieldWidth);
+  splitHardware.forEach((line: string) => {
+    if (yPosition > 275) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text(line, margin, yPosition);
+    yPosition += 4;
+  });
+  yPosition += 5;
+
+  if (yPosition > 220) {
+    doc.addPage();
+    yPosition = 12;
+  }
+
+  // Hardware table
+  const hardwareHeaders = ['Device Description:', 'Physical Location:', 'Local Username:', 'PIN/Password:'];
+  const hardwareRows = [
+    'Primary Smartphone',
+    'Home Computer/Laptop:',
+    'Tablet:',
+    'External Hard Drives',
+    'Other:'
+  ];
+
+  const hardwareCellHeight = 7;
+  const hardwareColWidth = fieldWidth / 4;
+  let hardwareTableY = yPosition;
+
+  // Headers
+  doc.setDrawColor(0, 0, 0);
+  doc.setFillColor(240, 240, 240);
+  doc.setFont(undefined, 'bold');
+  doc.setFontSize(7);
+
+  hardwareHeaders.forEach((header, colIndex) => {
+    const colX = margin + (colIndex * hardwareColWidth);
+    doc.rect(colX, hardwareTableY, hardwareColWidth, hardwareCellHeight, 'FD');
+    doc.text(header, colX + 0.5, hardwareTableY + 4.5);
+  });
+  hardwareTableY += hardwareCellHeight;
+
+  // Rows
+  doc.setFont(undefined, 'normal');
+  doc.setFillColor(255, 255, 255);
+
+  hardwareRows.forEach((rowLabel, rowIndex) => {
+    if (hardwareTableY > 270) {
+      doc.addPage();
+      hardwareTableY = 12;
+    }
+
+    // First column (label)
+    doc.rect(margin, hardwareTableY, hardwareColWidth, hardwareCellHeight);
+
+    // For "Other:" row, make it fillable
+    if (rowLabel === 'Other:') {
+      const otherLabelField = new doc.AcroFormTextField();
+      otherLabelField.fieldName = `hardware_other_label_${rowIndex}`;
+      otherLabelField.Rect = [margin + 0.3, hardwareTableY + 0.3, hardwareColWidth - 0.6, hardwareCellHeight - 0.6];
+      otherLabelField.fontSize = 7;
+      otherLabelField.textColor = [0, 0, 0];
+      otherLabelField.borderStyle = 'none';
+      otherLabelField.value = 'Other:';
+      doc.addField(otherLabelField);
+    } else {
+      doc.text(rowLabel, margin + 0.5, hardwareTableY + 4.5);
+    }
+
+    // Other columns (fillable fields)
+    for (let colIndex = 1; colIndex < 4; colIndex++) {
+      const colX = margin + (colIndex * hardwareColWidth);
+      doc.rect(colX, hardwareTableY, hardwareColWidth, hardwareCellHeight);
+
+      const field = new doc.AcroFormTextField();
+      field.fieldName = `hardware_row_${rowIndex}_col_${colIndex}`;
+      field.Rect = [colX + 0.3, hardwareTableY + 0.3, hardwareColWidth - 0.6, hardwareCellHeight - 0.6];
+      field.fontSize = 7;
+      field.textColor = [0, 0, 0];
+      field.borderStyle = 'none';
+      doc.addField(field);
+    }
+
+    hardwareTableY += hardwareCellHeight;
+  });
+
+  yPosition = hardwareTableY + 10;
+
+  // Email and Social Media Presence Section
+  if (yPosition > 240) {
+    doc.addPage();
+    yPosition = 12;
+  }
+
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'bold');
+  doc.text('Email and Social Media Presence:', margin, yPosition);
+  doc.setFont(undefined, 'normal');
+  yPosition += 5;
+
+  const socialText = "These accounts are often the 'master keys' for resetting passwords on other platforms:";
+  const splitSocial = doc.splitTextToSize(socialText, fieldWidth);
+  splitSocial.forEach((line: string) => {
+    if (yPosition > 275) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text(line, margin, yPosition);
+    yPosition += 4;
+  });
+  yPosition += 5;
+
+  if (yPosition > 200) {
+    doc.addPage();
+    yPosition = 12;
+  }
+
+  // Social Media table
+  const socialHeaders = ['Online Persona / Platform:', 'Website URL:', 'Username/Handle:', 'Password:'];
+  const socialRows = [
+    'Primary Email Account',
+    'Secondary/Backup Email',
+    'Facebook / Instagram',
+    'Linkedin / Professional',
+    'Other:',
+    'Other:',
+    'Other:',
+    'Other:',
+    'Other:',
+    'Other:'
+  ];
+
+  const socialCellHeight = 7;
+  const socialColWidth = fieldWidth / 4;
+  let socialTableY = yPosition;
+
+  // Headers
+  doc.setFillColor(240, 240, 240);
+  doc.setFont(undefined, 'bold');
+  doc.setFontSize(7);
+
+  socialHeaders.forEach((header, colIndex) => {
+    const colX = margin + (colIndex * socialColWidth);
+    doc.rect(colX, socialTableY, socialColWidth, socialCellHeight, 'FD');
+    doc.text(header, colX + 0.5, socialTableY + 4.5);
+  });
+  socialTableY += socialCellHeight;
+
+  // Rows
+  doc.setFont(undefined, 'normal');
+  doc.setFillColor(255, 255, 255);
+
+  socialRows.forEach((rowLabel, rowIndex) => {
+    if (socialTableY > 270) {
+      doc.addPage();
+      socialTableY = 12;
+    }
+
+    // First column (label)
+    doc.rect(margin, socialTableY, socialColWidth, socialCellHeight);
+
+    // For "Other:" rows, make them fillable
+    if (rowLabel === 'Other:') {
+      const otherLabelField = new doc.AcroFormTextField();
+      otherLabelField.fieldName = `social_other_label_${rowIndex}`;
+      otherLabelField.Rect = [margin + 0.3, socialTableY + 0.3, socialColWidth - 0.6, socialCellHeight - 0.6];
+      otherLabelField.fontSize = 7;
+      otherLabelField.textColor = [0, 0, 0];
+      otherLabelField.borderStyle = 'none';
+      otherLabelField.value = 'Other:';
+      doc.addField(otherLabelField);
+    } else {
+      doc.text(rowLabel, margin + 0.5, socialTableY + 4.5);
+    }
+
+    // Other columns (fillable fields)
+    for (let colIndex = 1; colIndex < 4; colIndex++) {
+      const colX = margin + (colIndex * socialColWidth);
+      doc.rect(colX, socialTableY, socialColWidth, socialCellHeight);
+
+      const field = new doc.AcroFormTextField();
+      field.fieldName = `social_row_${rowIndex}_col_${colIndex}`;
+      field.Rect = [colX + 0.3, socialTableY + 0.3, socialColWidth - 0.6, socialCellHeight - 0.6];
+      field.fontSize = 7;
+      field.textColor = [0, 0, 0];
+      field.borderStyle = 'none';
+      doc.addField(field);
+    }
+
+    socialTableY += socialCellHeight;
+  });
+
+  yPosition = socialTableY + 10;
+
+  // Financial and Critical Digital Files Section
+  if (yPosition > 240) {
+    doc.addPage();
+    yPosition = 12;
+  }
+
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'bold');
+  doc.text('Financial and Critical Digital Files:', margin, yPosition);
+  doc.setFont(undefined, 'normal');
+  yPosition += 5;
+
+  const financialText = "This includes online-only assets that may not produce paper statements, such as cryptocurrency or digital rewards:";
+  const splitFinancial = doc.splitTextToSize(financialText, fieldWidth);
+  splitFinancial.forEach((line: string) => {
+    if (yPosition > 275) {
+      doc.addPage();
+      yPosition = 12;
+    }
+    doc.text(line, margin, yPosition);
+    yPosition += 4;
+  });
+  yPosition += 5;
+
+  if (yPosition > 200) {
+    doc.addPage();
+    yPosition = 12;
+  }
+
+  // Financial table
+  const financialHeaders = ['Service or Asset Name:', 'URL/Provider:', 'Account Number:', 'Username / Password:'];
+  const financialRows = [
+    'Online Banking Portal',
+    'Crypto Wallet / Exchange',
+    'Cloud Storage (photos/documents)',
+    'Digital Loyalty Points',
+    'Other:',
+    'Other:',
+    'Other:',
+    'Other:',
+    'Other:',
+    'Other:'
+  ];
+
+  const financialCellHeight = 7;
+  const financialColWidth = fieldWidth / 4;
+  let financialTableY = yPosition;
+
+  // Headers
+  doc.setFillColor(240, 240, 240);
+  doc.setFont(undefined, 'bold');
+  doc.setFontSize(7);
+
+  financialHeaders.forEach((header, colIndex) => {
+    const colX = margin + (colIndex * financialColWidth);
+    doc.rect(colX, financialTableY, financialColWidth, financialCellHeight, 'FD');
+    doc.text(header, colX + 0.5, financialTableY + 4.5);
+  });
+  financialTableY += financialCellHeight;
+
+  // Rows
+  doc.setFont(undefined, 'normal');
+  doc.setFillColor(255, 255, 255);
+
+  financialRows.forEach((rowLabel, rowIndex) => {
+    if (financialTableY > 270) {
+      doc.addPage();
+      financialTableY = 12;
+    }
+
+    // First column (label)
+    doc.rect(margin, financialTableY, financialColWidth, financialCellHeight);
+
+    // For "Other:" rows, make them fillable
+    if (rowLabel === 'Other:') {
+      const otherLabelField = new doc.AcroFormTextField();
+      otherLabelField.fieldName = `financial_other_label_${rowIndex}`;
+      otherLabelField.Rect = [margin + 0.3, financialTableY + 0.3, financialColWidth - 0.6, financialCellHeight - 0.6];
+      otherLabelField.fontSize = 7;
+      otherLabelField.textColor = [0, 0, 0];
+      otherLabelField.borderStyle = 'none';
+      otherLabelField.value = 'Other:';
+      doc.addField(otherLabelField);
+    } else {
+      doc.text(rowLabel, margin + 0.5, financialTableY + 4.5);
+    }
+
+    // Other columns (fillable fields)
+    for (let colIndex = 1; colIndex < 4; colIndex++) {
+      const colX = margin + (colIndex * financialColWidth);
+      doc.rect(colX, financialTableY, financialColWidth, financialCellHeight);
+
+      const field = new doc.AcroFormTextField();
+      field.fieldName = `financial_row_${rowIndex}_col_${colIndex}`;
+      field.Rect = [colX + 0.3, financialTableY + 0.3, financialColWidth - 0.6, financialCellHeight - 0.6];
+      field.fontSize = 7;
+      field.textColor = [0, 0, 0];
+      field.borderStyle = 'none';
+      doc.addField(field);
+    }
+
+    financialTableY += financialCellHeight;
+  });
+
+  yPosition = financialTableY + 15;
+
   if (formData.hasCorporation === 'yes' && formData.corporationCount) {
     const corpCount = parseInt(formData.corporationCount);
     for (let corpIndex = 1; corpIndex <= corpCount; corpIndex++) {

@@ -250,6 +250,7 @@ interface FormData {
     corporationType?: string;
     corporationTypeOther?: string;
     owners?: string;
+    articlesLocation?: string;
     hasOtherOwner?: string;
     otherOwners?: string;
   }>;
@@ -1564,6 +1565,7 @@ export const generatePDF = (formData: FormData) => {
           { label: 'This company was incorporated in:', value: corporation?.jurisdiction || '', fieldName: 'jurisdiction' },
           { label: 'Type of corporation:', value: corporationTypeValue, fieldName: 'type' },
           { label: 'Owner(s):', value: ownersValue, fieldName: 'owners' },
+          { label: 'Location of the Articles of Incorporation:', value: corporation?.articlesLocation || '', fieldName: 'articlesLocation' },
         ];
 
         if (corporation?.corporationType === 'Holding Company') {

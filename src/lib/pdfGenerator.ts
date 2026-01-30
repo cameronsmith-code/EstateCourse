@@ -1581,7 +1581,342 @@ export const generatePDF = (formData: FormData) => {
           yPosition += cellHeight;
         });
 
-        yPosition += 4;
+        yPosition += 10;
+
+        const corpName = corporation?.legalName || `${ordinal} Corporation`;
+
+        doc.addPage();
+        yPosition = 12;
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(`${corpName} - Business and Professional Contracts:`, margin, yPosition);
+        yPosition += 6;
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text('For clients with corporations, your trustee must know your \'Quarterback Team\' to manage transitions or wind-ups effectively.', margin, yPosition);
+        yPosition += 8;
+
+        const bpcRowHeight = 10;
+        const bpcCol1Width = fieldWidth * 0.25;
+        const bpcCol2Width = fieldWidth * 0.25;
+        const bpcCol3Width = fieldWidth * 0.25;
+        const bpcCol4Width = fieldWidth * 0.25;
+
+        const bpcHeaders = ['Professional:', 'Name:', 'Firm/Contact Info:', 'Role in the Estate:'];
+        const bpcRows = ['Lawyer(s):', 'Accountant/Tax Prep(s):', 'Trustee(s):', 'Life/Disability/Critical Illness Provider(s):'];
+
+        let currentY = yPosition;
+        doc.setDrawColor(...colors.borderGray);
+        doc.setFillColor(200, 200, 200);
+        doc.setLineWidth(0.5);
+
+        bpcHeaders.forEach((header, colIdx) => {
+          const colWidths = [bpcCol1Width, bpcCol2Width, bpcCol3Width, bpcCol4Width];
+          const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.rect(xPos, currentY, colWidths[colIdx], bpcRowHeight, 'FD');
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.text(header, xPos + 1, currentY + 6);
+        });
+
+        currentY += bpcRowHeight;
+
+        bpcRows.forEach((rowLabel, rowIdx) => {
+          const rowY = currentY;
+          doc.setDrawColor(...colors.borderGray);
+          doc.setFillColor(240, 240, 250);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, rowY, bpcCol1Width, bpcRowHeight, 'FD');
+
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          doc.text(rowLabel, margin + 1, rowY + 6);
+
+          [bpcCol2Width, bpcCol3Width, bpcCol4Width].forEach((colWidth, colIdx) => {
+            const xPos = margin + bpcCol1Width + [0, bpcCol2Width, bpcCol2Width + bpcCol3Width][colIdx];
+            doc.rect(xPos, rowY, colWidth, bpcRowHeight);
+
+            const field = new doc.AcroFormTextField();
+            field.fieldName = `corp_${i + 1}_bpc_${rowIdx}_${colIdx}`;
+            field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, bpcRowHeight - 1];
+            field.fontSize = 7;
+            field.textColor = colors.darkText;
+            field.borderStyle = 'none';
+            field.multiline = true;
+            doc.addField(field);
+          });
+
+          currentY += bpcRowHeight;
+        });
+
+        yPosition = currentY + 12;
+
+        doc.addPage();
+        yPosition = 12;
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(`${corpName} - Corporate Governance and Legal Structure:`, margin, yPosition);
+        yPosition += 6;
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text('This table identifies the fundamental legal identity of your enterprise(s):', margin, yPosition);
+        yPosition += 8;
+
+        const cglsRowHeight = 10;
+        const cglsCol1Width = fieldWidth * 0.25;
+        const cglsCol2Width = fieldWidth * 0.30;
+        const cglsCol3Width = fieldWidth * 0.15;
+        const cglsCol4Width = fieldWidth * 0.30;
+
+        const cglsHeaders = ['Entity Legal Name:', 'Structure (CCPC, PC, Partnership, Sole Proprietorship):', 'Percent Owned:', 'Location of Minute Books/Articles of Incorporation:'];
+        const cglsRowCount = 3;
+
+        currentY = yPosition;
+        doc.setDrawColor(...colors.borderGray);
+        doc.setFillColor(200, 200, 200);
+        doc.setLineWidth(0.5);
+
+        cglsHeaders.forEach((header, colIdx) => {
+          const colWidths = [cglsCol1Width, cglsCol2Width, cglsCol3Width, cglsCol4Width];
+          const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.rect(xPos, currentY, colWidths[colIdx], cglsRowHeight, 'FD');
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.text(header, xPos + 1, currentY + 6);
+        });
+
+        currentY += cglsRowHeight;
+
+        for (let rowIdx = 0; rowIdx < cglsRowCount; rowIdx++) {
+          const rowY = currentY;
+          [cglsCol1Width, cglsCol2Width, cglsCol3Width, cglsCol4Width].forEach((colWidth, colIdx) => {
+            const xPos = margin + [0, cglsCol1Width, cglsCol1Width + cglsCol2Width, cglsCol1Width + cglsCol2Width + cglsCol3Width][colIdx];
+            doc.setDrawColor(...colors.borderGray);
+            doc.setLineWidth(0.5);
+            doc.rect(xPos, rowY, colWidth, cglsRowHeight);
+
+            const field = new doc.AcroFormTextField();
+            field.fieldName = `corp_${i + 1}_cgls_${rowIdx}_${colIdx}`;
+            field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, cglsRowHeight - 1];
+            field.fontSize = 7;
+            field.textColor = colors.darkText;
+            field.borderStyle = 'none';
+            field.multiline = true;
+            doc.addField(field);
+          });
+
+          currentY += cglsRowHeight;
+        }
+
+        yPosition = currentY + 12;
+
+        doc.addPage();
+        yPosition = 12;
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(`${corpName} - Professional Team:`, margin, yPosition);
+        yPosition += 6;
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text('These are the professionals that are related to your corporate needs:', margin, yPosition);
+        yPosition += 8;
+
+        const ptRowHeight = 10;
+        const ptCol1Width = fieldWidth * 0.25;
+        const ptCol2Width = fieldWidth * 0.25;
+        const ptCol3Width = fieldWidth * 0.25;
+        const ptCol4Width = fieldWidth * 0.25;
+
+        const ptHeaders = ['Professional:', 'Name:', 'Firm & Contact Info:', 'Primary Role:'];
+        const ptRows = ['Corporate Accountant:', 'Commercial Banker:', 'Business Valuator:', 'Other:', 'Other:'];
+
+        currentY = yPosition;
+        doc.setDrawColor(...colors.borderGray);
+        doc.setFillColor(200, 200, 200);
+        doc.setLineWidth(0.5);
+
+        ptHeaders.forEach((header, colIdx) => {
+          const colWidths = [ptCol1Width, ptCol2Width, ptCol3Width, ptCol4Width];
+          const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.rect(xPos, currentY, colWidths[colIdx], ptRowHeight, 'FD');
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.text(header, xPos + 1, currentY + 6);
+        });
+
+        currentY += ptRowHeight;
+
+        ptRows.forEach((rowLabel, rowIdx) => {
+          const rowY = currentY;
+          doc.setDrawColor(...colors.borderGray);
+          doc.setFillColor(240, 240, 250);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, rowY, ptCol1Width, ptRowHeight, 'FD');
+
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          doc.text(rowLabel, margin + 1, rowY + 6);
+
+          [ptCol2Width, ptCol3Width, ptCol4Width].forEach((colWidth, colIdx) => {
+            const xPos = margin + ptCol1Width + [0, ptCol2Width, ptCol2Width + ptCol3Width][colIdx];
+            doc.rect(xPos, rowY, colWidth, ptRowHeight);
+
+            const field = new doc.AcroFormTextField();
+            field.fieldName = `corp_${i + 1}_pt_${rowIdx}_${colIdx}`;
+            field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, ptRowHeight - 1];
+            field.fontSize = 7;
+            field.textColor = colors.darkText;
+            field.borderStyle = 'none';
+            field.multiline = true;
+            doc.addField(field);
+          });
+
+          currentY += ptRowHeight;
+        });
+
+        yPosition = currentY + 12;
+
+        doc.addPage();
+        yPosition = 12;
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(`${corpName} - Financial Obligations and Personal Guarantees:`, margin, yPosition);
+        yPosition += 8;
+
+        const fopgRowHeight = 10;
+        const fopgCol1Width = fieldWidth * 0.20;
+        const fopgCol2Width = fieldWidth * 0.22;
+        const fopgCol3Width = fieldWidth * 0.18;
+        const fopgCol4Width = fieldWidth * 0.15;
+        const fopgCol5Width = fieldWidth * 0.25;
+
+        const fopgHeaders = ['Creditor/Bank:', 'Loan Type (term, LOC, Mortgage):', 'Account Number:', 'Personal Guarantee? (Y/N)', 'Location of Supporting Documents'];
+        const fopgRowCount = 4;
+
+        currentY = yPosition;
+        doc.setDrawColor(...colors.borderGray);
+        doc.setFillColor(200, 200, 200);
+        doc.setLineWidth(0.5);
+
+        fopgHeaders.forEach((header, colIdx) => {
+          const colWidths = [fopgCol1Width, fopgCol2Width, fopgCol3Width, fopgCol4Width, fopgCol5Width];
+          const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.rect(xPos, currentY, colWidths[colIdx], fopgRowHeight, 'FD');
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.text(header, xPos + 1, currentY + 6);
+        });
+
+        currentY += fopgRowHeight;
+
+        for (let rowIdx = 0; rowIdx < fopgRowCount; rowIdx++) {
+          const rowY = currentY;
+          [fopgCol1Width, fopgCol2Width, fopgCol3Width, fopgCol4Width, fopgCol5Width].forEach((colWidth, colIdx) => {
+            const xPos = margin + [0, fopgCol1Width, fopgCol1Width + fopgCol2Width, fopgCol1Width + fopgCol2Width + fopgCol3Width, fopgCol1Width + fopgCol2Width + fopgCol3Width + fopgCol4Width][colIdx];
+            doc.setDrawColor(...colors.borderGray);
+            doc.setLineWidth(0.5);
+            doc.rect(xPos, rowY, colWidth, fopgRowHeight);
+
+            const field = new doc.AcroFormTextField();
+            field.fieldName = `corp_${i + 1}_fopg_${rowIdx}_${colIdx}`;
+            field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, fopgRowHeight - 1];
+            field.fontSize = 7;
+            field.textColor = colors.darkText;
+            field.borderStyle = 'none';
+            field.multiline = true;
+            doc.addField(field);
+          });
+
+          currentY += fopgRowHeight;
+        }
+
+        yPosition = currentY + 12;
+
+        doc.addPage();
+        yPosition = 12;
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(`${corpName} - Business Continuity and Risk Management:`, margin, yPosition);
+        yPosition += 6;
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text('Insurance is often the primary source of liquidity for funding buy/sell agreements or paying terminal taxes.', margin, yPosition);
+        yPosition += 8;
+
+        const bcrmRowHeight = 10;
+        const bcrmCol1Width = fieldWidth * 0.18;
+        const bcrmCol2Width = fieldWidth * 0.18;
+        const bcrmCol3Width = fieldWidth * 0.18;
+        const bcrmCol4Width = fieldWidth * 0.18;
+        const bcrmCol5Width = fieldWidth * 0.13;
+        const bcrmCol6Width = fieldWidth * 0.15;
+
+        const bcrmHeaders = ['Policy Type:', 'Insurance Carrier:', 'Key Contact:', 'Policy Number:', 'Beneficiary/Purpose:', 'Location of Supporting Documents'];
+        const bcrmRows = ['Key Person', 'Buy-Sell Funding', 'Overhead Expense', 'Commercial General Liability'];
+
+        currentY = yPosition;
+        doc.setDrawColor(...colors.borderGray);
+        doc.setFillColor(200, 200, 200);
+        doc.setLineWidth(0.5);
+
+        bcrmHeaders.forEach((header, colIdx) => {
+          const colWidths = [bcrmCol1Width, bcrmCol2Width, bcrmCol3Width, bcrmCol4Width, bcrmCol5Width, bcrmCol6Width];
+          const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.rect(xPos, currentY, colWidths[colIdx], bcrmRowHeight, 'FD');
+          doc.setFontSize(6.5);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.text(header, xPos + 1, currentY + 6);
+        });
+
+        currentY += bcrmRowHeight;
+
+        bcrmRows.forEach((rowLabel, rowIdx) => {
+          const rowY = currentY;
+          doc.setDrawColor(...colors.borderGray);
+          doc.setFillColor(240, 240, 250);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, rowY, bcrmCol1Width, bcrmRowHeight, 'FD');
+
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          doc.text(rowLabel, margin + 1, rowY + 6);
+
+          [bcrmCol2Width, bcrmCol3Width, bcrmCol4Width, bcrmCol5Width, bcrmCol6Width].forEach((colWidth, colIdx) => {
+            const xPos = margin + bcrmCol1Width + [0, bcrmCol2Width, bcrmCol2Width + bcrmCol3Width, bcrmCol2Width + bcrmCol3Width + bcrmCol4Width, bcrmCol2Width + bcrmCol3Width + bcrmCol4Width + bcrmCol5Width][colIdx];
+            doc.rect(xPos, rowY, colWidth, bcrmRowHeight);
+
+            const field = new doc.AcroFormTextField();
+            field.fieldName = `corp_${i + 1}_bcrm_${rowIdx}_${colIdx}`;
+            field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, bcrmRowHeight - 1];
+            field.fontSize = 7;
+            field.textColor = colors.darkText;
+            field.borderStyle = 'none';
+            field.multiline = true;
+            doc.addField(field);
+          });
+
+          currentY += bcrmRowHeight;
+        });
+
+        yPosition = currentY + 8;
       }
     }
   }

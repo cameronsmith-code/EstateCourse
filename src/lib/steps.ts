@@ -242,151 +242,6 @@ export const STEPS: Step[] = [
   },
   {
     id: 4,
-    title: 'Family Trusts',
-    description: 'Information about your family trusts',
-    questions: [
-      {
-        key: 'hasFamilyTrust',
-        label: 'Have you established a family trust?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'familyTrustCount',
-        label: 'How many family trusts have you established?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasFamilyTrust === 'yes',
-      },
-    ],
-  },
-  {
-    id: 5,
-    title: 'Corporate Information',
-    description: 'Information about your corporations',
-    questions: [
-      {
-        key: 'hasCorporation',
-        label: 'Do you have a corporation?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'corporationCount',
-        label: 'How many corporations do you own?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasCorporation === 'yes',
-      },
-      {
-        key: 'corporationsData',
-        label: 'Corporation Details',
-        type: 'dynamic',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasCorporation === 'yes',
-      },
-      {
-        key: 'trustHasCorporation',
-        label: 'Does the Family Trust own a Corporation?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasFamilyTrust === 'yes',
-      },
-      {
-        key: 'trustCorporationCount',
-        label: 'How many corporations does the Family Trust own?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasFamilyTrust === 'yes' && formData.trustHasCorporation === 'yes',
-      },
-      {
-        key: 'trustCorporationsData',
-        label: 'Trust Corporation Details',
-        type: 'dynamic',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasFamilyTrust === 'yes' && formData.trustHasCorporation === 'yes',
-      },
-    ],
-  },
-  {
-    id: 6,
-    title: 'Family Trusts Continued',
-    description: 'Information about trusts you are a beneficiary of',
-    questions: [
-      {
-        key: 'client1IsTrustBeneficiary',
-        label: 'Are you the beneficiary of a Trust?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'client1BeneficiaryTrustCount',
-        label: 'How many trusts are you the beneficiary of?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1IsTrustBeneficiary === 'yes',
-      },
-      {
-        key: 'client1IsSpousalTrustBeneficiary',
-        label: 'Are you the beneficiary of a Spousal Trust?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1IsTrustBeneficiary === 'yes',
-      },
-      {
-        key: 'client1SpousalTrustDocumentLocation',
-        label: 'Where is the Spousal Trust document located?',
-        type: 'text',
-        placeholder: 'e.g., Safe deposit box, home office filing cabinet',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1IsTrustBeneficiary === 'yes' && formData.client1IsSpousalTrustBeneficiary === 'yes',
-      },
-      {
-        key: 'client2IsTrustBeneficiary',
-        label: 'Are you the beneficiary of a Trust?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2BeneficiaryTrustCount',
-        label: 'How many trusts are you the beneficiary of?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2IsTrustBeneficiary === 'yes',
-      },
-    ],
-  },
-  {
-    id: 7,
     title: 'Who is on your Team?',
     description: 'Your Power(s) of Attorney and Estate Trustees should not act in a vacuum. This section lists the core professionals who already know your history.',
     questions: [
@@ -635,7 +490,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 8,
+    id: 5,
     title: 'Your Financial Footprint',
     description: 'Banking and financial account information',
     questions: [
@@ -747,8 +602,6 @@ export const STEPS: Step[] = [
           { value: 'joint_tenants', label: 'Jointly as tenants in common' },
           { value: 'client1', label: 'Client 1' },
           { value: 'client2', label: 'Client 2' },
-          { value: 'trust', label: 'a Trust' },
-          { value: 'corporation', label: 'a Corporation' },
           { value: 'other', label: 'Other' },
         ],
         required: false,
@@ -783,7 +636,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 9,
+    id: 6,
     title: 'Outstanding Debts',
     description: 'Information about any outstanding debts (not including credit cards)',
     questions: [
@@ -800,7 +653,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 10,
+    id: 7,
     title: 'Life Insurance',
     description: 'Information about life insurance, disability insurance, and critical illness policies',
     questions: [
@@ -929,7 +782,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 11,
+    id: 8,
     title: 'Property and Casualty Insurance',
     description: 'Information about home and property insurance',
     questions: [

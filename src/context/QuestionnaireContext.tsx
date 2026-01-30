@@ -149,65 +149,6 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
       const stepData = updated.get(step)!;
       stepData[key] = value;
 
-      // Clear dependent fields when parent answers change to 'no'
-      if (key === 'hasFamilyTrust' && value === 'no') {
-        // Clear all family trust related fields
-        delete stepData.familyTrustCount;
-        delete stepData.trustsData;
-
-        // Clear trust corporation fields from step 5
-        const step5 = updated.get(5) || {};
-        delete step5.trustHasCorporation;
-        delete step5.trustCorporationCount;
-        delete step5.trustCorporationsData;
-        if (Object.keys(step5).length > 0) {
-          updated.set(5, step5);
-        }
-      }
-
-      if (key === 'hasCorporation' && value === 'no') {
-        // Clear all corporation related fields
-        console.log('=== CONTEXT - CLEARING CORPORATION DATA ===');
-        console.log('Before clearing:', {
-          corporationCount: stepData.corporationCount,
-          corporationsData: stepData.corporationsData
-        });
-        delete stepData.corporationCount;
-        delete stepData.corporationsData;
-        console.log('After clearing:', {
-          corporationCount: stepData.corporationCount,
-          corporationsData: stepData.corporationsData
-        });
-      }
-
-      if (key === 'trustHasCorporation' && value === 'no') {
-        // Clear trust corporation count and data
-        delete stepData.trustCorporationCount;
-        delete stepData.trustCorporationsData;
-      }
-
-      if (key === 'client1IsTrustBeneficiary' && value === 'no') {
-        // Clear client 1 beneficiary trust fields
-        const step6 = updated.get(6) || {};
-        delete step6.client1BeneficiaryTrustCount;
-        delete step6.client1BeneficiaryTrustsData;
-        delete step6.client1IsSpousalTrustBeneficiary;
-        delete step6.client1SpousalTrustDocumentLocation;
-        if (Object.keys(step6).length > 0) {
-          updated.set(6, step6);
-        }
-      }
-
-      if (key === 'client2IsTrustBeneficiary' && value === 'no') {
-        // Clear client 2 beneficiary trust fields
-        const step6 = updated.get(6) || {};
-        delete step6.client2BeneficiaryTrustCount;
-        delete step6.client2BeneficiaryTrustsData;
-        if (Object.keys(step6).length > 0) {
-          updated.set(6, step6);
-        }
-      }
-
       return updated;
     });
   }, []);

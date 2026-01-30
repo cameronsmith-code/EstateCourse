@@ -17,14 +17,6 @@ export default function Completion() {
     const step6 = answers.get(6) || {};
     const step7 = answers.get(7) || {};
     const step8 = answers.get(8) || {};
-    const step9 = answers.get(9) || {};
-    const step10 = answers.get(10) || {};
-    const step11 = answers.get(11) || {};
-
-    console.log('=== COMPLETION - ALL STEPS ===');
-    console.log('Step 4 (Family Trusts):', step4);
-    console.log('Step 5 (Corporate):', step5);
-    console.log('Step 6 (Beneficiary Trusts):', step6);
 
     const data = {
       ...step1,
@@ -37,29 +29,12 @@ export default function Completion() {
       ...step6,
       ...step7,
       ...step8,
-      ...step9,
-      ...step10,
-      ...step11,
     };
-
-    console.log('=== COMPLETION - FINAL ASSEMBLED DATA ===');
-    console.log('hasCorporation value:', data.hasCorporation);
-    console.log('hasCorporation type:', typeof data.hasCorporation);
-    console.log('corporationCount value:', data.corporationCount);
-    console.log('corporationsData value:', data.corporationsData);
-    console.log('hasFamilyTrust value:', data.hasFamilyTrust);
-    console.log('familyTrustCount value:', data.familyTrustCount);
 
     setFormData(data);
   }, [answers]);
 
   const handleDownloadPDF = () => {
-    console.log('Completion - Form Data being passed to PDF:', formData);
-    console.log('Completion - Corporation fields:', {
-      hasCorporation: formData.hasCorporation,
-      corporationCount: formData.corporationCount,
-      corporationsData: formData.corporationsData
-    });
     generatePDF(formData as Parameters<typeof generatePDF>[0]);
   };
 

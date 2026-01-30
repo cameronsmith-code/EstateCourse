@@ -1565,11 +1565,22 @@ export const generatePDF = (formData: FormData) => {
           { label: 'Owner(s):', value: ownersValue, fieldName: 'owners' },
         ];
 
+        if (corporation?.corporationType === 'Holding Company') {
+          corpRows.push({
+            label: 'Holding Company Assets:',
+            value: corporation?.holdingCompanyAssets || '',
+            fieldName: 'holdingCompanyAssets'
+          });
+        }
+
         const cellHeight = 8;
         const labelWidth = fieldWidth * 0.40;
         const valueWidth = fieldWidth * 0.60;
 
-        const tableHeight = corpRows.length * cellHeight;
+        const tableHeight = corpRows.reduce((sum, row) => {
+          return sum + (row.fieldName === 'holdingCompanyAssets' ? 24 : cellHeight);
+        }, 0);
+
         if (yPosition + tableHeight > pageHeight - margin) {
           doc.addPage();
           yPosition = 12;
@@ -1581,12 +1592,14 @@ export const generatePDF = (formData: FormData) => {
         }
 
         corpRows.forEach((row, rowIndex) => {
+          const isHoldingAssets = row.fieldName === 'holdingCompanyAssets';
+          const rowHeight = isHoldingAssets ? 24 : cellHeight;
           const rowY = yPosition;
 
           doc.setDrawColor(...colors.borderGray);
           doc.setLineWidth(0.5);
-          doc.rect(margin, rowY, labelWidth, cellHeight);
-          doc.rect(margin + labelWidth, rowY, valueWidth, cellHeight);
+          doc.rect(margin, rowY, labelWidth, rowHeight);
+          doc.rect(margin + labelWidth, rowY, valueWidth, rowHeight);
 
           doc.setFontSize(9);
           doc.setFont(undefined, 'bold');
@@ -1595,14 +1608,17 @@ export const generatePDF = (formData: FormData) => {
 
           const field = new doc.AcroFormTextField();
           field.fieldName = `corporation_${i + 1}_${row.fieldName}`;
-          field.Rect = [margin + labelWidth + 0.5, rowY + 0.5, valueWidth - 1, cellHeight - 1];
+          field.Rect = [margin + labelWidth + 0.5, rowY + 0.5, valueWidth - 1, rowHeight - 1];
           field.fontSize = 9;
           field.textColor = colors.darkText;
           field.borderStyle = 'none';
           field.value = row.value;
+          if (isHoldingAssets) {
+            field.multiline = true;
+          }
           doc.addField(field);
 
-          yPosition += cellHeight;
+          yPosition += rowHeight;
         });
 
         yPosition += 12;

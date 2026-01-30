@@ -653,6 +653,21 @@ export default function StepForm({
                           </div>
                         )}
 
+                        {corporationsData[index]?.corporationType === 'Holding Company' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Describe the assets of the Holding Company:
+                            </label>
+                            <textarea
+                              value={corporationsData[index]?.holdingCompanyAssets || ''}
+                              onChange={(e) => handleCorporationChange(index, 'holdingCompanyAssets', e.target.value)}
+                              placeholder="Enter details about the holding company assets"
+                              rows={4}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                            />
+                          </div>
+                        )}
+
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Who has an ownership stake in this corporation? *

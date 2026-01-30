@@ -240,6 +240,42 @@ export default function StepForm({
     onAnswerChange('client1FinancialAdvisorsData', updated);
   };
 
+  const client2PoaPersonalCareCount = parseInt(answers['client2PoaPersonalCareCount'] as string) || 0;
+  const client2PoaPersonalCareData = (answers['client2PoaPersonalCareData'] as Array<Record<string, string>>) || Array(client2PoaPersonalCareCount).fill(null).map(() => ({}));
+
+  const handleClient2PoaPersonalCareChange = (index: number, field: string, value: string) => {
+    const updated = [...client2PoaPersonalCareData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2PoaPersonalCareData', updated);
+  };
+
+  const client2PoaPropertyCount = parseInt(answers['client2PoaPropertyCount'] as string) || 0;
+  const client2PoaPropertyData = (answers['client2PoaPropertyData'] as Array<Record<string, string>>) || Array(client2PoaPropertyCount).fill(null).map(() => ({}));
+
+  const handleClient2PoaPropertyChange = (index: number, field: string, value: string) => {
+    const updated = [...client2PoaPropertyData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2PoaPropertyData', updated);
+  };
+
+  const client2EstateTrusteeCount = parseInt(answers['client2EstateTrusteeCount'] as string) || 0;
+  const client2EstateTrusteeData = (answers['client2EstateTrusteeData'] as Array<Record<string, string>>) || Array(client2EstateTrusteeCount).fill(null).map(() => ({}));
+
+  const handleClient2EstateTrusteeChange = (index: number, field: string, value: string) => {
+    const updated = [...client2EstateTrusteeData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2EstateTrusteeData', updated);
+  };
+
   const client2FinancialAdvisorsCount = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
   const client2FinancialAdvisorsData = (answers['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(client2FinancialAdvisorsCount).fill(null).map(() => ({}));
 
@@ -454,7 +490,10 @@ export default function StepForm({
                 if (question.key === 'client2HasPoaPersonalCare' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
                   return null;
                 }
-                if (question.key === 'client2HasLivingWill' && answers['client2HasPoaPersonalCare'] !== 'yes') {
+                if (question.key === 'client2HasLivingWill' && (answers['client2HasPoaPersonalCare'] !== 'yes' || !hasSpouse)) {
+                  return null;
+                }
+                if (question.key === 'client2PoaPersonalCareCount' && answers['client2HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
                 if (question.key === 'client2PoaPersonalCareCount' && answers['client2HasPoaPersonalCare'] !== 'yes') {
@@ -819,6 +858,201 @@ export default function StepForm({
                             type="text"
                             value={client1EstateTrusteeData[index]?.relationship || ''}
                             onChange={(e) => handleEstateTrusteeChange(index, 'relationship', e.target.value)}
+                            placeholder="e.g., Spouse, Child, Sibling, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {step.id === 5 && answers['client2HasPoaPersonalCare'] === 'yes' && client2PoaPersonalCareCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">{client2Name}'s Powers of Attorney for Personal Care Details</h3>
+                  {Array.from({ length: client2PoaPersonalCareCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">POA for Personal Care #{index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2PoaPersonalCareData[index]?.name || ''}
+                            onChange={(e) => handleClient2PoaPersonalCareChange(index, 'name', e.target.value)}
+                            placeholder="Enter name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2PoaPersonalCareData[index]?.phone || ''}
+                            onChange={(e) => handleClient2PoaPersonalCareChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={client2PoaPersonalCareData[index]?.email || ''}
+                            onChange={(e) => handleClient2PoaPersonalCareChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Relationship to {client2Name} *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2PoaPersonalCareData[index]?.relationship || ''}
+                            onChange={(e) => handleClient2PoaPersonalCareChange(index, 'relationship', e.target.value)}
+                            placeholder="e.g., Spouse, Child, Sibling, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {step.id === 5 && answers['client2HasPoaProperty'] === 'yes' && client2PoaPropertyCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">{client2Name}'s Powers of Attorney for Property Details</h3>
+                  {Array.from({ length: client2PoaPropertyCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">POA for Property #{index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2PoaPropertyData[index]?.name || ''}
+                            onChange={(e) => handleClient2PoaPropertyChange(index, 'name', e.target.value)}
+                            placeholder="Enter name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2PoaPropertyData[index]?.phone || ''}
+                            onChange={(e) => handleClient2PoaPropertyChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={client2PoaPropertyData[index]?.email || ''}
+                            onChange={(e) => handleClient2PoaPropertyChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Relationship to {client2Name} *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2PoaPropertyData[index]?.relationship || ''}
+                            onChange={(e) => handleClient2PoaPropertyChange(index, 'relationship', e.target.value)}
+                            placeholder="e.g., Spouse, Child, Sibling, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {step.id === 5 && answers['client2HasEstateTrustee'] === 'yes' && client2EstateTrusteeCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">{client2Name}'s Estate Trustees Details</h3>
+                  {Array.from({ length: client2EstateTrusteeCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Estate Trustee #{index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2EstateTrusteeData[index]?.name || ''}
+                            onChange={(e) => handleClient2EstateTrusteeChange(index, 'name', e.target.value)}
+                            placeholder="Enter name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2EstateTrusteeData[index]?.phone || ''}
+                            onChange={(e) => handleClient2EstateTrusteeChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={client2EstateTrusteeData[index]?.email || ''}
+                            onChange={(e) => handleClient2EstateTrusteeChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Relationship to {client2Name} *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2EstateTrusteeData[index]?.relationship || ''}
+                            onChange={(e) => handleClient2EstateTrusteeChange(index, 'relationship', e.target.value)}
                             placeholder="e.g., Spouse, Child, Sibling, etc."
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />

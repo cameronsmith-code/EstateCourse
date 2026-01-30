@@ -244,6 +244,8 @@ interface FormData {
     legalName?: string;
     incorporatedInCanada?: string;
     jurisdiction?: string;
+    corporationType?: string;
+    corporationTypeOther?: string;
   }>;
   client1HasFuneralArrangements?: string;
   client1FuneralDocLocation?: string;
@@ -1547,9 +1549,14 @@ export const generatePDF = (formData: FormData) => {
         doc.text(`${ordinal} Corporation:`, margin, yPosition);
         yPosition += 8;
 
+        const corporationTypeValue = corporation?.corporationType === 'Other' && corporation?.corporationTypeOther
+          ? `${corporation.corporationType} - ${corporation.corporationTypeOther}`
+          : (corporation?.corporationType || '');
+
         const corpRows = [
-          { label: `${ordinal} Corporation's Name:`, value: corporation?.legalName || '' },
-          { label: 'This company was incorporated in:', value: corporation?.jurisdiction || '' },
+          { label: `${ordinal} Corporation's Name:`, value: corporation?.legalName || '', fieldName: 'name' },
+          { label: 'This company was incorporated in:', value: corporation?.jurisdiction || '', fieldName: 'jurisdiction' },
+          { label: 'Type of corporation:', value: corporationTypeValue, fieldName: 'type' },
         ];
 
         const cellHeight = 8;
@@ -1570,7 +1577,7 @@ export const generatePDF = (formData: FormData) => {
           doc.text(row.label, margin + 1, rowY + 5);
 
           const field = new doc.AcroFormTextField();
-          field.fieldName = `corporation_${i + 1}_${rowIndex === 0 ? 'name' : 'jurisdiction'}`;
+          field.fieldName = `corporation_${i + 1}_${row.fieldName}`;
           field.Rect = [margin + labelWidth + 0.5, rowY + 0.5, valueWidth - 1, cellHeight - 1];
           field.fontSize = 9;
           field.textColor = colors.darkText;

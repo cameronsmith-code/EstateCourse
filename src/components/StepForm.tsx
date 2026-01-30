@@ -159,6 +159,14 @@ export default function StepForm({
               setValidationError(`Please specify the jurisdiction for corporation ${i + 1}.`);
               return;
             }
+            if (!corporation?.corporationType) {
+              setValidationError(`Please select the type for corporation ${i + 1}.`);
+              return;
+            }
+            if (corporation?.corporationType === 'Other' && !corporation?.corporationTypeOther) {
+              setValidationError(`Please describe the corporation type for corporation ${i + 1}.`);
+              return;
+            }
           }
         }
       }
@@ -595,6 +603,38 @@ export default function StepForm({
                               value={corporationsData[index]?.jurisdiction || ''}
                               onChange={(e) => handleCorporationChange(index, 'jurisdiction', e.target.value)}
                               placeholder="Enter country/jurisdiction"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            What type of corporation is this? *
+                          </label>
+                          <select
+                            value={corporationsData[index]?.corporationType || ''}
+                            onChange={(e) => handleCorporationChange(index, 'corporationType', e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+                            <option value="">Select type</option>
+                            <option value="Operating Company">Operating Company</option>
+                            <option value="Holding Company">Holding Company</option>
+                            <option value="Professional Corporation">Professional Corporation</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+
+                        {corporationsData[index]?.corporationType === 'Other' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Please describe *
+                            </label>
+                            <input
+                              type="text"
+                              value={corporationsData[index]?.corporationTypeOther || ''}
+                              onChange={(e) => handleCorporationChange(index, 'corporationTypeOther', e.target.value)}
+                              placeholder="Enter corporation type"
                               className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                           </div>

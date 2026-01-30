@@ -451,6 +451,39 @@ export default function StepForm({
                 if (question.key === 'client1EstateTrusteeCount' && answers['client1HasEstateTrustee'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client2HasPoaPersonalCare' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2HasLivingWill' && answers['client2HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2PoaPersonalCareCount' && answers['client2HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2PoaPersonalCareHasDocCopy' && answers['client2HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasPoaProperty' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2PoaPropertyCount' && answers['client2HasPoaProperty'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2PoaPropertyHasDocCopy' && answers['client2HasPoaProperty'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasEstateTrustee' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2EstateTrusteeCount' && answers['client2HasEstateTrustee'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2EstateTrusteeHasWillCopy' && answers['client2HasEstateTrustee'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2EstateTrusteeKnowsWillLocation' && answers['client2EstateTrusteeHasWillCopy'] !== 'no') {
+                  return null;
+                }
                 if (question.key === 'client1FuneralDocLocation' && answers['client1HasFuneralArrangements'] !== 'yes') {
                   return null;
                 }
@@ -527,6 +560,39 @@ export default function StepForm({
                 }
                 if (question.key === 'client1EstateTrusteeHasDocCopy') {
                   customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
+                }
+                if (question.key === 'client2HasPoaPersonalCare') {
+                  customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Personal Care in your Will?`;
+                }
+                if (question.key === 'client2PoaPersonalCareCount') {
+                  customLabel = `${client2Name}, how many Powers of Attorney for Personal Care have you named?`;
+                }
+                if (question.key === 'client2HasPoaProperty') {
+                  customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                }
+                if (question.key === 'client2PoaPropertyCount') {
+                  customLabel = `${client2Name}, how many Powers of Attorney for Property have you named?`;
+                }
+                if (question.key === 'client2HasEstateTrustee') {
+                  customLabel = `${client2Name}, have you named an Estate Trustee(s) in your Will?`;
+                }
+                if (question.key === 'client2EstateTrusteeCount') {
+                  customLabel = `${client2Name}, how many Estate Trustees have you named?`;
+                }
+                if (question.key === 'client2PoaPersonalCareHasDocCopy') {
+                  customLabel = `${client2Name}, do they have a copy of the most recent document in their files?`;
+                }
+                if (question.key === 'client2HasLivingWill') {
+                  customLabel = `${client2Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;
+                }
+                if (question.key === 'client2PoaPropertyHasDocCopy') {
+                  customLabel = `${client2Name}, do they have a copy of the most recent document in their files?`;
+                }
+                if (question.key === 'client2EstateTrusteeHasWillCopy') {
+                  customLabel = `${client2Name}, do the named Estate Trustees have a copy of your most recent Will in their files?`;
+                }
+                if (question.key === 'client2EstateTrusteeKnowsWillLocation') {
+                  customLabel = `${client2Name}, do your Estate Trustees know where to find a copy of your Will?`;
                 }
 
                 return (

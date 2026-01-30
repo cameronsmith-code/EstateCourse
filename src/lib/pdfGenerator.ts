@@ -6271,6 +6271,38 @@ export const generatePDF = (formData: FormData) => {
 
   yPosition = financialTableY + 15;
 
+  // Add new page for additional information
+  doc.addPage();
+  yPosition = 30;
+  addPageHeader();
+
+  // Add question text
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...colors.darkText);
+  const questionText = 'Any other information not captured so far that would be helpful to your Powers of Attorney(ies) or Estate Trustee(s)?';
+  const splitQuestion = doc.splitTextToSize(questionText, fieldWidth);
+  doc.text(splitQuestion, margin, yPosition);
+
+  // Calculate height of question text
+  const questionHeight = splitQuestion.length * 6;
+  yPosition += questionHeight + 8;
+
+  // Create large fillable field for the rest of the page
+  const fieldHeight = pageHeight - yPosition - 20; // Leave space for footer
+
+  doc.setDrawColor(...colors.borderGray);
+  doc.setLineWidth(0.3);
+  doc.rect(margin, yPosition, fieldWidth, fieldHeight);
+
+  const additionalInfoField = new doc.AcroFormTextField();
+  additionalInfoField.fieldName = 'additionalInformation';
+  additionalInfoField.Rect = [margin, yPosition, fieldWidth, fieldHeight];
+  additionalInfoField.multiline = true;
+  additionalInfoField.fontSize = 10;
+  additionalInfoField.textColor = colors.darkText;
+  doc.addField(additionalInfoField);
+
   // Add footer to final page
   addPageFooter();
 

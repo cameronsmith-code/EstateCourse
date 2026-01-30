@@ -81,6 +81,8 @@ interface FormData {
   client2WillJurisdiction?: string;
   client2WillLocation?: string;
   willsSameLawyer?: string;
+  spousesPoaPersonalCare?: string;
+  spousesPoaProperty?: string;
   client1UsesAccountant?: string;
   client2UsesAccountant?: string;
   accountantSamePerson?: string;
@@ -1814,9 +1816,25 @@ export const generatePDF = (formData: FormData) => {
 
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
-    doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+    if (formData.spousesPoaPersonalCare === 'yes') {
+      const client1Name = formData.fullName || 'Client 1';
+      const client2Name = formData.spouseName || 'Client 2';
+      doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
+      yPosition += 6;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client1Name} and ${client2Name} indicated that they are each other's Powers of Attorney for Personal Care.`, margin, yPosition);
+      yPosition += 6;
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Their contingent POAs are:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+    } else {
+      doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+    }
 
     const poaCellHeight = 6;
     const poaColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
@@ -2124,9 +2142,25 @@ export const generatePDF = (formData: FormData) => {
 
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
-    doc.text('Powers of Attorney for Property:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+    if (formData.spousesPoaProperty === 'yes') {
+      const client1Name = formData.fullName || 'Client 1';
+      const client2Name = formData.spouseName || 'Client 2';
+      doc.text('Powers of Attorney for Property:', margin, yPosition);
+      yPosition += 6;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client1Name} and ${client2Name} indicated that they are each other's Powers of Attorney for Property.`, margin, yPosition);
+      yPosition += 6;
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Their contingent POAs are:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+    } else {
+      doc.text('Powers of Attorney for Property:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+    }
 
     const poaPropertyCellHeight = 6;
     const poaPropertyColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];

@@ -468,6 +468,12 @@ export default function StepForm({
                 if (question.key === 'willsSameLawyer' && !(answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
                   return null;
                 }
+                if (question.key === 'spousesPoaPersonalCare' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw'))) {
+                  return null;
+                }
+                if (question.key === 'spousesPoaProperty' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw'))) {
+                  return null;
+                }
                 if (question.key === 'client1HasPoaPersonalCare' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }
@@ -573,16 +579,32 @@ export default function StepForm({
                   customLabel = `${client2Name}, have you made arrangements for Funeral or Cemetery services?`;
                 }
                 if (question.key === 'client1HasPoaPersonalCare') {
-                  customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Personal Care in your Will?`;
+                  if (answers['spousesPoaPersonalCare'] === 'yes') {
+                    customLabel = `${client1Name}, have you named a contingent Power of Attorney(ies) for Personal Care in your Will?`;
+                  } else {
+                    customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Personal Care in your Will?`;
+                  }
                 }
                 if (question.key === 'client1PoaPersonalCareCount') {
-                  customLabel = `${client1Name}, how many Powers of Attorney for Personal Care have you named?`;
+                  if (answers['spousesPoaPersonalCare'] === 'yes') {
+                    customLabel = `${client1Name}, how many contingent Powers of Attorney for Personal Care have you named?`;
+                  } else {
+                    customLabel = `${client1Name}, how many Powers of Attorney for Personal Care have you named?`;
+                  }
                 }
                 if (question.key === 'client1HasPoaProperty') {
-                  customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                  if (answers['spousesPoaProperty'] === 'yes') {
+                    customLabel = `${client1Name}, have you named a contingent Power of Attorney(ies) for Property in your Will?`;
+                  } else {
+                    customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                  }
                 }
                 if (question.key === 'client1PoaPropertyCount') {
-                  customLabel = `${client1Name}, how many Powers of Attorney for Property have you named?`;
+                  if (answers['spousesPoaProperty'] === 'yes') {
+                    customLabel = `${client1Name}, how many contingent Powers of Attorney for Property have you named?`;
+                  } else {
+                    customLabel = `${client1Name}, how many Powers of Attorney for Property have you named?`;
+                  }
                 }
                 if (question.key === 'client1HasEstateTrustee') {
                   customLabel = `${client1Name}, have you named an Estate Trustee(s) in your Will?`;
@@ -603,16 +625,32 @@ export default function StepForm({
                   customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
                 }
                 if (question.key === 'client2HasPoaPersonalCare') {
-                  customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Personal Care in your Will?`;
+                  if (answers['spousesPoaPersonalCare'] === 'yes') {
+                    customLabel = `${client2Name}, have you named a contingent Power of Attorney(ies) for Personal Care in your Will?`;
+                  } else {
+                    customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Personal Care in your Will?`;
+                  }
                 }
                 if (question.key === 'client2PoaPersonalCareCount') {
-                  customLabel = `${client2Name}, how many Powers of Attorney for Personal Care have you named?`;
+                  if (answers['spousesPoaPersonalCare'] === 'yes') {
+                    customLabel = `${client2Name}, how many contingent Powers of Attorney for Personal Care have you named?`;
+                  } else {
+                    customLabel = `${client2Name}, how many Powers of Attorney for Personal Care have you named?`;
+                  }
                 }
                 if (question.key === 'client2HasPoaProperty') {
-                  customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                  if (answers['spousesPoaProperty'] === 'yes') {
+                    customLabel = `${client2Name}, have you named a contingent Power of Attorney(ies) for Property in your Will?`;
+                  } else {
+                    customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                  }
                 }
                 if (question.key === 'client2PoaPropertyCount') {
-                  customLabel = `${client2Name}, how many Powers of Attorney for Property have you named?`;
+                  if (answers['spousesPoaProperty'] === 'yes') {
+                    customLabel = `${client2Name}, how many contingent Powers of Attorney for Property have you named?`;
+                  } else {
+                    customLabel = `${client2Name}, how many Powers of Attorney for Property have you named?`;
+                  }
                 }
                 if (question.key === 'client2HasEstateTrustee') {
                   customLabel = `${client2Name}, have you named an Estate Trustee(s) in your Will?`;
@@ -673,10 +711,18 @@ export default function StepForm({
                     )}
                     {question.key === 'client1PoaPersonalCareCount' && client1PoaPersonalCareCount > 0 && (
                       <div className="space-y-6 mt-6">
-                        <h3 className="text-xl font-semibold text-white">Powers of Attorney for Personal Care Details</h3>
+                        <h3 className="text-xl font-semibold text-white">
+                          {answers['spousesPoaPersonalCare'] === 'yes'
+                            ? 'Contingent Powers of Attorney for Personal Care Details'
+                            : 'Powers of Attorney for Personal Care Details'}
+                        </h3>
                         {Array.from({ length: client1PoaPersonalCareCount }).map((_, index) => (
                           <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                            <h4 className="text-lg font-semibold text-white mb-4">POA for Personal Care #{index + 1}</h4>
+                            <h4 className="text-lg font-semibold text-white mb-4">
+                              {answers['spousesPoaPersonalCare'] === 'yes'
+                                ? `Contingent POA for Personal Care #${index + 1}`
+                                : `POA for Personal Care #${index + 1}`}
+                            </h4>
 
                             <div className="space-y-4">
                               <div>
@@ -737,10 +783,18 @@ export default function StepForm({
                     )}
                     {question.key === 'client1PoaPropertyCount' && client1PoaPropertyCount > 0 && (
                       <div className="space-y-6 mt-6">
-                        <h3 className="text-xl font-semibold text-white">Powers of Attorney for Property Details</h3>
+                        <h3 className="text-xl font-semibold text-white">
+                          {answers['spousesPoaProperty'] === 'yes'
+                            ? 'Contingent Powers of Attorney for Property Details'
+                            : 'Powers of Attorney for Property Details'}
+                        </h3>
                         {Array.from({ length: client1PoaPropertyCount }).map((_, index) => (
                           <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                            <h4 className="text-lg font-semibold text-white mb-4">POA for Property #{index + 1}</h4>
+                            <h4 className="text-lg font-semibold text-white mb-4">
+                              {answers['spousesPoaProperty'] === 'yes'
+                                ? `Contingent POA for Property #${index + 1}`
+                                : `POA for Property #${index + 1}`}
+                            </h4>
 
                             <div className="space-y-4">
                               <div>
@@ -865,10 +919,18 @@ export default function StepForm({
                     )}
                     {question.key === 'client2PoaPersonalCareCount' && client2PoaPersonalCareCount > 0 && (
                       <div className="space-y-6 mt-6">
-                        <h3 className="text-xl font-semibold text-white">{client2Name}'s Powers of Attorney for Personal Care Details</h3>
+                        <h3 className="text-xl font-semibold text-white">
+                          {answers['spousesPoaPersonalCare'] === 'yes'
+                            ? `${client2Name}'s Contingent Powers of Attorney for Personal Care Details`
+                            : `${client2Name}'s Powers of Attorney for Personal Care Details`}
+                        </h3>
                         {Array.from({ length: client2PoaPersonalCareCount }).map((_, index) => (
                           <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                            <h4 className="text-lg font-semibold text-white mb-4">POA for Personal Care #{index + 1}</h4>
+                            <h4 className="text-lg font-semibold text-white mb-4">
+                              {answers['spousesPoaPersonalCare'] === 'yes'
+                                ? `Contingent POA for Personal Care #${index + 1}`
+                                : `POA for Personal Care #${index + 1}`}
+                            </h4>
 
                             <div className="space-y-4">
                               <div>
@@ -929,10 +991,18 @@ export default function StepForm({
                     )}
                     {question.key === 'client2PoaPropertyCount' && client2PoaPropertyCount > 0 && (
                       <div className="space-y-6 mt-6">
-                        <h3 className="text-xl font-semibold text-white">{client2Name}'s Powers of Attorney for Property Details</h3>
+                        <h3 className="text-xl font-semibold text-white">
+                          {answers['spousesPoaProperty'] === 'yes'
+                            ? `${client2Name}'s Contingent Powers of Attorney for Property Details`
+                            : `${client2Name}'s Powers of Attorney for Property Details`}
+                        </h3>
                         {Array.from({ length: client2PoaPropertyCount }).map((_, index) => (
                           <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                            <h4 className="text-lg font-semibold text-white mb-4">POA for Property #{index + 1}</h4>
+                            <h4 className="text-lg font-semibold text-white mb-4">
+                              {answers['spousesPoaProperty'] === 'yes'
+                                ? `Contingent POA for Property #${index + 1}`
+                                : `POA for Property #${index + 1}`}
+                            </h4>
 
                             <div className="space-y-4">
                               <div>

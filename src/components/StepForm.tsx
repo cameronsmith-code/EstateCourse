@@ -498,6 +498,36 @@ export default function StepForm({
                 if (question.key === 'client2HasFuneralArrangements') {
                   customLabel = `${client2Name}, have you made arrangements for Funeral or Cemetery services?`;
                 }
+                if (question.key === 'client1HasPoaPersonalCare') {
+                  customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Personal Care in your Will?`;
+                }
+                if (question.key === 'client1PoaPersonalCareCount') {
+                  customLabel = `${client1Name}, how many Powers of Attorney for Personal Care have you named?`;
+                }
+                if (question.key === 'client1HasPoaProperty') {
+                  customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                }
+                if (question.key === 'client1PoaPropertyCount') {
+                  customLabel = `${client1Name}, how many Powers of Attorney for Property have you named?`;
+                }
+                if (question.key === 'client1HasEstateTrustee') {
+                  customLabel = `${client1Name}, have you named an Estate Trustee(s) in your Will?`;
+                }
+                if (question.key === 'client1EstateTrusteeCount') {
+                  customLabel = `${client1Name}, how many Estate Trustees have you named?`;
+                }
+                if (question.key === 'client1PoaPersonalCareHasDocCopy') {
+                  customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
+                }
+                if (question.key === 'client1HasLivingWill') {
+                  customLabel = `${client1Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;
+                }
+                if (question.key === 'client1PoaPropertyHasDocCopy') {
+                  customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
+                }
+                if (question.key === 'client1EstateTrusteeHasDocCopy') {
+                  customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
+                }
 
                 return (
                   <React.Fragment key={question.key}>

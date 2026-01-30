@@ -443,7 +443,20 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 5 && (() => {
+          {step.id === 5 && (
+            <>
+              {step.questions.map((question) => (
+                <FormField
+                  key={question.key}
+                  question={question}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                />
+              ))}
+            </>
+          )}
+
+          {step.id === 6 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'you';
@@ -1144,7 +1157,7 @@ export default function StepForm({
                 );
               })}
 
-              {step.id === 5 && client1FinancialAdvisorsCount > 0 && (
+              {step.id === 6 && client1FinancialAdvisorsCount > 0 && (
                 <div className="space-y-6 mt-6">
                   <h3 className="text-xl font-semibold text-white">Your Financial Advisors Details</h3>
                   {Array.from({ length: client1FinancialAdvisorsCount }).map((_, index) => (
@@ -1209,7 +1222,7 @@ export default function StepForm({
                 </div>
               )}
 
-              {step.id === 5 && client2FinancialAdvisorsCount > 0 && (
+              {step.id === 6 && client2FinancialAdvisorsCount > 0 && (
                 <div className="space-y-6 mt-6">
                   <h3 className="text-xl font-semibold text-white">Spouse's Financial Advisors Details</h3>
                   {Array.from({ length: client2FinancialAdvisorsCount }).map((_, index) => (
@@ -1277,7 +1290,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 6 && (() => {
+          {step.id === 7 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
@@ -2480,7 +2493,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 7 && (
+          {step.id === 8 && (
             <>
               {step.questions.map((question) => (
                 <FormField
@@ -2990,7 +3003,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 8 && (
+          {step.id === 9 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -3067,7 +3080,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 9 && (
+          {step.id === 10 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};

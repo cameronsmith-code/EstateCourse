@@ -6271,9 +6271,9 @@ export const generatePDF = (formData: FormData) => {
 
   yPosition = financialTableY + 15;
 
-  // Only show corporation section if explicitly answered 'yes' AND has a count > 0
-  console.log('=== PDF GENERATOR - CORPORATION CHECK ===');
-  console.log('Full formData keys:', Object.keys(formData));
+  // Only show PERSONAL corporation section if explicitly answered 'yes' AND has a count > 0
+  // This is separate from trust-owned corporations
+  console.log('=== PDF GENERATOR - PERSONAL CORPORATION CHECK ===');
   console.log('hasCorporation value:', formData.hasCorporation);
   console.log('hasCorporation type:', typeof formData.hasCorporation);
   console.log('hasCorporation === "yes":', formData.hasCorporation === 'yes');
@@ -6282,13 +6282,14 @@ export const generatePDF = (formData: FormData) => {
   console.log('corporationCount type:', typeof formData.corporationCount);
   console.log('corporationsData:', formData.corporationsData);
 
+  // Explicitly check that this is about PERSONAL corporations, not trust corporations
   const shouldShowCorporations = formData.hasCorporation === 'yes' &&
                                   formData.corporationCount &&
                                   !isNaN(parseInt(formData.corporationCount as string)) &&
                                   parseInt(formData.corporationCount as string) > 0;
 
-  console.log('shouldShowCorporations:', shouldShowCorporations);
-  console.log('===========================================');
+  console.log('shouldShowCorporations (personal):', shouldShowCorporations);
+  console.log('=====================================================');
 
   if (shouldShowCorporations) {
     const corpCount = parseInt(formData.corporationCount as string);
@@ -6965,10 +6966,29 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  // Only show trust corporation section if family trust exists AND trust has corporations
-  const shouldShowTrustCorporations = formData.hasFamilyTrust === 'yes' &&
-                                       formData.familyTrustCount &&
-                                       parseInt(formData.familyTrustCount as string) > 0;
+  // Only show trust corporation section if family trust exists AND at least one trust has corporations
+  const hasFamilyTrusts = formData.hasFamilyTrust === 'yes' &&
+                          formData.familyTrustCount &&
+                          parseInt(formData.familyTrustCount as string) > 0;
+
+  let hasTrustCorporations = false;
+  if (hasFamilyTrusts) {
+    const trustCount = parseInt(formData.familyTrustCount as string);
+    for (let i = 0; i < trustCount; i++) {
+      if (formData[`trust_${i}_hasCorporation`] === 'yes') {
+        hasTrustCorporations = true;
+        break;
+      }
+    }
+  }
+
+  const shouldShowTrustCorporations = hasFamilyTrusts && hasTrustCorporations;
+
+  console.log('=== PDF GENERATOR - TRUST CORPORATION CHECK ===');
+  console.log('hasFamilyTrusts:', hasFamilyTrusts);
+  console.log('hasTrustCorporations:', hasTrustCorporations);
+  console.log('shouldShowTrustCorporations:', shouldShowTrustCorporations);
+  console.log('================================================');
 
   if (shouldShowTrustCorporations) {
     const trustCount = parseInt(formData.familyTrustCount as string);

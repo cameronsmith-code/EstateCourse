@@ -19,18 +19,12 @@ export default function Completion() {
     const step8 = answers.get(8) || {};
     const step9 = answers.get(9) || {};
     const step10 = answers.get(10) || {};
+    const step11 = answers.get(11) || {};
 
     console.log('=== COMPLETION - ALL STEPS ===');
-    console.log('Step 1:', step1);
-    console.log('Step 2:', step2);
-    console.log('Step 3:', step3);
-    console.log('Step 4:', step4);
-    console.log('Step 5:', step5);
-    console.log('Step 6:', step6);
-    console.log('Step 7:', step7);
-    console.log('Step 8:', step8);
-    console.log('Step 9:', step9);
-    console.log('Step 10:', step10);
+    console.log('Step 4 (Family Trusts):', step4);
+    console.log('Step 5 (Corporate):', step5);
+    console.log('Step 6 (Beneficiary Trusts):', step6);
 
     const data = {
       ...step1,
@@ -45,6 +39,7 @@ export default function Completion() {
       ...step8,
       ...step9,
       ...step10,
+      ...step11,
     };
 
     console.log('=== COMPLETION - FINAL ASSEMBLED DATA ===');
@@ -52,7 +47,8 @@ export default function Completion() {
     console.log('hasCorporation type:', typeof data.hasCorporation);
     console.log('corporationCount value:', data.corporationCount);
     console.log('corporationsData value:', data.corporationsData);
-    console.log('Full data keys:', Object.keys(data));
+    console.log('hasFamilyTrust value:', data.hasFamilyTrust);
+    console.log('familyTrustCount value:', data.familyTrustCount);
 
     setFormData(data);
   }, [answers]);

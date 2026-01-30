@@ -1599,6 +1599,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 8;
 
         const bpcRowHeight = 10;
+        const bpcHeaderHeight = 14;
         const bpcCol1Width = fieldWidth * 0.25;
         const bpcCol2Width = fieldWidth * 0.25;
         const bpcCol3Width = fieldWidth * 0.25;
@@ -1615,14 +1616,16 @@ export const generatePDF = (formData: FormData) => {
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
           doc.setDrawColor(180, 180, 180);
           doc.setFillColor(250, 250, 250);
-          doc.rect(xPos, currentY, colWidths[colIdx], bpcRowHeight, 'FD');
+          doc.rect(xPos, currentY, colWidths[colIdx], bpcHeaderHeight, 'FD');
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(0, 0, 0);
-          doc.text(header, xPos + 1, currentY + 6);
+          const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
+          const textY = currentY + (bpcHeaderHeight - lines.length * 3) / 2 + 3;
+          doc.text(lines, xPos + 1, textY);
         });
 
-        currentY += bpcRowHeight;
+        currentY += bpcHeaderHeight;
 
         bpcRows.forEach((rowLabel, rowIdx) => {
           const rowY = currentY;
@@ -1671,6 +1674,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 8;
 
         const cglsRowHeight = 10;
+        const cglsHeaderHeight = 18;
         const cglsCol1Width = fieldWidth * 0.25;
         const cglsCol2Width = fieldWidth * 0.30;
         const cglsCol3Width = fieldWidth * 0.15;
@@ -1687,14 +1691,16 @@ export const generatePDF = (formData: FormData) => {
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
           doc.setDrawColor(180, 180, 180);
           doc.setFillColor(250, 250, 250);
-          doc.rect(xPos, currentY, colWidths[colIdx], cglsRowHeight, 'FD');
+          doc.rect(xPos, currentY, colWidths[colIdx], cglsHeaderHeight, 'FD');
           doc.setFontSize(7);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(0, 0, 0);
-          doc.text(header, xPos + 1, currentY + 6);
+          const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
+          const textY = currentY + (cglsHeaderHeight - lines.length * 2.5) / 2 + 2.5;
+          doc.text(lines, xPos + 1, textY);
         });
 
-        currentY += cglsRowHeight;
+        currentY += cglsHeaderHeight;
 
         for (let rowIdx = 0; rowIdx < cglsRowCount; rowIdx++) {
           const rowY = currentY;
@@ -1735,6 +1741,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 8;
 
         const ptRowHeight = 10;
+        const ptHeaderHeight = 14;
         const ptCol1Width = fieldWidth * 0.25;
         const ptCol2Width = fieldWidth * 0.25;
         const ptCol3Width = fieldWidth * 0.25;
@@ -1751,14 +1758,16 @@ export const generatePDF = (formData: FormData) => {
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
           doc.setDrawColor(180, 180, 180);
           doc.setFillColor(250, 250, 250);
-          doc.rect(xPos, currentY, colWidths[colIdx], ptRowHeight, 'FD');
+          doc.rect(xPos, currentY, colWidths[colIdx], ptHeaderHeight, 'FD');
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(0, 0, 0);
-          doc.text(header, xPos + 1, currentY + 6);
+          const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
+          const textY = currentY + (ptHeaderHeight - lines.length * 3) / 2 + 3;
+          doc.text(lines, xPos + 1, textY);
         });
 
-        currentY += ptRowHeight;
+        currentY += ptHeaderHeight;
 
         ptRows.forEach((rowLabel, rowIdx) => {
           const rowY = currentY;
@@ -1803,6 +1812,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 8;
 
         const fopgRowHeight = 10;
+        const fopgHeaderHeight = 18;
         const fopgCol1Width = fieldWidth * 0.20;
         const fopgCol2Width = fieldWidth * 0.22;
         const fopgCol3Width = fieldWidth * 0.18;
@@ -1820,14 +1830,16 @@ export const generatePDF = (formData: FormData) => {
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
           doc.setDrawColor(180, 180, 180);
           doc.setFillColor(250, 250, 250);
-          doc.rect(xPos, currentY, colWidths[colIdx], fopgRowHeight, 'FD');
+          doc.rect(xPos, currentY, colWidths[colIdx], fopgHeaderHeight, 'FD');
           doc.setFontSize(7);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(0, 0, 0);
-          doc.text(header, xPos + 1, currentY + 6);
+          const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
+          const textY = currentY + (fopgHeaderHeight - lines.length * 2.5) / 2 + 2.5;
+          doc.text(lines, xPos + 1, textY);
         });
 
-        currentY += fopgRowHeight;
+        currentY += fopgHeaderHeight;
 
         for (let rowIdx = 0; rowIdx < fopgRowCount; rowIdx++) {
           const rowY = currentY;
@@ -1868,6 +1880,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 8;
 
         const bcrmRowHeight = 10;
+        const bcrmHeaderHeight = 18;
         const bcrmCol1Width = fieldWidth * 0.18;
         const bcrmCol2Width = fieldWidth * 0.18;
         const bcrmCol3Width = fieldWidth * 0.18;
@@ -1886,14 +1899,16 @@ export const generatePDF = (formData: FormData) => {
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
           doc.setDrawColor(180, 180, 180);
           doc.setFillColor(250, 250, 250);
-          doc.rect(xPos, currentY, colWidths[colIdx], bcrmRowHeight, 'FD');
+          doc.rect(xPos, currentY, colWidths[colIdx], bcrmHeaderHeight, 'FD');
           doc.setFontSize(6.5);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(0, 0, 0);
-          doc.text(header, xPos + 1, currentY + 6);
+          const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
+          const textY = currentY + (bcrmHeaderHeight - lines.length * 2.5) / 2 + 2.5;
+          doc.text(lines, xPos + 1, textY);
         });
 
-        currentY += bcrmRowHeight;
+        currentY += bcrmHeaderHeight;
 
         bcrmRows.forEach((rowLabel, rowIdx) => {
           const rowY = currentY;
@@ -1942,6 +1957,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 8;
 
         const sbstRowHeight = 10;
+        const sbstHeaderHeight = 18;
         const sbstCol1Width = fieldWidth * 0.20;
         const sbstCol2Width = fieldWidth * 0.30;
         const sbstCol3Width = fieldWidth * 0.25;
@@ -1964,14 +1980,16 @@ export const generatePDF = (formData: FormData) => {
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
           doc.setDrawColor(180, 180, 180);
           doc.setFillColor(250, 250, 250);
-          doc.rect(xPos, currentY, colWidths[colIdx], sbstRowHeight, 'FD');
+          doc.rect(xPos, currentY, colWidths[colIdx], sbstHeaderHeight, 'FD');
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(0, 0, 0);
-          doc.text(header, xPos + 1, currentY + 6);
+          const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
+          const textY = currentY + (sbstHeaderHeight - lines.length * 3) / 2 + 3;
+          doc.text(lines, xPos + 1, textY);
         });
 
-        currentY += sbstRowHeight;
+        currentY += sbstHeaderHeight;
 
         sbstRows.forEach((row, rowIdx) => {
           const rowY = currentY;

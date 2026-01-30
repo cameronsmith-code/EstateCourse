@@ -1493,7 +1493,7 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 6;
     doc.setFontSize(9);
     doc.setFont(undefined, 'italic');
-    doc.text('It is recommended that you have a will done', margin, yPosition);
+    doc.text('It is recommended that you have a Will done', margin, yPosition);
     doc.setFont(undefined, 'normal');
     yPosition += 12;
   } else if (formData.client1HasWill === 'yes' || formData.client2HasWill === 'yes') {
@@ -1503,28 +1503,28 @@ export const generatePDF = (formData: FormData) => {
     if (formData.client1HasWill === 'yes' && formData.client1WillJurisdiction) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`The will was prepared in ${formData.client1WillJurisdiction}.`, margin, yPosition);
+      doc.text(`${client1Name}'s Will was prepared in ${formData.client1WillJurisdiction}.`, margin, yPosition);
       yPosition += 6;
     }
 
     if (formData.client1HasWill === 'yes' && formData.client1WillLocation) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`The will is located at: ${formData.client1WillLocation}`, margin, yPosition);
+      doc.text(`${client1Name}'s Will is located at: ${formData.client1WillLocation}`, margin, yPosition);
       yPosition += 6;
     }
 
     if (formData.client2HasWill === 'yes' && formData.client2WillJurisdiction && hasSpouse) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name}'s will was prepared in ${formData.client2WillJurisdiction}.`, margin, yPosition);
+      doc.text(`${client2Name}'s Will was prepared in ${formData.client2WillJurisdiction}.`, margin, yPosition);
       yPosition += 6;
     }
 
     if (formData.client2HasWill === 'yes' && formData.client2WillLocation && hasSpouse) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name}'s will is located at: ${formData.client2WillLocation}`, margin, yPosition);
+      doc.text(`${client2Name}'s Will is located at: ${formData.client2WillLocation}`, margin, yPosition);
       yPosition += 6;
     }
 

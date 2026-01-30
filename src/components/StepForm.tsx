@@ -646,7 +646,7 @@ export default function StepForm({
                     {question.key === 'client1HasWill' && answers['client1HasWill'] === 'yes' && (
                       <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          In what jurisdiction was {client1Name}'s will prepared?
+                          In what jurisdiction was {client1Name}'s Will prepared?
                         </label>
                         <input
                           type="text"
@@ -660,7 +660,7 @@ export default function StepForm({
                     {question.key === 'client2HasWill' && answers['client2HasWill'] === 'yes' && (
                       <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          In what jurisdiction was {client2Name}'s will prepared?
+                          In what jurisdiction was {client2Name}'s Will prepared?
                         </label>
                         <input
                           type="text"

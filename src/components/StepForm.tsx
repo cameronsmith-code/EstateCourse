@@ -501,6 +501,45 @@ export default function StepForm({
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Country of Residence
+                          </label>
+                          <input
+                            type="text"
+                            value={trustBeneficiariesData[index]?.countryOfResidence || ''}
+                            onChange={(e) => handleBeneficiaryChange(index, 'countryOfResidence', e.target.value)}
+                            placeholder="Enter country of residence"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number
+                          </label>
+                          <input
+                            type="tel"
+                            value={trustBeneficiariesData[index]?.phoneNumber || ''}
+                            onChange={(e) => handleBeneficiaryChange(index, 'phoneNumber', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address
+                          </label>
+                          <input
+                            type="email"
+                            value={trustBeneficiariesData[index]?.emailAddress || ''}
+                            onChange={(e) => handleBeneficiaryChange(index, 'emailAddress', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}

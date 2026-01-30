@@ -73,6 +73,9 @@ interface FormData {
   trustBeneficiariesData?: Array<{
     beneficiaryName?: string;
     relationshipToSettlor?: string;
+    countryOfResidence?: string;
+    phoneNumber?: string;
+    emailAddress?: string;
   }>;
   client1HasWill?: string;
   client1WillJurisdiction?: string;
@@ -1459,64 +1462,62 @@ export const generatePDF = (formData: FormData) => {
 
     const beneficiaryCount = parseInt(formData.trustBeneficiariesCount || '0');
     const beneCellHeight = 6;
-    const beneNumberWidth = fieldWidth * 0.08;
-    const beneNameWidth = fieldWidth * 0.52;
-    const beneRelationWidth = fieldWidth * 0.40;
-
-    const headerY = yPosition;
-    doc.setDrawColor(...colors.borderGray);
-    doc.setFillColor(220, 220, 220);
-    doc.setLineWidth(0.5);
-    doc.rect(margin, headerY, beneNumberWidth, beneCellHeight, 'FD');
-    doc.rect(margin + beneNumberWidth, headerY, beneNameWidth, beneCellHeight, 'FD');
-    doc.rect(margin + beneNumberWidth + beneNameWidth, headerY, beneRelationWidth, beneCellHeight, 'FD');
-
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.darkText);
-    doc.text('#', margin + 1, headerY + 4);
-    doc.text('Beneficiary Name:', margin + beneNumberWidth + 1, headerY + 4);
-    doc.text('Relationship to Settlor:', margin + beneNumberWidth + beneNameWidth + 1, headerY + 4);
-
-    yPosition += beneCellHeight;
+    const beneLabelWidth = fieldWidth * 0.35;
+    const beneValueWidth = fieldWidth * 0.65;
 
     for (let i = 0; i < beneficiaryCount; i++) {
-      const rowY = yPosition;
       const beneficiary = formData.trustBeneficiariesData?.[i];
 
-      doc.setDrawColor(...colors.borderGray);
-      doc.setFillColor(255, 255, 255);
-      doc.setLineWidth(0.5);
-      doc.rect(margin, rowY, beneNumberWidth, beneCellHeight, 'FD');
-      doc.rect(margin + beneNumberWidth, rowY, beneNameWidth, beneCellHeight);
-      doc.rect(margin + beneNumberWidth + beneNameWidth, rowY, beneRelationWidth, beneCellHeight);
+      // Check if we need a new page (5 rows * 6 height + 8 margin)
+      if (yPosition + 38 > pageHeight - margin) {
+        doc.addPage();
+        yPosition = 12;
+      }
 
-      doc.setFont(undefined, 'normal');
-      doc.setFontSize(9);
-      doc.text(`${i + 1}`, margin + 2, rowY + 4);
+      // Beneficiary header
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      doc.text(`Beneficiary ${i + 1}:`, margin, yPosition);
+      yPosition += 6;
 
-      const nameField = new doc.AcroFormTextField();
-      nameField.fieldName = `trust_beneficiary_${i + 1}_name`;
-      nameField.Rect = [margin + beneNumberWidth + 0.5, rowY + 0.5, beneNameWidth - 1, beneCellHeight - 1];
-      nameField.fontSize = 8;
-      nameField.textColor = colors.darkText;
-      nameField.borderStyle = 'none';
-      nameField.value = beneficiary?.beneficiaryName || '';
-      doc.addField(nameField);
+      const beneFields = [
+        { label: 'Beneficiary Name:', value: beneficiary?.beneficiaryName || '', fieldName: 'name' },
+        { label: 'Relationship to Settlor:', value: beneficiary?.relationshipToSettlor || '', fieldName: 'relationship' },
+        { label: 'Country of Residence:', value: beneficiary?.countryOfResidence || '', fieldName: 'country' },
+        { label: 'Phone Number:', value: beneficiary?.phoneNumber || '', fieldName: 'phone' },
+        { label: 'Email Address:', value: beneficiary?.emailAddress || '', fieldName: 'email' },
+      ];
 
-      const relationField = new doc.AcroFormTextField();
-      relationField.fieldName = `trust_beneficiary_${i + 1}_relationship`;
-      relationField.Rect = [margin + beneNumberWidth + beneNameWidth + 0.5, rowY + 0.5, beneRelationWidth - 1, beneCellHeight - 1];
-      relationField.fontSize = 8;
-      relationField.textColor = colors.darkText;
-      relationField.borderStyle = 'none';
-      relationField.value = beneficiary?.relationshipToSettlor || '';
-      doc.addField(relationField);
+      beneFields.forEach((field) => {
+        const rowY = yPosition;
 
-      yPosition += beneCellHeight;
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, rowY, beneLabelWidth, beneCellHeight);
+        doc.rect(margin + beneLabelWidth, rowY, beneValueWidth, beneCellHeight);
+
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(field.label, margin + 1, rowY + 4);
+
+        const inputField = new doc.AcroFormTextField();
+        inputField.fieldName = `trust_beneficiary_${i + 1}_${field.fieldName}`;
+        inputField.Rect = [margin + beneLabelWidth + 0.5, rowY + 0.5, beneValueWidth - 1, beneCellHeight - 1];
+        inputField.fontSize = 8;
+        inputField.textColor = colors.darkText;
+        inputField.borderStyle = 'none';
+        inputField.value = field.value;
+        doc.addField(inputField);
+
+        yPosition += beneCellHeight;
+      });
+
+      yPosition += 8;
     }
 
-    yPosition += 8;
+    yPosition += 0;
   }
 
   doc.addPage();

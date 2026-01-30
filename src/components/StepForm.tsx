@@ -468,10 +468,10 @@ export default function StepForm({
                 if (question.key === 'willsSameLawyer' && !(answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
                   return null;
                 }
-                if (question.key === 'spousesPoaPersonalCare' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw'))) {
+                if (question.key === 'spousesPoaPersonalCare' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw') && answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
                   return null;
                 }
-                if (question.key === 'spousesPoaProperty' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw'))) {
+                if (question.key === 'spousesPoaProperty' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw') && answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
                   return null;
                 }
                 if (question.key === 'client1HasPoaPersonalCare' && answers['client1HasWill'] !== 'yes') {

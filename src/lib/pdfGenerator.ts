@@ -6293,7 +6293,17 @@ export const generatePDF = (formData: FormData) => {
 
   if (shouldShowCorporations) {
     const corpCount = parseInt(formData.corporationCount as string);
-    for (let corpIndex = 1; corpIndex <= corpCount; corpIndex++) {
+    const corporationsData = formData.corporationsData as Array<Record<string, string>> | undefined;
+
+    console.log('=== PDF - RENDERING PERSONAL CORPORATIONS ===');
+    console.log('Corporation count:', corpCount);
+    console.log('Corporations data:', corporationsData);
+
+    for (let corpIndex = 0; corpIndex < corpCount; corpIndex++) {
+      const corpData = corporationsData?.[corpIndex] || {};
+
+      console.log(`Rendering corporation ${corpIndex + 1}:`, corpData);
+
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 12;
@@ -6308,16 +6318,17 @@ export const generatePDF = (formData: FormData) => {
 
       doc.rect(margin, yPosition, fieldWidth * 0.35, corpNameCellHeight);
       doc.setFont(undefined, 'bold');
-      doc.text(`${getOrdinalLabel(corpIndex)} Corporation's Name:`, margin + 0.5, yPosition + 5);
+      doc.text(`${getOrdinalLabel(corpIndex + 1)} Corporation's Name:`, margin + 0.5, yPosition + 5);
       doc.setFont(undefined, 'normal');
 
       doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, corpNameCellHeight);
       const corpNameField = new doc.AcroFormTextField();
-      corpNameField.fieldName = `corporation_${corpIndex}_name`;
+      corpNameField.fieldName = `corporation_${corpIndex + 1}_name`;
       corpNameField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, corpNameCellHeight - 0.6];
       corpNameField.fontSize = 8;
       corpNameField.textColor = [0, 0, 0];
       corpNameField.borderStyle = 'none';
+      corpNameField.value = corpData.corporationName || '';
       doc.addField(corpNameField);
 
       yPosition += corpNameCellHeight + 4;
@@ -6329,11 +6340,12 @@ export const generatePDF = (formData: FormData) => {
 
       doc.rect(margin + fieldWidth * 0.35, yPosition, fieldWidth * 0.65, corpNameCellHeight);
       const corpJurisdictionField = new doc.AcroFormTextField();
-      corpJurisdictionField.fieldName = `corporation_${corpIndex}_jurisdiction`;
+      corpJurisdictionField.fieldName = `corporation_${corpIndex + 1}_jurisdiction`;
       corpJurisdictionField.Rect = [margin + fieldWidth * 0.35 + 0.3, yPosition + 0.3, fieldWidth * 0.65 - 0.6, corpNameCellHeight - 0.6];
       corpJurisdictionField.fontSize = 8;
       corpJurisdictionField.textColor = [0, 0, 0];
       corpJurisdictionField.borderStyle = 'none';
+      corpJurisdictionField.value = corpData.jurisdiction || '';
       doc.addField(corpJurisdictionField);
 
       yPosition += corpNameCellHeight + 12;
@@ -6411,7 +6423,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin + cCol1Width + cCol2Width + cCol3Width, contractTableY, cCol4Width, contractCellHeight);
 
         const cField1 = new doc.AcroFormTextField();
-        cField1.fieldName = `corp_${corpIndex}_contract_name_${index}`;
+        cField1.fieldName = `corp_${corpIndex + 1}_contract_name_${index}`;
         cField1.Rect = [margin + cCol1Width + 0.3, contractTableY + 0.3, cCol2Width - 0.6, contractCellHeight - 0.6];
         cField1.fontSize = 7;
         cField1.textColor = [0, 0, 0];
@@ -6419,7 +6431,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(cField1);
 
         const cField2 = new doc.AcroFormTextField();
-        cField2.fieldName = `corp_${corpIndex}_contract_firm_${index}`;
+        cField2.fieldName = `corp_${corpIndex + 1}_contract_firm_${index}`;
         cField2.Rect = [margin + cCol1Width + cCol2Width + 0.3, contractTableY + 0.3, cCol3Width - 0.6, contractCellHeight - 0.6];
         cField2.fontSize = 7;
         cField2.textColor = [0, 0, 0];
@@ -6427,7 +6439,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(cField2);
 
         const cField3 = new doc.AcroFormTextField();
-        cField3.fieldName = `corp_${corpIndex}_contract_role_${index}`;
+        cField3.fieldName = `corp_${corpIndex + 1}_contract_role_${index}`;
         cField3.Rect = [margin + cCol1Width + cCol2Width + cCol3Width + 0.3, contractTableY + 0.3, cCol4Width - 0.6, contractCellHeight - 0.6];
         cField3.fontSize = 7;
         cField3.textColor = [0, 0, 0];
@@ -6495,7 +6507,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin + gCol1Width + gCol2Width + gCol3Width, govTableY, gCol4Width, govCellHeight);
 
         const gField1 = new doc.AcroFormTextField();
-        gField1.fieldName = `corp_${corpIndex}_gov_entity_${i}`;
+        gField1.fieldName = `corp_${corpIndex + 1}_gov_entity_${i}`;
         gField1.Rect = [margin + 0.3, govTableY + 0.3, gCol1Width - 0.6, govCellHeight - 0.6];
         gField1.fontSize = 7;
         gField1.textColor = [0, 0, 0];
@@ -6503,7 +6515,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(gField1);
 
         const gField2 = new doc.AcroFormTextField();
-        gField2.fieldName = `corp_${corpIndex}_gov_structure_${i}`;
+        gField2.fieldName = `corp_${corpIndex + 1}_gov_structure_${i}`;
         gField2.Rect = [margin + gCol1Width + 0.3, govTableY + 0.3, gCol2Width - 0.6, govCellHeight - 0.6];
         gField2.fontSize = 7;
         gField2.textColor = [0, 0, 0];
@@ -6511,7 +6523,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(gField2);
 
         const gField3 = new doc.AcroFormTextField();
-        gField3.fieldName = `corp_${corpIndex}_gov_percent_${i}`;
+        gField3.fieldName = `corp_${corpIndex + 1}_gov_percent_${i}`;
         gField3.Rect = [margin + gCol1Width + gCol2Width + 0.3, govTableY + 0.3, gCol3Width - 0.6, govCellHeight - 0.6];
         gField3.fontSize = 7;
         gField3.textColor = [0, 0, 0];
@@ -6519,7 +6531,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(gField3);
 
         const gField4 = new doc.AcroFormTextField();
-        gField4.fieldName = `corp_${corpIndex}_gov_location_${i}`;
+        gField4.fieldName = `corp_${corpIndex + 1}_gov_location_${i}`;
         gField4.Rect = [margin + gCol1Width + gCol2Width + gCol3Width + 0.3, govTableY + 0.3, gCol4Width - 0.6, govCellHeight - 0.6];
         gField4.fontSize = 7;
         gField4.textColor = [0, 0, 0];
@@ -6598,7 +6610,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin + pCol1Width + pCol2Width + pCol3Width, profTableY, pCol4Width, profCellHeight);
 
         const pField1 = new doc.AcroFormTextField();
-        pField1.fieldName = `corp_${corpIndex}_prof_name_${index}`;
+        pField1.fieldName = `corp_${corpIndex + 1}_prof_name_${index}`;
         pField1.Rect = [margin + pCol1Width + 0.3, profTableY + 0.3, pCol2Width - 0.6, profCellHeight - 0.6];
         pField1.fontSize = 7;
         pField1.textColor = [0, 0, 0];
@@ -6606,7 +6618,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(pField1);
 
         const pField2 = new doc.AcroFormTextField();
-        pField2.fieldName = `corp_${corpIndex}_prof_firm_${index}`;
+        pField2.fieldName = `corp_${corpIndex + 1}_prof_firm_${index}`;
         pField2.Rect = [margin + pCol1Width + pCol2Width + 0.3, profTableY + 0.3, pCol3Width - 0.6, profCellHeight - 0.6];
         pField2.fontSize = 7;
         pField2.textColor = [0, 0, 0];
@@ -6614,7 +6626,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(pField2);
 
         const pField3 = new doc.AcroFormTextField();
-        pField3.fieldName = `corp_${corpIndex}_prof_role_${index}`;
+        pField3.fieldName = `corp_${corpIndex + 1}_prof_role_${index}`;
         pField3.Rect = [margin + pCol1Width + pCol2Width + pCol3Width + 0.3, profTableY + 0.3, pCol4Width - 0.6, profCellHeight - 0.6];
         pField3.fontSize = 7;
         pField3.textColor = [0, 0, 0];
@@ -6682,7 +6694,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin + fCol1Width + fCol2Width + fCol3Width + fCol4Width, finTableY, fCol5Width, finCellHeight);
 
         const fField1 = new doc.AcroFormTextField();
-        fField1.fieldName = `corp_${corpIndex}_fin_creditor_${i}`;
+        fField1.fieldName = `corp_${corpIndex + 1}_fin_creditor_${i}`;
         fField1.Rect = [margin + 0.3, finTableY + 0.3, fCol1Width - 0.6, finCellHeight - 0.6];
         fField1.fontSize = 7;
         fField1.textColor = [0, 0, 0];
@@ -6690,7 +6702,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(fField1);
 
         const fField2 = new doc.AcroFormTextField();
-        fField2.fieldName = `corp_${corpIndex}_fin_loantype_${i}`;
+        fField2.fieldName = `corp_${corpIndex + 1}_fin_loantype_${i}`;
         fField2.Rect = [margin + fCol1Width + 0.3, finTableY + 0.3, fCol2Width - 0.6, finCellHeight - 0.6];
         fField2.fontSize = 7;
         fField2.textColor = [0, 0, 0];
@@ -6698,7 +6710,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(fField2);
 
         const fField3 = new doc.AcroFormTextField();
-        fField3.fieldName = `corp_${corpIndex}_fin_account_${i}`;
+        fField3.fieldName = `corp_${corpIndex + 1}_fin_account_${i}`;
         fField3.Rect = [margin + fCol1Width + fCol2Width + 0.3, finTableY + 0.3, fCol3Width - 0.6, finCellHeight - 0.6];
         fField3.fontSize = 7;
         fField3.textColor = [0, 0, 0];
@@ -6706,7 +6718,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(fField3);
 
         const fField4 = new doc.AcroFormTextField();
-        fField4.fieldName = `corp_${corpIndex}_fin_guarantee_${i}`;
+        fField4.fieldName = `corp_${corpIndex + 1}_fin_guarantee_${i}`;
         fField4.Rect = [margin + fCol1Width + fCol2Width + fCol3Width + 0.3, finTableY + 0.3, fCol4Width - 0.6, finCellHeight - 0.6];
         fField4.fontSize = 7;
         fField4.textColor = [0, 0, 0];
@@ -6714,7 +6726,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(fField4);
 
         const fField5 = new doc.AcroFormTextField();
-        fField5.fieldName = `corp_${corpIndex}_fin_location_${i}`;
+        fField5.fieldName = `corp_${corpIndex + 1}_fin_location_${i}`;
         fField5.Rect = [margin + fCol1Width + fCol2Width + fCol3Width + fCol4Width + 0.3, finTableY + 0.3, fCol5Width - 0.6, finCellHeight - 0.6];
         fField5.fontSize = 7;
         fField5.textColor = [0, 0, 0];
@@ -6809,7 +6821,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width + rCol5Width, riskTableY, rCol6Width, riskCellHeight);
 
         const rField1 = new doc.AcroFormTextField();
-        rField1.fieldName = `corp_${corpIndex}_risk_carrier_${index}`;
+        rField1.fieldName = `corp_${corpIndex + 1}_risk_carrier_${index}`;
         rField1.Rect = [margin + rCol1Width + 0.3, riskTableY + 0.3, rCol2Width - 0.6, riskCellHeight - 0.6];
         rField1.fontSize = 7;
         rField1.textColor = [0, 0, 0];
@@ -6817,7 +6829,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(rField1);
 
         const rField2 = new doc.AcroFormTextField();
-        rField2.fieldName = `corp_${corpIndex}_risk_contact_${index}`;
+        rField2.fieldName = `corp_${corpIndex + 1}_risk_contact_${index}`;
         rField2.Rect = [margin + rCol1Width + rCol2Width + 0.3, riskTableY + 0.3, rCol3Width - 0.6, riskCellHeight - 0.6];
         rField2.fontSize = 7;
         rField2.textColor = [0, 0, 0];
@@ -6825,7 +6837,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(rField2);
 
         const rField3 = new doc.AcroFormTextField();
-        rField3.fieldName = `corp_${corpIndex}_risk_policy_${index}`;
+        rField3.fieldName = `corp_${corpIndex + 1}_risk_policy_${index}`;
         rField3.Rect = [margin + rCol1Width + rCol2Width + rCol3Width + 0.3, riskTableY + 0.3, rCol4Width - 0.6, riskCellHeight - 0.6];
         rField3.fontSize = 7;
         rField3.textColor = [0, 0, 0];
@@ -6833,7 +6845,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(rField3);
 
         const rField4 = new doc.AcroFormTextField();
-        rField4.fieldName = `corp_${corpIndex}_risk_beneficiary_${index}`;
+        rField4.fieldName = `corp_${corpIndex + 1}_risk_beneficiary_${index}`;
         rField4.Rect = [margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width + 0.3, riskTableY + 0.3, rCol5Width - 0.6, riskCellHeight - 0.6];
         rField4.fontSize = 7;
         rField4.textColor = [0, 0, 0];
@@ -6841,7 +6853,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(rField4);
 
         const rField5 = new doc.AcroFormTextField();
-        rField5.fieldName = `corp_${corpIndex}_risk_location_${index}`;
+        rField5.fieldName = `corp_${corpIndex + 1}_risk_location_${index}`;
         rField5.Rect = [margin + rCol1Width + rCol2Width + rCol3Width + rCol4Width + rCol5Width + 0.3, riskTableY + 0.3, rCol6Width - 0.6, riskCellHeight - 0.6];
         rField5.fontSize = 7;
         rField5.textColor = [0, 0, 0];
@@ -6936,7 +6948,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin + sCol1Width + sCol2Width + sCol3Width, succTableY, sCol4Width, succCellHeight);
 
         const sField1 = new doc.AcroFormTextField();
-        sField1.fieldName = `corp_${corpIndex}_succession_response_${index}`;
+        sField1.fieldName = `corp_${corpIndex + 1}_succession_response_${index}`;
         sField1.Rect = [margin + sCol1Width + 0.3, succTableY + 0.3, sCol2Width - 0.6, succCellHeight - 0.6];
         sField1.fontSize = 7;
         sField1.textColor = [0, 0, 0];
@@ -6944,7 +6956,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(sField1);
 
         const sField2 = new doc.AcroFormTextField();
-        sField2.fieldName = `corp_${corpIndex}_succession_location_${index}`;
+        sField2.fieldName = `corp_${corpIndex + 1}_succession_location_${index}`;
         sField2.Rect = [margin + sCol1Width + sCol2Width + 0.3, succTableY + 0.3, sCol3Width - 0.6, succCellHeight - 0.6];
         sField2.fontSize = 7;
         sField2.textColor = [0, 0, 0];
@@ -6952,7 +6964,7 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(sField2);
 
         const sField3 = new doc.AcroFormTextField();
-        sField3.fieldName = `corp_${corpIndex}_succession_other_${index}`;
+        sField3.fieldName = `corp_${corpIndex + 1}_succession_other_${index}`;
         sField3.Rect = [margin + sCol1Width + sCol2Width + sCol3Width + 0.3, succTableY + 0.3, sCol4Width - 0.6, succCellHeight - 0.6];
         sField3.fontSize = 7;
         sField3.textColor = [0, 0, 0];

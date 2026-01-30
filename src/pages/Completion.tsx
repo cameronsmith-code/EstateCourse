@@ -20,6 +20,9 @@ export default function Completion() {
     const step9 = answers.get(9) || {};
     const step10 = answers.get(10) || {};
 
+    console.log('=== COMPLETION - RAW STEP DATA ===');
+    console.log('Step 5 (Corporate):', JSON.stringify(step5, null, 2));
+
     const data = {
       ...step1,
       client1PreviousRelationshipsData: step2.client1PreviousRelationshipsData,
@@ -34,6 +37,11 @@ export default function Completion() {
       ...step9,
       ...step10,
     };
+
+    console.log('=== COMPLETION - ASSEMBLED DATA ===');
+    console.log('hasCorporation:', data.hasCorporation);
+    console.log('corporationCount:', data.corporationCount);
+    console.log('corporationsData:', data.corporationsData);
 
     setFormData(data);
   }, [answers]);

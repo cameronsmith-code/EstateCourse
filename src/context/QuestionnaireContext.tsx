@@ -138,6 +138,9 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateAnswer = useCallback((step: number, key: string, value: unknown) => {
+    console.log(`=== CONTEXT - UPDATE ANSWER ===`);
+    console.log(`Step: ${step}, Key: ${key}, Value:`, value);
+
     setAnswers((prev) => {
       const updated = new Map(prev);
       if (!updated.has(step)) {
@@ -164,8 +167,17 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
 
       if (key === 'hasCorporation' && value === 'no') {
         // Clear all corporation related fields
+        console.log('=== CONTEXT - CLEARING CORPORATION DATA ===');
+        console.log('Before clearing:', {
+          corporationCount: stepData.corporationCount,
+          corporationsData: stepData.corporationsData
+        });
         delete stepData.corporationCount;
         delete stepData.corporationsData;
+        console.log('After clearing:', {
+          corporationCount: stepData.corporationCount,
+          corporationsData: stepData.corporationsData
+        });
       }
 
       if (key === 'trustHasCorporation' && value === 'no') {

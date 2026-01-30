@@ -443,13 +443,15 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 5 && (
-            <>
-              {step.questions.map((question) => {
-                const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-                const client1Name = basicAnswers['fullName'] as string || 'you';
-                const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
+          {step.id === 5 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
+            const client1Name = basicAnswers['fullName'] as string || 'you';
+            const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
+
+            return (
+              <>
+                {step.questions.map((question) => {
 
                 if (question.key === 'client1WillLocation' && answers['client1HasWill'] !== 'yes') {
                   return null;
@@ -1193,7 +1195,8 @@ export default function StepForm({
                 </div>
               )}
             </>
-          )}
+            );
+          })()}
 
           {step.id === 6 && (
             <>

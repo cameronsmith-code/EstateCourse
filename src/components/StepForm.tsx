@@ -566,6 +566,9 @@ export default function StepForm({
                 if (question.key === 'client2UsesAccountant') {
                   customLabel = `Does ${client2Name} use a professional accountant?`;
                 }
+                if (question.key === 'accountantSamePerson') {
+                  customLabel = `${client1Name} and ${client2Name}, do you use the same accountant?`;
+                }
                 if (question.key === 'client1FinancialAdvisors') {
                   customLabel = `${client1Name}, how many Financial Advisors do you work with?`;
                 }

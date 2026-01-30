@@ -2869,6 +2869,8 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       yPosition += 4;
       doc.setFontSize(8);
+      doc.text(`${client1Name} and ${client2Name} use the same accountant:`, margin, yPosition);
+      yPosition += 4;
       doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
       yPosition += 6;
 
@@ -2950,15 +2952,29 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition = accountantTableY + 10;
     } else if (bothUseAccountant && !sameAccountant) {
+      if (yPosition > 210) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Accountant/Tax Professional:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 4;
+      doc.setFontSize(8);
+      doc.text(`${client1Name} and ${client2Name} use separate accountants.`, margin, yPosition);
+      yPosition += 6;
+
       [client1Name, client2Name].forEach((clientName, clientIndex) => {
         if (yPosition > 200) {
           doc.addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(10);
+        doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
-        doc.text(`Accountant/Tax Professional - ${clientName}:`, margin, yPosition);
+        doc.text(`${clientName}:`, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 4;
         doc.setFontSize(8);

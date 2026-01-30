@@ -287,6 +287,23 @@ export const STEPS: Step[] = [
   },
   {
     id: 5,
+    title: 'Corporate Information',
+    description: 'Information about corporations you own',
+    questions: [
+      {
+        key: 'ownsCorporation',
+        label: 'Do you own a corporation?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+    ],
+  },
+  {
+    id: 6,
     title: 'Who is on your Team?',
     description: 'Your Power(s) of Attorney and Estate Trustees should not act in a vacuum. This section lists the core professionals who already know your history.',
     questions: [
@@ -689,7 +706,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     title: 'Your Financial Footprint',
     description: 'Banking and financial account information',
     questions: [
@@ -835,7 +852,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 7,
+    id: 8,
     title: 'Outstanding Debts',
     description: 'Information about any outstanding debts (not including credit cards)',
     questions: [
@@ -852,7 +869,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 8,
+    id: 9,
     title: 'Life Insurance',
     description: 'Information about life insurance, disability insurance, and critical illness policies',
     questions: [
@@ -981,7 +998,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 9,
+    id: 10,
     title: 'Property and Casualty Insurance',
     description: 'Information about home and property insurance',
     questions: [

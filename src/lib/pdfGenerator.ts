@@ -6272,12 +6272,22 @@ export const generatePDF = (formData: FormData) => {
   yPosition = financialTableY + 15;
 
   // Only show corporation section if explicitly answered 'yes' AND has a count > 0
+  console.log('Corporation Check:', {
+    hasCorporation: formData.hasCorporation,
+    corporationCount: formData.corporationCount,
+    hasCorporationType: typeof formData.hasCorporation,
+    corporationCountType: typeof formData.corporationCount
+  });
+
   const shouldShowCorporations = formData.hasCorporation === 'yes' &&
                                   formData.corporationCount &&
-                                  parseInt(formData.corporationCount) > 0;
+                                  !isNaN(parseInt(formData.corporationCount as string)) &&
+                                  parseInt(formData.corporationCount as string) > 0;
+
+  console.log('shouldShowCorporations:', shouldShowCorporations);
 
   if (shouldShowCorporations) {
-    const corpCount = parseInt(formData.corporationCount);
+    const corpCount = parseInt(formData.corporationCount as string);
     for (let corpIndex = 1; corpIndex <= corpCount; corpIndex++) {
       if (yPosition > 240) {
         doc.addPage();
@@ -6330,7 +6340,7 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(11);
       doc.setFont(undefined, 'bold');
-      doc.text('Business and Professional Contracts:', margin, yPosition);
+      doc.text('Business and Professional Contacts:', margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 6;
 
@@ -7021,7 +7031,7 @@ export const generatePDF = (formData: FormData) => {
 
           doc.setFontSize(11);
           doc.setFont(undefined, 'bold');
-          doc.text('Business and Professional Contracts:', margin, yPosition);
+          doc.text('Business and Professional Contacts:', margin, yPosition);
           doc.setFont(undefined, 'normal');
           yPosition += 6;
 

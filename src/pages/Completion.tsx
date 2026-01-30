@@ -39,6 +39,12 @@ export default function Completion() {
   }, [answers]);
 
   const handleDownloadPDF = () => {
+    console.log('Completion - Form Data being passed to PDF:', formData);
+    console.log('Completion - Corporation fields:', {
+      hasCorporation: formData.hasCorporation,
+      corporationCount: formData.corporationCount,
+      corporationsData: formData.corporationsData
+    });
     generatePDF(formData as Parameters<typeof generatePDF>[0]);
   };
 

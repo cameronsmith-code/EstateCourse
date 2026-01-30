@@ -1608,13 +1608,13 @@ export const generatePDF = (formData: FormData) => {
         const bpcRows = ['Lawyer(s):', 'Accountant/Tax Prep(s):', 'Trustee(s):', 'Life/Disability/Critical Illness Provider(s):'];
 
         let currentY = yPosition;
-        doc.setDrawColor(...colors.borderGray);
-        doc.setFillColor(245, 245, 245);
         doc.setLineWidth(0.5);
 
         bpcHeaders.forEach((header, colIdx) => {
           const colWidths = [bpcCol1Width, bpcCol2Width, bpcCol3Width, bpcCol4Width];
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.setDrawColor(180, 180, 180);
+          doc.setFillColor(250, 250, 250);
           doc.rect(xPos, currentY, colWidths[colIdx], bpcRowHeight, 'FD');
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
@@ -1680,13 +1680,13 @@ export const generatePDF = (formData: FormData) => {
         const cglsRowCount = 3;
 
         currentY = yPosition;
-        doc.setDrawColor(...colors.borderGray);
-        doc.setFillColor(245, 245, 245);
         doc.setLineWidth(0.5);
 
         cglsHeaders.forEach((header, colIdx) => {
           const colWidths = [cglsCol1Width, cglsCol2Width, cglsCol3Width, cglsCol4Width];
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.setDrawColor(180, 180, 180);
+          doc.setFillColor(250, 250, 250);
           doc.rect(xPos, currentY, colWidths[colIdx], cglsRowHeight, 'FD');
           doc.setFontSize(7);
           doc.setFont(undefined, 'bold');
@@ -1744,13 +1744,13 @@ export const generatePDF = (formData: FormData) => {
         const ptRows = ['Corporate Accountant:', 'Commercial Banker:', 'Business Valuator:', 'Other:', 'Other:'];
 
         currentY = yPosition;
-        doc.setDrawColor(...colors.borderGray);
-        doc.setFillColor(245, 245, 245);
         doc.setLineWidth(0.5);
 
         ptHeaders.forEach((header, colIdx) => {
           const colWidths = [ptCol1Width, ptCol2Width, ptCol3Width, ptCol4Width];
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.setDrawColor(180, 180, 180);
+          doc.setFillColor(250, 250, 250);
           doc.rect(xPos, currentY, colWidths[colIdx], ptRowHeight, 'FD');
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
@@ -1813,13 +1813,13 @@ export const generatePDF = (formData: FormData) => {
         const fopgRowCount = 4;
 
         currentY = yPosition;
-        doc.setDrawColor(...colors.borderGray);
-        doc.setFillColor(245, 245, 245);
         doc.setLineWidth(0.5);
 
         fopgHeaders.forEach((header, colIdx) => {
           const colWidths = [fopgCol1Width, fopgCol2Width, fopgCol3Width, fopgCol4Width, fopgCol5Width];
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.setDrawColor(180, 180, 180);
+          doc.setFillColor(250, 250, 250);
           doc.rect(xPos, currentY, colWidths[colIdx], fopgRowHeight, 'FD');
           doc.setFontSize(7);
           doc.setFont(undefined, 'bold');
@@ -1879,13 +1879,13 @@ export const generatePDF = (formData: FormData) => {
         const bcrmRows = ['Key Person', 'Buy-Sell Funding', 'Overhead Expense', 'Commercial General Liability'];
 
         currentY = yPosition;
-        doc.setDrawColor(...colors.borderGray);
-        doc.setFillColor(245, 245, 245);
         doc.setLineWidth(0.5);
 
         bcrmHeaders.forEach((header, colIdx) => {
           const colWidths = [bcrmCol1Width, bcrmCol2Width, bcrmCol3Width, bcrmCol4Width, bcrmCol5Width, bcrmCol6Width];
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.setDrawColor(180, 180, 180);
+          doc.setFillColor(250, 250, 250);
           doc.rect(xPos, currentY, colWidths[colIdx], bcrmRowHeight, 'FD');
           doc.setFontSize(6.5);
           doc.setFont(undefined, 'bold');
@@ -1922,6 +1922,88 @@ export const generatePDF = (formData: FormData) => {
           });
 
           currentY += bcrmRowHeight;
+        });
+
+        yPosition = currentY + 12;
+
+        if (yPosition + 80 > pageHeight - margin) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(`${corpName} - Succession and Buy-Sell Triggers:`, margin, yPosition);
+        yPosition += 6;
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text('Identify the roadmap for who takes control and how they are supposed to pay for it.', margin, yPosition);
+        yPosition += 8;
+
+        const sbstRowHeight = 10;
+        const sbstCol1Width = fieldWidth * 0.20;
+        const sbstCol2Width = fieldWidth * 0.30;
+        const sbstCol3Width = fieldWidth * 0.25;
+        const sbstCol4Width = fieldWidth * 0.25;
+
+        const sbstHeaders = ['Succession Detail:', 'Response/Instruction:', 'Location of Governing Agreement:', 'Other Information:'];
+        const sbstRows = [
+          { label: 'Chosen Successor:', placeholder: 'e.g. Shareholder Agreement' },
+          { label: 'Buy-Sell Trigger Events:', placeholder: 'e.g. Death, Disability, Divorce' },
+          { label: 'Valuation Method:', placeholder: 'e.g. Formula vs. Independent Valuation' },
+          { label: 'Other Scenario:', placeholder: '' },
+          { label: 'Other Scenario:', placeholder: '' }
+        ];
+
+        currentY = yPosition;
+        doc.setLineWidth(0.5);
+
+        sbstHeaders.forEach((header, colIdx) => {
+          const colWidths = [sbstCol1Width, sbstCol2Width, sbstCol3Width, sbstCol4Width];
+          const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+          doc.setDrawColor(180, 180, 180);
+          doc.setFillColor(250, 250, 250);
+          doc.rect(xPos, currentY, colWidths[colIdx], sbstRowHeight, 'FD');
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(0, 0, 0);
+          doc.text(header, xPos + 1, currentY + 6);
+        });
+
+        currentY += sbstRowHeight;
+
+        sbstRows.forEach((row, rowIdx) => {
+          const rowY = currentY;
+          doc.setDrawColor(180, 180, 180);
+          doc.setFillColor(240, 240, 250);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, rowY, sbstCol1Width, sbstRowHeight, 'FD');
+
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          doc.text(row.label, margin + 1, rowY + 6);
+
+          [sbstCol2Width, sbstCol3Width, sbstCol4Width].forEach((colWidth, colIdx) => {
+            const xPos = margin + sbstCol1Width + [0, sbstCol2Width, sbstCol2Width + sbstCol3Width][colIdx];
+            doc.setDrawColor(180, 180, 180);
+            doc.rect(xPos, rowY, colWidth, sbstRowHeight);
+
+            const field = new doc.AcroFormTextField();
+            field.fieldName = `corp_${i + 1}_sbst_${rowIdx}_${colIdx}`;
+            field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, sbstRowHeight - 1];
+            field.fontSize = 7;
+            field.textColor = colors.darkText;
+            field.borderStyle = 'none';
+            field.multiline = true;
+            if (colIdx === 0 && row.placeholder) {
+              field.value = row.placeholder;
+            }
+            doc.addField(field);
+          });
+
+          currentY += sbstRowHeight;
         });
 
         yPosition = currentY + 8;

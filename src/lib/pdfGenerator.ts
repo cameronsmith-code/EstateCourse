@@ -238,6 +238,13 @@ interface FormData {
   additionalVehiclesCount?: string;
   hasCorporation?: string;
   corporationCount?: string;
+  ownsCorporation?: string;
+  numberOfCorporations?: string;
+  corporationsData?: Array<{
+    legalName?: string;
+    incorporatedInCanada?: string;
+    jurisdiction?: string;
+  }>;
   client1HasFuneralArrangements?: string;
   client1FuneralDocLocation?: string;
   client2HasFuneralArrangements?: string;
@@ -1505,6 +1512,78 @@ export const generatePDF = (formData: FormData) => {
     }
 
     yPosition += 8;
+  }
+
+  doc.addPage();
+  yPosition = 12;
+  addSectionHeader('Corporate Information');
+
+  const hasSpouseForCorp = (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law');
+  const corpClient1Name = formData.fullName || 'Client 1';
+  const corpClient2Name = formData.spouseName || 'Client 2';
+
+  if (formData.ownsCorporation === 'no') {
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.darkText);
+    if (hasSpouseForCorp) {
+      doc.text(`${corpClient1Name} and ${corpClient2Name} indicated that they do not own a corporation.`, margin, yPosition);
+    } else {
+      doc.text(`${corpClient1Name} indicated that they do not own a corporation.`, margin, yPosition);
+    }
+    yPosition += 8;
+  } else if (formData.ownsCorporation === 'yes') {
+    const corporationCount = parseInt(formData.numberOfCorporations || '0');
+
+    if (corporationCount > 0) {
+      for (let i = 0; i < corporationCount; i++) {
+        const corporation = formData.corporationsData?.[i];
+        const ordinal = getOrdinalLabel(i + 1);
+
+        yPosition += 6;
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(`${ordinal} Corporation:`, margin, yPosition);
+        yPosition += 8;
+
+        const corpRows = [
+          { label: `${ordinal} Corporation's Name:`, value: corporation?.legalName || '' },
+          { label: 'This company was incorporated in:', value: corporation?.jurisdiction || '' },
+        ];
+
+        const cellHeight = 8;
+        const labelWidth = fieldWidth * 0.40;
+        const valueWidth = fieldWidth * 0.60;
+
+        corpRows.forEach((row, rowIndex) => {
+          const rowY = yPosition;
+
+          doc.setDrawColor(...colors.borderGray);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, rowY, labelWidth, cellHeight);
+          doc.rect(margin + labelWidth, rowY, valueWidth, cellHeight);
+
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.text(row.label, margin + 1, rowY + 5);
+
+          const field = new doc.AcroFormTextField();
+          field.fieldName = `corporation_${i + 1}_${rowIndex === 0 ? 'name' : 'jurisdiction'}`;
+          field.Rect = [margin + labelWidth + 0.5, rowY + 0.5, valueWidth - 1, cellHeight - 1];
+          field.fontSize = 9;
+          field.textColor = colors.darkText;
+          field.borderStyle = 'none';
+          field.value = row.value;
+          doc.addField(field);
+
+          yPosition += cellHeight;
+        });
+
+        yPosition += 4;
+      }
+    }
   }
 
   yPosition += 12;

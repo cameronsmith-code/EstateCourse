@@ -129,6 +129,39 @@ export default function StepForm({
           }
         }
       }
+    } else if (step.id === 5) {
+      if (answers['ownsCorporation'] === 'yes') {
+        if (!answers['numberOfCorporations']) {
+          setValidationError('Please specify the number of corporations you own.');
+          return;
+        }
+
+        const corporationsCount = parseInt(answers['numberOfCorporations'] as string);
+        const corporationsData = answers['corporationsData'] as Array<Record<string, string>> | undefined;
+
+        if (corporationsCount > 0) {
+          if (!corporationsData || corporationsData.length < corporationsCount) {
+            setValidationError('Please fill in details for all corporations.');
+            return;
+          }
+
+          for (let i = 0; i < corporationsCount; i++) {
+            const corporation = corporationsData[i];
+            if (!corporation?.legalName) {
+              setValidationError(`Please fill in the legal name for corporation ${i + 1}.`);
+              return;
+            }
+            if (!corporation?.incorporatedInCanada) {
+              setValidationError(`Please specify if corporation ${i + 1} was incorporated in Canada.`);
+              return;
+            }
+            if (!corporation?.jurisdiction) {
+              setValidationError(`Please specify the jurisdiction for corporation ${i + 1}.`);
+              return;
+            }
+          }
+        }
+      }
     } else {
       const requiredQuestions = step.questions.filter((q) => {
         if (!q.required) return false;
@@ -300,6 +333,18 @@ export default function StepForm({
     onAnswerChange('trustBeneficiariesData', updated);
   };
 
+  const numberOfCorporations = parseInt(answers['numberOfCorporations'] as string) || 0;
+  const corporationsData = (answers['corporationsData'] as Array<Record<string, string>>) || Array(numberOfCorporations).fill(null).map(() => ({}));
+
+  const handleCorporationChange = (index: number, field: string, value: string) => {
+    const updated = [...corporationsData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('corporationsData', updated);
+  };
+
   return (
     <div>
       {step.videoUrl && (
@@ -445,14 +490,120 @@ export default function StepForm({
 
           {step.id === 5 && (
             <>
-              {step.questions.map((question) => (
-                <FormField
-                  key={question.key}
-                  question={question}
-                  value={answers[question.key]}
-                  onChange={(value) => onAnswerChange(question.key, value)}
-                />
-              ))}
+              {step.questions.map((question) => {
+                if (question.key === 'numberOfCorporations' && answers['ownsCorporation'] !== 'yes') {
+                  return null;
+                }
+
+                return (
+                  <FormField
+                    key={question.key}
+                    question={question}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                  />
+                );
+              })}
+
+              {answers['ownsCorporation'] === 'yes' && numberOfCorporations > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Corporation Details</h3>
+                  {Array.from({ length: numberOfCorporations }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Corporation {index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            What is the legal name of the corporation? *
+                          </label>
+                          <input
+                            type="text"
+                            value={corporationsData[index]?.legalName || ''}
+                            onChange={(e) => handleCorporationChange(index, 'legalName', e.target.value)}
+                            placeholder="Enter legal name of corporation"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Was it incorporated in Canada? *
+                          </label>
+                          <div className="space-y-2">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`corporation-${index}-incorporated-in-canada`}
+                                value="yes"
+                                checked={corporationsData[index]?.incorporatedInCanada === 'yes'}
+                                onChange={(e) => handleCorporationChange(index, 'incorporatedInCanada', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">Yes</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`corporation-${index}-incorporated-in-canada`}
+                                value="no"
+                                checked={corporationsData[index]?.incorporatedInCanada === 'no'}
+                                onChange={(e) => handleCorporationChange(index, 'incorporatedInCanada', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">No</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        {corporationsData[index]?.incorporatedInCanada === 'yes' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              In what jurisdiction was it incorporated? *
+                            </label>
+                            <select
+                              value={corporationsData[index]?.jurisdiction || ''}
+                              onChange={(e) => handleCorporationChange(index, 'jurisdiction', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Select jurisdiction</option>
+                              <option value="Canada">Canada</option>
+                              <option value="Alberta">Alberta</option>
+                              <option value="British Columbia">British Columbia</option>
+                              <option value="Manitoba">Manitoba</option>
+                              <option value="New Brunswick">New Brunswick</option>
+                              <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                              <option value="Nova Scotia">Nova Scotia</option>
+                              <option value="Ontario">Ontario</option>
+                              <option value="Prince Edward Island">Prince Edward Island</option>
+                              <option value="Quebec">Quebec</option>
+                              <option value="Saskatchewan">Saskatchewan</option>
+                              <option value="Northwest Territories">Northwest Territories</option>
+                              <option value="Nunavut">Nunavut</option>
+                              <option value="Yukon">Yukon</option>
+                            </select>
+                          </div>
+                        )}
+
+                        {corporationsData[index]?.incorporatedInCanada === 'no' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Where was it incorporated? *
+                            </label>
+                            <input
+                              type="text"
+                              value={corporationsData[index]?.jurisdiction || ''}
+                              onChange={(e) => handleCorporationChange(index, 'jurisdiction', e.target.value)}
+                              placeholder="Enter country/jurisdiction"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
 

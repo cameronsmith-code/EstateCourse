@@ -104,6 +104,31 @@ export default function StepForm({
           return;
         }
       }
+    } else if (step.id === 4) {
+      if (answers['hasFamilyTrust'] === 'yes') {
+        if (!answers['trustBeneficiariesCount']) {
+          setValidationError('Please specify the number of beneficiaries for the trust.');
+          return;
+        }
+
+        const beneficiariesCount = parseInt(answers['trustBeneficiariesCount'] as string);
+        const trustBeneficiariesData = answers['trustBeneficiariesData'] as Array<Record<string, string>> | undefined;
+
+        if (beneficiariesCount > 0) {
+          if (!trustBeneficiariesData || trustBeneficiariesData.length < beneficiariesCount) {
+            setValidationError('Please fill in details for all beneficiaries.');
+            return;
+          }
+
+          for (let i = 0; i < beneficiariesCount; i++) {
+            const beneficiary = trustBeneficiariesData[i];
+            if (!beneficiary?.beneficiaryName || !beneficiary?.relationshipToSettlor) {
+              setValidationError(`Please fill in name and relationship for beneficiary ${i + 1}.`);
+              return;
+            }
+          }
+        }
+      }
     } else {
       const requiredQuestions = step.questions.filter((q) => {
         if (!q.required) return false;
@@ -165,6 +190,78 @@ export default function StepForm({
     }
     updated[index][field] = value;
     onAnswerChange('client2PreviousRelationshipsData', updated);
+  };
+
+  const client1PoaPersonalCareCount = parseInt(answers['client1PoaPersonalCareCount'] as string) || 0;
+  const client1PoaPersonalCareData = (answers['client1PoaPersonalCareData'] as Array<Record<string, string>>) || Array(client1PoaPersonalCareCount).fill(null).map(() => ({}));
+
+  const handlePoaPersonalCareChange = (index: number, field: string, value: string) => {
+    const updated = [...client1PoaPersonalCareData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1PoaPersonalCareData', updated);
+  };
+
+  const client1PoaPropertyCount = parseInt(answers['client1PoaPropertyCount'] as string) || 0;
+  const client1PoaPropertyData = (answers['client1PoaPropertyData'] as Array<Record<string, string>>) || Array(client1PoaPropertyCount).fill(null).map(() => ({}));
+
+  const handlePoaPropertyChange = (index: number, field: string, value: string) => {
+    const updated = [...client1PoaPropertyData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1PoaPropertyData', updated);
+  };
+
+  const client1EstateTrusteeCount = parseInt(answers['client1EstateTrusteeCount'] as string) || 0;
+  const client1EstateTrusteeData = (answers['client1EstateTrusteeData'] as Array<Record<string, string>>) || Array(client1EstateTrusteeCount).fill(null).map(() => ({}));
+
+  const handleEstateTrusteeChange = (index: number, field: string, value: string) => {
+    const updated = [...client1EstateTrusteeData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1EstateTrusteeData', updated);
+  };
+
+  const client1FinancialAdvisorsCount = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
+  const client1FinancialAdvisorsData = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(client1FinancialAdvisorsCount).fill(null).map(() => ({}));
+
+  const handleFinancialAdvisorChange = (index: number, field: string, value: string) => {
+    const updated = [...client1FinancialAdvisorsData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1FinancialAdvisorsData', updated);
+  };
+
+  const client2FinancialAdvisorsCount = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
+  const client2FinancialAdvisorsData = (answers['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(client2FinancialAdvisorsCount).fill(null).map(() => ({}));
+
+  const handleClient2FinancialAdvisorChange = (index: number, field: string, value: string) => {
+    const updated = [...client2FinancialAdvisorsData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2FinancialAdvisorsData', updated);
+  };
+
+  const trustBeneficiariesCount = parseInt(answers['trustBeneficiariesCount'] as string) || 0;
+  const trustBeneficiariesData = (answers['trustBeneficiariesData'] as Array<Record<string, string>>) || Array(trustBeneficiariesCount).fill(null).map(() => ({}));
+
+  const handleBeneficiaryChange = (index: number, field: string, value: string) => {
+    const updated = [...trustBeneficiariesData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('trustBeneficiariesData', updated);
   };
 
   return (
@@ -243,7 +340,74 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 7 && (
+          {step.id === 4 && (
+            <>
+              {step.questions.map((question) => {
+                if (question.key === 'trustLegalName' && answers['hasFamilyTrust'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'trustDeedLocation' && answers['hasFamilyTrust'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'trustYearEstablished' && answers['hasFamilyTrust'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'trustBeneficiariesCount' && answers['hasFamilyTrust'] !== 'yes') {
+                  return null;
+                }
+
+                return (
+                  <FormField
+                    key={question.key}
+                    question={question}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                  />
+                );
+              })}
+
+              {answers['hasFamilyTrust'] === 'yes' && trustBeneficiariesCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Trust Beneficiaries</h3>
+                  {Array.from({ length: trustBeneficiariesCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Beneficiary {index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Beneficiary Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={trustBeneficiariesData[index]?.beneficiaryName || ''}
+                            onChange={(e) => handleBeneficiaryChange(index, 'beneficiaryName', e.target.value)}
+                            placeholder="Enter beneficiary name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Relationship to Settlor *
+                          </label>
+                          <input
+                            type="text"
+                            value={trustBeneficiariesData[index]?.relationshipToSettlor || ''}
+                            onChange={(e) => handleBeneficiaryChange(index, 'relationshipToSettlor', e.target.value)}
+                            placeholder="e.g., Daughter, Son, Spouse, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {step.id === 5 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -373,10 +537,335 @@ export default function StepForm({
                   </React.Fragment>
                 );
               })}
+
+              {step.id === 5 && answers['client1HasPoaPersonalCare'] === 'yes' && client1PoaPersonalCareCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Powers of Attorney for Personal Care Details</h3>
+                  {Array.from({ length: client1PoaPersonalCareCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">POA for Personal Care #{index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1PoaPersonalCareData[index]?.name || ''}
+                            onChange={(e) => handlePoaPersonalCareChange(index, 'name', e.target.value)}
+                            placeholder="Enter name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1PoaPersonalCareData[index]?.phone || ''}
+                            onChange={(e) => handlePoaPersonalCareChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={client1PoaPersonalCareData[index]?.email || ''}
+                            onChange={(e) => handlePoaPersonalCareChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Relationship to You *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1PoaPersonalCareData[index]?.relationship || ''}
+                            onChange={(e) => handlePoaPersonalCareChange(index, 'relationship', e.target.value)}
+                            placeholder="e.g., Spouse, Child, Sibling, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {step.id === 5 && answers['client1HasPoaProperty'] === 'yes' && client1PoaPropertyCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Powers of Attorney for Property Details</h3>
+                  {Array.from({ length: client1PoaPropertyCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">POA for Property #{index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1PoaPropertyData[index]?.name || ''}
+                            onChange={(e) => handlePoaPropertyChange(index, 'name', e.target.value)}
+                            placeholder="Enter name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1PoaPropertyData[index]?.phone || ''}
+                            onChange={(e) => handlePoaPropertyChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={client1PoaPropertyData[index]?.email || ''}
+                            onChange={(e) => handlePoaPropertyChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Relationship to You *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1PoaPropertyData[index]?.relationship || ''}
+                            onChange={(e) => handlePoaPropertyChange(index, 'relationship', e.target.value)}
+                            placeholder="e.g., Spouse, Child, Sibling, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {step.id === 5 && answers['client1HasEstateTrustee'] === 'yes' && client1EstateTrusteeCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Estate Trustees Details</h3>
+                  {Array.from({ length: client1EstateTrusteeCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Estate Trustee #{index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1EstateTrusteeData[index]?.name || ''}
+                            onChange={(e) => handleEstateTrusteeChange(index, 'name', e.target.value)}
+                            placeholder="Enter name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1EstateTrusteeData[index]?.phone || ''}
+                            onChange={(e) => handleEstateTrusteeChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={client1EstateTrusteeData[index]?.email || ''}
+                            onChange={(e) => handleEstateTrusteeChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Relationship to You *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1EstateTrusteeData[index]?.relationship || ''}
+                            onChange={(e) => handleEstateTrusteeChange(index, 'relationship', e.target.value)}
+                            placeholder="e.g., Spouse, Child, Sibling, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {step.id === 5 && client1FinancialAdvisorsCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Your Financial Advisors Details</h3>
+                  {Array.from({ length: client1FinancialAdvisorsCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1FinancialAdvisorsData[index]?.name || ''}
+                            onChange={(e) => handleFinancialAdvisorChange(index, 'name', e.target.value)}
+                            placeholder="Enter name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Firm/Company *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1FinancialAdvisorsData[index]?.firm || ''}
+                            onChange={(e) => handleFinancialAdvisorChange(index, 'firm', e.target.value)}
+                            placeholder="Enter firm/company name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1FinancialAdvisorsData[index]?.phone || ''}
+                            onChange={(e) => handleFinancialAdvisorChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={client1FinancialAdvisorsData[index]?.email || ''}
+                            onChange={(e) => handleFinancialAdvisorChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {step.id === 5 && client2FinancialAdvisorsCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Spouse's Financial Advisors Details</h3>
+                  {Array.from({ length: client2FinancialAdvisorsCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2FinancialAdvisorsData[index]?.name || ''}
+                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'name', e.target.value)}
+                            placeholder="Enter name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Firm/Company *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2FinancialAdvisorsData[index]?.firm || ''}
+                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'firm', e.target.value)}
+                            placeholder="Enter firm/company name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2FinancialAdvisorsData[index]?.phone || ''}
+                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={client2FinancialAdvisorsData[index]?.email || ''}
+                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
 
-          {step.id === 8 && (
+          {step.id === 6 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -1659,7 +2148,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 9 && (
+          {step.id === 7 && (
             <>
               {step.questions.map((question) => (
                 <FormField
@@ -2169,7 +2658,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 10 && (
+          {step.id === 8 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -2246,7 +2735,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 11 && (
+          {step.id === 9 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};

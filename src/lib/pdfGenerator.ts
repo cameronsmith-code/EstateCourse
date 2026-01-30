@@ -65,6 +65,15 @@ interface FormData {
   hasChildren?: string;
   numberOfChildren?: string;
   childrenData?: ChildData[];
+  hasFamilyTrust?: string;
+  trustLegalName?: string;
+  trustDeedLocation?: string;
+  trustYearEstablished?: string;
+  trustBeneficiariesCount?: string;
+  trustBeneficiariesData?: Array<{
+    beneficiaryName?: string;
+    relationshipToSettlor?: string;
+  }>;
   client1HasWill?: string;
   client1WillJurisdiction?: string;
   client1WillLocation?: string;
@@ -76,7 +85,43 @@ interface FormData {
   client2UsesAccountant?: string;
   accountantSamePerson?: string;
   client1FinancialAdvisors?: string;
+  client1FinancialAdvisorsData?: Array<{
+    name?: string;
+    firm?: string;
+    phone?: string;
+    email?: string;
+  }>;
   client2FinancialAdvisors?: string;
+  client2FinancialAdvisorsData?: Array<{
+    name?: string;
+    firm?: string;
+    phone?: string;
+    email?: string;
+  }>;
+  client1HasPoaPersonalCare?: string;
+  client1PoaPersonalCareCount?: string;
+  client1PoaPersonalCareData?: Array<{
+    name?: string;
+    phone?: string;
+    email?: string;
+    relationship?: string;
+  }>;
+  client1HasPoaProperty?: string;
+  client1PoaPropertyCount?: string;
+  client1PoaPropertyData?: Array<{
+    name?: string;
+    phone?: string;
+    email?: string;
+    relationship?: string;
+  }>;
+  client1HasEstateTrustee?: string;
+  client1EstateTrusteeCount?: string;
+  client1EstateTrusteeData?: Array<{
+    name?: string;
+    phone?: string;
+    email?: string;
+    relationship?: string;
+  }>;
   bankingStructure?: string;
   jointBankCount?: string;
   jointInstitutionsData?: Array<{ name?: string }>;
@@ -1312,6 +1357,118 @@ export const generatePDF = (formData: FormData) => {
     });
   }
 
+  if (formData.hasFamilyTrust === 'yes') {
+    doc.addPage();
+    yPosition = 12;
+    addSectionHeader('Family Trust Information');
+
+    const trustInfoRows = [
+      { label: 'Trust 1 - Legal Name:', value: formData.trustLegalName || '' },
+      { label: 'Trust Deed Location:', value: formData.trustDeedLocation || '' },
+      { label: 'Year Established:', value: formData.trustYearEstablished || '' },
+      { label: 'Number of Beneficiaries:', value: formData.trustBeneficiariesCount || '' },
+    ];
+
+    const cellHeight = 8;
+    const labelWidth = fieldWidth * 0.35;
+    const valueWidth = fieldWidth * 0.65;
+
+    trustInfoRows.forEach((row, index) => {
+      const rowY = yPosition;
+
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, rowY, labelWidth, cellHeight);
+      doc.rect(margin + labelWidth, rowY, valueWidth, cellHeight);
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      doc.text(row.label, margin + 1, rowY + 5);
+
+      const field = new doc.AcroFormTextField();
+      field.fieldName = `trust_${index}`;
+      field.Rect = [margin + labelWidth + 0.5, rowY + 0.5, valueWidth - 1, cellHeight - 1];
+      field.fontSize = 9;
+      field.textColor = colors.darkText;
+      field.borderStyle = 'none';
+      field.value = row.value;
+      doc.addField(field);
+
+      yPosition += cellHeight;
+    });
+
+    yPosition += 8;
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.darkText);
+    doc.text('Trust Beneficiaries:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 6;
+
+    const beneficiaryCount = parseInt(formData.trustBeneficiariesCount || '0');
+    const beneCellHeight = 6;
+    const beneNumberWidth = fieldWidth * 0.08;
+    const beneNameWidth = fieldWidth * 0.52;
+    const beneRelationWidth = fieldWidth * 0.40;
+
+    const headerY = yPosition;
+    doc.setDrawColor(...colors.borderGray);
+    doc.setFillColor(220, 220, 220);
+    doc.setLineWidth(0.5);
+    doc.rect(margin, headerY, beneNumberWidth, beneCellHeight, 'FD');
+    doc.rect(margin + beneNumberWidth, headerY, beneNameWidth, beneCellHeight, 'FD');
+    doc.rect(margin + beneNumberWidth + beneNameWidth, headerY, beneRelationWidth, beneCellHeight, 'FD');
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.darkText);
+    doc.text('#', margin + 1, headerY + 4);
+    doc.text('Beneficiary Name:', margin + beneNumberWidth + 1, headerY + 4);
+    doc.text('Relationship to Settlor:', margin + beneNumberWidth + beneNameWidth + 1, headerY + 4);
+
+    yPosition += beneCellHeight;
+
+    for (let i = 0; i < beneficiaryCount; i++) {
+      const rowY = yPosition;
+      const beneficiary = formData.trustBeneficiariesData?.[i];
+
+      doc.setDrawColor(...colors.borderGray);
+      doc.setFillColor(255, 255, 255);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, rowY, beneNumberWidth, beneCellHeight, 'FD');
+      doc.rect(margin + beneNumberWidth, rowY, beneNameWidth, beneCellHeight);
+      doc.rect(margin + beneNumberWidth + beneNameWidth, rowY, beneRelationWidth, beneCellHeight);
+
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(9);
+      doc.text(`${i + 1}`, margin + 2, rowY + 4);
+
+      const nameField = new doc.AcroFormTextField();
+      nameField.fieldName = `trust_beneficiary_${i + 1}_name`;
+      nameField.Rect = [margin + beneNumberWidth + 0.5, rowY + 0.5, beneNameWidth - 1, beneCellHeight - 1];
+      nameField.fontSize = 8;
+      nameField.textColor = colors.darkText;
+      nameField.borderStyle = 'none';
+      nameField.value = beneficiary?.beneficiaryName || '';
+      doc.addField(nameField);
+
+      const relationField = new doc.AcroFormTextField();
+      relationField.fieldName = `trust_beneficiary_${i + 1}_relationship`;
+      relationField.Rect = [margin + beneNumberWidth + beneNameWidth + 0.5, rowY + 0.5, beneRelationWidth - 1, beneCellHeight - 1];
+      relationField.fontSize = 8;
+      relationField.textColor = colors.darkText;
+      relationField.borderStyle = 'none';
+      relationField.value = beneficiary?.relationshipToSettlor || '';
+      doc.addField(relationField);
+
+      yPosition += beneCellHeight;
+    }
+
+    yPosition += 8;
+  }
+
   yPosition += 12;
   doc.addPage();
   yPosition = 12;
@@ -1693,6 +1850,8 @@ export const generatePDF = (formData: FormData) => {
         poaTableY = 12;
       }
 
+      const poaData = formData.client1PoaPersonalCareData?.[i];
+
       doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
 
@@ -1707,6 +1866,7 @@ export const generatePDF = (formData: FormData) => {
       field1.fontSize = 7;
       field1.textColor = [0, 0, 0];
       field1.borderStyle = 'none';
+      field1.value = poaData?.name || '';
       doc.addField(field1);
 
       const field2 = new doc.AcroFormTextField();
@@ -1715,6 +1875,7 @@ export const generatePDF = (formData: FormData) => {
       field2.fontSize = 7;
       field2.textColor = [0, 0, 0];
       field2.borderStyle = 'none';
+      field2.value = poaData?.phone || '';
       doc.addField(field2);
 
       const field3 = new doc.AcroFormTextField();
@@ -1723,6 +1884,7 @@ export const generatePDF = (formData: FormData) => {
       field3.fontSize = 7;
       field3.textColor = [0, 0, 0];
       field3.borderStyle = 'none';
+      field3.value = poaData?.email || '';
       doc.addField(field3);
 
       const field4 = new doc.AcroFormTextField();
@@ -1731,6 +1893,7 @@ export const generatePDF = (formData: FormData) => {
       field4.fontSize = 7;
       field4.textColor = [0, 0, 0];
       field4.borderStyle = 'none';
+      field4.value = poaData?.relationship || '';
       doc.addField(field4);
 
       poaTableY += poaCellHeight;

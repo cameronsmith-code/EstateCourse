@@ -242,6 +242,51 @@ export const STEPS: Step[] = [
   },
   {
     id: 4,
+    title: 'Family Trusts',
+    description: 'Information about family trusts you have established',
+    questions: [
+      {
+        key: 'hasFamilyTrust',
+        label: 'Have you established a family trust?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'trustLegalName',
+        label: 'What is the Trust\'s legal name?',
+        type: 'text',
+        placeholder: 'Enter the trust\'s legal name',
+        required: false,
+      },
+      {
+        key: 'trustDeedLocation',
+        label: 'Where is the Trust Deed located?',
+        type: 'text',
+        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
+        required: false,
+      },
+      {
+        key: 'trustYearEstablished',
+        label: 'What year was the Trust established?',
+        type: 'number',
+        placeholder: 'Enter year (e.g., 2020)',
+        required: false,
+      },
+      {
+        key: 'trustBeneficiariesCount',
+        label: 'How many beneficiaries are there for the Trust?',
+        type: 'number',
+        placeholder: 'Enter number of beneficiaries',
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 5,
     title: 'Who is on your Team?',
     description: 'Your Power(s) of Attorney and Estate Trustees should not act in a vacuum. This section lists the core professionals who already know your history.',
     questions: [
@@ -490,7 +535,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 5,
+    id: 6,
     title: 'Your Financial Footprint',
     description: 'Banking and financial account information',
     questions: [
@@ -636,7 +681,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     title: 'Outstanding Debts',
     description: 'Information about any outstanding debts (not including credit cards)',
     questions: [
@@ -653,7 +698,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 7,
+    id: 8,
     title: 'Life Insurance',
     description: 'Information about life insurance, disability insurance, and critical illness policies',
     questions: [
@@ -782,7 +827,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 8,
+    id: 9,
     title: 'Property and Casualty Insurance',
     description: 'Information about home and property insurance',
     questions: [

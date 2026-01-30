@@ -540,6 +540,12 @@ export default function StepForm({
                 if (question.key === 'client2FuneralDocLocation' && (answers['client2HasFuneralArrangements'] !== 'yes' || !hasSpouse)) {
                   return null;
                 }
+                if (question.key === 'client1AccountingRecordsLocation' && answers['client1UsesAccountant'] !== 'no') {
+                  return null;
+                }
+                if (question.key === 'client2AccountingRecordsLocation' && (answers['client2UsesAccountant'] !== 'no' || !hasSpouse)) {
+                  return null;
+                }
                 if (question.key === 'accountantSamePerson' && !(answers['client1UsesAccountant'] === 'yes' && answers['client2UsesAccountant'] === 'yes')) {
                   return null;
                 }
@@ -565,6 +571,12 @@ export default function StepForm({
                 }
                 if (question.key === 'client2UsesAccountant') {
                   customLabel = `Does ${client2Name} use a professional accountant?`;
+                }
+                if (question.key === 'client1AccountingRecordsLocation') {
+                  customLabel = `${client1Name}, where are your accounting records kept?`;
+                }
+                if (question.key === 'client2AccountingRecordsLocation') {
+                  customLabel = `${client2Name}, where are your accounting records kept?`;
                 }
                 if (question.key === 'accountantSamePerson') {
                   customLabel = `${client1Name} and ${client2Name}, do you use the same accountant?`;

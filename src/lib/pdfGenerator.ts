@@ -84,7 +84,9 @@ interface FormData {
   spousesPoaPersonalCare?: string;
   spousesPoaProperty?: string;
   client1UsesAccountant?: string;
+  client1AccountingRecordsLocation?: string;
   client2UsesAccountant?: string;
+  client2AccountingRecordsLocation?: string;
   accountantSamePerson?: string;
   client1FinancialAdvisors?: string;
   client1FinancialAdvisorsData?: Array<{
@@ -2853,7 +2855,9 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  if (formData.client1UsesAccountant === 'yes' || formData.client2UsesAccountant === 'yes') {
+  const hasAccountingInfo = formData.client1UsesAccountant || formData.client2UsesAccountant;
+
+  if (hasAccountingInfo) {
     const bothUseAccountant = formData.client1UsesAccountant === 'yes' && formData.client2UsesAccountant === 'yes';
     const sameAccountant = formData.accountantSamePerson === 'yes';
 
@@ -3065,82 +3069,193 @@ export const generatePDF = (formData: FormData) => {
         yPosition = 12;
       }
 
-      const clientWithAccountant = formData.client1UsesAccountant === 'yes' ? client1Name : client2Name;
-
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      doc.text(`Accountant/Tax Professional - ${clientWithAccountant}:`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 4;
-      doc.setFontSize(8);
-      doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
+      doc.text('Accountant/Tax Professional:', margin, yPosition);
       yPosition += 6;
 
-      const accountantRows = [
-        { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
-        { label: 'Name:' },
-        { label: 'Firm:' },
-        { label: 'Phone Number:' },
-        { label: 'Email Address:' },
-        { label: 'City, Province:' },
-        { label: 'What Year did you begin working with this person?' },
-        { label: 'Other Details:' },
-        { label: 'Other Details:' },
-        { label: 'Other Details:' },
-      ];
-
-      const accountantCellHeight = 6;
-      const accountantColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-      let accountantTableY = yPosition;
-
-      accountantRows.forEach((row, rowIndex) => {
-        if (accountantTableY > 275) {
-          doc.addPage();
-          accountantTableY = 12;
-        }
-
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+      if (formData.client1UsesAccountant === 'yes') {
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${client1Name}:`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 4;
         doc.setFontSize(8);
+        doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
+        yPosition += 6;
 
-        const accountantCol1X = margin;
-        const accountantCol2X = margin + accountantColWidths[0];
-        const accountantCol3X = margin + accountantColWidths[0] + accountantColWidths[1];
+        const accountantRows = [
+          { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Name:' },
+          { label: 'Firm:' },
+          { label: 'Phone Number:' },
+          { label: 'Email Address:' },
+          { label: 'City, Province:' },
+          { label: 'What Year did you begin working with this person?' },
+          { label: 'Other Details:' },
+          { label: 'Other Details:' },
+          { label: 'Other Details:' },
+        ];
 
-        doc.rect(accountantCol1X, accountantTableY, accountantColWidths[0], accountantCellHeight);
-        doc.rect(accountantCol2X, accountantTableY, accountantColWidths[1], accountantCellHeight);
-        doc.rect(accountantCol3X, accountantTableY, accountantColWidths[2], accountantCellHeight);
+        const accountantCellHeight = 6;
+        const accountantColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let accountantTableY = yPosition;
 
-        if (rowIndex === 0) {
-          doc.text('Name:', accountantCol1X + 0.5, accountantTableY + 4);
-          doc.text('Information:', accountantCol2X + 0.5, accountantTableY + 4);
-          doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
-        } else {
-          doc.setFont(undefined, 'normal');
-          doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
+        accountantRows.forEach((row, rowIndex) => {
+          if (accountantTableY > 275) {
+            doc.addPage();
+            accountantTableY = 12;
+          }
 
-          const accountantField1 = new doc.AcroFormTextField();
-          accountantField1.fieldName = `accountant_single_${rowIndex}_col2`;
-          accountantField1.Rect = [accountantCol2X + 0.3, accountantTableY + 0.3, accountantColWidths[1] - 0.6, accountantCellHeight - 0.6];
-          accountantField1.fontSize = 7;
-          accountantField1.textColor = [0, 0, 0];
-          accountantField1.borderStyle = 'none';
-          doc.addField(accountantField1);
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
 
-          const accountantField2 = new doc.AcroFormTextField();
-          accountantField2.fieldName = `accountant_single_${rowIndex}_col3`;
-          accountantField2.Rect = [accountantCol3X + 0.3, accountantTableY + 0.3, accountantColWidths[2] - 0.6, accountantCellHeight - 0.6];
-          accountantField2.fontSize = 7;
-          accountantField2.textColor = [0, 0, 0];
-          accountantField2.borderStyle = 'none';
-          doc.addField(accountantField2);
+          const accountantCol1X = margin;
+          const accountantCol2X = margin + accountantColWidths[0];
+          const accountantCol3X = margin + accountantColWidths[0] + accountantColWidths[1];
+
+          doc.rect(accountantCol1X, accountantTableY, accountantColWidths[0], accountantCellHeight);
+          doc.rect(accountantCol2X, accountantTableY, accountantColWidths[1], accountantCellHeight);
+          doc.rect(accountantCol3X, accountantTableY, accountantColWidths[2], accountantCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Name:', accountantCol1X + 0.5, accountantTableY + 4);
+            doc.text('Information:', accountantCol2X + 0.5, accountantTableY + 4);
+            doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
+
+            const accountantField1 = new doc.AcroFormTextField();
+            accountantField1.fieldName = `accountant_client1_${rowIndex}_col2`;
+            accountantField1.Rect = [accountantCol2X + 0.3, accountantTableY + 0.3, accountantColWidths[1] - 0.6, accountantCellHeight - 0.6];
+            accountantField1.fontSize = 7;
+            accountantField1.textColor = [0, 0, 0];
+            accountantField1.borderStyle = 'none';
+            doc.addField(accountantField1);
+
+            const accountantField2 = new doc.AcroFormTextField();
+            accountantField2.fieldName = `accountant_client1_${rowIndex}_col3`;
+            accountantField2.Rect = [accountantCol3X + 0.3, accountantTableY + 0.3, accountantColWidths[2] - 0.6, accountantCellHeight - 0.6];
+            accountantField2.fontSize = 7;
+            accountantField2.textColor = [0, 0, 0];
+            accountantField2.borderStyle = 'none';
+            doc.addField(accountantField2);
+          }
+
+          accountantTableY += accountantCellHeight;
+        });
+
+        yPosition = accountantTableY + 10;
+      }
+
+      if (formData.client2UsesAccountant === 'yes') {
+        if (yPosition > 200) {
+          doc.addPage();
+          yPosition = 12;
         }
 
-        accountantTableY += accountantCellHeight;
-      });
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${client2Name}:`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 4;
+        doc.setFontSize(8);
+        doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
+        yPosition += 6;
 
-      yPosition = accountantTableY + 10;
+        const accountantRows = [
+          { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Name:' },
+          { label: 'Firm:' },
+          { label: 'Phone Number:' },
+          { label: 'Email Address:' },
+          { label: 'City, Province:' },
+          { label: 'What Year did you begin working with this person?' },
+          { label: 'Other Details:' },
+          { label: 'Other Details:' },
+          { label: 'Other Details:' },
+        ];
+
+        const accountantCellHeight = 6;
+        const accountantColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let accountantTableY = yPosition;
+
+        accountantRows.forEach((row, rowIndex) => {
+          if (accountantTableY > 275) {
+            doc.addPage();
+            accountantTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const accountantCol1X = margin;
+          const accountantCol2X = margin + accountantColWidths[0];
+          const accountantCol3X = margin + accountantColWidths[0] + accountantColWidths[1];
+
+          doc.rect(accountantCol1X, accountantTableY, accountantColWidths[0], accountantCellHeight);
+          doc.rect(accountantCol2X, accountantTableY, accountantColWidths[1], accountantCellHeight);
+          doc.rect(accountantCol3X, accountantTableY, accountantColWidths[2], accountantCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Name:', accountantCol1X + 0.5, accountantTableY + 4);
+            doc.text('Information:', accountantCol2X + 0.5, accountantTableY + 4);
+            doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+            doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
+
+            const accountantField1 = new doc.AcroFormTextField();
+            accountantField1.fieldName = `accountant_client2_${rowIndex}_col2`;
+            accountantField1.Rect = [accountantCol2X + 0.3, accountantTableY + 0.3, accountantColWidths[1] - 0.6, accountantCellHeight - 0.6];
+            accountantField1.fontSize = 7;
+            accountantField1.textColor = [0, 0, 0];
+            accountantField1.borderStyle = 'none';
+            doc.addField(accountantField1);
+
+            const accountantField2 = new doc.AcroFormTextField();
+            accountantField2.fieldName = `accountant_client2_${rowIndex}_col3`;
+            accountantField2.Rect = [accountantCol3X + 0.3, accountantTableY + 0.3, accountantColWidths[2] - 0.6, accountantCellHeight - 0.6];
+            accountantField2.fontSize = 7;
+            accountantField2.textColor = [0, 0, 0];
+            accountantField2.borderStyle = 'none';
+            doc.addField(accountantField2);
+          }
+
+          accountantTableY += accountantCellHeight;
+        });
+
+        yPosition = accountantTableY + 10;
+      }
+    }
+
+    if (formData.client1UsesAccountant === 'no' && formData.client1AccountingRecordsLocation) {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client1Name} indicated that they do their accounting on their own, and the location of their past records are: ${formData.client1AccountingRecordsLocation}`, margin, yPosition, { maxWidth: fieldWidth });
+      yPosition += 10;
+    }
+
+    if (formData.client2UsesAccountant === 'no' && formData.client2AccountingRecordsLocation) {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client2Name} indicated that they do their accounting on their own, and the location of their past records are: ${formData.client2AccountingRecordsLocation}`, margin, yPosition, { maxWidth: fieldWidth });
+      yPosition += 10;
     }
   }
 

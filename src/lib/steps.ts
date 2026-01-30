@@ -634,9 +634,16 @@ export const STEPS: Step[] = [
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
+          { value: 'no', label: 'No, I do my own accounting' },
         ],
         required: true,
+      },
+      {
+        key: 'client1AccountingRecordsLocation',
+        label: 'Where are your accounting records kept?',
+        type: 'text',
+        placeholder: 'Enter location of accounting records',
+        required: false,
       },
       {
         key: 'client2UsesAccountant',
@@ -644,8 +651,15 @@ export const STEPS: Step[] = [
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
+          { value: 'no', label: 'No, I do my own accounting' },
         ],
+        required: false,
+      },
+      {
+        key: 'client2AccountingRecordsLocation',
+        label: 'Where are your accounting records kept?',
+        type: 'text',
+        placeholder: 'Enter location of accounting records',
         required: false,
       },
       {

@@ -1198,459 +1198,379 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 6 && (
-            <>
-              {step.questions.map((question) => {
-                const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
-                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
-                const bankingStructure = answers['bankingStructure'];
-                const ownsRealEstate = answers['ownsRealEstate'];
-                const isPrimaryResidence = answers['isPrimaryResidence'];
+          {step.id === 6 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
+            const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+            const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+            const bankingStructure = answers['bankingStructure'];
+            const ownsRealEstate = answers['ownsRealEstate'];
+            const isPrimaryResidence = answers['isPrimaryResidence'];
 
-                if (question.key === 'bankingStructure' && !hasSpouse) {
-                  return null;
+            const renderInstitutions = (key: string, count: string, label: string) => {
+              const institutionCount = parseInt(answers[count] as string) || 0;
+              if (institutionCount === 0) return null;
+
+              const institutionsData = (answers[key] as Array<Record<string, string>>) || Array(institutionCount).fill(null).map(() => ({}));
+
+              const handleInstitutionChange = (index: number, value: string) => {
+                const updated = [...institutionsData];
+                if (!updated[index]) {
+                  updated[index] = {};
                 }
+                updated[index].name = value;
+                onAnswerChange(key, updated);
+              };
 
-                if (question.key === 'jointBankCount' && bankingStructure !== 'joint') {
-                  return null;
-                }
-
-                if (question.key === 'jointInstitutionsData') {
-                  return null;
-                }
-
-                if (question.key === 'client1BankCount') {
-                  if (hasSpouse && bankingStructure !== 'individual') {
-                    return null;
-                  }
-                  if (!hasSpouse) {
-                    return (
-                      <FormField
-                        key={question.key}
-                        question={question}
-                        value={answers[question.key]}
-                        onChange={(value) => onAnswerChange(question.key, value)}
+              return (
+                <div className="space-y-4 mt-6">
+                  <h3 className="text-md font-semibold text-white">{label}</h3>
+                  {Array.from({ length: institutionCount }).map((_, index) => (
+                    <div key={index}>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Institution {index + 1} Name:
+                      </label>
+                      <input
+                        type="text"
+                        value={institutionsData[index]?.name || ''}
+                        onChange={(e) => handleInstitutionChange(index, e.target.value)}
+                        placeholder="e.g., TD Bank, RBC, Scotiabank"
+                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
-                    );
-                  }
-                  if (bankingStructure === 'individual') {
-                    return (
-                      <FormField
-                        key={question.key}
-                        question={{ ...question, label: `${client1Name}, how many banks, trust companies or credit unions do you have accounts with?` }}
-                        value={answers[question.key]}
-                        onChange={(value) => onAnswerChange(question.key, value)}
-                      />
-                    );
-                  }
-                  return null;
-                }
-
-                if (question.key === 'client1InstitutionsData') {
-                  return null;
-                }
-
-                if (question.key === 'client2BankCount') {
-                  if (!hasSpouse || bankingStructure !== 'individual') {
-                    return null;
-                  }
-                  return (
-                    <FormField
-                      key={question.key}
-                      question={{ ...question, label: `${client2Name}, how many banks, trust companies or credit unions do you have accounts with?` }}
-                      value={answers[question.key]}
-                      onChange={(value) => onAnswerChange(question.key, value)}
-                    />
-                  );
-                }
-
-                if (question.key === 'client2InstitutionsData') {
-                  return null;
-                }
-
-                if (question.key === 'mixedJointBankCount' && bankingStructure !== 'mixed') {
-                  return null;
-                }
-
-                if (question.key === 'mixedJointInstitutionsData') {
-                  return null;
-                }
-
-                if (question.key === 'mixedClient1BankCount') {
-                  if (bankingStructure !== 'mixed') {
-                    return null;
-                  }
-                  return (
-                    <FormField
-                      key={question.key}
-                      question={{ ...question, label: `${client1Name}, how many individually held accounts do you have?` }}
-                      value={answers[question.key]}
-                      onChange={(value) => onAnswerChange(question.key, value)}
-                    />
-                  );
-                }
-
-                if (question.key === 'mixedClient1InstitutionsData') {
-                  return null;
-                }
-
-                if (question.key === 'mixedClient2BankCount') {
-                  if (bankingStructure !== 'mixed') {
-                    return null;
-                  }
-                  return (
-                    <FormField
-                      key={question.key}
-                      question={{ ...question, label: `${client2Name}, how many individually held accounts do you have?` }}
-                      value={answers[question.key]}
-                      onChange={(value) => onAnswerChange(question.key, value)}
-                    />
-                  );
-                }
-
-                if (question.key === 'mixedClient2InstitutionsData') {
-                  return null;
-                }
-
-                if (question.key === 'primaryResidenceOwner' && ownsRealEstate !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'isPrimaryResidence' && ownsRealEstate !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'hasAdditionalRealEstate' && (ownsRealEstate !== 'yes' || isPrimaryResidence !== 'yes')) {
-                  return null;
-                }
-                if (question.key === 'additionalPropertiesCount' && answers['hasAdditionalRealEstate'] !== 'yes') {
-                  return null;
-                }
-
-                if (question.key === 'primaryResidenceOwner') {
-                  const ownerOptions = [
-                    { value: 'joint_survivorship', label: 'Jointly with right of survivorship' },
-                    { value: 'joint_tenants', label: 'Jointly as tenants in common' },
-                    { value: 'client1', label: client1Name },
-                  ];
-                  if (hasSpouse) {
-                    ownerOptions.push({ value: 'client2', label: client2Name });
-                  }
-                  return (
-                    <FormField
-                      key={question.key}
-                      question={{ ...question, options: ownerOptions }}
-                      value={answers[question.key]}
-                      onChange={(value) => onAnswerChange(question.key, value)}
-                    />
-                  );
-                }
-
-                return (
-                  <FormField
-                    key={question.key}
-                    question={question}
-                    value={answers[question.key]}
-                    onChange={(value) => onAnswerChange(question.key, value)}
-                  />
-                );
-              })}
-
-              {(() => {
-                const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
-                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
-                const bankingStructure = answers['bankingStructure'];
-
-                const renderInstitutions = (key: string, count: string, label: string) => {
-                  const institutionCount = parseInt(answers[count] as string) || 0;
-                  if (institutionCount === 0) return null;
-
-                  const institutionsData = (answers[key] as Array<Record<string, string>>) || Array(institutionCount).fill(null).map(() => ({}));
-
-                  const handleInstitutionChange = (index: number, value: string) => {
-                    const updated = [...institutionsData];
-                    if (!updated[index]) {
-                      updated[index] = {};
-                    }
-                    updated[index].name = value;
-                    onAnswerChange(key, updated);
-                  };
-
-                  return (
-                    <div className="space-y-4 mt-6">
-                      <h3 className="text-md font-semibold text-white">{label}</h3>
-                      {Array.from({ length: institutionCount }).map((_, index) => (
-                        <div key={index}>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Institution {index + 1} Name:
-                          </label>
-                          <input
-                            type="text"
-                            value={institutionsData[index]?.name || ''}
-                            onChange={(e) => handleInstitutionChange(index, e.target.value)}
-                            placeholder="e.g., TD Bank, RBC, Scotiabank"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-                      ))}
                     </div>
-                  );
-                };
+                  ))}
+                </div>
+              );
+            };
 
-                if (!hasSpouse) {
-                  return renderInstitutions('client1InstitutionsData', 'client1BankCount', 'Your Banking Institutions');
-                } else if (bankingStructure === 'joint') {
-                  return renderInstitutions('jointInstitutionsData', 'jointBankCount', 'Joint Banking Institutions');
-                } else if (bankingStructure === 'individual') {
-                  return (
-                    <>
-                      {renderInstitutions('client1InstitutionsData', 'client1BankCount', `${client1Name}'s Banking Institutions`)}
-                      {renderInstitutions('client2InstitutionsData', 'client2BankCount', `${client2Name}'s Banking Institutions`)}
-                    </>
-                  );
-                } else if (bankingStructure === 'mixed') {
-                  return (
-                    <>
-                      {renderInstitutions('mixedJointInstitutionsData', 'mixedJointBankCount', 'Joint Banking Institutions')}
-                      {renderInstitutions('mixedClient1InstitutionsData', 'mixedClient1BankCount', `${client1Name}'s Individual Banking Institutions`)}
-                      {renderInstitutions('mixedClient2InstitutionsData', 'mixedClient2BankCount', `${client2Name}'s Individual Banking Institutions`)}
-                    </>
-                  );
-                }
-
-                return null;
-              })()}
-
-              {answers['hasAdditionalRealEstate'] === 'yes' && (() => {
-                const basicAnswers = allAnswers?.get(1) || {};
-                const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
-                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
-
-                const propertyCount = parseInt(answers['additionalPropertiesCount'] as string) || 0;
-                const propertiesData = (answers['propertiesData'] as Array<Record<string, string>>) || Array(propertyCount).fill(null).map(() => ({}));
-
-                const handlePropertyChange = (index: number, field: string, value: string) => {
-                  const updated = [...propertiesData];
-                  if (!updated[index]) {
-                    updated[index] = {};
+            return (
+              <>
+                {step.questions.map((question) => {
+                  if (question.key === 'bankingStructure' && !hasSpouse) {
+                    return null;
                   }
-                  updated[index][field] = value;
-                  onAnswerChange('propertiesData', updated);
-                };
 
-                const ownerOptions = [
-                  { value: 'joint_survivorship', label: 'Jointly with right of survivorship' },
-                  { value: 'joint_tenants', label: 'Jointly as tenants in common' },
-                  { value: 'client1', label: client1Name },
-                  { value: 'trust', label: 'a Trust' },
-                  { value: 'corporation', label: 'a Corporation' },
-                  { value: 'other', label: 'Other' },
-                ];
-                if (hasSpouse) {
-                  ownerOptions.splice(3, 0, { value: 'client2', label: client2Name });
-                }
+                  if (question.key === 'jointBankCount' && bankingStructure !== 'joint') {
+                    return null;
+                  }
 
-                return (
-                  <div className="space-y-8 mt-6">
-                    {Array.from({ length: propertyCount }).map((_, index) => (
-                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                        <h3 className="text-lg font-semibold text-white mb-4">Additional Property {index + 1}</h3>
+                  if (question.key === 'jointInstitutionsData') {
+                    return null;
+                  }
 
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              What is the name of this property?
-                            </label>
-                            <input
-                              type="text"
-                              value={propertiesData[index]?.propertyName || ''}
-                              onChange={(e) => handlePropertyChange(index, 'propertyName', e.target.value)}
-                              placeholder="Enter property name"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                  if (question.key === 'client1BankCount') {
+                    if (hasSpouse && bankingStructure !== 'individual') {
+                      return null;
+                    }
+                    const customLabel = !hasSpouse ? question.label : `${client1Name}, how many banks, trust companies or credit unions do you have accounts with?`;
+                    return (
+                      <React.Fragment key={question.key}>
+                        <FormField
+                          question={{ ...question, label: customLabel }}
+                          value={answers[question.key]}
+                          onChange={(value) => onAnswerChange(question.key, value)}
+                        />
+                        {renderInstitutions('client1InstitutionsData', 'client1BankCount', !hasSpouse ? 'Your Banking Institutions' : `${client1Name}'s Banking Institutions`)}
+                      </React.Fragment>
+                    );
+                  }
+
+                  if (question.key === 'client1InstitutionsData') {
+                    return null;
+                  }
+
+                  if (question.key === 'client2BankCount') {
+                    if (!hasSpouse || bankingStructure !== 'individual') {
+                      return null;
+                    }
+                    return (
+                      <React.Fragment key={question.key}>
+                        <FormField
+                          question={{ ...question, label: `${client2Name}, how many banks, trust companies or credit unions do you have accounts with?` }}
+                          value={answers[question.key]}
+                          onChange={(value) => onAnswerChange(question.key, value)}
+                        />
+                        {renderInstitutions('client2InstitutionsData', 'client2BankCount', `${client2Name}'s Banking Institutions`)}
+                      </React.Fragment>
+                    );
+                  }
+
+                  if (question.key === 'client2InstitutionsData') {
+                    return null;
+                  }
+
+                  if (question.key === 'jointBankCount') {
+                    if (bankingStructure !== 'joint') {
+                      return null;
+                    }
+                    return (
+                      <React.Fragment key={question.key}>
+                        <FormField
+                          question={question}
+                          value={answers[question.key]}
+                          onChange={(value) => onAnswerChange(question.key, value)}
+                        />
+                        {renderInstitutions('jointInstitutionsData', 'jointBankCount', 'Joint Banking Institutions')}
+                      </React.Fragment>
+                    );
+                  }
+
+                  if (question.key === 'mixedJointBankCount') {
+                    if (bankingStructure !== 'mixed') {
+                      return null;
+                    }
+                    return (
+                      <React.Fragment key={question.key}>
+                        <FormField
+                          question={question}
+                          value={answers[question.key]}
+                          onChange={(value) => onAnswerChange(question.key, value)}
+                        />
+                        {renderInstitutions('mixedJointInstitutionsData', 'mixedJointBankCount', 'Joint Banking Institutions')}
+                      </React.Fragment>
+                    );
+                  }
+
+                  if (question.key === 'mixedJointInstitutionsData') {
+                    return null;
+                  }
+
+                  if (question.key === 'mixedClient1BankCount') {
+                    if (bankingStructure !== 'mixed') {
+                      return null;
+                    }
+                    return (
+                      <React.Fragment key={question.key}>
+                        <FormField
+                          question={{ ...question, label: `${client1Name}, how many individually held accounts do you have?` }}
+                          value={answers[question.key]}
+                          onChange={(value) => onAnswerChange(question.key, value)}
+                        />
+                        {renderInstitutions('mixedClient1InstitutionsData', 'mixedClient1BankCount', `${client1Name}'s Individual Banking Institutions`)}
+                      </React.Fragment>
+                    );
+                  }
+
+                  if (question.key === 'mixedClient1InstitutionsData') {
+                    return null;
+                  }
+
+                  if (question.key === 'mixedClient2BankCount') {
+                    if (bankingStructure !== 'mixed') {
+                      return null;
+                    }
+                    return (
+                      <React.Fragment key={question.key}>
+                        <FormField
+                          question={{ ...question, label: `${client2Name}, how many individually held accounts do you have?` }}
+                          value={answers[question.key]}
+                          onChange={(value) => onAnswerChange(question.key, value)}
+                        />
+                        {renderInstitutions('mixedClient2InstitutionsData', 'mixedClient2BankCount', `${client2Name}'s Individual Banking Institutions`)}
+                      </React.Fragment>
+                    );
+                  }
+
+                  if (question.key === 'mixedClient2InstitutionsData') {
+                    return null;
+                  }
+
+                  if (question.key === 'primaryResidenceOwner' && ownsRealEstate !== 'yes') {
+                    return null;
+                  }
+                  if (question.key === 'isPrimaryResidence' && ownsRealEstate !== 'yes') {
+                    return null;
+                  }
+                  if (question.key === 'hasAdditionalRealEstate' && (ownsRealEstate !== 'yes' || isPrimaryResidence !== 'yes')) {
+                    return null;
+                  }
+                  if (question.key === 'additionalPropertiesCount' && answers['hasAdditionalRealEstate'] !== 'yes') {
+                    return null;
+                  }
+
+                  if (question.key === 'primaryResidenceOwner') {
+                    const ownerOptions = [
+                      { value: 'joint_survivorship', label: 'Jointly with right of survivorship' },
+                      { value: 'joint_tenants', label: 'Jointly as tenants in common' },
+                      { value: 'client1', label: client1Name },
+                    ];
+                    if (hasSpouse) {
+                      ownerOptions.push({ value: 'client2', label: client2Name });
+                    }
+                    return (
+                      <FormField
+                        key={question.key}
+                        question={{ ...question, options: ownerOptions }}
+                        value={answers[question.key]}
+                        onChange={(value) => onAnswerChange(question.key, value)}
+                      />
+                    );
+                  }
+
+                  if (question.key === 'additionalPropertiesCount') {
+                    if (answers['hasAdditionalRealEstate'] !== 'yes') {
+                      return null;
+                    }
+
+                    const propertyCount = parseInt(answers['additionalPropertiesCount'] as string) || 0;
+                    const propertiesData = (answers['propertiesData'] as Array<Record<string, string>>) || Array(propertyCount).fill(null).map(() => ({}));
+
+                    const handlePropertyChange = (index: number, field: string, value: string) => {
+                      const updated = [...propertiesData];
+                      if (!updated[index]) {
+                        updated[index] = {};
+                      }
+                      updated[index][field] = value;
+                      onAnswerChange('propertiesData', updated);
+                    };
+
+                    const ownerOptions = [
+                      { value: 'joint_survivorship', label: 'Jointly with right of survivorship' },
+                      { value: 'joint_tenants', label: 'Jointly as tenants in common' },
+                      { value: 'client1', label: client1Name },
+                      { value: 'trust', label: 'a Trust' },
+                      { value: 'corporation', label: 'a Corporation' },
+                      { value: 'other', label: 'Other' },
+                    ];
+                    if (hasSpouse) {
+                      ownerOptions.splice(3, 0, { value: 'client2', label: client2Name });
+                    }
+
+                    return (
+                      <React.Fragment key={question.key}>
+                        <FormField
+                          question={question}
+                          value={answers[question.key]}
+                          onChange={(value) => onAnswerChange(question.key, value)}
+                        />
+                        {propertyCount > 0 && (
+                          <div className="space-y-8 mt-6">
+                            {Array.from({ length: propertyCount }).map((_, index) => (
+                              <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                                <h3 className="text-lg font-semibold text-white mb-4">Additional Property {index + 1}</h3>
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      What is the name of this property?
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={propertiesData[index]?.propertyName || ''}
+                                      onChange={(e) => handlePropertyChange(index, 'propertyName', e.target.value)}
+                                      placeholder="Enter property name"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      What type of property do you own?
+                                    </label>
+                                    <select
+                                      value={propertiesData[index]?.propertyType || ''}
+                                      onChange={(e) => handlePropertyChange(index, 'propertyType', e.target.value)}
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                      <option value="">Select property type</option>
+                                      <option value="Residential">Residential</option>
+                                      <option value="Commercial">Commercial</option>
+                                      <option value="Cottage/Vacation">Cottage/Vacation</option>
+                                      <option value="Rental">Rental</option>
+                                      <option value="Land">Land</option>
+                                      <option value="Farm">Farm</option>
+                                      <option value="Other">Other</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Who is the named owner of this property?
+                                    </label>
+                                    <select
+                                      value={propertiesData[index]?.propertyOwner || ''}
+                                      onChange={(e) => handlePropertyChange(index, 'propertyOwner', e.target.value)}
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    >
+                                      <option value="">Select owner</option>
+                                      {ownerOptions.map(option => (
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      If you or your spouse were to die today, who would inherit this property?
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={propertiesData[index]?.inheritor || ''}
+                                      onChange={(e) => handlePropertyChange(index, 'inheritor', e.target.value)}
+                                      placeholder="Enter inheritor"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Do you have a Business Succession Plan/Agreement in place for the property?
+                                    </label>
+                                    <div className="flex gap-4">
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          name={`succession-plan-${index}`}
+                                          value="yes"
+                                          checked={propertiesData[index]?.hasSuccessionPlan === 'yes'}
+                                          onChange={(e) => handlePropertyChange(index, 'hasSuccessionPlan', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-gray-300">Yes</span>
+                                      </label>
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          name={`succession-plan-${index}`}
+                                          value="no"
+                                          checked={propertiesData[index]?.hasSuccessionPlan === 'no'}
+                                          onChange={(e) => handlePropertyChange(index, 'hasSuccessionPlan', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-gray-300">No</span>
+                                      </label>
+                                    </div>
+                                  </div>
+                                  {propertiesData[index]?.hasSuccessionPlan === 'yes' && (
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Where is this document stored?
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={propertiesData[index]?.successionPlanLocation || ''}
+                                        onChange={(e) => handlePropertyChange(index, 'successionPlanLocation', e.target.value)}
+                                        placeholder="Enter document location"
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
                           </div>
+                        )}
+                      </React.Fragment>
+                    );
+                  }
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              What type of property do you own?
-                            </label>
-                            <select
-                              value={propertiesData[index]?.propertyType || ''}
-                              onChange={(e) => handlePropertyChange(index, 'propertyType', e.target.value)}
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                              <option value="">Select property type</option>
-                              <option value="Vacation Home">Vacation Home</option>
-                              <option value="Rental Property">Rental Property</option>
-                              <option value="Business/Commercial Property">Business/Commercial Property</option>
-                            </select>
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Who is it owned by?
-                            </label>
-                            <select
-                              value={propertiesData[index]?.propertyOwner || ''}
-                              onChange={(e) => handlePropertyChange(index, 'propertyOwner', e.target.value)}
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                              <option value="">Select owner</option>
-                              {ownerOptions.map(option => (
-                                <option key={option.value} value={option.value}>{option.label}</option>
-                              ))}
-                            </select>
-                          </div>
-
-                          {propertiesData[index]?.propertyOwner === 'trust' && (
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Trust Name
-                              </label>
-                              <input
-                                type="text"
-                                value={propertiesData[index]?.trustName || ''}
-                                onChange={(e) => handlePropertyChange(index, 'trustName', e.target.value)}
-                                placeholder="Enter trust name"
-                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              />
-                            </div>
-                          )}
-
-                          {propertiesData[index]?.propertyOwner === 'corporation' && (
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Corporation Name
-                              </label>
-                              <input
-                                type="text"
-                                value={propertiesData[index]?.corporationName || ''}
-                                onChange={(e) => handlePropertyChange(index, 'corporationName', e.target.value)}
-                                placeholder="Enter corporation name"
-                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              />
-                            </div>
-                          )}
-
-                          {propertiesData[index]?.propertyOwner === 'other' && (
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Additional Details
-                              </label>
-                              <input
-                                type="text"
-                                value={propertiesData[index]?.otherDetails || ''}
-                                onChange={(e) => handlePropertyChange(index, 'otherDetails', e.target.value)}
-                                placeholder="Enter additional details"
-                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              />
-                            </div>
-                          )}
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              {hasSpouse
-                                ? `Does anyone outside of ${client1Name} or ${client2Name} have ownership in this property?`
-                                : `Does anyone outside of ${client1Name} have ownership in this property?`
-                              }
-                            </label>
-                            <div className="flex gap-4">
-                              <label className="flex items-center">
-                                <input
-                                  type="radio"
-                                  name={`hasAdditionalOwners-${index}`}
-                                  value="yes"
-                                  checked={propertiesData[index]?.hasAdditionalOwners === 'yes'}
-                                  onChange={(e) => handlePropertyChange(index, 'hasAdditionalOwners', e.target.value)}
-                                  className="mr-2"
-                                />
-                                <span className="text-gray-300">Yes</span>
-                              </label>
-                              <label className="flex items-center">
-                                <input
-                                  type="radio"
-                                  name={`hasAdditionalOwners-${index}`}
-                                  value="no"
-                                  checked={propertiesData[index]?.hasAdditionalOwners === 'no'}
-                                  onChange={(e) => handlePropertyChange(index, 'hasAdditionalOwners', e.target.value)}
-                                  className="mr-2"
-                                />
-                                <span className="text-gray-300">No</span>
-                              </label>
-                            </div>
-                          </div>
-
-                          {propertiesData[index]?.hasAdditionalOwners === 'yes' && (
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                How many other people share ownership in this property?
-                              </label>
-                              <input
-                                type="number"
-                                value={propertiesData[index]?.additionalOwnersCount || ''}
-                                onChange={(e) => handlePropertyChange(index, 'additionalOwnersCount', e.target.value)}
-                                placeholder="0"
-                                min="0"
-                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              />
-                            </div>
-                          )}
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Is there a written plan for what to do with this property should {client1Name}{hasSpouse ? ` and ${client2Name}` : ''} pass away?
-                            </label>
-                            <div className="flex gap-4">
-                              <label className="flex items-center">
-                                <input
-                                  type="radio"
-                                  name={`hasSuccessionPlan-${index}`}
-                                  value="yes"
-                                  checked={propertiesData[index]?.hasSuccessionPlan === 'yes'}
-                                  onChange={(e) => handlePropertyChange(index, 'hasSuccessionPlan', e.target.value)}
-                                  className="mr-2"
-                                />
-                                <span className="text-gray-300">Yes</span>
-                              </label>
-                              <label className="flex items-center">
-                                <input
-                                  type="radio"
-                                  name={`hasSuccessionPlan-${index}`}
-                                  value="no"
-                                  checked={propertiesData[index]?.hasSuccessionPlan === 'no'}
-                                  onChange={(e) => handlePropertyChange(index, 'hasSuccessionPlan', e.target.value)}
-                                  className="mr-2"
-                                />
-                                <span className="text-gray-300">No</span>
-                              </label>
-                            </div>
-                          </div>
-
-                          {propertiesData[index]?.hasSuccessionPlan === 'yes' && (
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Where is this document stored?
-                              </label>
-                              <input
-                                type="text"
-                                value={propertiesData[index]?.successionPlanLocation || ''}
-                                onChange={(e) => handlePropertyChange(index, 'successionPlanLocation', e.target.value)}
-                                placeholder="Enter document location"
-                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-            </>
-          )}
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={question}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  );
+                })}
+              </>
+            );
+          })()}
 
           {step.id === 2 && (client1PrevRelCount > 0 || client2PrevRelCount > 0) && (() => {
             const basicAnswers = allAnswers?.get(1) || {};

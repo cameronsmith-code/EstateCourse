@@ -167,6 +167,10 @@ export default function StepForm({
               setValidationError(`Please describe the corporation type for corporation ${i + 1}.`);
               return;
             }
+            if (!corporation?.owners || corporation.owners.trim() === '') {
+              setValidationError(`Please select at least one owner for corporation ${i + 1}.`);
+              return;
+            }
           }
         }
       }
@@ -639,6 +643,95 @@ export default function StepForm({
                             />
                           </div>
                         )}
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Who has an ownership stake in this corporation? *
+                          </label>
+                          <div className="space-y-2">
+                            {(() => {
+                              const basicAnswers = allAnswers?.get(1) || {};
+                              const trustAnswers = allAnswers?.get(4) || {};
+                              const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+                              const client2Name = basicAnswers['spouseName'] as string || '';
+                              const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law') && client2Name;
+                              const trustName = trustAnswers['trustLegalName'] as string || '';
+                              const hasTrust = trustAnswers['hasFamilyTrust'] === 'yes' && trustName;
+
+                              const selectedOwners = corporationsData[index]?.owners ?
+                                (typeof corporationsData[index].owners === 'string' ?
+                                  corporationsData[index].owners.split(',') :
+                                  corporationsData[index].owners) : [];
+
+                              const handleOwnerChange = (owner: string, checked: boolean) => {
+                                let updatedOwners = [...(Array.isArray(selectedOwners) ? selectedOwners : [])];
+                                if (checked) {
+                                  if (!updatedOwners.includes(owner)) {
+                                    updatedOwners.push(owner);
+                                  }
+                                } else {
+                                  updatedOwners = updatedOwners.filter(o => o !== owner);
+                                }
+                                handleCorporationChange(index, 'owners', updatedOwners.join(','));
+                              };
+
+                              return (
+                                <>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedOwners.includes(client1Name)}
+                                      onChange={(e) => handleOwnerChange(client1Name, e.target.checked)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">{client1Name}</span>
+                                  </label>
+
+                                  {hasSpouse && (
+                                    <label className="flex items-center">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedOwners.includes(client2Name)}
+                                        onChange={(e) => handleOwnerChange(client2Name, e.target.checked)}
+                                        className="mr-2"
+                                      />
+                                      <span className="text-white">{client2Name}</span>
+                                    </label>
+                                  )}
+
+                                  {hasTrust && (
+                                    <label className="flex items-center">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedOwners.includes(trustName)}
+                                        onChange={(e) => handleOwnerChange(trustName, e.target.checked)}
+                                        className="mr-2"
+                                      />
+                                      <span className="text-white">{trustName}</span>
+                                    </label>
+                                  )}
+
+                                  {corporationsData.map((corp, corpIndex) => {
+                                    if (corpIndex !== index && corp?.legalName) {
+                                      return (
+                                        <label key={corpIndex} className="flex items-center">
+                                          <input
+                                            type="checkbox"
+                                            checked={selectedOwners.includes(corp.legalName)}
+                                            onChange={(e) => handleOwnerChange(corp.legalName, e.target.checked)}
+                                            className="mr-2"
+                                          />
+                                          <span className="text-white">{corp.legalName}</span>
+                                        </label>
+                                      );
+                                    }
+                                    return null;
+                                  })}
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}

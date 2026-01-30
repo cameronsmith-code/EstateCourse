@@ -246,6 +246,7 @@ interface FormData {
     jurisdiction?: string;
     corporationType?: string;
     corporationTypeOther?: string;
+    owners?: string;
   }>;
   client1HasFuneralArrangements?: string;
   client1FuneralDocLocation?: string;
@@ -1553,10 +1554,13 @@ export const generatePDF = (formData: FormData) => {
           ? `${corporation.corporationType} - ${corporation.corporationTypeOther}`
           : (corporation?.corporationType || '');
 
+        const ownersValue = corporation?.owners ? corporation.owners.replace(/,/g, ', ') : '';
+
         const corpRows = [
           { label: `${ordinal} Corporation's Name:`, value: corporation?.legalName || '', fieldName: 'name' },
           { label: 'This company was incorporated in:', value: corporation?.jurisdiction || '', fieldName: 'jurisdiction' },
           { label: 'Type of corporation:', value: corporationTypeValue, fieldName: 'type' },
+          { label: 'Ownership stake:', value: ownersValue, fieldName: 'owners' },
         ];
 
         const cellHeight = 8;

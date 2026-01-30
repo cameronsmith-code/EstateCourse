@@ -3720,6 +3720,8 @@ export const generatePDF = (formData: FormData) => {
         yPosition = 12;
       }
 
+      const advisorData = formData.client1FinancialAdvisorsData?.[advisorIndex];
+
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
       doc.text(`Financial Advisor/Investment Manager - ${client1Name} (${advisorIndex + 1} of ${client1AdvisorCount}):`, margin, yPosition);
@@ -3745,8 +3747,6 @@ export const generatePDF = (formData: FormData) => {
       const advisorCellHeight = 6;
       const advisorColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
       let advisorTableY = yPosition;
-
-      const advisorData = formData.client1FinancialAdvisorsData?.[advisorIndex];
 
       advisorRows.forEach((row, rowIndex) => {
         if (advisorTableY > 275) {
@@ -3825,7 +3825,8 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      doc.text(`Institution ${advisorIndex + 1} Accounts Held`, margin, yPosition);
+      const institutionLabel = advisorData?.firm ? `${advisorData.firm} Accounts Held` : `Institution ${advisorIndex + 1} Accounts Held`;
+      doc.text(institutionLabel, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 6;
 
@@ -4043,7 +4044,8 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      doc.text(`Institution ${advisorIndex + 1} Accounts Held`, margin, yPosition);
+      const institutionLabel = advisorData?.firm ? `${advisorData.firm} Accounts Held` : `Institution ${advisorIndex + 1} Accounts Held`;
+      doc.text(institutionLabel, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 6;
 

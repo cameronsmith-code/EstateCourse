@@ -65,15 +65,6 @@ interface FormData {
   hasChildren?: string;
   numberOfChildren?: string;
   childrenData?: ChildData[];
-  hasFamilyTrust?: string;
-  trustLegalName?: string;
-  trustDeedLocation?: string;
-  trustYearEstablished?: string;
-  trustBeneficiariesCount?: string;
-  trustBeneficiariesData?: Array<{
-    beneficiaryName?: string;
-    relationshipToSettlor?: string;
-  }>;
   client1HasWill?: string;
   client1WillJurisdiction?: string;
   client1WillLocation?: string;
@@ -1319,115 +1310,6 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition += 8;
     });
-  }
-
-  if (formData.hasFamilyTrust === 'yes') {
-    doc.addPage();
-    yPosition = 12;
-    addSectionHeader('Family Trust Information');
-
-    const trustInfoRows = [
-      { label: 'Trust 1 - Legal Name:', value: formData.trustLegalName || '' },
-      { label: 'Trust Deed Location:', value: formData.trustDeedLocation || '' },
-      { label: 'Year Established:', value: formData.trustYearEstablished || '' },
-      { label: 'Number of Beneficiaries:', value: formData.trustBeneficiariesCount || '' },
-    ];
-
-    const cellHeight = 8;
-    const labelWidth = fieldWidth * 0.35;
-    const valueWidth = fieldWidth * 0.65;
-
-    trustInfoRows.forEach((row, index) => {
-      const rowY = yPosition;
-
-      doc.setDrawColor(...colors.borderGray);
-      doc.setLineWidth(0.5);
-      doc.rect(margin, rowY, labelWidth, cellHeight);
-      doc.rect(margin + labelWidth, rowY, valueWidth, cellHeight);
-
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(...colors.darkText);
-      doc.text(row.label, margin + 1, rowY + 5);
-
-      const field = new doc.AcroFormTextField();
-      field.fieldName = `trust_${index}`;
-      field.Rect = [margin + labelWidth + 0.5, rowY + 0.5, valueWidth - 1, cellHeight - 1];
-      field.fontSize = 9;
-      field.textColor = colors.darkText;
-      field.borderStyle = 'none';
-      field.value = row.value;
-      doc.addField(field);
-
-      yPosition += cellHeight;
-    });
-
-    yPosition += 8;
-
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.darkText);
-    doc.text('Trust Beneficiaries:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 6;
-
-    const beneficiaryCount = parseInt(formData.trustBeneficiariesCount || '0');
-    const beneCellHeight = 6;
-    const beneNumberWidth = fieldWidth * 0.08;
-    const beneNameWidth = fieldWidth * 0.52;
-    const beneRelationWidth = fieldWidth * 0.40;
-
-    const headerY = yPosition;
-    doc.setDrawColor(...colors.borderGray);
-    doc.setFillColor(220, 220, 220);
-    doc.setLineWidth(0.5);
-    doc.rect(margin, headerY, beneNumberWidth, beneCellHeight, 'FD');
-    doc.rect(margin + beneNumberWidth, headerY, beneNameWidth, beneCellHeight, 'FD');
-    doc.rect(margin + beneNumberWidth + beneNameWidth, headerY, beneRelationWidth, beneCellHeight, 'FD');
-
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.darkText);
-    doc.text('#', margin + 1, headerY + 4);
-    doc.text('Beneficiary Name:', margin + beneNumberWidth + 1, headerY + 4);
-    doc.text('Relationship to Settlor:', margin + beneNumberWidth + beneNameWidth + 1, headerY + 4);
-
-    yPosition += beneCellHeight;
-
-    for (let i = 0; i < beneficiaryCount; i++) {
-      const rowY = yPosition;
-
-      doc.setDrawColor(...colors.borderGray);
-      doc.setFillColor(255, 255, 255);
-      doc.setLineWidth(0.5);
-      doc.rect(margin, rowY, beneNumberWidth, beneCellHeight, 'FD');
-      doc.rect(margin + beneNumberWidth, rowY, beneNameWidth, beneCellHeight);
-      doc.rect(margin + beneNumberWidth + beneNameWidth, rowY, beneRelationWidth, beneCellHeight);
-
-      doc.setFont(undefined, 'normal');
-      doc.setFontSize(9);
-      doc.text(`${i + 1}`, margin + 2, rowY + 4);
-
-      const nameField = new doc.AcroFormTextField();
-      nameField.fieldName = `trust_beneficiary_${i + 1}_name`;
-      nameField.Rect = [margin + beneNumberWidth + 0.5, rowY + 0.5, beneNameWidth - 1, beneCellHeight - 1];
-      nameField.fontSize = 8;
-      nameField.textColor = colors.darkText;
-      nameField.borderStyle = 'none';
-      doc.addField(nameField);
-
-      const relationField = new doc.AcroFormTextField();
-      relationField.fieldName = `trust_beneficiary_${i + 1}_relationship`;
-      relationField.Rect = [margin + beneNumberWidth + beneNameWidth + 0.5, rowY + 0.5, beneRelationWidth - 1, beneCellHeight - 1];
-      relationField.fontSize = 8;
-      relationField.textColor = colors.darkText;
-      relationField.borderStyle = 'none';
-      doc.addField(relationField);
-
-      yPosition += beneCellHeight;
-    }
-
-    yPosition += 8;
   }
 
   yPosition += 12;

@@ -104,31 +104,6 @@ export default function StepForm({
           return;
         }
       }
-    } else if (step.id === 4) {
-      if (answers['hasFamilyTrust'] === 'yes') {
-        if (!answers['trustBeneficiariesCount']) {
-          setValidationError('Please specify the number of beneficiaries for the trust.');
-          return;
-        }
-
-        const beneficiariesCount = parseInt(answers['trustBeneficiariesCount'] as string);
-        const trustBeneficiariesData = answers['trustBeneficiariesData'] as Array<Record<string, string>> | undefined;
-
-        if (beneficiariesCount > 0) {
-          if (!trustBeneficiariesData || trustBeneficiariesData.length < beneficiariesCount) {
-            setValidationError('Please fill in details for all beneficiaries.');
-            return;
-          }
-
-          for (let i = 0; i < beneficiariesCount; i++) {
-            const beneficiary = trustBeneficiariesData[i];
-            if (!beneficiary?.beneficiaryName || !beneficiary?.relationshipToSettlor) {
-              setValidationError(`Please fill in name and relationship for beneficiary ${i + 1}.`);
-              return;
-            }
-          }
-        }
-      }
     } else {
       const requiredQuestions = step.questions.filter((q) => {
         if (!q.required) return false;
@@ -190,19 +165,6 @@ export default function StepForm({
     }
     updated[index][field] = value;
     onAnswerChange('client2PreviousRelationshipsData', updated);
-  };
-
-  const trustBeneficiariesCount = answers['trustBeneficiariesCount'] as string;
-  const beneficiariesCount = trustBeneficiariesCount ? parseInt(trustBeneficiariesCount) : 0;
-  const trustBeneficiariesData = (answers['trustBeneficiariesData'] as Array<Record<string, string>>) || Array(beneficiariesCount).fill(null).map(() => ({}));
-
-  const handleBeneficiaryChange = (index: number, field: string, value: string) => {
-    const updated = [...trustBeneficiariesData];
-    if (!updated[index]) {
-      updated[index] = {};
-    }
-    updated[index][field] = value;
-    onAnswerChange('trustBeneficiariesData', updated);
   };
 
   return (
@@ -2329,75 +2291,6 @@ export default function StepForm({
               })}
             </>
           )}
-
-          {step.id === 4 && (() => {
-            return (
-              <>
-                {step.questions.map((question) => {
-                  if (question.key === 'trustLegalName' && answers['hasFamilyTrust'] !== 'yes') {
-                    return null;
-                  }
-                  if (question.key === 'trustDeedLocation' && answers['hasFamilyTrust'] !== 'yes') {
-                    return null;
-                  }
-                  if (question.key === 'trustYearEstablished' && answers['hasFamilyTrust'] !== 'yes') {
-                    return null;
-                  }
-                  if (question.key === 'trustBeneficiariesCount' && answers['hasFamilyTrust'] !== 'yes') {
-                    return null;
-                  }
-
-                  return (
-                    <FormField
-                      key={question.key}
-                      question={question}
-                      value={answers[question.key]}
-                      onChange={(value) => onAnswerChange(question.key, value)}
-                    />
-                  );
-                })}
-
-                {answers['hasFamilyTrust'] === 'yes' && beneficiariesCount > 0 && (
-                  <div className="space-y-6 mt-6">
-                    <h3 className="text-xl font-semibold text-white">Trust Beneficiaries</h3>
-                    {Array.from({ length: beneficiariesCount }).map((_, index) => (
-                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                        <h4 className="text-lg font-semibold text-white mb-4">Beneficiary {index + 1}</h4>
-
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Beneficiary Name *
-                            </label>
-                            <input
-                              type="text"
-                              value={trustBeneficiariesData[index]?.beneficiaryName || ''}
-                              onChange={(e) => handleBeneficiaryChange(index, 'beneficiaryName', e.target.value)}
-                              placeholder="Enter beneficiary name"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Relationship to Settlor *
-                            </label>
-                            <input
-                              type="text"
-                              value={trustBeneficiariesData[index]?.relationshipToSettlor || ''}
-                              onChange={(e) => handleBeneficiaryChange(index, 'relationshipToSettlor', e.target.value)}
-                              placeholder="e.g., Daughter, Son, Spouse, etc."
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            );
-          })()}
 
           {validationError && (
             <div className="mb-6 p-4 bg-red-900 border border-red-700 rounded-lg">

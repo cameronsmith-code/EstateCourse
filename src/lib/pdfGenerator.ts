@@ -6272,12 +6272,15 @@ export const generatePDF = (formData: FormData) => {
   yPosition = financialTableY + 15;
 
   // Only show corporation section if explicitly answered 'yes' AND has a count > 0
-  console.log('Corporation Check:', {
-    hasCorporation: formData.hasCorporation,
-    corporationCount: formData.corporationCount,
-    hasCorporationType: typeof formData.hasCorporation,
-    corporationCountType: typeof formData.corporationCount
-  });
+  console.log('=== PDF GENERATOR - CORPORATION CHECK ===');
+  console.log('Full formData keys:', Object.keys(formData));
+  console.log('hasCorporation value:', formData.hasCorporation);
+  console.log('hasCorporation type:', typeof formData.hasCorporation);
+  console.log('hasCorporation === "yes":', formData.hasCorporation === 'yes');
+  console.log('hasCorporation === "no":', formData.hasCorporation === 'no');
+  console.log('corporationCount value:', formData.corporationCount);
+  console.log('corporationCount type:', typeof formData.corporationCount);
+  console.log('corporationsData:', formData.corporationsData);
 
   const shouldShowCorporations = formData.hasCorporation === 'yes' &&
                                   formData.corporationCount &&
@@ -6285,6 +6288,7 @@ export const generatePDF = (formData: FormData) => {
                                   parseInt(formData.corporationCount as string) > 0;
 
   console.log('shouldShowCorporations:', shouldShowCorporations);
+  console.log('===========================================');
 
   if (shouldShowCorporations) {
     const corpCount = parseInt(formData.corporationCount as string);

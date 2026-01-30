@@ -671,74 +671,73 @@ export default function StepForm({
                         />
                       </div>
                     )}
+                    {question.key === 'client1PoaPersonalCareCount' && client1PoaPersonalCareCount > 0 && (
+                      <div className="space-y-6 mt-6">
+                        <h3 className="text-xl font-semibold text-white">Powers of Attorney for Personal Care Details</h3>
+                        {Array.from({ length: client1PoaPersonalCareCount }).map((_, index) => (
+                          <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                            <h4 className="text-lg font-semibold text-white mb-4">POA for Personal Care #{index + 1}</h4>
+
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPersonalCareData[index]?.name || ''}
+                                  onChange={(e) => handlePoaPersonalCareChange(index, 'name', e.target.value)}
+                                  placeholder="Enter name"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Phone Number *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPersonalCareData[index]?.phone || ''}
+                                  onChange={(e) => handlePoaPersonalCareChange(index, 'phone', e.target.value)}
+                                  placeholder="Enter phone number"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Email Address *
+                                </label>
+                                <input
+                                  type="email"
+                                  value={client1PoaPersonalCareData[index]?.email || ''}
+                                  onChange={(e) => handlePoaPersonalCareChange(index, 'email', e.target.value)}
+                                  placeholder="Enter email address"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Relationship to You *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPersonalCareData[index]?.relationship || ''}
+                                  onChange={(e) => handlePoaPersonalCareChange(index, 'relationship', e.target.value)}
+                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </React.Fragment>
                 );
               })}
-
-              {step.id === 5 && answers['client1HasPoaPersonalCare'] === 'yes' && client1PoaPersonalCareCount > 0 && (
-                <div className="space-y-6 mt-6">
-                  <h3 className="text-xl font-semibold text-white">Powers of Attorney for Personal Care Details</h3>
-                  {Array.from({ length: client1PoaPersonalCareCount }).map((_, index) => (
-                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                      <h4 className="text-lg font-semibold text-white mb-4">POA for Personal Care #{index + 1}</h4>
-
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Name *
-                          </label>
-                          <input
-                            type="text"
-                            value={client1PoaPersonalCareData[index]?.name || ''}
-                            onChange={(e) => handlePoaPersonalCareChange(index, 'name', e.target.value)}
-                            placeholder="Enter name"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Phone Number *
-                          </label>
-                          <input
-                            type="text"
-                            value={client1PoaPersonalCareData[index]?.phone || ''}
-                            onChange={(e) => handlePoaPersonalCareChange(index, 'phone', e.target.value)}
-                            placeholder="Enter phone number"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Email Address *
-                          </label>
-                          <input
-                            type="email"
-                            value={client1PoaPersonalCareData[index]?.email || ''}
-                            onChange={(e) => handlePoaPersonalCareChange(index, 'email', e.target.value)}
-                            placeholder="Enter email address"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Relationship to You *
-                          </label>
-                          <input
-                            type="text"
-                            value={client1PoaPersonalCareData[index]?.relationship || ''}
-                            onChange={(e) => handlePoaPersonalCareChange(index, 'relationship', e.target.value)}
-                            placeholder="e.g., Spouse, Child, Sibling, etc."
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
 
               {step.id === 5 && answers['client1HasPoaProperty'] === 'yes' && client1PoaPropertyCount > 0 && (
                 <div className="space-y-6 mt-6">

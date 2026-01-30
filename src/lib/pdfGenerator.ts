@@ -6271,47 +6271,6 @@ export const generatePDF = (formData: FormData) => {
 
   yPosition = financialTableY + 15;
 
-  addSectionHeader('Additional Estate Planning Information');
-
-  const sections = [
-    { title: 'Assets & Properties', fieldName: 'assets' },
-    { title: 'Financial Accounts', fieldName: 'financial' },
-    { title: 'Insurance Policies', fieldName: 'insurance' },
-    { title: 'Executor Information', fieldName: 'executor' },
-    { title: 'Beneficiaries', fieldName: 'beneficiaries' },
-    { title: 'Special Instructions', fieldName: 'special' },
-    { title: 'Funeral Preferences', fieldName: 'funeral' },
-  ];
-
-  sections.forEach((section) => {
-    yPosition += 11;
-
-    checkPageBreak(28);
-
-    yPosition += 6;
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.mediumGray);
-    doc.text(section.title, margin, yPosition);
-    doc.setFont(undefined, 'normal');
-
-    yPosition += 5;
-    doc.setDrawColor(...colors.borderGray);
-    doc.setLineWidth(0.3);
-    doc.rect(margin, yPosition, fieldWidth, 18);
-
-    const textField = new doc.AcroFormTextField();
-    textField.fieldName = section.fieldName;
-    textField.Rect = [margin, yPosition, fieldWidth, 18];
-    textField.multiline = true;
-    textField.fontSize = 9;
-    textField.textColor = colors.darkText;
-    doc.addField(textField);
-
-    yPosition += 22;
-    doc.setTextColor(...colors.darkText);
-  });
-
   // Add footer to final page
   addPageFooter();
 

@@ -1609,7 +1609,7 @@ export const generatePDF = (formData: FormData) => {
 
         let currentY = yPosition;
         doc.setDrawColor(...colors.borderGray);
-        doc.setFillColor(200, 200, 200);
+        doc.setFillColor(245, 245, 245);
         doc.setLineWidth(0.5);
 
         bpcHeaders.forEach((header, colIdx) => {
@@ -1618,7 +1618,7 @@ export const generatePDF = (formData: FormData) => {
           doc.rect(xPos, currentY, colWidths[colIdx], bpcRowHeight, 'FD');
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(...colors.darkText);
+          doc.setTextColor(0, 0, 0);
           doc.text(header, xPos + 1, currentY + 6);
         });
 
@@ -1655,8 +1655,10 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = currentY + 12;
 
-        doc.addPage();
-        yPosition = 12;
+        if (yPosition + 60 > pageHeight - margin) {
+          doc.addPage();
+          yPosition = 12;
+        }
 
         doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
@@ -1679,7 +1681,7 @@ export const generatePDF = (formData: FormData) => {
 
         currentY = yPosition;
         doc.setDrawColor(...colors.borderGray);
-        doc.setFillColor(200, 200, 200);
+        doc.setFillColor(245, 245, 245);
         doc.setLineWidth(0.5);
 
         cglsHeaders.forEach((header, colIdx) => {
@@ -1688,7 +1690,7 @@ export const generatePDF = (formData: FormData) => {
           doc.rect(xPos, currentY, colWidths[colIdx], cglsRowHeight, 'FD');
           doc.setFontSize(7);
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(...colors.darkText);
+          doc.setTextColor(0, 0, 0);
           doc.text(header, xPos + 1, currentY + 6);
         });
 
@@ -1717,8 +1719,10 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = currentY + 12;
 
-        doc.addPage();
-        yPosition = 12;
+        if (yPosition + 80 > pageHeight - margin) {
+          doc.addPage();
+          yPosition = 12;
+        }
 
         doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
@@ -1741,7 +1745,7 @@ export const generatePDF = (formData: FormData) => {
 
         currentY = yPosition;
         doc.setDrawColor(...colors.borderGray);
-        doc.setFillColor(200, 200, 200);
+        doc.setFillColor(245, 245, 245);
         doc.setLineWidth(0.5);
 
         ptHeaders.forEach((header, colIdx) => {
@@ -1750,7 +1754,7 @@ export const generatePDF = (formData: FormData) => {
           doc.rect(xPos, currentY, colWidths[colIdx], ptRowHeight, 'FD');
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(...colors.darkText);
+          doc.setTextColor(0, 0, 0);
           doc.text(header, xPos + 1, currentY + 6);
         });
 
@@ -1787,8 +1791,10 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = currentY + 12;
 
-        doc.addPage();
-        yPosition = 12;
+        if (yPosition + 70 > pageHeight - margin) {
+          doc.addPage();
+          yPosition = 12;
+        }
 
         doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
@@ -1808,7 +1814,7 @@ export const generatePDF = (formData: FormData) => {
 
         currentY = yPosition;
         doc.setDrawColor(...colors.borderGray);
-        doc.setFillColor(200, 200, 200);
+        doc.setFillColor(245, 245, 245);
         doc.setLineWidth(0.5);
 
         fopgHeaders.forEach((header, colIdx) => {
@@ -1817,7 +1823,7 @@ export const generatePDF = (formData: FormData) => {
           doc.rect(xPos, currentY, colWidths[colIdx], fopgRowHeight, 'FD');
           doc.setFontSize(7);
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(...colors.darkText);
+          doc.setTextColor(0, 0, 0);
           doc.text(header, xPos + 1, currentY + 6);
         });
 
@@ -1846,8 +1852,10 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = currentY + 12;
 
-        doc.addPage();
-        yPosition = 12;
+        if (yPosition + 70 > pageHeight - margin) {
+          doc.addPage();
+          yPosition = 12;
+        }
 
         doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
@@ -1872,7 +1880,7 @@ export const generatePDF = (formData: FormData) => {
 
         currentY = yPosition;
         doc.setDrawColor(...colors.borderGray);
-        doc.setFillColor(200, 200, 200);
+        doc.setFillColor(245, 245, 245);
         doc.setLineWidth(0.5);
 
         bcrmHeaders.forEach((header, colIdx) => {
@@ -1881,7 +1889,7 @@ export const generatePDF = (formData: FormData) => {
           doc.rect(xPos, currentY, colWidths[colIdx], bcrmRowHeight, 'FD');
           doc.setFontSize(6.5);
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(...colors.darkText);
+          doc.setTextColor(0, 0, 0);
           doc.text(header, xPos + 1, currentY + 6);
         });
 

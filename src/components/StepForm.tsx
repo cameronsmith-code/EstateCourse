@@ -171,6 +171,15 @@ export default function StepForm({
               setValidationError(`Please select at least one owner for corporation ${i + 1}.`);
               return;
             }
+
+            // Validate "Other" owners if the checkbox is checked
+            if (corporation?.hasOtherOwner === 'true') {
+              const otherOwnersData = corporation?.otherOwners ? JSON.parse(corporation.otherOwners) : [];
+              if (otherOwnersData.length === 0 || otherOwnersData.some((owner: string) => !owner || owner.trim() === '')) {
+                setValidationError(`Please enter all "Other" owner names for corporation ${i + 1}.`);
+                return;
+              }
+            }
           }
         }
       }
@@ -663,6 +672,13 @@ export default function StepForm({
                                   corporationsData[index].owners.split(',') :
                                   corporationsData[index].owners) : [];
 
+                              const otherOwners = corporationsData[index]?.otherOwners ?
+                                (typeof corporationsData[index].otherOwners === 'string' ?
+                                  JSON.parse(corporationsData[index].otherOwners) :
+                                  corporationsData[index].otherOwners) : [];
+
+                              const hasOtherChecked = corporationsData[index]?.hasOtherOwner === 'true';
+
                               const handleOwnerChange = (owner: string, checked: boolean) => {
                                 let updatedOwners = [...(Array.isArray(selectedOwners) ? selectedOwners : [])];
                                 if (checked) {
@@ -673,6 +689,74 @@ export default function StepForm({
                                   updatedOwners = updatedOwners.filter(o => o !== owner);
                                 }
                                 handleCorporationChange(index, 'owners', updatedOwners.join(','));
+                              };
+
+                              const handleOtherOwnerChange = (otherIndex: number, value: string) => {
+                                const updated = [...otherOwners];
+                                updated[otherIndex] = value;
+                                handleCorporationChange(index, 'otherOwners', JSON.stringify(updated));
+
+                                // Update the owners list
+                                const predefinedOwners = [client1Name];
+                                if (hasSpouse) predefinedOwners.push(client2Name);
+                                if (hasTrust) predefinedOwners.push(trustName);
+                                corporationsData.forEach((corp, corpIndex) => {
+                                  if (corpIndex !== index && corp?.legalName) {
+                                    predefinedOwners.push(corp.legalName);
+                                  }
+                                });
+
+                                const currentSelected = selectedOwners.filter(o => predefinedOwners.includes(o));
+                                const validOtherOwners = updated.filter(o => o && o.trim() !== '');
+                                const allOwners = [...currentSelected, ...validOtherOwners];
+                                handleCorporationChange(index, 'owners', allOwners.join(','));
+                              };
+
+                              const handleAddMoreOwner = () => {
+                                const updated = [...otherOwners, ''];
+                                handleCorporationChange(index, 'otherOwners', JSON.stringify(updated));
+                              };
+
+                              const handleRemoveOwner = (otherIndex: number) => {
+                                const updated = otherOwners.filter((_: string, i: number) => i !== otherIndex);
+                                handleCorporationChange(index, 'otherOwners', JSON.stringify(updated));
+
+                                // Update the owners list
+                                const predefinedOwners = [client1Name];
+                                if (hasSpouse) predefinedOwners.push(client2Name);
+                                if (hasTrust) predefinedOwners.push(trustName);
+                                corporationsData.forEach((corp, corpIndex) => {
+                                  if (corpIndex !== index && corp?.legalName) {
+                                    predefinedOwners.push(corp.legalName);
+                                  }
+                                });
+
+                                const currentSelected = selectedOwners.filter(o => predefinedOwners.includes(o));
+                                const validOtherOwners = updated.filter(o => o && o.trim() !== '');
+                                const allOwners = [...currentSelected, ...validOtherOwners];
+                                handleCorporationChange(index, 'owners', allOwners.join(','));
+                              };
+
+                              const handleOtherCheckboxChange = (checked: boolean) => {
+                                handleCorporationChange(index, 'hasOtherOwner', checked.toString());
+                                if (checked && otherOwners.length === 0) {
+                                  handleCorporationChange(index, 'otherOwners', JSON.stringify(['']));
+                                } else if (!checked) {
+                                  handleCorporationChange(index, 'otherOwners', JSON.stringify([]));
+
+                                  // Remove other owners from the owners list
+                                  const predefinedOwners = [client1Name];
+                                  if (hasSpouse) predefinedOwners.push(client2Name);
+                                  if (hasTrust) predefinedOwners.push(trustName);
+                                  corporationsData.forEach((corp, corpIndex) => {
+                                    if (corpIndex !== index && corp?.legalName) {
+                                      predefinedOwners.push(corp.legalName);
+                                    }
+                                  });
+
+                                  const currentSelected = selectedOwners.filter(o => predefinedOwners.includes(o));
+                                  handleCorporationChange(index, 'owners', currentSelected.join(','));
+                                }
                               };
 
                               return (
@@ -727,6 +811,61 @@ export default function StepForm({
                                     }
                                     return null;
                                   })}
+
+                                  <label className="flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={hasOtherChecked}
+                                      onChange={(e) => handleOtherCheckboxChange(e.target.checked)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Other</span>
+                                  </label>
+
+                                  {hasOtherChecked && (
+                                    <div className="ml-6 mt-4 space-y-4">
+                                      {otherOwners.map((ownerName: string, otherIndex: number) => (
+                                        <div key={otherIndex} className="space-y-2">
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                              Enter owner name:
+                                            </label>
+                                            <input
+                                              type="text"
+                                              value={ownerName}
+                                              onChange={(e) => handleOtherOwnerChange(otherIndex, e.target.value)}
+                                              placeholder="Enter name"
+                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                          </div>
+
+                                          {otherIndex === otherOwners.length - 1 && ownerName && ownerName.trim() !== '' && (
+                                            <div>
+                                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                Are there any more to add?
+                                              </label>
+                                              <div className="flex space-x-4">
+                                                <button
+                                                  type="button"
+                                                  onClick={handleAddMoreOwner}
+                                                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                                >
+                                                  Yes
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => {}}
+                                                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:outline-none"
+                                                >
+                                                  No
+                                                </button>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </>
                               );
                             })()}

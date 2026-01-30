@@ -247,6 +247,8 @@ interface FormData {
     corporationType?: string;
     corporationTypeOther?: string;
     owners?: string;
+    hasOtherOwner?: string;
+    otherOwners?: string;
   }>;
   client1HasFuneralArrangements?: string;
   client1FuneralDocLocation?: string;

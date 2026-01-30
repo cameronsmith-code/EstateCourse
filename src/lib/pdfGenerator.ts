@@ -1562,12 +1562,23 @@ export const generatePDF = (formData: FormData) => {
           { label: `${ordinal} Corporation's Name:`, value: corporation?.legalName || '', fieldName: 'name' },
           { label: 'This company was incorporated in:', value: corporation?.jurisdiction || '', fieldName: 'jurisdiction' },
           { label: 'Type of corporation:', value: corporationTypeValue, fieldName: 'type' },
-          { label: 'Ownership stake:', value: ownersValue, fieldName: 'owners' },
+          { label: 'Owner(s):', value: ownersValue, fieldName: 'owners' },
         ];
 
         const cellHeight = 8;
         const labelWidth = fieldWidth * 0.40;
         const valueWidth = fieldWidth * 0.60;
+
+        const tableHeight = corpRows.length * cellHeight;
+        if (yPosition + tableHeight > pageHeight - margin) {
+          doc.addPage();
+          yPosition = 12;
+          doc.setFontSize(11);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.text(`${ordinal} Corporation:`, margin, yPosition);
+          yPosition += 8;
+        }
 
         corpRows.forEach((row, rowIndex) => {
           const rowY = yPosition;
@@ -1594,12 +1605,15 @@ export const generatePDF = (formData: FormData) => {
           yPosition += cellHeight;
         });
 
-        yPosition += 10;
+        yPosition += 12;
 
         const corpName = corporation?.legalName || `${ordinal} Corporation`;
 
-        doc.addPage();
-        yPosition = 12;
+        const bpcTableHeight = 14 + (4 * 10) + 8;
+        if (yPosition + bpcTableHeight > pageHeight - margin) {
+          doc.addPage();
+          yPosition = 12;
+        }
 
         doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
@@ -1671,7 +1685,12 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = currentY + 12;
 
-        if (yPosition + 60 > pageHeight - margin) {
+        const cglsRowHeight = 10;
+        const cglsHeaderHeight = 18;
+        const cglsRowCount = 3;
+        const cglsTableHeight = cglsHeaderHeight + (cglsRowCount * cglsRowHeight) + 14;
+
+        if (yPosition + cglsTableHeight > pageHeight - margin) {
           doc.addPage();
           yPosition = 12;
         }
@@ -1686,15 +1705,12 @@ export const generatePDF = (formData: FormData) => {
         doc.text('This table identifies the fundamental legal identity of your enterprise(s):', margin, yPosition);
         yPosition += 8;
 
-        const cglsRowHeight = 10;
-        const cglsHeaderHeight = 18;
         const cglsCol1Width = fieldWidth * 0.25;
         const cglsCol2Width = fieldWidth * 0.30;
         const cglsCol3Width = fieldWidth * 0.15;
         const cglsCol4Width = fieldWidth * 0.30;
 
         const cglsHeaders = ['Entity Legal Name:', 'Structure (CCPC, PC, Partnership, Sole Proprietorship):', 'Percent Owned:', 'Location of Minute Books/Articles of Incorporation:'];
-        const cglsRowCount = 3;
 
         currentY = yPosition;
         doc.setLineWidth(0.5);
@@ -1738,7 +1754,12 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = currentY + 12;
 
-        if (yPosition + 80 > pageHeight - margin) {
+        const ptRowHeight = 10;
+        const ptHeaderHeight = 14;
+        const ptRows = ['Corporate Accountant:', 'Commercial Banker:', 'Business Valuator:', 'Other:', 'Other:'];
+        const ptTableHeight = ptHeaderHeight + (ptRows.length * ptRowHeight) + 14;
+
+        if (yPosition + ptTableHeight > pageHeight - margin) {
           doc.addPage();
           yPosition = 12;
         }
@@ -1753,15 +1774,12 @@ export const generatePDF = (formData: FormData) => {
         doc.text('These are the professionals that are related to your corporate needs:', margin, yPosition);
         yPosition += 8;
 
-        const ptRowHeight = 10;
-        const ptHeaderHeight = 14;
         const ptCol1Width = fieldWidth * 0.25;
         const ptCol2Width = fieldWidth * 0.25;
         const ptCol3Width = fieldWidth * 0.25;
         const ptCol4Width = fieldWidth * 0.25;
 
         const ptHeaders = ['Professional:', 'Name:', 'Firm & Contact Info:', 'Primary Role:'];
-        const ptRows = ['Corporate Accountant:', 'Commercial Banker:', 'Business Valuator:', 'Other:', 'Other:'];
 
         currentY = yPosition;
         doc.setLineWidth(0.5);
@@ -1813,7 +1831,12 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = currentY + 12;
 
-        if (yPosition + 70 > pageHeight - margin) {
+        const fopgRowHeight = 10;
+        const fopgHeaderHeight = 18;
+        const fopgRowCount = 4;
+        const fopgTableHeight = fopgHeaderHeight + (fopgRowCount * fopgRowHeight) + 8;
+
+        if (yPosition + fopgTableHeight > pageHeight - margin) {
           doc.addPage();
           yPosition = 12;
         }
@@ -1824,8 +1847,6 @@ export const generatePDF = (formData: FormData) => {
         doc.text(`${corpName} - Financial Obligations and Personal Guarantees:`, margin, yPosition);
         yPosition += 8;
 
-        const fopgRowHeight = 10;
-        const fopgHeaderHeight = 18;
         const fopgCol1Width = fieldWidth * 0.20;
         const fopgCol2Width = fieldWidth * 0.22;
         const fopgCol3Width = fieldWidth * 0.18;
@@ -1833,7 +1854,6 @@ export const generatePDF = (formData: FormData) => {
         const fopgCol5Width = fieldWidth * 0.25;
 
         const fopgHeaders = ['Creditor/Bank:', 'Loan Type (term, LOC, Mortgage):', 'Account Number:', 'Personal Guarantee? (Y/N)', 'Location of Supporting Documents'];
-        const fopgRowCount = 4;
 
         currentY = yPosition;
         doc.setLineWidth(0.5);
@@ -1877,7 +1897,12 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = currentY + 12;
 
-        if (yPosition + 70 > pageHeight - margin) {
+        const bcrmRowHeight = 10;
+        const bcrmHeaderHeight = 18;
+        const bcrmRows = ['Key Person', 'Buy-Sell Funding', 'Overhead Expense', 'Commercial General Liability'];
+        const bcrmTableHeight = bcrmHeaderHeight + (bcrmRows.length * bcrmRowHeight) + 14;
+
+        if (yPosition + bcrmTableHeight > pageHeight - margin) {
           doc.addPage();
           yPosition = 12;
         }
@@ -1892,8 +1917,6 @@ export const generatePDF = (formData: FormData) => {
         doc.text('Insurance is often the primary source of liquidity for funding buy/sell agreements or paying terminal taxes.', margin, yPosition);
         yPosition += 8;
 
-        const bcrmRowHeight = 10;
-        const bcrmHeaderHeight = 18;
         const bcrmCol1Width = fieldWidth * 0.18;
         const bcrmCol2Width = fieldWidth * 0.18;
         const bcrmCol3Width = fieldWidth * 0.18;
@@ -1902,7 +1925,6 @@ export const generatePDF = (formData: FormData) => {
         const bcrmCol6Width = fieldWidth * 0.15;
 
         const bcrmHeaders = ['Policy Type:', 'Insurance Carrier:', 'Key Contact:', 'Policy Number:', 'Beneficiary/Purpose:', 'Location of Supporting Documents'];
-        const bcrmRows = ['Key Person', 'Buy-Sell Funding', 'Overhead Expense', 'Commercial General Liability'];
 
         currentY = yPosition;
         doc.setLineWidth(0.5);
@@ -1954,7 +1976,18 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = currentY + 12;
 
-        if (yPosition + 80 > pageHeight - margin) {
+        const sbstRowHeight = 10;
+        const sbstHeaderHeight = 18;
+        const sbstRows = [
+          { label: 'Chosen Successor:', placeholder: 'e.g. Shareholder Agreement' },
+          { label: 'Buy-Sell Trigger Events:', placeholder: 'e.g. Death, Disability, Divorce' },
+          { label: 'Valuation Method:', placeholder: 'e.g. Formula vs. Independent Valuation' },
+          { label: 'Other Scenario:', placeholder: '' },
+          { label: 'Other Scenario:', placeholder: '' }
+        ];
+        const sbstTableHeight = sbstHeaderHeight + (sbstRows.length * sbstRowHeight) + 14;
+
+        if (yPosition + sbstTableHeight > pageHeight - margin) {
           doc.addPage();
           yPosition = 12;
         }
@@ -1969,21 +2002,12 @@ export const generatePDF = (formData: FormData) => {
         doc.text('Identify the roadmap for who takes control and how they are supposed to pay for it.', margin, yPosition);
         yPosition += 8;
 
-        const sbstRowHeight = 10;
-        const sbstHeaderHeight = 18;
         const sbstCol1Width = fieldWidth * 0.20;
         const sbstCol2Width = fieldWidth * 0.30;
         const sbstCol3Width = fieldWidth * 0.25;
         const sbstCol4Width = fieldWidth * 0.25;
 
         const sbstHeaders = ['Succession Detail:', 'Response/Instruction:', 'Location of Governing Agreement:', 'Other Information:'];
-        const sbstRows = [
-          { label: 'Chosen Successor:', placeholder: 'e.g. Shareholder Agreement' },
-          { label: 'Buy-Sell Trigger Events:', placeholder: 'e.g. Death, Disability, Divorce' },
-          { label: 'Valuation Method:', placeholder: 'e.g. Formula vs. Independent Valuation' },
-          { label: 'Other Scenario:', placeholder: '' },
-          { label: 'Other Scenario:', placeholder: '' }
-        ];
 
         currentY = yPosition;
         doc.setLineWidth(0.5);

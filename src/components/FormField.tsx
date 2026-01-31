@@ -1,4 +1,5 @@
 import { StepQuestion } from '../lib/steps';
+import { useEffect } from 'react';
 
 type FormFieldProps = {
   question: StepQuestion;
@@ -8,6 +9,16 @@ type FormFieldProps = {
 
 export default function FormField({ question, value, onChange }: FormFieldProps) {
   const { key, label, type, placeholder, options, required } = question;
+
+  useEffect(() => {
+    if (key.includes('Funeral') && key.includes('Location')) {
+      console.log(`[FormField useEffect] ${key} value changed to:`, value);
+    }
+  }, [value, key]);
+
+  if (key.includes('Funeral') && key.includes('Location')) {
+    console.log(`[FormField render] ${key} value:`, value);
+  }
 
   const commonClasses =
     'w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all';

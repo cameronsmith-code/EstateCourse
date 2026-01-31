@@ -1042,6 +1042,15 @@ export default function StepForm({
             const client1Name = basicAnswers['fullName'] as string || 'you';
             const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
+            console.log('[StepForm Step 6] All funeral-related answers:', {
+              client1HasDiscussedFuneral: answers['client1HasDiscussedFuneral'],
+              client1FuneralWrittenDown: answers['client1FuneralWrittenDown'],
+              client1FuneralDocLocation: answers['client1FuneralDocLocation'],
+              client2HasDiscussedFuneral: answers['client2HasDiscussedFuneral'],
+              client2FuneralWrittenDown: answers['client2FuneralWrittenDown'],
+              client2FuneralDocLocation: answers['client2FuneralDocLocation'],
+            });
+
             return (
               <>
                 {step.questions.map((question) => {

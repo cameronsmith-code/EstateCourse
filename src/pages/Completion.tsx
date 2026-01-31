@@ -39,6 +39,12 @@ export default function Completion() {
       ...step11,
     };
 
+    console.log('[Completion] Step 6 funeral data:', {
+      client1HasDiscussedFuneral: step6.client1HasDiscussedFuneral,
+      client1FuneralWrittenDown: step6.client1FuneralWrittenDown,
+      client1FuneralDocLocation: step6.client1FuneralDocLocation,
+    });
+
     setFormData(data);
   }, [answers]);
 

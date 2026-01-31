@@ -6251,7 +6251,7 @@ export const generatePDF = (formData: FormData) => {
 
     heirloomTableY += heirloomCellHeight;
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 12; i++) {
       if (heirloomTableY > 275) {
         doc.addPage();
         heirloomTableY = 12;

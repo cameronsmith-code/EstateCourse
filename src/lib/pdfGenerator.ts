@@ -1518,7 +1518,205 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 8;
     }
 
-    yPosition += 0;
+    yPosition += 8;
+
+    if (yPosition + 80 > pageHeight - margin) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.darkText);
+    doc.text('Trust and Professional Contracts:', margin, yPosition);
+    yPosition += 6;
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text('For clients with Trusts, your Estate Trustee must know your \'Quarterback Team\' to manage transitions or wind-ups effectively.', margin, yPosition);
+    yPosition += 8;
+
+    const tpcRowHeight = 10;
+    const tpcHeaderHeight = 12;
+    const tpcCol1Width = fieldWidth * 0.25;
+    const tpcCol2Width = fieldWidth * 0.25;
+    const tpcCol3Width = fieldWidth * 0.25;
+    const tpcCol4Width = fieldWidth * 0.25;
+
+    const tpcHeaders = ['Professional:', 'Name:', 'Firm/Contact Info:', 'Role in the Estate:'];
+    const tpcRowLabels = ['Lawyer(s):', 'Accountant/Tax Prep(s):', 'Other:'];
+
+    let currentY = yPosition;
+    doc.setLineWidth(0.5);
+
+    tpcHeaders.forEach((header, colIdx) => {
+      const colWidths = [tpcCol1Width, tpcCol2Width, tpcCol3Width, tpcCol4Width];
+      const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+      doc.setDrawColor(180, 180, 180);
+      doc.setFillColor(250, 250, 250);
+      doc.rect(xPos, currentY, colWidths[colIdx], tpcHeaderHeight, 'FD');
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
+      const textY = currentY + (tpcHeaderHeight - lines.length * 2.5) / 2 + 2.5;
+      doc.text(lines, xPos + 1, textY);
+    });
+
+    currentY += tpcHeaderHeight;
+
+    tpcRowLabels.forEach((label, rowIdx) => {
+      const rowY = currentY;
+
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, rowY, tpcCol1Width, tpcRowHeight);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
+      doc.text(label, margin + 1, rowY + 6);
+
+      [tpcCol2Width, tpcCol3Width, tpcCol4Width].forEach((colWidth, colIdx) => {
+        const xPos = margin + [tpcCol1Width, tpcCol1Width + tpcCol2Width, tpcCol1Width + tpcCol2Width + tpcCol3Width][colIdx];
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.5);
+        doc.rect(xPos, rowY, colWidth, tpcRowHeight);
+
+        const field = new doc.AcroFormTextField();
+        field.fieldName = `trust_professional_${rowIdx}_${colIdx + 1}`;
+        field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, tpcRowHeight - 1];
+        field.fontSize = 8;
+        field.textColor = colors.darkText;
+        field.borderStyle = 'none';
+        doc.addField(field);
+      });
+
+      currentY += tpcRowHeight;
+    });
+
+    yPosition = currentY + 12;
+
+    if (yPosition + 80 > pageHeight - margin) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.darkText);
+    doc.text('Trustee Information:', margin, yPosition);
+    yPosition += 8;
+
+    const tiRowHeight = 10;
+    const tiHeaderHeight = 12;
+    const tiRowCount = 6;
+    const tiCol1Width = fieldWidth * 0.40;
+    const tiCol2Width = fieldWidth * 0.30;
+    const tiCol3Width = fieldWidth * 0.30;
+
+    const tiHeaders = ['Trustee Name:', 'Phone Number:', 'Email Address:'];
+
+    currentY = yPosition;
+    doc.setLineWidth(0.5);
+
+    tiHeaders.forEach((header, colIdx) => {
+      const colWidths = [tiCol1Width, tiCol2Width, tiCol3Width];
+      const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+      doc.setDrawColor(180, 180, 180);
+      doc.setFillColor(250, 250, 250);
+      doc.rect(xPos, currentY, colWidths[colIdx], tiHeaderHeight, 'FD');
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
+      const textY = currentY + (tiHeaderHeight - lines.length * 2.5) / 2 + 2.5;
+      doc.text(lines, xPos + 1, textY);
+    });
+
+    currentY += tiHeaderHeight;
+
+    for (let rowIdx = 0; rowIdx < tiRowCount; rowIdx++) {
+      const rowY = currentY;
+      [tiCol1Width, tiCol2Width, tiCol3Width].forEach((colWidth, colIdx) => {
+        const xPos = margin + [0, tiCol1Width, tiCol1Width + tiCol2Width][colIdx];
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.5);
+        doc.rect(xPos, rowY, colWidth, tiRowHeight);
+
+        const field = new doc.AcroFormTextField();
+        field.fieldName = `trust_trustee_${rowIdx}_${colIdx}`;
+        field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, tiRowHeight - 1];
+        field.fontSize = 8;
+        field.textColor = colors.darkText;
+        field.borderStyle = 'none';
+        doc.addField(field);
+      });
+
+      currentY += tiRowHeight;
+    }
+
+    yPosition = currentY + 12;
+
+    if (yPosition + 60 > pageHeight - margin) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.darkText);
+    doc.text('Trust Contents:', margin, yPosition);
+    yPosition += 8;
+
+    const tcRowHeight = 10;
+    const tcHeaderHeight = 12;
+    const tcRowCount = 4;
+    const tcCol1Width = fieldWidth * 0.25;
+    const tcCol2Width = fieldWidth * 0.25;
+    const tcCol3Width = fieldWidth * 0.25;
+    const tcCol4Width = fieldWidth * 0.25;
+
+    const tcHeaders = ['Asset Type:', 'Estimated Value:', 'Book Value/Cost Base:', 'Other Information:'];
+
+    currentY = yPosition;
+    doc.setLineWidth(0.5);
+
+    tcHeaders.forEach((header, colIdx) => {
+      const colWidths = [tcCol1Width, tcCol2Width, tcCol3Width, tcCol4Width];
+      const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+      doc.setDrawColor(180, 180, 180);
+      doc.setFillColor(250, 250, 250);
+      doc.rect(xPos, currentY, colWidths[colIdx], tcHeaderHeight, 'FD');
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0, 0, 0);
+      const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
+      const textY = currentY + (tcHeaderHeight - lines.length * 2.5) / 2 + 2.5;
+      doc.text(lines, xPos + 1, textY);
+    });
+
+    currentY += tcHeaderHeight;
+
+    for (let rowIdx = 0; rowIdx < tcRowCount; rowIdx++) {
+      const rowY = currentY;
+      [tcCol1Width, tcCol2Width, tcCol3Width, tcCol4Width].forEach((colWidth, colIdx) => {
+        const xPos = margin + [0, tcCol1Width, tcCol1Width + tcCol2Width, tcCol1Width + tcCol2Width + tcCol3Width][colIdx];
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.5);
+        doc.rect(xPos, rowY, colWidth, tcRowHeight);
+
+        const field = new doc.AcroFormTextField();
+        field.fieldName = `trust_contents_${rowIdx}_${colIdx}`;
+        field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, tcRowHeight - 1];
+        field.fontSize = 8;
+        field.textColor = colors.darkText;
+        field.borderStyle = 'none';
+        doc.addField(field);
+      });
+
+      currentY += tcRowHeight;
+    }
+
+    yPosition = currentY + 8;
   }
 
   doc.addPage();

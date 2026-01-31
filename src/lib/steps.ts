@@ -1097,4 +1097,31 @@ export const STEPS: Step[] = [
       },
     ],
   },
+  {
+    id: 11,
+    title: 'Pensions',
+    description: 'Information about pension plans',
+    questions: [
+      {
+        key: 'client1HasPension',
+        label: 'Are you or have you been a member of a pension plan?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client2HasPension',
+        label: 'Are you or have you been a member of a pension plan?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+    ],
+  },
 ];

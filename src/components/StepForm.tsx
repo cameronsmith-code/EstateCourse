@@ -183,6 +183,55 @@ export default function StepForm({
           }
         }
       }
+    } else if (step.id === 11) {
+      if (answers['client1HasPension'] === 'yes') {
+        if (!client1PensionsData || client1PensionsData.length === 0) {
+          setValidationError('Please add at least one pension for Client 1 or select "No".');
+          return;
+        }
+
+        for (let i = 0; i < client1PensionsData.length; i++) {
+          const pension = client1PensionsData[i];
+          if (!pension?.employer) {
+            setValidationError(`Please fill in the employer name for pension ${i + 1}.`);
+            return;
+          }
+          if (!pension?.stillWorking) {
+            setValidationError(`Please specify if still working for employer in pension ${i + 1}.`);
+            return;
+          }
+          if (!pension?.documentLocation) {
+            setValidationError(`Please specify the document location for pension ${i + 1}.`);
+            return;
+          }
+        }
+      }
+
+      const basicAnswers = allAnswers?.get(1) || {};
+      const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
+
+      if (hasSpouse && answers['client2HasPension'] === 'yes') {
+        if (!client2PensionsData || client2PensionsData.length === 0) {
+          setValidationError('Please add at least one pension for Client 2 or select "No".');
+          return;
+        }
+
+        for (let i = 0; i < client2PensionsData.length; i++) {
+          const pension = client2PensionsData[i];
+          if (!pension?.employer) {
+            setValidationError(`Please fill in the employer name for pension ${i + 1}.`);
+            return;
+          }
+          if (!pension?.stillWorking) {
+            setValidationError(`Please specify if still working for employer in pension ${i + 1}.`);
+            return;
+          }
+          if (!pension?.documentLocation) {
+            setValidationError(`Please specify the document location for pension ${i + 1}.`);
+            return;
+          }
+        }
+      }
     } else {
       const requiredQuestions = step.questions.filter((q) => {
         if (!q.required) return false;
@@ -244,6 +293,47 @@ export default function StepForm({
     }
     updated[index][field] = value;
     onAnswerChange('client2PreviousRelationshipsData', updated);
+  };
+
+  const client1PensionsData = (answers['client1PensionsData'] as Array<Record<string, string>>) || [];
+  const client2PensionsData = (answers['client2PensionsData'] as Array<Record<string, string>>) || [];
+
+  const handleClient1PensionChange = (index: number, field: string, value: string) => {
+    const updated = [...client1PensionsData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1PensionsData', updated);
+  };
+
+  const handleClient2PensionChange = (index: number, field: string, value: string) => {
+    const updated = [...client2PensionsData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2PensionsData', updated);
+  };
+
+  const addClient1Pension = () => {
+    const updated = [...client1PensionsData, {}];
+    onAnswerChange('client1PensionsData', updated);
+  };
+
+  const addClient2Pension = () => {
+    const updated = [...client2PensionsData, {}];
+    onAnswerChange('client2PensionsData', updated);
+  };
+
+  const removeClient1Pension = (index: number) => {
+    const updated = client1PensionsData.filter((_, i) => i !== index);
+    onAnswerChange('client1PensionsData', updated);
+  };
+
+  const removeClient2Pension = (index: number) => {
+    const updated = client2PensionsData.filter((_, i) => i !== index);
+    onAnswerChange('client2PensionsData', updated);
   };
 
   const client1PoaPersonalCareCount = parseInt(answers['client1PoaPersonalCareCount'] as string) || 0;
@@ -3000,6 +3090,229 @@ export default function StepForm({
                 </div>
               ))}
             </div>
+            );
+          })()}
+
+          {step.id === 11 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+            const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+            const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
+
+            return (
+              <div className="space-y-8">
+                {step.questions.map((question) => {
+                  if (question.key === 'client2HasPension' && !hasSpouse) {
+                    return null;
+                  }
+
+                  let customLabel = question.label;
+                  if (question.key === 'client1HasPension') {
+                    customLabel = `${client1Name}, are you or have you been a member of a pension plan?`;
+                  } else if (question.key === 'client2HasPension') {
+                    customLabel = `${client2Name}, are you or have you been a member of a pension plan?`;
+                  }
+
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={{ ...question, label: customLabel }}
+                      value={answers[question.key]}
+                      onChange={(value) => {
+                        onAnswerChange(question.key, value);
+                        // Auto-add first pension entry when user selects "yes"
+                        if (question.key === 'client1HasPension' && value === 'yes' && client1PensionsData.length === 0) {
+                          onAnswerChange('client1PensionsData', [{}]);
+                        } else if (question.key === 'client2HasPension' && value === 'yes' && client2PensionsData.length === 0) {
+                          onAnswerChange('client2PensionsData', [{}]);
+                        }
+                      }}
+                    />
+                  );
+                })}
+
+                {answers['client1HasPension'] === 'yes' && (
+                  <div className="mt-6 space-y-6">
+                    <div className="border border-blue-500 rounded-lg p-6 bg-gray-700">
+                      <h3 className="text-lg font-semibold text-white mb-4">{client1Name}'s Pensions</h3>
+
+                      {client1PensionsData.map((pension, index) => (
+                        <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-600 mb-4">
+                          <div className="flex justify-between items-center mb-4">
+                            <h4 className="text-md font-semibold text-white">Pension {index + 1}</h4>
+                            {client1PensionsData.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeClient1Pension(index)}
+                                className="text-red-400 hover:text-red-300 text-sm"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Which employer were you a member of a pension plan? *
+                              </label>
+                              <input
+                                type="text"
+                                value={pension?.employer || ''}
+                                onChange={(e) => handleClient1PensionChange(index, 'employer', e.target.value)}
+                                placeholder="Enter employer name"
+                                className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Are you still working for this employer? *
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`client1-stillWorking-${index}`}
+                                    value="yes"
+                                    checked={pension?.stillWorking === 'yes'}
+                                    onChange={(e) => handleClient1PensionChange(index, 'stillWorking', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`client1-stillWorking-${index}`}
+                                    value="no"
+                                    checked={pension?.stillWorking === 'no'}
+                                    onChange={(e) => handleClient1PensionChange(index, 'stillWorking', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Where is the pension document stored? *
+                              </label>
+                              <input
+                                type="text"
+                                value={pension?.documentLocation || ''}
+                                onChange={(e) => handleClient1PensionChange(index, 'documentLocation', e.target.value)}
+                                placeholder="e.g., Safe deposit box, home safe, lawyer's office"
+                                className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
+                        onClick={addClient1Pension}
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Add Another Pension
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {hasSpouse && answers['client2HasPension'] === 'yes' && (
+                  <div className="mt-6 space-y-6">
+                    <div className="border border-blue-500 rounded-lg p-6 bg-gray-700">
+                      <h3 className="text-lg font-semibold text-white mb-4">{client2Name}'s Pensions</h3>
+
+                      {client2PensionsData.map((pension, index) => (
+                        <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-600 mb-4">
+                          <div className="flex justify-between items-center mb-4">
+                            <h4 className="text-md font-semibold text-white">Pension {index + 1}</h4>
+                            {client2PensionsData.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeClient2Pension(index)}
+                                className="text-red-400 hover:text-red-300 text-sm"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Which employer were you a member of a pension plan? *
+                              </label>
+                              <input
+                                type="text"
+                                value={pension?.employer || ''}
+                                onChange={(e) => handleClient2PensionChange(index, 'employer', e.target.value)}
+                                placeholder="Enter employer name"
+                                className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Are you still working for this employer? *
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`client2-stillWorking-${index}`}
+                                    value="yes"
+                                    checked={pension?.stillWorking === 'yes'}
+                                    onChange={(e) => handleClient2PensionChange(index, 'stillWorking', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`client2-stillWorking-${index}`}
+                                    value="no"
+                                    checked={pension?.stillWorking === 'no'}
+                                    onChange={(e) => handleClient2PensionChange(index, 'stillWorking', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Where is the pension document stored? *
+                              </label>
+                              <input
+                                type="text"
+                                value={pension?.documentLocation || ''}
+                                onChange={(e) => handleClient2PensionChange(index, 'documentLocation', e.target.value)}
+                                placeholder="e.g., Safe deposit box, home safe, lawyer's office"
+                                className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
+                        onClick={addClient2Pension}
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Add Another Pension
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })()}
 

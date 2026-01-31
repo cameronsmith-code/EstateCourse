@@ -7833,6 +7833,184 @@ export const generatePDF = (formData: FormData) => {
 
   yPosition = financialTableY + 15;
 
+  // Pensions Section
+  const client1PensionsData = formData.client1PensionsData as Array<Record<string, string>> | undefined;
+  const client2PensionsData = formData.client2PensionsData as Array<Record<string, string>> | undefined;
+  const hasClient1Pensions = formData.client1HasPension === 'yes' && client1PensionsData && client1PensionsData.length > 0;
+  const hasClient2Pensions = formData.client2HasPension === 'yes' && client2PensionsData && client2PensionsData.length > 0;
+
+  if (hasClient1Pensions || hasClient2Pensions) {
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    checkPageBreak(30);
+    addSectionHeader('Pensions');
+
+    if (hasClient1Pensions) {
+      checkPageBreak(40);
+
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      doc.text(`${formData.fullName || 'Client 1'}'s Pensions`, margin, yPosition);
+      yPosition += 10;
+
+      const pensionCellHeight = 10;
+      const pensionCol1Width = fieldWidth * 0.35;
+      const pensionCol2Width = fieldWidth * 0.25;
+      const pensionCol3Width = fieldWidth * 0.40;
+      let pensionTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      // Header row
+      doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight);
+      doc.text('Employer Name', margin + 0.5, pensionTableY + 4.5);
+
+      doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight);
+      doc.text('Employment Status', margin + pensionCol1Width + 0.5, pensionTableY + 4.5);
+
+      doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight);
+      doc.text('Document Storage Location', margin + pensionCol1Width + pensionCol2Width + 0.5, pensionTableY + 4.5);
+
+      pensionTableY += pensionCellHeight;
+      doc.setFont(undefined, 'normal');
+
+      // Data rows
+      for (let i = 0; i < client1PensionsData.length; i++) {
+        if (pensionTableY > 275) {
+          doc.addPage();
+          pensionTableY = 12;
+        }
+
+        const pension = client1PensionsData[i];
+
+        // Employer Name column
+        doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight);
+        const employerField = new doc.AcroFormTextField();
+        employerField.fieldName = `client1_pension_employer_${i}`;
+        employerField.Rect = [margin + 0.3, pensionTableY + 0.3, pensionCol1Width - 0.6, pensionCellHeight - 0.6];
+        employerField.fontSize = 7;
+        employerField.textColor = [0, 0, 0];
+        employerField.borderStyle = 'none';
+        employerField.value = pension?.employer || '';
+        doc.addField(employerField);
+
+        // Employment Status column
+        doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight);
+        const statusField = new doc.AcroFormTextField();
+        statusField.fieldName = `client1_pension_status_${i}`;
+        statusField.Rect = [margin + pensionCol1Width + 0.3, pensionTableY + 0.3, pensionCol2Width - 0.6, pensionCellHeight - 0.6];
+        statusField.fontSize = 7;
+        statusField.textColor = [0, 0, 0];
+        statusField.borderStyle = 'none';
+        statusField.value = pension?.stillWorking === 'yes' ? 'Currently Employed' : 'Past Employer';
+        doc.addField(statusField);
+
+        // Document Location column
+        doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight);
+        const locationField = new doc.AcroFormTextField();
+        locationField.fieldName = `client1_pension_location_${i}`;
+        locationField.Rect = [margin + pensionCol1Width + pensionCol2Width + 0.3, pensionTableY + 0.3, pensionCol3Width - 0.6, pensionCellHeight - 0.6];
+        locationField.fontSize = 7;
+        locationField.textColor = [0, 0, 0];
+        locationField.borderStyle = 'none';
+        locationField.value = pension?.documentLocation || '';
+        doc.addField(locationField);
+
+        pensionTableY += pensionCellHeight;
+      }
+
+      yPosition = pensionTableY + 15;
+    }
+
+    if (hasClient2Pensions) {
+      checkPageBreak(40);
+
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      doc.text(`${formData.spouseName || 'Client 2'}'s Pensions`, margin, yPosition);
+      yPosition += 10;
+
+      const pensionCellHeight = 10;
+      const pensionCol1Width = fieldWidth * 0.35;
+      const pensionCol2Width = fieldWidth * 0.25;
+      const pensionCol3Width = fieldWidth * 0.40;
+      let pensionTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      // Header row
+      doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight);
+      doc.text('Employer Name', margin + 0.5, pensionTableY + 4.5);
+
+      doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight);
+      doc.text('Employment Status', margin + pensionCol1Width + 0.5, pensionTableY + 4.5);
+
+      doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight);
+      doc.text('Document Storage Location', margin + pensionCol1Width + pensionCol2Width + 0.5, pensionTableY + 4.5);
+
+      pensionTableY += pensionCellHeight;
+      doc.setFont(undefined, 'normal');
+
+      // Data rows
+      for (let i = 0; i < client2PensionsData.length; i++) {
+        if (pensionTableY > 275) {
+          doc.addPage();
+          pensionTableY = 12;
+        }
+
+        const pension = client2PensionsData[i];
+
+        // Employer Name column
+        doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight);
+        const employerField = new doc.AcroFormTextField();
+        employerField.fieldName = `client2_pension_employer_${i}`;
+        employerField.Rect = [margin + 0.3, pensionTableY + 0.3, pensionCol1Width - 0.6, pensionCellHeight - 0.6];
+        employerField.fontSize = 7;
+        employerField.textColor = [0, 0, 0];
+        employerField.borderStyle = 'none';
+        employerField.value = pension?.employer || '';
+        doc.addField(employerField);
+
+        // Employment Status column
+        doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight);
+        const statusField = new doc.AcroFormTextField();
+        statusField.fieldName = `client2_pension_status_${i}`;
+        statusField.Rect = [margin + pensionCol1Width + 0.3, pensionTableY + 0.3, pensionCol2Width - 0.6, pensionCellHeight - 0.6];
+        statusField.fontSize = 7;
+        statusField.textColor = [0, 0, 0];
+        statusField.borderStyle = 'none';
+        statusField.value = pension?.stillWorking === 'yes' ? 'Currently Employed' : 'Past Employer';
+        doc.addField(statusField);
+
+        // Document Location column
+        doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight);
+        const locationField = new doc.AcroFormTextField();
+        locationField.fieldName = `client2_pension_location_${i}`;
+        locationField.Rect = [margin + pensionCol1Width + pensionCol2Width + 0.3, pensionTableY + 0.3, pensionCol3Width - 0.6, pensionCellHeight - 0.6];
+        locationField.fontSize = 7;
+        locationField.textColor = [0, 0, 0];
+        locationField.borderStyle = 'none';
+        locationField.value = pension?.documentLocation || '';
+        doc.addField(locationField);
+
+        pensionTableY += pensionCellHeight;
+      }
+
+      yPosition = pensionTableY + 15;
+    }
+  }
+
   // Add new page for additional information
   doc.addPage();
   yPosition = 30;

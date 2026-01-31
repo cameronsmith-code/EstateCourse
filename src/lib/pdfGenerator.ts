@@ -179,6 +179,7 @@ interface FormData {
   ownsRealEstate?: string;
   primaryResidenceOwner?: string;
   isPrimaryResidence?: string;
+  isSameAddressAsBeginning?: string;
   hasAdditionalRealEstate?: string;
   propertiesData?: Array<{
     propertyName?: string;
@@ -5664,6 +5665,17 @@ export const generatePDF = (formData: FormData) => {
           primaryField.fontSize = 7;
           primaryField.textColor = [0, 0, 0];
           primaryField.borderStyle = 'none';
+
+          if (rowIndex === 1 && formData.isSameAddressAsBeginning === 'yes') {
+            const fullAddress = [
+              formData.address,
+              formData.city,
+              formData.province,
+              formData.postalCode
+            ].filter(Boolean).join(', ');
+            primaryField.value = fullAddress;
+          }
+
           doc.addField(primaryField);
         }
 

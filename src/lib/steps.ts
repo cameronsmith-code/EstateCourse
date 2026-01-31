@@ -851,6 +851,17 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'isSameAddressAsBeginning',
+        label: 'Is it the same address as what we filled in at the beginning of this questionnaire?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        dependsOn: { key: 'isPrimaryResidence', value: 'yes' },
+      },
+      {
         key: 'hasAdditionalRealEstate',
         label: 'Do you own additional properties?',
         type: 'radio',

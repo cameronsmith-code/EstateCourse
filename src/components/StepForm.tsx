@@ -1963,6 +1963,9 @@ export default function StepForm({
                   if (question.key === 'isPrimaryResidence' && ownsRealEstate !== 'yes') {
                     return null;
                   }
+                  if (question.key === 'isSameAddressAsBeginning' && isPrimaryResidence !== 'yes') {
+                    return null;
+                  }
                   if (question.key === 'hasAdditionalRealEstate' && (ownsRealEstate !== 'yes' || isPrimaryResidence !== 'yes')) {
                     return null;
                   }

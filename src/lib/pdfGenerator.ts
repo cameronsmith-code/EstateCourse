@@ -1656,7 +1656,7 @@ export const generatePDF = (formData: FormData) => {
 
     yPosition = currentY + 12;
 
-    if (yPosition + 60 > pageHeight - margin) {
+    if (yPosition + 100 > pageHeight - margin) {
       doc.addPage();
       yPosition = 12;
     }
@@ -1669,7 +1669,7 @@ export const generatePDF = (formData: FormData) => {
 
     const tcRowHeight = 10;
     const tcHeaderHeight = 12;
-    const tcRowCount = 4;
+    const tcRowCount = 8;
     const tcCol1Width = fieldWidth * 0.25;
     const tcCol2Width = fieldWidth * 0.25;
     const tcCol3Width = fieldWidth * 0.25;

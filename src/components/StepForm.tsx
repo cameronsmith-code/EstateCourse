@@ -1124,6 +1124,9 @@ export default function StepForm({
                 if (question.key === 'client2EstateTrusteeKnowsWillLocation' && answers['client2EstateTrusteeHasWillCopy'] !== 'no') {
                   return null;
                 }
+                if (question.key === 'client1FuneralArrangementsLocation' && answers['client1HasFuneralArrangements'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client1FuneralDocLocation' && answers['client1FuneralWrittenDown'] !== 'yes') {
                   return null;
                 }
@@ -1191,6 +1194,9 @@ export default function StepForm({
                 }
                 if (question.key === 'client1HasFuneralArrangements') {
                   customLabel = `${client1Name}, have you made arrangements for Funeral or Cemetery services?`;
+                }
+                if (question.key === 'client1FuneralArrangementsLocation') {
+                  customLabel = `Where is this document located?`;
                 }
                 if (question.key === 'client2HasFuneralArrangements') {
                   customLabel = `${client2Name}, have you made arrangements for Funeral or Cemetery services?`;

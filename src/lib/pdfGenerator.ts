@@ -4045,6 +4045,28 @@ export const generatePDF = (formData: FormData) => {
       if (formData.client2HasFuneralArrangements === 'yes') {
         doc.text(`${client2Name} has made arrangements for Funeral and Cemetery services.`, margin, yPosition);
         yPosition += 5;
+
+        doc.text('Document located at:', margin, yPosition);
+        yPosition += 6;
+
+        const boxHeight = 8;
+        const boxY = yPosition;
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, boxY, fieldWidth, boxHeight);
+
+        const field = new doc.AcroFormTextField();
+        field.fieldName = 'client2_funeral_arrangements_location';
+        field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+        field.fontSize = 8;
+        field.textColor = [0, 0, 0];
+        field.borderStyle = 'none';
+        if (formData.client2FuneralArrangementsLocation) {
+          field.value = formData.client2FuneralArrangementsLocation;
+        }
+        doc.addField(field);
+
+        yPosition = boxY + boxHeight + 8;
       }
 
       if (formData.client2HasDiscussedFuneral === 'yes') {

@@ -679,6 +679,14 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client2FuneralArrangementsLocation',
+        label: 'Where is this document located?',
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasFuneralArrangements === 'yes',
+      },
+      {
         key: 'client2HasDiscussedFuneral',
         label: 'Have you communicated to your loved ones what type of funeral you would like to have?',
         type: 'radio',

@@ -2111,7 +2111,7 @@ export default function StepForm({
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Do you have a Business Succession Plan/Agreement in place for the property?
+                                      Do you have a Property Succession Plan/Agreement in place for the property?
                                     </label>
                                     <div className="flex gap-4">
                                       <label className="flex items-center">

@@ -2009,17 +2009,34 @@ export default function StepForm({
                       onAnswerChange('propertiesData', updated);
                     };
 
+                    const trustAnswers = allAnswers?.get(4) || {};
+                    const corporationAnswers = allAnswers?.get(5) || {};
+
                     const ownerOptions = [
                       { value: 'joint_survivorship', label: 'Jointly with right of survivorship' },
                       { value: 'joint_tenants', label: 'Jointly as tenants in common' },
                       { value: 'client1', label: client1Name },
-                      { value: 'trust', label: 'a Trust' },
-                      { value: 'corporation', label: 'a Corporation' },
-                      { value: 'other', label: 'Other' },
                     ];
                     if (hasSpouse) {
-                      ownerOptions.splice(3, 0, { value: 'client2', label: client2Name });
+                      ownerOptions.push({ value: 'client2', label: client2Name });
                     }
+
+                    if (trustAnswers['hasFamilyTrust'] === 'yes') {
+                      const trustName = trustAnswers['trustLegalName'] as string || 'Trust 1';
+                      ownerOptions.push({ value: 'trust', label: trustName });
+                    }
+
+                    if (corporationAnswers['ownsCorporation'] === 'yes') {
+                      const corporationsData = corporationAnswers['corporationsData'] as Array<Record<string, string>> | undefined;
+                      if (corporationsData && corporationsData.length > 0) {
+                        corporationsData.forEach((corp, idx) => {
+                          const corpName = corp?.legalName || `Corporation ${idx + 1}`;
+                          ownerOptions.push({ value: `corporation_${idx}`, label: corpName });
+                        });
+                      }
+                    }
+
+                    ownerOptions.push({ value: 'other', label: 'Other' });
 
                     return (
                       <React.Fragment key={question.key}>

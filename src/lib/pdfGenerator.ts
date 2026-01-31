@@ -5697,10 +5697,20 @@ export const generatePDF = (formData: FormData) => {
           'joint_tenants': 'Jointly as tenants in common',
           'client1': formData.fullName || 'Client 1',
           'client2': formData.spouseName || 'Client 2',
-          'trust': property.trustName ? `Trust: ${property.trustName}` : 'a Trust',
-          'corporation': property.corporationName ? `Corporation: ${property.corporationName}` : 'a Corporation',
-          'other': property.otherDetails || 'Other',
+          'other': 'Other',
         };
+
+        if (formData.trustLegalName) {
+          ownerMap['trust'] = formData.trustLegalName;
+        }
+
+        if (formData.corporationsData && formData.corporationsData.length > 0) {
+          formData.corporationsData.forEach((corp, idx) => {
+            const corpName = corp?.legalName || `Corporation ${idx + 1}`;
+            ownerMap[`corporation_${idx}`] = corpName;
+          });
+        }
+
         const ownerLabel = ownerMap[property.propertyOwner || ''] || property.propertyOwner || '';
 
         doc.setFontSize(10);

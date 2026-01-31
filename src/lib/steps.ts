@@ -680,7 +680,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2HasDiscussedFuneral',
-        label: 'Has your spouse discussed the type of funeral they would like?',
+        label: 'Have you communicated to your loved ones what type of funeral you would like to have?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -690,7 +690,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2FuneralWrittenDown',
-        label: 'Is this written down?',
+        label: 'Is this written down anywhere?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -701,7 +701,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2FuneralDocLocation',
-        label: 'Where is this document located?',
+        label: 'Where is this document stored?',
         type: 'text',
         placeholder: 'Enter location',
         required: false,

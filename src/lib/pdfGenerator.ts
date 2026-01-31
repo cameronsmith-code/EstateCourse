@@ -4048,12 +4048,12 @@ export const generatePDF = (formData: FormData) => {
       }
 
       if (formData.client2HasDiscussedFuneral === 'yes') {
-        doc.text(`${client2Name} has discussed the type of funeral they would like.`, margin, yPosition);
+        doc.text(`${client2Name} has communicated to loved ones what type of funeral they would like to have.`, margin, yPosition);
         yPosition += 5;
       }
 
       if (formData.client2FuneralWrittenDown === 'yes') {
-        doc.text('This information is written down and located:', margin, yPosition);
+        doc.text('This information is written down and stored at:', margin, yPosition);
         yPosition += 6;
 
         const boxHeight = 8;
@@ -4075,6 +4075,27 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = boxY + boxHeight + 8;
       } else {
+        yPosition += 3;
+      }
+
+      if (formData.client2HasDiscussedFuneral === 'no') {
+        if (yPosition > 230) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('Action Item:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 5;
+
+        const actionText = 'Discuss and document your wishes related to funeral or remembrance to help your loved ones honor you under your terms.';
+        const wrappedActionText = doc.splitTextToSize(actionText, fieldWidth);
+        wrappedActionText.forEach((line: string) => {
+          doc.text(line, margin, yPosition);
+          yPosition += 4.5;
+        });
         yPosition += 3;
       }
     }

@@ -256,8 +256,12 @@ interface FormData {
     otherOwners?: string;
   }>;
   client1HasFuneralArrangements?: string;
+  client1HasDiscussedFuneral?: string;
+  client1FuneralWrittenDown?: string;
   client1FuneralDocLocation?: string;
   client2HasFuneralArrangements?: string;
+  client2HasDiscussedFuneral?: string;
+  client2FuneralWrittenDown?: string;
   client2FuneralDocLocation?: string;
 }
 
@@ -3972,7 +3976,13 @@ export const generatePDF = (formData: FormData) => {
   }
 
   // Funeral Arrangements Section
-  if (formData.client1HasFuneralArrangements === 'yes' || formData.client2HasFuneralArrangements === 'yes') {
+  const showFuneralSection =
+    formData.client1HasFuneralArrangements === 'yes' ||
+    formData.client1HasDiscussedFuneral === 'yes' ||
+    formData.client2HasFuneralArrangements === 'yes' ||
+    formData.client2HasDiscussedFuneral === 'yes';
+
+  if (showFuneralSection) {
     if (yPosition > 210) {
       doc.addPage();
       yPosition = 12;
@@ -3984,63 +3994,89 @@ export const generatePDF = (formData: FormData) => {
     doc.setFont(undefined, 'normal');
     yPosition += 8;
 
-    if (formData.client1HasFuneralArrangements === 'yes') {
+    if (formData.client1HasFuneralArrangements === 'yes' || formData.client1HasDiscussedFuneral === 'yes') {
       doc.setFontSize(9);
-      doc.text(`${client1Name} has made arrangements for Funeral and Cemetery services,`, margin, yPosition);
-      yPosition += 5;
-      doc.text('and the supporting document is located:', margin, yPosition);
-      yPosition += 6;
 
-      const boxHeight = 8;
-      const boxY = yPosition;
-      doc.setDrawColor(0, 0, 0);
-      doc.setLineWidth(0.5);
-      doc.rect(margin, boxY, fieldWidth, boxHeight);
-
-      const field = new doc.AcroFormTextField();
-      field.fieldName = 'client1_funeral_doc_location';
-      field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
-      field.fontSize = 8;
-      field.textColor = [0, 0, 0];
-      field.borderStyle = 'none';
-      if (formData.client1FuneralDocLocation) {
-        field.value = formData.client1FuneralDocLocation;
+      if (formData.client1HasFuneralArrangements === 'yes') {
+        doc.text(`${client1Name} has made arrangements for Funeral and Cemetery services.`, margin, yPosition);
+        yPosition += 5;
       }
-      doc.addField(field);
 
-      yPosition = boxY + boxHeight + 8;
+      if (formData.client1HasDiscussedFuneral === 'yes') {
+        doc.text(`${client1Name} has discussed the type of funeral they would like.`, margin, yPosition);
+        yPosition += 5;
+      }
+
+      if (formData.client1FuneralWrittenDown === 'yes') {
+        doc.text('This information is written down and located:', margin, yPosition);
+        yPosition += 6;
+
+        const boxHeight = 8;
+        const boxY = yPosition;
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, boxY, fieldWidth, boxHeight);
+
+        const field = new doc.AcroFormTextField();
+        field.fieldName = 'client1_funeral_doc_location';
+        field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+        field.fontSize = 8;
+        field.textColor = [0, 0, 0];
+        field.borderStyle = 'none';
+        if (formData.client1FuneralDocLocation) {
+          field.value = formData.client1FuneralDocLocation;
+        }
+        doc.addField(field);
+
+        yPosition = boxY + boxHeight + 8;
+      } else {
+        yPosition += 3;
+      }
     }
 
-    if (formData.client2HasFuneralArrangements === 'yes' && hasSpouse) {
+    if ((formData.client2HasFuneralArrangements === 'yes' || formData.client2HasDiscussedFuneral === 'yes') && hasSpouse) {
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 12;
       }
 
       doc.setFontSize(9);
-      doc.text(`${client2Name} has made arrangements for Funeral and Cemetery services,`, margin, yPosition);
-      yPosition += 5;
-      doc.text('and the supporting document is located:', margin, yPosition);
-      yPosition += 6;
 
-      const boxHeight = 8;
-      const boxY = yPosition;
-      doc.setDrawColor(0, 0, 0);
-      doc.setLineWidth(0.5);
-      doc.rect(margin, boxY, fieldWidth, boxHeight);
-
-      const field = new doc.AcroFormTextField();
-      field.fieldName = 'client2_funeral_doc_location';
-      field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
-      field.fontSize = 8;
-      field.textColor = [0, 0, 0];
-      field.borderStyle = 'none';
-      if (formData.client2FuneralDocLocation) {
-        field.value = formData.client2FuneralDocLocation;
+      if (formData.client2HasFuneralArrangements === 'yes') {
+        doc.text(`${client2Name} has made arrangements for Funeral and Cemetery services.`, margin, yPosition);
+        yPosition += 5;
       }
-      doc.addField(field);
 
-      yPosition = boxY + boxHeight + 8;
+      if (formData.client2HasDiscussedFuneral === 'yes') {
+        doc.text(`${client2Name} has discussed the type of funeral they would like.`, margin, yPosition);
+        yPosition += 5;
+      }
+
+      if (formData.client2FuneralWrittenDown === 'yes') {
+        doc.text('This information is written down and located:', margin, yPosition);
+        yPosition += 6;
+
+        const boxHeight = 8;
+        const boxY = yPosition;
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, boxY, fieldWidth, boxHeight);
+
+        const field = new doc.AcroFormTextField();
+        field.fieldName = 'client2_funeral_doc_location';
+        field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+        field.fontSize = 8;
+        field.textColor = [0, 0, 0];
+        field.borderStyle = 'none';
+        if (formData.client2FuneralDocLocation) {
+          field.value = formData.client2FuneralDocLocation;
+        }
+        doc.addField(field);
+
+        yPosition = boxY + boxHeight + 8;
+      } else {
+        yPosition += 3;
+      }
     }
   }
 

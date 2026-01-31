@@ -640,11 +640,33 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
+        key: 'client1HasDiscussedFuneral',
+        label: 'Have you discussed the type of funeral you would like?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client1FuneralWrittenDown',
+        label: 'Is this written down?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasDiscussedFuneral === 'yes',
+      },
+      {
         key: 'client1FuneralDocLocation',
-        label: 'Where is the supporting document located?',
+        label: 'Where is this document located?',
         type: 'text',
         placeholder: 'Enter location',
         required: false,
+        condition: (formData: Record<string, string>) => formData.client1FuneralWrittenDown === 'yes',
       },
       {
         key: 'client2HasFuneralArrangements',
@@ -657,11 +679,33 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client2HasDiscussedFuneral',
+        label: 'Has your spouse discussed the type of funeral they would like?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2FuneralWrittenDown',
+        label: 'Is this written down?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasDiscussedFuneral === 'yes',
+      },
+      {
         key: 'client2FuneralDocLocation',
-        label: 'Where is the supporting document located?',
+        label: 'Where is this document located?',
         type: 'text',
         placeholder: 'Enter location',
         required: false,
+        condition: (formData: Record<string, string>) => formData.client2FuneralWrittenDown === 'yes',
       },
       {
         key: 'client1UsesAccountant',

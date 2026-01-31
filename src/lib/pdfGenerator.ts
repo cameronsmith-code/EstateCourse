@@ -742,10 +742,40 @@ export const generatePDF = (formData: FormData) => {
 
     childrenToProcess.forEach((child, index) => {
       const childName = child.name || `Child ${index + 1}`;
-      addSubsectionHeader(`${childName} (DOB: ${child.dateOfBirth || ''})`);
+      addSubsectionHeader(`Child ${index + 1}`);
 
       doc.setFontSize(9);
       doc.setTextColor(...colors.darkText);
+
+      doc.setFont(undefined, 'bold');
+      doc.text('Child Name:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      const childNameField = new doc.AcroFormTextField();
+      childNameField.fieldName = `child${index + 1}_name`;
+      childNameField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+      childNameField.fontSize = 9;
+      childNameField.textColor = colors.darkText;
+      childNameField.value = child.name || '';
+      doc.addField(childNameField);
+
+      yPosition += 10;
+
+      doc.setFont(undefined, 'bold');
+      doc.text('Date of Birth:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      const childDobField = new doc.AcroFormTextField();
+      childDobField.fieldName = `child${index + 1}_dob`;
+      childDobField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+      childDobField.fontSize = 9;
+      childDobField.textColor = colors.darkText;
+      childDobField.value = child.dateOfBirth || '';
+      doc.addField(childDobField);
+
+      yPosition += 10;
 
       if (child.parentsOption) {
         let parentsText = '';

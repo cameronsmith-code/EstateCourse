@@ -192,6 +192,9 @@ interface FormData {
     additionalOwnersCount?: string;
     hasSuccessionPlan?: string;
     successionPlanLocation?: string;
+    rentalAgreementsLocation?: string;
+    revenueExpensesLocation?: string;
+    capitalExpendituresLocation?: string;
   }>;
   hasDebts?: string;
   debtsData?: Array<{
@@ -5941,6 +5944,55 @@ export const generatePDF = (formData: FormData) => {
         });
 
         yPosition = propertyTableY + 10;
+
+        if (property.propertyType === 'Rental' || property.propertyType === 'Commercial') {
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 12;
+          }
+
+          const rentalRows = [
+            { label: 'Rental Agreements Location:', fieldKey: 'rentalAgreementsLocation' },
+            { label: 'Revenue & Expenses Records Location:', fieldKey: 'revenueExpensesLocation' },
+            { label: 'Capital Expenditures Records Location:', fieldKey: 'capitalExpendituresLocation' },
+          ];
+
+          const rentalCellHeight = 7;
+          const rentalLabelWidth = fieldWidth * 0.45;
+          const rentalFieldWidth = fieldWidth * 0.55;
+          let rentalTableY = yPosition;
+
+          rentalRows.forEach((row, rowIndex) => {
+            if (rentalTableY > 275) {
+              doc.addPage();
+              rentalTableY = 12;
+            }
+
+            doc.setDrawColor(0, 0, 0);
+            doc.setFillColor(255, 255, 255);
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(8);
+
+            doc.rect(margin, rentalTableY, rentalLabelWidth, rentalCellHeight);
+            doc.rect(margin + rentalLabelWidth, rentalTableY, rentalFieldWidth, rentalCellHeight);
+            doc.text(row.label, margin + 0.5, rentalTableY + 4.5);
+
+            const rentalField = new doc.AcroFormTextField();
+            rentalField.fieldName = `property_${propIndex + 1}_${row.fieldKey}`;
+            rentalField.Rect = [margin + rentalLabelWidth + 0.3, rentalTableY + 0.3, rentalFieldWidth - 0.6, rentalCellHeight - 0.6];
+            rentalField.fontSize = 7;
+            rentalField.textColor = [0, 0, 0];
+            rentalField.borderStyle = 'none';
+            if (property[row.fieldKey as keyof typeof property]) {
+              rentalField.value = property[row.fieldKey as keyof typeof property] as string;
+            }
+            doc.addField(rentalField);
+
+            rentalTableY += rentalCellHeight;
+          });
+
+          yPosition = rentalTableY + 10;
+        }
 
         if (yPosition > 250) {
           doc.addPage();

@@ -1042,15 +1042,6 @@ export default function StepForm({
             const client1Name = basicAnswers['fullName'] as string || 'you';
             const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
-            console.log('[StepForm Step 6] All funeral-related answers:', {
-              client1HasDiscussedFuneral: answers['client1HasDiscussedFuneral'],
-              client1FuneralWrittenDown: answers['client1FuneralWrittenDown'],
-              client1FuneralDocLocation: answers['client1FuneralDocLocation'],
-              client2HasDiscussedFuneral: answers['client2HasDiscussedFuneral'],
-              client2FuneralWrittenDown: answers['client2FuneralWrittenDown'],
-              client2FuneralDocLocation: answers['client2FuneralDocLocation'],
-            });
-
             return (
               <>
                 {step.questions.map((question) => {
@@ -2220,6 +2211,46 @@ export default function StepForm({
                                       <option value="Other">Other</option>
                                     </select>
                                   </div>
+                                  {(propertiesData[index]?.propertyType === 'Rental' || propertiesData[index]?.propertyType === 'Commercial') && (
+                                    <>
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Where do you keep your rental agreements?
+                                        </label>
+                                        <input
+                                          type="text"
+                                          value={propertiesData[index]?.rentalAgreementsLocation || ''}
+                                          onChange={(e) => handlePropertyChange(index, 'rentalAgreementsLocation', e.target.value)}
+                                          placeholder="Enter location"
+                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Where do you keep records of your revenues and expenses?
+                                        </label>
+                                        <input
+                                          type="text"
+                                          value={propertiesData[index]?.revenueExpensesLocation || ''}
+                                          onChange={(e) => handlePropertyChange(index, 'revenueExpensesLocation', e.target.value)}
+                                          placeholder="Enter location"
+                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Where do you keep records of your capital expenditures?
+                                        </label>
+                                        <input
+                                          type="text"
+                                          value={propertiesData[index]?.capitalExpendituresLocation || ''}
+                                          onChange={(e) => handlePropertyChange(index, 'capitalExpendituresLocation', e.target.value)}
+                                          placeholder="Enter location"
+                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                    </>
+                                  )}
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Who is the named owner of this property?

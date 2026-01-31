@@ -3099,38 +3099,27 @@ export default function StepForm({
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
 
+            const client1Question = step.questions.find(q => q.key === 'client1HasPension');
+            const client2Question = step.questions.find(q => q.key === 'client2HasPension');
+
             return (
               <div className="space-y-8">
-                {step.questions.map((question) => {
-                  if (question.key === 'client2HasPension' && !hasSpouse) {
-                    return null;
-                  }
+                {/* Client 1's Pension Question */}
+                {client1Question && (
+                  <FormField
+                    key={client1Question.key}
+                    question={{ ...client1Question, label: `${client1Name}, are you or have you been a member of a pension plan?` }}
+                    value={answers[client1Question.key]}
+                    onChange={(value) => {
+                      onAnswerChange(client1Question.key, value);
+                      if (value === 'yes' && client1PensionsData.length === 0) {
+                        onAnswerChange('client1PensionsData', [{}]);
+                      }
+                    }}
+                  />
+                )}
 
-                  let customLabel = question.label;
-                  if (question.key === 'client1HasPension') {
-                    customLabel = `${client1Name}, are you or have you been a member of a pension plan?`;
-                  } else if (question.key === 'client2HasPension') {
-                    customLabel = `${client2Name}, are you or have you been a member of a pension plan?`;
-                  }
-
-                  return (
-                    <FormField
-                      key={question.key}
-                      question={{ ...question, label: customLabel }}
-                      value={answers[question.key]}
-                      onChange={(value) => {
-                        onAnswerChange(question.key, value);
-                        // Auto-add first pension entry when user selects "yes"
-                        if (question.key === 'client1HasPension' && value === 'yes' && client1PensionsData.length === 0) {
-                          onAnswerChange('client1PensionsData', [{}]);
-                        } else if (question.key === 'client2HasPension' && value === 'yes' && client2PensionsData.length === 0) {
-                          onAnswerChange('client2PensionsData', [{}]);
-                        }
-                      }}
-                    />
-                  );
-                })}
-
+                {/* Client 1's Pension Details */}
                 {answers['client1HasPension'] === 'yes' && (
                   <div className="mt-6 space-y-6">
                     <div className="border border-blue-500 rounded-lg p-6 bg-gray-700">
@@ -3222,6 +3211,22 @@ export default function StepForm({
                   </div>
                 )}
 
+                {/* Client 2's Pension Question */}
+                {hasSpouse && client2Question && (
+                  <FormField
+                    key={client2Question.key}
+                    question={{ ...client2Question, label: `${client2Name}, are you or have you been a member of a pension plan?` }}
+                    value={answers[client2Question.key]}
+                    onChange={(value) => {
+                      onAnswerChange(client2Question.key, value);
+                      if (value === 'yes' && client2PensionsData.length === 0) {
+                        onAnswerChange('client2PensionsData', [{}]);
+                      }
+                    }}
+                  />
+                )}
+
+                {/* Client 2's Pension Details */}
                 {hasSpouse && answers['client2HasPension'] === 'yes' && (
                   <div className="mt-6 space-y-6">
                     <div className="border border-blue-500 rounded-lg p-6 bg-gray-700">

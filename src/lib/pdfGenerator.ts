@@ -7870,13 +7870,13 @@ export const generatePDF = (formData: FormData) => {
 
       // Header row
       doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight);
-      doc.text('Employer Name', margin + 0.5, pensionTableY + 4.5);
+      doc.text('Employer Name:', margin + 0.5, pensionTableY + 4.5);
 
       doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight);
-      doc.text('Employment Status', margin + pensionCol1Width + 0.5, pensionTableY + 4.5);
+      doc.text('Employment Status:', margin + pensionCol1Width + 0.5, pensionTableY + 4.5);
 
       doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight);
-      doc.text('Document Storage Location', margin + pensionCol1Width + pensionCol2Width + 0.5, pensionTableY + 4.5);
+      doc.text('Location of Pension Information:', margin + pensionCol1Width + pensionCol2Width + 0.5, pensionTableY + 4.5);
 
       pensionTableY += pensionCellHeight;
       doc.setFont(undefined, 'normal');
@@ -7951,13 +7951,13 @@ export const generatePDF = (formData: FormData) => {
 
       // Header row
       doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight);
-      doc.text('Employer Name', margin + 0.5, pensionTableY + 4.5);
+      doc.text('Employer Name:', margin + 0.5, pensionTableY + 4.5);
 
       doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight);
-      doc.text('Employment Status', margin + pensionCol1Width + 0.5, pensionTableY + 4.5);
+      doc.text('Employment Status:', margin + pensionCol1Width + 0.5, pensionTableY + 4.5);
 
       doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight);
-      doc.text('Document Storage Location', margin + pensionCol1Width + pensionCol2Width + 0.5, pensionTableY + 4.5);
+      doc.text('Location of Pension Information:', margin + pensionCol1Width + pensionCol2Width + 0.5, pensionTableY + 4.5);
 
       pensionTableY += pensionCellHeight;
       doc.setFont(undefined, 'normal');

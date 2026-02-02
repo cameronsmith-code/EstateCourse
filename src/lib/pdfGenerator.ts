@@ -80,9 +80,13 @@ interface FormData {
   client1HasWill?: string;
   client1WillJurisdiction?: string;
   client1WillLocation?: string;
+  client1HasSecondaryWill?: string;
+  client1SecondaryWillLocation?: string;
   client2HasWill?: string;
   client2WillJurisdiction?: string;
   client2WillLocation?: string;
+  client2HasSecondaryWill?: string;
+  client2SecondaryWillLocation?: string;
   willsSameLawyer?: string;
   spousesPoaPersonalCare?: string;
   spousesPoaProperty?: string;
@@ -2293,7 +2297,14 @@ export const generatePDF = (formData: FormData) => {
     if (formData.client1HasWill === 'yes' && formData.client1WillLocation) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name}'s Will is located at: ${formData.client1WillLocation}`, margin, yPosition);
+      doc.text(`${client1Name} has a Will, and it is located: ${formData.client1WillLocation}`, margin, yPosition);
+      yPosition += 6;
+    }
+
+    if (formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillLocation) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client1Name} has a secondary Will, and it is located: ${formData.client1SecondaryWillLocation}`, margin, yPosition);
       yPosition += 6;
     }
 
@@ -2307,7 +2318,14 @@ export const generatePDF = (formData: FormData) => {
     if (formData.client2HasWill === 'yes' && formData.client2WillLocation && hasSpouse) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name}'s Will is located at: ${formData.client2WillLocation}`, margin, yPosition);
+      doc.text(`${client2Name} has a Will, and it is located: ${formData.client2WillLocation}`, margin, yPosition);
+      yPosition += 6;
+    }
+
+    if (formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillLocation && hasSpouse) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client2Name} has a secondary Will, and it is located: ${formData.client2SecondaryWillLocation}`, margin, yPosition);
       yPosition += 6;
     }
 

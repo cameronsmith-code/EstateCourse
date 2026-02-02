@@ -337,10 +337,30 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1WillLocation',
-        label: 'Where is the Will located?',
+        label: 'Where is your Will located?',
         type: 'text',
         placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
         required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1HasSecondaryWill',
+        label: 'Do you have a secondary Will?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1SecondaryWillLocation',
+        label: 'Where is the secondary Will located?',
+        type: 'text',
+        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasSecondaryWill === 'yes',
       },
       {
         key: 'spousesPoaPersonalCare',
@@ -663,10 +683,30 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2WillLocation',
-        label: 'Where is the Will located?',
+        label: 'Where is your spouse\'s Will located?',
         type: 'text',
         placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
         required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2HasSecondaryWill',
+        label: 'Does your spouse have a secondary Will?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2SecondaryWillLocation',
+        label: 'Where is the secondary Will located?',
+        type: 'text',
+        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasSecondaryWill === 'yes',
       },
       {
         key: 'willsSameLawyer',

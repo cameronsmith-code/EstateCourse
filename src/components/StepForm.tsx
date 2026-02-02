@@ -1094,6 +1094,12 @@ export default function StepForm({
                 if (question.key === 'client1PoaPersonalCareCount' && answers['client1HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1PoaPersonalCareDocLocation' && answers['client1HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1PoaPersonalCareHasDocCopy' && answers['client1HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client1HasPoaProperty' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }
@@ -1262,6 +1268,12 @@ export default function StepForm({
                   } else {
                     customLabel = `${client1Name}, how many Powers of Attorney for Personal Care have you named?`;
                   }
+                }
+                if (question.key === 'client1PoaPersonalCareDocLocation') {
+                  customLabel = `${client1Name}, where is your copy of the Power of Attorney for Personal Care document located?`;
+                }
+                if (question.key === 'client1PoaPersonalCareHasDocCopy') {
+                  customLabel = `${client1Name}, does the Power(s) of Attorney(ies) named above have a copy of your Power of Attorney for Personal Care?`;
                 }
                 if (question.key === 'client1HasPoaProperty') {
                   if (answers['spousesPoaProperty'] === 'yes') {

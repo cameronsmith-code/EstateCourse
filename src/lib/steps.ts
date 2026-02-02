@@ -424,6 +424,24 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client1PoaPersonalCareDocLocation',
+        label: 'Where is your copy of the Power of Attorney for Personal Care document located?',
+        type: 'text',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
+      },
+      {
+        key: 'client1PoaPersonalCareHasDocCopy',
+        label: 'Does the Power(s) of Attorney(ies) named above have a copy of your Power of Attorney for Personal Care?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
+      },
+      {
         key: 'client1HasPoaProperty',
         label: 'Have you named a Power of Attorney(ies) for Property?',
         type: 'radio',

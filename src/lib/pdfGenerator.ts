@@ -159,6 +159,8 @@ interface FormData {
     email?: string;
     relationship?: string;
   }>;
+  client1PoaPersonalCareDocLocation?: string;
+  client1PoaPersonalCareHasDocCopy?: string;
   client2PoaPersonalCareHasDocCopy?: string;
   client1PoaPropertyHasDocCopy?: string;
   client2PoaPropertyHasDocCopy?: string;
@@ -2732,6 +2734,54 @@ export const generatePDF = (formData: FormData) => {
     }
 
     yPosition = poaTableY + 10;
+
+    // Document location field
+    if (yPosition > 260) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('Where is your copy of the Power of Attorney for Personal Care document located?', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    doc.setDrawColor(0, 0, 0);
+    doc.rect(margin, yPosition, fieldWidth, 6);
+
+    const docLocationField = new doc.AcroFormTextField();
+    docLocationField.fieldName = 'client1_poa_personal_care_doc_location';
+    docLocationField.Rect = [margin + 0.3, yPosition + 0.3, fieldWidth - 0.6, 5.4];
+    docLocationField.fontSize = 9;
+    docLocationField.textColor = [0, 0, 0];
+    docLocationField.borderStyle = 'none';
+    docLocationField.value = formData.client1PoaPersonalCareDocLocation || '';
+    doc.addField(docLocationField);
+
+    yPosition += 10;
+
+    // Has copy question
+    if (yPosition > 260) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    const clientName = formData.fullName || 'The client';
+
+    if (formData.client1PoaPersonalCareHasDocCopy === 'yes') {
+      const hasCopyText = `${clientName} indicated that the Power(s) of Attorney(ies) named above have a copy of the Power of Attorney for Personal Care.`;
+      const hasCopyLines = doc.splitTextToSize(hasCopyText, fieldWidth);
+      doc.text(hasCopyLines, margin, yPosition);
+      yPosition += hasCopyLines.length * 5 + 5;
+    } else if (formData.client1PoaPersonalCareHasDocCopy === 'no') {
+      const noCopyText = `${clientName} indicated that the Power(s) of Attorney(ies) named above do NOT have a copy of the Power of Attorney for Personal Care.`;
+      const noCopyLines = doc.splitTextToSize(noCopyText, fieldWidth);
+      doc.text(noCopyLines, margin, yPosition);
+      yPosition += noCopyLines.length * 5 + 5;
+    }
 
     if (formData.client1HasLivingWill === 'yes') {
       if (yPosition > 260) {

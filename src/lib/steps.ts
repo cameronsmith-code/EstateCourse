@@ -517,6 +517,20 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client2PoaPersonalCareDocLocation',
+        label: 'Where is your spouse\'s copy of the Power of Attorney for Personal Care document located?',
+        type: 'text',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaPersonalCare === 'yes',
+      },
+      {
+        key: 'client2PoaPersonalCareJurisdiction',
+        label: 'In what jurisdiction was your spouse\'s Power of Attorney for Personal Care document prepared?',
+        type: 'text',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaPersonalCare === 'yes',
+      },
+      {
         key: 'client2HasPoaProperty',
         label: 'Has your spouse named a Power of Attorney(ies) for Property?',
         type: 'radio',

@@ -137,6 +137,8 @@ interface FormData {
   }>;
   client2HasPoaPersonalCare?: string;
   client2PoaPersonalCareCount?: string;
+  client2PoaPersonalCareDocLocation?: string;
+  client2PoaPersonalCareJurisdiction?: string;
   client2PoaPersonalCareData?: Array<{
     name?: string;
     phone?: string;
@@ -2909,6 +2911,58 @@ export const generatePDF = (formData: FormData) => {
     }
 
     yPosition = poaTableY + 10;
+
+    // Document location field
+    if (yPosition > 260) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Where is ${client2Name}'s copy of the Power of Attorney for Personal Care document located?`, margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    doc.setDrawColor(0, 0, 0);
+    doc.rect(margin, yPosition, fieldWidth, 6);
+
+    const docLocationField = new doc.AcroFormTextField();
+    docLocationField.fieldName = 'client2_poa_personal_care_doc_location';
+    docLocationField.Rect = [margin + 0.3, yPosition + 0.3, fieldWidth - 0.6, 5.4];
+    docLocationField.fontSize = 9;
+    docLocationField.textColor = [0, 0, 0];
+    docLocationField.borderStyle = 'none';
+    docLocationField.value = formData.client2PoaPersonalCareDocLocation || '';
+    doc.addField(docLocationField);
+
+    yPosition += 10;
+
+    // Jurisdiction field
+    if (yPosition > 260) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('In what jurisdiction was the Power of Attorney for Personal Care document prepared?', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    doc.setDrawColor(0, 0, 0);
+    doc.rect(margin, yPosition, fieldWidth, 6);
+
+    const jurisdictionField = new doc.AcroFormTextField();
+    jurisdictionField.fieldName = 'client2_poa_personal_care_jurisdiction';
+    jurisdictionField.Rect = [margin + 0.3, yPosition + 0.3, fieldWidth - 0.6, 5.4];
+    jurisdictionField.fontSize = 9;
+    jurisdictionField.textColor = [0, 0, 0];
+    jurisdictionField.borderStyle = 'none';
+    jurisdictionField.value = formData.client2PoaPersonalCareJurisdiction || '';
+    doc.addField(jurisdictionField);
+
+    yPosition += 10;
 
     if (formData.client2HasLivingWill === 'yes') {
       if (yPosition > 260) {

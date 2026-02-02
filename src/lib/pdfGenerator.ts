@@ -261,11 +261,11 @@ interface FormData {
   client1HasFuneralArrangements?: string;
   client1HasDiscussedFuneral?: string;
   client1FuneralWrittenDown?: string;
-  client1FuneralDocLocation?: string;
+  client1FuneralWishesLocation?: string;
   client2HasFuneralArrangements?: string;
   client2HasDiscussedFuneral?: string;
   client2FuneralWrittenDown?: string;
-  client2FuneralDocLocation?: string;
+  client2FuneralWishesLocation?: string;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -3965,7 +3965,7 @@ export const generatePDF = (formData: FormData) => {
       }
 
       if (formData.client1FuneralWrittenDown === 'yes') {
-        doc.text('This information is written down and located:', margin, yPosition);
+        doc.text('Location of written funeral wishes:', margin, yPosition);
         yPosition += 6;
 
         const boxHeight = 8;
@@ -3975,13 +3975,13 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin, boxY, fieldWidth, boxHeight);
 
         const field = new doc.AcroFormTextField();
-        field.fieldName = 'client1_funeral_doc_location';
+        field.fieldName = 'client1_funeral_wishes_location';
         field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
         field.fontSize = 8;
         field.textColor = [0, 0, 0];
         field.borderStyle = 'none';
-        if (formData.client1FuneralDocLocation) {
-          field.value = formData.client1FuneralDocLocation;
+        if (formData.client1FuneralWishesLocation) {
+          field.value = formData.client1FuneralWishesLocation;
         }
         doc.addField(field);
 
@@ -4032,7 +4032,7 @@ export const generatePDF = (formData: FormData) => {
       }
 
       if (formData.client2FuneralWrittenDown === 'yes') {
-        doc.text('This information is written down and stored at:', margin, yPosition);
+        doc.text('Location of written funeral wishes:', margin, yPosition);
         yPosition += 6;
 
         const boxHeight = 8;
@@ -4042,13 +4042,13 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(margin, boxY, fieldWidth, boxHeight);
 
         const field = new doc.AcroFormTextField();
-        field.fieldName = 'client2_funeral_doc_location';
+        field.fieldName = 'client2_funeral_wishes_location';
         field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
         field.fontSize = 8;
         field.textColor = [0, 0, 0];
         field.borderStyle = 'none';
-        if (formData.client2FuneralDocLocation) {
-          field.value = formData.client2FuneralDocLocation;
+        if (formData.client2FuneralWishesLocation) {
+          field.value = formData.client2FuneralWishesLocation;
         }
         doc.addField(field);
 

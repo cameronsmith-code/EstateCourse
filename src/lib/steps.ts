@@ -343,33 +343,6 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
-        key: 'client2HasWill',
-        label: 'Does your spouse have a Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2WillLocation',
-        label: 'Where is the Will located?',
-        type: 'text',
-        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
-        required: false,
-      },
-      {
-        key: 'willsSameLawyer',
-        label: 'Were they prepared at the same time/by the same lawyer?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
         key: 'spousesPoaPersonalCare',
         label: 'Are you two each other\'s Powers of Attorney for Personal Care?',
         type: 'radio',
@@ -675,6 +648,33 @@ export const STEPS: Step[] = [
         placeholder: 'Enter location',
         required: false,
         condition: (formData: Record<string, string>) => formData.client1FuneralWrittenDown === 'yes',
+      },
+      {
+        key: 'client2HasWill',
+        label: 'Does your spouse have a Will?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2WillLocation',
+        label: 'Where is the Will located?',
+        type: 'text',
+        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
+        required: false,
+      },
+      {
+        key: 'willsSameLawyer',
+        label: 'Were they prepared at the same time/by the same lawyer?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
       },
       {
         key: 'client2HasFuneralArrangements',

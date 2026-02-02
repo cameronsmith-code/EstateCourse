@@ -1239,9 +1239,9 @@ export default function StepForm({
                 }
                 if (question.key === 'client1HasPoaPersonalCare') {
                   if (answers['spousesPoaPersonalCare'] === 'yes') {
-                    customLabel = `${client1Name}, have you named a contingent Power of Attorney(ies) for Personal Care in your Will?`;
+                    customLabel = `${client1Name}, have you named a contingent Power of Attorney(ies) for Personal Care?`;
                   } else {
-                    customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Personal Care in your Will?`;
+                    customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Personal Care?`;
                   }
                 }
                 if (question.key === 'client1PoaPersonalCareCount') {
@@ -1285,9 +1285,9 @@ export default function StepForm({
                 }
                 if (question.key === 'client2HasPoaPersonalCare') {
                   if (answers['spousesPoaPersonalCare'] === 'yes') {
-                    customLabel = `${client2Name}, have you named a contingent Power of Attorney(ies) for Personal Care in your Will?`;
+                    customLabel = `${client2Name}, have you named a contingent Power of Attorney(ies) for Personal Care?`;
                   } else {
-                    customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Personal Care in your Will?`;
+                    customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Personal Care?`;
                   }
                 }
                 if (question.key === 'client2PoaPersonalCareCount') {

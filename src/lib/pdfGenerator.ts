@@ -161,6 +161,7 @@ interface FormData {
   }>;
   client1PoaPersonalCareDocLocation?: string;
   client1PoaPersonalCareHasDocCopy?: string;
+  client1PoaPersonalCareJurisdiction?: string;
   client2PoaPersonalCareHasDocCopy?: string;
   client1PoaPropertyHasDocCopy?: string;
   client2PoaPropertyHasDocCopy?: string;
@@ -2782,6 +2783,32 @@ export const generatePDF = (formData: FormData) => {
       doc.text(noCopyLines, margin, yPosition);
       yPosition += noCopyLines.length * 5 + 5;
     }
+
+    // Jurisdiction field
+    if (yPosition > 260) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('In what jurisdiction was the Power of Attorney for Personal Care document prepared?', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    doc.setDrawColor(0, 0, 0);
+    doc.rect(margin, yPosition, fieldWidth, 6);
+
+    const jurisdictionField = new doc.AcroFormTextField();
+    jurisdictionField.fieldName = 'client1_poa_personal_care_jurisdiction';
+    jurisdictionField.Rect = [margin + 0.3, yPosition + 0.3, fieldWidth - 0.6, 5.4];
+    jurisdictionField.fontSize = 9;
+    jurisdictionField.textColor = [0, 0, 0];
+    jurisdictionField.borderStyle = 'none';
+    jurisdictionField.value = formData.client1PoaPersonalCareJurisdiction || '';
+    doc.addField(jurisdictionField);
+
+    yPosition += 10;
 
     if (formData.client1HasLivingWill === 'yes') {
       if (yPosition > 260) {

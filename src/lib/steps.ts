@@ -442,6 +442,13 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
       },
       {
+        key: 'client1PoaPersonalCareJurisdiction',
+        label: 'In what jurisdiction was the Power of Attorney for Personal Care document prepared?',
+        type: 'text',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
+      },
+      {
         key: 'client1HasPoaProperty',
         label: 'Have you named a Power of Attorney(ies) for Property?',
         type: 'radio',

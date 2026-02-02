@@ -602,6 +602,14 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client1HasDiscussedFuneral === 'yes',
       },
       {
+        key: 'client1FuneralWishesLocation',
+        label: 'What is the location of your written funeral wishes?',
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasDiscussedFuneral === 'yes' && formData.client1FuneralWrittenDown === 'yes',
+      },
+      {
         key: 'client2HasWill',
         label: 'Does your spouse have a Will?',
         type: 'radio',
@@ -694,6 +702,14 @@ export const STEPS: Step[] = [
         ],
         required: false,
         condition: (formData: Record<string, string>) => formData.client2HasDiscussedFuneral === 'yes',
+      },
+      {
+        key: 'client2FuneralWishesLocation',
+        label: 'What is the location of your written funeral wishes?',
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasDiscussedFuneral === 'yes' && formData.client2FuneralWrittenDown === 'yes',
       },
       {
         key: 'client1UsesAccountant',

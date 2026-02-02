@@ -3965,6 +3965,28 @@ export const generatePDF = (formData: FormData) => {
       if (formData.client1FuneralWrittenDown === 'yes') {
         doc.text(`${client1Name} has written down the type of funeral they would like.`, margin, yPosition);
         yPosition += 5;
+
+        if (formData.client1FuneralWishesLocation) {
+          doc.text('Location of written funeral wishes:', margin, yPosition);
+          yPosition += 6;
+
+          const boxHeight = 8;
+          const boxY = yPosition;
+          doc.setDrawColor(0, 0, 0);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, boxY, fieldWidth, boxHeight);
+
+          const field = new doc.AcroFormTextField();
+          field.fieldName = 'client1_funeral_wishes_location';
+          field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+          field.fontSize = 8;
+          field.textColor = [0, 0, 0];
+          field.borderStyle = 'none';
+          field.value = formData.client1FuneralWishesLocation;
+          doc.addField(field);
+
+          yPosition = boxY + boxHeight + 8;
+        }
       }
 
       yPosition += 3;
@@ -4013,6 +4035,28 @@ export const generatePDF = (formData: FormData) => {
       if (formData.client2FuneralWrittenDown === 'yes') {
         doc.text(`${client2Name} has written down the type of funeral they would like.`, margin, yPosition);
         yPosition += 5;
+
+        if (formData.client2FuneralWishesLocation) {
+          doc.text('Location of written funeral wishes:', margin, yPosition);
+          yPosition += 6;
+
+          const boxHeight = 8;
+          const boxY = yPosition;
+          doc.setDrawColor(0, 0, 0);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, boxY, fieldWidth, boxHeight);
+
+          const field = new doc.AcroFormTextField();
+          field.fieldName = 'client2_funeral_wishes_location';
+          field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+          field.fontSize = 8;
+          field.textColor = [0, 0, 0];
+          field.borderStyle = 'none';
+          field.value = formData.client2FuneralWishesLocation;
+          doc.addField(field);
+
+          yPosition = boxY + boxHeight + 8;
+        }
       }
 
       yPosition += 3;

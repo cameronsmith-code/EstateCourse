@@ -1088,6 +1088,9 @@ export default function StepForm({
                 if (question.key === 'client1PoaPersonalCareCount' && answers['client1HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1PoaPersonalCareHasDocCopy' && answers['client1HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client1HasPoaProperty' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }

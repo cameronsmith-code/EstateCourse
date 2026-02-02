@@ -1055,6 +1055,9 @@ export default function StepForm({
                 if (question.key === 'client1SecondaryWillLocation' && answers['client1HasSecondaryWill'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1SecondaryWillJurisdiction' && answers['client1HasSecondaryWill'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client2HasWill' && !hasSpouse) {
                   return null;
                 }
@@ -1065,6 +1068,9 @@ export default function StepForm({
                   return null;
                 }
                 if (question.key === 'client2SecondaryWillLocation' && answers['client2HasSecondaryWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2SecondaryWillJurisdiction' && answers['client2HasSecondaryWill'] !== 'yes') {
                   return null;
                 }
                 if (question.key === 'client2UsesAccountant' && !hasSpouse) {
@@ -1183,11 +1189,17 @@ export default function StepForm({
                 if (question.key === 'client1WillLocation') {
                   customLabel = `${client1Name}, where is the Will located?`;
                 }
+                if (question.key === 'client1SecondaryWillJurisdiction') {
+                  customLabel = `In what jurisdiction was ${client1Name}'s secondary Will prepared?`;
+                }
                 if (question.key === 'client2HasWill') {
                   customLabel = `Does ${client2Name} have a Will?`;
                 }
                 if (question.key === 'client2WillLocation') {
                   customLabel = `${client2Name}, where is the Will located?`;
+                }
+                if (question.key === 'client2SecondaryWillJurisdiction') {
+                  customLabel = `In what jurisdiction was ${client2Name}'s secondary Will prepared?`;
                 }
                 if (question.key === 'client1UsesAccountant') {
                   customLabel = `Do you (${client1Name}) use a professional accountant?`;

@@ -82,11 +82,13 @@ interface FormData {
   client1WillLocation?: string;
   client1HasSecondaryWill?: string;
   client1SecondaryWillLocation?: string;
+  client1SecondaryWillJurisdiction?: string;
   client2HasWill?: string;
   client2WillJurisdiction?: string;
   client2WillLocation?: string;
   client2HasSecondaryWill?: string;
   client2SecondaryWillLocation?: string;
+  client2SecondaryWillJurisdiction?: string;
   willsSameLawyer?: string;
   spousesPoaPersonalCare?: string;
   spousesPoaProperty?: string;
@@ -2308,6 +2310,13 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
     }
 
+    if (formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillJurisdiction) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client1Name}'s secondary Will was prepared in ${formData.client1SecondaryWillJurisdiction}.`, margin, yPosition);
+      yPosition += 6;
+    }
+
     if (formData.client2HasWill === 'yes' && formData.client2WillJurisdiction && hasSpouse) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
@@ -2326,6 +2335,13 @@ export const generatePDF = (formData: FormData) => {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
       doc.text(`${client2Name} has a secondary Will, and it is located: ${formData.client2SecondaryWillLocation}`, margin, yPosition);
+      yPosition += 6;
+    }
+
+    if (formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillJurisdiction && hasSpouse) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client2Name}'s secondary Will was prepared in ${formData.client2SecondaryWillJurisdiction}.`, margin, yPosition);
       yPosition += 6;
     }
 

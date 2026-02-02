@@ -1049,10 +1049,22 @@ export default function StepForm({
                 if (question.key === 'client1WillLocation' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1HasSecondaryWill' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1SecondaryWillLocation' && answers['client1HasSecondaryWill'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client2HasWill' && !hasSpouse) {
                   return null;
                 }
                 if (question.key === 'client2WillLocation' && (answers['client2HasWill'] !== 'yes' || !hasSpouse)) {
+                  return null;
+                }
+                if (question.key === 'client2HasSecondaryWill' && (answers['client2HasWill'] !== 'yes' || !hasSpouse)) {
+                  return null;
+                }
+                if (question.key === 'client2SecondaryWillLocation' && answers['client2HasSecondaryWill'] !== 'yes') {
                   return null;
                 }
                 if (question.key === 'client2UsesAccountant' && !hasSpouse) {

@@ -1145,10 +1145,28 @@ export default function StepForm({
                 if (question.key === 'client1FuneralArrangementsLocation' && answers['client1HasFuneralArrangements'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1HasCommunicatedFuneralWishes' && answers['client1HasFuneralArrangements'] !== 'no') {
+                  return null;
+                }
+                if (question.key === 'client1FuneralPreferencesWritten' && answers['client1HasCommunicatedFuneralWishes'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1FuneralPreferencesLocation' && answers['client1FuneralPreferencesWritten'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client2HasFuneralArrangements' && !hasSpouse) {
                   return null;
                 }
                 if (question.key === 'client2FuneralArrangementsLocation' && (!hasSpouse || answers['client2HasFuneralArrangements'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2HasCommunicatedFuneralWishes' && (!hasSpouse || answers['client2HasFuneralArrangements'] !== 'no')) {
+                  return null;
+                }
+                if (question.key === 'client2FuneralPreferencesWritten' && (!hasSpouse || answers['client2HasCommunicatedFuneralWishes'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2FuneralPreferencesLocation' && (!hasSpouse || answers['client2FuneralPreferencesWritten'] !== 'yes')) {
                   return null;
                 }
                 if (question.key === 'client1AccountingRecordsLocation' && answers['client1UsesAccountant'] !== 'no') {

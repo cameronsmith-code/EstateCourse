@@ -524,7 +524,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.client1EstateTrusteeHasWillCopy === 'no',
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1EstateTrusteeHasWillCopy === 'no',
       },
       {
         key: 'client2HasPoaPersonalCare',
@@ -644,7 +644,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.client2EstateTrusteeHasWillCopy === 'no',
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2EstateTrusteeHasWillCopy === 'no',
       },
       {
         key: 'client1HasFuneralArrangements',

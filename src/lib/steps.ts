@@ -484,28 +484,6 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
-        key: 'client1EstateTrusteeHasWillCopy',
-        label: 'Do the named Estate Trustees have a copy of your most recent Will in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
-        key: 'client1EstateTrusteeKnowsWillLocation',
-        label: 'Do your Estate Trustees know where to find a copy of your Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1EstateTrusteeHasWillCopy === 'no',
-      },
-      {
         key: 'client2HasPoaPersonalCare',
         label: 'Has your spouse named a Power of Attorney(ies) for Personal Care?',
         type: 'radio',
@@ -583,28 +561,6 @@ export const STEPS: Step[] = [
           { value: '5', label: '5' },
         ],
         required: false,
-      },
-      {
-        key: 'client2EstateTrusteeHasWillCopy',
-        label: 'Do the named Estate Trustees have a copy of your spouse\'s most recent Will in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
-      },
-      {
-        key: 'client2EstateTrusteeKnowsWillLocation',
-        label: 'Do your spouse\'s Estate Trustees know where to find a copy of their Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2EstateTrusteeHasWillCopy === 'no',
       },
       {
         key: 'client1HasFuneralArrangements',

@@ -607,7 +607,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter location',
         required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasDiscussedFuneral === 'yes' && formData.client1FuneralWrittenDown === 'yes',
+        condition: (formData: Record<string, string>) => formData.client1FuneralWrittenDown === 'yes',
       },
       {
         key: 'client2HasWill',
@@ -709,7 +709,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter location',
         required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasDiscussedFuneral === 'yes' && formData.client2FuneralWrittenDown === 'yes',
+        condition: (formData: Record<string, string>) => formData.client2FuneralWrittenDown === 'yes',
       },
       {
         key: 'client1UsesAccountant',

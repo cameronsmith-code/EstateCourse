@@ -592,7 +592,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1FuneralWrittenDown',
-        label: 'Is this written down?',
+        label: 'Have you written your desired funeral arrangements down anywhere?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -694,7 +694,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2FuneralWrittenDown',
-        label: 'Is this written down anywhere?',
+        label: 'Have you written your desired funeral arrangements down anywhere?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -705,7 +705,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2FuneralDocLocation',
-        label: 'Where is this document stored?',
+        label: 'Where is this document located?',
         type: 'text',
         placeholder: 'Enter location',
         required: false,

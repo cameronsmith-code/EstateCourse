@@ -161,10 +161,8 @@ interface FormData {
   }>;
   client1PoaPersonalCareDocLocation?: string;
   client1PoaPersonalCareJurisdiction?: string;
-  client1EstateTrusteeHasWillCopy?: string;
-  client2EstateTrusteeHasWillCopy?: string;
-  client1EstateTrusteeKnowsWillLocation?: string;
-  client2EstateTrusteeKnowsWillLocation?: string;
+  client1EstateTrusteesKnowWillLocation?: string;
+  client2EstateTrusteesKnowWillLocation?: string;
   client1HasLivingWill?: string;
   client2HasLivingWill?: string;
   bankingStructure?: string;
@@ -3612,7 +3610,7 @@ export const generatePDF = (formData: FormData) => {
 
     const clientName = formData.fullName || 'The client';
 
-    if (formData.client1EstateTrusteeHasWillCopy === 'yes') {
+    if (formData.client1EstateTrusteesKnowWillLocation === 'yes') {
       if (yPosition > 260) {
         doc.addPage();
         yPosition = 12;
@@ -3620,23 +3618,11 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      const willCopyText = `${clientName} indicated that their chosen Estate Trustee(s) have a copy of their Will on file.`;
-      const willCopyLines = doc.splitTextToSize(willCopyText, fieldWidth);
-      doc.text(willCopyLines, margin, yPosition);
-      yPosition += willCopyLines.length * 5 + 5;
-    } else if (formData.client1EstateTrusteeKnowsWillLocation === 'yes') {
-      if (yPosition > 260) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'normal');
-      const knowsLocationText = `${clientName} indicated that their Estate Trustees know where to find/access the most recent copy of their Will.`;
+      const knowsLocationText = `${clientName} indicated that their Estate Trustees know where to locate their Will.`;
       const knowsLocationLines = doc.splitTextToSize(knowsLocationText, fieldWidth);
       doc.text(knowsLocationLines, margin, yPosition);
       yPosition += knowsLocationLines.length * 5 + 5;
-    } else if (formData.client1EstateTrusteeKnowsWillLocation === 'no') {
+    } else if (formData.client1EstateTrusteesKnowWillLocation === 'no') {
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 12;
@@ -3755,21 +3741,7 @@ export const generatePDF = (formData: FormData) => {
 
     yPosition = etTableY + 10;
 
-    if (formData.client2EstateTrusteeHasWillCopy === 'yes') {
-      if (yPosition > 260) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'normal');
-      const docCopyText = `${client2Name} indicated that the Estate Trustees have a copy of the most recent Will in their files.`;
-      const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
-      doc.text(docCopyLines, margin, yPosition);
-      yPosition += docCopyLines.length * 5 + 5;
-    }
-
-    if (formData.client2EstateTrusteeKnowsWillLocation === 'yes') {
+    if (formData.client2EstateTrusteesKnowWillLocation === 'yes') {
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 12;
@@ -3777,11 +3749,11 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      const knowsLocationText = `${client2Name} indicated that their Estate Trustees know where to find/access the most recent copy of their Will.`;
+      const knowsLocationText = `${client2Name} indicated that their Estate Trustees know where to locate their Will.`;
       const knowsLocationLines = doc.splitTextToSize(knowsLocationText, fieldWidth);
       doc.text(knowsLocationLines, margin, yPosition);
       yPosition += knowsLocationLines.length * 5 + 5;
-    } else if (formData.client2EstateTrusteeKnowsWillLocation === 'no') {
+    } else if (formData.client2EstateTrusteesKnowWillLocation === 'no') {
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 12;

@@ -484,6 +484,17 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client1EstateTrusteesKnowWillLocation',
+        label: 'Do they know where to locate your Will?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
         key: 'client2HasPoaPersonalCare',
         label: 'Has your spouse named a Power of Attorney(ies) for Personal Care?',
         type: 'radio',
@@ -561,6 +572,17 @@ export const STEPS: Step[] = [
           { value: '5', label: '5' },
         ],
         required: false,
+      },
+      {
+        key: 'client2EstateTrusteesKnowWillLocation',
+        label: 'Do they know where to locate your spouse\'s Will?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
       },
       {
         key: 'client1HasFuneralArrangements',

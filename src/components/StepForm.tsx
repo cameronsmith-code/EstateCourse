@@ -1097,9 +1097,6 @@ export default function StepForm({
                 if (question.key === 'client1PoaPersonalCareDocLocation' && answers['client1HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'client1PoaPersonalCareHasDocCopy' && answers['client1HasPoaPersonalCare'] !== 'yes') {
-                  return null;
-                }
                 if (question.key === 'client1PoaPersonalCareJurisdiction' && answers['client1HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
@@ -1127,16 +1124,10 @@ export default function StepForm({
                 if (question.key === 'client2PoaPersonalCareCount' && answers['client2HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'client2PoaPersonalCareHasDocCopy' && answers['client2HasPoaPersonalCare'] !== 'yes') {
-                  return null;
-                }
                 if (question.key === 'client2HasPoaProperty' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
                   return null;
                 }
                 if (question.key === 'client2PoaPropertyCount' && answers['client2HasPoaProperty'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client2PoaPropertyHasDocCopy' && answers['client2HasPoaProperty'] !== 'yes') {
                   return null;
                 }
                 if (question.key === 'client2HasEstateTrustee' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
@@ -1275,9 +1266,6 @@ export default function StepForm({
                 if (question.key === 'client1PoaPersonalCareDocLocation') {
                   customLabel = `${client1Name}, where is your copy of the Power of Attorney for Personal Care document located?`;
                 }
-                if (question.key === 'client1PoaPersonalCareHasDocCopy') {
-                  customLabel = `${client1Name}, does the Power(s) of Attorney(ies) named above have a copy of your Power of Attorney for Personal Care?`;
-                }
                 if (question.key === 'client1PoaPersonalCareJurisdiction') {
                   customLabel = `${client1Name}, in what jurisdiction was the Power of Attorney for Personal Care document prepared?`;
                 }
@@ -1303,9 +1291,6 @@ export default function StepForm({
                 }
                 if (question.key === 'client1HasLivingWill') {
                   customLabel = `${client1Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;
-                }
-                if (question.key === 'client1PoaPropertyHasDocCopy') {
-                  customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
                 }
                 if (question.key === 'client1EstateTrusteeHasDocCopy') {
                   customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
@@ -1344,14 +1329,8 @@ export default function StepForm({
                 if (question.key === 'client2EstateTrusteeCount') {
                   customLabel = `${client2Name}, how many Estate Trustees have you named?`;
                 }
-                if (question.key === 'client2PoaPersonalCareHasDocCopy') {
-                  customLabel = `${client2Name}, do they have a copy of the most recent document in their files?`;
-                }
                 if (question.key === 'client2HasLivingWill') {
                   customLabel = `${client2Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;
-                }
-                if (question.key === 'client2PoaPropertyHasDocCopy') {
-                  customLabel = `${client2Name}, do they have a copy of the most recent document in their files?`;
                 }
                 if (question.key === 'client2EstateTrusteeHasWillCopy') {
                   customLabel = `${client2Name}, do the named Estate Trustees have a copy of your most recent Will in their files?`;

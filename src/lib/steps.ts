@@ -431,17 +431,6 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
       },
       {
-        key: 'client1PoaPersonalCareHasDocCopy',
-        label: 'Does the Power(s) of Attorney(ies) named above have a copy of your Power of Attorney for Personal Care?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
-      },
-      {
         key: 'client1PoaPersonalCareJurisdiction',
         label: 'In what jurisdiction was the Power of Attorney for Personal Care document prepared?',
         type: 'text',
@@ -470,17 +459,6 @@ export const STEPS: Step[] = [
           { value: '5', label: '5' },
         ],
         required: false,
-      },
-      {
-        key: 'client1PoaPropertyHasDocCopy',
-        label: 'Do your Powers of Attorney for Property have a copy of the most recent document in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasPoaProperty === 'yes',
       },
       {
         key: 'client1HasEstateTrustee',
@@ -560,16 +538,6 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
-        key: 'client2PoaPersonalCareHasDocCopy',
-        label: 'Do they have a copy of the most recent document in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
         key: 'client2HasPoaProperty',
         label: 'Has your spouse named a Power of Attorney(ies) for Property?',
         type: 'radio',
@@ -589,16 +557,6 @@ export const STEPS: Step[] = [
           { value: '3', label: '3' },
           { value: '4', label: '4' },
           { value: '5', label: '5' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2PoaPropertyHasDocCopy',
-        label: 'Do they have a copy of the most recent document in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
         ],
         required: false,
       },

@@ -259,7 +259,13 @@ interface FormData {
     otherOwners?: string;
   }>;
   client1HasFuneralArrangements?: string;
+  client1HasCommunicatedFuneralWishes?: string;
+  client1FuneralPreferencesWritten?: string;
+  client1FuneralPreferencesLocation?: string;
   client2HasFuneralArrangements?: string;
+  client2HasCommunicatedFuneralWishes?: string;
+  client2FuneralPreferencesWritten?: string;
+  client2FuneralPreferencesLocation?: string;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -3907,7 +3913,13 @@ export const generatePDF = (formData: FormData) => {
   // Funeral Arrangements Section
   const showFuneralSection =
     formData.client1HasFuneralArrangements === 'yes' ||
-    formData.client2HasFuneralArrangements === 'yes';
+    formData.client1HasCommunicatedFuneralWishes === 'no' ||
+    formData.client1FuneralPreferencesWritten === 'no' ||
+    formData.client1FuneralPreferencesLocation ||
+    formData.client2HasFuneralArrangements === 'yes' ||
+    formData.client2HasCommunicatedFuneralWishes === 'no' ||
+    formData.client2FuneralPreferencesWritten === 'no' ||
+    formData.client2FuneralPreferencesLocation;
 
   if (showFuneralSection) {
     if (yPosition > 210) {
@@ -3924,33 +3936,96 @@ export const generatePDF = (formData: FormData) => {
     if (formData.client1HasFuneralArrangements === 'yes') {
       doc.setFontSize(9);
 
-      if (formData.client1HasFuneralArrangements === 'yes') {
-        doc.text(`${client1Name} has made arrangements for Funeral and Cemetery services.`, margin, yPosition);
-        yPosition += 5;
+      doc.text(`${client1Name} has made arrangements for Funeral and Cemetery services.`, margin, yPosition);
+      yPosition += 5;
 
-        doc.text('Document located at:', margin, yPosition);
-        yPosition += 6;
+      doc.text('Document located at:', margin, yPosition);
+      yPosition += 6;
 
-        const boxHeight = 8;
-        const boxY = yPosition;
-        doc.setDrawColor(0, 0, 0);
-        doc.setLineWidth(0.5);
-        doc.rect(margin, boxY, fieldWidth, boxHeight);
+      const boxHeight = 8;
+      const boxY = yPosition;
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, boxY, fieldWidth, boxHeight);
 
-        const field = new doc.AcroFormTextField();
-        field.fieldName = 'client1_funeral_arrangements_location';
-        field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
-        field.fontSize = 8;
-        field.textColor = [0, 0, 0];
-        field.borderStyle = 'none';
-        if (formData.client1FuneralArrangementsLocation) {
-          field.value = formData.client1FuneralArrangementsLocation;
-        }
-        doc.addField(field);
+      const field = new doc.AcroFormTextField();
+      field.fieldName = 'client1_funeral_arrangements_location';
+      field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+      field.fontSize = 8;
+      field.textColor = [0, 0, 0];
+      field.borderStyle = 'none';
+      if (formData.client1FuneralArrangementsLocation) {
+        field.value = formData.client1FuneralArrangementsLocation;
+      }
+      doc.addField(field);
 
-        yPosition = boxY + boxHeight + 8;
+      yPosition = boxY + boxHeight + 8;
+    }
+
+    if (formData.client1HasCommunicatedFuneralWishes === 'no') {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
       }
 
+      doc.setFontSize(9);
+      const actionText = `${client1Name}, if you have preferences related to the type funeral that you would like, it is best to communicate those wishes, in writing to your loved ones and Estate Trustee.`;
+      const wrappedActionText = doc.splitTextToSize(actionText, fieldWidth);
+      wrappedActionText.forEach((line: string) => {
+        doc.text(line, margin, yPosition);
+        yPosition += 4.5;
+      });
+      yPosition += 6;
+    }
+
+    if (formData.client1FuneralPreferencesWritten === 'no') {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      const actionText = `${client1Name}, consider writing out your preferences on funeral arrangements and share with your loved ones and Estate Trustee(s) to help guide them.`;
+      const wrappedActionText = doc.splitTextToSize(actionText, fieldWidth);
+      wrappedActionText.forEach((line: string) => {
+        doc.text(line, margin, yPosition);
+        yPosition += 4.5;
+      });
+      yPosition += 6;
+    }
+
+    if (formData.client1FuneralPreferencesLocation) {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.text(`${client1Name} has written down funeral preferences.`, margin, yPosition);
+      yPosition += 5;
+
+      doc.text('Location of written funeral preferences:', margin, yPosition);
+      yPosition += 6;
+
+      const boxHeight = 8;
+      const boxY = yPosition;
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, boxY, fieldWidth, boxHeight);
+
+      const field = new doc.AcroFormTextField();
+      field.fieldName = 'client1_funeral_preferences_location';
+      field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+      field.fontSize = 8;
+      field.textColor = [0, 0, 0];
+      field.borderStyle = 'none';
+      field.value = formData.client1FuneralPreferencesLocation;
+      doc.addField(field);
+
+      yPosition = boxY + boxHeight + 8;
+    }
+
+    if (formData.client1HasFuneralArrangements || formData.client1HasCommunicatedFuneralWishes || formData.client1FuneralPreferencesWritten || formData.client1FuneralPreferencesLocation) {
       yPosition += 3;
     }
 
@@ -3962,33 +4037,96 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(9);
 
-      if (formData.client2HasFuneralArrangements === 'yes') {
-        doc.text(`${client2Name} has made arrangements for Funeral and Cemetery services.`, margin, yPosition);
-        yPosition += 5;
+      doc.text(`${client2Name} has made arrangements for Funeral and Cemetery services.`, margin, yPosition);
+      yPosition += 5;
 
-        doc.text('Document located at:', margin, yPosition);
-        yPosition += 6;
+      doc.text('Document located at:', margin, yPosition);
+      yPosition += 6;
 
-        const boxHeight = 8;
-        const boxY = yPosition;
-        doc.setDrawColor(0, 0, 0);
-        doc.setLineWidth(0.5);
-        doc.rect(margin, boxY, fieldWidth, boxHeight);
+      const boxHeight = 8;
+      const boxY = yPosition;
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, boxY, fieldWidth, boxHeight);
 
-        const field = new doc.AcroFormTextField();
-        field.fieldName = 'client2_funeral_arrangements_location';
-        field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
-        field.fontSize = 8;
-        field.textColor = [0, 0, 0];
-        field.borderStyle = 'none';
-        if (formData.client2FuneralArrangementsLocation) {
-          field.value = formData.client2FuneralArrangementsLocation;
-        }
-        doc.addField(field);
+      const field = new doc.AcroFormTextField();
+      field.fieldName = 'client2_funeral_arrangements_location';
+      field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+      field.fontSize = 8;
+      field.textColor = [0, 0, 0];
+      field.borderStyle = 'none';
+      if (formData.client2FuneralArrangementsLocation) {
+        field.value = formData.client2FuneralArrangementsLocation;
+      }
+      doc.addField(field);
 
-        yPosition = boxY + boxHeight + 8;
+      yPosition = boxY + boxHeight + 8;
+    }
+
+    if (formData.client2HasCommunicatedFuneralWishes === 'no' && hasSpouse) {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
       }
 
+      doc.setFontSize(9);
+      const actionText = `${client2Name}, if you have preferences related to the type funeral that you would like, it is best to communicate those wishes, in writing to your loved ones and Estate Trustee.`;
+      const wrappedActionText = doc.splitTextToSize(actionText, fieldWidth);
+      wrappedActionText.forEach((line: string) => {
+        doc.text(line, margin, yPosition);
+        yPosition += 4.5;
+      });
+      yPosition += 6;
+    }
+
+    if (formData.client2FuneralPreferencesWritten === 'no' && hasSpouse) {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      const actionText = `${client2Name}, consider writing out your preferences on funeral arrangements and share with your loved ones and Estate Trustee(s) to help guide them.`;
+      const wrappedActionText = doc.splitTextToSize(actionText, fieldWidth);
+      wrappedActionText.forEach((line: string) => {
+        doc.text(line, margin, yPosition);
+        yPosition += 4.5;
+      });
+      yPosition += 6;
+    }
+
+    if (formData.client2FuneralPreferencesLocation && hasSpouse) {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.text(`${client2Name} has written down funeral preferences.`, margin, yPosition);
+      yPosition += 5;
+
+      doc.text('Location of written funeral preferences:', margin, yPosition);
+      yPosition += 6;
+
+      const boxHeight = 8;
+      const boxY = yPosition;
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, boxY, fieldWidth, boxHeight);
+
+      const field = new doc.AcroFormTextField();
+      field.fieldName = 'client2_funeral_preferences_location';
+      field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
+      field.fontSize = 8;
+      field.textColor = [0, 0, 0];
+      field.borderStyle = 'none';
+      field.value = formData.client2FuneralPreferencesLocation;
+      doc.addField(field);
+
+      yPosition = boxY + boxHeight + 8;
+    }
+
+    if (hasSpouse && (formData.client2HasFuneralArrangements || formData.client2HasCommunicatedFuneralWishes || formData.client2FuneralPreferencesWritten || formData.client2FuneralPreferencesLocation)) {
       yPosition += 3;
     }
   }

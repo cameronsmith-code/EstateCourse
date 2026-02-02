@@ -1210,11 +1210,29 @@ export default function StepForm({
                 if (question.key === 'client1FuneralArrangementsLocation') {
                   customLabel = `Where is this document located?`;
                 }
+                if (question.key === 'client1HasCommunicatedFuneralWishes') {
+                  customLabel = `${client1Name}, have you communicated to your loved ones what type of funeral you would like to have?`;
+                }
+                if (question.key === 'client1FuneralPreferencesWritten') {
+                  customLabel = `Are your preferences around funeral arrangements written down somewhere?`;
+                }
+                if (question.key === 'client1FuneralPreferencesLocation') {
+                  customLabel = `Where are your written preferred funeral wishes kept?`;
+                }
                 if (question.key === 'client2HasFuneralArrangements') {
                   customLabel = `${client2Name}, have you made arrangements for Funeral or Cemetery services?`;
                 }
                 if (question.key === 'client2FuneralArrangementsLocation') {
                   customLabel = `Where is this document located?`;
+                }
+                if (question.key === 'client2HasCommunicatedFuneralWishes') {
+                  customLabel = `${client2Name}, have you communicated to your loved ones what type of funeral you would like to have?`;
+                }
+                if (question.key === 'client2FuneralPreferencesWritten') {
+                  customLabel = `Are your preferences around funeral arrangements written down somewhere?`;
+                }
+                if (question.key === 'client2FuneralPreferencesLocation') {
+                  customLabel = `Where are your written preferred funeral wishes kept?`;
                 }
                 if (question.key === 'client1HasPoaPersonalCare') {
                   if (answers['spousesPoaPersonalCare'] === 'yes') {

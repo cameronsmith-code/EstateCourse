@@ -397,13 +397,14 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1PoaPersonalCareHasDocCopy',
-        label: 'Do they have a copy of the most recent document in their files?',
+        label: 'Do your Powers of Attorney for Personal Care have a copy of the most recent document in their files?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
       },
       {
         key: 'client1HasPoaProperty',
@@ -430,13 +431,14 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1PoaPropertyHasDocCopy',
-        label: 'Do they have a copy of the most recent document in their files?',
+        label: 'Do your Powers of Attorney for Property have a copy of the most recent document in their files?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasPoaProperty === 'yes',
       },
       {
         key: 'client1HasEstateTrustee',

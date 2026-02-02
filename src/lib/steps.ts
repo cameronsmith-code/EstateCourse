@@ -384,7 +384,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1HasPoaPersonalCare',
-        label: 'Have you named a Power of Attorney(ies) for Personal Care in your Will?',
+        label: 'Have you named a Power of Attorney(ies) for Personal Care?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -428,7 +428,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1HasPoaProperty',
-        label: 'Have you named a Power of Attorney(ies) for Property in your Will?',
+        label: 'Have you named a Power of Attorney(ies) for Property?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -506,7 +506,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2HasPoaPersonalCare',
-        label: 'Has your spouse named a Power of Attorney(ies) for Personal Care in their Will?',
+        label: 'Has your spouse named a Power of Attorney(ies) for Personal Care?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -549,7 +549,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2HasPoaProperty',
-        label: 'Has your spouse named a Power of Attorney(ies) for Property in their Will?',
+        label: 'Has your spouse named a Power of Attorney(ies) for Property?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },

@@ -424,17 +424,6 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
-        key: 'client1PoaPersonalCareHasDocCopy',
-        label: 'Do your Powers of Attorney for Personal Care have a copy of the most recent document in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
-      },
-      {
         key: 'client1HasPoaProperty',
         label: 'Have you named a Power of Attorney(ies) for Property?',
         type: 'radio',

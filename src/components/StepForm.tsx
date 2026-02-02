@@ -1094,9 +1094,6 @@ export default function StepForm({
                 if (question.key === 'client1PoaPersonalCareCount' && answers['client1HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'client1PoaPersonalCareHasDocCopy' && answers['client1HasPoaPersonalCare'] !== 'yes') {
-                  return null;
-                }
                 if (question.key === 'client1HasPoaProperty' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }
@@ -1285,9 +1282,6 @@ export default function StepForm({
                 }
                 if (question.key === 'client1EstateTrusteeCount') {
                   customLabel = `${client1Name}, how many Estate Trustees have you named?`;
-                }
-                if (question.key === 'client1PoaPersonalCareHasDocCopy') {
-                  customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
                 }
                 if (question.key === 'client1HasLivingWill') {
                   customLabel = `${client1Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;

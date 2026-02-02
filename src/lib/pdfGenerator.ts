@@ -259,11 +259,7 @@ interface FormData {
     otherOwners?: string;
   }>;
   client1HasFuneralArrangements?: string;
-  client1HasDiscussedFuneral?: string;
-  client1FuneralWrittenDown?: string;
   client2HasFuneralArrangements?: string;
-  client2HasDiscussedFuneral?: string;
-  client2FuneralWrittenDown?: string;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -3911,9 +3907,7 @@ export const generatePDF = (formData: FormData) => {
   // Funeral Arrangements Section
   const showFuneralSection =
     formData.client1HasFuneralArrangements === 'yes' ||
-    formData.client1HasDiscussedFuneral === 'yes' ||
-    formData.client2HasFuneralArrangements === 'yes' ||
-    formData.client2HasDiscussedFuneral === 'yes';
+    formData.client2HasFuneralArrangements === 'yes';
 
   if (showFuneralSection) {
     if (yPosition > 210) {
@@ -3927,7 +3921,7 @@ export const generatePDF = (formData: FormData) => {
     doc.setFont(undefined, 'normal');
     yPosition += 8;
 
-    if (formData.client1HasFuneralArrangements === 'yes' || formData.client1HasDiscussedFuneral === 'yes') {
+    if (formData.client1HasFuneralArrangements === 'yes') {
       doc.setFontSize(9);
 
       if (formData.client1HasFuneralArrangements === 'yes') {
@@ -3957,42 +3951,10 @@ export const generatePDF = (formData: FormData) => {
         yPosition = boxY + boxHeight + 8;
       }
 
-      if (formData.client1HasDiscussedFuneral === 'yes') {
-        doc.text(`${client1Name} has discussed the type of funeral they would like.`, margin, yPosition);
-        yPosition += 5;
-      }
-
-      if (formData.client1FuneralWrittenDown === 'yes') {
-        doc.text(`${client1Name} has written down the type of funeral they would like.`, margin, yPosition);
-        yPosition += 5;
-
-        if (formData.client1FuneralWishesLocation) {
-          doc.text('Location of written funeral wishes:', margin, yPosition);
-          yPosition += 6;
-
-          const boxHeight = 8;
-          const boxY = yPosition;
-          doc.setDrawColor(0, 0, 0);
-          doc.setLineWidth(0.5);
-          doc.rect(margin, boxY, fieldWidth, boxHeight);
-
-          const field = new doc.AcroFormTextField();
-          field.fieldName = 'client1_funeral_wishes_location';
-          field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
-          field.fontSize = 8;
-          field.textColor = [0, 0, 0];
-          field.borderStyle = 'none';
-          field.value = formData.client1FuneralWishesLocation;
-          doc.addField(field);
-
-          yPosition = boxY + boxHeight + 8;
-        }
-      }
-
       yPosition += 3;
     }
 
-    if ((formData.client2HasFuneralArrangements === 'yes' || formData.client2HasDiscussedFuneral === 'yes') && hasSpouse) {
+    if (formData.client2HasFuneralArrangements === 'yes' && hasSpouse) {
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 12;
@@ -4027,60 +3989,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition = boxY + boxHeight + 8;
       }
 
-      if (formData.client2HasDiscussedFuneral === 'yes') {
-        doc.text(`${client2Name} has communicated to loved ones what type of funeral they would like to have.`, margin, yPosition);
-        yPosition += 5;
-      }
-
-      if (formData.client2FuneralWrittenDown === 'yes') {
-        doc.text(`${client2Name} has written down the type of funeral they would like.`, margin, yPosition);
-        yPosition += 5;
-
-        if (formData.client2FuneralWishesLocation) {
-          doc.text('Location of written funeral wishes:', margin, yPosition);
-          yPosition += 6;
-
-          const boxHeight = 8;
-          const boxY = yPosition;
-          doc.setDrawColor(0, 0, 0);
-          doc.setLineWidth(0.5);
-          doc.rect(margin, boxY, fieldWidth, boxHeight);
-
-          const field = new doc.AcroFormTextField();
-          field.fieldName = 'client2_funeral_wishes_location';
-          field.Rect = [margin + 0.5, boxY + 0.5, fieldWidth - 1, boxHeight - 1];
-          field.fontSize = 8;
-          field.textColor = [0, 0, 0];
-          field.borderStyle = 'none';
-          field.value = formData.client2FuneralWishesLocation;
-          doc.addField(field);
-
-          yPosition = boxY + boxHeight + 8;
-        }
-      }
-
       yPosition += 3;
-
-      if (formData.client2HasDiscussedFuneral === 'no') {
-        if (yPosition > 230) {
-          doc.addPage();
-          yPosition = 12;
-        }
-
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        doc.text('Action Item:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 5;
-
-        const actionText = 'Discuss and document your wishes related to funeral or remembrance to help your loved ones honor you under your terms.';
-        const wrappedActionText = doc.splitTextToSize(actionText, fieldWidth);
-        wrappedActionText.forEach((line: string) => {
-          doc.text(line, margin, yPosition);
-          yPosition += 4.5;
-        });
-        yPosition += 3;
-      }
     }
   }
 

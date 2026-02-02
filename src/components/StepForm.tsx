@@ -1145,25 +1145,10 @@ export default function StepForm({
                 if (question.key === 'client1FuneralArrangementsLocation' && answers['client1HasFuneralArrangements'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'client1FuneralWrittenDown' && answers['client1HasDiscussedFuneral'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client1FuneralDocLocation' && answers['client1FuneralWrittenDown'] !== 'yes') {
-                  return null;
-                }
                 if (question.key === 'client2HasFuneralArrangements' && !hasSpouse) {
                   return null;
                 }
                 if (question.key === 'client2FuneralArrangementsLocation' && (!hasSpouse || answers['client2HasFuneralArrangements'] !== 'yes')) {
-                  return null;
-                }
-                if (question.key === 'client2HasDiscussedFuneral' && !hasSpouse) {
-                  return null;
-                }
-                if (question.key === 'client2FuneralWrittenDown' && (!hasSpouse || answers['client2HasDiscussedFuneral'] !== 'yes')) {
-                  return null;
-                }
-                if (question.key === 'client2FuneralDocLocation' && (!hasSpouse || answers['client2FuneralWrittenDown'] !== 'yes')) {
                   return null;
                 }
                 if (question.key === 'client1AccountingRecordsLocation' && answers['client1UsesAccountant'] !== 'no') {
@@ -1225,29 +1210,11 @@ export default function StepForm({
                 if (question.key === 'client1FuneralArrangementsLocation') {
                   customLabel = `Where is this document located?`;
                 }
-                if (question.key === 'client1HasDiscussedFuneral') {
-                  customLabel = `${client1Name}, have you communicated to your loved ones what type of funeral you would like to have?`;
-                }
-                if (question.key === 'client1FuneralWrittenDown') {
-                  customLabel = `Is this written down anywhere?`;
-                }
-                if (question.key === 'client1FuneralDocLocation') {
-                  customLabel = `Where is this document stored?`;
-                }
                 if (question.key === 'client2HasFuneralArrangements') {
                   customLabel = `${client2Name}, have you made arrangements for Funeral or Cemetery services?`;
                 }
                 if (question.key === 'client2FuneralArrangementsLocation') {
                   customLabel = `Where is this document located?`;
-                }
-                if (question.key === 'client2HasDiscussedFuneral') {
-                  customLabel = `${client2Name}, have you communicated to your loved ones what type of funeral you would like to have?`;
-                }
-                if (question.key === 'client2FuneralWrittenDown') {
-                  customLabel = `Is this written down anywhere?`;
-                }
-                if (question.key === 'client2FuneralDocLocation') {
-                  customLabel = `Where is this document stored?`;
                 }
                 if (question.key === 'client1HasPoaPersonalCare') {
                   if (answers['spousesPoaPersonalCare'] === 'yes') {

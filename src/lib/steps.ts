@@ -581,35 +581,6 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client1HasFuneralArrangements === 'yes',
       },
       {
-        key: 'client1HasDiscussedFuneral',
-        label: 'Have you discussed the type of funeral you would like?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client1FuneralWrittenDown',
-        label: 'Have you written down the type of funeral you would like to have?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasDiscussedFuneral === 'yes',
-      },
-      {
-        key: 'client1FuneralWishesLocation',
-        label: 'What is the location of your written funeral wishes?',
-        type: 'text',
-        placeholder: 'Enter location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1FuneralWrittenDown === 'yes',
-      },
-      {
         key: 'client2HasWill',
         label: 'Does your spouse have a Will?',
         type: 'radio',
@@ -681,35 +652,6 @@ export const STEPS: Step[] = [
         placeholder: 'Enter location',
         required: false,
         condition: (formData: Record<string, string>) => formData.client2HasFuneralArrangements === 'yes',
-      },
-      {
-        key: 'client2HasDiscussedFuneral',
-        label: 'Have you communicated to your loved ones what type of funeral you would like to have?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2FuneralWrittenDown',
-        label: 'Have you written down the type of funeral you would like to have?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasDiscussedFuneral === 'yes',
-      },
-      {
-        key: 'client2FuneralWishesLocation',
-        label: 'What is the location of your written funeral wishes?',
-        type: 'text',
-        placeholder: 'Enter location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2FuneralWrittenDown === 'yes',
       },
       {
         key: 'client1UsesAccountant',

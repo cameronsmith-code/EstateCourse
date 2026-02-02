@@ -1283,9 +1283,9 @@ export default function StepForm({
                 }
                 if (question.key === 'client1HasPoaProperty') {
                   if (answers['spousesPoaProperty'] === 'yes') {
-                    customLabel = `${client1Name}, have you named a contingent Power of Attorney(ies) for Property in your Will?`;
+                    customLabel = `${client1Name}, have you named a contingent Power of Attorney(ies) for Property?`;
                   } else {
-                    customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                    customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Property?`;
                   }
                 }
                 if (question.key === 'client1PoaPropertyCount') {
@@ -1326,9 +1326,9 @@ export default function StepForm({
                 }
                 if (question.key === 'client2HasPoaProperty') {
                   if (answers['spousesPoaProperty'] === 'yes') {
-                    customLabel = `${client2Name}, have you named a contingent Power of Attorney(ies) for Property in your Will?`;
+                    customLabel = `${client2Name}, have you named a contingent Power of Attorney(ies) for Property?`;
                   } else {
-                    customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                    customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Property?`;
                   }
                 }
                 if (question.key === 'client2PoaPropertyCount') {

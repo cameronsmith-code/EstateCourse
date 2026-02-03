@@ -2691,18 +2691,65 @@ export default function StepForm({
                       </div>
 
                       {(childrenData[index]?.parentsOption === 'client1-other' || childrenData[index]?.parentsOption === 'client2-other') && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Other parent's name:
-                          </label>
-                          <input
-                            type="text"
-                            value={childrenData[index]?.otherParentName || ''}
-                            onChange={(e) => handleChildChange(index, 'otherParentName', e.target.value)}
-                            placeholder="Enter other parent's name"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Other parent's name:
+                            </label>
+                            <input
+                              type="text"
+                              value={childrenData[index]?.otherParentName || ''}
+                              onChange={(e) => handleChildChange(index, 'otherParentName', e.target.value)}
+                              placeholder="Enter other parent's name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Are you paying or receiving child support payments related to this child?
+                            </label>
+                            <div className="flex gap-4">
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`childSupport-${index}`}
+                                  value="receiving"
+                                  checked={childrenData[index]?.childSupportStatus === 'receiving'}
+                                  onChange={(e) => handleChildChange(index, 'childSupportStatus', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">Receiving Child Support Payments</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`childSupport-${index}`}
+                                  value="paying"
+                                  checked={childrenData[index]?.childSupportStatus === 'paying'}
+                                  onChange={(e) => handleChildChange(index, 'childSupportStatus', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">Paying Child Support Payments</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {(childrenData[index]?.childSupportStatus === 'receiving' || childrenData[index]?.childSupportStatus === 'paying') && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Where is/are the supporting document related to Child Support Payments located?
+                              </label>
+                              <input
+                                type="text"
+                                value={childrenData[index]?.childSupportDocLocation || ''}
+                                onChange={(e) => handleChildChange(index, 'childSupportDocLocation', e.target.value)}
+                                placeholder="Enter document location"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          )}
+                        </>
                       )}
 
                       <div>

@@ -5,6 +5,8 @@ interface ChildData {
   dateOfBirth?: string;
   parentsOption?: string;
   otherParentName?: string;
+  childSupportStatus?: string;
+  childSupportDocLocation?: string;
   disabled?: string;
   disabilityTaxCredit?: string;
   disabilityNature?: string;
@@ -879,6 +881,33 @@ export const generatePDF = (formData: FormData) => {
         }
       }
 
+      if ((child.parentsOption === 'client1-other' || child.parentsOption === 'client2-other') && child.childSupportStatus) {
+        if (child.childSupportStatus === 'receiving') {
+          doc.text('Child Support Status: Receiving Child Support Payments', margin, yPosition);
+          yPosition += 4;
+        } else if (child.childSupportStatus === 'paying') {
+          doc.text('Child Support Status: Paying Child Support Payments', margin, yPosition);
+          yPosition += 4;
+        }
+
+        if (child.childSupportDocLocation) {
+          doc.setFont(undefined, 'bold');
+          doc.text('Child Support Document Location:', margin, yPosition);
+          doc.setFont(undefined, 'normal');
+          yPosition += 2;
+
+          const childSupportDocField = new doc.AcroFormTextField();
+          childSupportDocField.fieldName = `child${index + 1}_childSupportDocLocation`;
+          childSupportDocField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+          childSupportDocField.fontSize = 9;
+          childSupportDocField.textColor = colors.darkText;
+          childSupportDocField.value = child.childSupportDocLocation || '';
+          doc.addField(childSupportDocField);
+
+          yPosition += 10;
+        }
+      }
+
       doc.text(`Disabled: ${child.disabled === 'yes' ? 'Yes' : child.disabled === 'no' ? 'No' : ''}`, margin, yPosition);
       yPosition += 4;
 
@@ -1526,6 +1555,66 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition += 8;
     });
+
+    const hasChildSupport = childrenToProcess.some(child =>
+      (child.parentsOption === 'client1-other' || child.parentsOption === 'client2-other') &&
+      (child.childSupportStatus === 'receiving' || child.childSupportStatus === 'paying')
+    );
+
+    const hasSpousalSupport =
+      (formData.client1PreviousRelationshipsData?.some(rel => rel.hasSpousalSupport === 'yes')) ||
+      (formData.client2PreviousRelationshipsData?.some(rel => rel.hasSpousalSupport === 'yes'));
+
+    if (hasChildSupport || hasSpousalSupport) {
+      if (yPosition > 150) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(12);
+      doc.text('Additional Reading - Child & Spousal Support Payments After Death', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(9);
+
+      const supportText = [
+        'The existence of legally mandated support payments introduces specific debt and liability claims against',
+        'the estate prior to any distributions to the heirs.',
+        '',
+        '• Child Support: The financial responsibility relating to child support is shared between federal and',
+        '  provincial/territorial governments. Child support obligations are not extinguished by filing for',
+        '  bankruptcy, meaning they the continual financial obligation survives the death of the payor and must',
+        '  be paid by the estate. The responsibility for child support is a shared obligation between the federal',
+        '  and provincial/territorial governments. The executor (or administrator) must ensure that the',
+        '  deceased\'s debts are paid before assets are distributed to heirs. Child support payments are',
+        '  therefore treated as a continuing financial obligation of the estate.',
+        '',
+        '• Spousal Support: is generally intended to ensure the recipient spouse partakes in the payor spouse\'s',
+        '  wealth accumulated during the marriage. Like child support, the spousal support obligation typically',
+        '  continues against the estate, although support payments are sometimes subject to review based on',
+        '  changes in income.',
+        '',
+        '• Dependent Relief Claims: The minor children, and potentially the former spouse (depending on local',
+        '  support rules), qualify as dependants of the deceased. If the stator distribution of the estate under',
+        '  intestacy rules fails to provide adequately for these dependants, they may be able to apply to the',
+        '  courts for relief against the estate. In some provinces, certain assets that pass outside the estate',
+        '  (like insurance proceeds or registered plans with named beneficiaries) may be available to satisfy',
+        '  dependant relief or family law claims.'
+      ];
+
+      supportText.forEach(line => {
+        if (yPosition > 280) {
+          doc.addPage();
+          yPosition = 12;
+        }
+        doc.text(line, margin, yPosition);
+        yPosition += 5;
+      });
+
+      yPosition += 12;
+    }
   }
 
   if (formData.hasFamilyTrust === 'yes') {

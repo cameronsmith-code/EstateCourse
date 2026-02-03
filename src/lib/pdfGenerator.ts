@@ -2619,6 +2619,7 @@ export const generatePDF = (formData: FormData) => {
 
   if (formData.client1HasPoaPersonalCare === 'yes' && formData.client1PoaPersonalCareCount) {
     const poaCount = parseInt(formData.client1PoaPersonalCareCount, 10);
+    const client1Name = formData.fullName || 'Client 1';
 
     if (yPosition > 210) {
       doc.addPage();
@@ -2628,7 +2629,6 @@ export const generatePDF = (formData: FormData) => {
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
     if (formData.spousesPoaPersonalCare === 'yes') {
-      const client1Name = formData.fullName || 'Client 1';
       const client2Name = formData.spouseName || 'Client 2';
       doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
       yPosition += 6;
@@ -2738,7 +2738,7 @@ export const generatePDF = (formData: FormData) => {
 
     doc.setFontSize(9);
     doc.setFont(undefined, 'bold');
-    doc.text('Where is your copy of the Power of Attorney for Personal Care document located?', margin, yPosition);
+    doc.text(`Where is ${client1Name}'s copy of the Power of Attorney for Personal Care document located?`, margin, yPosition);
     yPosition += 6;
 
     doc.setFont(undefined, 'normal');
@@ -2764,7 +2764,7 @@ export const generatePDF = (formData: FormData) => {
 
     doc.setFontSize(9);
     doc.setFont(undefined, 'bold');
-    doc.text('In what jurisdiction was the Power of Attorney for Personal Care document prepared?', margin, yPosition);
+    doc.text(`In what jurisdiction was ${client1Name}'s Power of Attorney for Personal Care document prepared?`, margin, yPosition);
     yPosition += 6;
 
     doc.setFont(undefined, 'normal');
@@ -2946,7 +2946,7 @@ export const generatePDF = (formData: FormData) => {
 
     doc.setFontSize(9);
     doc.setFont(undefined, 'bold');
-    doc.text('In what jurisdiction was the Power of Attorney for Personal Care document prepared?', margin, yPosition);
+    doc.text(`In what jurisdiction was ${client2Name}'s Power of Attorney for Personal Care document prepared?`, margin, yPosition);
     yPosition += 6;
 
     doc.setFont(undefined, 'normal');

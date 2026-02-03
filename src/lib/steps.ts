@@ -1476,4 +1476,59 @@ export const STEPS: Step[] = [
       },
     ],
   },
+  {
+    id: 12,
+    title: 'Professional Association Insurance',
+    description: 'Insurance coverage through professional associations or alumni groups',
+    questions: [
+      {
+        key: 'client1HasProfessionalAssociationInsurance',
+        label: 'Do you have any insurance coverage through professional associations or alumni groups?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1ProfessionalAssociationDescription',
+        label: 'Describe the association or group.',
+        type: 'text',
+        placeholder: 'Enter association or group description',
+        required: false,
+      },
+      {
+        key: 'client1ProfessionalAssociationDocLocation',
+        label: 'Where is the document for insurance through a professional association or group located?',
+        type: 'text',
+        placeholder: 'Enter document location',
+        required: false,
+      },
+      {
+        key: 'client2HasProfessionalAssociationInsurance',
+        label: 'Do you have any insurance coverage through professional associations or alumni groups?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2ProfessionalAssociationDescription',
+        label: 'Describe the association or group.',
+        type: 'text',
+        placeholder: 'Enter association or group description',
+        required: false,
+      },
+      {
+        key: 'client2ProfessionalAssociationDocLocation',
+        label: 'Where is the document for insurance through a professional association or group located?',
+        type: 'text',
+        placeholder: 'Enter document location',
+        required: false,
+      },
+    ],
+  },
 ];

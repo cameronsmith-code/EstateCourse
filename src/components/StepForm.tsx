@@ -3502,6 +3502,57 @@ export default function StepForm({
             );
           })()}
 
+          {step.id === 12 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+            const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
+            const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
+
+            return (
+              <>
+                {step.questions.map((question) => {
+                  // Hide client 2 questions if no spouse
+                  if (question.key.startsWith('client2') && !hasSpouse) {
+                    return null;
+                  }
+
+                  // Hide client 1 follow-up questions if they answered no
+                  if (question.key === 'client1ProfessionalAssociationDescription' && answers['client1HasProfessionalAssociationInsurance'] !== 'yes') {
+                    return null;
+                  }
+                  if (question.key === 'client1ProfessionalAssociationDocLocation' && answers['client1HasProfessionalAssociationInsurance'] !== 'yes') {
+                    return null;
+                  }
+
+                  // Hide client 2 follow-up questions if they answered no or no spouse
+                  if (question.key === 'client2ProfessionalAssociationDescription' && (answers['client2HasProfessionalAssociationInsurance'] !== 'yes' || !hasSpouse)) {
+                    return null;
+                  }
+                  if (question.key === 'client2ProfessionalAssociationDocLocation' && (answers['client2HasProfessionalAssociationInsurance'] !== 'yes' || !hasSpouse)) {
+                    return null;
+                  }
+
+                  let customLabel = question.label;
+                  if (question.key === 'client1HasProfessionalAssociationInsurance') {
+                    customLabel = `${client1Name}, do you have any insurance coverage through professional associations or alumni groups?`;
+                  }
+                  if (question.key === 'client2HasProfessionalAssociationInsurance') {
+                    customLabel = `${client2Name}, do you have any insurance coverage through professional associations or alumni groups?`;
+                  }
+
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={{ ...question, label: customLabel }}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  );
+                })}
+              </>
+            );
+          })()}
+
           {step.id === 8 && (
             <>
               {step.questions.map((question) => (

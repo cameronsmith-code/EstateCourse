@@ -285,6 +285,12 @@ interface FormData {
   additionalVehicle9DocLocation?: string;
   additionalVehicle10Description?: string;
   additionalVehicle10DocLocation?: string;
+  client1HasProfessionalAssociationInsurance?: string;
+  client1ProfessionalAssociationDescription?: string;
+  client1ProfessionalAssociationDocLocation?: string;
+  client2HasProfessionalAssociationInsurance?: string;
+  client2ProfessionalAssociationDescription?: string;
+  client2ProfessionalAssociationDocLocation?: string;
   hasCorporation?: string;
   corporationCount?: string;
   ownsCorporation?: string;
@@ -7913,6 +7919,130 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 15;
   }
 
+  // Professional Association Insurance Section
+  const generateProfessionalAssociationChart = (clientName: string, description?: string, docLocation?: string) => {
+    if (yPosition > 230) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Professional Association Insurance - ${clientName}`, margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 10;
+
+    const rows = [
+      'Association/Group:',
+      'Coverage Type:',
+      'Policy Number:',
+      'Coverage Amount:',
+      'Document Location:',
+    ];
+
+    const rowValues = [
+      description || '',
+      '',
+      '',
+      '',
+      docLocation || '',
+    ];
+
+    const cellHeight = 7;
+    const labelColWidth = fieldWidth * 0.35;
+    const valueColWidth = fieldWidth - labelColWidth;
+    let tableY = yPosition;
+
+    rows.forEach((rowLabel, rowIndex) => {
+      if (tableY > 275) {
+        doc.addPage();
+        tableY = 12;
+      }
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8);
+
+      const labelColX = margin;
+      doc.rect(labelColX, tableY, labelColWidth, cellHeight);
+      doc.text(rowLabel, labelColX + 0.5, tableY + 4.5);
+
+      const valueColX = margin + labelColWidth;
+      doc.rect(valueColX, tableY, valueColWidth, cellHeight);
+
+      const field = new doc.AcroFormTextField();
+      field.fieldName = `professional_assoc_${clientName.replace(/\s+/g, '_').toLowerCase()}_row_${rowIndex}`;
+      field.Rect = [valueColX + 0.3, tableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+      field.fontSize = 7;
+      field.textColor = [0, 0, 0];
+      field.borderStyle = 'none';
+      field.value = rowValues[rowIndex];
+      doc.addField(field);
+
+      tableY += cellHeight;
+    });
+
+    yPosition = tableY + 15;
+  };
+
+  if (formData.client1HasProfessionalAssociationInsurance === 'yes' || formData.client2HasProfessionalAssociationInsurance === 'yes') {
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    if (isFirstInsuranceSection) {
+      addSectionHeader('Insurance Summary');
+      isFirstInsuranceSection = false;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('Professional Association Insurance', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 15;
+
+    if (formData.client1HasProfessionalAssociationInsurance === 'yes') {
+      generateProfessionalAssociationChart(
+        formData.fullName || 'Client 1',
+        formData.client1ProfessionalAssociationDescription,
+        formData.client1ProfessionalAssociationDocLocation
+      );
+    }
+
+    if (formData.client2HasProfessionalAssociationInsurance === 'yes') {
+      generateProfessionalAssociationChart(
+        formData.spouseName || 'Client 2',
+        formData.client2ProfessionalAssociationDescription,
+        formData.client2ProfessionalAssociationDocLocation
+      );
+    }
+  }
+
+  if (formData.client1HasProfessionalAssociationInsurance === 'no' &&
+      (formData.client2HasProfessionalAssociationInsurance === 'no' || !formData.client2HasProfessionalAssociationInsurance)) {
+    if (yPosition > 240) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    if (isFirstInsuranceSection) {
+      addSectionHeader('Insurance Summary');
+      isFirstInsuranceSection = false;
+    }
+
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('Professional Association Insurance', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 15;
+
+    doc.setFontSize(10);
+    doc.text('Client(s) indicated that they have no professional association insurance.', margin, yPosition);
+    yPosition += 15;
+  }
+
   // Your Virtual Footprint Section
   if (yPosition > 240) {
     doc.addPage();
@@ -8743,6 +8873,21 @@ export const generatePDF = (formData: FormData) => {
         });
       }
     }
+  }
+
+  // Add professional association insurance documents
+  if (formData.client1HasProfessionalAssociationInsurance === 'yes' && formData.client1ProfessionalAssociationDocLocation) {
+    client1Documents.push({
+      type: `${client1Name} - Professional Association Insurance${formData.client1ProfessionalAssociationDescription ? ` (${formData.client1ProfessionalAssociationDescription})` : ''}`,
+      location: formData.client1ProfessionalAssociationDocLocation
+    });
+  }
+
+  if (formData.client2HasProfessionalAssociationInsurance === 'yes' && formData.client2ProfessionalAssociationDocLocation) {
+    client2Documents.push({
+      type: `${client2Name} - Professional Association Insurance${formData.client2ProfessionalAssociationDescription ? ` (${formData.client2ProfessionalAssociationDescription})` : ''}`,
+      location: formData.client2ProfessionalAssociationDocLocation
+    });
   }
 
   // Create Client 1 Document Summary Table

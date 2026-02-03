@@ -402,19 +402,6 @@ export const generatePDF = (formData: FormData) => {
 
   yPosition += 15;
 
-  // Client names
-  const clientNames = formData.hasSpouse === 'yes' && formData.spouseName
-    ? `(${formData.fullName || ''}) and (${formData.spouseName}),`
-    : formData.fullName ? `(${formData.fullName}),` : '';
-
-  if (clientNames) {
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.darkText);
-    doc.text(clientNames, pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 10;
-  }
-
   // Welcome title
   doc.setFontSize(16);
   doc.setFont(undefined, 'bold');

@@ -2289,6 +2289,52 @@ export default function StepForm({
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Is there anyone else who has ownership of the property?
+                                    </label>
+                                    <div className="flex gap-4">
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          name={`additional-owners-${index}`}
+                                          value="yes"
+                                          checked={propertiesData[index]?.hasAdditionalOwners === 'yes'}
+                                          onChange={(e) => handlePropertyChange(index, 'hasAdditionalOwners', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-gray-300">Yes</span>
+                                      </label>
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          name={`additional-owners-${index}`}
+                                          value="no"
+                                          checked={propertiesData[index]?.hasAdditionalOwners === 'no'}
+                                          onChange={(e) => handlePropertyChange(index, 'hasAdditionalOwners', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-gray-300">No</span>
+                                      </label>
+                                    </div>
+                                  </div>
+                                  {propertiesData[index]?.hasAdditionalOwners === 'yes' && (
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        How many other parties own the property?
+                                      </label>
+                                      <select
+                                        value={propertiesData[index]?.additionalOwnersCount || ''}
+                                        onChange={(e) => handlePropertyChange(index, 'additionalOwnersCount', e.target.value)}
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      >
+                                        <option value="">Select number</option>
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                                          <option key={num} value={num}>{num}</option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Do you have a Property Succession Plan/Agreement in place for the property?
                                     </label>
                                     <div className="flex gap-4">

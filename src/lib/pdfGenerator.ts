@@ -5936,11 +5936,12 @@ export const generatePDF = (formData: FormData) => {
 
         if (property.hasAdditionalOwners === 'yes' && property.additionalOwnersCount) {
           const additionalOwnerCount = parseInt(property.additionalOwnersCount) || 0;
-          const totalRows = 2 + additionalOwnerCount;
+          const totalRows = 1 + additionalOwnerCount;
 
           const ownershipCellHeight = 7;
-          const ownerNameColWidth = fieldWidth * 0.5;
-          const ownershipPercentColWidth = fieldWidth * 0.5;
+          const ownerNameColWidth = fieldWidth * 0.4;
+          const ownershipPercentColWidth = fieldWidth * 0.2;
+          const otherDetailsColWidth = fieldWidth * 0.4;
           let ownershipTableY = yPosition;
 
           doc.setDrawColor(0, 0, 0);
@@ -5948,14 +5949,19 @@ export const generatePDF = (formData: FormData) => {
           doc.setFont(undefined, 'bold');
           doc.setFontSize(8);
 
+          // Header row
           doc.rect(margin, ownershipTableY, ownerNameColWidth, ownershipCellHeight);
           doc.text('Owner Name:', margin + 0.5, ownershipTableY + 4.5);
 
           doc.rect(margin + ownerNameColWidth, ownershipTableY, ownershipPercentColWidth, ownershipCellHeight);
           doc.text('Ownership %:', margin + ownerNameColWidth + 0.5, ownershipTableY + 4.5);
 
+          doc.rect(margin + ownerNameColWidth + ownershipPercentColWidth, ownershipTableY, otherDetailsColWidth, ownershipCellHeight);
+          doc.text('Other Details:', margin + ownerNameColWidth + ownershipPercentColWidth + 0.5, ownershipTableY + 4.5);
+
           ownershipTableY += ownershipCellHeight;
 
+          // Data rows
           for (let i = 0; i < totalRows; i++) {
             if (ownershipTableY > 275) {
               doc.addPage();
@@ -5965,6 +5971,7 @@ export const generatePDF = (formData: FormData) => {
             doc.setFont(undefined, 'normal');
             doc.rect(margin, ownershipTableY, ownerNameColWidth, ownershipCellHeight);
             doc.rect(margin + ownerNameColWidth, ownershipTableY, ownershipPercentColWidth, ownershipCellHeight);
+            doc.rect(margin + ownerNameColWidth + ownershipPercentColWidth, ownershipTableY, otherDetailsColWidth, ownershipCellHeight);
 
             const ownerNameField = new doc.AcroFormTextField();
             ownerNameField.fieldName = `property_${propIndex + 1}_owner_name_${i + 1}`;
@@ -5981,6 +5988,14 @@ export const generatePDF = (formData: FormData) => {
             ownerPercentField.textColor = [0, 0, 0];
             ownerPercentField.borderStyle = 'none';
             doc.addField(ownerPercentField);
+
+            const otherDetailsField = new doc.AcroFormTextField();
+            otherDetailsField.fieldName = `property_${propIndex + 1}_other_details_${i + 1}`;
+            otherDetailsField.Rect = [margin + ownerNameColWidth + ownershipPercentColWidth + 0.3, ownershipTableY + 0.3, otherDetailsColWidth - 0.6, ownershipCellHeight - 0.6];
+            otherDetailsField.fontSize = 7;
+            otherDetailsField.textColor = [0, 0, 0];
+            otherDetailsField.borderStyle = 'none';
+            doc.addField(otherDetailsField);
 
             ownershipTableY += ownershipCellHeight;
           }

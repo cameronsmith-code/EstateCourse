@@ -4140,7 +4140,19 @@ export default function StepForm({
                   return null;
                 }
 
+                if (question.key === 'client1VehicleDescription' && answers['client1HasVehicleInsurance'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1VehicleInsuranceDocLocation' && answers['client1HasVehicleInsurance'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client2HasVehicleInsurance' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2VehicleDescription' && (answers['client2HasVehicleInsurance'] !== 'yes' || !hasSpouse)) {
+                  return null;
+                }
+                if (question.key === 'client2VehicleInsuranceDocLocation' && (answers['client2HasVehicleInsurance'] !== 'yes' || !hasSpouse)) {
                   return null;
                 }
                 if (question.key === 'hasAdditionalVehicles' &&
@@ -4149,6 +4161,69 @@ export default function StepForm({
                   return null;
                 }
                 if (question.key === 'additionalVehiclesCount' && answers['hasAdditionalVehicles'] !== 'yes') {
+                  return null;
+                }
+
+                // Conditional logic for additional vehicle descriptions and document locations
+                const additionalVehicleCount = parseInt(answers['additionalVehiclesCount'] as string) || 0;
+                if (question.key === 'additionalVehicle1Description' && additionalVehicleCount < 1) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle1DocLocation' && additionalVehicleCount < 1) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle2Description' && additionalVehicleCount < 2) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle2DocLocation' && additionalVehicleCount < 2) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle3Description' && additionalVehicleCount < 3) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle3DocLocation' && additionalVehicleCount < 3) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle4Description' && additionalVehicleCount < 4) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle4DocLocation' && additionalVehicleCount < 4) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle5Description' && additionalVehicleCount < 5) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle5DocLocation' && additionalVehicleCount < 5) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle6Description' && additionalVehicleCount < 6) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle6DocLocation' && additionalVehicleCount < 6) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle7Description' && additionalVehicleCount < 7) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle7DocLocation' && additionalVehicleCount < 7) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle8Description' && additionalVehicleCount < 8) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle8DocLocation' && additionalVehicleCount < 8) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle9Description' && additionalVehicleCount < 9) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle9DocLocation' && additionalVehicleCount < 9) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle10Description' && additionalVehicleCount < 10) {
+                  return null;
+                }
+                if (question.key === 'additionalVehicle10DocLocation' && additionalVehicleCount < 10) {
                   return null;
                 }
 

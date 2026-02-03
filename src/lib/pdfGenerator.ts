@@ -258,9 +258,33 @@ interface FormData {
   additionalProperty9DocLocation?: string;
   additionalProperty10DocLocation?: string;
   client1HasVehicleInsurance?: string;
+  client1VehicleDescription?: string;
+  client1VehicleInsuranceDocLocation?: string;
   client2HasVehicleInsurance?: string;
+  client2VehicleDescription?: string;
+  client2VehicleInsuranceDocLocation?: string;
   hasAdditionalVehicles?: string;
   additionalVehiclesCount?: string;
+  additionalVehicle1Description?: string;
+  additionalVehicle1DocLocation?: string;
+  additionalVehicle2Description?: string;
+  additionalVehicle2DocLocation?: string;
+  additionalVehicle3Description?: string;
+  additionalVehicle3DocLocation?: string;
+  additionalVehicle4Description?: string;
+  additionalVehicle4DocLocation?: string;
+  additionalVehicle5Description?: string;
+  additionalVehicle5DocLocation?: string;
+  additionalVehicle6Description?: string;
+  additionalVehicle6DocLocation?: string;
+  additionalVehicle7Description?: string;
+  additionalVehicle7DocLocation?: string;
+  additionalVehicle8Description?: string;
+  additionalVehicle8DocLocation?: string;
+  additionalVehicle9Description?: string;
+  additionalVehicle9DocLocation?: string;
+  additionalVehicle10Description?: string;
+  additionalVehicle10DocLocation?: string;
   hasCorporation?: string;
   corporationCount?: string;
   ownsCorporation?: string;
@@ -7742,7 +7766,7 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  const generateVehicleInsuranceChart = (vehicleLabel: string, clientName: string) => {
+  const generateVehicleInsuranceChart = (vehicleLabel: string, clientName: string, vehicleDescription?: string, docLocation?: string) => {
     if (yPosition > 230) {
       doc.addPage();
       yPosition = 12;
@@ -7760,6 +7784,14 @@ export const generatePDF = (formData: FormData) => {
       'Insurance Provider:',
       'Coverage Amount:',
       'Document Location:',
+    ];
+
+    const rowValues = [
+      vehicleDescription || '',
+      '',
+      '',
+      '',
+      docLocation || '',
     ];
 
     const cellHeight = 7;
@@ -7791,6 +7823,7 @@ export const generatePDF = (formData: FormData) => {
       vehicleField.fontSize = 7;
       vehicleField.textColor = [0, 0, 0];
       vehicleField.borderStyle = 'none';
+      vehicleField.value = rowValues[rowIndex];
       doc.addField(vehicleField);
 
       vehicleTableY += cellHeight;
@@ -7819,19 +7852,39 @@ export const generatePDF = (formData: FormData) => {
     let vehicleNumber = 1;
 
     if (formData.client1HasVehicleInsurance === 'yes') {
-      generateVehicleInsuranceChart(`Vehicle ${vehicleNumber}`, formData.fullName || 'Client 1');
+      generateVehicleInsuranceChart(
+        `Vehicle ${vehicleNumber}`,
+        formData.fullName || 'Client 1',
+        formData.client1VehicleDescription,
+        formData.client1VehicleInsuranceDocLocation
+      );
       vehicleNumber++;
     }
 
     if (formData.client2HasVehicleInsurance === 'yes') {
-      generateVehicleInsuranceChart(`Vehicle ${vehicleNumber}`, formData.spouseName || 'Client 2');
+      generateVehicleInsuranceChart(
+        `Vehicle ${vehicleNumber}`,
+        formData.spouseName || 'Client 2',
+        formData.client2VehicleDescription,
+        formData.client2VehicleInsuranceDocLocation
+      );
       vehicleNumber++;
     }
 
     if (formData.hasAdditionalVehicles === 'yes' && formData.additionalVehiclesCount) {
       const additionalCount = parseInt(formData.additionalVehiclesCount);
-      for (let i = 0; i < additionalCount; i++) {
-        generateVehicleInsuranceChart(`Vehicle ${vehicleNumber}`, 'Additional Vehicle');
+      for (let i = 1; i <= additionalCount; i++) {
+        const descriptionKey = `additionalVehicle${i}Description` as keyof FormData;
+        const docLocationKey = `additionalVehicle${i}DocLocation` as keyof FormData;
+        const description = formData[descriptionKey] as string | undefined;
+        const docLocation = formData[docLocationKey] as string | undefined;
+
+        generateVehicleInsuranceChart(
+          `Vehicle ${vehicleNumber}`,
+          'Additional Vehicle',
+          description,
+          docLocation
+        );
         vehicleNumber++;
       }
     }
@@ -8653,6 +8706,39 @@ export const generatePDF = (formData: FormData) => {
       if (docLocation) {
         client1Documents.push({
           type: `Additional Property ${i} Insurance`,
+          location: docLocation
+        });
+      }
+    }
+  }
+
+  // Add vehicle insurance documents
+  if (formData.client1HasVehicleInsurance === 'yes' && formData.client1VehicleInsuranceDocLocation) {
+    client1Documents.push({
+      type: `${client1Name} - Vehicle Insurance${formData.client1VehicleDescription ? ` (${formData.client1VehicleDescription})` : ''}`,
+      location: formData.client1VehicleInsuranceDocLocation
+    });
+  }
+
+  if (formData.client2HasVehicleInsurance === 'yes' && formData.client2VehicleInsuranceDocLocation) {
+    client2Documents.push({
+      type: `${client2Name} - Vehicle Insurance${formData.client2VehicleDescription ? ` (${formData.client2VehicleDescription})` : ''}`,
+      location: formData.client2VehicleInsuranceDocLocation
+    });
+  }
+
+  // Add additional vehicle insurance documents
+  if (formData.hasAdditionalVehicles === 'yes' && formData.additionalVehiclesCount) {
+    const additionalVehicleCount = parseInt(formData.additionalVehiclesCount);
+    for (let i = 1; i <= additionalVehicleCount; i++) {
+      const descriptionKey = `additionalVehicle${i}Description` as keyof FormData;
+      const docLocationKey = `additionalVehicle${i}DocLocation` as keyof FormData;
+      const description = formData[descriptionKey] as string | undefined;
+      const docLocation = formData[docLocationKey] as string | undefined;
+
+      if (docLocation) {
+        client1Documents.push({
+          type: `Additional Vehicle ${i} Insurance${description ? ` (${description})` : ''}`,
           location: docLocation
         });
       }

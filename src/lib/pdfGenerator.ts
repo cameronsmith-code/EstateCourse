@@ -276,23 +276,6 @@ const getOrdinalLabel = (num: number): string => {
 };
 
 export const generatePDF = (formData: FormData) => {
-  console.log('PDF Generator - Full FormData:', formData);
-  console.log('PDF Generator - Previous Relationships Check:', {
-    client1HasPreviousRelationship: formData.client1HasPreviousRelationship,
-    client1NumberOfPreviousRelationships: formData.client1NumberOfPreviousRelationships,
-    client1PreviousRelationshipsData: formData.client1PreviousRelationshipsData,
-    client2HasPreviousRelationship: formData.client2HasPreviousRelationship,
-    client2NumberOfPreviousRelationships: formData.client2NumberOfPreviousRelationships,
-    client2PreviousRelationshipsData: formData.client2PreviousRelationshipsData,
-  });
-  console.log('PDF Generator - Will Location Check:', {
-    client1HasWill: formData.client1HasWill,
-    client1WillLocation: formData.client1WillLocation,
-    client1WillJurisdiction: formData.client1WillJurisdiction,
-    client2HasWill: formData.client2HasWill,
-    client2WillLocation: formData.client2WillLocation,
-    client2WillJurisdiction: formData.client2WillJurisdiction,
-  });
 
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -536,10 +519,8 @@ export const generatePDF = (formData: FormData) => {
     const prevRelCount = parseInt(formData.client1NumberOfPreviousRelationships || '0');
     const prevRelData = formData.client1PreviousRelationshipsData.slice(0, prevRelCount);
 
-    console.log('Client 1 Previous Relationships Data:', prevRelData);
 
     prevRelData.forEach((relationship, index) => {
-      console.log(`Client 1 Relationship ${index}:`, relationship);
 
       addSubsectionHeader(`${client1Name}'s Previous Relationship ${index + 1}`);
 
@@ -645,10 +626,8 @@ export const generatePDF = (formData: FormData) => {
     const prevRelCount = parseInt(formData.client2NumberOfPreviousRelationships || '0');
     const prevRelData = formData.client2PreviousRelationshipsData.slice(0, prevRelCount);
 
-    console.log('Client 2 Previous Relationships Data:', prevRelData);
 
     prevRelData.forEach((relationship, index) => {
-      console.log(`Client 2 Relationship ${index}:`, relationship);
 
       addSubsectionHeader(`${client2Name}'s Previous Relationship ${index + 1}`);
 
@@ -2262,7 +2241,6 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  yPosition += 12;
   doc.addPage();
   yPosition = 12;
   addSectionHeader('Who is on your Team?');
@@ -2274,78 +2252,36 @@ export const generatePDF = (formData: FormData) => {
   doc.text('This section lists the core professionals who already know your history.', margin, yPosition);
   yPosition += 8;
   doc.setTextColor(...colors.darkText);
-  yPosition += 10;
+  yPosition += 12;
 
-  const hasSpouse = (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law');
+  const bankingStructure = formData.bankingStructure;
+  let totalBankCount = 0;
 
-  if (formData.client1HasWill === 'no' && (!hasSpouse || formData.client2HasWill === 'no')) {
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    doc.text('Estate Lawyer / Notary:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 6;
+  if (!hasSpouse) {
+    totalBankCount = parseInt(formData.client1BankCount || '0');
+  } else if (bankingStructure === 'joint') {
+    totalBankCount = parseInt(formData.jointBankCount || '0');
+  } else if (bankingStructure === 'individual') {
+    totalBankCount = parseInt(formData.client1BankCount || '0') + parseInt(formData.client2BankCount || '0');
+  } else if (bankingStructure === 'mixed') {
+    totalBankCount = parseInt(formData.mixedJointBankCount || '0') + parseInt(formData.mixedClient1BankCount || '0') + parseInt(formData.mixedClient2BankCount || '0');
+  }
+
+  if (totalBankCount > 0) {
+    doc.addPage();
+    yPosition = 12;
+    addSectionHeader('Your Financial Footprint');
+
     doc.setFontSize(9);
-    doc.setFont(undefined, 'italic');
-    doc.text('It is recommended that you have a Will done', margin, yPosition);
-    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('Banking and financial account information', margin, yPosition);
     yPosition += 12;
-  } else if (formData.client1HasWill === 'yes' || formData.client2HasWill === 'yes') {
-    const bothHaveWills = formData.client1HasWill === 'yes' && formData.client2HasWill === 'yes';
-    const sameLawyer = formData.willsSameLawyer === 'yes';
+    doc.setTextColor(...colors.darkText);
 
-    if (formData.client1HasWill === 'yes' && formData.client1WillJurisdiction) {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name}'s Will was prepared in ${formData.client1WillJurisdiction}.`, margin, yPosition);
-      yPosition += 6;
-    }
-
-    if (formData.client1HasWill === 'yes' && formData.client1WillLocation) {
-      console.log('DISPLAYING Client 1 Will Location:', formData.client1WillLocation);
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name} has a Will, and it is located: ${formData.client1WillLocation}`, margin, yPosition);
-      yPosition += 6;
-    } else {
-      console.log('NOT displaying Client 1 Will Location. Has Will?:', formData.client1HasWill, 'Location:', formData.client1WillLocation);
-    }
-
-    if (formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillLocation) {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name} has a secondary Will, and it is located: ${formData.client1SecondaryWillLocation}`, margin, yPosition);
-      yPosition += 6;
-    }
-
-    if (formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillJurisdiction) {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name}'s secondary Will was prepared in ${formData.client1SecondaryWillJurisdiction}.`, margin, yPosition);
-      yPosition += 6;
-    }
-
-    if (formData.client2HasWill === 'yes' && formData.client2WillJurisdiction && hasSpouse) {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name}'s Will was prepared in ${formData.client2WillJurisdiction}.`, margin, yPosition);
-      yPosition += 6;
-    }
-
-    if (formData.client2HasWill === 'yes' && formData.client2WillLocation && hasSpouse) {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name} has a Will, and it is located: ${formData.client2WillLocation}`, margin, yPosition);
-      yPosition += 6;
-    }
-
-    if (formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillLocation && hasSpouse) {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name} has a secondary Will, and it is located: ${formData.client2SecondaryWillLocation}`, margin, yPosition);
-      yPosition += 6;
-    }
-
-    if (formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillJurisdiction && hasSpouse) {
+    if (bankingStructure === 'joint') {
+      const jointCount = parseInt(formData.jointBankCount || '0');
+      const jointInstitutions = formData.jointInstitutionsData || [];
+      for (let i = 0; i < jointCount; i++) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
       doc.text(`${client2Name}'s secondary Will was prepared in ${formData.client2SecondaryWillJurisdiction}.`, margin, yPosition);
@@ -2522,7 +2458,6 @@ export const generatePDF = (formData: FormData) => {
             lawyerField1.borderStyle = 'none';
             if (row.label === 'Will Location:') {
               const willLocation = clientIndex === 0 ? formData.client1WillLocation : formData.client2WillLocation;
-              console.log(`Pre-filling Will Location for client ${clientIndex + 1}:`, willLocation);
               if (willLocation) {
                 lawyerField1.value = willLocation;
               }
@@ -2607,7 +2542,6 @@ export const generatePDF = (formData: FormData) => {
           lawyerField1.borderStyle = 'none';
           if (row.label === 'Will Location:') {
             const willLocation = formData.client1HasWill === 'yes' ? formData.client1WillLocation : formData.client2WillLocation;
-            console.log('Pre-filling Will Location (single client):', willLocation, 'Client1 has will:', formData.client1HasWill);
             if (willLocation) {
               lawyerField1.value = willLocation;
             }
@@ -5752,6 +5686,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition = bankTableY + 10;
       }
     }
+  }
   }
 
   if (formData.ownsRealEstate === 'yes') {

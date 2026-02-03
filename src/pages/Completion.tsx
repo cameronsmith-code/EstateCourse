@@ -39,6 +39,12 @@ export default function Completion() {
       ...step11,
     };
 
+    console.log('=== PDF FORM DATA ===');
+    console.log('client1HasWill:', data.client1HasWill);
+    console.log('client1WillLocation:', data.client1WillLocation);
+    console.log('client2HasWill:', data.client2HasWill);
+    console.log('client2WillLocation:', data.client2WillLocation);
+
     setFormData(data);
   }, [answers]);
 

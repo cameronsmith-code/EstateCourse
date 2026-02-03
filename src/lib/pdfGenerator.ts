@@ -285,6 +285,14 @@ export const generatePDF = (formData: FormData) => {
     client2NumberOfPreviousRelationships: formData.client2NumberOfPreviousRelationships,
     client2PreviousRelationshipsData: formData.client2PreviousRelationshipsData,
   });
+  console.log('PDF Generator - Will Location Check:', {
+    client1HasWill: formData.client1HasWill,
+    client1WillLocation: formData.client1WillLocation,
+    client1WillJurisdiction: formData.client1WillJurisdiction,
+    client2HasWill: formData.client2HasWill,
+    client2WillLocation: formData.client2WillLocation,
+    client2WillJurisdiction: formData.client2WillJurisdiction,
+  });
 
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -2293,10 +2301,13 @@ export const generatePDF = (formData: FormData) => {
     }
 
     if (formData.client1HasWill === 'yes' && formData.client1WillLocation) {
+      console.log('DISPLAYING Client 1 Will Location:', formData.client1WillLocation);
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
       doc.text(`${client1Name} has a Will, and it is located: ${formData.client1WillLocation}`, margin, yPosition);
       yPosition += 6;
+    } else {
+      console.log('NOT displaying Client 1 Will Location. Has Will?:', formData.client1HasWill, 'Location:', formData.client1WillLocation);
     }
 
     if (formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillLocation) {
@@ -2511,6 +2522,7 @@ export const generatePDF = (formData: FormData) => {
             lawyerField1.borderStyle = 'none';
             if (row.label === 'Will Location:') {
               const willLocation = clientIndex === 0 ? formData.client1WillLocation : formData.client2WillLocation;
+              console.log(`Pre-filling Will Location for client ${clientIndex + 1}:`, willLocation);
               if (willLocation) {
                 lawyerField1.value = willLocation;
               }
@@ -2595,6 +2607,7 @@ export const generatePDF = (formData: FormData) => {
           lawyerField1.borderStyle = 'none';
           if (row.label === 'Will Location:') {
             const willLocation = formData.client1HasWill === 'yes' ? formData.client1WillLocation : formData.client2WillLocation;
+            console.log('Pre-filling Will Location (single client):', willLocation, 'Client1 has will:', formData.client1HasWill);
             if (willLocation) {
               lawyerField1.value = willLocation;
             }

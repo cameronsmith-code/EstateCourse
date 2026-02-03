@@ -1149,6 +1149,13 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
+        key: 'homeInsuranceDocLocation',
+        label: 'Where is the home insurance document stored?',
+        type: 'text',
+        placeholder: 'Enter document location',
+        required: false,
+      },
+      {
         key: 'hasAdditionalProperties',
         label: 'Do you have additional properties?',
         type: 'radio',

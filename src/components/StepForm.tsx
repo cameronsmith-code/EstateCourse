@@ -4097,6 +4097,9 @@ export default function StepForm({
                 const client1Name = basicAnswers['fullName'] as string || 'you';
                 const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
+                if (question.key === 'homeInsuranceDocLocation' && answers['hasHomeInsurance'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'hasAdditionalProperties' && answers['hasHomeInsurance'] !== 'yes') {
                   return null;
                 }

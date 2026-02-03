@@ -244,6 +244,7 @@ interface FormData {
   client2HasCriticalIllness?: string;
   client2CriticalIllnessCount?: string;
   hasHomeInsurance?: string;
+  homeInsuranceDocLocation?: string;
   hasAdditionalProperties?: string;
   additionalPropertiesCount?: string;
   client1HasVehicleInsurance?: string;
@@ -7632,7 +7633,7 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  const generatePropertyInsuranceChart = (propertyLabel: string) => {
+  const generatePropertyInsuranceChart = (propertyLabel: string, documentLocation?: string) => {
     if (yPosition > 230) {
       doc.addPage();
       yPosition = 12;
@@ -7682,6 +7683,12 @@ export const generatePDF = (formData: FormData) => {
       propertyField.fontSize = 7;
       propertyField.textColor = [0, 0, 0];
       propertyField.borderStyle = 'none';
+
+      // Pre-populate Document Location field if provided
+      if (rowLabel === 'Document Location:' && documentLocation) {
+        propertyField.value = documentLocation;
+      }
+
       doc.addField(propertyField);
 
       propertyTableY += cellHeight;
@@ -7712,7 +7719,7 @@ export const generatePDF = (formData: FormData) => {
       doc.text('Client(s) indicated that they have no property insurance.', margin, yPosition);
       yPosition += 15;
     } else if (formData.hasHomeInsurance === 'yes') {
-      generatePropertyInsuranceChart('Primary Home Insurance');
+      generatePropertyInsuranceChart('Primary Home Insurance', formData.homeInsuranceDocLocation);
 
       if (formData.hasAdditionalProperties === 'yes' && formData.additionalPropertiesCount) {
         const additionalCount = parseInt(formData.additionalPropertiesCount);
@@ -8614,6 +8621,14 @@ export const generatePDF = (formData: FormData) => {
     client1Documents.push({
       type: 'Family Trust Deed',
       location: formData.trustDeedLocation
+    });
+  }
+
+  // Add home insurance document
+  if (formData.hasHomeInsurance === 'yes' && formData.homeInsuranceDocLocation) {
+    client1Documents.push({
+      type: 'Home Insurance',
+      location: formData.homeInsuranceDocLocation
     });
   }
 

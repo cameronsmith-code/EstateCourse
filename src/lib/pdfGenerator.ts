@@ -2241,6 +2241,9 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
+  // TEMPORARILY DISABLED: "Who is on your Team?" section
+  // This section is being rebuilt from scratch
+  /*
   doc.addPage();
   yPosition = 12;
   addSectionHeader('Who is on your Team?');
@@ -4977,6 +4980,8 @@ export const generatePDF = (formData: FormData) => {
       yPosition = accountTableY + 10;
     }
   }
+  */
+  // END OF TEMPORARILY DISABLED CORRUPTED SECTION
 
   // Additional Reading Section for Funeral Arrangements
   const needsFuneralReading = formData.client1HasFuneralArrangements === 'no' ||
@@ -5687,7 +5692,6 @@ export const generatePDF = (formData: FormData) => {
         yPosition = bankTableY + 10;
       }
     }
-  }
   }
 
   if (formData.ownsRealEstate === 'yes') {

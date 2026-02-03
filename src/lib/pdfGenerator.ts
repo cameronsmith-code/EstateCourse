@@ -404,8 +404,8 @@ export const generatePDF = (formData: FormData) => {
 
   // Client names
   const clientNames = formData.hasSpouse === 'yes' && formData.spouseName
-    ? `${formData.fullName || ''} and ${formData.spouseName}`
-    : formData.fullName || '';
+    ? `(${formData.fullName || ''}) and (${formData.spouseName}),`
+    : formData.fullName ? `(${formData.fullName}),` : '';
 
   if (clientNames) {
     doc.setFontSize(12);

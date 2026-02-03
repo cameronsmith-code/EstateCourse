@@ -2319,7 +2319,7 @@ export default function StepForm({
                                   {propertiesData[index]?.hasAdditionalOwners === 'yes' && (
                                     <div>
                                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        How many other parties own the property?
+                                        How many TOTAL parties own the property?
                                       </label>
                                       <select
                                         value={propertiesData[index]?.additionalOwnersCount || ''}

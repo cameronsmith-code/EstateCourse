@@ -184,14 +184,9 @@ export default function StepForm({
         }
       }
     } else if (step.id === 11) {
-      const basicAnswers = allAnswers?.get(1) || {};
-      const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-      const client1Name = basicAnswers['fullName'] as string;
-      const client2Name = basicAnswers['spouseName'] as string;
-
       if (answers['client1HasPension'] === 'yes') {
         if (!client1PensionsData || client1PensionsData.length === 0) {
-          setValidationError(`Please add at least one pension for ${client1Name} or select "No".`);
+          setValidationError('Please add at least one pension for Client 1 or select "No".');
           return;
         }
 
@@ -212,9 +207,12 @@ export default function StepForm({
         }
       }
 
+      const basicAnswers = allAnswers?.get(1) || {};
+      const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
+
       if (hasSpouse && answers['client2HasPension'] === 'yes') {
         if (!client2PensionsData || client2PensionsData.length === 0) {
-          setValidationError(`Please add at least one pension for ${client2Name} or select "No".`);
+          setValidationError('Please add at least one pension for Client 2 or select "No".');
           return;
         }
 
@@ -336,6 +334,102 @@ export default function StepForm({
   const removeClient2Pension = (index: number) => {
     const updated = client2PensionsData.filter((_, i) => i !== index);
     onAnswerChange('client2PensionsData', updated);
+  };
+
+  const client1PoaPersonalCareCount = parseInt(answers['client1PoaPersonalCareCount'] as string) || 0;
+  const client1PoaPersonalCareData = (answers['client1PoaPersonalCareData'] as Array<Record<string, string>>) || Array(client1PoaPersonalCareCount).fill(null).map(() => ({}));
+
+  const handlePoaPersonalCareChange = (index: number, field: string, value: string) => {
+    const updated = [...client1PoaPersonalCareData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1PoaPersonalCareData', updated);
+  };
+
+  const client1PoaPropertyCount = parseInt(answers['client1PoaPropertyCount'] as string) || 0;
+  const client1PoaPropertyData = (answers['client1PoaPropertyData'] as Array<Record<string, string>>) || Array(client1PoaPropertyCount).fill(null).map(() => ({}));
+
+  const handlePoaPropertyChange = (index: number, field: string, value: string) => {
+    const updated = [...client1PoaPropertyData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1PoaPropertyData', updated);
+  };
+
+  const client1EstateTrusteeCount = parseInt(answers['client1EstateTrusteeCount'] as string) || 0;
+  const client1EstateTrusteeData = (answers['client1EstateTrusteeData'] as Array<Record<string, string>>) || Array(client1EstateTrusteeCount).fill(null).map(() => ({}));
+
+  const handleEstateTrusteeChange = (index: number, field: string, value: string) => {
+    const updated = [...client1EstateTrusteeData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1EstateTrusteeData', updated);
+  };
+
+  const client1FinancialAdvisorsCount = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
+  const client1FinancialAdvisorsData = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(client1FinancialAdvisorsCount).fill(null).map(() => ({}));
+
+  const handleFinancialAdvisorChange = (index: number, field: string, value: string) => {
+    const updated = [...client1FinancialAdvisorsData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1FinancialAdvisorsData', updated);
+  };
+
+  const client2PoaPersonalCareCount = parseInt(answers['client2PoaPersonalCareCount'] as string) || 0;
+  const client2PoaPersonalCareData = (answers['client2PoaPersonalCareData'] as Array<Record<string, string>>) || Array(client2PoaPersonalCareCount).fill(null).map(() => ({}));
+
+  const handleClient2PoaPersonalCareChange = (index: number, field: string, value: string) => {
+    const updated = [...client2PoaPersonalCareData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2PoaPersonalCareData', updated);
+  };
+
+  const client2PoaPropertyCount = parseInt(answers['client2PoaPropertyCount'] as string) || 0;
+  const client2PoaPropertyData = (answers['client2PoaPropertyData'] as Array<Record<string, string>>) || Array(client2PoaPropertyCount).fill(null).map(() => ({}));
+
+  const handleClient2PoaPropertyChange = (index: number, field: string, value: string) => {
+    const updated = [...client2PoaPropertyData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2PoaPropertyData', updated);
+  };
+
+  const client2EstateTrusteeCount = parseInt(answers['client2EstateTrusteeCount'] as string) || 0;
+  const client2EstateTrusteeData = (answers['client2EstateTrusteeData'] as Array<Record<string, string>>) || Array(client2EstateTrusteeCount).fill(null).map(() => ({}));
+
+  const handleClient2EstateTrusteeChange = (index: number, field: string, value: string) => {
+    const updated = [...client2EstateTrusteeData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2EstateTrusteeData', updated);
+  };
+
+  const client2FinancialAdvisorsCount = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
+  const client2FinancialAdvisorsData = (answers['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(client2FinancialAdvisorsCount).fill(null).map(() => ({}));
+
+  const handleClient2FinancialAdvisorChange = (index: number, field: string, value: string) => {
+    const updated = [...client2FinancialAdvisorsData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2FinancialAdvisorsData', updated);
   };
 
   const trustBeneficiariesCount = parseInt(answers['trustBeneficiariesCount'] as string) || 0;
@@ -711,7 +805,7 @@ export default function StepForm({
                             {(() => {
                               const basicAnswers = allAnswers?.get(1) || {};
                               const trustAnswers = allAnswers?.get(4) || {};
-                              const client1Name = basicAnswers['fullName'] as string;
+                              const client1Name = basicAnswers['fullName'] as string || 'Client 1';
                               const client2Name = basicAnswers['spouseName'] as string || '';
                               const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law') && client2Name;
                               const trustName = trustAnswers['trustLegalName'] as string || '';
@@ -945,8 +1039,902 @@ export default function StepForm({
           {step.id === 6 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-            const client1Name = basicAnswers['fullName'] as string;
-            const client2Name = basicAnswers['spouseName'] as string;
+            const client1Name = basicAnswers['fullName'] as string || 'you';
+            const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
+
+            return (
+              <>
+                {step.questions.map((question) => {
+
+                if (question.key === 'client1WillLocation' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1HasSecondaryWill' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1SecondaryWillLocation' && answers['client1HasSecondaryWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1SecondaryWillJurisdiction' && answers['client1HasSecondaryWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasWill' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2WillLocation' && (answers['client2HasWill'] !== 'yes' || !hasSpouse)) {
+                  return null;
+                }
+                if (question.key === 'client2HasSecondaryWill' && (answers['client2HasWill'] !== 'yes' || !hasSpouse)) {
+                  return null;
+                }
+                if (question.key === 'client2SecondaryWillLocation' && answers['client2HasSecondaryWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2SecondaryWillJurisdiction' && answers['client2HasSecondaryWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2UsesAccountant' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'willsSameLawyer' && !(answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
+                  return null;
+                }
+                if (question.key === 'spousesPoaPersonalCare' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw') && answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
+                  return null;
+                }
+                if (question.key === 'spousesPoaProperty' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw') && answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client1HasPoaPersonalCare' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1HasLivingWill' && answers['client1HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1PoaPersonalCareCount' && answers['client1HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1HasPoaProperty' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1PoaPropertyCount' && answers['client1HasPoaProperty'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1HasEstateTrustee' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1EstateTrusteeCount' && answers['client1HasEstateTrustee'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasPoaPersonalCare' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2HasLivingWill' && (answers['client2HasPoaPersonalCare'] !== 'yes' || !hasSpouse)) {
+                  return null;
+                }
+                if (question.key === 'client2PoaPersonalCareCount' && answers['client2HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2PoaPersonalCareCount' && answers['client2HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2PoaPersonalCareHasDocCopy' && answers['client2HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasPoaProperty' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2PoaPropertyCount' && answers['client2HasPoaProperty'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2PoaPropertyHasDocCopy' && answers['client2HasPoaProperty'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasEstateTrustee' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2EstateTrusteeCount' && answers['client2HasEstateTrustee'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2EstateTrusteeHasWillCopy' && answers['client2HasEstateTrustee'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2EstateTrusteeKnowsWillLocation' && answers['client2EstateTrusteeHasWillCopy'] !== 'no') {
+                  return null;
+                }
+                if (question.key === 'client1FuneralArrangementsLocation' && answers['client1HasFuneralArrangements'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1FuneralWrittenDown' && answers['client1HasDiscussedFuneral'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1FuneralDocLocation' && answers['client1FuneralWrittenDown'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasFuneralArrangements' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2FuneralArrangementsLocation' && (!hasSpouse || answers['client2HasFuneralArrangements'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2HasDiscussedFuneral' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2FuneralWrittenDown' && (!hasSpouse || answers['client2HasDiscussedFuneral'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2FuneralDocLocation' && (!hasSpouse || answers['client2FuneralWrittenDown'] !== 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client1AccountingRecordsLocation' && answers['client1UsesAccountant'] !== 'no') {
+                  return null;
+                }
+                if (question.key === 'client2AccountingRecordsLocation' && (answers['client2UsesAccountant'] !== 'no' || !hasSpouse)) {
+                  return null;
+                }
+                if (question.key === 'accountantSamePerson' && !(answers['client1UsesAccountant'] === 'yes' && answers['client2UsesAccountant'] === 'yes')) {
+                  return null;
+                }
+                if (question.key === 'client2FinancialAdvisors' && !hasSpouse) {
+                  return null;
+                }
+
+                let customLabel = question.label;
+                if (question.key === 'client1HasWill') {
+                  customLabel = `Do you (${client1Name}) have a Will?`;
+                }
+                if (question.key === 'client1WillLocation') {
+                  customLabel = `${client1Name}, where is the Will located?`;
+                }
+                if (question.key === 'client1SecondaryWillJurisdiction') {
+                  customLabel = `In what jurisdiction was ${client1Name}'s secondary Will prepared?`;
+                }
+                if (question.key === 'client2HasWill') {
+                  customLabel = `Does ${client2Name} have a Will?`;
+                }
+                if (question.key === 'client2WillLocation') {
+                  customLabel = `${client2Name}, where is the Will located?`;
+                }
+                if (question.key === 'client2SecondaryWillJurisdiction') {
+                  customLabel = `In what jurisdiction was ${client2Name}'s secondary Will prepared?`;
+                }
+                if (question.key === 'client1UsesAccountant') {
+                  customLabel = `Do you (${client1Name}) use a professional accountant?`;
+                }
+                if (question.key === 'client2UsesAccountant') {
+                  customLabel = `Does ${client2Name} use a professional accountant?`;
+                }
+                if (question.key === 'client1AccountingRecordsLocation') {
+                  customLabel = `${client1Name}, where are your accounting records kept?`;
+                }
+                if (question.key === 'client2AccountingRecordsLocation') {
+                  customLabel = `${client2Name}, where are your accounting records kept?`;
+                }
+                if (question.key === 'accountantSamePerson') {
+                  customLabel = `${client1Name} and ${client2Name}, do you use the same accountant?`;
+                }
+                if (question.key === 'client1FinancialAdvisors') {
+                  customLabel = `${client1Name}, how many Financial Advisors do you work with?`;
+                }
+                if (question.key === 'client2FinancialAdvisors') {
+                  customLabel = `${client2Name}, how many Financial Advisors do you work with?`;
+                }
+                if (question.key === 'client1HasFuneralArrangements') {
+                  customLabel = `${client1Name}, have you made arrangements for Funeral or Cemetery services?`;
+                }
+                if (question.key === 'client1FuneralArrangementsLocation') {
+                  customLabel = `Where is this document located?`;
+                }
+                if (question.key === 'client1HasDiscussedFuneral') {
+                  customLabel = `${client1Name}, have you communicated to your loved ones what type of funeral you would like to have?`;
+                }
+                if (question.key === 'client1FuneralWrittenDown') {
+                  customLabel = `Is this written down anywhere?`;
+                }
+                if (question.key === 'client1FuneralDocLocation') {
+                  customLabel = `Where is this document stored?`;
+                }
+                if (question.key === 'client2HasFuneralArrangements') {
+                  customLabel = `${client2Name}, have you made arrangements for Funeral or Cemetery services?`;
+                }
+                if (question.key === 'client2FuneralArrangementsLocation') {
+                  customLabel = `Where is this document located?`;
+                }
+                if (question.key === 'client2HasDiscussedFuneral') {
+                  customLabel = `${client2Name}, have you communicated to your loved ones what type of funeral you would like to have?`;
+                }
+                if (question.key === 'client2FuneralWrittenDown') {
+                  customLabel = `Is this written down anywhere?`;
+                }
+                if (question.key === 'client2FuneralDocLocation') {
+                  customLabel = `Where is this document stored?`;
+                }
+                if (question.key === 'client1HasPoaPersonalCare') {
+                  if (answers['spousesPoaPersonalCare'] === 'yes') {
+                    customLabel = `${client1Name}, have you named a contingent Power of Attorney(ies) for Personal Care?`;
+                  } else {
+                    customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Personal Care?`;
+                  }
+                }
+                if (question.key === 'client1PoaPersonalCareCount') {
+                  if (answers['spousesPoaPersonalCare'] === 'yes') {
+                    customLabel = `${client1Name}, how many contingent Powers of Attorney for Personal Care have you named?`;
+                  } else {
+                    customLabel = `${client1Name}, how many Powers of Attorney for Personal Care have you named?`;
+                  }
+                }
+                if (question.key === 'client1HasPoaProperty') {
+                  if (answers['spousesPoaProperty'] === 'yes') {
+                    customLabel = `${client1Name}, have you named a contingent Power of Attorney(ies) for Property in your Will?`;
+                  } else {
+                    customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                  }
+                }
+                if (question.key === 'client1PoaPropertyCount') {
+                  if (answers['spousesPoaProperty'] === 'yes') {
+                    customLabel = `${client1Name}, how many contingent Powers of Attorney for Property have you named?`;
+                  } else {
+                    customLabel = `${client1Name}, how many Powers of Attorney for Property have you named?`;
+                  }
+                }
+                if (question.key === 'client1HasEstateTrustee') {
+                  customLabel = `${client1Name}, have you named an Estate Trustee(s) in your Will?`;
+                }
+                if (question.key === 'client1EstateTrusteeCount') {
+                  customLabel = `${client1Name}, how many Estate Trustees have you named?`;
+                }
+                if (question.key === 'client1HasLivingWill') {
+                  customLabel = `${client1Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;
+                }
+                if (question.key === 'client1PoaPropertyHasDocCopy') {
+                  customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
+                }
+                if (question.key === 'client1EstateTrusteeHasDocCopy') {
+                  customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
+                }
+                if (question.key === 'client2HasPoaPersonalCare') {
+                  if (answers['spousesPoaPersonalCare'] === 'yes') {
+                    customLabel = `${client2Name}, have you named a contingent Power of Attorney(ies) for Personal Care?`;
+                  } else {
+                    customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Personal Care?`;
+                  }
+                }
+                if (question.key === 'client2PoaPersonalCareCount') {
+                  if (answers['spousesPoaPersonalCare'] === 'yes') {
+                    customLabel = `${client2Name}, how many contingent Powers of Attorney for Personal Care have you named?`;
+                  } else {
+                    customLabel = `${client2Name}, how many Powers of Attorney for Personal Care have you named?`;
+                  }
+                }
+                if (question.key === 'client2HasPoaProperty') {
+                  if (answers['spousesPoaProperty'] === 'yes') {
+                    customLabel = `${client2Name}, have you named a contingent Power of Attorney(ies) for Property in your Will?`;
+                  } else {
+                    customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                  }
+                }
+                if (question.key === 'client2PoaPropertyCount') {
+                  if (answers['spousesPoaProperty'] === 'yes') {
+                    customLabel = `${client2Name}, how many contingent Powers of Attorney for Property have you named?`;
+                  } else {
+                    customLabel = `${client2Name}, how many Powers of Attorney for Property have you named?`;
+                  }
+                }
+                if (question.key === 'client2HasEstateTrustee') {
+                  customLabel = `${client2Name}, have you named an Estate Trustee(s) in your Will?`;
+                }
+                if (question.key === 'client2EstateTrusteeCount') {
+                  customLabel = `${client2Name}, how many Estate Trustees have you named?`;
+                }
+                if (question.key === 'client2PoaPersonalCareHasDocCopy') {
+                  customLabel = `${client2Name}, do they have a copy of the most recent document in their files?`;
+                }
+                if (question.key === 'client2HasLivingWill') {
+                  customLabel = `${client2Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;
+                }
+                if (question.key === 'client2PoaPropertyHasDocCopy') {
+                  customLabel = `${client2Name}, do they have a copy of the most recent document in their files?`;
+                }
+                if (question.key === 'client2EstateTrusteeHasWillCopy') {
+                  customLabel = `${client2Name}, do the named Estate Trustees have a copy of your most recent Will in their files?`;
+                }
+                if (question.key === 'client2EstateTrusteeKnowsWillLocation') {
+                  customLabel = `${client2Name}, do your Estate Trustees know where to find a copy of your Will?`;
+                }
+
+                return (
+                  <React.Fragment key={question.key}>
+                    <FormField
+                      question={{ ...question, label: customLabel }}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                    {question.key === 'client1HasWill' && answers['client1HasWill'] === 'yes' && (
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          In what jurisdiction was {client1Name}'s Will prepared?
+                        </label>
+                        <input
+                          type="text"
+                          value={answers['client1WillJurisdiction'] || ''}
+                          onChange={(e) => onAnswerChange('client1WillJurisdiction', e.target.value)}
+                          placeholder="e.g., Ontario, British Columbia, etc."
+                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    )}
+                    {question.key === 'client2HasWill' && answers['client2HasWill'] === 'yes' && (
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          In what jurisdiction was {client2Name}'s Will prepared?
+                        </label>
+                        <input
+                          type="text"
+                          value={answers['client2WillJurisdiction'] || ''}
+                          onChange={(e) => onAnswerChange('client2WillJurisdiction', e.target.value)}
+                          placeholder="e.g., Ontario, British Columbia, etc."
+                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    )}
+                    {question.key === 'client1PoaPersonalCareCount' && client1PoaPersonalCareCount > 0 && (
+                      <div className="space-y-6 mt-6">
+                        <h3 className="text-xl font-semibold text-white">
+                          {answers['spousesPoaPersonalCare'] === 'yes'
+                            ? 'Contingent Powers of Attorney for Personal Care Details'
+                            : 'Powers of Attorney for Personal Care Details'}
+                        </h3>
+                        {Array.from({ length: client1PoaPersonalCareCount }).map((_, index) => (
+                          <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                            <h4 className="text-lg font-semibold text-white mb-4">
+                              {answers['spousesPoaPersonalCare'] === 'yes'
+                                ? `Contingent POA for Personal Care #${index + 1}`
+                                : `POA for Personal Care #${index + 1}`}
+                            </h4>
+
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPersonalCareData[index]?.name || ''}
+                                  onChange={(e) => handlePoaPersonalCareChange(index, 'name', e.target.value)}
+                                  placeholder="Enter name"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Phone Number *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPersonalCareData[index]?.phone || ''}
+                                  onChange={(e) => handlePoaPersonalCareChange(index, 'phone', e.target.value)}
+                                  placeholder="Enter phone number"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Email Address *
+                                </label>
+                                <input
+                                  type="email"
+                                  value={client1PoaPersonalCareData[index]?.email || ''}
+                                  onChange={(e) => handlePoaPersonalCareChange(index, 'email', e.target.value)}
+                                  placeholder="Enter email address"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Relationship to You *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPersonalCareData[index]?.relationship || ''}
+                                  onChange={(e) => handlePoaPersonalCareChange(index, 'relationship', e.target.value)}
+                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {question.key === 'client1PoaPropertyCount' && client1PoaPropertyCount > 0 && (
+                      <div className="space-y-6 mt-6">
+                        <h3 className="text-xl font-semibold text-white">
+                          {answers['spousesPoaProperty'] === 'yes'
+                            ? 'Contingent Powers of Attorney for Property Details'
+                            : 'Powers of Attorney for Property Details'}
+                        </h3>
+                        {Array.from({ length: client1PoaPropertyCount }).map((_, index) => (
+                          <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                            <h4 className="text-lg font-semibold text-white mb-4">
+                              {answers['spousesPoaProperty'] === 'yes'
+                                ? `Contingent POA for Property #${index + 1}`
+                                : `POA for Property #${index + 1}`}
+                            </h4>
+
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPropertyData[index]?.name || ''}
+                                  onChange={(e) => handlePoaPropertyChange(index, 'name', e.target.value)}
+                                  placeholder="Enter name"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Phone Number *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPropertyData[index]?.phone || ''}
+                                  onChange={(e) => handlePoaPropertyChange(index, 'phone', e.target.value)}
+                                  placeholder="Enter phone number"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Email Address *
+                                </label>
+                                <input
+                                  type="email"
+                                  value={client1PoaPropertyData[index]?.email || ''}
+                                  onChange={(e) => handlePoaPropertyChange(index, 'email', e.target.value)}
+                                  placeholder="Enter email address"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Relationship to You *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPropertyData[index]?.relationship || ''}
+                                  onChange={(e) => handlePoaPropertyChange(index, 'relationship', e.target.value)}
+                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {question.key === 'client1EstateTrusteeCount' && client1EstateTrusteeCount > 0 && (
+                      <div className="space-y-6 mt-6">
+                        <h3 className="text-xl font-semibold text-white">Estate Trustees Details</h3>
+                        {Array.from({ length: client1EstateTrusteeCount }).map((_, index) => (
+                          <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                            <h4 className="text-lg font-semibold text-white mb-4">Estate Trustee #{index + 1}</h4>
+
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1EstateTrusteeData[index]?.name || ''}
+                                  onChange={(e) => handleEstateTrusteeChange(index, 'name', e.target.value)}
+                                  placeholder="Enter name"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Phone Number *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1EstateTrusteeData[index]?.phone || ''}
+                                  onChange={(e) => handleEstateTrusteeChange(index, 'phone', e.target.value)}
+                                  placeholder="Enter phone number"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Email Address *
+                                </label>
+                                <input
+                                  type="email"
+                                  value={client1EstateTrusteeData[index]?.email || ''}
+                                  onChange={(e) => handleEstateTrusteeChange(index, 'email', e.target.value)}
+                                  placeholder="Enter email address"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Relationship to You *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1EstateTrusteeData[index]?.relationship || ''}
+                                  onChange={(e) => handleEstateTrusteeChange(index, 'relationship', e.target.value)}
+                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {question.key === 'client2PoaPersonalCareCount' && client2PoaPersonalCareCount > 0 && (
+                      <div className="space-y-6 mt-6">
+                        <h3 className="text-xl font-semibold text-white">
+                          {answers['spousesPoaPersonalCare'] === 'yes'
+                            ? `${client2Name}'s Contingent Powers of Attorney for Personal Care Details`
+                            : `${client2Name}'s Powers of Attorney for Personal Care Details`}
+                        </h3>
+                        {Array.from({ length: client2PoaPersonalCareCount }).map((_, index) => (
+                          <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                            <h4 className="text-lg font-semibold text-white mb-4">
+                              {answers['spousesPoaPersonalCare'] === 'yes'
+                                ? `Contingent POA for Personal Care #${index + 1}`
+                                : `POA for Personal Care #${index + 1}`}
+                            </h4>
+
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2PoaPersonalCareData[index]?.name || ''}
+                                  onChange={(e) => handleClient2PoaPersonalCareChange(index, 'name', e.target.value)}
+                                  placeholder="Enter name"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Phone Number *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2PoaPersonalCareData[index]?.phone || ''}
+                                  onChange={(e) => handleClient2PoaPersonalCareChange(index, 'phone', e.target.value)}
+                                  placeholder="Enter phone number"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Email Address *
+                                </label>
+                                <input
+                                  type="email"
+                                  value={client2PoaPersonalCareData[index]?.email || ''}
+                                  onChange={(e) => handleClient2PoaPersonalCareChange(index, 'email', e.target.value)}
+                                  placeholder="Enter email address"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Relationship to {client2Name} *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2PoaPersonalCareData[index]?.relationship || ''}
+                                  onChange={(e) => handleClient2PoaPersonalCareChange(index, 'relationship', e.target.value)}
+                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {question.key === 'client2PoaPropertyCount' && client2PoaPropertyCount > 0 && (
+                      <div className="space-y-6 mt-6">
+                        <h3 className="text-xl font-semibold text-white">
+                          {answers['spousesPoaProperty'] === 'yes'
+                            ? `${client2Name}'s Contingent Powers of Attorney for Property Details`
+                            : `${client2Name}'s Powers of Attorney for Property Details`}
+                        </h3>
+                        {Array.from({ length: client2PoaPropertyCount }).map((_, index) => (
+                          <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                            <h4 className="text-lg font-semibold text-white mb-4">
+                              {answers['spousesPoaProperty'] === 'yes'
+                                ? `Contingent POA for Property #${index + 1}`
+                                : `POA for Property #${index + 1}`}
+                            </h4>
+
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2PoaPropertyData[index]?.name || ''}
+                                  onChange={(e) => handleClient2PoaPropertyChange(index, 'name', e.target.value)}
+                                  placeholder="Enter name"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Phone Number *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2PoaPropertyData[index]?.phone || ''}
+                                  onChange={(e) => handleClient2PoaPropertyChange(index, 'phone', e.target.value)}
+                                  placeholder="Enter phone number"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Email Address *
+                                </label>
+                                <input
+                                  type="email"
+                                  value={client2PoaPropertyData[index]?.email || ''}
+                                  onChange={(e) => handleClient2PoaPropertyChange(index, 'email', e.target.value)}
+                                  placeholder="Enter email address"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Relationship to {client2Name} *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2PoaPropertyData[index]?.relationship || ''}
+                                  onChange={(e) => handleClient2PoaPropertyChange(index, 'relationship', e.target.value)}
+                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {question.key === 'client2EstateTrusteeCount' && client2EstateTrusteeCount > 0 && (
+                      <div className="space-y-6 mt-6">
+                        <h3 className="text-xl font-semibold text-white">{client2Name}'s Estate Trustees Details</h3>
+                        {Array.from({ length: client2EstateTrusteeCount }).map((_, index) => (
+                          <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                            <h4 className="text-lg font-semibold text-white mb-4">Estate Trustee #{index + 1}</h4>
+
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2EstateTrusteeData[index]?.name || ''}
+                                  onChange={(e) => handleClient2EstateTrusteeChange(index, 'name', e.target.value)}
+                                  placeholder="Enter name"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Phone Number *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2EstateTrusteeData[index]?.phone || ''}
+                                  onChange={(e) => handleClient2EstateTrusteeChange(index, 'phone', e.target.value)}
+                                  placeholder="Enter phone number"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Email Address *
+                                </label>
+                                <input
+                                  type="email"
+                                  value={client2EstateTrusteeData[index]?.email || ''}
+                                  onChange={(e) => handleClient2EstateTrusteeChange(index, 'email', e.target.value)}
+                                  placeholder="Enter email address"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Relationship to {client2Name} *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2EstateTrusteeData[index]?.relationship || ''}
+                                  onChange={(e) => handleClient2EstateTrusteeChange(index, 'relationship', e.target.value)}
+                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+
+              {step.id === 6 && client1FinancialAdvisorsCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Your Financial Advisors Details</h3>
+                  {Array.from({ length: client1FinancialAdvisorsCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1FinancialAdvisorsData[index]?.name || ''}
+                            onChange={(e) => handleFinancialAdvisorChange(index, 'name', e.target.value)}
+                            placeholder="Enter name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Firm/Company *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1FinancialAdvisorsData[index]?.firm || ''}
+                            onChange={(e) => handleFinancialAdvisorChange(index, 'firm', e.target.value)}
+                            placeholder="Enter firm/company name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={client1FinancialAdvisorsData[index]?.phone || ''}
+                            onChange={(e) => handleFinancialAdvisorChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={client1FinancialAdvisorsData[index]?.email || ''}
+                            onChange={(e) => handleFinancialAdvisorChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {step.id === 6 && client2FinancialAdvisorsCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Spouse's Financial Advisors Details</h3>
+                  {Array.from({ length: client2FinancialAdvisorsCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2FinancialAdvisorsData[index]?.name || ''}
+                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'name', e.target.value)}
+                            placeholder="Enter name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Firm/Company *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2FinancialAdvisorsData[index]?.firm || ''}
+                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'firm', e.target.value)}
+                            placeholder="Enter firm/company name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="text"
+                            value={client2FinancialAdvisorsData[index]?.phone || ''}
+                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={client2FinancialAdvisorsData[index]?.email || ''}
+                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+            );
+          })()}
+
+          {step.id === 7 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
+            const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+            const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
             const bankingStructure = answers['bankingStructure'];
             const ownsRealEstate = answers['ownsRealEstate'];
             const isPrimaryResidence = answers['isPrimaryResidence'];
@@ -1378,8 +2366,8 @@ export default function StepForm({
 
           {step.id === 2 && (client1PrevRelCount > 0 || client2PrevRelCount > 0) && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
-            const client1Name = basicAnswers['fullName'] as string;
-            const client2Name = basicAnswers['spouseName'] as string;
+            const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+            const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
 
             return (
               <div className="space-y-8">
@@ -1624,8 +2612,8 @@ export default function StepForm({
 
           {step.id === 3 && childCount > 0 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
-            const client1Name = basicAnswers['fullName'] as string;
-            const client2Name = basicAnswers['spouseName'] as string;
+            const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+            const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
 
             return (
@@ -2207,8 +3195,8 @@ export default function StepForm({
 
           {step.id === 11 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
-            const client1Name = basicAnswers['fullName'] as string;
-            const client2Name = basicAnswers['spouseName'] as string;
+            const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+            const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
 
             const client1Question = step.questions.find(q => q.key === 'client1HasPension');
@@ -2433,35 +3421,6 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 7 && (() => {
-            const allFormData = Object.fromEntries(
-              Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
-                Object.entries(stepAnswers)
-              )
-            );
-
-            return (
-              <>
-                {step.questions.map((question) => {
-                  if (question.condition && typeof question.condition === 'function') {
-                    if (!question.condition(allFormData)) {
-                      return null;
-                    }
-                  }
-
-                  return (
-                    <FormField
-                      key={question.key}
-                      question={question}
-                      value={answers[question.key]}
-                      onChange={(value) => onAnswerChange(question.key, value)}
-                    />
-                  );
-                })}
-              </>
-            );
-          })()}
-
           {step.id === 8 && (
             <>
               {step.questions.map((question) => (
@@ -2476,8 +3435,8 @@ export default function StepForm({
               {answers['hasDebts'] === 'yes' && (() => {
                 const basicAnswers = allAnswers?.get(1) || {};
                 const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-                const client1Name = basicAnswers['fullName'] as string;
-                const client2Name = basicAnswers['spouseName'] as string;
+                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
+                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
 
                 const debtsData = (answers['debtsData'] as Array<Record<string, string>>) || [{}];
 
@@ -2687,7 +3646,7 @@ export default function StepForm({
 
               {(() => {
                 const basicAnswers = allAnswers?.get(1) || {};
-                const client1Name = basicAnswers['fullName'] as string;
+                const client1Name = basicAnswers['fullName'] as string || 'Client 1';
 
                 const hasCreditCards = answers['client1HasCreditCards'];
                 const creditCardCount = answers['client1CreditCardCount'] || '0';
@@ -2829,7 +3788,7 @@ export default function StepForm({
               {(() => {
                 const basicAnswers = allAnswers?.get(1) || {};
                 const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-                const client2Name = basicAnswers['spouseName'] as string;
+                const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
 
                 if (!hasSpouse) return null;
 
@@ -2977,8 +3936,8 @@ export default function StepForm({
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
                 const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-                const client1Name = basicAnswers['fullName'] as string;
-                const client2Name = basicAnswers['spouseName'] as string;
+                const client1Name = basicAnswers['fullName'] as string || 'you';
+                const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
                 if (question.key === 'client2HasWorkBenefits' && !hasSpouse) {
                   return null;
@@ -3054,8 +4013,8 @@ export default function StepForm({
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
                 const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-                const client1Name = basicAnswers['fullName'] as string;
-                const client2Name = basicAnswers['spouseName'] as string;
+                const client1Name = basicAnswers['fullName'] as string || 'you';
+                const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
                 if (question.key === 'hasAdditionalProperties' && answers['hasHomeInsurance'] !== 'yes') {
                   return null;

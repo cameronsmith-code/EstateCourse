@@ -105,65 +105,31 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
           console.warn('Background sync failed:', err);
         });
       } else {
-        // Check if a questionnaire already exists in the database for this session
-        const { data: existingQuestionnaire } = await supabase
-          .from('questionnaires')
-          .select('*')
-          .eq('session_id', sessionId)
-          .maybeSingle();
-
-        let newQuestionnaire: Questionnaire;
-
-        if (existingQuestionnaire) {
-          // Use existing questionnaire from database
-          newQuestionnaire = existingQuestionnaire as Questionnaire;
-
-          // Load answers from database
-          const { data: dbAnswers } = await supabase
-            .from('questionnaire_answers')
-            .select('*')
-            .eq('questionnaire_id', existingQuestionnaire.id);
-
-          const syncedAnswers: Map<number, Answer> = new Map();
-          if (dbAnswers && dbAnswers.length > 0) {
-            dbAnswers.forEach((ans) => {
-              const step = ans.step;
-              if (!syncedAnswers.has(step)) {
-                syncedAnswers.set(step, {});
-              }
-              syncedAnswers.get(step)![ans.question_key] = ans.answer;
-            });
-          }
-
-          setAnswers(syncedAnswers);
-        } else {
-          // Create new questionnaire
-          newQuestionnaire = {
-            id: crypto.randomUUID(),
-            session_id: sessionId,
-            current_step: 1,
-            status: 'in_progress',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-
-          const { error: insertError } = await supabase.from('questionnaires').insert([{
-            id: newQuestionnaire.id,
-            session_id: sessionId,
-            user_id: null,
-            current_step: 1,
-            status: 'in_progress',
-          }]);
-
-          if (insertError) {
-            console.warn('Failed to save to database:', insertError);
-          }
-        }
+        const newQuestionnaire: Questionnaire = {
+          id: crypto.randomUUID(),
+          session_id: sessionId,
+          current_step: 1,
+          status: 'in_progress',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newQuestionnaire));
         setQuestionnaire(newQuestionnaire);
-        setCurrentStep(newQuestionnaire.current_step);
+        setCurrentStep(1);
         setLoading(false);
+
+        supabase.from('questionnaires').insert([{
+          id: newQuestionnaire.id,
+          session_id: sessionId,
+          current_step: 1,
+          status: 'in_progress',
+        }]).then(
+          () => {},
+          (err) => {
+            console.warn('Failed to save to database:', err);
+          }
+        );
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');

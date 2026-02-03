@@ -27,6 +27,17 @@ export default function Wizard() {
     initQuestionnaire();
   }, [initQuestionnaire]);
 
+  useEffect(() => {
+    if (!loading && currentStep > 1 && !isStepVisible(currentStep)) {
+      const nextVisible = getNextVisibleStep(currentStep - 1);
+      if (nextVisible !== null && nextVisible !== currentStep) {
+        for (let i = 0; i < nextVisible - currentStep; i++) {
+          nextStep();
+        }
+      }
+    }
+  }, [currentStep, loading]);
+
   if (!STEPS || STEPS.length === 0) {
     return (
       <div className="max-w-2xl mx-auto">
@@ -177,7 +188,7 @@ export default function Wizard() {
         step={currentStepData}
         answers={currentAnswers}
         allAnswers={answers}
-        isFirstStep={getPreviousVisibleStep(validCurrentStep) === null}
+        isFirstStep={validCurrentStep === 1}
         isLastStep={getNextVisibleStep(validCurrentStep) === null}
         onNext={handleNext}
         onPrevious={handlePrevious}

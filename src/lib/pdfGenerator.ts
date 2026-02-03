@@ -273,6 +273,10 @@ interface FormData {
   client2HasDiscussedFuneral?: string;
   client2FuneralWrittenDown?: string;
   client2FuneralDocLocation?: string;
+  client1HasPension?: string;
+  client1PensionsData?: Array<Record<string, string>>;
+  client2HasPension?: string;
+  client2PensionsData?: Array<Record<string, string>>;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -8449,6 +8453,285 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition = pensionTableY + 15;
     }
+  }
+
+  // Add Supporting Document Summary section
+  doc.addPage();
+  yPosition = 12;
+  addSectionHeader('Supporting Document Summary');
+
+  // Collect all document locations for Client 1
+  const client1Documents: Array<{ type: string; location: string }> = [];
+
+  if (formData.hasMarriageContract === 'yes' && formData.marriageContractLocation) {
+    client1Documents.push({
+      type: 'Marriage Contract',
+      location: formData.marriageContractLocation
+    });
+  }
+
+  if (formData.client1HasWill === 'yes' && formData.client1WillLocation) {
+    client1Documents.push({
+      type: `${client1Name} - Will`,
+      location: formData.client1WillLocation
+    });
+  }
+
+  if (formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillLocation) {
+    client1Documents.push({
+      type: `${client1Name} - Secondary Will`,
+      location: formData.client1SecondaryWillLocation
+    });
+  }
+
+  if (formData.client1UsesAccountant === 'yes' && formData.client1AccountingRecordsLocation) {
+    client1Documents.push({
+      type: `${client1Name} - Accounting Records`,
+      location: formData.client1AccountingRecordsLocation
+    });
+  }
+
+  if (formData.client1IsSpousalTrustBeneficiary === 'yes' && formData.client1SpousalTrustDocumentLocation) {
+    client1Documents.push({
+      type: `${client1Name} - Spousal Trust Document`,
+      location: formData.client1SpousalTrustDocumentLocation
+    });
+  }
+
+  if (formData.client1PreviousRelationshipsData && formData.client1PreviousRelationshipsData.length > 0) {
+    formData.client1PreviousRelationshipsData.forEach((rel, index) => {
+      if (rel.hasSpousalSupport === 'yes' && rel.supportDocumentLocation) {
+        client1Documents.push({
+          type: `${client1Name} - Spousal Support Agreement (Relationship ${index + 1})`,
+          location: rel.supportDocumentLocation
+        });
+      }
+    });
+  }
+
+  if (formData.client1BeneficiaryTrustsData && formData.client1BeneficiaryTrustsData.length > 0) {
+    formData.client1BeneficiaryTrustsData.forEach((trust, index) => {
+      if (trust.documentLocation) {
+        client1Documents.push({
+          type: `${client1Name} - Beneficiary Trust ${index + 1}`,
+          location: trust.documentLocation
+        });
+      }
+    });
+  }
+
+  if (formData.client1PensionsData && formData.client1PensionsData.length > 0) {
+    formData.client1PensionsData.forEach((pension, index) => {
+      if (pension.documentLocation) {
+        client1Documents.push({
+          type: `${client1Name} - Pension ${index + 1}`,
+          location: pension.documentLocation
+        });
+      }
+    });
+  }
+
+  // Collect all document locations for Client 2
+  const client2Documents: Array<{ type: string; location: string }> = [];
+
+  if (hasSpouse) {
+    if (formData.client2HasWill === 'yes' && formData.client2WillLocation) {
+      client2Documents.push({
+        type: `${client2Name} - Will`,
+        location: formData.client2WillLocation
+      });
+    }
+
+    if (formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillLocation) {
+      client2Documents.push({
+        type: `${client2Name} - Secondary Will`,
+        location: formData.client2SecondaryWillLocation
+      });
+    }
+
+    if (formData.client2UsesAccountant === 'yes' && formData.client2AccountingRecordsLocation) {
+      client2Documents.push({
+        type: `${client2Name} - Accounting Records`,
+        location: formData.client2AccountingRecordsLocation
+      });
+    }
+
+    if (formData.client2PreviousRelationshipsData && formData.client2PreviousRelationshipsData.length > 0) {
+      formData.client2PreviousRelationshipsData.forEach((rel, index) => {
+        if (rel.hasSpousalSupport === 'yes' && rel.supportDocumentLocation) {
+          client2Documents.push({
+            type: `${client2Name} - Spousal Support Agreement (Relationship ${index + 1})`,
+            location: rel.supportDocumentLocation
+          });
+        }
+      });
+    }
+
+    if (formData.client2BeneficiaryTrustsData && formData.client2BeneficiaryTrustsData.length > 0) {
+      formData.client2BeneficiaryTrustsData.forEach((trust, index) => {
+        if (trust.documentLocation) {
+          client2Documents.push({
+            type: `${client2Name} - Beneficiary Trust ${index + 1}`,
+            location: trust.documentLocation
+          });
+        }
+      });
+    }
+
+    if (formData.client2PensionsData && formData.client2PensionsData.length > 0) {
+      formData.client2PensionsData.forEach((pension, index) => {
+        if (pension.documentLocation) {
+          client2Documents.push({
+            type: `${client2Name} - Pension ${index + 1}`,
+            location: pension.documentLocation
+          });
+        }
+      });
+    }
+  }
+
+  // Collect child support documents
+  if (formData.childrenData && formData.childrenData.length > 0) {
+    formData.childrenData.forEach((child, index) => {
+      if (child.childSupportDocLocation) {
+        if (child.parentsOption === 'client1-other') {
+          client1Documents.push({
+            type: `${client1Name} - Child Support Documents (${child.name || `Child ${index + 1}`})`,
+            location: child.childSupportDocLocation
+          });
+        } else if (child.parentsOption === 'client2-other') {
+          client2Documents.push({
+            type: `${client2Name} - Child Support Documents (${child.name || `Child ${index + 1}`})`,
+            location: child.childSupportDocLocation
+          });
+        }
+      }
+    });
+  }
+
+  // Add family trust document
+  if (formData.hasFamilyTrust === 'yes' && formData.trustDeedLocation) {
+    client1Documents.push({
+      type: 'Family Trust Deed',
+      location: formData.trustDeedLocation
+    });
+  }
+
+  // Create Client 1 Document Summary Table
+  if (client1Documents.length > 0) {
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.darkText);
+    doc.text(`${client1Name} - Document Summary`, margin, yPosition);
+    yPosition += 6;
+
+    const docTableCellHeight = 8;
+    const docTableLabelWidth = fieldWidth * 0.4;
+    const docTableValueWidth = fieldWidth * 0.6;
+
+    // Header row
+    doc.setDrawColor(...colors.borderGray);
+    doc.setFillColor(200, 200, 200);
+    doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight, 'FD');
+    doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight, 'FD');
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('Document Type', margin + 2, yPosition + 5);
+    doc.text('Location', margin + docTableLabelWidth + 2, yPosition + 5);
+    yPosition += docTableCellHeight;
+
+    // Data rows
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(8);
+
+    client1Documents.forEach((docItem) => {
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setDrawColor(...colors.borderGray);
+      doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight);
+      doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight);
+
+      const typeText = doc.splitTextToSize(docItem.type, docTableLabelWidth - 4);
+      doc.text(typeText, margin + 2, yPosition + 5);
+
+      const locationField = new doc.AcroFormTextField();
+      locationField.fieldName = `doc_location_${docItem.type.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      locationField.Rect = [margin + docTableLabelWidth + 1, yPosition + 1, docTableValueWidth - 2, docTableCellHeight - 2];
+      locationField.fontSize = 8;
+      locationField.textColor = colors.darkText;
+      locationField.value = docItem.location;
+      locationField.borderStyle = 'none';
+      doc.addField(locationField);
+
+      yPosition += docTableCellHeight;
+    });
+
+    yPosition += 10;
+  }
+
+  // Create Client 2 Document Summary Table
+  if (client2Documents.length > 0) {
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.darkText);
+    doc.text(`${client2Name} - Document Summary`, margin, yPosition);
+    yPosition += 6;
+
+    const docTableCellHeight = 8;
+    const docTableLabelWidth = fieldWidth * 0.4;
+    const docTableValueWidth = fieldWidth * 0.6;
+
+    // Header row
+    doc.setDrawColor(...colors.borderGray);
+    doc.setFillColor(200, 200, 200);
+    doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight, 'FD');
+    doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight, 'FD');
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('Document Type', margin + 2, yPosition + 5);
+    doc.text('Location', margin + docTableLabelWidth + 2, yPosition + 5);
+    yPosition += docTableCellHeight;
+
+    // Data rows
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(8);
+
+    client2Documents.forEach((docItem) => {
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setDrawColor(...colors.borderGray);
+      doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight);
+      doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight);
+
+      const typeText = doc.splitTextToSize(docItem.type, docTableLabelWidth - 4);
+      doc.text(typeText, margin + 2, yPosition + 5);
+
+      const locationField = new doc.AcroFormTextField();
+      locationField.fieldName = `doc_location_${docItem.type.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      locationField.Rect = [margin + docTableLabelWidth + 1, yPosition + 1, docTableValueWidth - 2, docTableCellHeight - 2];
+      locationField.fontSize = 8;
+      locationField.textColor = colors.darkText;
+      locationField.value = docItem.location;
+      locationField.borderStyle = 'none';
+      doc.addField(locationField);
+
+      yPosition += docTableCellHeight;
+    });
+
+    yPosition += 10;
   }
 
   // Add new page for additional information

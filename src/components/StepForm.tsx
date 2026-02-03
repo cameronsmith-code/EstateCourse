@@ -258,15 +258,15 @@ export default function StepForm({
 
   const numberOfChildren = allAnswers?.get(1)?.['numberOfChildren'];
   const childCount = numberOfChildren ? (numberOfChildren === '6+' ? 6 : parseInt(numberOfChildren as string)) : 0;
-  const childrenData = (answers['childrenData'] as Array<Record<string, string>>) || Array(childCount).fill(null).map(() => ({}));
+  const childrenData = (answers['childrenData'] as Array<Record<string, string>>) || Array(Math.max(0, childCount || 0)).fill(null).map(() => ({}));
 
   const client1NumberOfPreviousRelationships = allAnswers?.get(1)?.['client1NumberOfPreviousRelationships'];
   const client1PrevRelCount = client1NumberOfPreviousRelationships ? parseInt(client1NumberOfPreviousRelationships as string) : 0;
-  const client1PreviousRelationshipsData = (answers['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || Array(client1PrevRelCount).fill(null).map(() => ({}));
+  const client1PreviousRelationshipsData = (answers['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || Array(Math.max(0, client1PrevRelCount || 0)).fill(null).map(() => ({}));
 
   const client2NumberOfPreviousRelationships = allAnswers?.get(1)?.['client2NumberOfPreviousRelationships'];
   const client2PrevRelCount = client2NumberOfPreviousRelationships ? parseInt(client2NumberOfPreviousRelationships as string) : 0;
-  const client2PreviousRelationshipsData = (answers['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || Array(client2PrevRelCount).fill(null).map(() => ({}));
+  const client2PreviousRelationshipsData = (answers['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || Array(Math.max(0, client2PrevRelCount || 0)).fill(null).map(() => ({}));
 
   const handleChildChange = (index: number, field: string, value: string) => {
     const updated = [...childrenData];
@@ -337,7 +337,7 @@ export default function StepForm({
   };
 
   const client1PoaPersonalCareCount = parseInt(answers['client1PoaPersonalCareCount'] as string) || 0;
-  const client1PoaPersonalCareData = (answers['client1PoaPersonalCareData'] as Array<Record<string, string>>) || Array(client1PoaPersonalCareCount).fill(null).map(() => ({}));
+  const client1PoaPersonalCareData = (answers['client1PoaPersonalCareData'] as Array<Record<string, string>>) || Array(Math.max(0, client1PoaPersonalCareCount || 0)).fill(null).map(() => ({}));
 
   const handlePoaPersonalCareChange = (index: number, field: string, value: string) => {
     const updated = [...client1PoaPersonalCareData];
@@ -349,7 +349,7 @@ export default function StepForm({
   };
 
   const client1PoaPropertyCount = parseInt(answers['client1PoaPropertyCount'] as string) || 0;
-  const client1PoaPropertyData = (answers['client1PoaPropertyData'] as Array<Record<string, string>>) || Array(client1PoaPropertyCount).fill(null).map(() => ({}));
+  const client1PoaPropertyData = (answers['client1PoaPropertyData'] as Array<Record<string, string>>) || Array(Math.max(0, client1PoaPropertyCount || 0)).fill(null).map(() => ({}));
 
   const handlePoaPropertyChange = (index: number, field: string, value: string) => {
     const updated = [...client1PoaPropertyData];
@@ -361,7 +361,7 @@ export default function StepForm({
   };
 
   const client1EstateTrusteeCount = parseInt(answers['client1EstateTrusteeCount'] as string) || 0;
-  const client1EstateTrusteeData = (answers['client1EstateTrusteeData'] as Array<Record<string, string>>) || Array(client1EstateTrusteeCount).fill(null).map(() => ({}));
+  const client1EstateTrusteeData = (answers['client1EstateTrusteeData'] as Array<Record<string, string>>) || Array(Math.max(0, client1EstateTrusteeCount || 0)).fill(null).map(() => ({}));
 
   const handleEstateTrusteeChange = (index: number, field: string, value: string) => {
     const updated = [...client1EstateTrusteeData];
@@ -373,7 +373,7 @@ export default function StepForm({
   };
 
   const client1FinancialAdvisorsCount = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
-  const client1FinancialAdvisorsData = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(client1FinancialAdvisorsCount).fill(null).map(() => ({}));
+  const client1FinancialAdvisorsData = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(Math.max(0, client1FinancialAdvisorsCount || 0)).fill(null).map(() => ({}));
 
   const handleFinancialAdvisorChange = (index: number, field: string, value: string) => {
     const updated = [...client1FinancialAdvisorsData];
@@ -385,7 +385,7 @@ export default function StepForm({
   };
 
   const client2PoaPersonalCareCount = parseInt(answers['client2PoaPersonalCareCount'] as string) || 0;
-  const client2PoaPersonalCareData = (answers['client2PoaPersonalCareData'] as Array<Record<string, string>>) || Array(client2PoaPersonalCareCount).fill(null).map(() => ({}));
+  const client2PoaPersonalCareData = (answers['client2PoaPersonalCareData'] as Array<Record<string, string>>) || Array(Math.max(0, client2PoaPersonalCareCount || 0)).fill(null).map(() => ({}));
 
   const handleClient2PoaPersonalCareChange = (index: number, field: string, value: string) => {
     const updated = [...client2PoaPersonalCareData];
@@ -397,7 +397,7 @@ export default function StepForm({
   };
 
   const client2PoaPropertyCount = parseInt(answers['client2PoaPropertyCount'] as string) || 0;
-  const client2PoaPropertyData = (answers['client2PoaPropertyData'] as Array<Record<string, string>>) || Array(client2PoaPropertyCount).fill(null).map(() => ({}));
+  const client2PoaPropertyData = (answers['client2PoaPropertyData'] as Array<Record<string, string>>) || Array(Math.max(0, client2PoaPropertyCount || 0)).fill(null).map(() => ({}));
 
   const handleClient2PoaPropertyChange = (index: number, field: string, value: string) => {
     const updated = [...client2PoaPropertyData];
@@ -409,7 +409,7 @@ export default function StepForm({
   };
 
   const client2EstateTrusteeCount = parseInt(answers['client2EstateTrusteeCount'] as string) || 0;
-  const client2EstateTrusteeData = (answers['client2EstateTrusteeData'] as Array<Record<string, string>>) || Array(client2EstateTrusteeCount).fill(null).map(() => ({}));
+  const client2EstateTrusteeData = (answers['client2EstateTrusteeData'] as Array<Record<string, string>>) || Array(Math.max(0, client2EstateTrusteeCount || 0)).fill(null).map(() => ({}));
 
   const handleClient2EstateTrusteeChange = (index: number, field: string, value: string) => {
     const updated = [...client2EstateTrusteeData];
@@ -421,7 +421,7 @@ export default function StepForm({
   };
 
   const client2FinancialAdvisorsCount = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
-  const client2FinancialAdvisorsData = (answers['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(client2FinancialAdvisorsCount).fill(null).map(() => ({}));
+  const client2FinancialAdvisorsData = (answers['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(Math.max(0, client2FinancialAdvisorsCount || 0)).fill(null).map(() => ({}));
 
   const handleClient2FinancialAdvisorChange = (index: number, field: string, value: string) => {
     const updated = [...client2FinancialAdvisorsData];
@@ -433,7 +433,7 @@ export default function StepForm({
   };
 
   const trustBeneficiariesCount = parseInt(answers['trustBeneficiariesCount'] as string) || 0;
-  const trustBeneficiariesData = (answers['trustBeneficiariesData'] as Array<Record<string, string>>) || Array(trustBeneficiariesCount).fill(null).map(() => ({}));
+  const trustBeneficiariesData = (answers['trustBeneficiariesData'] as Array<Record<string, string>>) || Array(Math.max(0, trustBeneficiariesCount || 0)).fill(null).map(() => ({}));
 
   const handleBeneficiaryChange = (index: number, field: string, value: string) => {
     const updated = [...trustBeneficiariesData];
@@ -445,7 +445,7 @@ export default function StepForm({
   };
 
   const numberOfCorporations = parseInt(answers['numberOfCorporations'] as string) || 0;
-  const corporationsData = (answers['corporationsData'] as Array<Record<string, string>>) || Array(numberOfCorporations).fill(null).map(() => ({}));
+  const corporationsData = (answers['corporationsData'] as Array<Record<string, string>>) || Array(Math.max(0, numberOfCorporations || 0)).fill(null).map(() => ({}));
 
   const handleCorporationChange = (index: number, field: string, value: string) => {
     const updated = [...corporationsData];
@@ -1943,7 +1943,7 @@ export default function StepForm({
               const institutionCount = parseInt(answers[count] as string) || 0;
               if (institutionCount === 0) return null;
 
-              const institutionsData = (answers[key] as Array<Record<string, string>>) || Array(institutionCount).fill(null).map(() => ({}));
+              const institutionsData = (answers[key] as Array<Record<string, string>>) || Array(Math.max(0, institutionCount || 0)).fill(null).map(() => ({}));
 
               const handleInstitutionChange = (index: number, value: string) => {
                 const updated = [...institutionsData];
@@ -2148,7 +2148,7 @@ export default function StepForm({
                     }
 
                     const propertyCount = parseInt(answers['additionalPropertiesCount'] as string) || 0;
-                    const propertiesData = (answers['propertiesData'] as Array<Record<string, string>>) || Array(propertyCount).fill(null).map(() => ({}));
+                    const propertiesData = (answers['propertiesData'] as Array<Record<string, string>>) || Array(Math.max(0, propertyCount || 0)).fill(null).map(() => ({}));
 
                     const handlePropertyChange = (index: number, field: string, value: string) => {
                       const updated = [...propertiesData];
@@ -3711,7 +3711,7 @@ export default function StepForm({
                             onChange={(e) => {
                               const count = parseInt(e.target.value) || 0;
                               onAnswerChange('client1CreditCardCount', e.target.value);
-                              const newData = Array(count).fill(null).map((_, i) => creditCardsData[i] || {});
+                              const newData = Array(Math.max(0, count)).fill(null).map((_, i) => creditCardsData[i] || {});
                               onAnswerChange('creditCardsData', newData);
                             }}
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -3855,7 +3855,7 @@ export default function StepForm({
                             onChange={(e) => {
                               const count = parseInt(e.target.value) || 0;
                               onAnswerChange('client2CreditCardCount', e.target.value);
-                              const newData = Array(count).fill(null).map((_, i) => client2CreditCardsData[i] || {});
+                              const newData = Array(Math.max(0, count)).fill(null).map((_, i) => client2CreditCardsData[i] || {});
                               onAnswerChange('client2CreditCardsData', newData);
                             }}
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"

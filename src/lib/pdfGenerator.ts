@@ -5125,6 +5125,97 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 12;
   }
 
+  // Additional Reading Section for Secondary Wills
+  const needsSecondaryWillReading = formData.client1HasSecondaryWill === 'no' ||
+                                     (hasSpouse && formData.client2HasSecondaryWill === 'no');
+
+  if (needsSecondaryWillReading) {
+    if (yPosition > 120) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(12);
+    doc.text('Additional Reading - How do Secondary Wills Work?', margin, yPosition);
+    yPosition += 8;
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+
+    const secondaryWillText = [
+      'In the intake form it was indicated that one or more parties selected \'No\' to having a Secondary Will.',
+      'They are a niche Estate Administration Tax avoidance strategy that people use. Here is a brief overview',
+      'of what the strategy entails and how they work.',
+      '',
+      'How do Secondary Wills work in Ontario?',
+      '',
+      'Secondary Wills, typically used as part of a multiple Wills strategy, are a financial and estate planning',
+      'technique utilized primarily in jurisdictions that impose significant fees on probate, such as Ontario.',
+      'The central purpose of employing secondary Wills in Ontario is to minimize or avoid probate fees (also',
+      'called estate administration tax) on high-value assets that do not legally require the Will to be validated',
+      'in court.',
+      '',
+      'Here are the details on how Secondary Wills function in Ontario:',
+      '',
+      'The Mechanism of Multiple Wills:',
+      '',
+      'The strategy involves deliberately segregating assets into two distinct Wills to control which properties',
+      'are subject to the provincial probate process:',
+      '',
+      'a.  The Primary Will: This document deals exclusively with assets that legally require a grant of probate',
+      '    (or Certificate of Appointment of Estate Trustee with a Will, in Ontario) for the executor to obtain',
+      '    legal title and distribute the property. These usually include assets held solely in the deceased\'s name',
+      '    where the financial institution (like a bank or brokerage firm) requires legal validation, such as bank',
+      '    accounts and investment portfolios.',
+      '',
+      'b.  The Secondary Will: This document covers assets that typically do not require probate to transfer legal',
+      '    ownership. In Ontario, the secondary Will is commonly used to transfer specific high-value assets such',
+      '    as privately held securities of a private corporation or personal effects like artwork and jewelry.',
+      '',
+      'Benefits and Application:',
+      '',
+      'By structuring the estate this way, the executor only needs to submit the primary Will for probate, thereby',
+      'avoiding the imposition of probate fees on the assets listed in the non-probated secondary will.',
+      '',
+      'a.  Non-Probateable Assets: The secondary Will functions successfully because provincial corporate statues',
+      '    may grant the corporation\'s directors the authority to transfer the shares of a deceased shareholder',
+      '    without requiring the Will to be probated.',
+      '',
+      'b.  Cost Savings: Since the probate tax is based on the value of the assets that pass through the probated',
+      '    Will, this technique is a method to reduce the total probate fee payable. Ontario charges potentially',
+      '    significant probate taxes, which provides a strong motivation for implementing this planning.',
+      '',
+      'Risks and Considerations in Ontario:',
+      '',
+      'The use of this probate planning technique carries risks and complexity, especially in jurisdictions known',
+      'to challenge such arrangements.',
+      '',
+      'a.  Aggressive Scrutiny: Ontario, especially, has been very aggressive in challenging attempts to reduce',
+      '    or bypass probate through this method.',
+      '',
+      'b.  Ancillary Requirements: Even if the secondary Will is intended to avoid probate, there are circumstances',
+      '    where it might still be required. For example, if the secondary Will creates trusts – or if financial',
+      '    institutions have internal policies requiring probate documentation to open accounts for the resultant',
+      '    trust – a grant of probate may still be necessary.',
+      '',
+      'c.  Irrevocability: When using Multiple Wills, care must be taken during the drafting process to ensure',
+      '    that the execution and revocation clauses are explicitly written so that the execution of one Will does',
+      '    not inadvertently revoke the other.'
+    ];
+
+    secondaryWillText.forEach(line => {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += 5;
+    });
+
+    yPosition += 12;
+  }
+
   const bankingStructure = formData.bankingStructure;
   let totalBankCount = 0;
 

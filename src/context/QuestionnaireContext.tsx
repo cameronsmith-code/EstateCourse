@@ -71,39 +71,41 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
         setAnswers(loadedAnswers);
         setLoading(false);
 
-        Promise.race([
-          supabase
-            .from('questionnaires')
-            .select('*')
-            .eq('session_id', sessionId)
-            .maybeSingle()
-            .then(async ({ data: dbQuestionnaire }) => {
-              if (dbQuestionnaire) {
-                const { data: dbAnswers } = await supabase
-                  .from('questionnaire_answers')
-                  .select('*')
-                  .eq('questionnaire_id', dbQuestionnaire.id);
+        if (supabase) {
+          Promise.race([
+            supabase
+              .from('questionnaires')
+              .select('*')
+              .eq('session_id', sessionId)
+              .maybeSingle()
+              .then(async ({ data: dbQuestionnaire }) => {
+                if (dbQuestionnaire) {
+                  const { data: dbAnswers } = await supabase
+                    .from('questionnaire_answers')
+                    .select('*')
+                    .eq('questionnaire_id', dbQuestionnaire.id);
 
-                const syncedAnswers: Map<number, Answer> = new Map();
-                if (dbAnswers && dbAnswers.length > 0) {
-                  dbAnswers.forEach((ans) => {
-                    const step = ans.step;
-                    if (!syncedAnswers.has(step)) {
-                      syncedAnswers.set(step, {});
-                    }
-                    syncedAnswers.get(step)![ans.question_key] = ans.answer;
-                  });
+                  const syncedAnswers: Map<number, Answer> = new Map();
+                  if (dbAnswers && dbAnswers.length > 0) {
+                    dbAnswers.forEach((ans) => {
+                      const step = ans.step;
+                      if (!syncedAnswers.has(step)) {
+                        syncedAnswers.set(step, {});
+                      }
+                      syncedAnswers.get(step)![ans.question_key] = ans.answer;
+                    });
+                  }
+
+                  setAnswers(syncedAnswers);
+                  setQuestionnaire(dbQuestionnaire as Questionnaire);
+                  setCurrentStep(dbQuestionnaire.current_step);
                 }
-
-                setAnswers(syncedAnswers);
-                setQuestionnaire(dbQuestionnaire as Questionnaire);
-                setCurrentStep(dbQuestionnaire.current_step);
-              }
-            }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout')), 5000))
-        ]).catch((err) => {
-          console.warn('Background sync failed:', err);
-        });
+              }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout')), 5000))
+          ]).catch((err) => {
+            console.warn('Background sync failed:', err);
+          });
+        }
       } else {
         const newQuestionnaire: Questionnaire = {
           id: crypto.randomUUID(),
@@ -119,17 +121,19 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
         setCurrentStep(1);
         setLoading(false);
 
-        supabase.from('questionnaires').insert([{
-          id: newQuestionnaire.id,
-          session_id: sessionId,
-          current_step: 1,
-          status: 'in_progress',
-        }]).then(
-          () => {},
-          (err) => {
-            console.warn('Failed to save to database:', err);
-          }
-        );
+        if (supabase) {
+          supabase.from('questionnaires').insert([{
+            id: newQuestionnaire.id,
+            session_id: sessionId,
+            current_step: 1,
+            status: 'in_progress',
+          }]).then(
+            () => {},
+            (err) => {
+              console.warn('Failed to save to database:', err);
+            }
+          );
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -166,71 +170,73 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
         });
         localStorage.setItem(ANSWERS_KEY, JSON.stringify(answersObj));
 
-        try {
-          const stepAnswers = answers.get(step);
+        if (supabase) {
+          try {
+            const stepAnswers = answers.get(step);
 
-          // Get all existing answers for this step
-          const { data: existingAnswers } = await supabase
-            .from('questionnaire_answers')
-            .select('id, question_key')
-            .eq('questionnaire_id', questionnaire.id)
-            .eq('step', step);
+            // Get all existing answers for this step
+            const { data: existingAnswers } = await supabase
+              .from('questionnaire_answers')
+              .select('id, question_key')
+              .eq('questionnaire_id', questionnaire.id)
+              .eq('step', step);
 
-          const existingMap = new Map(
-            (existingAnswers || []).map(a => [a.question_key, a.id])
-          );
+            const existingMap = new Map(
+              (existingAnswers || []).map(a => [a.question_key, a.id])
+            );
 
-          const toInsert = [];
-          const toUpdate = [];
-          const toDelete = [];
+            const toInsert = [];
+            const toUpdate = [];
+            const toDelete = [];
 
-          // Handle current answers
-          if (stepAnswers && Object.keys(stepAnswers).length > 0) {
-            for (const [key, value] of Object.entries(stepAnswers)) {
-              const existingId = existingMap.get(key);
-              if (existingId) {
-                toUpdate.push({
-                  id: existingId,
-                  answer: value,
-                  updated_at: new Date().toISOString()
-                });
-                existingMap.delete(key); // Remove from map
-              } else {
-                toInsert.push({
-                  questionnaire_id: questionnaire.id,
-                  step,
-                  question_key: key,
-                  answer: value,
-                });
+            // Handle current answers
+            if (stepAnswers && Object.keys(stepAnswers).length > 0) {
+              for (const [key, value] of Object.entries(stepAnswers)) {
+                const existingId = existingMap.get(key);
+                if (existingId) {
+                  toUpdate.push({
+                    id: existingId,
+                    answer: value,
+                    updated_at: new Date().toISOString()
+                  });
+                  existingMap.delete(key); // Remove from map
+                } else {
+                  toInsert.push({
+                    questionnaire_id: questionnaire.id,
+                    step,
+                    question_key: key,
+                    answer: value,
+                  });
+                }
               }
             }
-          }
 
-          // Any remaining items in existingMap should be deleted
-          for (const [key, id] of existingMap.entries()) {
-            toDelete.push(id);
-          }
+            // Any remaining items in existingMap should be deleted
+            for (const [key, id] of existingMap.entries()) {
+              toDelete.push(id);
+            }
 
-          // Execute database operations
-          if (toInsert.length > 0) {
-            await supabase.from('questionnaire_answers').insert(toInsert);
-          }
+            // Execute database operations
+            if (toInsert.length > 0) {
+              await supabase.from('questionnaire_answers').insert(toInsert);
+            }
 
-          for (const update of toUpdate) {
-            await supabase
-              .from('questionnaire_answers')
-              .update({ answer: update.answer, updated_at: update.updated_at })
-              .eq('id', update.id);
-          }
+            for (const update of toUpdate) {
+              await supabase
+                .from('questionnaire_answers')
+                .update({ answer: update.answer, updated_at: update.updated_at })
+                .eq('id', update.id);
+            }
 
-          if (toDelete.length > 0) {
-            await supabase
-              .from('questionnaire_answers')
-              .delete()
-              .in('id', toDelete);
+            if (toDelete.length > 0) {
+              await supabase
+                .from('questionnaire_answers')
+                .delete()
+                .in('id', toDelete);
+            }
+          } catch (dbErr) {
+            console.warn('Failed to save answers to database:', dbErr);
           }
-        } catch (dbErr) {
-          console.warn('Failed to save answers to database:', dbErr);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to save answers');
@@ -266,16 +272,18 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
       console.warn('Background save failed:', err);
     });
 
-    supabase
-      .from('questionnaires')
-      .update({ current_step: newStep, updated_at: new Date().toISOString() })
-      .eq('id', questionnaire.id)
-      .then(
-        () => {},
-        (err) => {
-          console.warn('Failed to update questionnaire step in database:', err);
-        }
-      );
+    if (supabase) {
+      supabase
+        .from('questionnaires')
+        .update({ current_step: newStep, updated_at: new Date().toISOString() })
+        .eq('id', questionnaire.id)
+        .then(
+          () => {},
+          (err) => {
+            console.warn('Failed to update questionnaire step in database:', err);
+          }
+        );
+    }
   }, [questionnaire, currentStep, answers, saveAnswers]);
 
   const previousStep = useCallback(() => {
@@ -304,16 +312,18 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
       console.warn('Background save failed:', err);
     });
 
-    supabase
-      .from('questionnaires')
-      .update({ status: 'completed', updated_at: new Date().toISOString() })
-      .eq('id', questionnaire.id)
-      .then(
-        () => {},
-        (err) => {
-          console.warn('Failed to mark questionnaire complete in database:', err);
-        }
-      );
+    if (supabase) {
+      supabase
+        .from('questionnaires')
+        .update({ status: 'completed', updated_at: new Date().toISOString() })
+        .eq('id', questionnaire.id)
+        .then(
+          () => {},
+          (err) => {
+            console.warn('Failed to mark questionnaire complete in database:', err);
+          }
+        );
+    }
   }, [questionnaire, currentStep, answers, saveAnswers]);
 
   const clearAllAnswers = useCallback(async () => {
@@ -332,21 +342,23 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(ANSWERS_KEY);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 
-    Promise.all([
-      supabase
-        .from('questionnaire_answers')
-        .delete()
-        .eq('questionnaire_id', questionnaire.id),
-      supabase
-        .from('questionnaires')
-        .update({ current_step: 1, updated_at: new Date().toISOString() })
-        .eq('id', questionnaire.id)
-    ]).then(
-      () => {},
-      (err) => {
-        console.warn('Failed to clear answers in database:', err);
-      }
-    );
+    if (supabase) {
+      Promise.all([
+        supabase
+          .from('questionnaire_answers')
+          .delete()
+          .eq('questionnaire_id', questionnaire.id),
+        supabase
+          .from('questionnaires')
+          .update({ current_step: 1, updated_at: new Date().toISOString() })
+          .eq('id', questionnaire.id)
+      ]).then(
+        () => {},
+        (err) => {
+          console.warn('Failed to clear answers in database:', err);
+        }
+      );
+    }
   }, [questionnaire]);
 
   return (

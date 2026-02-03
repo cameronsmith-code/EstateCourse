@@ -188,6 +188,9 @@ const getOrdinalLabel = (num: number): string => {
 };
 
 export const generatePDF = (formData: FormData) => {
+  // Ensure we have client names, use fallbacks if not provided
+  const client1Name = formData.fullName || 'Client 1';
+  const client2Name = formData.spouseName || 'Client 2';
 
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -394,8 +397,6 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.setFontSize(9);
       doc.setTextColor(...colors.darkText);
-      const client1Name = formData.fullName;
-      const client2Name = formData.spouseName;
       const labelText = `${client1Name} and ${client2Name} have a marriage contract, and the document is located:`;
       doc.text(labelText, margin, yPosition);
       yPosition += 6;
@@ -416,8 +417,6 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  const client1Name = formData.fullName;
-  const client2Name = formData.spouseName;
 
   const hasAnyPreviousRelationships =
     formData.client1HasPreviousRelationship === 'yes' ||
@@ -1663,17 +1662,15 @@ export const generatePDF = (formData: FormData) => {
   addSectionHeader('Corporate Information');
 
   const hasSpouseForCorp = (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law');
-  const corpClient1Name = formData.fullName;
-  const corpClient2Name = formData.spouseName;
 
   if (formData.ownsCorporation === 'no') {
     doc.setFontSize(10);
     doc.setFont(undefined, 'normal');
     doc.setTextColor(...colors.darkText);
     if (hasSpouseForCorp) {
-      doc.text(`${corpClient1Name} and ${corpClient2Name} indicated that they do not own a corporation.`, margin, yPosition);
+      doc.text(`${client1Name} and ${client2Name} indicated that they do not own a corporation.`, margin, yPosition);
     } else {
-      doc.text(`${corpClient1Name} indicated that they do not own a corporation.`, margin, yPosition);
+      doc.text(`${client1Name} indicated that they do not own a corporation.`, margin, yPosition);
     }
     yPosition += 8;
   } else if (formData.ownsCorporation === 'yes') {
@@ -3166,7 +3163,7 @@ export const generatePDF = (formData: FormData) => {
 
         doc.setFont(undefined, 'normal');
         doc.setFontSize(8);
-        const successionQuestion = `Is there a written plan for what to do with this property should ${formData.fullName}${formData.spouseName ? ` and ${formData.spouseName}` : ''} pass away?`;
+        const successionQuestion = `Is there a written plan for what to do with this property should ${client1Name}${formData.spouseName ? ` and ${client2Name}` : ''} pass away?`;
         const successionAnswer = property.hasSuccessionPlan === 'yes' ? 'Yes' : property.hasSuccessionPlan === 'no' ? 'No' : 'Not answered';
         doc.text(successionQuestion, margin, yPosition);
         yPosition += 5;
@@ -3720,11 +3717,8 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 12;
     doc.setTextColor(...colors.darkText);
 
-    const client1Name = formData.fullName;
-    const client2Name = formData.spouseName;
-
-    const client1Debts = formData.debtsData.filter(debt => debt.debtOwner === client1Name);
-    const client2Debts = formData.debtsData.filter(debt => debt.debtOwner === client2Name);
+    const client1Debts = formData.debtsData.filter(debt => debt.debtOwner === formData.fullName);
+    const client2Debts = formData.debtsData.filter(debt => debt.debtOwner === formData.spouseName);
     const jointDebts = formData.debtsData.filter(debt => debt.debtOwner === 'Jointly');
     const otherDebts = formData.debtsData.filter(debt =>
       debt.debtOwner !== client1Name &&
@@ -3979,8 +3973,6 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 12;
     addSectionHeader('Credit Cards');
 
-    const client1Name = formData.fullName;
-
     const cellHeight = 6;
     const colWidths = [
       fieldWidth * 0.28,
@@ -4084,8 +4076,6 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
-    const client1Name = formData.fullName;
-
     doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
     doc.text('Credit Cards', margin, yPosition);
@@ -4104,8 +4094,6 @@ export const generatePDF = (formData: FormData) => {
         doc.addPage();
         yPosition = 12;
       }
-
-      const client2Name = formData.spouseName;
 
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
@@ -4215,8 +4203,6 @@ export const generatePDF = (formData: FormData) => {
         doc.addPage();
         yPosition = 12;
       }
-
-      const client2Name = formData.spouseName;
 
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
@@ -4384,12 +4370,12 @@ export const generatePDF = (formData: FormData) => {
   let isFirstInsuranceSection = hasAnyInsurance;
 
   if (formData.client1HasWorkBenefits) {
-    generateWorkBenefitsChart(formData.fullName, formData.client1HasWorkBenefits, isFirstInsuranceSection);
+    generateWorkBenefitsChart(client1Name, formData.client1HasWorkBenefits, isFirstInsuranceSection);
     isFirstInsuranceSection = false;
   }
 
   if (formData.client2HasWorkBenefits) {
-    generateWorkBenefitsChart(formData.spouseName, formData.client2HasWorkBenefits, isFirstInsuranceSection);
+    generateWorkBenefitsChart(client2Name, formData.client2HasWorkBenefits, isFirstInsuranceSection);
     isFirstInsuranceSection = false;
   }
 
@@ -4418,14 +4404,14 @@ export const generatePDF = (formData: FormData) => {
   if (formData.client1HasLifeInsurance === 'yes' && formData.client1LifeInsuranceCount) {
     const count = parseInt(formData.client1LifeInsuranceCount);
     if (count > 0) {
-      generateInsuranceChart('Life Insurance Policies', count, formData.fullName);
+      generateInsuranceChart('Life Insurance Policies', count, client1Name);
     }
   }
 
   if (formData.client2HasLifeInsurance === 'yes' && formData.client2LifeInsuranceCount) {
     const count = parseInt(formData.client2LifeInsuranceCount);
     if (count > 0) {
-      generateInsuranceChart('Life Insurance Policies', count, formData.spouseName);
+      generateInsuranceChart('Life Insurance Policies', count, client2Name);
     }
   }
 
@@ -4454,14 +4440,14 @@ export const generatePDF = (formData: FormData) => {
   if (formData.client1HasDisabilityInsurance === 'yes' && formData.client1DisabilityInsuranceCount) {
     const count = parseInt(formData.client1DisabilityInsuranceCount);
     if (count > 0) {
-      generateInsuranceChart('Disability Insurance Policies', count, formData.fullName);
+      generateInsuranceChart('Disability Insurance Policies', count, client1Name);
     }
   }
 
   if (formData.client2HasDisabilityInsurance === 'yes' && formData.client2DisabilityInsuranceCount) {
     const count = parseInt(formData.client2DisabilityInsuranceCount);
     if (count > 0) {
-      generateInsuranceChart('Disability Insurance Policies', count, formData.spouseName);
+      generateInsuranceChart('Disability Insurance Policies', count, client2Name);
     }
   }
 
@@ -4490,14 +4476,14 @@ export const generatePDF = (formData: FormData) => {
   if (formData.client1HasCriticalIllness === 'yes' && formData.client1CriticalIllnessCount) {
     const count = parseInt(formData.client1CriticalIllnessCount);
     if (count > 0) {
-      generateInsuranceChart('Critical Illness Policies', count, formData.fullName);
+      generateInsuranceChart('Critical Illness Policies', count, client1Name);
     }
   }
 
   if (formData.client2HasCriticalIllness === 'yes' && formData.client2CriticalIllnessCount) {
     const count = parseInt(formData.client2CriticalIllnessCount);
     if (count > 0) {
-      generateInsuranceChart('Critical Illness Policies', count, formData.spouseName);
+      generateInsuranceChart('Critical Illness Policies', count, client2Name);
     }
   }
 
@@ -4669,12 +4655,12 @@ export const generatePDF = (formData: FormData) => {
     let vehicleNumber = 1;
 
     if (formData.client1HasVehicleInsurance === 'yes') {
-      generateVehicleInsuranceChart(`Vehicle ${vehicleNumber}`, formData.fullName);
+      generateVehicleInsuranceChart(`Vehicle ${vehicleNumber}`, client1Name);
       vehicleNumber++;
     }
 
     if (formData.client2HasVehicleInsurance === 'yes') {
-      generateVehicleInsuranceChart(`Vehicle ${vehicleNumber}`, formData.spouseName);
+      generateVehicleInsuranceChart(`Vehicle ${vehicleNumber}`, client2Name);
       vehicleNumber++;
     }
 
@@ -5167,7 +5153,7 @@ export const generatePDF = (formData: FormData) => {
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(...colors.darkText);
-      doc.text(`${formData.fullName}'s Pensions`, margin, yPosition);
+      doc.text(`${client1Name}'s Pensions`, margin, yPosition);
       yPosition += 10;
 
       const pensionCellHeight = 10;
@@ -5248,7 +5234,7 @@ export const generatePDF = (formData: FormData) => {
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(...colors.darkText);
-      doc.text(`${formData.spouseName}'s Pensions`, margin, yPosition);
+      doc.text(`${client2Name}'s Pensions`, margin, yPosition);
       yPosition += 10;
 
       const pensionCellHeight = 10;

@@ -387,7 +387,33 @@ export const generatePDF = (formData: FormData) => {
   };
 
   // Introduction Page (Page 1)
-  yPosition = margin + 10;
+  yPosition = 35;
+
+  // Title Page Design (at top of page 1)
+  // Title background box
+  doc.setFillColor(...colors.lightGray);
+  doc.rect(margin - 3, yPosition - 8, fieldWidth + 6, 28, 'F');
+
+  // Main title
+  doc.setFontSize(24);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...colors.navyBlue);
+  doc.text('Estate Planning Questionnaire', pageWidth / 2, yPosition, { align: 'center' });
+
+  // Subtitle
+  yPosition += 10;
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...colors.mediumGray);
+  doc.text('Comprehensive Estate & Financial Planning Document', pageWidth / 2, yPosition, { align: 'center' });
+
+  // Decorative line
+  yPosition += 8;
+  doc.setDrawColor(...colors.navyBlue);
+  doc.setLineWidth(1);
+  doc.line(margin + 20, yPosition, pageWidth - margin - 20, yPosition);
+
+  yPosition += 15;
 
   // Date generated
   const currentDate = new Date().toLocaleDateString('en-US', {
@@ -456,37 +482,12 @@ export const generatePDF = (formData: FormData) => {
   // Add footer to introduction page
   addPageFooter();
 
-  // Start new page for the title and questionnaire content
+  // Start new page for questionnaire content
   doc.addPage();
   pageNumber++;
   yPosition = 35;
 
-  // Title Page Design (now on page 2)
-  // Title background box
-  doc.setFillColor(...colors.lightGray);
-  doc.rect(margin - 3, yPosition - 8, fieldWidth + 6, 28, 'F');
-
-  // Main title
-  doc.setFontSize(24);
-  doc.setFont(undefined, 'bold');
-  doc.setTextColor(...colors.navyBlue);
-  doc.text('Estate Planning Questionnaire', pageWidth / 2, yPosition, { align: 'center' });
-
-  // Subtitle
-  yPosition += 10;
-  doc.setFontSize(11);
-  doc.setFont(undefined, 'normal');
-  doc.setTextColor(...colors.mediumGray);
-  doc.text('Comprehensive Estate & Financial Planning Document', pageWidth / 2, yPosition, { align: 'center' });
-
-  // Decorative line
-  yPosition += 8;
-  doc.setDrawColor(...colors.navyBlue);
-  doc.setLineWidth(1);
-  doc.line(margin + 20, yPosition, pageWidth - margin - 20, yPosition);
-
   // Instructions
-  yPosition += 12;
   doc.setFontSize(9);
   doc.setTextColor(...colors.mediumGray);
   doc.text('This is a fillable PDF document - click on the fields to enter your information', pageWidth / 2, yPosition, { align: 'center' });

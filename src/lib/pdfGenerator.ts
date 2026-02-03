@@ -2254,6 +2254,7 @@ export const generatePDF = (formData: FormData) => {
   doc.setTextColor(...colors.darkText);
   yPosition += 12;
 
+  const hasSpouse = (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law');
   const bankingStructure = formData.bankingStructure;
   let totalBankCount = 0;
 

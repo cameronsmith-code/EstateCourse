@@ -2289,18 +2289,6 @@ export default function StepForm({
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      If you or your spouse were to die today, who would inherit this property?
-                                    </label>
-                                    <input
-                                      type="text"
-                                      value={propertiesData[index]?.inheritor || ''}
-                                      onChange={(e) => handlePropertyChange(index, 'inheritor', e.target.value)}
-                                      placeholder="Enter inheritor"
-                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Do you have a Property Succession Plan/Agreement in place for the property?
                                     </label>
                                     <div className="flex gap-4">

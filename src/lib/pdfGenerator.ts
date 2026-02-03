@@ -247,6 +247,16 @@ interface FormData {
   homeInsuranceDocLocation?: string;
   hasAdditionalProperties?: string;
   additionalPropertiesCount?: string;
+  additionalProperty1DocLocation?: string;
+  additionalProperty2DocLocation?: string;
+  additionalProperty3DocLocation?: string;
+  additionalProperty4DocLocation?: string;
+  additionalProperty5DocLocation?: string;
+  additionalProperty6DocLocation?: string;
+  additionalProperty7DocLocation?: string;
+  additionalProperty8DocLocation?: string;
+  additionalProperty9DocLocation?: string;
+  additionalProperty10DocLocation?: string;
   client1HasVehicleInsurance?: string;
   client2HasVehicleInsurance?: string;
   hasAdditionalVehicles?: string;
@@ -7724,7 +7734,9 @@ export const generatePDF = (formData: FormData) => {
       if (formData.hasAdditionalProperties === 'yes' && formData.additionalPropertiesCount) {
         const additionalCount = parseInt(formData.additionalPropertiesCount);
         for (let i = 1; i <= additionalCount; i++) {
-          generatePropertyInsuranceChart(`Additional Property ${i} Insurance`);
+          const docLocationKey = `additionalProperty${i}DocLocation` as keyof FormData;
+          const docLocation = formData[docLocationKey] as string | undefined;
+          generatePropertyInsuranceChart(`Additional Property ${i} Insurance`, docLocation);
         }
       }
     }
@@ -8630,6 +8642,21 @@ export const generatePDF = (formData: FormData) => {
       type: 'Home Insurance',
       location: formData.homeInsuranceDocLocation
     });
+  }
+
+  // Add additional property insurance documents
+  if (formData.hasAdditionalProperties === 'yes' && formData.additionalPropertiesCount) {
+    const additionalCount = parseInt(formData.additionalPropertiesCount);
+    for (let i = 1; i <= additionalCount; i++) {
+      const docLocationKey = `additionalProperty${i}DocLocation` as keyof FormData;
+      const docLocation = formData[docLocationKey] as string | undefined;
+      if (docLocation) {
+        client1Documents.push({
+          type: `Additional Property ${i} Insurance`,
+          location: docLocation
+        });
+      }
+    }
   }
 
   // Create Client 1 Document Summary Table

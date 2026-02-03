@@ -4106,6 +4106,40 @@ export default function StepForm({
                 if (question.key === 'additionalPropertiesCount' && answers['hasAdditionalProperties'] !== 'yes') {
                   return null;
                 }
+
+                // Conditional logic for additional property document locations
+                const additionalPropCount = parseInt(answers['additionalPropertiesCount'] as string) || 0;
+                if (question.key === 'additionalProperty1DocLocation' && additionalPropCount < 1) {
+                  return null;
+                }
+                if (question.key === 'additionalProperty2DocLocation' && additionalPropCount < 2) {
+                  return null;
+                }
+                if (question.key === 'additionalProperty3DocLocation' && additionalPropCount < 3) {
+                  return null;
+                }
+                if (question.key === 'additionalProperty4DocLocation' && additionalPropCount < 4) {
+                  return null;
+                }
+                if (question.key === 'additionalProperty5DocLocation' && additionalPropCount < 5) {
+                  return null;
+                }
+                if (question.key === 'additionalProperty6DocLocation' && additionalPropCount < 6) {
+                  return null;
+                }
+                if (question.key === 'additionalProperty7DocLocation' && additionalPropCount < 7) {
+                  return null;
+                }
+                if (question.key === 'additionalProperty8DocLocation' && additionalPropCount < 8) {
+                  return null;
+                }
+                if (question.key === 'additionalProperty9DocLocation' && additionalPropCount < 9) {
+                  return null;
+                }
+                if (question.key === 'additionalProperty10DocLocation' && additionalPropCount < 10) {
+                  return null;
+                }
+
                 if (question.key === 'client2HasVehicleInsurance' && !hasSpouse) {
                   return null;
                 }

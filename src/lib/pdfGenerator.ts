@@ -582,7 +582,7 @@ export const generatePDF = (formData: FormData) => {
       doc.setTextColor(...colors.darkText);
       const client1Name = formData.fullName || 'Client 1';
       const client2Name = formData.spouseName || 'Client 2';
-      const labelText = `${client1Name} and ${client2Name} have a marriage contract, and the document is located:`;
+      const labelText = `(${client1Name}) and (${client2Name}), have a marriage contract, and the document is located:`;
       doc.text(labelText, margin, yPosition);
       yPosition += 6;
 
@@ -879,11 +879,11 @@ export const generatePDF = (formData: FormData) => {
       if (child.parentsOption) {
         let parentsText = '';
         if (child.parentsOption === 'both') {
-          parentsText = `Parents: ${client1Name} and ${client2Name}`;
+          parentsText = `Parents: (${client1Name}) and (${client2Name}),`;
         } else if (child.parentsOption === 'client1-other') {
-          parentsText = `Parents: ${client1Name} and ${child.otherParentName || 'Other'}`;
+          parentsText = `Parents: (${client1Name}) and (${child.otherParentName || 'Other'}),`;
         } else if (child.parentsOption === 'client2-other') {
-          parentsText = `Parents: ${client2Name} and ${child.otherParentName || 'Other'}`;
+          parentsText = `Parents: (${client2Name}) and (${child.otherParentName || 'Other'}),`;
         }
         if (parentsText) {
           doc.text(parentsText, margin, yPosition);
@@ -1861,9 +1861,9 @@ export const generatePDF = (formData: FormData) => {
     doc.setFont(undefined, 'normal');
     doc.setTextColor(...colors.darkText);
     if (hasSpouseForCorp) {
-      doc.text(`${corpClient1Name} and ${corpClient2Name} indicated that they do not own a corporation.`, margin, yPosition);
+      doc.text(`(${corpClient1Name}) and (${corpClient2Name}), indicated that they do not own a corporation.`, margin, yPosition);
     } else {
-      doc.text(`${corpClient1Name} indicated that they do not own a corporation.`, margin, yPosition);
+      doc.text(`(${corpClient1Name}), indicated that they do not own a corporation.`, margin, yPosition);
     }
     yPosition += 8;
   } else if (formData.ownsCorporation === 'yes') {
@@ -2723,7 +2723,7 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name} and ${client2Name} indicated that they are each other's Powers of Attorney for Personal Care.`, margin, yPosition);
+      doc.text(`(${client1Name}) and (${client2Name}), indicated that they are each other's Powers of Attorney for Personal Care.`, margin, yPosition);
       yPosition += 6;
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
@@ -2853,7 +2853,7 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      doc.text(`(Note: ${client1Name} and ${client2Name} are each other's primary POA for Personal Care)`, margin, yPosition);
+      doc.text(`(Note: (${client1Name}) and (${client2Name}), are each other's primary POA for Personal Care)`, margin, yPosition);
       yPosition += 6;
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
@@ -3177,7 +3177,7 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name} and ${client2Name} indicated that they are each other's Powers of Attorney for Property.`, margin, yPosition);
+      doc.text(`(${client1Name}) and (${client2Name}), indicated that they are each other's Powers of Attorney for Property.`, margin, yPosition);
       yPosition += 6;
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
@@ -3301,7 +3301,7 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      doc.text(`(Note: ${client1Name} and ${client2Name} are each other's primary POA for Property)`, margin, yPosition);
+      doc.text(`(Note: (${client1Name}) and (${client2Name}), are each other's primary POA for Property)`, margin, yPosition);
       yPosition += 6;
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
@@ -4270,7 +4270,7 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       yPosition += 4;
       doc.setFontSize(8);
-      doc.text(`${client1Name} and ${client2Name} use the same accountant:`, margin, yPosition);
+      doc.text(`(${client1Name}) and (${client2Name}), use the same accountant:`, margin, yPosition);
       yPosition += 4;
       doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
       yPosition += 6;
@@ -4364,7 +4364,7 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       yPosition += 4;
       doc.setFontSize(8);
-      doc.text(`${client1Name} and ${client2Name} use separate accountants.`, margin, yPosition);
+      doc.text(`(${client1Name}) and (${client2Name}), use separate accountants.`, margin, yPosition);
       yPosition += 6;
 
       [client1Name, client2Name].forEach((clientName, clientIndex) => {
@@ -6110,7 +6110,7 @@ export const generatePDF = (formData: FormData) => {
 
         doc.setFont(undefined, 'normal');
         doc.setFontSize(8);
-        const successionQuestion = `Is there a written plan for what to do with this property should ${formData.fullName || 'Client 1'}${formData.spouseName ? ` and ${formData.spouseName}` : ''} pass away?`;
+        const successionQuestion = `Is there a written plan for what to do with this property should (${formData.fullName || 'Client 1'})${formData.spouseName ? ` and (${formData.spouseName}),` : ','} pass away?`;
         const successionAnswer = property.hasSuccessionPlan === 'yes' ? 'Yes' : property.hasSuccessionPlan === 'no' ? 'No' : 'Not answered';
         doc.text(successionQuestion, margin, yPosition);
         yPosition += 5;

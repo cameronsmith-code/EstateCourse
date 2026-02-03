@@ -2431,6 +2431,35 @@ export default function StepForm({
             );
           })()}
 
+          {step.id === 7 && (() => {
+            const allFormData = Object.fromEntries(
+              Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                Object.entries(stepAnswers)
+              )
+            );
+
+            return (
+              <>
+                {step.questions.map((question) => {
+                  if (question.condition && typeof question.condition === 'function') {
+                    if (!question.condition(allFormData)) {
+                      return null;
+                    }
+                  }
+
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={question}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  );
+                })}
+              </>
+            );
+          })()}
+
           {step.id === 8 && (
             <>
               {step.questions.map((question) => (

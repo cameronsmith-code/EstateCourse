@@ -9042,6 +9042,36 @@ export const generatePDF = (formData: FormData) => {
   // Add footer to final page
   addPageFooter();
 
+  // Add Estate Trustee Tasks and Information Section
+  doc.addPage();
+  yPosition = 12;
+  addPageHeader();
+
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...colors.headerText);
+  doc.text('Estate Trustee Tasks and Information', margin, yPosition);
+  yPosition += 15;
+
+  doc.setFontSize(10);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...colors.darkText);
+
+  const estateTrusteeText = 'Settling an estate in Canada is an intricate process that the sources explicitly state can involve over 60 individual tasks. These responsibilities represent a significant fiduciary burden that often requires months or even years of effort.';
+  const splitEstateTrusteeText = doc.splitTextToSize(estateTrusteeText, fieldWidth);
+  splitEstateTrusteeText.forEach((line: string) => {
+    if (yPosition > 275) {
+      doc.addPage();
+      yPosition = 12;
+      addPageHeader();
+    }
+    doc.text(line, margin, yPosition);
+    yPosition += 6;
+  });
+
+  // Add footer to final page
+  addPageFooter();
+
   const fileName = `estate-planning-${formData.fullName?.replace(/\s+/g, '-').toLowerCase() || 'form'}.pdf`;
   doc.save(fileName);
 };

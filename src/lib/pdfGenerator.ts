@@ -9049,7 +9049,7 @@ export const generatePDF = (formData: FormData) => {
 
   doc.setFontSize(16);
   doc.setFont(undefined, 'bold');
-  doc.setTextColor(...colors.headerText);
+  doc.setTextColor(...colors.navyBlue);
   doc.text('Estate Trustee Tasks and Information', margin, yPosition);
   yPosition += 15;
 

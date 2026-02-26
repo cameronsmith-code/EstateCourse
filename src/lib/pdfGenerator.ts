@@ -132,10 +132,14 @@ interface FormData {
   client1HasEstateTrustee?: string;
   client1EstateTrusteeCount?: string;
   client1EstateTrusteeData?: Array<{
+    type?: string;
     name?: string;
     phone?: string;
     email?: string;
     relationship?: string;
+    companyName?: string;
+    companyAddress?: string;
+    contactName?: string;
   }>;
   client2HasPoaPersonalCare?: string;
   client2PoaPersonalCareCount?: string;
@@ -156,10 +160,14 @@ interface FormData {
   client2HasEstateTrustee?: string;
   client2EstateTrusteeCount?: string;
   client2EstateTrusteeData?: Array<{
+    type?: string;
     name?: string;
     phone?: string;
     email?: string;
     relationship?: string;
+    companyName?: string;
+    companyAddress?: string;
+    contactName?: string;
   }>;
   client2PoaPersonalCareHasDocCopy?: string;
   client1PoaPropertyHasDocCopy?: string;
@@ -3721,6 +3729,7 @@ export const generatePDF = (formData: FormData) => {
 
   if (formData.client1HasEstateTrustee === 'yes' && formData.client1EstateTrusteeCount) {
     const estateTrusteeCount = parseInt(formData.client1EstateTrusteeCount, 10);
+    const estateTrusteeData = formData.client1EstateTrusteeData || [];
 
     if (yPosition > 210) {
       doc.addPage();
@@ -3734,81 +3743,144 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 8;
 
     const etCellHeight = 6;
-    const etColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
-    let etTableY = yPosition;
-
-    doc.setDrawColor(0, 0, 0);
-    doc.setFillColor(200, 200, 200);
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(8);
-
-    const etCol1X = margin;
-    const etCol2X = margin + etColWidths[0];
-    const etCol3X = margin + etColWidths[0] + etColWidths[1];
-    const etCol4X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2];
-
-    doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
-    doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
-    doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
-    doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
-
-    doc.text('Name:', etCol1X + 0.5, etTableY + 4);
-    doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
-    doc.text('Email Address:', etCol3X + 0.5, etTableY + 4);
-    doc.text('Relationship to You:', etCol4X + 0.5, etTableY + 4);
-
-    etTableY += etCellHeight;
 
     for (let i = 0; i < estateTrusteeCount; i++) {
-      if (etTableY > 275) {
+      const trustee = estateTrusteeData[i] || {};
+      const isCorporate = trustee.type === 'corporate';
+
+      if (yPosition > 240) {
         doc.addPage();
-        etTableY = 12;
+        yPosition = 12;
       }
 
-      doc.setFillColor(255, 255, 255);
-      doc.setFont(undefined, 'normal');
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Estate Trustee #${i + 1}${isCorporate ? ' (Corporate Trustee)' : ' (Person)'}`, margin, yPosition);
+      yPosition += 6;
 
-      doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
-      doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
-      doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
-      doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+      if (isCorporate) {
+        const etColWidths = [fieldWidth * 0.3, fieldWidth * 0.7];
+        let etTableY = yPosition;
 
-      const field1 = new doc.AcroFormTextField();
-      field1.fieldName = `estate_trustee_${i}_name`;
-      field1.Rect = [etCol1X + 0.3, etTableY + 0.3, etColWidths[0] - 0.6, etCellHeight - 0.6];
-      field1.fontSize = 7;
-      field1.textColor = [0, 0, 0];
-      field1.borderStyle = 'none';
-      doc.addField(field1);
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(200, 200, 200);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(8);
 
-      const field2 = new doc.AcroFormTextField();
-      field2.fieldName = `estate_trustee_${i}_phone`;
-      field2.Rect = [etCol2X + 0.3, etTableY + 0.3, etColWidths[1] - 0.6, etCellHeight - 0.6];
-      field2.fontSize = 7;
-      field2.textColor = [0, 0, 0];
-      field2.borderStyle = 'none';
-      doc.addField(field2);
+        const labelCol = margin;
+        const valueCol = margin + etColWidths[0];
 
-      const field3 = new doc.AcroFormTextField();
-      field3.fieldName = `estate_trustee_${i}_email`;
-      field3.Rect = [etCol3X + 0.3, etTableY + 0.3, etColWidths[2] - 0.6, etCellHeight - 0.6];
-      field3.fontSize = 7;
-      field3.textColor = [0, 0, 0];
-      field3.borderStyle = 'none';
-      doc.addField(field3);
+        const fields = [
+          { label: 'Trust Company Name:', key: 'companyName' },
+          { label: 'Trust Company Address:', key: 'companyAddress' },
+          { label: 'Key Contact Name:', key: 'contactName' },
+          { label: 'Phone Number:', key: 'phone' },
+          { label: 'Email:', key: 'email' }
+        ];
 
-      const field4 = new doc.AcroFormTextField();
-      field4.fieldName = `estate_trustee_${i}_relationship`;
-      field4.Rect = [etCol4X + 0.3, etTableY + 0.3, etColWidths[3] - 0.6, etCellHeight - 0.6];
-      field4.fontSize = 7;
-      field4.textColor = [0, 0, 0];
-      field4.borderStyle = 'none';
-      doc.addField(field4);
+        fields.forEach((field, idx) => {
+          if (etTableY > 275) {
+            doc.addPage();
+            etTableY = 12;
+          }
 
-      etTableY += etCellHeight;
+          doc.setFillColor(240, 240, 240);
+          doc.setFont(undefined, 'normal');
+          doc.rect(labelCol, etTableY, etColWidths[0], etCellHeight);
+          doc.text(field.label, labelCol + 0.5, etTableY + 4);
+
+          doc.setFillColor(255, 255, 255);
+          doc.rect(valueCol, etTableY, etColWidths[1], etCellHeight);
+
+          const fieldObj = new doc.AcroFormTextField();
+          fieldObj.fieldName = `estate_trustee_${i}_${field.key}`;
+          fieldObj.Rect = [valueCol + 0.3, etTableY + 0.3, etColWidths[1] - 0.6, etCellHeight - 0.6];
+          fieldObj.fontSize = 7;
+          fieldObj.textColor = [0, 0, 0];
+          fieldObj.borderStyle = 'none';
+          doc.addField(fieldObj);
+
+          etTableY += etCellHeight;
+        });
+
+        yPosition = etTableY + 8;
+      } else {
+        const etColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+        let etTableY = yPosition;
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(200, 200, 200);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(8);
+
+        const etCol1X = margin;
+        const etCol2X = margin + etColWidths[0];
+        const etCol3X = margin + etColWidths[0] + etColWidths[1];
+        const etCol4X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2];
+
+        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
+        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
+        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
+        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+
+        doc.text('Name:', etCol1X + 0.5, etTableY + 4);
+        doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
+        doc.text('Email Address:', etCol3X + 0.5, etTableY + 4);
+        doc.text('Relationship:', etCol4X + 0.5, etTableY + 4);
+
+        etTableY += etCellHeight;
+
+        if (etTableY > 275) {
+          doc.addPage();
+          etTableY = 12;
+        }
+
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'normal');
+
+        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
+        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
+        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
+        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+
+        const field1 = new doc.AcroFormTextField();
+        field1.fieldName = `estate_trustee_${i}_name`;
+        field1.Rect = [etCol1X + 0.3, etTableY + 0.3, etColWidths[0] - 0.6, etCellHeight - 0.6];
+        field1.fontSize = 7;
+        field1.textColor = [0, 0, 0];
+        field1.borderStyle = 'none';
+        doc.addField(field1);
+
+        const field2 = new doc.AcroFormTextField();
+        field2.fieldName = `estate_trustee_${i}_phone`;
+        field2.Rect = [etCol2X + 0.3, etTableY + 0.3, etColWidths[1] - 0.6, etCellHeight - 0.6];
+        field2.fontSize = 7;
+        field2.textColor = [0, 0, 0];
+        field2.borderStyle = 'none';
+        doc.addField(field2);
+
+        const field3 = new doc.AcroFormTextField();
+        field3.fieldName = `estate_trustee_${i}_email`;
+        field3.Rect = [etCol3X + 0.3, etTableY + 0.3, etColWidths[2] - 0.6, etCellHeight - 0.6];
+        field3.fontSize = 7;
+        field3.textColor = [0, 0, 0];
+        field3.borderStyle = 'none';
+        doc.addField(field3);
+
+        const field4 = new doc.AcroFormTextField();
+        field4.fieldName = `estate_trustee_${i}_relationship`;
+        field4.Rect = [etCol4X + 0.3, etTableY + 0.3, etColWidths[3] - 0.6, etCellHeight - 0.6];
+        field4.fontSize = 7;
+        field4.textColor = [0, 0, 0];
+        field4.borderStyle = 'none';
+        doc.addField(field4);
+
+        etTableY += etCellHeight;
+        yPosition = etTableY + 8;
+      }
     }
 
-    yPosition = etTableY + 10;
+    yPosition += 2;
 
     const clientName = formData.fullName || 'The client';
 
@@ -3858,6 +3930,7 @@ export const generatePDF = (formData: FormData) => {
 
   if (formData.client2HasEstateTrustee === 'yes' && formData.client2EstateTrusteeCount) {
     const etCount = parseInt(formData.client2EstateTrusteeCount, 10);
+    const estateTrusteeData = formData.client2EstateTrusteeData || [];
 
     if (yPosition > 210) {
       doc.addPage();
@@ -3873,87 +3946,149 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 8;
 
     const etCellHeight = 6;
-    const etColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
-    let etTableY = yPosition;
-
-    doc.setDrawColor(0, 0, 0);
-    doc.setFillColor(200, 200, 200);
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(8);
-
-    const etCol1X = margin;
-    const etCol2X = margin + etColWidths[0];
-    const etCol3X = margin + etColWidths[0] + etColWidths[1];
-    const etCol4X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2];
-
-    doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
-    doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
-    doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
-    doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
-
-    doc.text('Name:', etCol1X + 0.5, etTableY + 4);
-    doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
-    doc.text('Email Address:', etCol3X + 0.5, etTableY + 4);
-    doc.text('Relationship to You:', etCol4X + 0.5, etTableY + 4);
-
-    etTableY += etCellHeight;
 
     for (let i = 0; i < etCount; i++) {
-      if (etTableY > 275) {
+      const trustee = estateTrusteeData[i] || {};
+      const isCorporate = trustee.type === 'corporate';
+
+      if (yPosition > 240) {
         doc.addPage();
-        etTableY = 12;
+        yPosition = 12;
       }
 
-      const etData = formData.client2EstateTrusteeData?.[i];
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Estate Trustee #${i + 1}${isCorporate ? ' (Corporate Trustee)' : ' (Person)'}`, margin, yPosition);
+      yPosition += 6;
 
-      doc.setFillColor(255, 255, 255);
-      doc.setFont(undefined, 'normal');
+      if (isCorporate) {
+        const etColWidths = [fieldWidth * 0.3, fieldWidth * 0.7];
+        let etTableY = yPosition;
 
-      doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
-      doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
-      doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
-      doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(200, 200, 200);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(8);
 
-      const field1 = new doc.AcroFormTextField();
-      field1.fieldName = `estate_trustee_client2_${i}_name`;
-      field1.Rect = [etCol1X + 0.3, etTableY + 0.3, etColWidths[0] - 0.6, etCellHeight - 0.6];
-      field1.fontSize = 7;
-      field1.textColor = [0, 0, 0];
-      field1.borderStyle = 'none';
-      field1.value = etData?.name || '';
-      doc.addField(field1);
+        const labelCol = margin;
+        const valueCol = margin + etColWidths[0];
 
-      const field2 = new doc.AcroFormTextField();
-      field2.fieldName = `estate_trustee_client2_${i}_phone`;
-      field2.Rect = [etCol2X + 0.3, etTableY + 0.3, etColWidths[1] - 0.6, etCellHeight - 0.6];
-      field2.fontSize = 7;
-      field2.textColor = [0, 0, 0];
-      field2.borderStyle = 'none';
-      field2.value = etData?.phone || '';
-      doc.addField(field2);
+        const fields = [
+          { label: 'Trust Company Name:', key: 'companyName' },
+          { label: 'Trust Company Address:', key: 'companyAddress' },
+          { label: 'Key Contact Name:', key: 'contactName' },
+          { label: 'Phone Number:', key: 'phone' },
+          { label: 'Email:', key: 'email' }
+        ];
 
-      const field3 = new doc.AcroFormTextField();
-      field3.fieldName = `estate_trustee_client2_${i}_email`;
-      field3.Rect = [etCol3X + 0.3, etTableY + 0.3, etColWidths[2] - 0.6, etCellHeight - 0.6];
-      field3.fontSize = 7;
-      field3.textColor = [0, 0, 0];
-      field3.borderStyle = 'none';
-      field3.value = etData?.email || '';
-      doc.addField(field3);
+        fields.forEach((field, idx) => {
+          if (etTableY > 275) {
+            doc.addPage();
+            etTableY = 12;
+          }
 
-      const field4 = new doc.AcroFormTextField();
-      field4.fieldName = `estate_trustee_client2_${i}_relationship`;
-      field4.Rect = [etCol4X + 0.3, etTableY + 0.3, etColWidths[3] - 0.6, etCellHeight - 0.6];
-      field4.fontSize = 7;
-      field4.textColor = [0, 0, 0];
-      field4.borderStyle = 'none';
-      field4.value = etData?.relationship || '';
-      doc.addField(field4);
+          doc.setFillColor(240, 240, 240);
+          doc.setFont(undefined, 'normal');
+          doc.rect(labelCol, etTableY, etColWidths[0], etCellHeight);
+          doc.text(field.label, labelCol + 0.5, etTableY + 4);
 
-      etTableY += etCellHeight;
+          doc.setFillColor(255, 255, 255);
+          doc.rect(valueCol, etTableY, etColWidths[1], etCellHeight);
+
+          const fieldObj = new doc.AcroFormTextField();
+          fieldObj.fieldName = `estate_trustee_client2_${i}_${field.key}`;
+          fieldObj.Rect = [valueCol + 0.3, etTableY + 0.3, etColWidths[1] - 0.6, etCellHeight - 0.6];
+          fieldObj.fontSize = 7;
+          fieldObj.textColor = [0, 0, 0];
+          fieldObj.borderStyle = 'none';
+          fieldObj.value = trustee[field.key] || '';
+          doc.addField(fieldObj);
+
+          etTableY += etCellHeight;
+        });
+
+        yPosition = etTableY + 8;
+      } else {
+        const etColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+        let etTableY = yPosition;
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setFillColor(200, 200, 200);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(8);
+
+        const etCol1X = margin;
+        const etCol2X = margin + etColWidths[0];
+        const etCol3X = margin + etColWidths[0] + etColWidths[1];
+        const etCol4X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2];
+
+        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
+        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
+        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
+        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+
+        doc.text('Name:', etCol1X + 0.5, etTableY + 4);
+        doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
+        doc.text('Email Address:', etCol3X + 0.5, etTableY + 4);
+        doc.text('Relationship:', etCol4X + 0.5, etTableY + 4);
+
+        etTableY += etCellHeight;
+
+        if (etTableY > 275) {
+          doc.addPage();
+          etTableY = 12;
+        }
+
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'normal');
+
+        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
+        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
+        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
+        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+
+        const field1 = new doc.AcroFormTextField();
+        field1.fieldName = `estate_trustee_client2_${i}_name`;
+        field1.Rect = [etCol1X + 0.3, etTableY + 0.3, etColWidths[0] - 0.6, etCellHeight - 0.6];
+        field1.fontSize = 7;
+        field1.textColor = [0, 0, 0];
+        field1.borderStyle = 'none';
+        field1.value = trustee?.name || '';
+        doc.addField(field1);
+
+        const field2 = new doc.AcroFormTextField();
+        field2.fieldName = `estate_trustee_client2_${i}_phone`;
+        field2.Rect = [etCol2X + 0.3, etTableY + 0.3, etColWidths[1] - 0.6, etCellHeight - 0.6];
+        field2.fontSize = 7;
+        field2.textColor = [0, 0, 0];
+        field2.borderStyle = 'none';
+        field2.value = trustee?.phone || '';
+        doc.addField(field2);
+
+        const field3 = new doc.AcroFormTextField();
+        field3.fieldName = `estate_trustee_client2_${i}_email`;
+        field3.Rect = [etCol3X + 0.3, etTableY + 0.3, etColWidths[2] - 0.6, etCellHeight - 0.6];
+        field3.fontSize = 7;
+        field3.textColor = [0, 0, 0];
+        field3.borderStyle = 'none';
+        field3.value = trustee?.email || '';
+        doc.addField(field3);
+
+        const field4 = new doc.AcroFormTextField();
+        field4.fieldName = `estate_trustee_client2_${i}_relationship`;
+        field4.Rect = [etCol4X + 0.3, etTableY + 0.3, etColWidths[3] - 0.6, etCellHeight - 0.6];
+        field4.fontSize = 7;
+        field4.textColor = [0, 0, 0];
+        field4.borderStyle = 'none';
+        field4.value = trustee?.relationship || '';
+        doc.addField(field4);
+
+        etTableY += etCellHeight;
+        yPosition = etTableY + 8;
+      }
     }
 
-    yPosition = etTableY + 10;
+    yPosition += 2;
 
     if (formData.client2EstateTrusteeHasWillCopy === 'yes') {
       if (yPosition > 260) {

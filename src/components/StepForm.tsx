@@ -1531,55 +1531,156 @@ export default function StepForm({
                             <div className="space-y-4">
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Name *
+                                  Is this Trustee a person or a Corporate Trustee (through a Trust Company)? *
                                 </label>
-                                <input
-                                  type="text"
-                                  value={client1EstateTrusteeData[index]?.name || ''}
-                                  onChange={(e) => handleEstateTrusteeChange(index, 'name', e.target.value)}
-                                  placeholder="Enter name"
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`client1_estate_trustee_type_${index}`}
+                                      value="person"
+                                      checked={client1EstateTrusteeData[index]?.type === 'person' || !client1EstateTrusteeData[index]?.type}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'type', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Person</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`client1_estate_trustee_type_${index}`}
+                                      value="corporate"
+                                      checked={client1EstateTrusteeData[index]?.type === 'corporate'}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'type', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Corporate Trustee</span>
+                                  </label>
+                                </div>
                               </div>
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Phone Number *
-                                </label>
-                                <input
-                                  type="text"
-                                  value={client1EstateTrusteeData[index]?.phone || ''}
-                                  onChange={(e) => handleEstateTrusteeChange(index, 'phone', e.target.value)}
-                                  placeholder="Enter phone number"
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
+                              {client1EstateTrusteeData[index]?.type === 'corporate' ? (
+                                <>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Trust Company Name *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client1EstateTrusteeData[index]?.companyName || ''}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'companyName', e.target.value)}
+                                      placeholder="Enter trust company name"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Email Address *
-                                </label>
-                                <input
-                                  type="email"
-                                  value={client1EstateTrusteeData[index]?.email || ''}
-                                  onChange={(e) => handleEstateTrusteeChange(index, 'email', e.target.value)}
-                                  placeholder="Enter email address"
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Trust Company Address *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client1EstateTrusteeData[index]?.companyAddress || ''}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'companyAddress', e.target.value)}
+                                      placeholder="Enter trust company address"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Relationship to You *
-                                </label>
-                                <input
-                                  type="text"
-                                  value={client1EstateTrusteeData[index]?.relationship || ''}
-                                  onChange={(e) => handleEstateTrusteeChange(index, 'relationship', e.target.value)}
-                                  placeholder="e.g., Spouse, Child, Sibling, etc."
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Key Contact Name *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client1EstateTrusteeData[index]?.contactName || ''}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'contactName', e.target.value)}
+                                      placeholder="Enter key contact name"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Phone Number *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client1EstateTrusteeData[index]?.phone || ''}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'phone', e.target.value)}
+                                      placeholder="Enter phone number"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Email *
+                                    </label>
+                                    <input
+                                      type="email"
+                                      value={client1EstateTrusteeData[index]?.email || ''}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'email', e.target.value)}
+                                      placeholder="Enter email address"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Name *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client1EstateTrusteeData[index]?.name || ''}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'name', e.target.value)}
+                                      placeholder="Enter name"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Phone Number *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client1EstateTrusteeData[index]?.phone || ''}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'phone', e.target.value)}
+                                      placeholder="Enter phone number"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Email Address *
+                                    </label>
+                                    <input
+                                      type="email"
+                                      value={client1EstateTrusteeData[index]?.email || ''}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'email', e.target.value)}
+                                      placeholder="Enter email address"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Relationship to You *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client1EstateTrusteeData[index]?.relationship || ''}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'relationship', e.target.value)}
+                                      placeholder="e.g., Spouse, Child, Sibling, etc."
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                </>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -1739,55 +1840,156 @@ export default function StepForm({
                             <div className="space-y-4">
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Name *
+                                  Is this Trustee a person or a Corporate Trustee (through a Trust Company)? *
                                 </label>
-                                <input
-                                  type="text"
-                                  value={client2EstateTrusteeData[index]?.name || ''}
-                                  onChange={(e) => handleClient2EstateTrusteeChange(index, 'name', e.target.value)}
-                                  placeholder="Enter name"
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`client2_estate_trustee_type_${index}`}
+                                      value="person"
+                                      checked={client2EstateTrusteeData[index]?.type === 'person' || !client2EstateTrusteeData[index]?.type}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'type', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Person</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`client2_estate_trustee_type_${index}`}
+                                      value="corporate"
+                                      checked={client2EstateTrusteeData[index]?.type === 'corporate'}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'type', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Corporate Trustee</span>
+                                  </label>
+                                </div>
                               </div>
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Phone Number *
-                                </label>
-                                <input
-                                  type="text"
-                                  value={client2EstateTrusteeData[index]?.phone || ''}
-                                  onChange={(e) => handleClient2EstateTrusteeChange(index, 'phone', e.target.value)}
-                                  placeholder="Enter phone number"
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
+                              {client2EstateTrusteeData[index]?.type === 'corporate' ? (
+                                <>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Trust Company Name *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client2EstateTrusteeData[index]?.companyName || ''}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'companyName', e.target.value)}
+                                      placeholder="Enter trust company name"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Email Address *
-                                </label>
-                                <input
-                                  type="email"
-                                  value={client2EstateTrusteeData[index]?.email || ''}
-                                  onChange={(e) => handleClient2EstateTrusteeChange(index, 'email', e.target.value)}
-                                  placeholder="Enter email address"
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Trust Company Address *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client2EstateTrusteeData[index]?.companyAddress || ''}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'companyAddress', e.target.value)}
+                                      placeholder="Enter trust company address"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Relationship to {client2Name} *
-                                </label>
-                                <input
-                                  type="text"
-                                  value={client2EstateTrusteeData[index]?.relationship || ''}
-                                  onChange={(e) => handleClient2EstateTrusteeChange(index, 'relationship', e.target.value)}
-                                  placeholder="e.g., Spouse, Child, Sibling, etc."
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Key Contact Name *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client2EstateTrusteeData[index]?.contactName || ''}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'contactName', e.target.value)}
+                                      placeholder="Enter key contact name"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Phone Number *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client2EstateTrusteeData[index]?.phone || ''}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'phone', e.target.value)}
+                                      placeholder="Enter phone number"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Email *
+                                    </label>
+                                    <input
+                                      type="email"
+                                      value={client2EstateTrusteeData[index]?.email || ''}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'email', e.target.value)}
+                                      placeholder="Enter email address"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Name *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client2EstateTrusteeData[index]?.name || ''}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'name', e.target.value)}
+                                      placeholder="Enter name"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Phone Number *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client2EstateTrusteeData[index]?.phone || ''}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'phone', e.target.value)}
+                                      placeholder="Enter phone number"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Email Address *
+                                    </label>
+                                    <input
+                                      type="email"
+                                      value={client2EstateTrusteeData[index]?.email || ''}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'email', e.target.value)}
+                                      placeholder="Enter email address"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Relationship to {client2Name} *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client2EstateTrusteeData[index]?.relationship || ''}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'relationship', e.target.value)}
+                                      placeholder="e.g., Spouse, Child, Sibling, etc."
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                </>
+                              )}
                             </div>
                           </div>
                         ))}

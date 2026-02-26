@@ -2083,12 +2083,6 @@ export const generatePDF = (formData: FormData) => {
     });
 
     yPosition += 10;
-  } else if (formData.hasSoleProprietorship === 'no') {
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...colors.darkText);
-    doc.text(`${businessClient1Name} does not operate as a sole proprietor.`, margin, yPosition);
-    yPosition += 10;
   }
 
   if (formData.hasPartnership === 'yes') {
@@ -2104,15 +2098,9 @@ export const generatePDF = (formData: FormData) => {
     doc.setTextColor(...colors.darkText);
     doc.text(`${businessClient1Name} has ownership interests in a partnership.`, margin, yPosition);
     yPosition += 10;
-  } else if (formData.hasPartnership === 'no') {
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...colors.darkText);
-    doc.text(`${businessClient1Name} does not have ownership interests in a partnership.`, margin, yPosition);
-    yPosition += 10;
   }
 
-  if (hasSpouseForBusiness) {
+  if (hasSpouseForBusiness && (formData.client2HasSoleProprietorship === 'yes' || formData.client2HasPartnership === 'yes')) {
     const businessClient2Name = formData.spouseName || 'Client 2';
 
     yPosition += 10;
@@ -2180,12 +2168,6 @@ export const generatePDF = (formData: FormData) => {
       });
 
       yPosition += 10;
-    } else if (formData.client2HasSoleProprietorship === 'no') {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.setTextColor(...colors.darkText);
-      doc.text(`${businessClient2Name} does not operate as a sole proprietor.`, margin, yPosition);
-      yPosition += 10;
     }
 
     if (formData.client2HasPartnership === 'yes') {
@@ -2200,12 +2182,6 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.setTextColor(...colors.darkText);
       doc.text(`${businessClient2Name} has ownership interests in a partnership.`, margin, yPosition);
-      yPosition += 10;
-    } else if (formData.client2HasPartnership === 'no') {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.setTextColor(...colors.darkText);
-      doc.text(`${businessClient2Name} does not have ownership interests in a partnership.`, margin, yPosition);
       yPosition += 10;
     }
   }

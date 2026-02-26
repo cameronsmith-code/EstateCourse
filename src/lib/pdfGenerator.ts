@@ -2081,6 +2081,92 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 10;
   }
 
+  if (hasSpouseForBusiness) {
+    const businessClient2Name = formData.spouseName || 'Client 2';
+
+    yPosition += 10;
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.darkText);
+    doc.text(`${businessClient2Name}'s Business Information`, margin, yPosition);
+    yPosition += 10;
+
+    if (formData.client2HasSoleProprietorship === 'yes') {
+      yPosition += 6;
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      doc.text('Sole Proprietorship:', margin, yPosition);
+      yPosition += 8;
+
+      const client2NatureValue = formData.client2SoleProprietorshipNature === 'other' && formData.client2SoleProprietorshipNatureOther
+        ? `Other - ${formData.client2SoleProprietorshipNatureOther}`
+        : (natureOfBusinessLabels[formData.client2SoleProprietorshipNature || ''] || '');
+
+      const client2SoleProprietorshipRows = [
+        { label: 'Nature of Business:', value: client2NatureValue },
+      ];
+
+      const cellHeight = 8;
+      const labelWidth = fieldWidth * 0.35;
+      const valueWidth = fieldWidth * 0.65;
+
+      client2SoleProprietorshipRows.forEach((row, index) => {
+        const rowY = yPosition;
+
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, rowY, labelWidth, cellHeight);
+        doc.rect(margin + labelWidth, rowY, valueWidth, cellHeight);
+
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(row.label, margin + 1, rowY + 5);
+
+        const field = new doc.AcroFormTextField();
+        field.fieldName = `client2_sole_proprietorship_${index}`;
+        field.Rect = [margin + labelWidth + 0.5, rowY + 0.5, valueWidth - 1, cellHeight - 1];
+        field.fontSize = 9;
+        field.textColor = colors.darkText;
+        field.borderStyle = 'none';
+        field.value = row.value;
+        doc.addField(field);
+
+        yPosition += cellHeight;
+      });
+
+      yPosition += 10;
+    } else if (formData.client2HasSoleProprietorship === 'no') {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
+      doc.text(`${businessClient2Name} does not operate as a sole proprietor.`, margin, yPosition);
+      yPosition += 10;
+    }
+
+    if (formData.client2HasPartnership === 'yes') {
+      yPosition += 6;
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      doc.text('Partnership:', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
+      doc.text(`${businessClient2Name} has ownership interests in a partnership.`, margin, yPosition);
+      yPosition += 10;
+    } else if (formData.client2HasPartnership === 'no') {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
+      doc.text(`${businessClient2Name} does not have ownership interests in a partnership.`, margin, yPosition);
+      yPosition += 10;
+    }
+  }
+
   doc.addPage();
   yPosition = 12;
   addSectionHeader('Corporate Information');

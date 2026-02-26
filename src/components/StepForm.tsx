@@ -640,14 +640,20 @@ export default function StepForm({
 
           {step.id === 5 && (
             <>
-              {step.questions.map((question) => (
-                <FormField
-                  key={question.key}
-                  question={question}
-                  value={answers[question.key]}
-                  onChange={(value) => onAnswerChange(question.key, value)}
-                />
-              ))}
+              {step.questions.map((question) => {
+                const displayLabel = typeof question.label === 'function'
+                  ? question.label(allAnswers || new Map())
+                  : question.label;
+
+                return (
+                  <FormField
+                    key={question.key}
+                    question={{ ...question, label: displayLabel }}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                  />
+                );
+              })}
             </>
           )}
 

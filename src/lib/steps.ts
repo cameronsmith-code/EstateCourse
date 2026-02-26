@@ -1,6 +1,6 @@
 export type StepQuestion = {
   key: string;
-  label: string;
+  label: string | ((answers: Map<number, Record<string, unknown>>) => string);
   type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'email' | 'date' | 'number';
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
@@ -292,7 +292,10 @@ export const STEPS: Step[] = [
     questions: [
       {
         key: 'hasSoleProprietorship',
-        label: 'Do you operate as a sole proprietor?',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, do you operate a business as a sole proprietor?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -326,13 +329,66 @@ export const STEPS: Step[] = [
       },
       {
         key: 'hasPartnership',
-        label: 'Do you have ownership interests in a partnership?',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, do you have ownership interests in a partnership?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
         ],
         required: true,
+      },
+      {
+        key: 'client2HasSoleProprietorship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, do you operate a business as a sole proprietor?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2SoleProprietorshipNature',
+        label: 'Nature of Business:',
+        type: 'select',
+        options: [
+          { value: 'professional_practice', label: 'Professional Practice (e.g., Physician, Lawyer, Consultant)' },
+          { value: 'skilled_trade', label: 'Skilled Trade' },
+          { value: 'service_business', label: 'Service Business (e.g., marketing, coaching)' },
+          { value: 'retail_ecommerce', label: 'Retail/e-commerce' },
+          { value: 'real_estate_rental', label: 'Real estate rental business' },
+          { value: 'side_hustle', label: 'Side Hustle' },
+          { value: 'other', label: 'Other' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasSoleProprietorship === 'yes',
+      },
+      {
+        key: 'client2SoleProprietorshipNatureOther',
+        label: 'Please specify the nature of your business:',
+        type: 'text',
+        placeholder: 'Enter nature of business',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2SoleProprietorshipNature === 'other',
+      },
+      {
+        key: 'client2HasPartnership',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, do you have ownership interests in a partnership?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
       },
     ],
   },

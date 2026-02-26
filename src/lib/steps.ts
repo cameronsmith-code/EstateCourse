@@ -302,7 +302,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'hasPartnership',
-        label: 'Are you a member of a partnership?',
+        label: 'Do you have ownership interests in a partnership?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },

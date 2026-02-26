@@ -288,7 +288,7 @@ export const STEPS: Step[] = [
   {
     id: 5,
     title: 'Sole Proprietorships and Partnerships',
-    description: 'Information about sole proprietorships and partnerships you own or are a member of',
+    description: 'Information about any non-incorporated businesses you have an interest in.',
     questions: [
       {
         key: 'hasSoleProprietorship',

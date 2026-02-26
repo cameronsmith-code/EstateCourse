@@ -328,6 +328,19 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.soleProprietorshipNature === 'other',
       },
       {
+        key: 'soleProprietorshipRevenue',
+        label: 'Approximate Annual Gross Revenue:',
+        type: 'radio',
+        options: [
+          { value: 'under_100k', label: 'Under $100,000' },
+          { value: '100k_500k', label: '$100,000 - $500,000' },
+          { value: '500k_1m', label: '$500,000 - $1,000,000' },
+          { value: 'over_1m', label: 'Over $1,000,000' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasSoleProprietorship === 'yes',
+      },
+      {
         key: 'hasPartnership',
         label: (answers) => {
           const client1Name = answers.get(1)?.fullName || 'Client 1';
@@ -376,6 +389,19 @@ export const STEPS: Step[] = [
         placeholder: 'Enter nature of business',
         required: false,
         condition: (formData: Record<string, string>) => formData.client2SoleProprietorshipNature === 'other',
+      },
+      {
+        key: 'client2SoleProprietorshipRevenue',
+        label: 'Approximate Annual Gross Revenue:',
+        type: 'radio',
+        options: [
+          { value: 'under_100k', label: 'Under $100,000' },
+          { value: '100k_500k', label: '$100,000 - $500,000' },
+          { value: '500k_1m', label: '$500,000 - $1,000,000' },
+          { value: 'over_1m', label: 'Over $1,000,000' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasSoleProprietorship === 'yes',
       },
       {
         key: 'client2HasPartnership',

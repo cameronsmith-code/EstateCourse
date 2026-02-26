@@ -2018,8 +2018,18 @@ export const generatePDF = (formData: FormData) => {
       ? `Other - ${formData.soleProprietorshipNatureOther}`
       : (natureOfBusinessLabels[formData.soleProprietorshipNature || ''] || '');
 
+    const revenueLabels: Record<string, string> = {
+      'under_100k': 'Under $100,000',
+      '100k_500k': '$100,000 - $500,000',
+      '500k_1m': '$500,000 - $1,000,000',
+      'over_1m': 'Over $1,000,000'
+    };
+
+    const revenueValue = revenueLabels[formData.soleProprietorshipRevenue || ''] || '';
+
     const soleProprietorshipRows = [
       { label: 'Nature of Business:', value: natureValue },
+      { label: 'Approximate Annual Gross Revenue:', value: revenueValue },
     ];
 
     const cellHeight = 8;
@@ -2103,8 +2113,11 @@ export const generatePDF = (formData: FormData) => {
         ? `Other - ${formData.client2SoleProprietorshipNatureOther}`
         : (natureOfBusinessLabels[formData.client2SoleProprietorshipNature || ''] || '');
 
+      const client2RevenueValue = revenueLabels[formData.client2SoleProprietorshipRevenue || ''] || '';
+
       const client2SoleProprietorshipRows = [
         { label: 'Nature of Business:', value: client2NatureValue },
+        { label: 'Approximate Annual Gross Revenue:', value: client2RevenueValue },
       ];
 
       const cellHeight = 8;

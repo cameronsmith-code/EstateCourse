@@ -129,7 +129,7 @@ export default function StepForm({
           }
         }
       }
-    } else if (step.id === 5) {
+    } else if (step.id === 6) {
       if (answers['ownsCorporation'] === 'yes') {
         if (!answers['numberOfCorporations']) {
           setValidationError('Please specify the number of corporations you own.');
@@ -183,7 +183,7 @@ export default function StepForm({
           }
         }
       }
-    } else if (step.id === 11) {
+    } else if (step.id === 12) {
       if (answers['client1HasPension'] === 'yes') {
         if (!client1PensionsData || client1PensionsData.length === 0) {
           setValidationError('Please add at least one pension for Client 1 or select "No".');
@@ -640,6 +640,19 @@ export default function StepForm({
 
           {step.id === 5 && (
             <>
+              {step.questions.map((question) => (
+                <FormField
+                  key={question.key}
+                  question={question}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                />
+              ))}
+            </>
+          )}
+
+          {step.id === 6 && (
+            <>
               {step.questions.map((question) => {
                 if (question.key === 'numberOfCorporations' && answers['ownsCorporation'] !== 'yes') {
                   return null;
@@ -1036,7 +1049,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 6 && (() => {
+          {step.id === 7 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'you';
@@ -1999,7 +2012,7 @@ export default function StepForm({
                 );
               })}
 
-              {step.id === 6 && client1FinancialAdvisorsCount > 0 && (
+              {step.id === 7 && client1FinancialAdvisorsCount > 0 && (
                 <div className="space-y-6 mt-6">
                   <h3 className="text-xl font-semibold text-white">Your Financial Advisors Details</h3>
                   {Array.from({ length: client1FinancialAdvisorsCount }).map((_, index) => (
@@ -2064,7 +2077,7 @@ export default function StepForm({
                 </div>
               )}
 
-              {step.id === 6 && client2FinancialAdvisorsCount > 0 && (
+              {step.id === 7 && client2FinancialAdvisorsCount > 0 && (
                 <div className="space-y-6 mt-6">
                   <h3 className="text-xl font-semibold text-white">Spouse's Financial Advisors Details</h3>
                   {Array.from({ length: client2FinancialAdvisorsCount }).map((_, index) => (
@@ -2132,7 +2145,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 7 && (() => {
+          {step.id === 8 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
@@ -3476,7 +3489,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 11 && (() => {
+          {step.id === 12 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
@@ -3804,7 +3817,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 12 && (() => {
+          {step.id === 13 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
@@ -3855,7 +3868,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 8 && (
+          {step.id === 9 && (
             <>
               {step.questions.map((question) => (
                 <FormField
@@ -4365,7 +4378,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 9 && (
+          {step.id === 10 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -4442,7 +4455,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 10 && (
+          {step.id === 11 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};

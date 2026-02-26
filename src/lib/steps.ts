@@ -287,6 +287,33 @@ export const STEPS: Step[] = [
   },
   {
     id: 5,
+    title: 'Sole Proprietorships and Partnerships',
+    description: 'Information about sole proprietorships and partnerships you own or are a member of',
+    questions: [
+      {
+        key: 'hasSoleProprietorship',
+        label: 'Do you operate as a sole proprietor?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'hasPartnership',
+        label: 'Are you a member of a partnership?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+    ],
+  },
+  {
+    id: 6,
     title: 'Corporate Information',
     description: 'Information about corporations you own',
     questions: [
@@ -321,7 +348,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     title: 'Who is on your Team?',
     description: 'Your Power(s) of Attorney and Estate Trustees should not act in a vacuum. This section lists the core professionals who already know your history.',
     questions: [
@@ -831,7 +858,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 7,
+    id: 8,
     title: 'Your Financial Footprint',
     description: 'Banking and financial account information',
     questions: [
@@ -988,7 +1015,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 8,
+    id: 9,
     title: 'Outstanding Debts',
     description: 'Information about any outstanding debts (not including credit cards)',
     questions: [
@@ -1005,7 +1032,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 9,
+    id: 10,
     title: 'Life Insurance',
     description: 'Information about life insurance, disability insurance, and critical illness policies',
     questions: [
@@ -1134,7 +1161,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 10,
+    id: 11,
     title: 'Property and Casualty Insurance',
     description: 'Information about home and property insurance',
     questions: [
@@ -1450,7 +1477,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 11,
+    id: 12,
     title: 'Pensions and Retirement Benefits',
     description: 'Information about pension plans',
     questions: [
@@ -1535,7 +1562,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 12,
+    id: 13,
     title: 'Professional Association Insurance',
     description: 'Insurance coverage through professional associations or alumni groups',
     questions: [

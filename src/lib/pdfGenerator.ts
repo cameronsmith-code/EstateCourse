@@ -326,6 +326,12 @@ interface FormData {
   client1PensionsData?: Array<Record<string, string>>;
   client2HasPension?: string;
   client2PensionsData?: Array<Record<string, string>>;
+  client1HasESOP?: string;
+  client1ESOPEmployer?: string;
+  client1ESOPLocation?: string;
+  client2HasESOP?: string;
+  client2ESOPEmployer?: string;
+  client2ESOPLocation?: string;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -8792,6 +8798,110 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
+  // ESOP Section
+  const hasClient1ESOP = formData.client1HasESOP === 'yes';
+  const hasClient2ESOP = formData.client2HasESOP === 'yes';
+
+  if (hasClient1ESOP || hasClient2ESOP) {
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    checkPageBreak(30);
+    addSectionHeader('Employee Stock Option Plans (ESOP)');
+
+    if (hasClient1ESOP) {
+      checkPageBreak(30);
+
+      const labelText = `${formData.fullName || 'Client 1'} has an Employee Stock Option Plan (ESOP).`;
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.text);
+      doc.text(labelText, margin, yPosition);
+      yPosition += 8;
+
+      // Employer Name
+      doc.text('Name of Employer:', margin, yPosition);
+      yPosition += 6;
+
+      doc.setDrawColor(...colors.border);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, yPosition, fieldWidth, fieldHeight, 'FD');
+
+      const client1ESOPEmployerField = new doc.AcroFormTextField();
+      client1ESOPEmployerField.fieldName = 'client1_esop_employer';
+      client1ESOPEmployerField.Rect = [margin, yPosition, fieldWidth, fieldHeight];
+      client1ESOPEmployerField.multiline = false;
+      client1ESOPEmployerField.fontSize = 11;
+      client1ESOPEmployerField.value = formData.client1ESOPEmployer || '';
+      doc.addField(client1ESOPEmployerField);
+
+      yPosition += fieldHeight + 8;
+
+      // Document Location
+      doc.text('Where is the information on your ESOP stored?', margin, yPosition);
+      yPosition += 6;
+
+      doc.rect(margin, yPosition, fieldWidth, fieldHeight, 'FD');
+
+      const client1ESOPLocationField = new doc.AcroFormTextField();
+      client1ESOPLocationField.fieldName = 'client1_esop_location';
+      client1ESOPLocationField.Rect = [margin, yPosition, fieldWidth, fieldHeight];
+      client1ESOPLocationField.multiline = false;
+      client1ESOPLocationField.fontSize = 11;
+      client1ESOPLocationField.value = formData.client1ESOPLocation || '';
+      doc.addField(client1ESOPLocationField);
+
+      yPosition += fieldHeight + 15;
+    }
+
+    if (hasClient2ESOP) {
+      checkPageBreak(30);
+
+      const labelText = `${formData.spouseName || 'Client 2'} has an Employee Stock Option Plan (ESOP).`;
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.text);
+      doc.text(labelText, margin, yPosition);
+      yPosition += 8;
+
+      // Employer Name
+      doc.text('Name of Employer:', margin, yPosition);
+      yPosition += 6;
+
+      doc.setDrawColor(...colors.border);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, yPosition, fieldWidth, fieldHeight, 'FD');
+
+      const client2ESOPEmployerField = new doc.AcroFormTextField();
+      client2ESOPEmployerField.fieldName = 'client2_esop_employer';
+      client2ESOPEmployerField.Rect = [margin, yPosition, fieldWidth, fieldHeight];
+      client2ESOPEmployerField.multiline = false;
+      client2ESOPEmployerField.fontSize = 11;
+      client2ESOPEmployerField.value = formData.client2ESOPEmployer || '';
+      doc.addField(client2ESOPEmployerField);
+
+      yPosition += fieldHeight + 8;
+
+      // Document Location
+      doc.text('Where is the information on your ESOP stored?', margin, yPosition);
+      yPosition += 6;
+
+      doc.rect(margin, yPosition, fieldWidth, fieldHeight, 'FD');
+
+      const client2ESOPLocationField = new doc.AcroFormTextField();
+      client2ESOPLocationField.fieldName = 'client2_esop_location';
+      client2ESOPLocationField.Rect = [margin, yPosition, fieldWidth, fieldHeight];
+      client2ESOPLocationField.multiline = false;
+      client2ESOPLocationField.fontSize = 11;
+      client2ESOPLocationField.value = formData.client2ESOPLocation || '';
+      doc.addField(client2ESOPLocationField);
+
+      yPosition += fieldHeight + 15;
+    }
+  }
+
   // Add Supporting Document Summary section
   doc.addPage();
   yPosition = 12;
@@ -8868,6 +8978,13 @@ export const generatePDF = (formData: FormData) => {
     });
   }
 
+  if (formData.client1HasESOP === 'yes' && formData.client1ESOPLocation) {
+    client1Documents.push({
+      type: `${client1Name} - ESOP`,
+      location: formData.client1ESOPLocation
+    });
+  }
+
   // Collect all document locations for Client 2
   const client2Documents: Array<{ type: string; location: string }> = [];
 
@@ -8923,6 +9040,13 @@ export const generatePDF = (formData: FormData) => {
             location: pension.documentLocation
           });
         }
+      });
+    }
+
+    if (formData.client2HasESOP === 'yes' && formData.client2ESOPLocation) {
+      client2Documents.push({
+        type: `${client2Name} - ESOP`,
+        location: formData.client2ESOPLocation
       });
     }
   }

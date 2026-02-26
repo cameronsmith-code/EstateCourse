@@ -1474,6 +1474,64 @@ export const STEPS: Step[] = [
         ],
         required: false,
       },
+      {
+        key: 'client1HasESOP',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, do you have an Employee Stock Option Plan (ESOP)?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1ESOPEmployer',
+        label: 'Name of Employer:',
+        type: 'text',
+        placeholder: 'Enter employer name',
+        required: false,
+        condition: (answers) => answers.client1HasESOP === 'yes',
+      },
+      {
+        key: 'client1ESOPLocation',
+        label: 'Where is the information on your ESOP stored?',
+        type: 'text',
+        placeholder: 'Enter document location',
+        required: false,
+        condition: (answers) => answers.client1HasESOP === 'yes',
+      },
+      {
+        key: 'client2HasESOP',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, do you have an Employee Stock Option Plan (ESOP)?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2ESOPEmployer',
+        label: 'Name of Employer:',
+        type: 'text',
+        placeholder: 'Enter employer name',
+        required: false,
+        condition: (answers) => answers.client2HasESOP === 'yes',
+      },
+      {
+        key: 'client2ESOPLocation',
+        label: 'Where is the information on your ESOP stored?',
+        type: 'text',
+        placeholder: 'Enter document location',
+        required: false,
+        condition: (answers) => answers.client2HasESOP === 'yes',
+      },
     ],
   },
   {

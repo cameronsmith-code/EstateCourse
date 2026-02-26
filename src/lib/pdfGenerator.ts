@@ -2010,6 +2010,7 @@ export const generatePDF = (formData: FormData) => {
       'service_business': 'Service Business (e.g., marketing, coaching)',
       'retail_ecommerce': 'Retail/e-commerce',
       'real_estate_rental': 'Real estate rental business',
+      'side_hustle': 'Side Hustle',
       'other': 'Other'
     };
 

@@ -310,6 +310,7 @@ export const STEPS: Step[] = [
           { value: 'service_business', label: 'Service Business (e.g., marketing, coaching)' },
           { value: 'retail_ecommerce', label: 'Retail/e-commerce' },
           { value: 'real_estate_rental', label: 'Real estate rental business' },
+          { value: 'side_hustle', label: 'Side Hustle' },
           { value: 'other', label: 'Other' },
         ],
         required: false,

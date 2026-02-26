@@ -3700,6 +3700,106 @@ export default function StepForm({
                     </div>
                   </div>
                 )}
+
+                {/* Client 1's ESOP Question */}
+                <div className="mt-8">
+                  <FormField
+                    key="client1HasESOP"
+                    question={{
+                      key: 'client1HasESOP',
+                      label: `${client1Name}, do you have an Employee Stock Option Plan (ESOP)?`,
+                      type: 'radio',
+                      options: [
+                        { value: 'yes', label: 'Yes' },
+                        { value: 'no', label: 'No' },
+                      ],
+                      required: true
+                    }}
+                    value={answers['client1HasESOP']}
+                    onChange={(value) => onAnswerChange('client1HasESOP', value)}
+                  />
+                </div>
+
+                {/* Client 1's ESOP Details */}
+                {answers['client1HasESOP'] === 'yes' && (
+                  <div className="mt-6 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Name of Employer:
+                      </label>
+                      <input
+                        type="text"
+                        value={(answers['client1ESOPEmployer'] as string) || ''}
+                        onChange={(e) => onAnswerChange('client1ESOPEmployer', e.target.value)}
+                        placeholder="Enter employer name"
+                        className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Where is the information on your ESOP stored?
+                      </label>
+                      <input
+                        type="text"
+                        value={(answers['client1ESOPLocation'] as string) || ''}
+                        onChange={(e) => onAnswerChange('client1ESOPLocation', e.target.value)}
+                        placeholder="Enter document location"
+                        className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Client 2's ESOP Question */}
+                {hasSpouse && (
+                  <div className="mt-8">
+                    <FormField
+                      key="client2HasESOP"
+                      question={{
+                        key: 'client2HasESOP',
+                        label: `${client2Name}, do you have an Employee Stock Option Plan (ESOP)?`,
+                        type: 'radio',
+                        options: [
+                          { value: 'yes', label: 'Yes' },
+                          { value: 'no', label: 'No' },
+                        ],
+                        required: false
+                      }}
+                      value={answers['client2HasESOP']}
+                      onChange={(value) => onAnswerChange('client2HasESOP', value)}
+                    />
+                  </div>
+                )}
+
+                {/* Client 2's ESOP Details */}
+                {hasSpouse && answers['client2HasESOP'] === 'yes' && (
+                  <div className="mt-6 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Name of Employer:
+                      </label>
+                      <input
+                        type="text"
+                        value={(answers['client2ESOPEmployer'] as string) || ''}
+                        onChange={(e) => onAnswerChange('client2ESOPEmployer', e.target.value)}
+                        placeholder="Enter employer name"
+                        className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Where is the information on your ESOP stored?
+                      </label>
+                      <input
+                        type="text"
+                        value={(answers['client2ESOPLocation'] as string) || ''}
+                        onChange={(e) => onAnswerChange('client2ESOPLocation', e.target.value)}
+                        placeholder="Enter document location"
+                        className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })()}

@@ -2027,30 +2027,9 @@ export const generatePDF = (formData: FormData) => {
 
     const revenueValue = revenueLabels[formData.soleProprietorshipRevenue || ''] || '';
 
-    const businessAttributeLabels: Record<string, string> = {
-      'employees': 'Employees',
-      'contractors': 'Contractors',
-      'long_term_contracts': 'Long-term Client Contracts',
-      'recurring_revenue': 'Recurring revenue',
-      'physical_inventory': 'Physical inventory',
-      'equipment': 'Equipment of material value',
-      'commercial_lease': 'Commercial lease',
-      'intellectual_property': 'Intellectual property (brand, patents, domain, proprietary systems)',
-      'other': 'Other'
-    };
-
-    const attributesArray = formData.soleProprietorshipAttributes ? formData.soleProprietorshipAttributes.split(',') : [];
-    const attributesText = attributesArray.map((attr: string) => {
-      if (attr === 'other' && formData.soleProprietorshipAttributesOther) {
-        return `Other - ${formData.soleProprietorshipAttributesOther}`;
-      }
-      return businessAttributeLabels[attr] || '';
-    }).filter((text: string) => text).join(', ');
-
     const soleProprietorshipRows = [
       { label: 'Nature of Business:', value: natureValue },
       { label: 'Approximate Annual Gross Revenue:', value: revenueValue },
-      { label: 'Business Attributes:', value: attributesText },
     ];
 
     const cellHeight = 8;
@@ -2083,6 +2062,84 @@ export const generatePDF = (formData: FormData) => {
     });
 
     yPosition += 10;
+
+    const businessAttributes = [
+      { key: 'hasEmployees', label: 'Employees', detailsKey: 'employeesDetails', docKey: 'employeesDocLocation' },
+      { key: 'hasContractors', label: 'Contractors', detailsKey: 'contractorsDetails', docKey: 'contractorsDocLocation' },
+      { key: 'hasLongTermContracts', label: 'Long-term client contracts', detailsKey: 'longTermContractsDetails', docKey: 'longTermContractsDocLocation' },
+      { key: 'hasRecurringRevenue', label: 'Recurring revenue', detailsKey: 'recurringRevenueDetails', docKey: 'recurringRevenueDocLocation' },
+      { key: 'hasPhysicalInventory', label: 'Physical Inventory', detailsKey: 'physicalInventoryDetails', docKey: 'physicalInventoryDocLocation' },
+      { key: 'hasEquipment', label: 'Equipment of material value', detailsKey: 'equipmentDetails', docKey: 'equipmentDocLocation' },
+      { key: 'hasCommercialLease', label: 'Commercial lease', detailsKey: 'commercialLeaseDetails', docKey: 'commercialLeaseDocLocation' },
+      { key: 'hasIntellectualProperty', label: 'Intellectual Property', detailsKey: 'intellectualPropertyDetails', docKey: 'intellectualPropertyDocLocation' },
+    ];
+
+    const activeAttributes = businessAttributes.filter(attr => formData[attr.key] === 'yes');
+
+    if (activeAttributes.length > 0) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      doc.text('Business Attributes:', margin, yPosition);
+      yPosition += 8;
+
+      const attrCellHeight = 8;
+      const attrLabelWidth = fieldWidth * 0.25;
+      const attrDetailsWidth = fieldWidth * 0.375;
+      const attrDocWidth = fieldWidth * 0.375;
+
+      const headerY = yPosition;
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, headerY, attrLabelWidth, attrCellHeight);
+      doc.rect(margin + attrLabelWidth, headerY, attrDetailsWidth, attrCellHeight);
+      doc.rect(margin + attrLabelWidth + attrDetailsWidth, headerY, attrDocWidth, attrCellHeight);
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      doc.text('Attribute', margin + 1, headerY + 5);
+      doc.text('Details', margin + attrLabelWidth + 1, headerY + 5);
+      doc.text('Location of Contracts/Documentation', margin + attrLabelWidth + attrDetailsWidth + 1, headerY + 5);
+      yPosition += attrCellHeight;
+
+      activeAttributes.forEach((attr, index) => {
+        const rowY = yPosition;
+
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, rowY, attrLabelWidth, attrCellHeight);
+        doc.rect(margin + attrLabelWidth, rowY, attrDetailsWidth, attrCellHeight);
+        doc.rect(margin + attrLabelWidth + attrDetailsWidth, rowY, attrDocWidth, attrCellHeight);
+
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...colors.darkText);
+        doc.text(attr.label, margin + 1, rowY + 5);
+
+        const detailsField = new doc.AcroFormTextField();
+        detailsField.fieldName = `business_attr_details_${index}`;
+        detailsField.Rect = [margin + attrLabelWidth + 0.5, rowY + 0.5, attrDetailsWidth - 1, attrCellHeight - 1];
+        detailsField.fontSize = 8;
+        detailsField.textColor = colors.darkText;
+        detailsField.borderStyle = 'none';
+        detailsField.value = formData[attr.detailsKey] || '';
+        doc.addField(detailsField);
+
+        const docField = new doc.AcroFormTextField();
+        docField.fieldName = `business_attr_doc_${index}`;
+        docField.Rect = [margin + attrLabelWidth + attrDetailsWidth + 0.5, rowY + 0.5, attrDocWidth - 1, attrCellHeight - 1];
+        docField.fontSize = 8;
+        docField.textColor = colors.darkText;
+        docField.borderStyle = 'none';
+        docField.value = formData[attr.docKey] || '';
+        doc.addField(docField);
+
+        yPosition += attrCellHeight;
+      });
+
+      yPosition += 10;
+    }
   }
 
   if (formData.hasPartnership === 'yes') {

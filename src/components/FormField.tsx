@@ -12,6 +12,14 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
   const commonClasses =
     'w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all';
 
+  if (type === 'label') {
+    return (
+      <div className="mb-4 mt-6">
+        <h3 className="text-lg font-semibold text-white">{label}</h3>
+      </div>
+    );
+  }
+
   if (type === 'textarea') {
     return (
       <div className="mb-6">

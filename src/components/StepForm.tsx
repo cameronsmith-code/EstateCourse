@@ -641,6 +641,17 @@ export default function StepForm({
           {step.id === 5 && (
             <>
               {step.questions.map((question) => {
+                if (question.condition) {
+                  const allFormData = Object.fromEntries(
+                    Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                      Object.entries(stepAnswers)
+                    )
+                  );
+                  if (!question.condition(allFormData)) {
+                    return null;
+                  }
+                }
+
                 const displayLabel = typeof question.label === 'function'
                   ? question.label(allAnswers || new Map())
                   : question.label;

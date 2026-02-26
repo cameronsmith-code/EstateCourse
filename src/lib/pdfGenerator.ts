@@ -2027,9 +2027,30 @@ export const generatePDF = (formData: FormData) => {
 
     const revenueValue = revenueLabels[formData.soleProprietorshipRevenue || ''] || '';
 
+    const businessAttributeLabels: Record<string, string> = {
+      'employees': 'Employees',
+      'contractors': 'Contractors',
+      'long_term_contracts': 'Long-term Client Contracts',
+      'recurring_revenue': 'Recurring revenue',
+      'physical_inventory': 'Physical inventory',
+      'equipment': 'Equipment of material value',
+      'commercial_lease': 'Commercial lease',
+      'intellectual_property': 'Intellectual property (brand, patents, domain, proprietary systems)',
+      'other': 'Other'
+    };
+
+    const attributesArray = formData.soleProprietorshipAttributes ? formData.soleProprietorshipAttributes.split(',') : [];
+    const attributesText = attributesArray.map((attr: string) => {
+      if (attr === 'other' && formData.soleProprietorshipAttributesOther) {
+        return `Other - ${formData.soleProprietorshipAttributesOther}`;
+      }
+      return businessAttributeLabels[attr] || '';
+    }).filter((text: string) => text).join(', ');
+
     const soleProprietorshipRows = [
       { label: 'Nature of Business:', value: natureValue },
       { label: 'Approximate Annual Gross Revenue:', value: revenueValue },
+      { label: 'Business Attributes:', value: attributesText },
     ];
 
     const cellHeight = 8;
@@ -2115,9 +2136,18 @@ export const generatePDF = (formData: FormData) => {
 
       const client2RevenueValue = revenueLabels[formData.client2SoleProprietorshipRevenue || ''] || '';
 
+      const client2AttributesArray = formData.client2SoleProprietorshipAttributes ? formData.client2SoleProprietorshipAttributes.split(',') : [];
+      const client2AttributesText = client2AttributesArray.map((attr: string) => {
+        if (attr === 'other' && formData.client2SoleProprietorshipAttributesOther) {
+          return `Other - ${formData.client2SoleProprietorshipAttributesOther}`;
+        }
+        return businessAttributeLabels[attr] || '';
+      }).filter((text: string) => text).join(', ');
+
       const client2SoleProprietorshipRows = [
         { label: 'Nature of Business:', value: client2NatureValue },
         { label: 'Approximate Annual Gross Revenue:', value: client2RevenueValue },
+        { label: 'Business Attributes:', value: client2AttributesText },
       ];
 
       const cellHeight = 8;

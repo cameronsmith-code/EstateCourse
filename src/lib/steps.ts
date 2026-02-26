@@ -341,6 +341,35 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.hasSoleProprietorship === 'yes',
       },
       {
+        key: 'soleProprietorshipAttributes',
+        label: 'Does the Business have: (check all that apply)',
+        type: 'checkbox',
+        options: [
+          { value: 'employees', label: 'Employees' },
+          { value: 'contractors', label: 'Contractors' },
+          { value: 'long_term_contracts', label: 'Long-term Client Contracts' },
+          { value: 'recurring_revenue', label: 'Recurring revenue' },
+          { value: 'physical_inventory', label: 'Physical inventory' },
+          { value: 'equipment', label: 'Equipment of material value' },
+          { value: 'commercial_lease', label: 'Commercial lease' },
+          { value: 'intellectual_property', label: 'Intellectual property (brand, patents, domain, proprietary systems)' },
+          { value: 'other', label: 'Other' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasSoleProprietorship === 'yes',
+      },
+      {
+        key: 'soleProprietorshipAttributesOther',
+        label: 'Please specify other business attributes:',
+        type: 'text',
+        placeholder: 'Enter other attributes',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const attributes = formData.soleProprietorshipAttributes;
+          return formData.hasSoleProprietorship === 'yes' && attributes && attributes.includes('other');
+        },
+      },
+      {
         key: 'hasPartnership',
         label: (answers) => {
           const client1Name = answers.get(1)?.fullName || 'Client 1';
@@ -402,6 +431,35 @@ export const STEPS: Step[] = [
         ],
         required: false,
         condition: (formData: Record<string, string>) => formData.client2HasSoleProprietorship === 'yes',
+      },
+      {
+        key: 'client2SoleProprietorshipAttributes',
+        label: 'Does the Business have: (check all that apply)',
+        type: 'checkbox',
+        options: [
+          { value: 'employees', label: 'Employees' },
+          { value: 'contractors', label: 'Contractors' },
+          { value: 'long_term_contracts', label: 'Long-term Client Contracts' },
+          { value: 'recurring_revenue', label: 'Recurring revenue' },
+          { value: 'physical_inventory', label: 'Physical inventory' },
+          { value: 'equipment', label: 'Equipment of material value' },
+          { value: 'commercial_lease', label: 'Commercial lease' },
+          { value: 'intellectual_property', label: 'Intellectual property (brand, patents, domain, proprietary systems)' },
+          { value: 'other', label: 'Other' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasSoleProprietorship === 'yes',
+      },
+      {
+        key: 'client2SoleProprietorshipAttributesOther',
+        label: 'Please specify other business attributes:',
+        type: 'text',
+        placeholder: 'Enter other attributes',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const attributes = formData.client2SoleProprietorshipAttributes;
+          return formData.client2HasSoleProprietorship === 'yes' && attributes && attributes.includes('other');
+        },
       },
       {
         key: 'client2HasPartnership',

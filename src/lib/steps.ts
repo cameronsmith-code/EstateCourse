@@ -1451,7 +1451,7 @@ export const STEPS: Step[] = [
   },
   {
     id: 11,
-    title: 'Pensions',
+    title: 'Pensions and Retirement Benefits',
     description: 'Information about pension plans',
     questions: [
       {

@@ -1325,6 +1325,9 @@ export default function StepForm({
                     customLabel = `${client1Name}, how many Powers of Attorney for Personal Care have you named?`;
                   }
                 }
+                if (question.key === 'client1HasContingentPoaPersonalCare') {
+                  customLabel = `${client1Name}, have you named other or contingent Power(s) of Attorney for Personal Care?`;
+                }
                 if (question.key === 'client1HasPoaProperty') {
                   if (answers['spousesPoaProperty'] === 'yes') {
                     customLabel = `${client1Name}, have you named a contingent Power of Attorney(ies) for Property in your Will?`;

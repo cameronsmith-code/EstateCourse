@@ -152,6 +152,7 @@ interface FormData {
   }>;
   client2HasPoaPersonalCare?: string;
   client2PoaPersonalCareCount?: string;
+  client2PoaPersonalCareDocLocation?: string;
   client2PoaPersonalCareData?: Array<{
     name?: string;
     phone?: string;
@@ -3482,6 +3483,28 @@ export const generatePDF = (formData: FormData) => {
     }
 
     yPosition = poaTableY + 10;
+
+    if (formData.client2PoaPersonalCareDocLocation) {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text('Document Location:', margin, yPosition);
+      yPosition += 6;
+
+      doc.setFont(undefined, 'normal');
+      const docLocationField = new doc.AcroFormTextField();
+      docLocationField.fieldName = 'client2_poa_personal_care_doc_location';
+      docLocationField.Rect = [margin, yPosition, fieldWidth, 8];
+      docLocationField.fontSize = 9;
+      docLocationField.textColor = [0, 0, 0];
+      docLocationField.value = formData.client2PoaPersonalCareDocLocation || '';
+      doc.addField(docLocationField);
+      yPosition += 10;
+    }
 
     if (formData.client2PoaPersonalCareHasDocCopy === 'yes') {
       if (yPosition > 260) {

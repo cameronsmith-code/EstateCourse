@@ -844,6 +844,23 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client2PoaPersonalCareDocLocation',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, where are your Power of Attorney for Personal Care documents located?`;
+        },
+        type: 'text',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const basicAnswers = formData as unknown as Map<number, Record<string, unknown>>;
+          const maritalStatus = typeof basicAnswers.get === 'function'
+            ? basicAnswers.get(1)?.maritalStatus
+            : formData.maritalStatus;
+          return (maritalStatus === 'married' || maritalStatus === 'common_law') &&
+                 formData.client2HasPoaPersonalCare === 'yes';
+        },
+      },
+      {
         key: 'client1HasPoaProperty',
         label: 'Have you named a Power of Attorney(ies) for Property?',
         type: 'radio',

@@ -3205,76 +3205,144 @@ export default function StepForm({
 
                         {childrenData[index]?.allergies === 'yes' && (
                           <>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                What is {childrenData[index]?.name || `Child ${index + 1}`} allergic to?
-                              </label>
-                              <input
-                                type="text"
-                                value={childrenData[index]?.allergyDetails || ''}
-                                onChange={(e) => handleChildChange(index, 'allergyDetails', e.target.value)}
-                                placeholder="List allergies"
-                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                              />
-                            </div>
+                            {(() => {
+                              const allergyList = JSON.parse(childrenData[index]?.allergyList || '[]') as Array<{ details: string; severity: string; hasAdditional?: string }>;
 
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                What is the severity?
-                              </label>
-                              <input
-                                type="text"
-                                value={childrenData[index]?.allergySeverity || ''}
-                                onChange={(e) => handleChildChange(index, 'allergySeverity', e.target.value)}
-                                placeholder="e.g., Mild, Moderate, Severe, Life-threatening"
-                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                              />
-                            </div>
+                              const handleAllergyChange = (allergyIndex: number, field: 'details' | 'severity' | 'hasAdditional', value: string) => {
+                                const updated = [...allergyList];
+                                if (!updated[allergyIndex]) {
+                                  updated[allergyIndex] = { details: '', severity: '', hasAdditional: '' };
+                                }
+                                updated[allergyIndex][field] = value;
+                                handleChildChange(index, 'allergyList', JSON.stringify(updated));
+                              };
 
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Do they carry around an Epi Pen or other medications?
-                              </label>
-                              <div className="flex gap-4">
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    name={`allergyMedication-${index}`}
-                                    value="yes"
-                                    checked={childrenData[index]?.allergyMedication === 'yes'}
-                                    onChange={(e) => handleChildChange(index, 'allergyMedication', e.target.value)}
-                                    className="mr-2"
-                                  />
-                                  <span className="text-gray-300">Yes</span>
-                                </label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    name={`allergyMedication-${index}`}
-                                    value="no"
-                                    checked={childrenData[index]?.allergyMedication === 'no'}
-                                    onChange={(e) => handleChildChange(index, 'allergyMedication', e.target.value)}
-                                    className="mr-2"
-                                  />
-                                  <span className="text-gray-300">No</span>
-                                </label>
-                              </div>
-                            </div>
+                              if (allergyList.length === 0) {
+                                allergyList.push({ details: '', severity: '', hasAdditional: '' });
+                              }
 
-                            {childrenData[index]?.allergyMedication === 'yes' && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Please describe:
-                                </label>
-                                <input
-                                  type="text"
-                                  value={childrenData[index]?.allergyMedicationDescription || ''}
-                                  onChange={(e) => handleChildChange(index, 'allergyMedicationDescription', e.target.value)}
-                                  placeholder="Describe medications they carry"
-                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                />
-                              </div>
-                            )}
+                              return allergyList.map((allergy, allergyIndex) => (
+                                <div key={allergyIndex} className="space-y-4 border-l-2 border-blue-500 pl-4">
+                                  {allergyIndex > 0 && (
+                                    <div className="text-sm font-medium text-blue-400 -ml-4 pl-4">
+                                      Additional Allergy #{allergyIndex + 1}
+                                    </div>
+                                  )}
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      What is {childrenData[index]?.name || `Child ${index + 1}`} allergic to?
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={allergy.details || ''}
+                                      onChange={(e) => handleAllergyChange(allergyIndex, 'details', e.target.value)}
+                                      placeholder="List allergy"
+                                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      What is the severity?
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={allergy.severity || ''}
+                                      onChange={(e) => handleAllergyChange(allergyIndex, 'severity', e.target.value)}
+                                      placeholder="e.g., Mild, Moderate, Severe, Life-threatening"
+                                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Does this child have any additional allergies?
+                                    </label>
+                                    <div className="flex gap-4">
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          name={`hasAdditionalAllergy-${index}-${allergyIndex}`}
+                                          value="yes"
+                                          checked={allergy.hasAdditional === 'yes'}
+                                          onChange={(e) => {
+                                            handleAllergyChange(allergyIndex, 'hasAdditional', e.target.value);
+                                            if (allergyIndex === allergyList.length - 1) {
+                                              const updated = [...allergyList];
+                                              updated.push({ details: '', severity: '', hasAdditional: '' });
+                                              handleChildChange(index, 'allergyList', JSON.stringify(updated));
+                                            }
+                                          }}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-gray-300">Yes</span>
+                                      </label>
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          name={`hasAdditionalAllergy-${index}-${allergyIndex}`}
+                                          value="no"
+                                          checked={allergy.hasAdditional === 'no'}
+                                          onChange={(e) => handleAllergyChange(allergyIndex, 'hasAdditional', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-gray-300">No</span>
+                                      </label>
+                                    </div>
+                                  </div>
+
+                                  {allergy.hasAdditional === 'no' && allergyIndex === allergyList.length - 1 && (
+                                    <>
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Do they carry around an Epi Pen or other medications?
+                                        </label>
+                                        <div className="flex gap-4">
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`allergyMedication-${index}`}
+                                              value="yes"
+                                              checked={childrenData[index]?.allergyMedication === 'yes'}
+                                              onChange={(e) => handleChildChange(index, 'allergyMedication', e.target.value)}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Yes</span>
+                                          </label>
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`allergyMedication-${index}`}
+                                              value="no"
+                                              checked={childrenData[index]?.allergyMedication === 'no'}
+                                              onChange={(e) => handleChildChange(index, 'allergyMedication', e.target.value)}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">No</span>
+                                          </label>
+                                        </div>
+                                      </div>
+
+                                      {childrenData[index]?.allergyMedication === 'yes' && (
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            Please describe:
+                                          </label>
+                                          <input
+                                            type="text"
+                                            value={childrenData[index]?.allergyMedicationDescription || ''}
+                                            onChange={(e) => handleChildChange(index, 'allergyMedicationDescription', e.target.value)}
+                                            placeholder="Describe medications they carry"
+                                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                          />
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              ));
+                            })()}
                           </>
                         )}
 

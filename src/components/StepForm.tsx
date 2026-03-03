@@ -1016,7 +1016,7 @@ export default function StepForm({
                                           {otherIndex === otherOwners.length - 1 && ownerName && ownerName.trim() !== '' && (
                                             <div>
                                               <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                Are there any more to add?
+                                                Does anyone else have an ownership stake in the company?
                                               </label>
                                               <div className="flex space-x-4">
                                                 <button

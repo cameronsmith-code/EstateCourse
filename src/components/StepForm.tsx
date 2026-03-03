@@ -1156,7 +1156,7 @@ export default function StepForm({
                 if (question.key === 'client1EstateTrusteeCount' && answers['client1HasEstateTrustee'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'client2HasPoaPersonalCare' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
+                if (question.key === 'client2HasPoaPersonalCare' && !hasSpouse) {
                   return null;
                 }
                 if (question.key === 'client2HasLivingWill' && (answers['client2HasPoaPersonalCare'] !== 'yes' || !hasSpouse)) {

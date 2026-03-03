@@ -905,49 +905,6 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client1EstateTrusteeHasWillCopy === 'no',
       },
       {
-        key: 'client2HasPoaPersonalCare',
-        label: 'Has your spouse named a Power of Attorney(ies) for Personal Care?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2HasLivingWill',
-        label: 'Does your spouse have a \'Living Will\'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2PoaPersonalCareCount',
-        label: 'How many Powers of Attorney for Personal Care has your spouse named?',
-        type: 'select',
-        options: [
-          { value: '1', label: '1' },
-          { value: '2', label: '2' },
-          { value: '3', label: '3' },
-          { value: '4', label: '4' },
-          { value: '5', label: '5' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2PoaPersonalCareHasDocCopy',
-        label: 'Do they have a copy of the most recent document in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
         key: 'client2HasPoaProperty',
         label: 'Has your spouse named a Power of Attorney(ies) for Property?',
         type: 'radio',
@@ -1119,6 +1076,49 @@ export const STEPS: Step[] = [
       {
         key: 'willsSameLawyer',
         label: 'Were they prepared at the same time/by the same lawyer?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2HasPoaPersonalCare',
+        label: 'Has your spouse named a Power of Attorney(ies) for Personal Care?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2HasLivingWill',
+        label: 'Does your spouse have a \'Living Will\'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2PoaPersonalCareCount',
+        label: 'How many Powers of Attorney for Personal Care has your spouse named?',
+        type: 'select',
+        options: [
+          { value: '1', label: '1' },
+          { value: '2', label: '2' },
+          { value: '3', label: '3' },
+          { value: '4', label: '4' },
+          { value: '5', label: '5' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2PoaPersonalCareHasDocCopy',
+        label: 'Do they have a copy of the most recent document in their files?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },

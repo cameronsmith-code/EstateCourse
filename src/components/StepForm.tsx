@@ -1150,6 +1150,9 @@ export default function StepForm({
                 if (question.key === 'client1PoaPropertyCount' && answers['client1HasPoaProperty'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1PoaPropertyHasDocCopy' && answers['client1HasPoaProperty'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client1HasEstateTrustee' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }

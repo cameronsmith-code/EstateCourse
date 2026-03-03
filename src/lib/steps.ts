@@ -786,6 +786,24 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'spouseIsPoaPersonalCare',
+        label: 'Is your spouse or common law partner your POA for Personal Care?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const basicAnswers = formData as unknown as Map<number, Record<string, unknown>>;
+          const maritalStatus = typeof basicAnswers.get === 'function'
+            ? basicAnswers.get(1)?.maritalStatus
+            : formData.maritalStatus;
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 (maritalStatus === 'married' || maritalStatus === 'common_law');
+        },
+      },
+      {
         key: 'client1HasLivingWill',
         label: 'Do you have a \'Living Will\'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.',
         type: 'radio',

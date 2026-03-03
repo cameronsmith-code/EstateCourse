@@ -1130,6 +1130,14 @@ export default function StepForm({
                 if (question.key === 'client1HasPoaPersonalCare' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'spouseIsPoaPersonalCare') {
+                  const basicAnswers = allAnswers?.get(1);
+                  const maritalStatus = basicAnswers?.maritalStatus;
+                  if (answers['client1HasPoaPersonalCare'] !== 'yes' ||
+                      (maritalStatus !== 'married' && maritalStatus !== 'common_law')) {
+                    return null;
+                  }
+                }
                 if (question.key === 'client1HasLivingWill' && answers['client1HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
@@ -1421,15 +1429,50 @@ export default function StepForm({
                     )}
                     {question.key === 'client1PoaPersonalCareCount' && client1PoaPersonalCareCount > 0 && (
                       <div className="space-y-6 mt-6">
+                        {answers['spouseIsPoaPersonalCare'] === 'yes' && (
+                          <div className="border border-gray-600 rounded-lg p-6 bg-gray-700 mb-6">
+                            <h4 className="text-lg font-semibold text-white mb-4">
+                              POA for Personal Care #1
+                            </h4>
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={allAnswers?.get(1)?.spouseName as string || ''}
+                                  disabled
+                                  className="w-full px-4 py-2 bg-gray-500 border border-gray-500 text-white rounded-lg cursor-not-allowed"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Relationship to You *
+                                </label>
+                                <input
+                                  type="text"
+                                  value="Spouse/Common Law Partner"
+                                  disabled
+                                  className="w-full px-4 py-2 bg-gray-500 border border-gray-500 text-white rounded-lg cursor-not-allowed"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         <h3 className="text-xl font-semibold text-white">
-                          {answers['spousesPoaPersonalCare'] === 'yes'
+                          {answers['spouseIsPoaPersonalCare'] === 'yes'
+                            ? 'Contingent Powers of Attorney for Personal Care Details'
+                            : answers['spousesPoaPersonalCare'] === 'yes'
                             ? 'Contingent Powers of Attorney for Personal Care Details'
                             : 'Powers of Attorney for Personal Care Details'}
                         </h3>
                         {Array.from({ length: client1PoaPersonalCareCount }).map((_, index) => (
                           <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
                             <h4 className="text-lg font-semibold text-white mb-4">
-                              {answers['spousesPoaPersonalCare'] === 'yes'
+                              {answers['spouseIsPoaPersonalCare'] === 'yes'
+                                ? `Contingent POA for Personal Care #${index + 1}`
+                                : answers['spousesPoaPersonalCare'] === 'yes'
                                 ? `Contingent POA for Personal Care #${index + 1}`
                                 : `POA for Personal Care #${index + 1}`}
                             </h4>

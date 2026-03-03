@@ -954,6 +954,9 @@ export const generatePDF = (formData: FormData) => {
         } else if (child.childSupportStatus === 'paying') {
           doc.text('Child Support Status: Paying Child Support Payments', margin, yPosition);
           yPosition += 4;
+        } else if (child.childSupportStatus === 'neither') {
+          doc.text('Child Support Status: Neither paying nor receiving child support payments', margin, yPosition);
+          yPosition += 4;
         }
 
         if (child.childSupportDocLocation) {

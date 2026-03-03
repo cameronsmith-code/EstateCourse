@@ -2941,7 +2941,7 @@ export default function StepForm({
                             <label className="block text-sm font-medium text-gray-300 mb-2">
                               Are you paying or receiving child support payments related to this child?
                             </label>
-                            <div className="flex gap-4">
+                            <div className="flex flex-col gap-2">
                               <label className="flex items-center">
                                 <input
                                   type="radio"
@@ -2963,6 +2963,17 @@ export default function StepForm({
                                   className="mr-2"
                                 />
                                 <span className="text-gray-300">Paying Child Support Payments</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`childSupport-${index}`}
+                                  value="neither"
+                                  checked={childrenData[index]?.childSupportStatus === 'neither'}
+                                  onChange={(e) => handleChildChange(index, 'childSupportStatus', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">Neither paying nor receiving child support payments</span>
                               </label>
                             </div>
                           </div>

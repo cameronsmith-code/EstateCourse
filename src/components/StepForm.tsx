@@ -1159,6 +1159,12 @@ export default function StepForm({
                 if (question.key === 'client1EstateTrusteeCount' && answers['client1HasEstateTrustee'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1EstateTrusteeHasWillCopy' && answers['client1HasEstateTrustee'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client1EstateTrusteeKnowsWillLocation' && answers['client1EstateTrusteeHasWillCopy'] !== 'no') {
+                  return null;
+                }
                 if (question.key === 'client2HasPoaPersonalCare' && !hasSpouse) {
                   return null;
                 }
@@ -1344,6 +1350,12 @@ export default function StepForm({
                 }
                 if (question.key === 'client1EstateTrusteeHasDocCopy') {
                   customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
+                }
+                if (question.key === 'client1EstateTrusteeHasWillCopy') {
+                  customLabel = `${client1Name}, do the named Estate Trustees have a copy of your most recent Will in their files?`;
+                }
+                if (question.key === 'client1EstateTrusteeKnowsWillLocation') {
+                  customLabel = `${client1Name}, do your Estate Trustees know where to find a copy of your Will?`;
                 }
                 if (question.key === 'client2HasPoaPersonalCare') {
                   if (answers['spousesPoaPersonalCare'] === 'yes') {

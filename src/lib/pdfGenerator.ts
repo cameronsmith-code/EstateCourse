@@ -3205,7 +3205,7 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name} indicated that they have not named any contingent Power's of Attorney for Personal Care - consider updating this.`, margin, yPosition);
+      doc.text(`${client1Name} indicated that they have not named other or contingent Power(s) of Attorney for Personal Care - consider updating this.`, margin, yPosition);
       yPosition += 10;
     } else if (formData.client1HasContingentPoaPersonalCare === 'yes' && formData.client1PoaPersonalCareCount) {
       const poaCount = parseInt(formData.client1PoaPersonalCareCount, 10);

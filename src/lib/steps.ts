@@ -807,7 +807,7 @@ export const STEPS: Step[] = [
         key: 'client1HasContingentPoaPersonalCare',
         label: (answers) => {
           const client1Name = answers.get(1)?.fullName || 'Client 1';
-          return `${client1Name}, have you named any contingent Power's of Attorney for Personal Care?`;
+          return `${client1Name}, have you named other or contingent Power(s) of Attorney for Personal Care?`;
         },
         type: 'radio',
         options: [

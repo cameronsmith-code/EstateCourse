@@ -804,16 +804,6 @@ export const STEPS: Step[] = [
         },
       },
       {
-        key: 'client1HasLivingWill',
-        label: 'Do you have a \'Living Will\'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
         key: 'client1PoaPersonalCareCount',
         label: 'How many Powers of Attorney for Personal Care have you named?',
         type: 'select',
@@ -823,6 +813,16 @@ export const STEPS: Step[] = [
           { value: '3', label: '3' },
           { value: '4', label: '4' },
           { value: '5', label: '5' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client1HasLivingWill',
+        label: 'Do you have a \'Living Will\'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
         ],
         required: false,
       },

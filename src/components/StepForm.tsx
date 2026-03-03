@@ -1058,6 +1058,18 @@ export default function StepForm({
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Location of Corporate Minute Book
+                          </label>
+                          <input
+                            type="text"
+                            value={corporationsData[index]?.minuteBookLocation || ''}
+                            onChange={(e) => handleCorporationChange(index, 'minuteBookLocation', e.target.value)}
+                            placeholder="e.g., Home office filing cabinet, Safety deposit box, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}

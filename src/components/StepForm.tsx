@@ -3203,6 +3203,81 @@ export default function StepForm({
                           </div>
                         </div>
 
+                        {childrenData[index]?.allergies === 'yes' && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                What is {childrenData[index]?.name || `Child ${index + 1}`} allergic to?
+                              </label>
+                              <input
+                                type="text"
+                                value={childrenData[index]?.allergyDetails || ''}
+                                onChange={(e) => handleChildChange(index, 'allergyDetails', e.target.value)}
+                                placeholder="List allergies"
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                What is the severity?
+                              </label>
+                              <input
+                                type="text"
+                                value={childrenData[index]?.allergySeverity || ''}
+                                onChange={(e) => handleChildChange(index, 'allergySeverity', e.target.value)}
+                                placeholder="e.g., Mild, Moderate, Severe, Life-threatening"
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Do they carry around an Epi Pen or other medications?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`allergyMedication-${index}`}
+                                    value="yes"
+                                    checked={childrenData[index]?.allergyMedication === 'yes'}
+                                    onChange={(e) => handleChildChange(index, 'allergyMedication', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`allergyMedication-${index}`}
+                                    value="no"
+                                    checked={childrenData[index]?.allergyMedication === 'no'}
+                                    onChange={(e) => handleChildChange(index, 'allergyMedication', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+
+                            {childrenData[index]?.allergyMedication === 'yes' && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Please describe:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={childrenData[index]?.allergyMedicationDescription || ''}
+                                  onChange={(e) => handleChildChange(index, 'allergyMedicationDescription', e.target.value)}
+                                  placeholder="Describe medications they carry"
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                />
+                              </div>
+                            )}
+                          </>
+                        )}
+
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Do they have any past or current medical issues or needs?

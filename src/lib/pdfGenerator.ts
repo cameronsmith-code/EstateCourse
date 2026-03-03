@@ -16,6 +16,10 @@ interface ChildData {
   independent?: string;
   medications?: string;
   allergies?: string;
+  allergyDetails?: string;
+  allergySeverity?: string;
+  allergyMedication?: string;
+  allergyMedicationDescription?: string;
   medicalIssues?: string;
   canadianResident?: string;
   provinceTerritory?: string;
@@ -1021,16 +1025,50 @@ export const generatePDF = (formData: FormData) => {
 
         if (child.allergies === 'yes') {
           doc.setFontSize(8);
-          doc.text('Allergies:', margin, yPosition);
+          doc.setFont(undefined, 'bold');
+          doc.text('Allergy Information:', margin, yPosition);
+          yPosition += 5;
+
+          doc.setFont(undefined, 'normal');
+          doc.text(`What is ${childName} allergic to?`, margin, yPosition);
           yPosition += 2;
-          const allergiesField = new doc.AcroFormTextField();
-          allergiesField.fieldName = `child${index + 1}_allergies`;
-          allergiesField.Rect = [margin, yPosition, fieldWidth - 15, 8];
-          allergiesField.multiline = true;
-          allergiesField.fontSize = 8;
-          allergiesField.textColor = [0, 0, 0];
-          doc.addField(allergiesField);
-          yPosition += 12;
+          const allergyDetailsField = new doc.AcroFormTextField();
+          allergyDetailsField.fieldName = `child${index + 1}_allergyDetails`;
+          allergyDetailsField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+          allergyDetailsField.fontSize = 8;
+          allergyDetailsField.textColor = [0, 0, 0];
+          allergyDetailsField.value = child.allergyDetails || '';
+          doc.addField(allergyDetailsField);
+          yPosition += 9;
+
+          doc.text('What is the severity?', margin, yPosition);
+          yPosition += 2;
+          const allergySeverityField = new doc.AcroFormTextField();
+          allergySeverityField.fieldName = `child${index + 1}_allergySeverity`;
+          allergySeverityField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+          allergySeverityField.fontSize = 8;
+          allergySeverityField.textColor = [0, 0, 0];
+          allergySeverityField.value = child.allergySeverity || '';
+          doc.addField(allergySeverityField);
+          yPosition += 9;
+
+          doc.text(`Do they carry around an Epi Pen or other medications? ${child.allergyMedication === 'yes' ? 'Yes' : child.allergyMedication === 'no' ? 'No' : ''}`, margin, yPosition);
+          yPosition += 5;
+
+          if (child.allergyMedication === 'yes') {
+            doc.text('Please describe:', margin, yPosition);
+            yPosition += 2;
+            const allergyMedicationField = new doc.AcroFormTextField();
+            allergyMedicationField.fieldName = `child${index + 1}_allergyMedicationDescription`;
+            allergyMedicationField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+            allergyMedicationField.fontSize = 8;
+            allergyMedicationField.textColor = [0, 0, 0];
+            allergyMedicationField.value = child.allergyMedicationDescription || '';
+            doc.addField(allergyMedicationField);
+            yPosition += 9;
+          }
+
+          yPosition += 3;
         }
 
         if (child.medicalIssues === 'yes') {

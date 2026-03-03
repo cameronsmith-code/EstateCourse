@@ -1007,39 +1007,6 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
-        key: 'client2HasPoaProperty',
-        label: 'Has your spouse named a Power of Attorney(ies) for Property?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2PoaPropertyCount',
-        label: 'How many Powers of Attorney for Property has your spouse named?',
-        type: 'select',
-        options: [
-          { value: '1', label: '1' },
-          { value: '2', label: '2' },
-          { value: '3', label: '3' },
-          { value: '4', label: '4' },
-          { value: '5', label: '5' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2PoaPropertyHasDocCopy',
-        label: 'Do they have a copy of the most recent document in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
         key: 'client2HasEstateTrustee',
         label: 'Has your spouse named an Estate Trustee in their Will?',
         type: 'radio',
@@ -1118,6 +1085,39 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2PoaPersonalCareHasDocCopy',
+        label: 'Do they have a copy of the most recent document in their files?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2HasPoaProperty',
+        label: 'Has your spouse named a Power of Attorney(ies) for Property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2PoaPropertyCount',
+        label: 'How many Powers of Attorney for Property has your spouse named?',
+        type: 'select',
+        options: [
+          { value: '1', label: '1' },
+          { value: '2', label: '2' },
+          { value: '3', label: '3' },
+          { value: '4', label: '4' },
+          { value: '5', label: '5' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2PoaPropertyHasDocCopy',
         label: 'Do they have a copy of the most recent document in their files?',
         type: 'radio',
         options: [

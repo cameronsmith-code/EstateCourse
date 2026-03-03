@@ -1138,10 +1138,13 @@ export default function StepForm({
                     return null;
                   }
                 }
+                if (question.key === 'client1HasContingentPoaPersonalCare' && answers['client1HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client1HasLivingWill' && answers['client1HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'client1PoaPersonalCareCount' && answers['client1HasPoaPersonalCare'] !== 'yes') {
+                if (question.key === 'client1PoaPersonalCareCount' && answers['client1HasContingentPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
                 if (question.key === 'client1HasPoaProperty' && answers['client1HasWill'] !== 'yes') {

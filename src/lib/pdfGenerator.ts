@@ -122,6 +122,7 @@ interface FormData {
     email?: string;
   }>;
   client1HasPoaPersonalCare?: string;
+  client1HasContingentPoaPersonalCare?: string;
   client1PoaPersonalCareCount?: string;
   client1PoaPersonalCareData?: Array<{
     name?: string;
@@ -3169,8 +3170,9 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  if (formData.client1HasPoaPersonalCare === 'yes' && formData.client1PoaPersonalCareCount) {
-    const poaCount = parseInt(formData.client1PoaPersonalCareCount, 10);
+  if (formData.client1HasPoaPersonalCare === 'yes') {
+    const client1Name = formData.fullName || 'Client 1';
+    const client2Name = formData.spouseName || 'Client 2';
 
     if (yPosition > 210) {
       doc.addPage();
@@ -3179,8 +3181,6 @@ export const generatePDF = (formData: FormData) => {
 
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
-    const client1Name = formData.fullName || 'Client 1';
-    const client2Name = formData.spouseName || 'Client 2';
 
     if (formData.spouseIsPoaPersonalCare === 'yes') {
       doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
@@ -3189,11 +3189,6 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.text(`${client1Name} indicated that ${client2Name} (spouse/common law partner) is their POA for Personal Care.`, margin, yPosition);
       yPosition += 6;
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text('Contingent POAs are:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
     } else if (formData.spousesPoaPersonalCare === 'yes') {
       doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
       yPosition += 6;
@@ -3201,167 +3196,177 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.text(`(${client1Name}) and (${client2Name}), indicated that they are each other's Powers of Attorney for Personal Care.`, margin, yPosition);
       yPosition += 6;
+    }
+
+    if (formData.client1HasContingentPoaPersonalCare === 'no') {
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      doc.text('Their contingent POAs are:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
-    } else {
-      doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
-    }
-
-    const poaCellHeight = 6;
-    const poaColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
-    let poaTableY = yPosition;
-
-    doc.setDrawColor(0, 0, 0);
-    doc.setFillColor(200, 200, 200);
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(8);
-
-    const poaCol1X = margin;
-    const poaCol2X = margin + poaColWidths[0];
-    const poaCol3X = margin + poaColWidths[0] + poaColWidths[1];
-    const poaCol4X = margin + poaColWidths[0] + poaColWidths[1] + poaColWidths[2];
-
-    doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
-    doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
-    doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
-    doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
-
-    doc.text('Name:', poaCol1X + 0.5, poaTableY + 4);
-    doc.text('Phone Number:', poaCol2X + 0.5, poaTableY + 4);
-    doc.text('Email Address:', poaCol3X + 0.5, poaTableY + 4);
-    doc.text('Relationship to You:', poaCol4X + 0.5, poaTableY + 4);
-
-    poaTableY += poaCellHeight;
-
-    if (formData.spouseIsPoaPersonalCare === 'yes') {
-      if (poaTableY > 275) {
-        doc.addPage();
-        poaTableY = 12;
-      }
-
-      doc.setFillColor(255, 255, 255);
-      doc.setFont(undefined, 'normal');
-
-      doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
-      doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
-      doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
-      doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
-
-      const spouseField1 = new doc.AcroFormTextField();
-      spouseField1.fieldName = 'poa_personal_care_spouse_name';
-      spouseField1.Rect = [poaCol1X + 0.3, poaTableY + 0.3, poaColWidths[0] - 0.6, poaCellHeight - 0.6];
-      spouseField1.fontSize = 7;
-      spouseField1.textColor = [0, 0, 0];
-      spouseField1.borderStyle = 'none';
-      spouseField1.value = client2Name;
-      doc.addField(spouseField1);
-
-      const spouseField2 = new doc.AcroFormTextField();
-      spouseField2.fieldName = 'poa_personal_care_spouse_phone';
-      spouseField2.Rect = [poaCol2X + 0.3, poaTableY + 0.3, poaColWidths[1] - 0.6, poaCellHeight - 0.6];
-      spouseField2.fontSize = 7;
-      spouseField2.textColor = [0, 0, 0];
-      spouseField2.borderStyle = 'none';
-      spouseField2.value = formData.spousePhone || '';
-      doc.addField(spouseField2);
-
-      const spouseField3 = new doc.AcroFormTextField();
-      spouseField3.fieldName = 'poa_personal_care_spouse_email';
-      spouseField3.Rect = [poaCol3X + 0.3, poaTableY + 0.3, poaColWidths[2] - 0.6, poaCellHeight - 0.6];
-      spouseField3.fontSize = 7;
-      spouseField3.textColor = [0, 0, 0];
-      spouseField3.borderStyle = 'none';
-      spouseField3.value = formData.spouseEmail || '';
-      doc.addField(spouseField3);
-
-      const spouseField4 = new doc.AcroFormTextField();
-      spouseField4.fieldName = 'poa_personal_care_spouse_relationship';
-      spouseField4.Rect = [poaCol4X + 0.3, poaTableY + 0.3, poaColWidths[3] - 0.6, poaCellHeight - 0.6];
-      spouseField4.fontSize = 7;
-      spouseField4.textColor = [0, 0, 0];
-      spouseField4.borderStyle = 'none';
-      spouseField4.value = 'Spouse/Common Law Partner';
-      doc.addField(spouseField4);
-
-      poaTableY += poaCellHeight;
-    }
-
-    for (let i = 0; i < poaCount; i++) {
-      if (poaTableY > 275) {
-        doc.addPage();
-        poaTableY = 12;
-      }
-
-      const poaData = formData.client1PoaPersonalCareData?.[i];
-
-      doc.setFillColor(255, 255, 255);
-      doc.setFont(undefined, 'normal');
-
-      doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
-      doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
-      doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
-      doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
-
-      const field1 = new doc.AcroFormTextField();
-      field1.fieldName = `poa_personal_care_${i}_name`;
-      field1.Rect = [poaCol1X + 0.3, poaTableY + 0.3, poaColWidths[0] - 0.6, poaCellHeight - 0.6];
-      field1.fontSize = 7;
-      field1.textColor = [0, 0, 0];
-      field1.borderStyle = 'none';
-      field1.value = poaData?.name || '';
-      doc.addField(field1);
-
-      const field2 = new doc.AcroFormTextField();
-      field2.fieldName = `poa_personal_care_${i}_phone`;
-      field2.Rect = [poaCol2X + 0.3, poaTableY + 0.3, poaColWidths[1] - 0.6, poaCellHeight - 0.6];
-      field2.fontSize = 7;
-      field2.textColor = [0, 0, 0];
-      field2.borderStyle = 'none';
-      field2.value = poaData?.phone || '';
-      doc.addField(field2);
-
-      const field3 = new doc.AcroFormTextField();
-      field3.fieldName = `poa_personal_care_${i}_email`;
-      field3.Rect = [poaCol3X + 0.3, poaTableY + 0.3, poaColWidths[2] - 0.6, poaCellHeight - 0.6];
-      field3.fontSize = 7;
-      field3.textColor = [0, 0, 0];
-      field3.borderStyle = 'none';
-      field3.value = poaData?.email || '';
-      doc.addField(field3);
-
-      const field4 = new doc.AcroFormTextField();
-      field4.fieldName = `poa_personal_care_${i}_relationship`;
-      field4.Rect = [poaCol4X + 0.3, poaTableY + 0.3, poaColWidths[3] - 0.6, poaCellHeight - 0.6];
-      field4.fontSize = 7;
-      field4.textColor = [0, 0, 0];
-      field4.borderStyle = 'none';
-      field4.value = poaData?.relationship || '';
-      doc.addField(field4);
-
-      poaTableY += poaCellHeight;
-    }
-
-    yPosition = poaTableY + 10;
-
-    if (formData.client1HasLivingWill === 'yes') {
-      if (yPosition > 260) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
+      doc.text('Contingent Power(s) of Attorney:', margin, yPosition);
+      yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      const clientName = formData.fullName || 'The client';
-      const livingWillText = `Note that ${clientName}'s Power of Attorney(ies) for Personal Care also have Living Will instructions.`;
-      const livingWillLines = doc.splitTextToSize(livingWillText, fieldWidth);
-      doc.text(livingWillLines, margin, yPosition);
-      yPosition += livingWillLines.length * 5 + 5;
+      doc.text(`${client1Name} indicated that they have not named any contingent Power's of Attorney for Personal Care - consider updating this.`, margin, yPosition);
+      yPosition += 10;
+    } else if (formData.client1HasContingentPoaPersonalCare === 'yes' && formData.client1PoaPersonalCareCount) {
+      const poaCount = parseInt(formData.client1PoaPersonalCareCount, 10);
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Contingent Power(s) of Attorney:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      const poaCellHeight = 6;
+      const poaColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+      let poaTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(200, 200, 200);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      const poaCol1X = margin;
+      const poaCol2X = margin + poaColWidths[0];
+      const poaCol3X = margin + poaColWidths[0] + poaColWidths[1];
+      const poaCol4X = margin + poaColWidths[0] + poaColWidths[1] + poaColWidths[2];
+
+      doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
+      doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
+      doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
+      doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
+
+      doc.text('Name:', poaCol1X + 0.5, poaTableY + 4);
+      doc.text('Phone Number:', poaCol2X + 0.5, poaTableY + 4);
+      doc.text('Email Address:', poaCol3X + 0.5, poaTableY + 4);
+      doc.text('Relationship to You:', poaCol4X + 0.5, poaTableY + 4);
+
+      poaTableY += poaCellHeight;
+
+      if (formData.spouseIsPoaPersonalCare === 'yes') {
+        if (poaTableY > 275) {
+          doc.addPage();
+          poaTableY = 12;
+        }
+
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'normal');
+
+        doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
+        doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
+        doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
+        doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
+
+        const spouseField1 = new doc.AcroFormTextField();
+        spouseField1.fieldName = 'poa_personal_care_spouse_name';
+        spouseField1.Rect = [poaCol1X + 0.3, poaTableY + 0.3, poaColWidths[0] - 0.6, poaCellHeight - 0.6];
+        spouseField1.fontSize = 7;
+        spouseField1.textColor = [0, 0, 0];
+        spouseField1.borderStyle = 'none';
+        spouseField1.value = client2Name;
+        doc.addField(spouseField1);
+
+        const spouseField2 = new doc.AcroFormTextField();
+        spouseField2.fieldName = 'poa_personal_care_spouse_phone';
+        spouseField2.Rect = [poaCol2X + 0.3, poaTableY + 0.3, poaColWidths[1] - 0.6, poaCellHeight - 0.6];
+        spouseField2.fontSize = 7;
+        spouseField2.textColor = [0, 0, 0];
+        spouseField2.borderStyle = 'none';
+        spouseField2.value = formData.spousePhone || '';
+        doc.addField(spouseField2);
+
+        const spouseField3 = new doc.AcroFormTextField();
+        spouseField3.fieldName = 'poa_personal_care_spouse_email';
+        spouseField3.Rect = [poaCol3X + 0.3, poaTableY + 0.3, poaColWidths[2] - 0.6, poaCellHeight - 0.6];
+        spouseField3.fontSize = 7;
+        spouseField3.textColor = [0, 0, 0];
+        spouseField3.borderStyle = 'none';
+        spouseField3.value = formData.spouseEmail || '';
+        doc.addField(spouseField3);
+
+        const spouseField4 = new doc.AcroFormTextField();
+        spouseField4.fieldName = 'poa_personal_care_spouse_relationship';
+        spouseField4.Rect = [poaCol4X + 0.3, poaTableY + 0.3, poaColWidths[3] - 0.6, poaCellHeight - 0.6];
+        spouseField4.fontSize = 7;
+        spouseField4.textColor = [0, 0, 0];
+        spouseField4.borderStyle = 'none';
+        spouseField4.value = 'Spouse/Common Law Partner';
+        doc.addField(spouseField4);
+
+        poaTableY += poaCellHeight;
+      }
+
+      for (let i = 0; i < poaCount; i++) {
+        if (poaTableY > 275) {
+          doc.addPage();
+          poaTableY = 12;
+        }
+
+        const poaData = formData.client1PoaPersonalCareData?.[i];
+
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'normal');
+
+        doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
+        doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
+        doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
+        doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
+
+        const field1 = new doc.AcroFormTextField();
+        field1.fieldName = `poa_personal_care_${i}_name`;
+        field1.Rect = [poaCol1X + 0.3, poaTableY + 0.3, poaColWidths[0] - 0.6, poaCellHeight - 0.6];
+        field1.fontSize = 7;
+        field1.textColor = [0, 0, 0];
+        field1.borderStyle = 'none';
+        field1.value = poaData?.name || '';
+        doc.addField(field1);
+
+        const field2 = new doc.AcroFormTextField();
+        field2.fieldName = `poa_personal_care_${i}_phone`;
+        field2.Rect = [poaCol2X + 0.3, poaTableY + 0.3, poaColWidths[1] - 0.6, poaCellHeight - 0.6];
+        field2.fontSize = 7;
+        field2.textColor = [0, 0, 0];
+        field2.borderStyle = 'none';
+        field2.value = poaData?.phone || '';
+        doc.addField(field2);
+
+        const field3 = new doc.AcroFormTextField();
+        field3.fieldName = `poa_personal_care_${i}_email`;
+        field3.Rect = [poaCol3X + 0.3, poaTableY + 0.3, poaColWidths[2] - 0.6, poaCellHeight - 0.6];
+        field3.fontSize = 7;
+        field3.textColor = [0, 0, 0];
+        field3.borderStyle = 'none';
+        field3.value = poaData?.email || '';
+        doc.addField(field3);
+
+        const field4 = new doc.AcroFormTextField();
+        field4.fieldName = `poa_personal_care_${i}_relationship`;
+        field4.Rect = [poaCol4X + 0.3, poaTableY + 0.3, poaColWidths[3] - 0.6, poaCellHeight - 0.6];
+        field4.fontSize = 7;
+        field4.textColor = [0, 0, 0];
+        field4.borderStyle = 'none';
+        field4.value = poaData?.relationship || '';
+        doc.addField(field4);
+
+        poaTableY += poaCellHeight;
+      }
+
+      yPosition = poaTableY + 10;
     }
+  }
+
+  if (formData.client1HasLivingWill === 'yes') {
+    if (yPosition > 260) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    const clientName = formData.fullName || 'The client';
+    const livingWillText = `Note that ${clientName}'s Power of Attorney(ies) for Personal Care also have Living Will instructions.`;
+    const livingWillLines = doc.splitTextToSize(livingWillText, fieldWidth);
+    doc.text(livingWillLines, margin, yPosition);
+    yPosition += livingWillLines.length * 5 + 5;
   }
 
   if (formData.client2HasPoaPersonalCare === 'yes' && formData.client2PoaPersonalCareCount) {

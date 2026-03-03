@@ -804,8 +804,24 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'client1HasContingentPoaPersonalCare',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, have you named any contingent Power's of Attorney for Personal Care?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
         key: 'client1PoaPersonalCareCount',
-        label: 'How many Powers of Attorney for Personal Care have you named?',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, how many contingent Power(s) of Attorney(ies) for Personal Care have you named?`;
+        },
         type: 'select',
         options: [
           { value: '1', label: '1' },
@@ -815,6 +831,7 @@ export const STEPS: Step[] = [
           { value: '5', label: '5' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasContingentPoaPersonalCare === 'yes',
       },
       {
         key: 'client1HasLivingWill',

@@ -129,6 +129,38 @@ interface FormData {
     email?: string;
     relationship?: string;
   }>;
+  hasContingentPoaPersonalCare?: string;
+  contingentPoaPersonalCareCount?: string;
+  contingentPoaPersonalCare1Name?: string;
+  contingentPoaPersonalCare1Relationship?: string;
+  contingentPoaPersonalCare1Phone?: string;
+  contingentPoaPersonalCare1Email?: string;
+  contingentPoaPersonalCare1City?: string;
+  contingentPoaPersonalCare1Country?: string;
+  contingentPoaPersonalCare2Name?: string;
+  contingentPoaPersonalCare2Relationship?: string;
+  contingentPoaPersonalCare2Phone?: string;
+  contingentPoaPersonalCare2Email?: string;
+  contingentPoaPersonalCare2City?: string;
+  contingentPoaPersonalCare2Country?: string;
+  contingentPoaPersonalCare3Name?: string;
+  contingentPoaPersonalCare3Relationship?: string;
+  contingentPoaPersonalCare3Phone?: string;
+  contingentPoaPersonalCare3Email?: string;
+  contingentPoaPersonalCare3City?: string;
+  contingentPoaPersonalCare3Country?: string;
+  contingentPoaPersonalCare4Name?: string;
+  contingentPoaPersonalCare4Relationship?: string;
+  contingentPoaPersonalCare4Phone?: string;
+  contingentPoaPersonalCare4Email?: string;
+  contingentPoaPersonalCare4City?: string;
+  contingentPoaPersonalCare4Country?: string;
+  contingentPoaPersonalCare5Name?: string;
+  contingentPoaPersonalCare5Relationship?: string;
+  contingentPoaPersonalCare5Phone?: string;
+  contingentPoaPersonalCare5Email?: string;
+  contingentPoaPersonalCare5City?: string;
+  contingentPoaPersonalCare5Country?: string;
   client1HasPoaProperty?: string;
   client1PoaPropertyCount?: string;
   client1PoaPropertyData?: Array<{
@@ -3347,6 +3379,141 @@ export const generatePDF = (formData: FormData) => {
     }
 
     yPosition = poaTableY + 10;
+
+    if (formData.hasContingentPoaPersonalCare === 'yes' && formData.contingentPoaPersonalCareCount) {
+      const contingentCount = parseInt(formData.contingentPoaPersonalCareCount, 10);
+
+      if (yPosition > 210) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Additional/Contingent Powers of Attorney for Personal Care:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      const contingentCellHeight = 6;
+      const contingentColWidths = [fieldWidth * 0.15, fieldWidth * 0.15, fieldWidth * 0.15, fieldWidth * 0.15, fieldWidth * 0.15, fieldWidth * 0.25];
+      let contingentTableY = yPosition;
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(200, 200, 200);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+
+      const col1X = margin;
+      const col2X = margin + contingentColWidths[0];
+      const col3X = margin + contingentColWidths[0] + contingentColWidths[1];
+      const col4X = margin + contingentColWidths[0] + contingentColWidths[1] + contingentColWidths[2];
+      const col5X = margin + contingentColWidths[0] + contingentColWidths[1] + contingentColWidths[2] + contingentColWidths[3];
+      const col6X = margin + contingentColWidths[0] + contingentColWidths[1] + contingentColWidths[2] + contingentColWidths[3] + contingentColWidths[4];
+
+      doc.rect(col1X, contingentTableY, contingentColWidths[0], contingentCellHeight);
+      doc.rect(col2X, contingentTableY, contingentColWidths[1], contingentCellHeight);
+      doc.rect(col3X, contingentTableY, contingentColWidths[2], contingentCellHeight);
+      doc.rect(col4X, contingentTableY, contingentColWidths[3], contingentCellHeight);
+      doc.rect(col5X, contingentTableY, contingentColWidths[4], contingentCellHeight);
+      doc.rect(col6X, contingentTableY, contingentColWidths[5], contingentCellHeight);
+
+      doc.text('Name:', col1X + 0.5, contingentTableY + 4);
+      doc.text('Relationship:', col2X + 0.5, contingentTableY + 4);
+      doc.text('Phone:', col3X + 0.5, contingentTableY + 4);
+      doc.text('Email:', col4X + 0.5, contingentTableY + 4);
+      doc.text('City:', col5X + 0.5, contingentTableY + 4);
+      doc.text('Country:', col6X + 0.5, contingentTableY + 4);
+
+      contingentTableY += contingentCellHeight;
+
+      for (let i = 1; i <= contingentCount; i++) {
+        if (contingentTableY > 275) {
+          doc.addPage();
+          contingentTableY = 12;
+        }
+
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'normal');
+
+        doc.rect(col1X, contingentTableY, contingentColWidths[0], contingentCellHeight);
+        doc.rect(col2X, contingentTableY, contingentColWidths[1], contingentCellHeight);
+        doc.rect(col3X, contingentTableY, contingentColWidths[2], contingentCellHeight);
+        doc.rect(col4X, contingentTableY, contingentColWidths[3], contingentCellHeight);
+        doc.rect(col5X, contingentTableY, contingentColWidths[4], contingentCellHeight);
+        doc.rect(col6X, contingentTableY, contingentColWidths[5], contingentCellHeight);
+
+        const nameField = new doc.AcroFormTextField();
+        nameField.fieldName = `contingent_poa_personal_care_${i}_name`;
+        nameField.Rect = [col1X + 0.3, contingentTableY + 0.3, contingentColWidths[0] - 0.6, contingentCellHeight - 0.6];
+        nameField.fontSize = 7;
+        nameField.textColor = [0, 0, 0];
+        nameField.borderStyle = 'none';
+        nameField.value = formData[`contingentPoaPersonalCare${i}Name`] || '';
+        doc.addField(nameField);
+
+        const relationshipField = new doc.AcroFormTextField();
+        relationshipField.fieldName = `contingent_poa_personal_care_${i}_relationship`;
+        relationshipField.Rect = [col2X + 0.3, contingentTableY + 0.3, contingentColWidths[1] - 0.6, contingentCellHeight - 0.6];
+        relationshipField.fontSize = 7;
+        relationshipField.textColor = [0, 0, 0];
+        relationshipField.borderStyle = 'none';
+        relationshipField.value = formData[`contingentPoaPersonalCare${i}Relationship`] || '';
+        doc.addField(relationshipField);
+
+        const phoneField = new doc.AcroFormTextField();
+        phoneField.fieldName = `contingent_poa_personal_care_${i}_phone`;
+        phoneField.Rect = [col3X + 0.3, contingentTableY + 0.3, contingentColWidths[2] - 0.6, contingentCellHeight - 0.6];
+        phoneField.fontSize = 7;
+        phoneField.textColor = [0, 0, 0];
+        phoneField.borderStyle = 'none';
+        phoneField.value = formData[`contingentPoaPersonalCare${i}Phone`] || '';
+        doc.addField(phoneField);
+
+        const emailField = new doc.AcroFormTextField();
+        emailField.fieldName = `contingent_poa_personal_care_${i}_email`;
+        emailField.Rect = [col4X + 0.3, contingentTableY + 0.3, contingentColWidths[3] - 0.6, contingentCellHeight - 0.6];
+        emailField.fontSize = 7;
+        emailField.textColor = [0, 0, 0];
+        emailField.borderStyle = 'none';
+        emailField.value = formData[`contingentPoaPersonalCare${i}Email`] || '';
+        doc.addField(emailField);
+
+        const cityField = new doc.AcroFormTextField();
+        cityField.fieldName = `contingent_poa_personal_care_${i}_city`;
+        cityField.Rect = [col5X + 0.3, contingentTableY + 0.3, contingentColWidths[4] - 0.6, contingentCellHeight - 0.6];
+        cityField.fontSize = 7;
+        cityField.textColor = [0, 0, 0];
+        cityField.borderStyle = 'none';
+        cityField.value = formData[`contingentPoaPersonalCare${i}City`] || '';
+        doc.addField(cityField);
+
+        const countryField = new doc.AcroFormTextField();
+        countryField.fieldName = `contingent_poa_personal_care_${i}_country`;
+        countryField.Rect = [col6X + 0.3, contingentTableY + 0.3, contingentColWidths[5] - 0.6, contingentCellHeight - 0.6];
+        countryField.fontSize = 7;
+        countryField.textColor = [0, 0, 0];
+        countryField.borderStyle = 'none';
+        countryField.value = formData[`contingentPoaPersonalCare${i}Country`] || '';
+        doc.addField(countryField);
+
+        contingentTableY += contingentCellHeight;
+      }
+
+      yPosition = contingentTableY + 10;
+    } else if (formData.hasContingentPoaPersonalCare === 'no') {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const clientName = formData.fullName || 'The client';
+      const recommendationText = `${clientName} should consider adding additional/contingent Powers of Attorney for Personal Care.`;
+      const recommendationLines = doc.splitTextToSize(recommendationText, fieldWidth);
+      doc.text(recommendationLines, margin, yPosition);
+      yPosition += recommendationLines.length * 5 + 5;
+    }
 
     if (formData.client1HasLivingWill === 'yes') {
       if (yPosition > 260) {

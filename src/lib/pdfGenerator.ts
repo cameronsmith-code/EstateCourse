@@ -134,6 +134,7 @@ interface FormData {
     providedCopy?: string;
   }>;
   client1HasPoaProperty?: string;
+  client1HasContingentPoaProperty?: string;
   client1PoaPropertyCount?: string;
   client1PoaPropertyData?: Array<{
     name?: string;

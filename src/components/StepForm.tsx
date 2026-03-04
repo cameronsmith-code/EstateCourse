@@ -1158,7 +1158,7 @@ export default function StepForm({
                 if (question.key === 'client1HasPoaProperty' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'client1PoaPropertyCount' && answers['client1HasPoaProperty'] !== 'yes') {
+                if (question.key === 'client1PoaPropertyCount' && answers['client1HasContingentPoaProperty'] !== 'yes') {
                   return null;
                 }
                 if (question.key === 'client1PoaPropertyHasDocCopy' && answers['client1HasPoaProperty'] !== 'yes') {
@@ -1646,18 +1646,18 @@ export default function StepForm({
                         )}
                         <h3 className="text-xl font-semibold text-white">
                           {answers['spouseIsPoaProperty'] === 'yes'
-                            ? 'Contingent Powers of Attorney for Property Details'
+                            ? 'Alternative or Contingent Powers of Attorney for Property Details'
                             : answers['spousesPoaProperty'] === 'yes'
-                            ? 'Contingent Powers of Attorney for Property Details'
+                            ? 'Alternative or Contingent Powers of Attorney for Property Details'
                             : 'Powers of Attorney for Property Details'}
                         </h3>
                         {Array.from({ length: client1PoaPropertyCount }).map((_, index) => (
                           <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
                             <h4 className="text-lg font-semibold text-white mb-4">
                               {answers['spouseIsPoaProperty'] === 'yes'
-                                ? `Contingent POA for Property #${index + 1}`
+                                ? `Alternative or Contingent POA for Property #${index + 1}`
                                 : answers['spousesPoaProperty'] === 'yes'
-                                ? `Contingent POA for Property #${index + 1}`
+                                ? `Alternative or Contingent POA for Property #${index + 1}`
                                 : `POA for Property #${index + 1}`}
                             </h4>
 

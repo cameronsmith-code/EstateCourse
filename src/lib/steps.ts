@@ -872,8 +872,27 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'client1HasContingentPoaProperty',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, have you named any alternative or contingent Powers of Attorney for Property?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes';
+        },
+      },
+      {
         key: 'client1PoaPropertyCount',
-        label: 'How many Powers of Attorney for Property have you named?',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, how many alternative or contingent Powers of Attorney for Property have you named?`;
+        },
         type: 'select',
         options: [
           { value: '1', label: '1' },
@@ -884,7 +903,7 @@ export const STEPS: Step[] = [
         ],
         required: false,
         condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' && formData.spouseIsPoaProperty !== 'yes';
+          return formData.client1HasContingentPoaProperty === 'yes';
         },
       },
       {

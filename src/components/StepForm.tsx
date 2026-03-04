@@ -1573,6 +1573,90 @@ export default function StepForm({
 
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Country of Residence *
+                                </label>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="Canada"
+                                      checked={client1PoaPersonalCareData[index]?.country === 'Canada'}
+                                      onChange={(e) => handlePoaPersonalCareChange(index, 'country', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Canada</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="Other"
+                                      checked={client1PoaPersonalCareData[index]?.country === 'Other'}
+                                      onChange={(e) => handlePoaPersonalCareChange(index, 'country', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Other</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {client1PoaPersonalCareData[index]?.country === 'Other' && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Please specify country *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={client1PoaPersonalCareData[index]?.otherCountry || ''}
+                                    onChange={(e) => handlePoaPersonalCareChange(index, 'otherCountry', e.target.value)}
+                                    placeholder="Enter country"
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                              )}
+
+                              {client1PoaPersonalCareData[index]?.country === 'Canada' && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Province/Territory *
+                                  </label>
+                                  <select
+                                    value={client1PoaPersonalCareData[index]?.province || ''}
+                                    onChange={(e) => handlePoaPersonalCareChange(index, 'province', e.target.value)}
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  >
+                                    <option value="">Select province/territory</option>
+                                    <option value="Alberta">Alberta</option>
+                                    <option value="British Columbia">British Columbia</option>
+                                    <option value="Manitoba">Manitoba</option>
+                                    <option value="New Brunswick">New Brunswick</option>
+                                    <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                                    <option value="Northwest Territories">Northwest Territories</option>
+                                    <option value="Nova Scotia">Nova Scotia</option>
+                                    <option value="Nunavut">Nunavut</option>
+                                    <option value="Ontario">Ontario</option>
+                                    <option value="Prince Edward Island">Prince Edward Island</option>
+                                    <option value="Quebec">Quebec</option>
+                                    <option value="Saskatchewan">Saskatchewan</option>
+                                    <option value="Yukon">Yukon</option>
+                                  </select>
+                                </div>
+                              )}
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  City of Residence *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPersonalCareData[index]?.city || ''}
+                                  onChange={(e) => handlePoaPersonalCareChange(index, 'city', e.target.value)}
+                                  placeholder="Enter city"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Have you provided them with a copy of your most recent document? *
                                 </label>
                                 <div className="flex gap-4">
@@ -1716,6 +1800,90 @@ export default function StepForm({
                                   value={client1PoaPropertyData[index]?.relationship || ''}
                                   onChange={(e) => handlePoaPropertyChange(index, 'relationship', e.target.value)}
                                   placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Country of Residence *
+                                </label>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="Canada"
+                                      checked={client1PoaPropertyData[index]?.country === 'Canada'}
+                                      onChange={(e) => handlePoaPropertyChange(index, 'country', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Canada</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="Other"
+                                      checked={client1PoaPropertyData[index]?.country === 'Other'}
+                                      onChange={(e) => handlePoaPropertyChange(index, 'country', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Other</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {client1PoaPropertyData[index]?.country === 'Other' && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Please specify country *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={client1PoaPropertyData[index]?.otherCountry || ''}
+                                    onChange={(e) => handlePoaPropertyChange(index, 'otherCountry', e.target.value)}
+                                    placeholder="Enter country"
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                              )}
+
+                              {client1PoaPropertyData[index]?.country === 'Canada' && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Province/Territory *
+                                  </label>
+                                  <select
+                                    value={client1PoaPropertyData[index]?.province || ''}
+                                    onChange={(e) => handlePoaPropertyChange(index, 'province', e.target.value)}
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  >
+                                    <option value="">Select province/territory</option>
+                                    <option value="Alberta">Alberta</option>
+                                    <option value="British Columbia">British Columbia</option>
+                                    <option value="Manitoba">Manitoba</option>
+                                    <option value="New Brunswick">New Brunswick</option>
+                                    <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                                    <option value="Northwest Territories">Northwest Territories</option>
+                                    <option value="Nova Scotia">Nova Scotia</option>
+                                    <option value="Nunavut">Nunavut</option>
+                                    <option value="Ontario">Ontario</option>
+                                    <option value="Prince Edward Island">Prince Edward Island</option>
+                                    <option value="Quebec">Quebec</option>
+                                    <option value="Saskatchewan">Saskatchewan</option>
+                                    <option value="Yukon">Yukon</option>
+                                  </select>
+                                </div>
+                              )}
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  City of Residence *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client1PoaPropertyData[index]?.city || ''}
+                                  onChange={(e) => handlePoaPropertyChange(index, 'city', e.target.value)}
+                                  placeholder="Enter city"
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                               </div>
@@ -1941,6 +2109,90 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Country of Residence *
+                                    </label>
+                                    <div className="flex gap-4">
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          value="Canada"
+                                          checked={client1EstateTrusteeData[index]?.country === 'Canada'}
+                                          onChange={(e) => handleEstateTrusteeChange(index, 'country', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-white">Canada</span>
+                                      </label>
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          value="Other"
+                                          checked={client1EstateTrusteeData[index]?.country === 'Other'}
+                                          onChange={(e) => handleEstateTrusteeChange(index, 'country', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-white">Other</span>
+                                      </label>
+                                    </div>
+                                  </div>
+
+                                  {client1EstateTrusteeData[index]?.country === 'Other' && (
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Please specify country *
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={client1EstateTrusteeData[index]?.otherCountry || ''}
+                                        onChange={(e) => handleEstateTrusteeChange(index, 'otherCountry', e.target.value)}
+                                        placeholder="Enter country"
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                  )}
+
+                                  {client1EstateTrusteeData[index]?.country === 'Canada' && (
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Province/Territory *
+                                      </label>
+                                      <select
+                                        value={client1EstateTrusteeData[index]?.province || ''}
+                                        onChange={(e) => handleEstateTrusteeChange(index, 'province', e.target.value)}
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      >
+                                        <option value="">Select province/territory</option>
+                                        <option value="Alberta">Alberta</option>
+                                        <option value="British Columbia">British Columbia</option>
+                                        <option value="Manitoba">Manitoba</option>
+                                        <option value="New Brunswick">New Brunswick</option>
+                                        <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                                        <option value="Northwest Territories">Northwest Territories</option>
+                                        <option value="Nova Scotia">Nova Scotia</option>
+                                        <option value="Nunavut">Nunavut</option>
+                                        <option value="Ontario">Ontario</option>
+                                        <option value="Prince Edward Island">Prince Edward Island</option>
+                                        <option value="Quebec">Quebec</option>
+                                        <option value="Saskatchewan">Saskatchewan</option>
+                                        <option value="Yukon">Yukon</option>
+                                      </select>
+                                    </div>
+                                  )}
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      City of Residence *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client1EstateTrusteeData[index]?.city || ''}
+                                      onChange={(e) => handleEstateTrusteeChange(index, 'city', e.target.value)}
+                                      placeholder="Enter city"
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Have you provided them with a copy of your most recent document? *
                                     </label>
                                     <div className="flex gap-4">
@@ -2040,6 +2292,90 @@ export default function StepForm({
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                               </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Country of Residence *
+                                </label>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="Canada"
+                                      checked={client2PoaPersonalCareData[index]?.country === 'Canada'}
+                                      onChange={(e) => handleClient2PoaPersonalCareChange(index, 'country', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Canada</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="Other"
+                                      checked={client2PoaPersonalCareData[index]?.country === 'Other'}
+                                      onChange={(e) => handleClient2PoaPersonalCareChange(index, 'country', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Other</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {client2PoaPersonalCareData[index]?.country === 'Other' && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Please specify country *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={client2PoaPersonalCareData[index]?.otherCountry || ''}
+                                    onChange={(e) => handleClient2PoaPersonalCareChange(index, 'otherCountry', e.target.value)}
+                                    placeholder="Enter country"
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                              )}
+
+                              {client2PoaPersonalCareData[index]?.country === 'Canada' && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Province/Territory *
+                                  </label>
+                                  <select
+                                    value={client2PoaPersonalCareData[index]?.province || ''}
+                                    onChange={(e) => handleClient2PoaPersonalCareChange(index, 'province', e.target.value)}
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  >
+                                    <option value="">Select province/territory</option>
+                                    <option value="Alberta">Alberta</option>
+                                    <option value="British Columbia">British Columbia</option>
+                                    <option value="Manitoba">Manitoba</option>
+                                    <option value="New Brunswick">New Brunswick</option>
+                                    <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                                    <option value="Northwest Territories">Northwest Territories</option>
+                                    <option value="Nova Scotia">Nova Scotia</option>
+                                    <option value="Nunavut">Nunavut</option>
+                                    <option value="Ontario">Ontario</option>
+                                    <option value="Prince Edward Island">Prince Edward Island</option>
+                                    <option value="Quebec">Quebec</option>
+                                    <option value="Saskatchewan">Saskatchewan</option>
+                                    <option value="Yukon">Yukon</option>
+                                  </select>
+                                </div>
+                              )}
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  City of Residence *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2PoaPersonalCareData[index]?.city || ''}
+                                  onChange={(e) => handleClient2PoaPersonalCareChange(index, 'city', e.target.value)}
+                                  placeholder="Enter city"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -2111,6 +2447,90 @@ export default function StepForm({
                                   value={client2PoaPropertyData[index]?.relationship || ''}
                                   onChange={(e) => handleClient2PoaPropertyChange(index, 'relationship', e.target.value)}
                                   placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Country of Residence *
+                                </label>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="Canada"
+                                      checked={client2PoaPropertyData[index]?.country === 'Canada'}
+                                      onChange={(e) => handleClient2PoaPropertyChange(index, 'country', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Canada</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="Other"
+                                      checked={client2PoaPropertyData[index]?.country === 'Other'}
+                                      onChange={(e) => handleClient2PoaPropertyChange(index, 'country', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Other</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {client2PoaPropertyData[index]?.country === 'Other' && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Please specify country *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={client2PoaPropertyData[index]?.otherCountry || ''}
+                                    onChange={(e) => handleClient2PoaPropertyChange(index, 'otherCountry', e.target.value)}
+                                    placeholder="Enter country"
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                              )}
+
+                              {client2PoaPropertyData[index]?.country === 'Canada' && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Province/Territory *
+                                  </label>
+                                  <select
+                                    value={client2PoaPropertyData[index]?.province || ''}
+                                    onChange={(e) => handleClient2PoaPropertyChange(index, 'province', e.target.value)}
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  >
+                                    <option value="">Select province/territory</option>
+                                    <option value="Alberta">Alberta</option>
+                                    <option value="British Columbia">British Columbia</option>
+                                    <option value="Manitoba">Manitoba</option>
+                                    <option value="New Brunswick">New Brunswick</option>
+                                    <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                                    <option value="Northwest Territories">Northwest Territories</option>
+                                    <option value="Nova Scotia">Nova Scotia</option>
+                                    <option value="Nunavut">Nunavut</option>
+                                    <option value="Ontario">Ontario</option>
+                                    <option value="Prince Edward Island">Prince Edward Island</option>
+                                    <option value="Quebec">Quebec</option>
+                                    <option value="Saskatchewan">Saskatchewan</option>
+                                    <option value="Yukon">Yukon</option>
+                                  </select>
+                                </div>
+                              )}
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  City of Residence *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2PoaPropertyData[index]?.city || ''}
+                                  onChange={(e) => handleClient2PoaPropertyChange(index, 'city', e.target.value)}
+                                  placeholder="Enter city"
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                               </div>
@@ -2274,6 +2694,90 @@ export default function StepForm({
                                       value={client2EstateTrusteeData[index]?.relationship || ''}
                                       onChange={(e) => handleClient2EstateTrusteeChange(index, 'relationship', e.target.value)}
                                       placeholder="e.g., Spouse, Child, Sibling, etc."
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Country of Residence *
+                                    </label>
+                                    <div className="flex gap-4">
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          value="Canada"
+                                          checked={client2EstateTrusteeData[index]?.country === 'Canada'}
+                                          onChange={(e) => handleClient2EstateTrusteeChange(index, 'country', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-white">Canada</span>
+                                      </label>
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          value="Other"
+                                          checked={client2EstateTrusteeData[index]?.country === 'Other'}
+                                          onChange={(e) => handleClient2EstateTrusteeChange(index, 'country', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-white">Other</span>
+                                      </label>
+                                    </div>
+                                  </div>
+
+                                  {client2EstateTrusteeData[index]?.country === 'Other' && (
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Please specify country *
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={client2EstateTrusteeData[index]?.otherCountry || ''}
+                                        onChange={(e) => handleClient2EstateTrusteeChange(index, 'otherCountry', e.target.value)}
+                                        placeholder="Enter country"
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                  )}
+
+                                  {client2EstateTrusteeData[index]?.country === 'Canada' && (
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Province/Territory *
+                                      </label>
+                                      <select
+                                        value={client2EstateTrusteeData[index]?.province || ''}
+                                        onChange={(e) => handleClient2EstateTrusteeChange(index, 'province', e.target.value)}
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      >
+                                        <option value="">Select province/territory</option>
+                                        <option value="Alberta">Alberta</option>
+                                        <option value="British Columbia">British Columbia</option>
+                                        <option value="Manitoba">Manitoba</option>
+                                        <option value="New Brunswick">New Brunswick</option>
+                                        <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                                        <option value="Northwest Territories">Northwest Territories</option>
+                                        <option value="Nova Scotia">Nova Scotia</option>
+                                        <option value="Nunavut">Nunavut</option>
+                                        <option value="Ontario">Ontario</option>
+                                        <option value="Prince Edward Island">Prince Edward Island</option>
+                                        <option value="Quebec">Quebec</option>
+                                        <option value="Saskatchewan">Saskatchewan</option>
+                                        <option value="Yukon">Yukon</option>
+                                      </select>
+                                    </div>
+                                  )}
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      City of Residence *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={client2EstateTrusteeData[index]?.city || ''}
+                                      onChange={(e) => handleClient2EstateTrusteeChange(index, 'city', e.target.value)}
+                                      placeholder="Enter city"
                                       className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
                                   </div>

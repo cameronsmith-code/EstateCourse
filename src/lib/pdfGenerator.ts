@@ -131,6 +131,10 @@ interface FormData {
     phone?: string;
     email?: string;
     relationship?: string;
+    country?: string;
+    otherCountry?: string;
+    province?: string;
+    city?: string;
     providedCopy?: string;
   }>;
   client1HasPoaProperty?: string;
@@ -141,6 +145,10 @@ interface FormData {
     phone?: string;
     email?: string;
     relationship?: string;
+    country?: string;
+    otherCountry?: string;
+    province?: string;
+    city?: string;
     providedCopy?: string;
   }>;
   client1HasEstateTrustee?: string;
@@ -151,6 +159,10 @@ interface FormData {
     phone?: string;
     email?: string;
     relationship?: string;
+    country?: string;
+    otherCountry?: string;
+    province?: string;
+    city?: string;
     companyName?: string;
     companyAddress?: string;
     contactName?: string;
@@ -165,6 +177,10 @@ interface FormData {
     phone?: string;
     email?: string;
     relationship?: string;
+    country?: string;
+    otherCountry?: string;
+    province?: string;
+    city?: string;
     providedCopy?: string;
   }>;
   client2HasPoaProperty?: string;
@@ -175,6 +191,10 @@ interface FormData {
     phone?: string;
     email?: string;
     relationship?: string;
+    country?: string;
+    otherCountry?: string;
+    province?: string;
+    city?: string;
     providedCopy?: string;
   }>;
   client2HasEstateTrustee?: string;
@@ -185,6 +205,10 @@ interface FormData {
     phone?: string;
     email?: string;
     relationship?: string;
+    country?: string;
+    otherCountry?: string;
+    province?: string;
+    city?: string;
     companyName?: string;
     companyAddress?: string;
     contactName?: string;
@@ -3383,6 +3407,19 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(field5);
 
         poaTableY += poaCellHeight;
+
+        if (poaData?.country || poaData?.city) {
+          if (poaTableY > 270) {
+            doc.addPage();
+            poaTableY = 12;
+          }
+
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'italic');
+          const residenceText = `   Residence: ${poaData?.country === 'Other' ? (poaData?.otherCountry || 'Unknown') : (poaData?.country || 'N/A')}${poaData?.country === 'Canada' && poaData?.province ? `, ${poaData.province}` : ''}${poaData?.city ? `, ${poaData.city}` : ''}`;
+          doc.text(residenceText, poaCol1X, poaTableY + 4);
+          poaTableY += 6;
+        }
       }
 
       yPosition = poaTableY + 10;
@@ -3536,6 +3573,19 @@ export const generatePDF = (formData: FormData) => {
       doc.addField(field4);
 
       poaTableY += poaCellHeight;
+
+      if (poaData?.country || poaData?.city) {
+        if (poaTableY > 270) {
+          doc.addPage();
+          poaTableY = 12;
+        }
+
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'italic');
+        const residenceText = `   Residence: ${poaData?.country === 'Other' ? (poaData?.otherCountry || 'Unknown') : (poaData?.country || 'N/A')}${poaData?.country === 'Canada' && poaData?.province ? `, ${poaData.province}` : ''}${poaData?.city ? `, ${poaData.city}` : ''}`;
+        doc.text(residenceText, poaCol1X, poaTableY + 4);
+        poaTableY += 6;
+      }
     }
 
     yPosition = poaTableY + 10;
@@ -3958,6 +4008,19 @@ export const generatePDF = (formData: FormData) => {
       doc.addField(field5);
 
       poaPropertyTableY += poaPropertyCellHeight;
+
+      if (poaPropertyData?.country || poaPropertyData?.city) {
+        if (poaPropertyTableY > 270) {
+          doc.addPage();
+          poaPropertyTableY = 12;
+        }
+
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'italic');
+        const residenceText = `   Residence: ${poaPropertyData?.country === 'Other' ? (poaPropertyData?.otherCountry || 'Unknown') : (poaPropertyData?.country || 'N/A')}${poaPropertyData?.country === 'Canada' && poaPropertyData?.province ? `, ${poaPropertyData.province}` : ''}${poaPropertyData?.city ? `, ${poaPropertyData.city}` : ''}`;
+        doc.text(residenceText, poaPropertyCol1X, poaPropertyTableY + 4);
+        poaPropertyTableY += 6;
+      }
     }
 
     yPosition = poaPropertyTableY + 10;
@@ -4091,6 +4154,19 @@ export const generatePDF = (formData: FormData) => {
       doc.addField(field4);
 
       poaPropertyTableY += poaPropertyCellHeight;
+
+      if (poaData?.country || poaData?.city) {
+        if (poaPropertyTableY > 270) {
+          doc.addPage();
+          poaPropertyTableY = 12;
+        }
+
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'italic');
+        const residenceText = `   Residence: ${poaData?.country === 'Other' ? (poaData?.otherCountry || 'Unknown') : (poaData?.country || 'N/A')}${poaData?.country === 'Canada' && poaData?.province ? `, ${poaData.province}` : ''}${poaData?.city ? `, ${poaData.city}` : ''}`;
+        doc.text(residenceText, poaPropertyCol1X, poaPropertyTableY + 4);
+        poaPropertyTableY += 6;
+      }
     }
 
     yPosition = poaPropertyTableY + 10;
@@ -4486,6 +4562,20 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(field5);
 
         etTableY += etCellHeight;
+
+        if (trustee.country || trustee.city) {
+          if (etTableY > 270) {
+            doc.addPage();
+            etTableY = 12;
+          }
+
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'italic');
+          const residenceText = `   Residence: ${trustee.country === 'Other' ? (trustee.otherCountry || 'Unknown') : (trustee.country || 'N/A')}${trustee.country === 'Canada' && trustee.province ? `, ${trustee.province}` : ''}${trustee.city ? `, ${trustee.city}` : ''}`;
+          doc.text(residenceText, etCol1X, etTableY + 4);
+          etTableY += 6;
+        }
+
         yPosition = etTableY + 8;
       }
     }
@@ -4698,6 +4788,20 @@ export const generatePDF = (formData: FormData) => {
         doc.addField(field4);
 
         etTableY += etCellHeight;
+
+        if (trustee?.country || trustee?.city) {
+          if (etTableY > 270) {
+            doc.addPage();
+            etTableY = 12;
+          }
+
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'italic');
+          const residenceText = `   Residence: ${trustee.country === 'Other' ? (trustee.otherCountry || 'Unknown') : (trustee.country || 'N/A')}${trustee.country === 'Canada' && trustee.province ? `, ${trustee.province}` : ''}${trustee.city ? `, ${trustee.city}` : ''}`;
+          doc.text(residenceText, etCol1X, etTableY + 4);
+          etTableY += 6;
+        }
+
         yPosition = etTableY + 8;
       }
     }

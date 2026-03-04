@@ -110,7 +110,7 @@ interface FormData {
   client2UsesAccountant?: string;
   client2AccountingRecordsLocation?: string;
   accountantSamePerson?: string;
-  isCameronSmithAdvisor?: string;
+  client1IsCameronSmithAdvisor?: string;
   client1FinancialAdvisors?: string;
   client1FinancialAdvisorsData?: Array<{
     name?: string;
@@ -118,6 +118,7 @@ interface FormData {
     phone?: string;
     email?: string;
   }>;
+  client2IsCameronSmithAdvisor?: string;
   client2FinancialAdvisors?: string;
   client2FinancialAdvisorsData?: Array<{
     name?: string;

@@ -28,10 +28,10 @@ export default function StepForm({
   const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
-    const isCameronSmith = answers['isCameronSmithAdvisor'];
-    const advisorCount = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
+    const client1IsCameronSmith = answers['client1IsCameronSmithAdvisor'];
+    const client1AdvisorCount = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
 
-    if (isCameronSmith === 'yes' && advisorCount > 0) {
+    if (client1IsCameronSmith === 'yes' && client1AdvisorCount > 0) {
       const currentAdvisorsData = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
 
       if (!currentAdvisorsData[0] || !currentAdvisorsData[0].name) {
@@ -47,7 +47,29 @@ export default function StepForm({
         onAnswerChange('client1FinancialAdvisorsData', updatedData);
       }
     }
-  }, [answers['isCameronSmithAdvisor'], answers['client1FinancialAdvisors']]);
+  }, [answers['client1IsCameronSmithAdvisor'], answers['client1FinancialAdvisors']]);
+
+  useEffect(() => {
+    const client2IsCameronSmith = answers['client2IsCameronSmithAdvisor'];
+    const client2AdvisorCount = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
+
+    if (client2IsCameronSmith === 'yes' && client2AdvisorCount > 0) {
+      const currentAdvisorsData = (answers['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
+
+      if (!currentAdvisorsData[0] || !currentAdvisorsData[0].name) {
+        const cameronSmithData = {
+          name: 'Cameron Smith',
+          firm: 'Clarify Wealth / Investment Planning Counsel',
+          phone: '(647) 448-5963',
+          email: 'Cameron.Smith@ipcsecurities.com'
+        };
+
+        const updatedData = [...currentAdvisorsData];
+        updatedData[0] = { ...cameronSmithData, ...updatedData[0] };
+        onAnswerChange('client2FinancialAdvisorsData', updatedData);
+      }
+    }
+  }, [answers['client2IsCameronSmithAdvisor'], answers['client2FinancialAdvisors']]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -1311,8 +1333,14 @@ export default function StepForm({
                 if (question.key === 'accountantSamePerson') {
                   customLabel = `${client1Name} and ${client2Name}, do you use the same accountant?`;
                 }
+                if (question.key === 'client1IsCameronSmithAdvisor') {
+                  customLabel = `${client1Name}, is Cameron Smith, CFP® your financial advisor?`;
+                }
                 if (question.key === 'client1FinancialAdvisors') {
                   customLabel = `${client1Name}, how many Financial Advisors do you work with?`;
+                }
+                if (question.key === 'client2IsCameronSmithAdvisor') {
+                  customLabel = `${client2Name}, is Cameron Smith, CFP® your financial advisor?`;
                 }
                 if (question.key === 'client2FinancialAdvisors') {
                   customLabel = `${client2Name}, how many Financial Advisors do you work with?`;

@@ -1450,11 +1450,7 @@ export default function StepForm({
                   customLabel = `${client2Name}, have you named any additional or contingent Powers of Attorney for Personal Care?`;
                 }
                 if (question.key === 'client2PoaPersonalCareCount') {
-                  if (answers['spousesPoaPersonalCare'] === 'yes') {
-                    customLabel = `${client2Name}, how many contingent Powers of Attorney for Personal Care have you named?`;
-                  } else {
-                    customLabel = `${client2Name}, how many Powers of Attorney for Personal Care have you named?`;
-                  }
+                  customLabel = `${client2Name}, how many additional or contingent Powers of Attorney for Personal Care have you named?`;
                 }
                 if (question.key === 'client2HasPoaProperty') {
                   if (answers['spousesPoaProperty'] === 'yes') {

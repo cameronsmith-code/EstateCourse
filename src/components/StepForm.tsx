@@ -1244,6 +1244,12 @@ export default function StepForm({
                 if (question.key === 'client2HasPoaProperty' && !hasSpouse) {
                   return null;
                 }
+                if (question.key === 'client2SpouseIsPoaProperty' && answers['client2HasPoaProperty'] !== 'yes') {
+                  return null;
+                }
+                if (question.key === 'client2HasContingentPoaProperty' && answers['client2HasPoaProperty'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client2PoaPropertyCount' && answers['client2HasPoaProperty'] !== 'yes') {
                   return null;
                 }

@@ -1241,7 +1241,7 @@ export default function StepForm({
                 if (question.key === 'client2PoaPersonalCareHasDocCopy' && answers['client2HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'client2HasPoaProperty' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
+                if (question.key === 'client2HasPoaProperty' && !hasSpouse) {
                   return null;
                 }
                 if (question.key === 'client2PoaPropertyCount' && answers['client2HasPoaProperty'] !== 'yes') {

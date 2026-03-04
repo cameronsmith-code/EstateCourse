@@ -1226,6 +1226,12 @@ export default function StepForm({
                 if (question.key === 'client2HasPoaPersonalCare' && !hasSpouse) {
                   return null;
                 }
+                if (question.key === 'client2SpouseIsPoaPersonalCare' && (answers['client2HasPoaPersonalCare'] !== 'yes' || !hasSpouse)) {
+                  return null;
+                }
+                if (question.key === 'client2HasContingentPoaPersonalCare' && answers['client2HasPoaPersonalCare'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client2HasLivingWill' && (answers['client2HasPoaPersonalCare'] !== 'yes' || !hasSpouse)) {
                   return null;
                 }

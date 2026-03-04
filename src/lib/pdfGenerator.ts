@@ -130,6 +130,7 @@ interface FormData {
     phone?: string;
     email?: string;
     relationship?: string;
+    providedCopy?: string;
   }>;
   client1HasPoaProperty?: string;
   client1PoaPropertyCount?: string;
@@ -138,6 +139,7 @@ interface FormData {
     phone?: string;
     email?: string;
     relationship?: string;
+    providedCopy?: string;
   }>;
   client1HasEstateTrustee?: string;
   client1EstateTrusteeCount?: string;
@@ -150,6 +152,7 @@ interface FormData {
     companyName?: string;
     companyAddress?: string;
     contactName?: string;
+    providedCopy?: string;
   }>;
   client2HasPoaPersonalCare?: string;
   client2HasContingentPoaPersonalCare?: string;
@@ -160,6 +163,7 @@ interface FormData {
     phone?: string;
     email?: string;
     relationship?: string;
+    providedCopy?: string;
   }>;
   client2HasPoaProperty?: string;
   client2PoaPropertyCount?: string;
@@ -169,6 +173,7 @@ interface FormData {
     phone?: string;
     email?: string;
     relationship?: string;
+    providedCopy?: string;
   }>;
   client2HasEstateTrustee?: string;
   client2EstateTrusteeCount?: string;
@@ -181,6 +186,7 @@ interface FormData {
     companyName?: string;
     companyAddress?: string;
     contactName?: string;
+    providedCopy?: string;
   }>;
   client2PoaPersonalCareHasDocCopy?: string;
   client1PoaPropertyHasDocCopy?: string;
@@ -3221,7 +3227,7 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 8;
 
       const poaCellHeight = 6;
-      const poaColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+      const poaColWidths = [fieldWidth * 0.22, fieldWidth * 0.18, fieldWidth * 0.22, fieldWidth * 0.23, fieldWidth * 0.15];
       let poaTableY = yPosition;
 
       doc.setDrawColor(0, 0, 0);
@@ -3233,16 +3239,19 @@ export const generatePDF = (formData: FormData) => {
       const poaCol2X = margin + poaColWidths[0];
       const poaCol3X = margin + poaColWidths[0] + poaColWidths[1];
       const poaCol4X = margin + poaColWidths[0] + poaColWidths[1] + poaColWidths[2];
+      const poaCol5X = margin + poaColWidths[0] + poaColWidths[1] + poaColWidths[2] + poaColWidths[3];
 
       doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
       doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
       doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
       doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
+      doc.rect(poaCol5X, poaTableY, poaColWidths[4], poaCellHeight);
 
       doc.text('Name:', poaCol1X + 0.5, poaTableY + 4);
       doc.text('Phone Number:', poaCol2X + 0.5, poaTableY + 4);
       doc.text('Email Address:', poaCol3X + 0.5, poaTableY + 4);
       doc.text('Relationship to You:', poaCol4X + 0.5, poaTableY + 4);
+      doc.text('Provided Copy?', poaCol5X + 0.5, poaTableY + 4);
 
       poaTableY += poaCellHeight;
 
@@ -3259,6 +3268,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
         doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
         doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
+        doc.rect(poaCol5X, poaTableY, poaColWidths[4], poaCellHeight);
 
         const spouseField1 = new doc.AcroFormTextField();
         spouseField1.fieldName = 'poa_personal_care_spouse_name';
@@ -3296,6 +3306,15 @@ export const generatePDF = (formData: FormData) => {
         spouseField4.value = 'Spouse/Common Law Partner';
         doc.addField(spouseField4);
 
+        const spouseField5 = new doc.AcroFormTextField();
+        spouseField5.fieldName = 'poa_personal_care_spouse_providedcopy';
+        spouseField5.Rect = [poaCol5X + 0.3, poaTableY + 0.3, poaColWidths[4] - 0.6, poaCellHeight - 0.6];
+        spouseField5.fontSize = 7;
+        spouseField5.textColor = [0, 0, 0];
+        spouseField5.borderStyle = 'none';
+        spouseField5.value = '';
+        doc.addField(spouseField5);
+
         poaTableY += poaCellHeight;
       }
 
@@ -3314,6 +3333,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
         doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
         doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
+        doc.rect(poaCol5X, poaTableY, poaColWidths[4], poaCellHeight);
 
         const field1 = new doc.AcroFormTextField();
         field1.fieldName = `poa_personal_care_${i}_name`;
@@ -3350,6 +3370,15 @@ export const generatePDF = (formData: FormData) => {
         field4.borderStyle = 'none';
         field4.value = poaData?.relationship || '';
         doc.addField(field4);
+
+        const field5 = new doc.AcroFormTextField();
+        field5.fieldName = `poa_personal_care_${i}_providedcopy`;
+        field5.Rect = [poaCol5X + 0.3, poaTableY + 0.3, poaColWidths[4] - 0.6, poaCellHeight - 0.6];
+        field5.fontSize = 7;
+        field5.textColor = [0, 0, 0];
+        field5.borderStyle = 'none';
+        field5.value = poaData?.providedCopy === 'yes' ? 'Yes' : poaData?.providedCopy === 'no' ? 'No' : '';
+        doc.addField(field5);
 
         poaTableY += poaCellHeight;
       }
@@ -3773,7 +3802,7 @@ export const generatePDF = (formData: FormData) => {
     }
 
     const poaPropertyCellHeight = 6;
-    const poaPropertyColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+    const poaPropertyColWidths = [fieldWidth * 0.22, fieldWidth * 0.18, fieldWidth * 0.22, fieldWidth * 0.23, fieldWidth * 0.15];
     let poaPropertyTableY = yPosition;
 
     doc.setDrawColor(0, 0, 0);
@@ -3785,16 +3814,19 @@ export const generatePDF = (formData: FormData) => {
     const poaPropertyCol2X = margin + poaPropertyColWidths[0];
     const poaPropertyCol3X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1];
     const poaPropertyCol4X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1] + poaPropertyColWidths[2];
+    const poaPropertyCol5X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1] + poaPropertyColWidths[2] + poaPropertyColWidths[3];
 
     doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight);
     doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
     doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
     doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+    doc.rect(poaPropertyCol5X, poaPropertyTableY, poaPropertyColWidths[4], poaPropertyCellHeight);
 
     doc.text('Name:', poaPropertyCol1X + 0.5, poaPropertyTableY + 4);
     doc.text('Phone Number:', poaPropertyCol2X + 0.5, poaPropertyTableY + 4);
     doc.text('Email Address:', poaPropertyCol3X + 0.5, poaPropertyTableY + 4);
     doc.text('Relationship to You:', poaPropertyCol4X + 0.5, poaPropertyTableY + 4);
+    doc.text('Provided Copy?', poaPropertyCol5X + 0.5, poaPropertyTableY + 4);
 
     poaPropertyTableY += poaPropertyCellHeight;
 
@@ -3811,6 +3843,9 @@ export const generatePDF = (formData: FormData) => {
       doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
       doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
       doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol5X, poaPropertyTableY, poaPropertyColWidths[4], poaPropertyCellHeight);
+
+      const poaPropertyData = formData.client1PoaPropertyData?.[i];
 
       const field1 = new doc.AcroFormTextField();
       field1.fieldName = `poa_property_${i}_name`;
@@ -3818,6 +3853,7 @@ export const generatePDF = (formData: FormData) => {
       field1.fontSize = 7;
       field1.textColor = [0, 0, 0];
       field1.borderStyle = 'none';
+      field1.value = poaPropertyData?.name || '';
       doc.addField(field1);
 
       const field2 = new doc.AcroFormTextField();
@@ -3826,6 +3862,7 @@ export const generatePDF = (formData: FormData) => {
       field2.fontSize = 7;
       field2.textColor = [0, 0, 0];
       field2.borderStyle = 'none';
+      field2.value = poaPropertyData?.phone || '';
       doc.addField(field2);
 
       const field3 = new doc.AcroFormTextField();
@@ -3834,6 +3871,7 @@ export const generatePDF = (formData: FormData) => {
       field3.fontSize = 7;
       field3.textColor = [0, 0, 0];
       field3.borderStyle = 'none';
+      field3.value = poaPropertyData?.email || '';
       doc.addField(field3);
 
       const field4 = new doc.AcroFormTextField();
@@ -3842,7 +3880,17 @@ export const generatePDF = (formData: FormData) => {
       field4.fontSize = 7;
       field4.textColor = [0, 0, 0];
       field4.borderStyle = 'none';
+      field4.value = poaPropertyData?.relationship || '';
       doc.addField(field4);
+
+      const field5 = new doc.AcroFormTextField();
+      field5.fieldName = `poa_property_${i}_providedcopy`;
+      field5.Rect = [poaPropertyCol5X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[4] - 0.6, poaPropertyCellHeight - 0.6];
+      field5.fontSize = 7;
+      field5.textColor = [0, 0, 0];
+      field5.borderStyle = 'none';
+      field5.value = poaPropertyData?.providedCopy === 'yes' ? 'Yes' : poaPropertyData?.providedCopy === 'no' ? 'No' : '';
+      doc.addField(field5);
 
       poaPropertyTableY += poaPropertyCellHeight;
     }
@@ -3897,7 +3945,7 @@ export const generatePDF = (formData: FormData) => {
     }
 
     const poaPropertyCellHeight = 6;
-    const poaPropertyColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+    const poaPropertyColWidths = [fieldWidth * 0.22, fieldWidth * 0.18, fieldWidth * 0.22, fieldWidth * 0.23, fieldWidth * 0.15];
     let poaPropertyTableY = yPosition;
 
     doc.setDrawColor(0, 0, 0);
@@ -3909,16 +3957,19 @@ export const generatePDF = (formData: FormData) => {
     const poaPropertyCol2X = margin + poaPropertyColWidths[0];
     const poaPropertyCol3X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1];
     const poaPropertyCol4X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1] + poaPropertyColWidths[2];
+    const poaPropertyCol5X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1] + poaPropertyColWidths[2] + poaPropertyColWidths[3];
 
     doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight);
     doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
     doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
     doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+    doc.rect(poaPropertyCol5X, poaPropertyTableY, poaPropertyColWidths[4], poaPropertyCellHeight);
 
     doc.text('Name:', poaPropertyCol1X + 0.5, poaPropertyTableY + 4);
     doc.text('Phone Number:', poaPropertyCol2X + 0.5, poaPropertyTableY + 4);
     doc.text('Email Address:', poaPropertyCol3X + 0.5, poaPropertyTableY + 4);
     doc.text('Relationship to You:', poaPropertyCol4X + 0.5, poaPropertyTableY + 4);
+    doc.text('Provided Copy?', poaPropertyCol5X + 0.5, poaPropertyTableY + 4);
 
     poaPropertyTableY += poaPropertyCellHeight;
 
@@ -4249,7 +4300,8 @@ export const generatePDF = (formData: FormData) => {
           { label: 'Trust Company Address:', key: 'companyAddress' },
           { label: 'Key Contact Name:', key: 'contactName' },
           { label: 'Phone Number:', key: 'phone' },
-          { label: 'Email:', key: 'email' }
+          { label: 'Email:', key: 'email' },
+          { label: 'Provided Copy?', key: 'providedCopy' }
         ];
 
         fields.forEach((field, idx) => {
@@ -4272,6 +4324,8 @@ export const generatePDF = (formData: FormData) => {
           fieldObj.fontSize = 7;
           fieldObj.textColor = [0, 0, 0];
           fieldObj.borderStyle = 'none';
+          const value = trustee[field.key as keyof typeof trustee] || '';
+          fieldObj.value = field.key === 'providedCopy' ? (value === 'yes' ? 'Yes' : value === 'no' ? 'No' : '') : String(value);
           doc.addField(fieldObj);
 
           etTableY += etCellHeight;
@@ -4279,7 +4333,7 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = etTableY + 8;
       } else {
-        const etColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+        const etColWidths = [fieldWidth * 0.22, fieldWidth * 0.18, fieldWidth * 0.22, fieldWidth * 0.23, fieldWidth * 0.15];
         let etTableY = yPosition;
 
         doc.setDrawColor(0, 0, 0);
@@ -4291,16 +4345,19 @@ export const generatePDF = (formData: FormData) => {
         const etCol2X = margin + etColWidths[0];
         const etCol3X = margin + etColWidths[0] + etColWidths[1];
         const etCol4X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2];
+        const etCol5X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2] + etColWidths[3];
 
         doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
         doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
         doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
         doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+        doc.rect(etCol5X, etTableY, etColWidths[4], etCellHeight);
 
         doc.text('Name:', etCol1X + 0.5, etTableY + 4);
         doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
         doc.text('Email Address:', etCol3X + 0.5, etTableY + 4);
         doc.text('Relationship:', etCol4X + 0.5, etTableY + 4);
+        doc.text('Provided Copy?', etCol5X + 0.5, etTableY + 4);
 
         etTableY += etCellHeight;
 
@@ -4316,6 +4373,7 @@ export const generatePDF = (formData: FormData) => {
         doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
         doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
         doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+        doc.rect(etCol5X, etTableY, etColWidths[4], etCellHeight);
 
         const field1 = new doc.AcroFormTextField();
         field1.fieldName = `estate_trustee_${i}_name`;
@@ -4323,6 +4381,7 @@ export const generatePDF = (formData: FormData) => {
         field1.fontSize = 7;
         field1.textColor = [0, 0, 0];
         field1.borderStyle = 'none';
+        field1.value = trustee.name || '';
         doc.addField(field1);
 
         const field2 = new doc.AcroFormTextField();
@@ -4331,6 +4390,7 @@ export const generatePDF = (formData: FormData) => {
         field2.fontSize = 7;
         field2.textColor = [0, 0, 0];
         field2.borderStyle = 'none';
+        field2.value = trustee.phone || '';
         doc.addField(field2);
 
         const field3 = new doc.AcroFormTextField();
@@ -4339,6 +4399,7 @@ export const generatePDF = (formData: FormData) => {
         field3.fontSize = 7;
         field3.textColor = [0, 0, 0];
         field3.borderStyle = 'none';
+        field3.value = trustee.email || '';
         doc.addField(field3);
 
         const field4 = new doc.AcroFormTextField();
@@ -4347,7 +4408,17 @@ export const generatePDF = (formData: FormData) => {
         field4.fontSize = 7;
         field4.textColor = [0, 0, 0];
         field4.borderStyle = 'none';
+        field4.value = trustee.relationship || '';
         doc.addField(field4);
+
+        const field5 = new doc.AcroFormTextField();
+        field5.fieldName = `estate_trustee_${i}_providedcopy`;
+        field5.Rect = [etCol5X + 0.3, etTableY + 0.3, etColWidths[4] - 0.6, etCellHeight - 0.6];
+        field5.fontSize = 7;
+        field5.textColor = [0, 0, 0];
+        field5.borderStyle = 'none';
+        field5.value = trustee.providedCopy === 'yes' ? 'Yes' : trustee.providedCopy === 'no' ? 'No' : '';
+        doc.addField(field5);
 
         etTableY += etCellHeight;
         yPosition = etTableY + 8;
@@ -4452,7 +4523,8 @@ export const generatePDF = (formData: FormData) => {
           { label: 'Trust Company Address:', key: 'companyAddress' },
           { label: 'Key Contact Name:', key: 'contactName' },
           { label: 'Phone Number:', key: 'phone' },
-          { label: 'Email:', key: 'email' }
+          { label: 'Email:', key: 'email' },
+          { label: 'Provided Copy?', key: 'providedCopy' }
         ];
 
         fields.forEach((field, idx) => {
@@ -4483,7 +4555,7 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition = etTableY + 8;
       } else {
-        const etColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+        const etColWidths = [fieldWidth * 0.22, fieldWidth * 0.18, fieldWidth * 0.22, fieldWidth * 0.23, fieldWidth * 0.15];
         let etTableY = yPosition;
 
         doc.setDrawColor(0, 0, 0);
@@ -4495,16 +4567,19 @@ export const generatePDF = (formData: FormData) => {
         const etCol2X = margin + etColWidths[0];
         const etCol3X = margin + etColWidths[0] + etColWidths[1];
         const etCol4X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2];
+        const etCol5X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2] + etColWidths[3];
 
         doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
         doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
         doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
         doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+        doc.rect(etCol5X, etTableY, etColWidths[4], etCellHeight);
 
         doc.text('Name:', etCol1X + 0.5, etTableY + 4);
         doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
         doc.text('Email Address:', etCol3X + 0.5, etTableY + 4);
         doc.text('Relationship:', etCol4X + 0.5, etTableY + 4);
+        doc.text('Provided Copy?', etCol5X + 0.5, etTableY + 4);
 
         etTableY += etCellHeight;
 

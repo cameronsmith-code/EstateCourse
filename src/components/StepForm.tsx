@@ -1556,6 +1556,34 @@ export default function StepForm({
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                               </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Have you provided them with a copy of your most recent document? *
+                                </label>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="yes"
+                                      checked={client1PoaPersonalCareData[index]?.providedCopy === 'yes'}
+                                      onChange={(e) => handlePoaPersonalCareChange(index, 'providedCopy', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Yes</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="no"
+                                      checked={client1PoaPersonalCareData[index]?.providedCopy === 'no'}
+                                      onChange={(e) => handlePoaPersonalCareChange(index, 'providedCopy', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">No</span>
+                                  </label>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -1641,6 +1669,34 @@ export default function StepForm({
                                   placeholder="e.g., Spouse, Child, Sibling, etc."
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Have you provided them with a copy of your most recent document? *
+                                </label>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="yes"
+                                      checked={client1PoaPropertyData[index]?.providedCopy === 'yes'}
+                                      onChange={(e) => handlePoaPropertyChange(index, 'providedCopy', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">Yes</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      value="no"
+                                      checked={client1PoaPropertyData[index]?.providedCopy === 'no'}
+                                      onChange={(e) => handlePoaPropertyChange(index, 'providedCopy', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-white">No</span>
+                                  </label>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1751,6 +1807,34 @@ export default function StepForm({
                                       className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
                                   </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Have you provided them with a copy of your most recent document? *
+                                    </label>
+                                    <div className="flex gap-4">
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          value="yes"
+                                          checked={client1EstateTrusteeData[index]?.providedCopy === 'yes'}
+                                          onChange={(e) => handleEstateTrusteeChange(index, 'providedCopy', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-white">Yes</span>
+                                      </label>
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          value="no"
+                                          checked={client1EstateTrusteeData[index]?.providedCopy === 'no'}
+                                          onChange={(e) => handleEstateTrusteeChange(index, 'providedCopy', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-white">No</span>
+                                      </label>
+                                    </div>
+                                  </div>
                                 </>
                               ) : (
                                 <>
@@ -1804,6 +1888,34 @@ export default function StepForm({
                                       placeholder="e.g., Spouse, Child, Sibling, etc."
                                       className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Have you provided them with a copy of your most recent document? *
+                                    </label>
+                                    <div className="flex gap-4">
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          value="yes"
+                                          checked={client1EstateTrusteeData[index]?.providedCopy === 'yes'}
+                                          onChange={(e) => handleEstateTrusteeChange(index, 'providedCopy', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-white">Yes</span>
+                                      </label>
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          value="no"
+                                          checked={client1EstateTrusteeData[index]?.providedCopy === 'no'}
+                                          onChange={(e) => handleEstateTrusteeChange(index, 'providedCopy', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-white">No</span>
+                                      </label>
+                                    </div>
                                   </div>
                                 </>
                               )}

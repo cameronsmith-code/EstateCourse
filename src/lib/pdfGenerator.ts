@@ -221,8 +221,6 @@ interface FormData {
   client2PoaPersonalCareHasDocCopy?: string;
   client1PoaPropertyHasDocCopy?: string;
   client2PoaPropertyHasDocCopy?: string;
-  client1EstateTrusteeHasWillCopy?: string;
-  client2EstateTrusteeHasWillCopy?: string;
   client1EstateTrusteeKnowsWillLocation?: string;
   client2EstateTrusteeKnowsWillLocation?: string;
   client1HasLivingWill?: string;
@@ -4667,19 +4665,7 @@ export const generatePDF = (formData: FormData) => {
 
     const clientName = formData.fullName || 'The client';
 
-    if (formData.client1EstateTrusteeHasWillCopy === 'yes') {
-      if (yPosition > 260) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'normal');
-      const willCopyText = `${clientName} indicated that their chosen Estate Trustee(s) have a copy of their Will on file.`;
-      const willCopyLines = doc.splitTextToSize(willCopyText, fieldWidth);
-      doc.text(willCopyLines, margin, yPosition);
-      yPosition += willCopyLines.length * 5 + 5;
-    } else if (formData.client1EstateTrusteeKnowsWillLocation === 'yes') {
+    if (formData.client1EstateTrusteeKnowsWillLocation === 'yes') {
       if (yPosition > 260) {
         doc.addPage();
         yPosition = 12;
@@ -4890,20 +4876,6 @@ export const generatePDF = (formData: FormData) => {
     }
 
     yPosition += 2;
-
-    if (formData.client2EstateTrusteeHasWillCopy === 'yes') {
-      if (yPosition > 260) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'normal');
-      const docCopyText = `${client2Name} indicated that the Estate Trustees have a copy of the most recent Will in their files.`;
-      const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
-      doc.text(docCopyLines, margin, yPosition);
-      yPosition += docCopyLines.length * 5 + 5;
-    }
 
     if (formData.client2EstateTrusteeKnowsWillLocation === 'yes') {
       if (yPosition > 240) {

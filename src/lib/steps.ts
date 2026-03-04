@@ -941,16 +941,6 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
-        key: 'client1EstateTrusteeHasWillCopy',
-        label: 'Do the named Estate Trustees have a copy of your most recent Will in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
         key: 'client1EstateTrusteeKnowsWillLocation',
         label: 'Do your Estate Trustees know where to find a copy of your Will?',
         type: 'radio',
@@ -959,7 +949,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.client1EstateTrusteeHasWillCopy === 'no',
+        condition: (formData: Record<string, string>) => formData.client1HasEstateTrustee === 'yes',
       },
       {
         key: 'client1HasFuneralArrangements',
@@ -1231,16 +1221,6 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client2HasEstateTrustee === 'yes',
       },
       {
-        key: 'client2EstateTrusteeHasWillCopy',
-        label: 'Do the named Estate Trustees have a copy of your most recent Will in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
         key: 'client2EstateTrusteeKnowsWillLocation',
         label: 'Do your Estate Trustees know where to find a copy of your Will?',
         type: 'radio',
@@ -1249,7 +1229,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.client2EstateTrusteeHasWillCopy === 'no',
+        condition: (formData: Record<string, string>) => formData.client2HasEstateTrustee === 'yes',
       },
       {
         key: 'client2HasFuneralArrangements',

@@ -844,23 +844,6 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
-        key: 'client2PoaPersonalCareDocLocation',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName || 'Client 2';
-          return `${client2Name}, where are your Power of Attorney for Personal Care documents located?`;
-        },
-        type: 'text',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          const basicAnswers = formData as unknown as Map<number, Record<string, unknown>>;
-          const maritalStatus = typeof basicAnswers.get === 'function'
-            ? basicAnswers.get(1)?.maritalStatus
-            : formData.maritalStatus;
-          return (maritalStatus === 'married' || maritalStatus === 'common_law') &&
-                 formData.client2HasPoaPersonalCare === 'yes';
-        },
-      },
-      {
         key: 'client1HasPoaProperty',
         label: 'Have you named a Power of Attorney(ies) for Property?',
         type: 'radio',
@@ -1041,6 +1024,136 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client2HasPoaPersonalCare',
+        label: 'Has your spouse named a Power of Attorney(ies) for Personal Care?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2HasContingentPoaPersonalCare',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, has your spouse named other or contingent Power(s) of Attorney for Personal Care?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaPersonalCare === 'yes',
+      },
+      {
+        key: 'client2PoaPersonalCareCount',
+        label: 'How many contingent Powers of Attorney for Personal Care has your spouse named?',
+        type: 'select',
+        options: [
+          { value: '1', label: '1' },
+          { value: '2', label: '2' },
+          { value: '3', label: '3' },
+          { value: '4', label: '4' },
+          { value: '5', label: '5' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasContingentPoaPersonalCare === 'yes',
+      },
+      {
+        key: 'client2PoaPersonalCareHasDocCopy',
+        label: 'Do they have a copy of the most recent document in their files?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaPersonalCare === 'yes',
+      },
+      {
+        key: 'client2HasLivingWill',
+        label: 'Does your spouse have a \'Living Will\'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2PoaPersonalCareDocLocation',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, where are your Power of Attorney for Personal Care documents located?`;
+        },
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const basicAnswers = formData as unknown as Map<number, Record<string, unknown>>;
+          const maritalStatus = typeof basicAnswers.get === 'function'
+            ? basicAnswers.get(1)?.maritalStatus
+            : formData.maritalStatus;
+          return (maritalStatus === 'married' || maritalStatus === 'common_law') &&
+                 formData.client2HasPoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2HasPoaProperty',
+        label: 'Has your spouse named a Power of Attorney(ies) for Property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2PoaPropertyCount',
+        label: 'How many Powers of Attorney for Property has your spouse named?',
+        type: 'select',
+        options: [
+          { value: '1', label: '1' },
+          { value: '2', label: '2' },
+          { value: '3', label: '3' },
+          { value: '4', label: '4' },
+          { value: '5', label: '5' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaProperty === 'yes',
+      },
+      {
+        key: 'client2PoaPropertyHasDocCopy',
+        label: 'Do your spouse\'s Powers of Attorney for Property have a copy of the most recent document in their files?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaProperty === 'yes',
+      },
+      {
+        key: 'client2PoaPropertyDocLocation',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, where are your Power of Attorney for Property documents located?`;
+        },
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const basicAnswers = formData as unknown as Map<number, Record<string, unknown>>;
+          const maritalStatus = typeof basicAnswers.get === 'function'
+            ? basicAnswers.get(1)?.maritalStatus
+            : formData.maritalStatus;
+          return (maritalStatus === 'married' || maritalStatus === 'common_law') &&
+                 formData.client2HasPoaProperty === 'yes';
+        },
+      },
+      {
         key: 'client2HasEstateTrustee',
         label: 'Has your spouse named an Estate Trustee in their Will?',
         type: 'radio',
@@ -1062,6 +1175,7 @@ export const STEPS: Step[] = [
           { value: '5', label: '5' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasEstateTrustee === 'yes',
       },
       {
         key: 'client2EstateTrusteeHasWillCopy',
@@ -1072,6 +1186,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasEstateTrustee === 'yes',
       },
       {
         key: 'client2EstateTrusteeKnowsWillLocation',
@@ -1083,59 +1198,6 @@ export const STEPS: Step[] = [
         ],
         required: false,
         condition: (formData: Record<string, string>) => formData.client2EstateTrusteeHasWillCopy === 'no',
-      },
-      {
-        key: 'client2HasPoaPersonalCare',
-        label: 'Has your spouse named a Power of Attorney(ies) for Personal Care?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2HasPoaProperty',
-        label: 'Has your spouse named a Power of Attorney(ies) for Property?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2HasLivingWill',
-        label: 'Does your spouse have a \'Living Will\'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2PoaPersonalCareCount',
-        label: 'How many Powers of Attorney for Personal Care has your spouse named?',
-        type: 'select',
-        options: [
-          { value: '1', label: '1' },
-          { value: '2', label: '2' },
-          { value: '3', label: '3' },
-          { value: '4', label: '4' },
-          { value: '5', label: '5' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2PoaPersonalCareHasDocCopy',
-        label: 'Do they have a copy of the most recent document in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
       },
       {
         key: 'client2HasFuneralArrangements',

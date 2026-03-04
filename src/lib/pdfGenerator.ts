@@ -151,6 +151,7 @@ interface FormData {
     contactName?: string;
   }>;
   client2HasPoaPersonalCare?: string;
+  client2HasContingentPoaPersonalCare?: string;
   client2PoaPersonalCareCount?: string;
   client2PoaPersonalCareDocLocation?: string;
   client2PoaPersonalCareData?: Array<{
@@ -161,6 +162,7 @@ interface FormData {
   }>;
   client2HasPoaProperty?: string;
   client2PoaPropertyCount?: string;
+  client2PoaPropertyDocLocation?: string;
   client2PoaPropertyData?: Array<{
     name?: string;
     phone?: string;
@@ -3953,6 +3955,28 @@ export const generatePDF = (formData: FormData) => {
     }
 
     yPosition = poaPropertyTableY + 10;
+
+    if (formData.client2PoaPropertyDocLocation) {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text('Document Location:', margin, yPosition);
+      yPosition += 6;
+
+      doc.setFont(undefined, 'normal');
+      const docLocationField = new doc.AcroFormTextField();
+      docLocationField.fieldName = 'client2_poa_property_doc_location';
+      docLocationField.Rect = [margin, yPosition, fieldWidth, 8];
+      docLocationField.fontSize = 9;
+      docLocationField.textColor = [0, 0, 0];
+      docLocationField.value = formData.client2PoaPropertyDocLocation || '';
+      doc.addField(docLocationField);
+      yPosition += 10;
+    }
 
     if (formData.client2PoaPropertyHasDocCopy === 'yes') {
       if (yPosition > 260) {

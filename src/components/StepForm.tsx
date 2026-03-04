@@ -1561,6 +1561,20 @@ export default function StepForm({
                         ))}
                       </div>
                     )}
+                    {question.key === 'client1PoaPersonalCareCount' && client1PoaPersonalCareCount > 0 && (
+                      <div className="mt-6 border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <label className="block text-lg font-medium text-white mb-4">
+                          {allAnswers?.get(1)?.fullName || 'Client 1'}, where is the Power of Attorney for Personal Care document located?
+                        </label>
+                        <input
+                          type="text"
+                          value={(answers['client1PoaPersonalCareDocLocation'] as string) || ''}
+                          onChange={(e) => onAnswerChange('client1PoaPersonalCareDocLocation', e.target.value)}
+                          placeholder="Enter location"
+                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    )}
                     {question.key === 'client1PoaPropertyCount' && client1PoaPropertyCount > 0 && (
                       <div className="space-y-6 mt-6">
                         <h3 className="text-xl font-semibold text-white">

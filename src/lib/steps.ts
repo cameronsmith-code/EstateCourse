@@ -844,17 +844,6 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
-        key: 'client1PoaPersonalCareDocLocation',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName || 'Client 1';
-          return `${client1Name}, where is the Power of Attorney for Personal Care document stored?`;
-        },
-        type: 'text',
-        placeholder: 'Enter location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
-      },
-      {
         key: 'client1HasPoaProperty',
         label: 'Have you named a Power of Attorney(ies) for Property?',
         type: 'radio',

@@ -124,6 +124,7 @@ interface FormData {
   client1HasPoaPersonalCare?: string;
   client1HasContingentPoaPersonalCare?: string;
   client1PoaPersonalCareCount?: string;
+  client1PoaPersonalCareDocLocation?: string;
   client1PoaPersonalCareData?: Array<{
     name?: string;
     phone?: string;
@@ -3354,6 +3355,28 @@ export const generatePDF = (formData: FormData) => {
       }
 
       yPosition = poaTableY + 10;
+    }
+
+    if (formData.client1PoaPersonalCareDocLocation) {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text('Document Location:', margin, yPosition);
+      yPosition += 6;
+
+      doc.setFont(undefined, 'normal');
+      const docLocationField = new doc.AcroFormTextField();
+      docLocationField.fieldName = 'client1_poa_personal_care_doc_location';
+      docLocationField.Rect = [margin, yPosition, fieldWidth, 8];
+      docLocationField.fontSize = 9;
+      docLocationField.textColor = [0, 0, 0];
+      docLocationField.value = formData.client1PoaPersonalCareDocLocation || '';
+      doc.addField(docLocationField);
+      yPosition += 10;
     }
   }
 

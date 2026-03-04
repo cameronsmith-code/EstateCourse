@@ -38,6 +38,7 @@ interface FormData {
   city?: string;
   province?: string;
   postalCode?: string;
+  country?: string;
   email?: string;
   phone?: string;
   hasSpouse?: string;
@@ -65,6 +66,7 @@ interface FormData {
   spouseCity?: string;
   spouseProvince?: string;
   spousePostalCode?: string;
+  spouseCountry?: string;
   spouseEmail?: string;
   spousePhone?: string;
   hasChildren?: string;
@@ -3819,6 +3821,85 @@ export const generatePDF = (formData: FormData) => {
       doc.text(line, margin, yPosition);
       yPosition += 4.5;
     });
+
+    yPosition += 2;
+
+    // Check if any POA for Personal Care lives in a different location than the client
+    const client1Province = formData.province;
+    const client1Country = formData.country || 'Canada';
+    const client2Province = formData.spouseProvince;
+    const client2Country = formData.spouseCountry || (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law' ? 'Canada' : undefined);
+
+    let hasGeographicConcern = false;
+
+    // Check client1's POAs
+    if (formData.client1PoaPersonalCareData && Array.isArray(formData.client1PoaPersonalCareData)) {
+      for (const poa of formData.client1PoaPersonalCareData) {
+        if (poa.country && poa.country !== client1Country) {
+          hasGeographicConcern = true;
+          break;
+        }
+        if (poa.country === 'Canada' && client1Country === 'Canada' && poa.province && poa.province !== client1Province) {
+          hasGeographicConcern = true;
+          break;
+        }
+      }
+    }
+
+    // Check client2's POAs if not already found
+    if (!hasGeographicConcern && formData.client2PoaPersonalCareData && Array.isArray(formData.client2PoaPersonalCareData) && client2Country) {
+      for (const poa of formData.client2PoaPersonalCareData) {
+        if (poa.country && poa.country !== client2Country) {
+          hasGeographicConcern = true;
+          break;
+        }
+        if (poa.country === 'Canada' && client2Country === 'Canada' && poa.province && poa.province !== client2Province) {
+          hasGeographicConcern = true;
+          break;
+        }
+      }
+    }
+
+    // Add Geographic/Jurisdictional Concerns section if needed
+    if (hasGeographicConcern) {
+      yPosition += 4;
+
+      doc.setFont(undefined, 'bold');
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 12;
+      }
+      doc.text('Geographic / Jurisdictional Concerns', margin, yPosition);
+      yPosition += 6;
+
+      doc.setFont(undefined, 'normal');
+      const geoConcernText = [
+        'It was indicated that a Power of Attorney for Personal Care resides in a different province, territory or',
+        'country. If a Power of Attorney for Personal Care (POAPC) lives in a different province or country, practical',
+        'and legal complications can arise when health decisions need to be made quickly. Health-care providers often',
+        'prefer dealing with someone who can be physically present to consult with doctors, review care options, and',
+        'sign documents. If the attorney cannot attend in person, it may slow decision-making or create communication',
+        'gaps during critical moments. In some cases, institutions may be unfamiliar with out-of-province documents or',
+        'require additional verification before accepting instructions, which can create delays in urgent care situations.',
+        '',
+        'To address this, many people structure their personal care powers of attorney with multiple layers of support.',
+        'One option is appointing a local primary attorney for personal care who can be physically present with the',
+        'patient and medical team. Another approach is naming co-attorneys, pairing a trusted local person with a family',
+        'member who lives elsewhere so decisions can still reflect the broader family\'s wishes. Alternatively, the',
+        'out-of-province person can remain the primary attorney while a local alternate attorney is named who can step',
+        'in if distance becomes a barrier. This structure helps ensure that someone trusted, available, and familiar with',
+        'the local healthcare system can act quickly if personal care decisions are required.'
+      ];
+
+      geoConcernText.forEach(line => {
+        if (yPosition > 280) {
+          doc.addPage();
+          yPosition = 12;
+        }
+        doc.text(line, margin, yPosition);
+        yPosition += 4.5;
+      });
+    }
 
     yPosition += 12;
   }

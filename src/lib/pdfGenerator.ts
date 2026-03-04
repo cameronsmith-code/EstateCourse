@@ -5717,7 +5717,537 @@ export const generatePDF = (formData: FormData) => {
   const client1AdvisorCount = parseInt(formData.client1FinancialAdvisors || '0');
   const client2AdvisorCount = parseInt(formData.client2FinancialAdvisors || '0');
 
-  if (client1AdvisorCount > 0) {
+  const client1HasCameronSmith = formData.client1IsCameronSmithAdvisor === 'yes';
+  const client2HasCameronSmith = formData.client2IsCameronSmithAdvisor === 'yes';
+  const bothHaveCameronSmith = client1HasCameronSmith && client2HasCameronSmith && hasSpouse;
+
+  if (bothHaveCameronSmith && client1AdvisorCount > 0) {
+    if (yPosition > 190) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.darkText);
+    doc.text(`${client1Name} and ${client2Name} both indicated that Cameron Smith is their financial planner.`, margin, yPosition, { maxWidth: fieldWidth });
+    yPosition += 8;
+
+    const advisorData = formData.client1FinancialAdvisorsData?.[0];
+
+    const advisorRows = [
+      { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
+      { label: 'Firm Name:' },
+      { label: 'Key Contact:' },
+      { label: 'Phone Number:' },
+      { label: 'Email Address:' },
+      { label: 'City, Province:' },
+      { label: 'What Year did you begin working with this person?' },
+      { label: 'Where are past statements/tax documents stored?' },
+      { label: 'Other Details:' },
+      { label: 'Other Details:' },
+    ];
+
+    const advisorCellHeight = 6;
+    const advisorColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+    let advisorTableY = yPosition;
+
+    advisorRows.forEach((row, rowIndex) => {
+      if (advisorTableY > 275) {
+        doc.addPage();
+        advisorTableY = 12;
+      }
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+      doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+      doc.setFontSize(8);
+
+      const advisorCol1X = margin;
+      const advisorCol2X = margin + advisorColWidths[0];
+      const advisorCol3X = margin + advisorColWidths[0] + advisorColWidths[1];
+
+      doc.rect(advisorCol1X, advisorTableY, advisorColWidths[0], advisorCellHeight);
+      doc.rect(advisorCol2X, advisorTableY, advisorColWidths[1], advisorCellHeight);
+      doc.rect(advisorCol3X, advisorTableY, advisorColWidths[2], advisorCellHeight);
+
+      if (rowIndex === 0) {
+        doc.text('Name:', advisorCol1X + 0.5, advisorTableY + 4);
+        doc.text('Information:', advisorCol2X + 0.5, advisorTableY + 4);
+        doc.text('Other Details:', advisorCol3X + 0.5, advisorTableY + 4);
+      } else {
+        doc.setFont(undefined, 'normal');
+
+        if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+          const labelField = new doc.AcroFormTextField();
+          labelField.fieldName = `advisor_both_cameron_${rowIndex}_col1`;
+          labelField.Rect = [advisorCol1X + 0.3, advisorTableY + 0.3, advisorColWidths[0] - 0.6, advisorCellHeight - 0.6];
+          labelField.fontSize = 8;
+          labelField.textColor = [0, 0, 0];
+          labelField.borderStyle = 'none';
+          labelField.value = row.label;
+          doc.addField(labelField);
+        } else {
+          doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
+        }
+
+        const advisorField1 = new doc.AcroFormTextField();
+        advisorField1.fieldName = `advisor_both_cameron_${rowIndex}_col2`;
+        advisorField1.Rect = [advisorCol2X + 0.3, advisorTableY + 0.3, advisorColWidths[1] - 0.6, advisorCellHeight - 0.6];
+        advisorField1.fontSize = 7;
+        advisorField1.textColor = [0, 0, 0];
+        advisorField1.borderStyle = 'none';
+        if (rowIndex === 1) {
+          advisorField1.value = advisorData?.firm || '';
+        } else if (rowIndex === 2) {
+          advisorField1.value = advisorData?.name || '';
+        } else if (rowIndex === 3) {
+          advisorField1.value = advisorData?.phone || '';
+        } else if (rowIndex === 4) {
+          advisorField1.value = advisorData?.email || '';
+        }
+        doc.addField(advisorField1);
+
+        const advisorField2 = new doc.AcroFormTextField();
+        advisorField2.fieldName = `advisor_both_cameron_${rowIndex}_col3`;
+        advisorField2.Rect = [advisorCol3X + 0.3, advisorTableY + 0.3, advisorColWidths[2] - 0.6, advisorCellHeight - 0.6];
+        advisorField2.fontSize = 7;
+        advisorField2.textColor = [0, 0, 0];
+        advisorField2.borderStyle = 'none';
+        doc.addField(advisorField2);
+      }
+
+      advisorTableY += advisorCellHeight;
+    });
+
+    yPosition = advisorTableY + 10;
+
+    if (client1AdvisorCount > 1) {
+      for (let advisorIndex = 1; advisorIndex < client1AdvisorCount; advisorIndex++) {
+        if (yPosition > 190) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        const advisorData = formData.client1FinancialAdvisorsData?.[advisorIndex];
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Financial Advisor/Investment Manager - ${client1Name} (${advisorIndex + 1} of ${client1AdvisorCount}):`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 4;
+        doc.setFontSize(8);
+        doc.text('Contact details for the person managing your portfolios and the location of current statements.', margin, yPosition);
+        yPosition += 6;
+
+        const advisorRows = [
+          { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Firm Name:' },
+          { label: 'Key Contact:' },
+          { label: 'Phone Number:' },
+          { label: 'Email Address:' },
+          { label: 'City, Province:' },
+          { label: 'What Year did you begin working with this person?' },
+          { label: 'Where are past statements/tax documents stored?' },
+          { label: 'Other Details:' },
+          { label: 'Other Details:' },
+        ];
+
+        const advisorCellHeight = 6;
+        const advisorColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let advisorTableY = yPosition;
+
+        advisorRows.forEach((row, rowIndex) => {
+          if (advisorTableY > 275) {
+            doc.addPage();
+            advisorTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const advisorCol1X = margin;
+          const advisorCol2X = margin + advisorColWidths[0];
+          const advisorCol3X = margin + advisorColWidths[0] + advisorColWidths[1];
+
+          doc.rect(advisorCol1X, advisorTableY, advisorColWidths[0], advisorCellHeight);
+          doc.rect(advisorCol2X, advisorTableY, advisorColWidths[1], advisorCellHeight);
+          doc.rect(advisorCol3X, advisorTableY, advisorColWidths[2], advisorCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Name:', advisorCol1X + 0.5, advisorTableY + 4);
+            doc.text('Information:', advisorCol2X + 0.5, advisorTableY + 4);
+            doc.text('Other Details:', advisorCol3X + 0.5, advisorTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col1`;
+              labelField.Rect = [advisorCol1X + 0.3, advisorTableY + 0.3, advisorColWidths[0] - 0.6, advisorCellHeight - 0.6];
+              labelField.fontSize = 8;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
+            }
+
+            const advisorField1 = new doc.AcroFormTextField();
+            advisorField1.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col2`;
+            advisorField1.Rect = [advisorCol2X + 0.3, advisorTableY + 0.3, advisorColWidths[1] - 0.6, advisorCellHeight - 0.6];
+            advisorField1.fontSize = 7;
+            advisorField1.textColor = [0, 0, 0];
+            advisorField1.borderStyle = 'none';
+            if (rowIndex === 1) {
+              advisorField1.value = advisorData?.firm || '';
+            } else if (rowIndex === 2) {
+              advisorField1.value = advisorData?.name || '';
+            } else if (rowIndex === 3) {
+              advisorField1.value = advisorData?.phone || '';
+            } else if (rowIndex === 4) {
+              advisorField1.value = advisorData?.email || '';
+            }
+            doc.addField(advisorField1);
+
+            const advisorField2 = new doc.AcroFormTextField();
+            advisorField2.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col3`;
+            advisorField2.Rect = [advisorCol3X + 0.3, advisorTableY + 0.3, advisorColWidths[2] - 0.6, advisorCellHeight - 0.6];
+            advisorField2.fontSize = 7;
+            advisorField2.textColor = [0, 0, 0];
+            advisorField2.borderStyle = 'none';
+            doc.addField(advisorField2);
+          }
+
+          advisorTableY += advisorCellHeight;
+        });
+
+        yPosition = advisorTableY + 10;
+
+        if (yPosition > 150) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        const institutionLabel = advisorData?.firm ? `${advisorData.firm} Accounts Held` : `Institution ${advisorIndex + 1} Accounts Held`;
+        doc.text(institutionLabel, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const accountRows = [
+          { label: 'Account Type:', col2: 'Institution:', col3: 'Last 4 Digits of the Account Number:', col4: 'Beneficiary on File (if applicable):' },
+          { label: 'RRSP' },
+          { label: 'Spousal RRSP' },
+          { label: 'Locked In RRSP/LIRA' },
+          { label: 'RRIF' },
+          { label: 'Spousal RRIF' },
+          { label: 'Life Income Fund (LIF)' },
+          { label: 'TFSA' },
+          { label: 'Non-Registered Account' },
+          { label: 'RESP' },
+          { label: 'RDSP' },
+          { label: 'FHSA' },
+          { label: 'In Trust For:' },
+          { label: 'Other:' },
+          { label: 'Joint with _____:' },
+        ];
+
+        const accountCellHeight = 6;
+        const accountColWidths = [fieldWidth * 0.20, fieldWidth * 0.27, fieldWidth * 0.27, fieldWidth * 0.26];
+        let accountTableY = yPosition;
+
+        accountRows.forEach((row, rowIndex) => {
+          if (accountTableY > 275) {
+            doc.addPage();
+            accountTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(7);
+
+          const accountCol1X = margin;
+          const accountCol2X = margin + accountColWidths[0];
+          const accountCol3X = margin + accountColWidths[0] + accountColWidths[1];
+          const accountCol4X = margin + accountColWidths[0] + accountColWidths[1] + accountColWidths[2];
+
+          doc.rect(accountCol1X, accountTableY, accountColWidths[0], accountCellHeight);
+          doc.rect(accountCol2X, accountTableY, accountColWidths[1], accountCellHeight);
+          doc.rect(accountCol3X, accountTableY, accountColWidths[2], accountCellHeight);
+          doc.rect(accountCol4X, accountTableY, accountColWidths[3], accountCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Account Type:', accountCol1X + 0.5, accountTableY + 3);
+            doc.text('Institution:', accountCol2X + 0.5, accountTableY + 3);
+            doc.text('Last 4 Digits:', accountCol3X + 0.5, accountTableY + 3);
+            doc.text('Beneficiary:', accountCol4X + 0.5, accountTableY + 3);
+          } else {
+            doc.setFont(undefined, 'normal');
+
+            if (row.label === 'Other:' || row.label === 'In Trust For:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `account_client1_advisor${advisorIndex + 1}_${rowIndex}_col1`;
+              labelField.Rect = [accountCol1X + 0.3, accountTableY + 0.3, accountColWidths[0] - 0.6, accountCellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, accountCol1X + 0.5, accountTableY + 3.5);
+            }
+
+            const accountField1 = new doc.AcroFormTextField();
+            accountField1.fieldName = `account_client1_advisor${advisorIndex + 1}_${rowIndex}_col2`;
+            accountField1.Rect = [accountCol2X + 0.3, accountTableY + 0.3, accountColWidths[1] - 0.6, accountCellHeight - 0.6];
+            accountField1.fontSize = 7;
+            accountField1.textColor = [0, 0, 0];
+            accountField1.borderStyle = 'none';
+            doc.addField(accountField1);
+
+            const accountField2 = new doc.AcroFormTextField();
+            accountField2.fieldName = `account_client1_advisor${advisorIndex + 1}_${rowIndex}_col3`;
+            accountField2.Rect = [accountCol3X + 0.3, accountTableY + 0.3, accountColWidths[2] - 0.6, accountCellHeight - 0.6];
+            accountField2.fontSize = 7;
+            accountField2.textColor = [0, 0, 0];
+            accountField2.borderStyle = 'none';
+            doc.addField(accountField2);
+
+            const accountField3 = new doc.AcroFormTextField();
+            accountField3.fieldName = `account_client1_advisor${advisorIndex + 1}_${rowIndex}_col4`;
+            accountField3.Rect = [accountCol4X + 0.3, accountTableY + 0.3, accountColWidths[3] - 0.6, accountCellHeight - 0.6];
+            accountField3.fontSize = 7;
+            accountField3.textColor = [0, 0, 0];
+            accountField3.borderStyle = 'none';
+            doc.addField(accountField3);
+          }
+
+          accountTableY += accountCellHeight;
+        });
+
+        yPosition = accountTableY + 10;
+      }
+    }
+
+    if (client2AdvisorCount > 1) {
+      for (let advisorIndex = 1; advisorIndex < client2AdvisorCount; advisorIndex++) {
+        if (yPosition > 190) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        const advisorData = formData.client2FinancialAdvisorsData?.[advisorIndex];
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Financial Advisor/Investment Manager - ${client2Name} (${advisorIndex + 1} of ${client2AdvisorCount}):`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 4;
+        doc.setFontSize(8);
+        doc.text('Contact details for the person managing your portfolios and the location of current statements.', margin, yPosition);
+        yPosition += 6;
+
+        const advisorRows = [
+          { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
+          { label: 'Firm Name:' },
+          { label: 'Key Contact:' },
+          { label: 'Phone Number:' },
+          { label: 'Email Address:' },
+          { label: 'City, Province:' },
+          { label: 'What Year did you begin working with this person?' },
+          { label: 'Where are past statements/tax documents stored?' },
+          { label: 'Other Details:' },
+          { label: 'Other Details:' },
+        ];
+
+        const advisorCellHeight = 6;
+        const advisorColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+        let advisorTableY = yPosition;
+
+        advisorRows.forEach((row, rowIndex) => {
+          if (advisorTableY > 275) {
+            doc.addPage();
+            advisorTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(8);
+
+          const advisorCol1X = margin;
+          const advisorCol2X = margin + advisorColWidths[0];
+          const advisorCol3X = margin + advisorColWidths[0] + advisorColWidths[1];
+
+          doc.rect(advisorCol1X, advisorTableY, advisorColWidths[0], advisorCellHeight);
+          doc.rect(advisorCol2X, advisorTableY, advisorColWidths[1], advisorCellHeight);
+          doc.rect(advisorCol3X, advisorTableY, advisorColWidths[2], advisorCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Name:', advisorCol1X + 0.5, advisorTableY + 4);
+            doc.text('Information:', advisorCol2X + 0.5, advisorTableY + 4);
+            doc.text('Other Details:', advisorCol3X + 0.5, advisorTableY + 4);
+          } else {
+            doc.setFont(undefined, 'normal');
+
+            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col1`;
+              labelField.Rect = [advisorCol1X + 0.3, advisorTableY + 0.3, advisorColWidths[0] - 0.6, advisorCellHeight - 0.6];
+              labelField.fontSize = 8;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
+            }
+
+            const advisorField1 = new doc.AcroFormTextField();
+            advisorField1.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col2`;
+            advisorField1.Rect = [advisorCol2X + 0.3, advisorTableY + 0.3, advisorColWidths[1] - 0.6, advisorCellHeight - 0.6];
+            advisorField1.fontSize = 7;
+            advisorField1.textColor = [0, 0, 0];
+            advisorField1.borderStyle = 'none';
+            if (rowIndex === 1) {
+              advisorField1.value = advisorData?.firm || '';
+            } else if (rowIndex === 2) {
+              advisorField1.value = advisorData?.name || '';
+            } else if (rowIndex === 3) {
+              advisorField1.value = advisorData?.phone || '';
+            } else if (rowIndex === 4) {
+              advisorField1.value = advisorData?.email || '';
+            }
+            doc.addField(advisorField1);
+
+            const advisorField2 = new doc.AcroFormTextField();
+            advisorField2.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col3`;
+            advisorField2.Rect = [advisorCol3X + 0.3, advisorTableY + 0.3, advisorColWidths[2] - 0.6, advisorCellHeight - 0.6];
+            advisorField2.fontSize = 7;
+            advisorField2.textColor = [0, 0, 0];
+            advisorField2.borderStyle = 'none';
+            doc.addField(advisorField2);
+          }
+
+          advisorTableY += advisorCellHeight;
+        });
+
+        yPosition = advisorTableY + 10;
+
+        if (yPosition > 150) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        const institutionLabel = advisorData?.firm ? `${advisorData.firm} Accounts Held` : `Institution ${advisorIndex + 1} Accounts Held`;
+        doc.text(institutionLabel, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const accountRows = [
+          { label: 'Account Type:', col2: 'Institution:', col3: 'Last 4 Digits of the Account Number:', col4: 'Beneficiary on File (if applicable):' },
+          { label: 'RRSP' },
+          { label: 'Spousal RRSP' },
+          { label: 'Locked In RRSP/LIRA' },
+          { label: 'RRIF' },
+          { label: 'Spousal RRIF' },
+          { label: 'Life Income Fund (LIF)' },
+          { label: 'TFSA' },
+          { label: 'Non-Registered Account' },
+          { label: 'RESP' },
+          { label: 'RDSP' },
+          { label: 'FHSA' },
+          { label: 'In Trust For:' },
+          { label: 'Other:' },
+          { label: 'Joint with _____:' },
+        ];
+
+        const accountCellHeight = 6;
+        const accountColWidths = [fieldWidth * 0.20, fieldWidth * 0.27, fieldWidth * 0.27, fieldWidth * 0.26];
+        let accountTableY = yPosition;
+
+        accountRows.forEach((row, rowIndex) => {
+          if (accountTableY > 275) {
+            doc.addPage();
+            accountTableY = 12;
+          }
+
+          doc.setDrawColor(0, 0, 0);
+          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
+          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFontSize(7);
+
+          const accountCol1X = margin;
+          const accountCol2X = margin + accountColWidths[0];
+          const accountCol3X = margin + accountColWidths[0] + accountColWidths[1];
+          const accountCol4X = margin + accountColWidths[0] + accountColWidths[1] + accountColWidths[2];
+
+          doc.rect(accountCol1X, accountTableY, accountColWidths[0], accountCellHeight);
+          doc.rect(accountCol2X, accountTableY, accountColWidths[1], accountCellHeight);
+          doc.rect(accountCol3X, accountTableY, accountColWidths[2], accountCellHeight);
+          doc.rect(accountCol4X, accountTableY, accountColWidths[3], accountCellHeight);
+
+          if (rowIndex === 0) {
+            doc.text('Account Type:', accountCol1X + 0.5, accountTableY + 3);
+            doc.text('Institution:', accountCol2X + 0.5, accountTableY + 3);
+            doc.text('Last 4 Digits:', accountCol3X + 0.5, accountTableY + 3);
+            doc.text('Beneficiary:', accountCol4X + 0.5, accountTableY + 3);
+          } else {
+            doc.setFont(undefined, 'normal');
+
+            if (row.label === 'Other:' || row.label === 'In Trust For:' || row.label === 'Joint with _____:') {
+              const labelField = new doc.AcroFormTextField();
+              labelField.fieldName = `account_client2_advisor${advisorIndex + 1}_${rowIndex}_col1`;
+              labelField.Rect = [accountCol1X + 0.3, accountTableY + 0.3, accountColWidths[0] - 0.6, accountCellHeight - 0.6];
+              labelField.fontSize = 7;
+              labelField.textColor = [0, 0, 0];
+              labelField.borderStyle = 'none';
+              labelField.value = row.label;
+              doc.addField(labelField);
+            } else {
+              doc.text(row.label, accountCol1X + 0.5, accountTableY + 3.5);
+            }
+
+            const accountField1 = new doc.AcroFormTextField();
+            accountField1.fieldName = `account_client2_advisor${advisorIndex + 1}_${rowIndex}_col2`;
+            accountField1.Rect = [accountCol2X + 0.3, accountTableY + 0.3, accountColWidths[1] - 0.6, accountCellHeight - 0.6];
+            accountField1.fontSize = 7;
+            accountField1.textColor = [0, 0, 0];
+            accountField1.borderStyle = 'none';
+            doc.addField(accountField1);
+
+            const accountField2 = new doc.AcroFormTextField();
+            accountField2.fieldName = `account_client2_advisor${advisorIndex + 1}_${rowIndex}_col3`;
+            accountField2.Rect = [accountCol3X + 0.3, accountTableY + 0.3, accountColWidths[2] - 0.6, accountCellHeight - 0.6];
+            accountField2.fontSize = 7;
+            accountField2.textColor = [0, 0, 0];
+            accountField2.borderStyle = 'none';
+            doc.addField(accountField2);
+
+            const accountField3 = new doc.AcroFormTextField();
+            accountField3.fieldName = `account_client2_advisor${advisorIndex + 1}_${rowIndex}_col4`;
+            accountField3.Rect = [accountCol4X + 0.3, accountTableY + 0.3, accountColWidths[3] - 0.6, accountCellHeight - 0.6];
+            accountField3.fontSize = 7;
+            accountField3.textColor = [0, 0, 0];
+            accountField3.borderStyle = 'none';
+            doc.addField(accountField3);
+          }
+
+          accountTableY += accountCellHeight;
+        });
+
+        yPosition = accountTableY + 10;
+      }
+    }
+  } else if (client1AdvisorCount > 0) {
     for (let advisorIndex = 0; advisorIndex < client1AdvisorCount; advisorIndex++) {
       if (yPosition > 190) {
         doc.addPage();

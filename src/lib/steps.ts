@@ -1331,6 +1331,16 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'isCameronSmithAdvisor',
+        label: 'Is Cameron Smith, CFP® your financial advisor?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
         key: 'client1FinancialAdvisors',
         label: 'How many Financial Advisors do you work with?',
         type: 'number',

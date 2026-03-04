@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
 import { Step } from '../lib/steps';
 import FormField from './FormField';
 import VideoPlayer from './VideoPlayer';
@@ -26,6 +26,28 @@ export default function StepForm({
   onAnswerChange,
 }: StepFormProps) {
   const [validationError, setValidationError] = useState('');
+
+  useEffect(() => {
+    const isCameronSmith = answers['isCameronSmithAdvisor'];
+    const advisorCount = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
+
+    if (isCameronSmith === 'yes' && advisorCount > 0) {
+      const currentAdvisorsData = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
+
+      if (!currentAdvisorsData[0] || !currentAdvisorsData[0].name) {
+        const cameronSmithData = {
+          name: 'Cameron Smith',
+          firm: 'Clarify Wealth / Investment Planning Counsel',
+          phone: '(647) 448-5963',
+          email: 'Cameron.Smith@ipcsecurities.com'
+        };
+
+        const updatedData = [...currentAdvisorsData];
+        updatedData[0] = { ...cameronSmithData, ...updatedData[0] };
+        onAnswerChange('client1FinancialAdvisorsData', updatedData);
+      }
+    }
+  }, [answers['isCameronSmithAdvisor'], answers['client1FinancialAdvisors']]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

@@ -2280,9 +2280,7 @@ export default function StepForm({
                     {question.key === 'client2PoaPersonalCareCount' && client2PoaPersonalCareCount > 0 && (
                       <div className="space-y-6 mt-6">
                         <h3 className="text-xl font-semibold text-white">
-                          {answers['spousesPoaPersonalCare'] === 'yes'
-                            ? `${client2Name}'s Contingent Powers of Attorney for Personal Care Details`
-                            : `${client2Name}'s Powers of Attorney for Personal Care Details`}
+                          {`${client2Name}'s additional or contingent Powers of Attorney for Personal Care Details`}
                         </h3>
                         {Array.from({ length: client2PoaPersonalCareCount }).map((_, index) => (
                           <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">

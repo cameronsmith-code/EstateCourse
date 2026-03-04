@@ -1158,6 +1158,9 @@ export default function StepForm({
                 if (question.key === 'client1HasPoaProperty' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }
+                if (question.key === 'client1HasContingentPoaProperty' && answers['client1HasPoaProperty'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client1PoaPropertyCount' && answers['client1HasContingentPoaProperty'] !== 'yes') {
                   return null;
                 }

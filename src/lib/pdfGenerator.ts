@@ -102,6 +102,7 @@ interface FormData {
   spousesPoaPersonalCare?: string;
   spouseIsPoaPersonalCare?: string;
   spousesPoaProperty?: string;
+  spouseIsPoaProperty?: string;
   client1UsesAccountant?: string;
   client1AccountingRecordsLocation?: string;
   client2UsesAccountant?: string;
@@ -3829,6 +3830,69 @@ export const generatePDF = (formData: FormData) => {
     doc.text('Provided Copy?', poaPropertyCol5X + 0.5, poaPropertyTableY + 4);
 
     poaPropertyTableY += poaPropertyCellHeight;
+
+    if (formData.spouseIsPoaProperty === 'yes') {
+      if (poaPropertyTableY > 275) {
+        doc.addPage();
+        poaPropertyTableY = 12;
+      }
+
+      doc.setFillColor(255, 255, 255);
+      doc.setFont(undefined, 'normal');
+
+      doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol5X, poaPropertyTableY, poaPropertyColWidths[4], poaPropertyCellHeight);
+
+      const spouseField1 = new doc.AcroFormTextField();
+      spouseField1.fieldName = 'poa_property_spouse_name';
+      spouseField1.Rect = [poaPropertyCol1X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[0] - 0.6, poaPropertyCellHeight - 0.6];
+      spouseField1.fontSize = 7;
+      spouseField1.textColor = [0, 0, 0];
+      spouseField1.borderStyle = 'none';
+      spouseField1.value = client2Name;
+      doc.addField(spouseField1);
+
+      const spouseField2 = new doc.AcroFormTextField();
+      spouseField2.fieldName = 'poa_property_spouse_phone';
+      spouseField2.Rect = [poaPropertyCol2X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[1] - 0.6, poaPropertyCellHeight - 0.6];
+      spouseField2.fontSize = 7;
+      spouseField2.textColor = [0, 0, 0];
+      spouseField2.borderStyle = 'none';
+      spouseField2.value = formData.spousePhone || '';
+      doc.addField(spouseField2);
+
+      const spouseField3 = new doc.AcroFormTextField();
+      spouseField3.fieldName = 'poa_property_spouse_email';
+      spouseField3.Rect = [poaPropertyCol3X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[2] - 0.6, poaPropertyCellHeight - 0.6];
+      spouseField3.fontSize = 7;
+      spouseField3.textColor = [0, 0, 0];
+      spouseField3.borderStyle = 'none';
+      spouseField3.value = formData.spouseEmail || '';
+      doc.addField(spouseField3);
+
+      const spouseField4 = new doc.AcroFormTextField();
+      spouseField4.fieldName = 'poa_property_spouse_relationship';
+      spouseField4.Rect = [poaPropertyCol4X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[3] - 0.6, poaPropertyCellHeight - 0.6];
+      spouseField4.fontSize = 7;
+      spouseField4.textColor = [0, 0, 0];
+      spouseField4.borderStyle = 'none';
+      spouseField4.value = 'Spouse/Common Law Partner';
+      doc.addField(spouseField4);
+
+      const spouseField5 = new doc.AcroFormTextField();
+      spouseField5.fieldName = 'poa_property_spouse_providedcopy';
+      spouseField5.Rect = [poaPropertyCol5X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[4] - 0.6, poaPropertyCellHeight - 0.6];
+      spouseField5.fontSize = 7;
+      spouseField5.textColor = [0, 0, 0];
+      spouseField5.borderStyle = 'none';
+      spouseField5.value = '';
+      doc.addField(spouseField5);
+
+      poaPropertyTableY += poaPropertyCellHeight;
+    }
 
     for (let i = 0; i < poaPropertyCount; i++) {
       if (poaPropertyTableY > 275) {

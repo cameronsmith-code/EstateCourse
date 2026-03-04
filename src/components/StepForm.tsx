@@ -1138,6 +1138,14 @@ export default function StepForm({
                     return null;
                   }
                 }
+                if (question.key === 'spouseIsPoaProperty') {
+                  const basicAnswers = allAnswers?.get(1);
+                  const maritalStatus = basicAnswers?.maritalStatus;
+                  if (answers['client1HasPoaProperty'] !== 'yes' ||
+                      (maritalStatus !== 'married' && maritalStatus !== 'common_law')) {
+                    return null;
+                  }
+                }
                 if (question.key === 'client1HasContingentPoaPersonalCare' && answers['client1HasPoaPersonalCare'] !== 'yes') {
                   return null;
                 }
@@ -1605,15 +1613,50 @@ export default function StepForm({
                     )}
                     {question.key === 'client1PoaPropertyCount' && client1PoaPropertyCount > 0 && (
                       <div className="space-y-6 mt-6">
+                        {answers['spouseIsPoaProperty'] === 'yes' && (
+                          <div className="border border-gray-600 rounded-lg p-6 bg-gray-700 mb-6">
+                            <h4 className="text-lg font-semibold text-white mb-4">
+                              POA for Property #1
+                            </h4>
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={allAnswers?.get(1)?.spouseName as string || ''}
+                                  disabled
+                                  className="w-full px-4 py-2 bg-gray-500 border border-gray-500 text-white rounded-lg cursor-not-allowed"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Relationship to You *
+                                </label>
+                                <input
+                                  type="text"
+                                  value="Spouse/Common Law Partner"
+                                  disabled
+                                  className="w-full px-4 py-2 bg-gray-500 border border-gray-500 text-white rounded-lg cursor-not-allowed"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         <h3 className="text-xl font-semibold text-white">
-                          {answers['spousesPoaProperty'] === 'yes'
+                          {answers['spouseIsPoaProperty'] === 'yes'
+                            ? 'Contingent Powers of Attorney for Property Details'
+                            : answers['spousesPoaProperty'] === 'yes'
                             ? 'Contingent Powers of Attorney for Property Details'
                             : 'Powers of Attorney for Property Details'}
                         </h3>
                         {Array.from({ length: client1PoaPropertyCount }).map((_, index) => (
                           <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
                             <h4 className="text-lg font-semibold text-white mb-4">
-                              {answers['spousesPoaProperty'] === 'yes'
+                              {answers['spouseIsPoaProperty'] === 'yes'
+                                ? `Contingent POA for Property #${index + 1}`
+                                : answers['spousesPoaProperty'] === 'yes'
                                 ? `Contingent POA for Property #${index + 1}`
                                 : `POA for Property #${index + 1}`}
                             </h4>
@@ -2006,7 +2049,9 @@ export default function StepForm({
                         {Array.from({ length: client2PoaPropertyCount }).map((_, index) => (
                           <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
                             <h4 className="text-lg font-semibold text-white mb-4">
-                              {answers['spousesPoaProperty'] === 'yes'
+                              {answers['spouseIsPoaProperty'] === 'yes'
+                                ? `Contingent POA for Property #${index + 1}`
+                                : answers['spousesPoaProperty'] === 'yes'
                                 ? `Contingent POA for Property #${index + 1}`
                                 : `POA for Property #${index + 1}`}
                             </h4>

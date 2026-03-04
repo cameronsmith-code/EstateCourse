@@ -854,6 +854,24 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'spouseIsPoaProperty',
+        label: 'Is your spouse or common law partner your POA for Property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const basicAnswers = formData as unknown as Map<number, Record<string, unknown>>;
+          const maritalStatus = typeof basicAnswers.get === 'function'
+            ? basicAnswers.get(1)?.maritalStatus
+            : formData.maritalStatus;
+          return formData.client1HasPoaProperty === 'yes' &&
+                 (maritalStatus === 'married' || maritalStatus === 'common_law');
+        },
+      },
+      {
         key: 'client1PoaPropertyCount',
         label: 'How many Powers of Attorney for Property have you named?',
         type: 'select',
@@ -865,6 +883,9 @@ export const STEPS: Step[] = [
           { value: '5', label: '5' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.spouseIsPoaProperty !== 'yes';
+        },
       },
       {
         key: 'client1PoaPropertyHasDocCopy',

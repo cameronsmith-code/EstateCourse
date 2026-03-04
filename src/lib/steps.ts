@@ -1103,6 +1103,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaPersonalCare === 'yes',
       },
       {
         key: 'client2PoaPersonalCareCount',

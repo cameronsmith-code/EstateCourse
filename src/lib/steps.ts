@@ -721,6 +721,17 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
+        key: 'client1WillYear',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'your';
+          return `In what year was ${client1Name}'s Will prepared?`;
+        },
+        type: 'text',
+        placeholder: 'e.g., 2023',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
         key: 'client1WillLocation',
         label: 'Where is your Will located?',
         type: 'text',
@@ -1013,6 +1024,17 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+      },
+      {
+        key: 'client2WillYear',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'your spouse';
+          return `In what year was ${client2Name}'s Will prepared?`;
+        },
+        type: 'text',
+        placeholder: 'e.g., 2023',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
       },
       {
         key: 'client2WillLocation',

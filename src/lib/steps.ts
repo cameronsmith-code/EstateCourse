@@ -907,17 +907,6 @@ export const STEPS: Step[] = [
         },
       },
       {
-        key: 'client1PoaPropertyHasDocCopy',
-        label: 'Do your Powers of Attorney for Property have a copy of the most recent document in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasPoaProperty === 'yes',
-      },
-      {
         key: 'client1HasEstateTrustee',
         label: 'Have you named an Estate Trustee in your Will?',
         type: 'radio',
@@ -1206,17 +1195,6 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => {
           return formData.client2HasContingentPoaProperty === 'yes';
         },
-      },
-      {
-        key: 'client2PoaPropertyHasDocCopy',
-        label: 'Do your Powers of Attorney for Property have a copy of the most recent document in their files?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasPoaProperty === 'yes',
       },
       {
         key: 'client2HasEstateTrustee',

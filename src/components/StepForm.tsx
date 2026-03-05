@@ -1420,9 +1420,6 @@ export default function StepForm({
                 if (question.key === 'client2PoaPersonalCareDocLocation') {
                   customLabel = `${client2Name}, where is the Power of Attorney for Personal Care document located?`;
                 }
-                if (question.key === 'client1PoaPropertyHasDocCopy') {
-                  customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
-                }
                 if (question.key === 'client1EstateTrusteeHasDocCopy') {
                   customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
                 }
@@ -1461,14 +1458,8 @@ export default function StepForm({
                 if (question.key === 'client2EstateTrusteeCount') {
                   customLabel = `${client2Name}, how many Estate Trustees have you named?`;
                 }
-                if (question.key === 'client2PoaPersonalCareHasDocCopy') {
-                  customLabel = `${client2Name}, do they have a copy of the most recent document in their files?`;
-                }
                 if (question.key === 'client2HasLivingWill') {
                   customLabel = `${client2Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;
-                }
-                if (question.key === 'client2PoaPropertyHasDocCopy') {
-                  customLabel = `${client2Name}, do they have a copy of the most recent document in their files?`;
                 }
                 if (question.key === 'client2EstateTrusteeKnowsWillLocation') {
                   customLabel = `${client2Name}, do your Estate Trustees know where to find a copy of your Will?`;

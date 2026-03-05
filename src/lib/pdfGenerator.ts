@@ -225,10 +225,6 @@ interface FormData {
   client1PoaPropertyHasDocCopy?: string;
   client2PoaPersonalCareHasDocCopy?: string;
   client2PoaPropertyHasDocCopy?: string;
-  spousePoaPersonalCareHasDocCopy?: string;
-  spousePoaPropertyHasDocCopy?: string;
-  client2SpousePoaPersonalCareHasDocCopy?: string;
-  client2SpousePoaPropertyHasDocCopy?: string;
   client1EstateTrusteeKnowsWillLocation?: string;
   client2EstateTrusteeKnowsWillLocation?: string;
   client1HasLivingWill?: string;
@@ -3537,24 +3533,6 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.text(`${client1Name} indicated that ${client2Name} (spouse/common law partner) is their POA for Personal Care.`, margin, yPosition);
       yPosition += 6;
-
-      if (formData.spousePoaPersonalCareHasDocCopy) {
-        if (yPosition > 260) {
-          doc.addPage();
-          yPosition = 12;
-        }
-        let docCopyText = '';
-        if (formData.spousePoaPersonalCareHasDocCopy === 'yes_copy') {
-          docCopyText = `${client2Name} (spouse/common law partner) has a copy of the most recent documentation in their files.`;
-        } else if (formData.spousePoaPersonalCareHasDocCopy === 'yes_instructions') {
-          docCopyText = `${client2Name} (spouse/common law partner) has instructions on where/how to access the most recent documentation.`;
-        } else if (formData.spousePoaPersonalCareHasDocCopy === 'no') {
-          docCopyText = `${client2Name} (spouse/common law partner) does not have access to the most recent documentation.`;
-        }
-        const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
-        doc.text(docCopyLines, margin, yPosition);
-        yPosition += docCopyLines.length * 5 + 5;
-      }
     } else if (formData.spousesPoaPersonalCare === 'yes') {
       doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
       yPosition += 6;
@@ -3837,24 +3815,6 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.text(`${client2Name} indicated that ${client1Name} (spouse/common law partner) is their POA for Personal Care.`, margin, yPosition);
       yPosition += 6;
-
-      if (formData.client2SpousePoaPersonalCareHasDocCopy) {
-        if (yPosition > 260) {
-          doc.addPage();
-          yPosition = 12;
-        }
-        let docCopyText = '';
-        if (formData.client2SpousePoaPersonalCareHasDocCopy === 'yes_copy') {
-          docCopyText = `${client1Name} (spouse/common law partner) has a copy of the most recent documentation in their files.`;
-        } else if (formData.client2SpousePoaPersonalCareHasDocCopy === 'yes_instructions') {
-          docCopyText = `${client1Name} (spouse/common law partner) has instructions on where/how to access the most recent documentation.`;
-        } else if (formData.client2SpousePoaPersonalCareHasDocCopy === 'no') {
-          docCopyText = `${client1Name} (spouse/common law partner) does not have access to the most recent documentation.`;
-        }
-        const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
-        doc.text(docCopyLines, margin, yPosition);
-        yPosition += docCopyLines.length * 5 + 5;
-      }
     } else if (formData.spousesPoaPersonalCare === 'yes') {
       const client1Name = formData.fullName || 'Client 1';
       doc.text(`${client2Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
@@ -4335,24 +4295,6 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.text(`${client1Name} indicated that ${client2Name} (spouse/common law partner) is their POA for Property.`, margin, yPosition);
       yPosition += 6;
-
-      if (formData.spousePoaPropertyHasDocCopy) {
-        if (yPosition > 260) {
-          doc.addPage();
-          yPosition = 12;
-        }
-        let docCopyText = '';
-        if (formData.spousePoaPropertyHasDocCopy === 'yes_copy') {
-          docCopyText = `${client2Name} (spouse/common law partner) has a copy of the most recent documentation in their files.`;
-        } else if (formData.spousePoaPropertyHasDocCopy === 'yes_instructions') {
-          docCopyText = `${client2Name} (spouse/common law partner) has instructions on where/how to access the most recent documentation.`;
-        } else if (formData.spousePoaPropertyHasDocCopy === 'no') {
-          docCopyText = `${client2Name} (spouse/common law partner) does not have access to the most recent documentation.`;
-        }
-        const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
-        doc.text(docCopyLines, margin, yPosition);
-        yPosition += docCopyLines.length * 5 + 10;
-      }
     } else if (formData.spousesPoaProperty === 'yes') {
       doc.text('Powers of Attorney for Property:', margin, yPosition);
       yPosition += 6;
@@ -4535,24 +4477,6 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.text(`${client2Name} indicated that ${client1Name} (spouse/common law partner) is their POA for Property.`, margin, yPosition);
       yPosition += 6;
-
-      if (formData.client2SpousePoaPropertyHasDocCopy) {
-        if (yPosition > 260) {
-          doc.addPage();
-          yPosition = 12;
-        }
-        let docCopyText = '';
-        if (formData.client2SpousePoaPropertyHasDocCopy === 'yes_copy') {
-          docCopyText = `${client1Name} (spouse/common law partner) has a copy of the most recent documentation in their files.`;
-        } else if (formData.client2SpousePoaPropertyHasDocCopy === 'yes_instructions') {
-          docCopyText = `${client1Name} (spouse/common law partner) has instructions on where/how to access the most recent documentation.`;
-        } else if (formData.client2SpousePoaPropertyHasDocCopy === 'no') {
-          docCopyText = `${client1Name} (spouse/common law partner) does not have access to the most recent documentation.`;
-        }
-        const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
-        doc.text(docCopyLines, margin, yPosition);
-        yPosition += docCopyLines.length * 5 + 10;
-      }
     } else if (formData.spousesPoaProperty === 'yes') {
       const client1Name = formData.fullName || 'Client 1';
       doc.text(`${client2Name}'s Powers of Attorney for Property:`, margin, yPosition);

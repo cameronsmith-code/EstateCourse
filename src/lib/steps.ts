@@ -792,6 +792,20 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'client1PoaPersonalCareHasDocCopy',
+        label: 'Does this person have access to your most recent documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes_copy', label: 'Yes - they have a copy' },
+          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.spouseIsPoaPersonalCare === 'yes';
+        },
+      },
+      {
         key: 'client1HasContingentPoaPersonalCare',
         label: (answers) => {
           const client1Name = answers.get(1)?.fullName || 'Client 1';
@@ -821,27 +835,6 @@ export const STEPS: Step[] = [
         ],
         required: false,
         condition: (formData: Record<string, string>) => formData.client1HasContingentPoaPersonalCare === 'yes',
-      },
-      {
-        key: 'client1PoaPersonalCareHasDocCopy',
-        label: 'Does this person have access to your most recent documentation?',
-        type: 'radio',
-        options: [
-          { value: 'yes_copy', label: 'Yes - they have a copy' },
-          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          const basicAnswers = formData as unknown as Map<number, Record<string, unknown>>;
-          const maritalStatus = typeof basicAnswers.get === 'function'
-            ? basicAnswers.get(1)?.maritalStatus
-            : formData.maritalStatus;
-          const isMarried = maritalStatus === 'married' || maritalStatus === 'common_law';
-          const notMarried = !isMarried;
-
-          return formData.client1HasPoaPersonalCare === 'yes' && notMarried;
-        },
       },
       {
         key: 'client1HasLivingWill',
@@ -1115,6 +1108,20 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'client2PoaPersonalCareHasDocCopy',
+        label: 'Does this person have access to your most recent documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes_copy', label: 'Yes - they have a copy' },
+          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2SpouseIsPoaPersonalCare === 'yes';
+        },
+      },
+      {
         key: 'client2PoaPersonalCareDisplay',
         label: (answers) => {
           const client2Name = answers.get(1)?.spouseName || 'Client 2';
@@ -1156,27 +1163,6 @@ export const STEPS: Step[] = [
         ],
         required: false,
         condition: (formData: Record<string, string>) => formData.client2HasContingentPoaPersonalCare === 'yes',
-      },
-      {
-        key: 'client2PoaPersonalCareHasDocCopy',
-        label: 'Does this person have access to your most recent documentation?',
-        type: 'radio',
-        options: [
-          { value: 'yes_copy', label: 'Yes - they have a copy' },
-          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          const basicAnswers = formData as unknown as Map<number, Record<string, unknown>>;
-          const maritalStatus = typeof basicAnswers.get === 'function'
-            ? basicAnswers.get(1)?.maritalStatus
-            : formData.maritalStatus;
-          const isMarried = maritalStatus === 'married' || maritalStatus === 'common_law';
-          const notMarried = !isMarried;
-
-          return formData.client2HasPoaPersonalCare === 'yes' && notMarried;
-        },
       },
       {
         key: 'client2HasLivingWill',

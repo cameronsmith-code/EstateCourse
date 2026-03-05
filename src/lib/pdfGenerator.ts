@@ -3187,24 +3187,6 @@ export const generatePDF = (formData: FormData) => {
       jurisdictionField.value = formData.client1WillJurisdiction || '';
       jurisdictionField.defaultValue = 'e.g., Ontario, British Columbia, etc.';
       doc.addField(jurisdictionField);
-      yPosition += 10;
-
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text(`In what year was ${client1Name}'s Will prepared?`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 2;
-
-      doc.rect(margin, yPosition, fieldWidth, 6);
-
-      const yearField = new doc.AcroFormTextField();
-      yearField.fieldName = 'client1_will_year';
-      yearField.Rect = [margin, yPosition, fieldWidth, 6];
-      yearField.fontSize = 9;
-      yearField.textColor = colors.darkText;
-      yearField.value = formData.client1WillYear || '';
-      yearField.defaultValue = 'e.g., 2023';
-      doc.addField(yearField);
       yPosition += 14;
     }
 
@@ -3248,24 +3230,6 @@ export const generatePDF = (formData: FormData) => {
       jurisdictionField2.value = formData.client2WillJurisdiction || '';
       jurisdictionField2.defaultValue = 'e.g., Ontario, British Columbia, etc.';
       doc.addField(jurisdictionField2);
-      yPosition += 10;
-
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text(`In what year was ${client2Name}'s Will prepared?`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 2;
-
-      doc.rect(margin, yPosition, fieldWidth, 6);
-
-      const yearField2 = new doc.AcroFormTextField();
-      yearField2.fieldName = 'client2_will_year';
-      yearField2.Rect = [margin, yPosition, fieldWidth, 6];
-      yearField2.fontSize = 9;
-      yearField2.textColor = colors.darkText;
-      yearField2.value = formData.client2WillYear || '';
-      yearField2.defaultValue = 'e.g., 2023';
-      doc.addField(yearField2);
       yPosition += 14;
     }
 

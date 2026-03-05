@@ -756,26 +756,6 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client1HasSecondaryWill === 'yes',
       },
       {
-        key: 'spousesPoaPersonalCare',
-        label: 'Are you two each other\'s Powers of Attorney for Personal Care?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'spousesPoaProperty',
-        label: 'Are you two each other\'s Powers of Attorney for Property?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
         key: 'client1HasPoaPersonalCare',
         label: 'Have you named a Power of Attorney(ies) for Personal Care?',
         type: 'radio',

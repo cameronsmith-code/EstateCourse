@@ -2301,7 +2301,7 @@ export default function StepForm({
                         )}
                         <h3 className="text-xl font-semibold text-white">
                           {answers['spousesPoaPersonalCare'] === 'yes'
-                            ? `${client2Name}'s Contingent or additional Powers of Attorney for Personal Care`
+                            ? `${client2Name}'s contingent or additional Powers of Attorney for Personal Care Details`
                             : `${client2Name}'s Powers of Attorney for Personal Care Details`}
                         </h3>
                         {Array.from({ length: client2PoaPersonalCareCount }).map((_, index) => (

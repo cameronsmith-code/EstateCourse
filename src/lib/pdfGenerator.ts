@@ -3773,7 +3773,56 @@ export const generatePDF = (formData: FormData) => {
     yPosition += livingWillLines.length * 5 + 5;
   }
 
-  if (formData.client2HasPoaPersonalCare === 'yes' && formData.client2PoaPersonalCareCount) {
+  if (formData.client2HasPoaPersonalCare === 'yes') {
+    const client2Name = formData.spouseName || 'Client 2';
+    if (yPosition > 230) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+
+    if (formData.client2SpouseIsPoaPersonalCare === 'yes') {
+      const client1Name = formData.fullName || 'Client 1';
+      doc.text(`${client2Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
+      yPosition += 6;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${client2Name} indicated that ${client1Name} (spouse/common law partner) is their POA for Personal Care.`, margin, yPosition);
+      yPosition += 6;
+    } else if (formData.spousesPoaPersonalCare === 'yes') {
+      const client1Name = formData.fullName || 'Client 1';
+      doc.text(`${client2Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
+      yPosition += 6;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text(`(Note: (${client1Name}) and (${client2Name}), are each other's primary POA for Personal Care)`, margin, yPosition);
+      yPosition += 6;
+    } else {
+      doc.text(`${client2Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+    }
+  }
+
+  if (formData.client2HasContingentPoaPersonalCare === 'no') {
+    const client2Name = formData.spouseName || 'Client 2';
+
+    if (yPosition > 260) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Contingent Power(s) of Attorney:', margin, yPosition);
+    yPosition += 6;
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${client2Name} indicated that they have not named other or contingent Power(s) of Attorney for Personal Care - consider updating this.`, margin, yPosition);
+    yPosition += 10;
+  } else if (formData.client2HasContingentPoaPersonalCare === 'yes' && formData.client2PoaPersonalCareCount) {
     const poaCount = parseInt(formData.client2PoaPersonalCareCount, 10);
 
     if (yPosition > 210) {
@@ -3781,28 +3830,11 @@ export const generatePDF = (formData: FormData) => {
       yPosition = 12;
     }
 
-    const client2Name = formData.spouseName || 'Client 2';
-
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
-    if (formData.spousesPoaPersonalCare === 'yes') {
-      const client1Name = formData.fullName || 'Client 1';
-      doc.text(`${client2Name}'s Contingent Powers of Attorney for Personal Care:`, margin, yPosition);
-      yPosition += 6;
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'normal');
-      doc.text(`(Note: (${client1Name}) and (${client2Name}), are each other's primary POA for Personal Care)`, margin, yPosition);
-      yPosition += 6;
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${client2Name}'s contingent POAs are:`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
-    } else {
-      doc.text(`${client2Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
-    }
+    doc.text('Contingent Power(s) of Attorney:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 8;
 
     const poaCellHeight = 6;
     const poaColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];

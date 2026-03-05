@@ -89,14 +89,12 @@ interface FormData {
   soleProprietorshipNatureOther?: string;
   hasPartnership?: string;
   client1HasWill?: string;
-  client1WillYear?: string;
   client1WillJurisdiction?: string;
   client1WillLocation?: string;
   client1HasSecondaryWill?: string;
   client1SecondaryWillLocation?: string;
   client1SecondaryWillJurisdiction?: string;
   client2HasWill?: string;
-  client2WillYear?: string;
   client2WillJurisdiction?: string;
   client2WillLocation?: string;
   client2HasSecondaryWill?: string;
@@ -3168,13 +3166,6 @@ export const generatePDF = (formData: FormData) => {
     const bothHaveWills = formData.client1HasWill === 'yes' && formData.client2HasWill === 'yes';
     const sameLawyer = formData.willsSameLawyer === 'yes';
 
-    if (formData.client1HasWill === 'yes' && formData.client1WillYear) {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name}'s most recent Will was prepared in ${formData.client1WillYear}.`, margin, yPosition);
-      yPosition += 6;
-    }
-
     if (formData.client1HasWill === 'yes' && formData.client1WillJurisdiction) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
@@ -3200,13 +3191,6 @@ export const generatePDF = (formData: FormData) => {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
       doc.text(`${client1Name}'s secondary Will was prepared in ${formData.client1SecondaryWillJurisdiction}.`, margin, yPosition);
-      yPosition += 6;
-    }
-
-    if (formData.client2HasWill === 'yes' && formData.client2WillYear && hasSpouse) {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name}'s most recent Will was prepared in ${formData.client2WillYear}.`, margin, yPosition);
       yPosition += 6;
     }
 

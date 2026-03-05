@@ -218,6 +218,7 @@ interface FormData {
     contactName?: string;
     providedCopy?: string;
   }>;
+  client1PoaPersonalCareHasDocCopy?: string;
   client2PoaPersonalCareHasDocCopy?: string;
   client1PoaPropertyHasDocCopy?: string;
   client2PoaPropertyHasDocCopy?: string;
@@ -3447,6 +3448,21 @@ export const generatePDF = (formData: FormData) => {
       docLocationField.value = formData.client1PoaPersonalCareDocLocation || '';
       doc.addField(docLocationField);
       yPosition += 10;
+    }
+
+    if (formData.client1PoaPersonalCareHasDocCopy === 'yes') {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const clientName = formData.fullName || 'The client';
+      const docCopyText = `${clientName} indicated that the Power(s) of Attorney for Personal Care have a copy of the most recent documentation in their files.`;
+      const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
+      doc.text(docCopyLines, margin, yPosition);
+      yPosition += docCopyLines.length * 5 + 5;
     }
   }
 

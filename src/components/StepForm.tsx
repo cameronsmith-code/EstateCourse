@@ -1453,11 +1453,7 @@ export default function StepForm({
                   customLabel = `${client2Name}, have you named any additional or contingent Powers of Attorney for Property?`;
                 }
                 if (question.key === 'client2PoaPropertyCount') {
-                  if (answers['spousesPoaProperty'] === 'yes') {
-                    customLabel = `${client2Name}, how many contingent Powers of Attorney for Property have you named?`;
-                  } else {
-                    customLabel = `${client2Name}, how many Powers of Attorney for Property have you named?`;
-                  }
+                  customLabel = `${client2Name}, how many additional or contingent Powers of Attorney for Property have you named?`;
                 }
                 if (question.key === 'client2HasEstateTrustee') {
                   customLabel = `${client2Name}, have you named an Estate Trustee(s) in your Will?`;

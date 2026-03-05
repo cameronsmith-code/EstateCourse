@@ -1125,6 +1125,18 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'client2SpousePoaPersonalCareHasDocCopy',
+        label: 'Does this person have access to your most recent documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes_copy', label: 'Yes - they have a copy' },
+          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2SpouseIsPoaPersonalCare === 'yes',
+      },
+      {
         key: 'client2PoaPersonalCareDisplay',
         label: (answers) => {
           const client2Name = answers.get(1)?.spouseName || 'Client 2';
@@ -1226,6 +1238,18 @@ export const STEPS: Step[] = [
           return formData.client2HasPoaProperty === 'yes' &&
                  (maritalStatus === 'married' || maritalStatus === 'common_law');
         },
+      },
+      {
+        key: 'client2SpousePoaPropertyHasDocCopy',
+        label: 'Does this person have access to your most recent documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes_copy', label: 'Yes - they have a copy' },
+          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2SpouseIsPoaProperty === 'yes',
       },
       {
         key: 'client2HasContingentPoaProperty',

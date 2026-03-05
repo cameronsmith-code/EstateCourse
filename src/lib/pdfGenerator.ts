@@ -2849,6 +2849,294 @@ export const generatePDF = (formData: FormData) => {
   yPosition += 12;
   doc.addPage();
   yPosition = 12;
+  addSectionHeader('Powers of Attorney for Personal Care');
+
+  doc.setFontSize(9);
+  doc.setTextColor(...colors.mediumGray);
+  doc.text('List your Powers of Attorney for Personal Care and their contact information.', margin, yPosition);
+  yPosition += 10;
+  doc.setTextColor(...colors.darkText);
+
+  // Client 1's POA for Personal Care
+  addSubsectionHeader(`${client1Name}'s Powers of Attorney for Personal Care`);
+
+  if (formData.client1HasContingentPoaPersonalCare === 'yes' && formData.client1PoaPersonalCareCount) {
+    const poaCount = parseInt(formData.client1PoaPersonalCareCount, 10);
+    const poaData = formData.client1PoaPersonalCareData || [];
+
+    for (let i = 0; i < poaCount; i++) {
+      const poa = poaData[i] || {};
+
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Power of Attorney ${i + 1}:`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      // Name
+      doc.setFont(undefined, 'bold');
+      doc.text('Name:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const nameField = new doc.AcroFormTextField();
+      nameField.fieldName = `client1_poa_pc_${i + 1}_name`;
+      nameField.Rect = [margin, yPosition, fieldWidth, 6];
+      nameField.fontSize = 9;
+      nameField.textColor = colors.darkText;
+      nameField.value = poa.name || '';
+      doc.addField(nameField);
+      yPosition += 10;
+
+      // Phone
+      doc.setFont(undefined, 'bold');
+      doc.text('Phone Number:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const phoneField = new doc.AcroFormTextField();
+      phoneField.fieldName = `client1_poa_pc_${i + 1}_phone`;
+      phoneField.Rect = [margin, yPosition, fieldWidth, 6];
+      phoneField.fontSize = 9;
+      phoneField.textColor = colors.darkText;
+      phoneField.value = poa.phone || '';
+      doc.addField(phoneField);
+      yPosition += 10;
+
+      // Email
+      doc.setFont(undefined, 'bold');
+      doc.text('Email Address:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const emailField = new doc.AcroFormTextField();
+      emailField.fieldName = `client1_poa_pc_${i + 1}_email`;
+      emailField.Rect = [margin, yPosition, fieldWidth, 6];
+      emailField.fontSize = 9;
+      emailField.textColor = colors.darkText;
+      emailField.value = poa.email || '';
+      doc.addField(emailField);
+      yPosition += 10;
+
+      // Relationship
+      doc.setFont(undefined, 'bold');
+      doc.text('Relationship to You:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const relationshipField = new doc.AcroFormTextField();
+      relationshipField.fieldName = `client1_poa_pc_${i + 1}_relationship`;
+      relationshipField.Rect = [margin, yPosition, fieldWidth, 6];
+      relationshipField.fontSize = 9;
+      relationshipField.textColor = colors.darkText;
+      relationshipField.value = poa.relationship || '';
+      doc.addField(relationshipField);
+      yPosition += 10;
+
+      // Location
+      const location = poa.city && poa.province
+        ? `${poa.city}, ${poa.province}`
+        : poa.city || poa.province || '';
+
+      doc.setFont(undefined, 'bold');
+      doc.text('Location:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const locationField = new doc.AcroFormTextField();
+      locationField.fieldName = `client1_poa_pc_${i + 1}_location`;
+      locationField.Rect = [margin, yPosition, fieldWidth, 6];
+      locationField.fontSize = 9;
+      locationField.textColor = colors.darkText;
+      locationField.value = location;
+      doc.addField(locationField);
+      yPosition += 10;
+
+      // Provided Copy?
+      doc.setFont(undefined, 'bold');
+      doc.text('Provided Copy?', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const providedCopyField = new doc.AcroFormTextField();
+      providedCopyField.fieldName = `client1_poa_pc_${i + 1}_provided_copy`;
+      providedCopyField.Rect = [margin, yPosition, fieldWidth, 6];
+      providedCopyField.fontSize = 9;
+      providedCopyField.textColor = colors.darkText;
+      providedCopyField.value = poa.providedCopy || '';
+      doc.addField(providedCopyField);
+      yPosition += 14;
+    }
+  } else {
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'italic');
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('No Powers of Attorney for Personal Care information provided.', margin, yPosition);
+    doc.setTextColor(...colors.darkText);
+    doc.setFont(undefined, 'normal');
+    yPosition += 12;
+  }
+
+  // Client 2's POA for Personal Care (if applicable)
+  if ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law') && formData.client2HasContingentPoaPersonalCare === 'yes' && formData.client2PoaPersonalCareCount) {
+    const client2Name = formData.spouseName || 'Client 2';
+
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    addSubsectionHeader(`${client2Name}'s Powers of Attorney for Personal Care`);
+
+    const poaCount = parseInt(formData.client2PoaPersonalCareCount, 10);
+    const poaData = formData.client2PoaPersonalCareData || [];
+
+    for (let i = 0; i < poaCount; i++) {
+      const poa = poaData[i] || {};
+
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Power of Attorney ${i + 1}:`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      // Name
+      doc.setFont(undefined, 'bold');
+      doc.text('Name:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const nameField = new doc.AcroFormTextField();
+      nameField.fieldName = `client2_poa_pc_${i + 1}_name`;
+      nameField.Rect = [margin, yPosition, fieldWidth, 6];
+      nameField.fontSize = 9;
+      nameField.textColor = colors.darkText;
+      nameField.value = poa.name || '';
+      doc.addField(nameField);
+      yPosition += 10;
+
+      // Phone
+      doc.setFont(undefined, 'bold');
+      doc.text('Phone Number:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const phoneField = new doc.AcroFormTextField();
+      phoneField.fieldName = `client2_poa_pc_${i + 1}_phone`;
+      phoneField.Rect = [margin, yPosition, fieldWidth, 6];
+      phoneField.fontSize = 9;
+      phoneField.textColor = colors.darkText;
+      phoneField.value = poa.phone || '';
+      doc.addField(phoneField);
+      yPosition += 10;
+
+      // Email
+      doc.setFont(undefined, 'bold');
+      doc.text('Email Address:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const emailField = new doc.AcroFormTextField();
+      emailField.fieldName = `client2_poa_pc_${i + 1}_email`;
+      emailField.Rect = [margin, yPosition, fieldWidth, 6];
+      emailField.fontSize = 9;
+      emailField.textColor = colors.darkText;
+      emailField.value = poa.email || '';
+      doc.addField(emailField);
+      yPosition += 10;
+
+      // Relationship
+      doc.setFont(undefined, 'bold');
+      doc.text('Relationship to Them:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const relationshipField = new doc.AcroFormTextField();
+      relationshipField.fieldName = `client2_poa_pc_${i + 1}_relationship`;
+      relationshipField.Rect = [margin, yPosition, fieldWidth, 6];
+      relationshipField.fontSize = 9;
+      relationshipField.textColor = colors.darkText;
+      relationshipField.value = poa.relationship || '';
+      doc.addField(relationshipField);
+      yPosition += 10;
+
+      // Location
+      const location = poa.city && poa.province
+        ? `${poa.city}, ${poa.province}`
+        : poa.city || poa.province || '';
+
+      doc.setFont(undefined, 'bold');
+      doc.text('Location:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const locationField = new doc.AcroFormTextField();
+      locationField.fieldName = `client2_poa_pc_${i + 1}_location`;
+      locationField.Rect = [margin, yPosition, fieldWidth, 6];
+      locationField.fontSize = 9;
+      locationField.textColor = colors.darkText;
+      locationField.value = location;
+      doc.addField(locationField);
+      yPosition += 10;
+
+      // Provided Copy?
+      doc.setFont(undefined, 'bold');
+      doc.text('Provided Copy?', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const providedCopyField = new doc.AcroFormTextField();
+      providedCopyField.fieldName = `client2_poa_pc_${i + 1}_provided_copy`;
+      providedCopyField.Rect = [margin, yPosition, fieldWidth, 6];
+      providedCopyField.fontSize = 9;
+      providedCopyField.textColor = colors.darkText;
+      providedCopyField.value = poa.providedCopy || '';
+      doc.addField(providedCopyField);
+      yPosition += 14;
+    }
+  }
+
+  yPosition += 12;
+  doc.addPage();
+  yPosition = 12;
   addSectionHeader('Who is on your Team?');
 
   doc.setFontSize(9);

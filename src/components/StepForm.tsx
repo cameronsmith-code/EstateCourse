@@ -207,6 +207,70 @@ export default function StepForm({
     }
   }, [answers['client2SpouseIsPoaProperty']]);
 
+  useEffect(() => {
+    if (answers['client1HasWill'] === 'no') {
+      const keysToClear = [
+        'client1WillLocation',
+        'client1WillJurisdiction',
+        'client1HasSecondaryWill',
+        'client1SecondaryWillLocation',
+        'client1SecondaryWillJurisdiction',
+        'willsSameLawyer'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasWill']]);
+
+  useEffect(() => {
+    if (answers['client2HasWill'] === 'no') {
+      const keysToClear = [
+        'client2WillLocation',
+        'client2WillJurisdiction',
+        'client2HasSecondaryWill',
+        'client2SecondaryWillLocation',
+        'client2SecondaryWillJurisdiction',
+        'willsSameLawyer'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasWill']]);
+
+  useEffect(() => {
+    if (answers['client1HasSecondaryWill'] === 'no') {
+      const keysToClear = [
+        'client1SecondaryWillLocation',
+        'client1SecondaryWillJurisdiction'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasSecondaryWill']]);
+
+  useEffect(() => {
+    if (answers['client2HasSecondaryWill'] === 'no') {
+      const keysToClear = [
+        'client2SecondaryWillLocation',
+        'client2SecondaryWillJurisdiction'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasSecondaryWill']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');

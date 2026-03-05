@@ -918,17 +918,6 @@ export const STEPS: Step[] = [
         },
       },
       {
-        key: 'client1PoaPropertyHasDocCopy',
-        label: 'Do your Powers of Attorney for Property have the most recent copy of your documentation?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasPoaProperty === 'yes',
-      },
-      {
         key: 'client1HasEstateTrustee',
         label: 'Have you named an Estate Trustee in your Will?',
         type: 'radio',

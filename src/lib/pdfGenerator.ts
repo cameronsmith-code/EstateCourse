@@ -3234,7 +3234,7 @@ export const generatePDF = (formData: FormData) => {
 
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      doc.text('Estate Lawyer / Notary:', margin, yPosition);
+      doc.text(`Estate Lawyer / Notary - ${client1Name} & ${client2Name}:`, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 6;
 

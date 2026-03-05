@@ -2967,9 +2967,9 @@ export const generatePDF = (formData: FormData) => {
       doc.addField(locationField);
       yPosition += 10;
 
-      // Provided Copy?
+      // Has Access to Documentation?
       doc.setFont(undefined, 'bold');
-      doc.text('Provided Copy?', margin, yPosition);
+      doc.text('Has Access to Documentation?', margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 2;
 
@@ -3113,9 +3113,9 @@ export const generatePDF = (formData: FormData) => {
       doc.addField(locationField);
       yPosition += 10;
 
-      // Provided Copy?
+      // Has Access to Documentation?
       doc.setFont(undefined, 'bold');
-      doc.text('Provided Copy?', margin, yPosition);
+      doc.text('Has Access to Documentation?', margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 2;
 
@@ -3570,7 +3570,7 @@ export const generatePDF = (formData: FormData) => {
       doc.text('Phone Number:', poaCol2X + 0.5, poaTableY + 4);
       doc.text('Email Address:', poaCol3X + 0.5, poaTableY + 4);
       doc.text('Relationship to You:', poaCol4X + 0.5, poaTableY + 4);
-      doc.text('Provided Copy?', poaCol5X + 0.5, poaTableY + 4);
+      doc.text('Has Access to Documentation?', poaCol5X + 0.5, poaTableY + 4);
 
       poaTableY += poaCellHeight;
 
@@ -4806,7 +4806,7 @@ export const generatePDF = (formData: FormData) => {
           { label: 'Key Contact Name:', key: 'contactName' },
           { label: 'Phone Number:', key: 'phone' },
           { label: 'Email:', key: 'email' },
-          { label: 'Provided Copy?', key: 'providedCopy' }
+          { label: 'Has Access to Documentation?', key: 'providedCopy' }
         ];
 
         fields.forEach((field, idx) => {
@@ -4862,7 +4862,7 @@ export const generatePDF = (formData: FormData) => {
         doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
         doc.text('Email Address:', etCol3X + 0.5, etTableY + 4);
         doc.text('Relationship:', etCol4X + 0.5, etTableY + 4);
-        doc.text('Provided Copy?', etCol5X + 0.5, etTableY + 4);
+        doc.text('Has Access to Documentation?', etCol5X + 0.5, etTableY + 4);
 
         etTableY += etCellHeight;
 
@@ -5031,7 +5031,7 @@ export const generatePDF = (formData: FormData) => {
           { label: 'Key Contact Name:', key: 'contactName' },
           { label: 'Phone Number:', key: 'phone' },
           { label: 'Email:', key: 'email' },
-          { label: 'Provided Copy?', key: 'providedCopy' }
+          { label: 'Has Access to Documentation?', key: 'providedCopy' }
         ];
 
         fields.forEach((field, idx) => {
@@ -5086,7 +5086,7 @@ export const generatePDF = (formData: FormData) => {
         doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
         doc.text('Email Address:', etCol3X + 0.5, etTableY + 4);
         doc.text('Relationship:', etCol4X + 0.5, etTableY + 4);
-        doc.text('Provided Copy?', etCol5X + 0.5, etTableY + 4);
+        doc.text('Has Access to Documentation?', etCol5X + 0.5, etTableY + 4);
 
         etTableY += etCellHeight;
 

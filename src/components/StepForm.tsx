@@ -1763,7 +1763,7 @@ export default function StepForm({
 
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Do they have the most recent copy of your documentation? *
+                                  Does this person have access to your documentation? *
                                 </label>
                                 <div className="flex gap-4">
                                   <label className="flex items-center">
@@ -2105,7 +2105,7 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Do they have the most recent copy of your documentation? *
+                                      Does this person have access to your documentation? *
                                     </label>
                                     <div className="flex gap-4">
                                       <label className="flex items-center">
@@ -2271,7 +2271,7 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Do they have the most recent copy of your documentation? *
+                                      Does this person have access to your documentation? *
                                     </label>
                                     <div className="flex gap-4">
                                       <label className="flex items-center">
@@ -2488,7 +2488,7 @@ export default function StepForm({
 
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Do they have the most recent copy of your documentation? *
+                                  Does this person have access to your documentation? *
                                 </label>
                                 <div className="flex gap-4">
                                   <label className="flex items-center">
@@ -2810,7 +2810,7 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Do they have the most recent copy of your documentation? *
+                                      Does this person have access to your documentation? *
                                     </label>
                                     <div className="flex gap-4">
                                       <label className="flex items-center">
@@ -2976,7 +2976,7 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Do they have the most recent copy of your documentation? *
+                                      Does this person have access to your documentation? *
                                     </label>
                                     <div className="flex gap-4">
                                       <label className="flex items-center">

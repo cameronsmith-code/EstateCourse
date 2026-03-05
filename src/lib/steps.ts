@@ -1029,10 +1029,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2HasSecondaryWill',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName || 'Client 2';
-          return `${client2Name}, do you have a secondary Will?`;
-        },
+        label: 'Does your spouse have a secondary Will?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },

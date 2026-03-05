@@ -1323,6 +1323,9 @@ export default function StepForm({
                 if (question.key === 'client2WillLocation') {
                   customLabel = `${client2Name}, where is the Will located?`;
                 }
+                if (question.key === 'client2HasSecondaryWill') {
+                  customLabel = `${client2Name}, do you have a secondary Will?`;
+                }
                 if (question.key === 'client2SecondaryWillJurisdiction') {
                   customLabel = `In what jurisdiction was ${client2Name}'s secondary Will prepared?`;
                 }

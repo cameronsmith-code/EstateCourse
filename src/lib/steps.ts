@@ -834,6 +834,17 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client1HasContingentPoaPersonalCare === 'yes',
       },
       {
+        key: 'client1PoaPersonalCareHasDocCopy',
+        label: 'Do your Powers of Attorney for Personal Care have the most recent copy of your documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
+      },
+      {
         key: 'client1HasLivingWill',
         label: 'Do you have a \'Living Will\'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.',
         type: 'radio',
@@ -905,6 +916,17 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => {
           return formData.client1HasContingentPoaProperty === 'yes';
         },
+      },
+      {
+        key: 'client1PoaPropertyHasDocCopy',
+        label: 'Do your Powers of Attorney for Property have the most recent copy of your documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasPoaProperty === 'yes',
       },
       {
         key: 'client1HasEstateTrustee',
@@ -1114,6 +1136,17 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client2HasContingentPoaPersonalCare === 'yes',
       },
       {
+        key: 'client2PoaPersonalCareHasDocCopy',
+        label: 'Do your spouse\'s Powers of Attorney for Personal Care have the most recent copy of their documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaPersonalCare === 'yes',
+      },
+      {
         key: 'client2HasLivingWill',
         label: 'Does your spouse have a \'Living Will\'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.',
         type: 'radio',
@@ -1195,6 +1228,17 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => {
           return formData.client2HasContingentPoaProperty === 'yes';
         },
+      },
+      {
+        key: 'client2PoaPropertyHasDocCopy',
+        label: 'Do your spouse\'s Powers of Attorney for Property have the most recent copy of their documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaProperty === 'yes',
       },
       {
         key: 'client2HasEstateTrustee',

@@ -3168,18 +3168,44 @@ export const generatePDF = (formData: FormData) => {
     const bothHaveWills = formData.client1HasWill === 'yes' && formData.client2HasWill === 'yes';
     const sameLawyer = formData.willsSameLawyer === 'yes';
 
-    if (formData.client1HasWill === 'yes' && formData.client1WillYear) {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name}'s Will was prepared in ${formData.client1WillYear}.`, margin, yPosition);
-      yPosition += 6;
-    }
+    if (formData.client1HasWill === 'yes') {
+      checkPageBreak(25);
 
-    if (formData.client1HasWill === 'yes' && formData.client1WillJurisdiction) {
       doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`In what jurisdiction was ${client1Name}'s Will prepared?`, margin, yPosition);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name}'s Will was prepared in ${formData.client1WillJurisdiction}.`, margin, yPosition);
-      yPosition += 6;
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const jurisdictionField = new doc.AcroFormTextField();
+      jurisdictionField.fieldName = 'client1_will_jurisdiction';
+      jurisdictionField.Rect = [margin, yPosition, fieldWidth, 6];
+      jurisdictionField.fontSize = 9;
+      jurisdictionField.textColor = colors.darkText;
+      jurisdictionField.value = formData.client1WillJurisdiction || '';
+      jurisdictionField.defaultValue = 'e.g., Ontario, British Columbia, etc.';
+      doc.addField(jurisdictionField);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`In what year was ${client1Name}'s Will prepared?`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const yearField = new doc.AcroFormTextField();
+      yearField.fieldName = 'client1_will_year';
+      yearField.Rect = [margin, yPosition, fieldWidth, 6];
+      yearField.fontSize = 9;
+      yearField.textColor = colors.darkText;
+      yearField.value = formData.client1WillYear || '';
+      yearField.defaultValue = 'e.g., 2023';
+      doc.addField(yearField);
+      yPosition += 14;
     }
 
     if (formData.client1HasWill === 'yes' && formData.client1WillLocation) {
@@ -3203,18 +3229,44 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
     }
 
-    if (formData.client2HasWill === 'yes' && formData.client2WillYear && hasSpouse) {
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name}'s Will was prepared in ${formData.client2WillYear}.`, margin, yPosition);
-      yPosition += 6;
-    }
+    if (formData.client2HasWill === 'yes' && hasSpouse) {
+      checkPageBreak(25);
 
-    if (formData.client2HasWill === 'yes' && formData.client2WillJurisdiction && hasSpouse) {
       doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`In what jurisdiction was ${client2Name}'s Will prepared?`, margin, yPosition);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name}'s Will was prepared in ${formData.client2WillJurisdiction}.`, margin, yPosition);
-      yPosition += 6;
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const jurisdictionField2 = new doc.AcroFormTextField();
+      jurisdictionField2.fieldName = 'client2_will_jurisdiction';
+      jurisdictionField2.Rect = [margin, yPosition, fieldWidth, 6];
+      jurisdictionField2.fontSize = 9;
+      jurisdictionField2.textColor = colors.darkText;
+      jurisdictionField2.value = formData.client2WillJurisdiction || '';
+      jurisdictionField2.defaultValue = 'e.g., Ontario, British Columbia, etc.';
+      doc.addField(jurisdictionField2);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`In what year was ${client2Name}'s Will prepared?`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const yearField2 = new doc.AcroFormTextField();
+      yearField2.fieldName = 'client2_will_year';
+      yearField2.Rect = [margin, yPosition, fieldWidth, 6];
+      yearField2.fontSize = 9;
+      yearField2.textColor = colors.darkText;
+      yearField2.value = formData.client2WillYear || '';
+      yearField2.defaultValue = 'e.g., 2023';
+      doc.addField(yearField2);
+      yPosition += 14;
     }
 
     if (formData.client2HasWill === 'yes' && formData.client2WillLocation && hasSpouse) {

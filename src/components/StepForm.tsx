@@ -1449,6 +1449,9 @@ export default function StepForm({
                     customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
                   }
                 }
+                if (question.key === 'client2HasContingentPoaProperty') {
+                  customLabel = `${client2Name}, have you named any additional or contingent Powers of Attorney for Property?`;
+                }
                 if (question.key === 'client2PoaPropertyCount') {
                   if (answers['spousesPoaProperty'] === 'yes') {
                     customLabel = `${client2Name}, how many contingent Powers of Attorney for Property have you named?`;

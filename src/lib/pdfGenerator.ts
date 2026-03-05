@@ -4527,6 +4527,7 @@ export const generatePDF = (formData: FormData) => {
       doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
       doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
       doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol5X, poaPropertyTableY, poaPropertyColWidths[4], poaPropertyCellHeight);
 
       const field1 = new doc.AcroFormTextField();
       field1.fieldName = `poa_property_client2_${i}_name`;
@@ -4563,6 +4564,15 @@ export const generatePDF = (formData: FormData) => {
       field4.borderStyle = 'none';
       field4.value = poaData?.relationship || '';
       doc.addField(field4);
+
+      const field5 = new doc.AcroFormTextField();
+      field5.fieldName = `poa_property_client2_${i}_providedcopy`;
+      field5.Rect = [poaPropertyCol5X + 0.3, poaPropertyTableY + 0.3, poaPropertyColWidths[4] - 0.6, poaPropertyCellHeight - 0.6];
+      field5.fontSize = 7;
+      field5.textColor = [0, 0, 0];
+      field5.borderStyle = 'none';
+      field5.value = poaData?.providedCopy === 'yes' ? 'Yes' : poaData?.providedCopy === 'no' ? 'No' : '';
+      doc.addField(field5);
 
       poaPropertyTableY += poaPropertyCellHeight;
 

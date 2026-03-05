@@ -2280,14 +2280,14 @@ export default function StepForm({
                                 </label>
                                 <input
                                   type="text"
-                                  value={allAnswers?.get(1)?.client1Name as string || ''}
+                                  value={(allAnswers?.get(1)?.fullName as string) || ''}
                                   disabled
                                   className="w-full px-4 py-2 bg-gray-500 border border-gray-500 text-white rounded-lg cursor-not-allowed"
                                 />
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Relationship to You *
+                                  Relationship to {client2Name} *
                                 </label>
                                 <input
                                   type="text"

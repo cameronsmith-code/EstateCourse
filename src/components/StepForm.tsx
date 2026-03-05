@@ -2544,7 +2544,7 @@ export default function StepForm({
                             <div className="space-y-4">
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Spouse name *
+                                  {client2Name}'s POA for Property:
                                 </label>
                                 <input
                                   type="text"
@@ -2555,7 +2555,7 @@ export default function StepForm({
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Relationship to you *
+                                  Relationship to {client2Name} *
                                 </label>
                                 <input
                                   type="text"

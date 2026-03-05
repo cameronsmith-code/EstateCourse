@@ -1481,6 +1481,37 @@ export default function StepForm({
                       value={answers[question.key]}
                       onChange={(value) => onAnswerChange(question.key, value)}
                     />
+                    {question.key === 'client2PoaPersonalCareDisplay' && answers['client2SpouseIsPoaPersonalCare'] === 'yes' && (
+                      <div className="border border-gray-600 rounded-lg p-6 bg-gray-700 mt-6 mb-6">
+                        <h4 className="text-lg font-semibold text-white mb-4">
+                          POA for Personal Care #1
+                        </h4>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Name *
+                            </label>
+                            <input
+                              type="text"
+                              value={(allAnswers?.get(1)?.fullName as string) || ''}
+                              disabled
+                              className="w-full px-4 py-2 bg-gray-500 border border-gray-500 text-white rounded-lg cursor-not-allowed"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Relationship to {client2Name} *
+                            </label>
+                            <input
+                              type="text"
+                              value="Spouse/Common Law Partner"
+                              disabled
+                              className="w-full px-4 py-2 bg-gray-500 border border-gray-500 text-white rounded-lg cursor-not-allowed"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     {question.key === 'client1HasWill' && answers['client1HasWill'] === 'yes' && (
                       <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-300 mb-2">

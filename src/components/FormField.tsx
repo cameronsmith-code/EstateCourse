@@ -20,6 +20,14 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
     );
   }
 
+  if (type === 'display') {
+    return (
+      <div className="mb-4 mt-6">
+        <h3 className="text-xl font-semibold text-white">{label}</h3>
+      </div>
+    );
+  }
+
   if (type === 'textarea') {
     return (
       <div className="mb-6">

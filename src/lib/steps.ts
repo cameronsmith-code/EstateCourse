@@ -1082,6 +1082,18 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'client2PoaPersonalCareDisplay',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}'s Power of Attorney for Personal Care`;
+        },
+        type: 'display',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2SpouseIsPoaPersonalCare === 'yes';
+        },
+      },
+      {
         key: 'client2HasContingentPoaPersonalCare',
         label: (answers) => {
           const client2Name = answers.get(1)?.spouseName || 'Client 2';

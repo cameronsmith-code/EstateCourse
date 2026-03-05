@@ -2328,6 +2328,19 @@ export default function StepForm({
 
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Relationship to {client2Name} *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={client2PoaPersonalCareData[index]?.relationship || ''}
+                                  onChange={(e) => handleClient2PoaPersonalCareChange(index, 'relationship', e.target.value)}
+                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Phone Number *
                                 </label>
                                 <input
@@ -2348,19 +2361,6 @@ export default function StepForm({
                                   value={client2PoaPersonalCareData[index]?.email || ''}
                                   onChange={(e) => handleClient2PoaPersonalCareChange(index, 'email', e.target.value)}
                                   placeholder="Enter email address"
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Relationship to {client2Name} *
-                                </label>
-                                <input
-                                  type="text"
-                                  value={client2PoaPersonalCareData[index]?.relationship || ''}
-                                  onChange={(e) => handleClient2PoaPersonalCareChange(index, 'relationship', e.target.value)}
-                                  placeholder="e.g., Spouse, Child, Sibling, etc."
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                               </div>

@@ -1047,7 +1047,11 @@ export const STEPS: Step[] = [
       },
       {
         key: 'willsSameLawyer',
-        label: 'Were the Wills prepared at the same time/by the same lawyer?',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
+          return `Were the Wills for ${client1Name} and ${client2Name} prepared at the same time/by the same lawyer?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },

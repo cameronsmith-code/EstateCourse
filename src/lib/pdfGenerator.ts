@@ -3222,7 +3222,7 @@ export const generatePDF = (formData: FormData) => {
     doc.setFont(undefined, 'bold');
 
     if (formData.spouseIsPoaPersonalCare === 'yes') {
-      doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
+      doc.text(`${client1Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
@@ -3235,6 +3235,10 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.text(`(${client1Name}) and (${client2Name}), indicated that they are each other's Powers of Attorney for Personal Care.`, margin, yPosition);
       yPosition += 6;
+    } else {
+      doc.text(`${client1Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
     }
 
     if (formData.client1HasContingentPoaPersonalCare === 'no') {
@@ -3945,7 +3949,8 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       yPosition += 8;
     } else {
-      doc.text('Powers of Attorney for Property:', margin, yPosition);
+      const client1Name = formData.fullName || 'Client 1';
+      doc.text(`${client1Name}'s Powers of Attorney for Property:`, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 8;
     }
@@ -4501,7 +4506,8 @@ export const generatePDF = (formData: FormData) => {
 
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
-    doc.text('Estate Trustees:', margin, yPosition);
+    const client1Name = formData.fullName || 'Client 1';
+    doc.text(`${client1Name}'s Estate Trustees:`, margin, yPosition);
     doc.setFont(undefined, 'normal');
     yPosition += 8;
 

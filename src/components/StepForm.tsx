@@ -2309,7 +2309,7 @@ export default function StepForm({
                             <h4 className="text-lg font-semibold text-white mb-4">
                               {answers['spousesPoaPersonalCare'] === 'yes'
                                 ? `Contingent POA for Personal Care #${index + 1}`
-                                : `POA for Personal Care #${index + 1}`}
+                                : `Additional or contingent POA for Personal Care #${index + 1}`}
                             </h4>
 
                             <div className="space-y-4">

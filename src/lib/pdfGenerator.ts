@@ -220,8 +220,6 @@ interface FormData {
     providedCopy?: string;
   }>;
   client1PoaPersonalCareHasDocCopy?: string;
-  client2PoaPersonalCareHasDocCopy?: string;
-  client2PoaPropertyHasDocCopy?: string;
   client1EstateTrusteeKnowsWillLocation?: string;
   client2EstateTrusteeKnowsWillLocation?: string;
   client1HasLivingWill?: string;
@@ -3954,20 +3952,6 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 10;
     }
 
-    if (formData.client2PoaPersonalCareHasDocCopy === 'yes') {
-      if (yPosition > 260) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'normal');
-      const docCopyText = `${client2Name} indicated that the Power(s) of Attorney for Personal Care have a copy of the most recent documentation in their files.`;
-      const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
-      doc.text(docCopyLines, margin, yPosition);
-      yPosition += docCopyLines.length * 5 + 5;
-    }
-
     if (formData.client2HasLivingWill === 'yes') {
       if (yPosition > 260) {
         doc.addPage();
@@ -4584,20 +4568,6 @@ export const generatePDF = (formData: FormData) => {
       docLocationField.value = formData.client2PoaPropertyDocLocation || '';
       doc.addField(docLocationField);
       yPosition += 10;
-    }
-
-    if (formData.client2PoaPropertyHasDocCopy === 'yes') {
-      if (yPosition > 260) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'normal');
-      const docCopyText = `${client2Name} indicated that the Power(s) of Attorney for Property have a copy of the most recent documentation in their files.`;
-      const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
-      doc.text(docCopyLines, margin, yPosition);
-      yPosition += docCopyLines.length * 5 + 5;
     }
   }
 

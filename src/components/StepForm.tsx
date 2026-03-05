@@ -75,6 +75,7 @@ export default function StepForm({
     if (answers['client1HasPoaPersonalCare'] === 'no') {
       const keysToClears = [
         'spouseIsPoaPersonalCare',
+        'spousePoaPersonalCareHasDocCopy',
         'client1HasContingentPoaPersonalCare',
         'client1PoaPersonalCareCount',
         'client1PoaPersonalCareData',
@@ -93,6 +94,7 @@ export default function StepForm({
     if (answers['client2HasPoaPersonalCare'] === 'no') {
       const keysToClear = [
         'client2SpouseIsPoaPersonalCare',
+        'client2SpousePoaPersonalCareHasDocCopy',
         'client2PoaPersonalCareDisplay',
         'client2HasContingentPoaPersonalCare',
         'client2PoaPersonalCareCount',
@@ -111,6 +113,7 @@ export default function StepForm({
     if (answers['client1HasPoaProperty'] === 'no') {
       const keysToClear = [
         'spouseIsPoaProperty',
+        'spousePoaPropertyHasDocCopy',
         'client1HasContingentPoaProperty',
         'client1PoaPropertyCount',
         'client1PoaPropertyData'
@@ -127,6 +130,7 @@ export default function StepForm({
     if (answers['client2HasPoaProperty'] === 'no') {
       const keysToClear = [
         'client2SpouseIsPoaProperty',
+        'client2SpousePoaPropertyHasDocCopy',
         'client2HasContingentPoaProperty',
         'client2PoaPropertyCount',
         'client2PoaPropertyData'
@@ -170,6 +174,38 @@ export default function StepForm({
       });
     }
   }, [answers['client2HasEstateTrustee']]);
+
+  useEffect(() => {
+    if (answers['spouseIsPoaPersonalCare'] === 'no') {
+      if (answers['spousePoaPersonalCareHasDocCopy'] !== undefined) {
+        onAnswerChange('spousePoaPersonalCareHasDocCopy', undefined);
+      }
+    }
+  }, [answers['spouseIsPoaPersonalCare']]);
+
+  useEffect(() => {
+    if (answers['spouseIsPoaProperty'] === 'no') {
+      if (answers['spousePoaPropertyHasDocCopy'] !== undefined) {
+        onAnswerChange('spousePoaPropertyHasDocCopy', undefined);
+      }
+    }
+  }, [answers['spouseIsPoaProperty']]);
+
+  useEffect(() => {
+    if (answers['client2SpouseIsPoaPersonalCare'] === 'no') {
+      if (answers['client2SpousePoaPersonalCareHasDocCopy'] !== undefined) {
+        onAnswerChange('client2SpousePoaPersonalCareHasDocCopy', undefined);
+      }
+    }
+  }, [answers['client2SpouseIsPoaPersonalCare']]);
+
+  useEffect(() => {
+    if (answers['client2SpouseIsPoaProperty'] === 'no') {
+      if (answers['client2SpousePoaPropertyHasDocCopy'] !== undefined) {
+        onAnswerChange('client2SpousePoaPropertyHasDocCopy', undefined);
+      }
+    }
+  }, [answers['client2SpouseIsPoaProperty']]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

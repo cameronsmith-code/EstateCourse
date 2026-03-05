@@ -850,10 +850,9 @@ export const STEPS: Step[] = [
             ? basicAnswers.get(1)?.maritalStatus
             : formData.maritalStatus;
           const isMarried = maritalStatus === 'married' || maritalStatus === 'common_law';
-          const spouseIsNotPoa = formData.spouseIsPoaPersonalCare === 'no';
           const notMarried = !isMarried;
 
-          return formData.client1HasPoaPersonalCare === 'yes' && (notMarried || spouseIsNotPoa);
+          return formData.client1HasPoaPersonalCare === 'yes' && notMarried;
         },
       },
       {
@@ -957,10 +956,9 @@ export const STEPS: Step[] = [
             ? basicAnswers.get(1)?.maritalStatus
             : formData.maritalStatus;
           const isMarried = maritalStatus === 'married' || maritalStatus === 'common_law';
-          const spouseIsNotPoa = formData.spouseIsPoaProperty === 'no';
           const notMarried = !isMarried;
 
-          return formData.client1HasPoaProperty === 'yes' && (notMarried || spouseIsNotPoa);
+          return formData.client1HasPoaProperty === 'yes' && notMarried;
         },
       },
       {
@@ -1211,10 +1209,9 @@ export const STEPS: Step[] = [
             ? basicAnswers.get(1)?.maritalStatus
             : formData.maritalStatus;
           const isMarried = maritalStatus === 'married' || maritalStatus === 'common_law';
-          const spouseIsNotPoa = formData.client2SpouseIsPoaPersonalCare === 'no';
           const notMarried = !isMarried;
 
-          return formData.client2HasPoaPersonalCare === 'yes' && (notMarried || spouseIsNotPoa);
+          return formData.client2HasPoaPersonalCare === 'yes' && notMarried;
         },
       },
       {
@@ -1328,10 +1325,9 @@ export const STEPS: Step[] = [
             ? basicAnswers.get(1)?.maritalStatus
             : formData.maritalStatus;
           const isMarried = maritalStatus === 'married' || maritalStatus === 'common_law';
-          const spouseIsNotPoa = formData.client2SpouseIsPoaProperty === 'no';
           const notMarried = !isMarried;
 
-          return formData.client2HasPoaProperty === 'yes' && (notMarried || spouseIsNotPoa);
+          return formData.client2HasPoaProperty === 'yes' && notMarried;
         },
       },
       {

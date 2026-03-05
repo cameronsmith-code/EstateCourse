@@ -940,6 +940,7 @@ export const STEPS: Step[] = [
           { value: '5', label: '5' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasEstateTrustee === 'yes',
       },
       {
         key: 'client1EstateTrusteeKnowsWillLocation',

@@ -71,6 +71,106 @@ export default function StepForm({
     }
   }, [answers['client2IsCameronSmithAdvisor'], answers['client2FinancialAdvisors']]);
 
+  useEffect(() => {
+    if (answers['client1HasPoaPersonalCare'] === 'no') {
+      const keysToClears = [
+        'spouseIsPoaPersonalCare',
+        'client1HasContingentPoaPersonalCare',
+        'client1PoaPersonalCareCount',
+        'client1PoaPersonalCareData',
+        'client1PoaPersonalCareHasDocCopy',
+        'client1PoaPersonalCareDocLocation'
+      ];
+      keysToClears.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasPoaPersonalCare']]);
+
+  useEffect(() => {
+    if (answers['client2HasPoaPersonalCare'] === 'no') {
+      const keysToClear = [
+        'client2SpouseIsPoaPersonalCare',
+        'client2PoaPersonalCareDisplay',
+        'client2HasContingentPoaPersonalCare',
+        'client2PoaPersonalCareCount',
+        'client2PoaPersonalCareData',
+        'client2PoaPersonalCareDocLocation'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasPoaPersonalCare']]);
+
+  useEffect(() => {
+    if (answers['client1HasPoaProperty'] === 'no') {
+      const keysToClear = [
+        'spouseIsPoaProperty',
+        'client1HasContingentPoaProperty',
+        'client1PoaPropertyCount',
+        'client1PoaPropertyData'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasPoaProperty']]);
+
+  useEffect(() => {
+    if (answers['client2HasPoaProperty'] === 'no') {
+      const keysToClear = [
+        'client2SpouseIsPoaProperty',
+        'client2HasContingentPoaProperty',
+        'client2PoaPropertyCount',
+        'client2PoaPropertyData'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasPoaProperty']]);
+
+  useEffect(() => {
+    if (answers['client1HasEstateTrustee'] === 'no') {
+      const keysToClear = [
+        'client1EstateTrusteeCount',
+        'client1EstateTrusteeData',
+        'client1EstateTrusteeKnowsWillLocation',
+        'client1EstateTrusteeHasDocCopy'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasEstateTrustee']]);
+
+  useEffect(() => {
+    if (answers['client2HasEstateTrustee'] === 'no') {
+      const keysToClear = [
+        'client2EstateTrusteeCount',
+        'client2EstateTrusteeData',
+        'client2EstateTrusteeKnowsWillLocation',
+        'client2EstateTrusteeHasDocCopy'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasEstateTrustee']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');

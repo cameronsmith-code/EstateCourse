@@ -220,6 +220,9 @@ interface FormData {
     providedCopy?: string;
   }>;
   client1PoaPersonalCareHasDocCopy?: string;
+  client1PoaPropertyHasDocCopy?: string;
+  client2PoaPersonalCareHasDocCopy?: string;
+  client2PoaPropertyHasDocCopy?: string;
   client1EstateTrusteeKnowsWillLocation?: string;
   client2EstateTrusteeKnowsWillLocation?: string;
   client1HasLivingWill?: string;
@@ -3740,7 +3743,7 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 10;
     }
 
-    if (formData.client1PoaPersonalCareHasDocCopy === 'yes') {
+    if (formData.client1PoaPersonalCareHasDocCopy) {
       if (yPosition > 260) {
         doc.addPage();
         yPosition = 12;
@@ -3749,7 +3752,14 @@ export const generatePDF = (formData: FormData) => {
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
       const clientName = formData.fullName || 'The client';
-      const docCopyText = `${clientName} indicated that the Power(s) of Attorney for Personal Care have a copy of the most recent documentation in their files.`;
+      let docCopyText = '';
+      if (formData.client1PoaPersonalCareHasDocCopy === 'yes_copy') {
+        docCopyText = `${clientName} indicated that the Power(s) of Attorney for Personal Care have a copy of the most recent documentation in their files.`;
+      } else if (formData.client1PoaPersonalCareHasDocCopy === 'yes_instructions') {
+        docCopyText = `${clientName} indicated that the Power(s) of Attorney for Personal Care have instructions on where/how to access the most recent documentation.`;
+      } else if (formData.client1PoaPersonalCareHasDocCopy === 'no') {
+        docCopyText = `${clientName} indicated that the Power(s) of Attorney for Personal Care do not have access to the most recent documentation.`;
+      }
       const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
       doc.text(docCopyLines, margin, yPosition);
       yPosition += docCopyLines.length * 5 + 5;
@@ -3950,6 +3960,28 @@ export const generatePDF = (formData: FormData) => {
       docLocationField.value = formData.client2PoaPersonalCareDocLocation || '';
       doc.addField(docLocationField);
       yPosition += 10;
+    }
+
+    if (formData.client2PoaPersonalCareHasDocCopy) {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const client2Name = formData.spouseName || 'Client 2';
+      let docCopyText = '';
+      if (formData.client2PoaPersonalCareHasDocCopy === 'yes_copy') {
+        docCopyText = `${client2Name} indicated that the Power(s) of Attorney for Personal Care have a copy of the most recent documentation in their files.`;
+      } else if (formData.client2PoaPersonalCareHasDocCopy === 'yes_instructions') {
+        docCopyText = `${client2Name} indicated that the Power(s) of Attorney for Personal Care have instructions on where/how to access the most recent documentation.`;
+      } else if (formData.client2PoaPersonalCareHasDocCopy === 'no') {
+        docCopyText = `${client2Name} indicated that the Power(s) of Attorney for Personal Care do not have access to the most recent documentation.`;
+      }
+      const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
+      doc.text(docCopyLines, margin, yPosition);
+      yPosition += docCopyLines.length * 5 + 5;
     }
 
     if (formData.client2HasLivingWill === 'yes') {
@@ -4388,6 +4420,28 @@ export const generatePDF = (formData: FormData) => {
     yPosition = poaPropertyTableY + 10;
   }
 
+  if (formData.client1PoaPropertyHasDocCopy) {
+    if (yPosition > 260) {
+      doc.addPage();
+      yPosition = 12;
+    }
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    const client1Name = formData.fullName || 'The client';
+    let docCopyText = '';
+    if (formData.client1PoaPropertyHasDocCopy === 'yes_copy') {
+      docCopyText = `${client1Name} indicated that the Power(s) of Attorney for Property have a copy of the most recent documentation in their files.`;
+    } else if (formData.client1PoaPropertyHasDocCopy === 'yes_instructions') {
+      docCopyText = `${client1Name} indicated that the Power(s) of Attorney for Property have instructions on where/how to access the most recent documentation.`;
+    } else if (formData.client1PoaPropertyHasDocCopy === 'no') {
+      docCopyText = `${client1Name} indicated that the Power(s) of Attorney for Property do not have access to the most recent documentation.`;
+    }
+    const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
+    doc.text(docCopyLines, margin, yPosition);
+    yPosition += docCopyLines.length * 5 + 10;
+  }
+
   if (formData.client2HasPoaProperty === 'yes') {
     const client2Name = formData.spouseName || 'Client 2';
 
@@ -4568,6 +4622,28 @@ export const generatePDF = (formData: FormData) => {
       docLocationField.value = formData.client2PoaPropertyDocLocation || '';
       doc.addField(docLocationField);
       yPosition += 10;
+    }
+
+    if (formData.client2PoaPropertyHasDocCopy) {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const client2Name = formData.spouseName || 'Client 2';
+      let docCopyText = '';
+      if (formData.client2PoaPropertyHasDocCopy === 'yes_copy') {
+        docCopyText = `${client2Name} indicated that the Power(s) of Attorney for Property have a copy of the most recent documentation in their files.`;
+      } else if (formData.client2PoaPropertyHasDocCopy === 'yes_instructions') {
+        docCopyText = `${client2Name} indicated that the Power(s) of Attorney for Property have instructions on where/how to access the most recent documentation.`;
+      } else if (formData.client2PoaPropertyHasDocCopy === 'no') {
+        docCopyText = `${client2Name} indicated that the Power(s) of Attorney for Property do not have access to the most recent documentation.`;
+      }
+      const docCopyLines = doc.splitTextToSize(docCopyText, fieldWidth);
+      doc.text(docCopyLines, margin, yPosition);
+      yPosition += docCopyLines.length * 5 + 10;
     }
   }
 

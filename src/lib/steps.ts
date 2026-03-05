@@ -836,10 +836,11 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1PoaPersonalCareHasDocCopy',
-        label: 'Do your Powers of Attorney for Personal Care have the most recent copy of your documentation?',
+        label: 'Does this person have access to your most recent documentation?',
         type: 'radio',
         options: [
-          { value: 'yes', label: 'Yes' },
+          { value: 'yes_copy', label: 'Yes - they have a copy' },
+          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
           { value: 'no', label: 'No' },
         ],
         required: false,
@@ -917,6 +918,18 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => {
           return formData.client1HasContingentPoaProperty === 'yes';
         },
+      },
+      {
+        key: 'client1PoaPropertyHasDocCopy',
+        label: 'Does this person have access to your most recent documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes_copy', label: 'Yes - they have a copy' },
+          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasPoaProperty === 'yes',
       },
       {
         key: 'client1HasEstateTrustee',
@@ -1131,6 +1144,18 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client2HasContingentPoaPersonalCare === 'yes',
       },
       {
+        key: 'client2PoaPersonalCareHasDocCopy',
+        label: 'Does this person have access to your most recent documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes_copy', label: 'Yes - they have a copy' },
+          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaPersonalCare === 'yes',
+      },
+      {
         key: 'client2HasLivingWill',
         label: 'Does your spouse have a \'Living Will\'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.',
         type: 'radio',
@@ -1212,6 +1237,18 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => {
           return formData.client2HasContingentPoaProperty === 'yes';
         },
+      },
+      {
+        key: 'client2PoaPropertyHasDocCopy',
+        label: 'Does this person have access to your most recent documentation?',
+        type: 'radio',
+        options: [
+          { value: 'yes_copy', label: 'Yes - they have a copy' },
+          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaProperty === 'yes',
       },
       {
         key: 'client2HasEstateTrustee',

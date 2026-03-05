@@ -1047,7 +1047,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'willsSameLawyer',
-        label: 'Were they prepared at the same time/by the same lawyer?',
+        label: 'Were the Wills prepared at the same time/by the same lawyer?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },

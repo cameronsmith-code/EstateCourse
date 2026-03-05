@@ -1418,7 +1418,7 @@ export default function StepForm({
                   customLabel = `${client1Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;
                 }
                 if (question.key === 'client2PoaPersonalCareDocLocation') {
-                  customLabel = `${client2Name}, where are your Power of Attorney for Personal Care documents located?`;
+                  customLabel = `${client2Name}, where is the Power of Attorney for Personal Care document located?`;
                 }
                 if (question.key === 'client1PoaPropertyHasDocCopy') {
                   customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;

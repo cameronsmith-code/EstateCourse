@@ -3715,7 +3715,9 @@ export const generatePDF = (formData: FormData) => {
         field5.fontSize = 7;
         field5.textColor = [0, 0, 0];
         field5.borderStyle = 'none';
-        field5.value = poaData?.providedCopy === 'yes' ? 'Yes' : poaData?.providedCopy === 'no' ? 'No' : '';
+        field5.value = poaData?.providedCopy === 'yes_copy' ? 'Yes - they have a copy' :
+                        poaData?.providedCopy === 'yes_instructions' ? 'Yes - instructions provided' :
+                        poaData?.providedCopy === 'no' ? 'No' : '';
         doc.addField(field5);
 
         poaTableY += poaCellHeight;
@@ -4922,7 +4924,11 @@ export const generatePDF = (formData: FormData) => {
           fieldObj.textColor = [0, 0, 0];
           fieldObj.borderStyle = 'none';
           const value = trustee[field.key as keyof typeof trustee] || '';
-          fieldObj.value = field.key === 'providedCopy' ? (value === 'yes' ? 'Yes' : value === 'no' ? 'No' : '') : String(value);
+          fieldObj.value = field.key === 'providedCopy' ?
+            (value === 'yes_copy' ? 'Yes - they have a copy' :
+             value === 'yes_instructions' ? 'Yes - instructions provided' :
+             value === 'no' ? 'No' : '') :
+            String(value);
           doc.addField(fieldObj);
 
           etTableY += etCellHeight;
@@ -5014,7 +5020,9 @@ export const generatePDF = (formData: FormData) => {
         field5.fontSize = 7;
         field5.textColor = [0, 0, 0];
         field5.borderStyle = 'none';
-        field5.value = trustee.providedCopy === 'yes' ? 'Yes' : trustee.providedCopy === 'no' ? 'No' : '';
+        field5.value = trustee.providedCopy === 'yes_copy' ? 'Yes - they have a copy' :
+                        trustee.providedCopy === 'yes_instructions' ? 'Yes - instructions provided' :
+                        trustee.providedCopy === 'no' ? 'No' : '';
         doc.addField(field5);
 
         etTableY += etCellHeight;

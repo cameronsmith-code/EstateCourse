@@ -1947,26 +1947,36 @@ export default function StepForm({
 
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Does this person have access to your documentation? *
+                                  Does this person have access to your most recent documentation? *
                                 </label>
-                                <div className="flex gap-4">
-                                  <label className="flex items-center">
+                                <div className="flex flex-col gap-3">
+                                  <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                     <input
                                       type="radio"
-                                      value="yes"
-                                      checked={client1PoaPersonalCareData[index]?.providedCopy === 'yes'}
+                                      value="yes_copy"
+                                      checked={client1PoaPersonalCareData[index]?.providedCopy === 'yes_copy'}
                                       onChange={(e) => handlePoaPersonalCareChange(index, 'providedCopy', e.target.value)}
-                                      className="mr-2"
+                                      className="mr-3"
                                     />
-                                    <span className="text-white">Yes</span>
+                                    <span className="text-white">Yes - they have a copy</span>
                                   </label>
-                                  <label className="flex items-center">
+                                  <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
+                                    <input
+                                      type="radio"
+                                      value="yes_instructions"
+                                      checked={client1PoaPersonalCareData[index]?.providedCopy === 'yes_instructions'}
+                                      onChange={(e) => handlePoaPersonalCareChange(index, 'providedCopy', e.target.value)}
+                                      className="mr-3"
+                                    />
+                                    <span className="text-white">Yes - they have instructions on where/how to access the documentation</span>
+                                  </label>
+                                  <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                     <input
                                       type="radio"
                                       value="no"
                                       checked={client1PoaPersonalCareData[index]?.providedCopy === 'no'}
                                       onChange={(e) => handlePoaPersonalCareChange(index, 'providedCopy', e.target.value)}
-                                      className="mr-2"
+                                      className="mr-3"
                                     />
                                     <span className="text-white">No</span>
                                   </label>
@@ -2289,26 +2299,36 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Does this person have access to your documentation? *
+                                      Does this person have access to your most recent documentation? *
                                     </label>
-                                    <div className="flex gap-4">
-                                      <label className="flex items-center">
+                                    <div className="flex flex-col gap-3">
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                         <input
                                           type="radio"
-                                          value="yes"
-                                          checked={client1EstateTrusteeData[index]?.providedCopy === 'yes'}
+                                          value="yes_copy"
+                                          checked={client1EstateTrusteeData[index]?.providedCopy === 'yes_copy'}
                                           onChange={(e) => handleEstateTrusteeChange(index, 'providedCopy', e.target.value)}
-                                          className="mr-2"
+                                          className="mr-3"
                                         />
-                                        <span className="text-white">Yes</span>
+                                        <span className="text-white">Yes - they have a copy</span>
                                       </label>
-                                      <label className="flex items-center">
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
+                                        <input
+                                          type="radio"
+                                          value="yes_instructions"
+                                          checked={client1EstateTrusteeData[index]?.providedCopy === 'yes_instructions'}
+                                          onChange={(e) => handleEstateTrusteeChange(index, 'providedCopy', e.target.value)}
+                                          className="mr-3"
+                                        />
+                                        <span className="text-white">Yes - they have instructions on where/how to access the documentation</span>
+                                      </label>
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                         <input
                                           type="radio"
                                           value="no"
                                           checked={client1EstateTrusteeData[index]?.providedCopy === 'no'}
                                           onChange={(e) => handleEstateTrusteeChange(index, 'providedCopy', e.target.value)}
-                                          className="mr-2"
+                                          className="mr-3"
                                         />
                                         <span className="text-white">No</span>
                                       </label>
@@ -2455,26 +2475,36 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Does this person have access to your documentation? *
+                                      Does this person have access to your most recent documentation? *
                                     </label>
-                                    <div className="flex gap-4">
-                                      <label className="flex items-center">
+                                    <div className="flex flex-col gap-3">
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                         <input
                                           type="radio"
-                                          value="yes"
-                                          checked={client1EstateTrusteeData[index]?.providedCopy === 'yes'}
+                                          value="yes_copy"
+                                          checked={client1EstateTrusteeData[index]?.providedCopy === 'yes_copy'}
                                           onChange={(e) => handleEstateTrusteeChange(index, 'providedCopy', e.target.value)}
-                                          className="mr-2"
+                                          className="mr-3"
                                         />
-                                        <span className="text-white">Yes</span>
+                                        <span className="text-white">Yes - they have a copy</span>
                                       </label>
-                                      <label className="flex items-center">
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
+                                        <input
+                                          type="radio"
+                                          value="yes_instructions"
+                                          checked={client1EstateTrusteeData[index]?.providedCopy === 'yes_instructions'}
+                                          onChange={(e) => handleEstateTrusteeChange(index, 'providedCopy', e.target.value)}
+                                          className="mr-3"
+                                        />
+                                        <span className="text-white">Yes - they have instructions on where/how to access the documentation</span>
+                                      </label>
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                         <input
                                           type="radio"
                                           value="no"
                                           checked={client1EstateTrusteeData[index]?.providedCopy === 'no'}
                                           onChange={(e) => handleEstateTrusteeChange(index, 'providedCopy', e.target.value)}
-                                          className="mr-2"
+                                          className="mr-3"
                                         />
                                         <span className="text-white">No</span>
                                       </label>
@@ -2672,26 +2702,36 @@ export default function StepForm({
 
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Does this person have access to your documentation? *
+                                  Does this person have access to your most recent documentation? *
                                 </label>
-                                <div className="flex gap-4">
-                                  <label className="flex items-center">
+                                <div className="flex flex-col gap-3">
+                                  <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                     <input
                                       type="radio"
-                                      value="yes"
-                                      checked={client2PoaPersonalCareData[index]?.providedCopy === 'yes'}
+                                      value="yes_copy"
+                                      checked={client2PoaPersonalCareData[index]?.providedCopy === 'yes_copy'}
                                       onChange={(e) => handleClient2PoaPersonalCareChange(index, 'providedCopy', e.target.value)}
-                                      className="mr-2"
+                                      className="mr-3"
                                     />
-                                    <span className="text-white">Yes</span>
+                                    <span className="text-white">Yes - they have a copy</span>
                                   </label>
-                                  <label className="flex items-center">
+                                  <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
+                                    <input
+                                      type="radio"
+                                      value="yes_instructions"
+                                      checked={client2PoaPersonalCareData[index]?.providedCopy === 'yes_instructions'}
+                                      onChange={(e) => handleClient2PoaPersonalCareChange(index, 'providedCopy', e.target.value)}
+                                      className="mr-3"
+                                    />
+                                    <span className="text-white">Yes - they have instructions on where/how to access the documentation</span>
+                                  </label>
+                                  <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                     <input
                                       type="radio"
                                       value="no"
                                       checked={client2PoaPersonalCareData[index]?.providedCopy === 'no'}
                                       onChange={(e) => handleClient2PoaPersonalCareChange(index, 'providedCopy', e.target.value)}
-                                      className="mr-2"
+                                      className="mr-3"
                                     />
                                     <span className="text-white">No</span>
                                   </label>
@@ -2994,26 +3034,36 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Does this person have access to your documentation? *
+                                      Does this person have access to your most recent documentation? *
                                     </label>
-                                    <div className="flex gap-4">
-                                      <label className="flex items-center">
+                                    <div className="flex flex-col gap-3">
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                         <input
                                           type="radio"
-                                          value="yes"
-                                          checked={client2EstateTrusteeData[index]?.providedCopy === 'yes'}
+                                          value="yes_copy"
+                                          checked={client2EstateTrusteeData[index]?.providedCopy === 'yes_copy'}
                                           onChange={(e) => handleClient2EstateTrusteeChange(index, 'providedCopy', e.target.value)}
-                                          className="mr-2"
+                                          className="mr-3"
                                         />
-                                        <span className="text-white">Yes</span>
+                                        <span className="text-white">Yes - they have a copy</span>
                                       </label>
-                                      <label className="flex items-center">
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
+                                        <input
+                                          type="radio"
+                                          value="yes_instructions"
+                                          checked={client2EstateTrusteeData[index]?.providedCopy === 'yes_instructions'}
+                                          onChange={(e) => handleClient2EstateTrusteeChange(index, 'providedCopy', e.target.value)}
+                                          className="mr-3"
+                                        />
+                                        <span className="text-white">Yes - they have instructions on where/how to access the documentation</span>
+                                      </label>
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                         <input
                                           type="radio"
                                           value="no"
                                           checked={client2EstateTrusteeData[index]?.providedCopy === 'no'}
                                           onChange={(e) => handleClient2EstateTrusteeChange(index, 'providedCopy', e.target.value)}
-                                          className="mr-2"
+                                          className="mr-3"
                                         />
                                         <span className="text-white">No</span>
                                       </label>
@@ -3160,26 +3210,36 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Does this person have access to your documentation? *
+                                      Does this person have access to your most recent documentation? *
                                     </label>
-                                    <div className="flex gap-4">
-                                      <label className="flex items-center">
+                                    <div className="flex flex-col gap-3">
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                         <input
                                           type="radio"
-                                          value="yes"
-                                          checked={client2EstateTrusteeData[index]?.providedCopy === 'yes'}
+                                          value="yes_copy"
+                                          checked={client2EstateTrusteeData[index]?.providedCopy === 'yes_copy'}
                                           onChange={(e) => handleClient2EstateTrusteeChange(index, 'providedCopy', e.target.value)}
-                                          className="mr-2"
+                                          className="mr-3"
                                         />
-                                        <span className="text-white">Yes</span>
+                                        <span className="text-white">Yes - they have a copy</span>
                                       </label>
-                                      <label className="flex items-center">
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
+                                        <input
+                                          type="radio"
+                                          value="yes_instructions"
+                                          checked={client2EstateTrusteeData[index]?.providedCopy === 'yes_instructions'}
+                                          onChange={(e) => handleClient2EstateTrusteeChange(index, 'providedCopy', e.target.value)}
+                                          className="mr-3"
+                                        />
+                                        <span className="text-white">Yes - they have instructions on where/how to access the documentation</span>
+                                      </label>
+                                      <label className="flex items-center p-3 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                                         <input
                                           type="radio"
                                           value="no"
                                           checked={client2EstateTrusteeData[index]?.providedCopy === 'no'}
                                           onChange={(e) => handleClient2EstateTrusteeChange(index, 'providedCopy', e.target.value)}
-                                          className="mr-2"
+                                          className="mr-3"
                                         />
                                         <span className="text-white">No</span>
                                       </label>

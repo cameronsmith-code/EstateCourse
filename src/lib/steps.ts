@@ -708,7 +708,7 @@ export const STEPS: Step[] = [
   {
     id: 7,
     title: 'Who is on your Team?',
-    description: 'Your Estate Trustees should not act in a vacuum. This section lists the core professionals who already know your history.',
+    description: 'This section lists the core professionals who already know your history.',
     questions: [
       {
         key: 'client1HasWill',
@@ -762,41 +762,6 @@ export const STEPS: Step[] = [
         placeholder: 'e.g., Ontario, British Columbia',
         required: false,
         condition: (formData: Record<string, string>) => formData.client1HasSecondaryWill === 'yes',
-      },
-      {
-        key: 'client1HasEstateTrustee',
-        label: 'Have you named an Estate Trustee in your Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client1EstateTrusteeCount',
-        label: 'How many Estate Trustees have you named?',
-        type: 'select',
-        options: [
-          { value: '1', label: '1' },
-          { value: '2', label: '2' },
-          { value: '3', label: '3' },
-          { value: '4', label: '4' },
-          { value: '5', label: '5' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasEstateTrustee === 'yes',
-      },
-      {
-        key: 'client1EstateTrusteeKnowsWillLocation',
-        label: 'Do your Estate Trustees know where to find a copy of your Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasEstateTrustee === 'yes',
       },
       {
         key: 'client1HasFuneralArrangements',
@@ -911,41 +876,6 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-      },
-      {
-        key: 'client2HasEstateTrustee',
-        label: 'Has your spouse named an Estate Trustee in their Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2EstateTrusteeCount',
-        label: 'How many Estate Trustees has your spouse named?',
-        type: 'select',
-        options: [
-          { value: '1', label: '1' },
-          { value: '2', label: '2' },
-          { value: '3', label: '3' },
-          { value: '4', label: '4' },
-          { value: '5', label: '5' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasEstateTrustee === 'yes',
-      },
-      {
-        key: 'client2EstateTrusteeKnowsWillLocation',
-        label: 'Do your Estate Trustees know where to find a copy of your Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasEstateTrustee === 'yes',
       },
       {
         key: 'client2HasFuneralArrangements',

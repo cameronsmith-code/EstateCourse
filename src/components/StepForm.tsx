@@ -72,38 +72,6 @@ export default function StepForm({
   }, [answers['client2IsCameronSmithAdvisor'], answers['client2FinancialAdvisors']]);
 
   useEffect(() => {
-    if (answers['client1HasEstateTrustee'] === 'no') {
-      const keysToClear = [
-        'client1EstateTrusteeCount',
-        'client1EstateTrusteeData',
-        'client1EstateTrusteeKnowsWillLocation',
-        'client1EstateTrusteeHasDocCopy'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client1HasEstateTrustee']]);
-
-  useEffect(() => {
-    if (answers['client2HasEstateTrustee'] === 'no') {
-      const keysToClear = [
-        'client2EstateTrusteeCount',
-        'client2EstateTrusteeData',
-        'client2EstateTrusteeKnowsWillLocation',
-        'client2EstateTrusteeHasDocCopy'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client2HasEstateTrustee']]);
-
-  useEffect(() => {
     if (answers['spouseIsPoaPersonalCare'] === 'no') {
       if (answers['spousePoaPersonalCareHasDocCopy'] !== undefined) {
         onAnswerChange('spousePoaPersonalCareHasDocCopy', undefined);
@@ -534,18 +502,6 @@ export default function StepForm({
     onAnswerChange('client1PoaPropertyData', updated);
   };
 
-  const client1EstateTrusteeCount = parseInt(answers['client1EstateTrusteeCount'] as string) || 0;
-  const client1EstateTrusteeData = (answers['client1EstateTrusteeData'] as Array<Record<string, string>>) || Array(Math.max(0, client1EstateTrusteeCount || 0)).fill(null).map(() => ({}));
-
-  const handleEstateTrusteeChange = (index: number, field: string, value: string) => {
-    const updated = [...client1EstateTrusteeData];
-    if (!updated[index]) {
-      updated[index] = {};
-    }
-    updated[index][field] = value;
-    onAnswerChange('client1EstateTrusteeData', updated);
-  };
-
   const client1FinancialAdvisorsCount = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
   const client1FinancialAdvisorsData = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(Math.max(0, client1FinancialAdvisorsCount || 0)).fill(null).map(() => ({}));
 
@@ -580,18 +536,6 @@ export default function StepForm({
     }
     updated[index][field] = value;
     onAnswerChange('client2PoaPropertyData', updated);
-  };
-
-  const client2EstateTrusteeCount = parseInt(answers['client2EstateTrusteeCount'] as string) || 0;
-  const client2EstateTrusteeData = (answers['client2EstateTrusteeData'] as Array<Record<string, string>>) || Array(Math.max(0, client2EstateTrusteeCount || 0)).fill(null).map(() => ({}));
-
-  const handleClient2EstateTrusteeChange = (index: number, field: string, value: string) => {
-    const updated = [...client2EstateTrusteeData];
-    if (!updated[index]) {
-      updated[index] = {};
-    }
-    updated[index][field] = value;
-    onAnswerChange('client2EstateTrusteeData', updated);
   };
 
   const client2FinancialAdvisorsCount = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
@@ -1341,15 +1285,6 @@ export default function StepForm({
                 if (question.key === 'client1PoaPropertyHasDocCopy' && answers['client1HasPoaProperty'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'client1HasEstateTrustee' && answers['client1HasWill'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client1EstateTrusteeCount' && answers['client1HasEstateTrustee'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client1EstateTrusteeKnowsWillLocation' && answers['client1HasEstateTrustee'] !== 'yes') {
-                  return null;
-                }
                 if (question.key === 'client2HasPoaPersonalCare' && !hasSpouse) {
                   return null;
                 }
@@ -1389,15 +1324,6 @@ export default function StepForm({
                   return null;
                 }
                 if (question.key === 'client2PoaPropertyHasDocCopy' && answers['client2HasPoaProperty'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client2HasEstateTrustee' && (!hasSpouse || answers['client2HasWill'] !== 'yes')) {
-                  return null;
-                }
-                if (question.key === 'client2EstateTrusteeCount' && answers['client2HasEstateTrustee'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client2EstateTrusteeKnowsWillLocation' && answers['client2HasEstateTrustee'] !== 'yes') {
                   return null;
                 }
                 if (question.key === 'client1FuneralArrangementsLocation' && answers['client1HasFuneralArrangements'] !== 'yes') {
@@ -1516,28 +1442,6 @@ export default function StepForm({
                 if (question.key === 'client2FuneralDocLocation') {
                   customLabel = `Where is this document stored?`;
                 }
-                if (question.key === 'client1HasEstateTrustee') {
-                  customLabel = `${client1Name}, have you named an Estate Trustee(s) in your Will?`;
-                }
-                if (question.key === 'client1EstateTrusteeCount') {
-                  customLabel = `${client1Name}, how many Estate Trustees have you named?`;
-                }
-                if (question.key === 'client1EstateTrusteeHasDocCopy') {
-                  customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
-                }
-                if (question.key === 'client1EstateTrusteeKnowsWillLocation') {
-                  customLabel = `${client1Name}, do your Estate Trustees know where to find a copy of your Will?`;
-                }
-                if (question.key === 'client2HasEstateTrustee') {
-                  customLabel = `${client2Name}, have you named an Estate Trustee(s) in your Will?`;
-                }
-                if (question.key === 'client2EstateTrusteeCount') {
-                  customLabel = `${client2Name}, how many Estate Trustees have you named?`;
-                }
-                if (question.key === 'client2EstateTrusteeKnowsWillLocation') {
-                  customLabel = `${client2Name}, do your Estate Trustees know where to find a copy of your Will?`;
-                }
-
                 return (
                   <React.Fragment key={question.key}>
                     <FormField

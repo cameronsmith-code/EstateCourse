@@ -72,102 +72,6 @@ export default function StepForm({
   }, [answers['client2IsCameronSmithAdvisor'], answers['client2FinancialAdvisors']]);
 
   useEffect(() => {
-    if (answers['client1HasPoaPersonalCare'] === 'no') {
-      const keysToClears = [
-        'spouseIsPoaPersonalCare',
-        'spousePoaPersonalCareHasDocCopy',
-        'client1HasContingentPoaPersonalCare',
-        'client1PoaPersonalCareCount',
-        'client1PoaPersonalCareData',
-        'client1PoaPersonalCareHasDocCopy',
-        'client1PoaPersonalCareDocLocation'
-      ];
-      keysToClears.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client1HasPoaPersonalCare']]);
-
-  useEffect(() => {
-    if (answers['client2HasPoaPersonalCare'] === 'no') {
-      const keysToClear = [
-        'client2SpouseIsPoaPersonalCare',
-        'client2SpousePoaPersonalCareHasDocCopy',
-        'client2PoaPersonalCareDisplay',
-        'client2HasContingentPoaPersonalCare',
-        'client2PoaPersonalCareCount',
-        'client2PoaPersonalCareData',
-        'client2PoaPersonalCareDocLocation'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client2HasPoaPersonalCare']]);
-
-  useEffect(() => {
-    if (answers['client1HasPoaProperty'] === 'no') {
-      const keysToClear = [
-        'spouseIsPoaProperty',
-        'spousePoaPropertyHasDocAccess',
-        'spousePoaPropertyHasDocCopy',
-        'client1HasContingentPoaProperty',
-        'client1PoaPropertyCount',
-        'client1PoaPropertyData'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client1HasPoaProperty']]);
-
-  useEffect(() => {
-    if (answers['client2HasPoaProperty'] === 'no') {
-      const keysToClear = [
-        'client2SpouseIsPoaProperty',
-        'client2SpousePoaPropertyHasDocAccess',
-        'client2SpousePoaPropertyHasDocCopy',
-        'client2HasContingentPoaProperty',
-        'client2PoaPropertyCount',
-        'client2PoaPropertyData'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client2HasPoaProperty']]);
-
-  useEffect(() => {
-    if (answers['spouseIsPoaProperty'] !== 'yes') {
-      const keysToClear = ['spousePoaPropertyHasDocAccess'];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['spouseIsPoaProperty']]);
-
-  useEffect(() => {
-    if (answers['client2SpouseIsPoaProperty'] !== 'yes') {
-      const keysToClear = ['client2SpousePoaPropertyHasDocAccess'];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client2SpouseIsPoaProperty']]);
-
-  useEffect(() => {
     if (answers['client1HasEstateTrustee'] === 'no') {
       const keysToClear = [
         'client1EstateTrusteeCount',
@@ -1612,42 +1516,11 @@ export default function StepForm({
                 if (question.key === 'client2FuneralDocLocation') {
                   customLabel = `Where is this document stored?`;
                 }
-                if (question.key === 'client1HasPoaPersonalCare') {
-                  if (answers['spousesPoaPersonalCare'] === 'yes') {
-                    customLabel = `${client1Name}, have you named a contingent Power of Attorney(ies) for Personal Care?`;
-                  } else {
-                    customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Personal Care?`;
-                  }
-                }
-                if (question.key === 'client1PoaPersonalCareCount') {
-                  customLabel = `${client1Name}, how many contingent or additional Powers of Attorney for Personal Care have you named?`;
-                }
-                if (question.key === 'client1HasContingentPoaPersonalCare') {
-                  customLabel = `${client1Name}, have you named other or contingent Power(s) of Attorney for Personal Care?`;
-                }
-                if (question.key === 'client1HasPoaProperty') {
-                  customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
-                }
-                if (question.key === 'spousePoaPropertyHasDocAccess') {
-                  customLabel = `Does ${client2Name} have access to ${client1Name}'s most recent Power of Attorney for Property documentation?`;
-                }
-                if (question.key === 'client1HasContingentPoaProperty') {
-                  customLabel = `${client1Name}, have you named any alternative or contingent Powers of Attorney for Property?`;
-                }
-                if (question.key === 'client1PoaPropertyCount') {
-                  customLabel = `${client1Name}, how many alternative or contingent Powers of Attorney for Property have you named?`;
-                }
                 if (question.key === 'client1HasEstateTrustee') {
                   customLabel = `${client1Name}, have you named an Estate Trustee(s) in your Will?`;
                 }
                 if (question.key === 'client1EstateTrusteeCount') {
                   customLabel = `${client1Name}, how many Estate Trustees have you named?`;
-                }
-                if (question.key === 'client1HasLivingWill') {
-                  customLabel = `${client1Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;
-                }
-                if (question.key === 'client2PoaPersonalCareDocLocation') {
-                  customLabel = `${client2Name}, where is the Power of Attorney for Personal Care document located?`;
                 }
                 if (question.key === 'client1EstateTrusteeHasDocCopy') {
                   customLabel = `${client1Name}, do they have a copy of the most recent document in their files?`;
@@ -1655,39 +1528,11 @@ export default function StepForm({
                 if (question.key === 'client1EstateTrusteeKnowsWillLocation') {
                   customLabel = `${client1Name}, do your Estate Trustees know where to find a copy of your Will?`;
                 }
-                if (question.key === 'client2HasPoaPersonalCare') {
-                  if (answers['spousesPoaPersonalCare'] === 'yes') {
-                    customLabel = `${client2Name}, have you named a contingent Power of Attorney(ies) for Personal Care?`;
-                  } else {
-                    customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Personal Care?`;
-                  }
-                }
-                if (question.key === 'client2HasContingentPoaPersonalCare') {
-                  customLabel = `${client2Name}, have you named any additional or contingent Powers of Attorney for Personal Care?`;
-                }
-                if (question.key === 'client2PoaPersonalCareCount') {
-                  customLabel = `${client2Name}, how many additional or contingent Powers of Attorney for Personal Care have you named?`;
-                }
-                if (question.key === 'client2HasPoaProperty') {
-                  customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
-                }
-                if (question.key === 'client2SpousePoaPropertyHasDocAccess') {
-                  customLabel = `Does ${client1Name} have access to ${client2Name}'s most recent Power of Attorney for Property documentation?`;
-                }
-                if (question.key === 'client2HasContingentPoaProperty') {
-                  customLabel = `${client2Name}, have you named any additional or contingent Powers of Attorney for Property?`;
-                }
-                if (question.key === 'client2PoaPropertyCount') {
-                  customLabel = `${client2Name}, how many alternative or contingent Powers of Attorney for Property have you named?`;
-                }
                 if (question.key === 'client2HasEstateTrustee') {
                   customLabel = `${client2Name}, have you named an Estate Trustee(s) in your Will?`;
                 }
                 if (question.key === 'client2EstateTrusteeCount') {
                   customLabel = `${client2Name}, how many Estate Trustees have you named?`;
-                }
-                if (question.key === 'client2HasLivingWill') {
-                  customLabel = `${client2Name}, do you have a 'Living Will'? A POA-PC specifies who will look after you if you become incapacitated, a Living Will provides your written instructions about medical care, especially related to things like life support, resuscitation (CPR), feeding tubes, and end-of-life care.`;
                 }
                 if (question.key === 'client2EstateTrusteeKnowsWillLocation') {
                   customLabel = `${client2Name}, do your Estate Trustees know where to find a copy of your Will?`;

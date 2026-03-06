@@ -878,7 +878,7 @@ export const STEPS: Step[] = [
         key: 'spousePoaPropertyHasDocAccess',
         label: (answers) => {
           const spouseName = answers.get(1)?.spouseName || 'your spouse or common law partner';
-          return `Does ${spouseName} have access to your most recent POA for Property documentation?`;
+          return `Does ${spouseName} have the most recent copy of your Power of Attorney for Property documentation?`;
         },
         type: 'radio',
         options: [
@@ -888,7 +888,13 @@ export const STEPS: Step[] = [
         ],
         required: false,
         condition: (formData: Record<string, string>) => {
-          return formData.spouseIsPoaProperty === 'yes';
+          const basicAnswers = formData as unknown as Map<number, Record<string, unknown>>;
+          const maritalStatus = typeof basicAnswers.get === 'function'
+            ? basicAnswers.get(1)?.maritalStatus
+            : formData.maritalStatus;
+          return formData.client1HasPoaProperty === 'yes' &&
+                 formData.spouseIsPoaProperty === 'yes' &&
+                 (maritalStatus === 'married' || maritalStatus === 'common_law');
         },
       },
       {
@@ -1234,7 +1240,7 @@ export const STEPS: Step[] = [
         label: (answers) => {
           const client1Name = answers.get(1)?.fullName || 'Client 1';
           const client2Name = answers.get(1)?.spouseName || 'Client 2';
-          return `Does ${client1Name} have access to ${client2Name}'s most recent POA for Property documentation?`;
+          return `Does ${client1Name} have the most recent copy of ${client2Name}'s Power of Attorney for Property documentation?`;
         },
         type: 'radio',
         options: [
@@ -1244,7 +1250,13 @@ export const STEPS: Step[] = [
         ],
         required: false,
         condition: (formData: Record<string, string>) => {
-          return formData.client2SpouseIsPoaProperty === 'yes';
+          const basicAnswers = formData as unknown as Map<number, Record<string, unknown>>;
+          const maritalStatus = typeof basicAnswers.get === 'function'
+            ? basicAnswers.get(1)?.maritalStatus
+            : formData.maritalStatus;
+          return formData.client2HasPoaProperty === 'yes' &&
+                 formData.client2SpouseIsPoaProperty === 'yes' &&
+                 (maritalStatus === 'married' || maritalStatus === 'common_law');
         },
       },
       {

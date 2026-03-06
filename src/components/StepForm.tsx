@@ -1333,6 +1333,9 @@ export default function StepForm({
               <>
                 {step.questions.map((question) => {
 
+                if (question.key === 'client1WillYear' && answers['client1HasWill'] !== 'yes') {
+                  return null;
+                }
                 if (question.key === 'client1WillLocation' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }

@@ -210,6 +210,7 @@ export default function StepForm({
   useEffect(() => {
     if (answers['client1HasWill'] === 'no') {
       const keysToClear = [
+        'client1WillYear',
         'client1WillLocation',
         'client1WillJurisdiction',
         'client1HasSecondaryWill',

@@ -721,10 +721,29 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
+        key: 'client1WillJurisdiction',
+        label: 'In what jurisdiction was your Will prepared?',
+        type: 'text',
+        placeholder: 'e.g., Ontario, British Columbia, etc.',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
         key: 'client1WillLocation',
         label: 'Where is your Will located?',
         type: 'text',
         placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1WillYear',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client';
+          return `${client1Name}, in what year was your most recent Will prepared?`;
+        },
+        type: 'text',
+        placeholder: 'e.g., 2023',
         required: false,
         condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
       },

@@ -91,6 +91,7 @@ interface FormData {
   client1HasWill?: string;
   client1WillJurisdiction?: string;
   client1WillLocation?: string;
+  client1WillYear?: string;
   client1HasSecondaryWill?: string;
   client1SecondaryWillLocation?: string;
   client1SecondaryWillJurisdiction?: string;
@@ -3185,6 +3186,28 @@ export const generatePDF = (formData: FormData) => {
       jurisdictionField.value = formData.client1WillJurisdiction || '';
       jurisdictionField.defaultValue = 'e.g., Ontario, British Columbia, etc.';
       doc.addField(jurisdictionField);
+      yPosition += 14;
+    }
+
+    if (formData.client1HasWill === 'yes') {
+      checkPageBreak(25);
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${client1Name}, in what year was your most recent Will prepared?`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      doc.rect(margin, yPosition, fieldWidth, 6);
+
+      const yearField = new doc.AcroFormTextField();
+      yearField.fieldName = 'client1_will_year';
+      yearField.Rect = [margin, yPosition, fieldWidth, 6];
+      yearField.fontSize = 9;
+      yearField.textColor = colors.darkText;
+      yearField.value = formData.client1WillYear || '';
+      yearField.defaultValue = 'e.g., 2023';
+      doc.addField(yearField);
       yPosition += 14;
     }
 

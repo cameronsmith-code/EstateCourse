@@ -89,14 +89,12 @@ interface FormData {
   soleProprietorshipNatureOther?: string;
   hasPartnership?: string;
   client1HasWill?: string;
-  client1WillYear?: string;
   client1WillJurisdiction?: string;
   client1WillLocation?: string;
   client1HasSecondaryWill?: string;
   client1SecondaryWillLocation?: string;
   client1SecondaryWillJurisdiction?: string;
   client2HasWill?: string;
-  client2WillYear?: string;
   client2WillJurisdiction?: string;
   client2WillLocation?: string;
   client2HasSecondaryWill?: string;

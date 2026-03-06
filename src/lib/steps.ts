@@ -721,17 +721,6 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
-        key: 'client1WillYear',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName || 'your';
-          return `What year was ${client1Name}'s Will last updated?`;
-        },
-        type: 'text',
-        placeholder: 'e.g., 2023',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
         key: 'client1WillLocation',
         label: 'Where is your Will located?',
         type: 'text',

@@ -89,6 +89,7 @@ interface FormData {
   soleProprietorshipNatureOther?: string;
   hasPartnership?: string;
   client1HasWill?: string;
+  client1WillYear?: string;
   client1WillLocation?: string;
   client1HasSecondaryWill?: string;
   client1SecondaryWillLocation?: string;
@@ -3168,12 +3169,18 @@ export const generatePDF = (formData: FormData) => {
     if (formData.client1HasWill === 'yes') {
       checkPageBreak(25);
 
+      if (formData.client1WillYear) {
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`${client1Name} has a Will, created in ${formData.client1WillYear}.`, margin, yPosition);
+        yPosition += 6;
+      }
     }
 
     if (formData.client1HasWill === 'yes' && formData.client1WillLocation) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name} has a Will, and it is located: ${formData.client1WillLocation}`, margin, yPosition);
+      doc.text(`${client1Name}'s Will is located: ${formData.client1WillLocation}`, margin, yPosition);
       yPosition += 6;
     }
 

@@ -88,20 +88,6 @@ interface FormData {
   soleProprietorshipNature?: string;
   soleProprietorshipNatureOther?: string;
   hasPartnership?: string;
-  client1HasWill?: string;
-  client1WillYear?: string;
-  client1WillLocation?: string;
-  client1HasSecondaryWill?: string;
-  client1SecondaryWillLocation?: string;
-  client1SecondaryWillJurisdiction?: string;
-  client2HasWill?: string;
-  client2WillYear?: string;
-  client2WillJurisdiction?: string;
-  client2WillLocation?: string;
-  client2HasSecondaryWill?: string;
-  client2SecondaryWillLocation?: string;
-  client2SecondaryWillJurisdiction?: string;
-  willsSameLawyer?: string;
   spousesPoaPersonalCare?: string;
   spouseIsPoaPersonalCare?: string;
   spousesPoaProperty?: string;
@@ -546,7 +532,7 @@ export const generatePDF = (formData: FormData) => {
   doc.setFontSize(16);
   doc.setFont(undefined, 'bold');
   doc.setTextColor(...colors.navyBlue);
-  const welcomeLines = doc.splitTextToSize('Welcome to your Will Companion Kit from Clarify Wealth.', fieldWidth);
+  const welcomeLines = doc.splitTextToSize('Welcome to your Estate Planning Companion from Clarify Wealth.', fieldWidth);
   welcomeLines.forEach((line: string) => {
     doc.text(line, pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 8;
@@ -562,15 +548,15 @@ export const generatePDF = (formData: FormData) => {
   const introText = [
     'First, thank you for taking the time to prepare this document. While completing it may take some effort—and you may prefer to work through it in sections—it will ultimately save many times that effort for those who may need to rely on it in the future.',
     '',
-    'Most Canadians remain underprepared when it comes to estate planning. A report on Estate Planning published in April 2022 by the National Institute on Aging (NAI), in collaboration with Royal Trust, found that 26% of Canadians over age 55 do not have a Will, and that 66% of Canadians between the ages of 35 and 54 do not have one. In addition, only 28% of Canadians aged 35–54 have a Power of Attorney in place, and just 53% of Canadians over age 55 have one.',
+    'Most Canadians remain underprepared when it comes to estate planning. A report on Estate Planning published in April 2022 by the National Institute on Aging (NAI), in collaboration with Royal Trust, found that only 28% of Canadians aged 35–54 have a Power of Attorney in place, and just 53% of Canadians over age 55 have one.',
     '',
-    'This document is designed to make life significantly easier for your Powers of Attorney, Estate Trustees (or Executors), and heirs when they are called upon to look after your affairs—whether during your lifetime or after your passing.',
+    'This document is designed to make life significantly easier for your Powers of Attorney and heirs when they are called upon to look after your affairs—whether during your lifetime or after your passing.',
     '',
-    'It is not intended to replace or override any appointments or instructions set out in your Will or other legal documents. Rather, it is meant to support those documents by helping the individuals responsible for carrying out your wishes do so in an organized and efficient manner.',
+    'It is not intended to replace or override any appointments or instructions set out in your legal documents. Rather, it is meant to support those documents by helping the individuals responsible for carrying out your wishes do so in an organized and efficient manner.',
     '',
-    'Store this document along with your Will and Power of Attorney documents so it will be readily available for those who it will help.',
+    'Store this document along with your Power of Attorney documents so it will be readily available for those who it will help.',
     '',
-    'Congratulations on taking this important step. Your heirs, Powers of Attorney, and Estate Trustees will be grateful that you did.'
+    'Congratulations on taking this important step. Your heirs and Powers of Attorney will be grateful that you did.'
   ];
 
   introText.forEach((paragraph) => {

@@ -104,44 +104,6 @@ export default function StepForm({
   }, [answers['client2SpouseIsPoaProperty']]);
 
   useEffect(() => {
-    if (answers['client1HasWill'] === 'no') {
-      const keysToClear = [
-        'client1WillYear',
-        'client1WillLocation',
-        'client1WillJurisdiction',
-        'client1HasSecondaryWill',
-        'client1SecondaryWillLocation',
-        'client1SecondaryWillJurisdiction',
-        'willsSameLawyer'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client1HasWill']]);
-
-  useEffect(() => {
-    if (answers['client2HasWill'] === 'no') {
-      const keysToClear = [
-        'client2WillYear',
-        'client2WillLocation',
-        'client2WillJurisdiction',
-        'client2HasSecondaryWill',
-        'client2SecondaryWillLocation',
-        'client2SecondaryWillJurisdiction',
-        'willsSameLawyer'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client2HasWill']]);
-
-  useEffect(() => {
     if (answers['client1HasSecondaryWill'] === 'no') {
       const keysToClear = [
         'client1SecondaryWillLocation',
@@ -1206,49 +1168,7 @@ export default function StepForm({
               <>
                 {step.questions.map((question) => {
 
-                if (question.key === 'client1WillYear' && answers['client1HasWill'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client1WillLocation' && answers['client1HasWill'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client1HasSecondaryWill' && answers['client1HasWill'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client1SecondaryWillLocation' && answers['client1HasSecondaryWill'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client1SecondaryWillJurisdiction' && answers['client1HasSecondaryWill'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client2HasWill' && !hasSpouse) {
-                  return null;
-                }
-                if (question.key === 'client2WillYear' && (answers['client2HasWill'] !== 'yes' || !hasSpouse)) {
-                  return null;
-                }
-                if (question.key === 'client2WillLocation' && (answers['client2HasWill'] !== 'yes' || !hasSpouse)) {
-                  return null;
-                }
-                if (question.key === 'client2HasSecondaryWill' && (answers['client2HasWill'] !== 'yes' || !hasSpouse)) {
-                  return null;
-                }
-                if (question.key === 'client2SecondaryWillLocation' && answers['client2HasSecondaryWill'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client2SecondaryWillJurisdiction' && answers['client2HasSecondaryWill'] !== 'yes') {
-                  return null;
-                }
                 if (question.key === 'client2UsesAccountant' && !hasSpouse) {
-                  return null;
-                }
-                if (question.key === 'willsSameLawyer' && !(answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
-                  return null;
-                }
-                if (question.key === 'spousesPoaPersonalCare' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw') && answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
-                  return null;
-                }
-                if (question.key === 'spousesPoaProperty' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw') && answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
                   return null;
                 }
                 if (question.key === 'spouseIsPoaPersonalCare') {
@@ -1364,27 +1284,6 @@ export default function StepForm({
                 }
 
                 let customLabel = question.label;
-                if (question.key === 'client1HasWill') {
-                  customLabel = `Do you (${client1Name}) have a Will?`;
-                }
-                if (question.key === 'client1WillLocation') {
-                  customLabel = `${client1Name}, where is the Will located?`;
-                }
-                if (question.key === 'client1SecondaryWillJurisdiction') {
-                  customLabel = `In what jurisdiction was ${client1Name}'s secondary Will prepared?`;
-                }
-                if (question.key === 'client2HasWill') {
-                  customLabel = `Does ${client2Name} have a Will?`;
-                }
-                if (question.key === 'client2WillLocation') {
-                  customLabel = `${client2Name}, where is the Will located?`;
-                }
-                if (question.key === 'client2HasSecondaryWill') {
-                  customLabel = `${client2Name}, do you have a secondary Will?`;
-                }
-                if (question.key === 'client2SecondaryWillJurisdiction') {
-                  customLabel = `In what jurisdiction was ${client2Name}'s secondary Will prepared?`;
-                }
                 if (question.key === 'client1UsesAccountant') {
                   customLabel = `Do you (${client1Name}) use a professional accountant?`;
                 }
@@ -1509,34 +1408,6 @@ export default function StepForm({
                             />
                           </div>
                         </div>
-                      </div>
-                    )}
-                    {question.key === 'client1HasWill' && answers['client1HasWill'] === 'yes' && (
-                      <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          In what jurisdiction was {client1Name}'s Will prepared?
-                        </label>
-                        <input
-                          type="text"
-                          value={answers['client1WillJurisdiction'] || ''}
-                          onChange={(e) => onAnswerChange('client1WillJurisdiction', e.target.value)}
-                          placeholder="e.g., Ontario, British Columbia, etc."
-                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                    )}
-                    {question.key === 'client2HasWill' && answers['client2HasWill'] === 'yes' && (
-                      <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          In what jurisdiction was {client2Name}'s Will prepared?
-                        </label>
-                        <input
-                          type="text"
-                          value={answers['client2WillJurisdiction'] || ''}
-                          onChange={(e) => onAnswerChange('client2WillJurisdiction', e.target.value)}
-                          placeholder="e.g., Ontario, British Columbia, etc."
-                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
                       </div>
                     )}
                     {question.key === 'client1PoaPersonalCareCount' && client1PoaPersonalCareCount > 0 && (

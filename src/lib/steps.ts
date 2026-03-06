@@ -711,59 +711,6 @@ export const STEPS: Step[] = [
     description: 'This section lists the core professionals who already know your history.',
     questions: [
       {
-        key: 'client1HasWill',
-        label: 'Do you have a Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'client1WillYear',
-        label: 'In what year was the Will created?',
-        type: 'text',
-        placeholder: 'e.g., 2023',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
-        key: 'client1WillLocation',
-        label: 'Where is your Will located?',
-        type: 'text',
-        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
-        key: 'client1HasSecondaryWill',
-        label: 'Do you have a secondary Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
-        key: 'client1SecondaryWillLocation',
-        label: 'Where is the secondary Will located?',
-        type: 'text',
-        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasSecondaryWill === 'yes',
-      },
-      {
-        key: 'client1SecondaryWillJurisdiction',
-        label: 'In what jurisdiction was your secondary Will prepared?',
-        type: 'text',
-        placeholder: 'e.g., Ontario, British Columbia',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasSecondaryWill === 'yes',
-      },
-      {
         key: 'client1HasFuneralArrangements',
         label: 'Have you made arrangements for Funeral or Cemetery services?',
         type: 'radio',
@@ -809,73 +756,6 @@ export const STEPS: Step[] = [
         placeholder: 'Enter location',
         required: false,
         condition: (formData: Record<string, string>) => formData.client1FuneralWrittenDown === 'yes',
-      },
-      {
-        key: 'client2HasWill',
-        label: 'Does your spouse have a Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2WillYear',
-        label: 'In what year was the Will created?',
-        type: 'text',
-        placeholder: 'e.g., 2023',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
-      },
-      {
-        key: 'client2WillLocation',
-        label: 'Where is your spouse\'s Will located?',
-        type: 'text',
-        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
-      },
-      {
-        key: 'client2HasSecondaryWill',
-        label: 'Does your spouse have a secondary Will?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
-      },
-      {
-        key: 'client2SecondaryWillLocation',
-        label: 'Where is the secondary Will located?',
-        type: 'text',
-        placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasSecondaryWill === 'yes',
-      },
-      {
-        key: 'client2SecondaryWillJurisdiction',
-        label: 'In what jurisdiction was your spouse\'s secondary Will prepared?',
-        type: 'text',
-        placeholder: 'e.g., Ontario, British Columbia',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasSecondaryWill === 'yes',
-      },
-      {
-        key: 'willsSameLawyer',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName || 'Client 1';
-          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
-          return `Were the Wills for ${client1Name} and ${client2Name} prepared at the same time/by the same lawyer?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
       },
       {
         key: 'client2HasFuneralArrangements',

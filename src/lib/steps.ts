@@ -1023,6 +1023,14 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'client2WillYear',
+        label: 'In what year was the Will created?',
+        type: 'text',
+        placeholder: 'e.g., 2023',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
         key: 'client2WillLocation',
         label: 'Where is your spouse\'s Will located?',
         type: 'text',

@@ -95,6 +95,7 @@ interface FormData {
   client1SecondaryWillLocation?: string;
   client1SecondaryWillJurisdiction?: string;
   client2HasWill?: string;
+  client2WillYear?: string;
   client2WillJurisdiction?: string;
   client2WillLocation?: string;
   client2HasSecondaryWill?: string;
@@ -3200,6 +3201,13 @@ export const generatePDF = (formData: FormData) => {
 
     if (formData.client2HasWill === 'yes' && hasSpouse) {
       checkPageBreak(25);
+
+      if (formData.client2WillYear) {
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`${client2Name} has a Will, created in ${formData.client2WillYear}.`, margin, yPosition);
+        yPosition += 6;
+      }
 
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');

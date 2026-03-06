@@ -229,6 +229,7 @@ export default function StepForm({
   useEffect(() => {
     if (answers['client2HasWill'] === 'no') {
       const keysToClear = [
+        'client2WillYear',
         'client2WillLocation',
         'client2WillJurisdiction',
         'client2HasSecondaryWill',
@@ -1349,6 +1350,9 @@ export default function StepForm({
                   return null;
                 }
                 if (question.key === 'client2HasWill' && !hasSpouse) {
+                  return null;
+                }
+                if (question.key === 'client2WillYear' && (answers['client2HasWill'] !== 'yes' || !hasSpouse)) {
                   return null;
                 }
                 if (question.key === 'client2WillLocation' && (answers['client2HasWill'] !== 'yes' || !hasSpouse)) {

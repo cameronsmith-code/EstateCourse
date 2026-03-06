@@ -1379,9 +1379,6 @@ export default function StepForm({
                 if (question.key === 'spousesPoaProperty' && !(hasSpouse && (answers['relationshipStatus'] === 'married' || answers['relationshipStatus'] === 'commonLaw') && answers['client1HasWill'] === 'yes' && answers['client2HasWill'] === 'yes')) {
                   return null;
                 }
-                if (question.key === 'client1HasPoaPersonalCare' && answers['client1HasWill'] !== 'yes') {
-                  return null;
-                }
                 if (question.key === 'spouseIsPoaPersonalCare') {
                   const basicAnswers = allAnswers?.get(1);
                   const maritalStatus = basicAnswers?.maritalStatus;
@@ -1405,9 +1402,6 @@ export default function StepForm({
                   return null;
                 }
                 if (question.key === 'client1PoaPersonalCareCount' && answers['client1HasContingentPoaPersonalCare'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'client1HasPoaProperty' && answers['client1HasWill'] !== 'yes') {
                   return null;
                 }
                 if (question.key === 'client1HasContingentPoaProperty' && answers['client1HasPoaProperty'] !== 'yes') {

@@ -106,6 +106,7 @@ interface FormData {
   spouseIsPoaPersonalCare?: string;
   spousesPoaProperty?: string;
   spouseIsPoaProperty?: string;
+  spousePoaPropertyHasDocAccess?: string;
   client1UsesAccountant?: string;
   client1AccountingRecordsLocation?: string;
   client2UsesAccountant?: string;
@@ -191,6 +192,7 @@ interface FormData {
   client2HasPoaProperty?: string;
   client2HasContingentPoaProperty?: string;
   client2SpouseIsPoaProperty?: string;
+  client2SpousePoaPropertyHasDocAccess?: string;
   client2PoaPropertyCount?: string;
   client2PoaPropertyDocLocation?: string;
   client2PoaPropertyData?: Array<{
@@ -4308,6 +4310,15 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.text(`${client1Name} indicated that ${client2Name} (spouse/common law partner) is their POA for Property.`, margin, yPosition);
       yPosition += 6;
+
+      if (formData.spousePoaPropertyHasDocAccess) {
+        const docAccessLabel =
+          formData.spousePoaPropertyHasDocAccess === 'yes_copy' ? 'Yes - they have a copy' :
+          formData.spousePoaPropertyHasDocAccess === 'yes_instructions' ? 'Yes - they have instructions on where/how to access the documentation' :
+          'No';
+        doc.text(`Does ${client2Name} have access to ${client1Name}'s most recent POA for Property documentation? ${docAccessLabel}`, margin, yPosition);
+        yPosition += 6;
+      }
     } else if (formData.spousesPoaProperty === 'yes') {
       doc.text('Powers of Attorney for Property:', margin, yPosition);
       yPosition += 6;
@@ -4490,6 +4501,15 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.text(`${client2Name} indicated that ${client1Name} (spouse/common law partner) is their POA for Property.`, margin, yPosition);
       yPosition += 6;
+
+      if (formData.client2SpousePoaPropertyHasDocAccess) {
+        const docAccessLabel =
+          formData.client2SpousePoaPropertyHasDocAccess === 'yes_copy' ? 'Yes - they have a copy' :
+          formData.client2SpousePoaPropertyHasDocAccess === 'yes_instructions' ? 'Yes - they have instructions on where/how to access the documentation' :
+          'No';
+        doc.text(`Does ${client1Name} have access to ${client2Name}'s most recent POA for Property documentation? ${docAccessLabel}`, margin, yPosition);
+        yPosition += 6;
+      }
     } else if (formData.spousesPoaProperty === 'yes') {
       const client1Name = formData.fullName || 'Client 1';
       doc.text(`${client2Name}'s Powers of Attorney for Property:`, margin, yPosition);

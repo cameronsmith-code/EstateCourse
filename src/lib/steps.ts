@@ -875,6 +875,23 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'spousePoaPropertyHasDocAccess',
+        label: (answers) => {
+          const spouseName = answers.get(1)?.spouseName || 'your spouse or common law partner';
+          return `Does ${spouseName} have access to your most recent POA for Property documentation?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_copy', label: 'Yes - they have a copy' },
+          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.spouseIsPoaProperty === 'yes';
+        },
+      },
+      {
         key: 'client1HasContingentPoaProperty',
         label: (answers) => {
           const client1Name = answers.get(1)?.fullName || 'Client 1';
@@ -1210,6 +1227,24 @@ export const STEPS: Step[] = [
             : formData.maritalStatus;
           return formData.client2HasPoaProperty === 'yes' &&
                  (maritalStatus === 'married' || maritalStatus === 'common_law');
+        },
+      },
+      {
+        key: 'client2SpousePoaPropertyHasDocAccess',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `Does ${client1Name} have access to ${client2Name}'s most recent POA for Property documentation?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_copy', label: 'Yes - they have a copy' },
+          { value: 'yes_instructions', label: 'Yes - they have instructions on where/how to access the documentation' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2SpouseIsPoaProperty === 'yes';
         },
       },
       {

@@ -113,6 +113,7 @@ export default function StepForm({
     if (answers['client1HasPoaProperty'] === 'no') {
       const keysToClear = [
         'spouseIsPoaProperty',
+        'spousePoaPropertyHasDocAccess',
         'spousePoaPropertyHasDocCopy',
         'client1HasContingentPoaProperty',
         'client1PoaPropertyCount',
@@ -130,6 +131,7 @@ export default function StepForm({
     if (answers['client2HasPoaProperty'] === 'no') {
       const keysToClear = [
         'client2SpouseIsPoaProperty',
+        'client2SpousePoaPropertyHasDocAccess',
         'client2SpousePoaPropertyHasDocCopy',
         'client2HasContingentPoaProperty',
         'client2PoaPropertyCount',
@@ -142,6 +144,28 @@ export default function StepForm({
       });
     }
   }, [answers['client2HasPoaProperty']]);
+
+  useEffect(() => {
+    if (answers['spouseIsPoaProperty'] !== 'yes') {
+      const keysToClear = ['spousePoaPropertyHasDocAccess'];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['spouseIsPoaProperty']]);
+
+  useEffect(() => {
+    if (answers['client2SpouseIsPoaProperty'] !== 'yes') {
+      const keysToClear = ['client2SpousePoaPropertyHasDocAccess'];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2SpouseIsPoaProperty']]);
 
   useEffect(() => {
     if (answers['client1HasEstateTrustee'] === 'no') {
@@ -1604,6 +1628,9 @@ export default function StepForm({
                 if (question.key === 'client1HasPoaProperty') {
                   customLabel = `${client1Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
                 }
+                if (question.key === 'spousePoaPropertyHasDocAccess') {
+                  customLabel = `Does ${client2Name} have access to ${client1Name}'s most recent Power of Attorney for Property documentation?`;
+                }
                 if (question.key === 'client1HasContingentPoaProperty') {
                   customLabel = `${client1Name}, have you named any alternative or contingent Powers of Attorney for Property?`;
                 }
@@ -1643,6 +1670,9 @@ export default function StepForm({
                 }
                 if (question.key === 'client2HasPoaProperty') {
                   customLabel = `${client2Name}, have you named a Power of Attorney(ies) for Property in your Will?`;
+                }
+                if (question.key === 'client2SpousePoaPropertyHasDocAccess') {
+                  customLabel = `Does ${client1Name} have access to ${client2Name}'s most recent Power of Attorney for Property documentation?`;
                 }
                 if (question.key === 'client2HasContingentPoaProperty') {
                   customLabel = `${client2Name}, have you named any additional or contingent Powers of Attorney for Property?`;

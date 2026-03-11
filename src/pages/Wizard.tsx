@@ -188,7 +188,7 @@ export default function Wizard() {
         step={currentStepData}
         answers={currentAnswers}
         allAnswers={answers}
-        isFirstStep={validCurrentStep === 1}
+        isFirstStep={getPreviousVisibleStep(validCurrentStep) === null}
         isLastStep={getNextVisibleStep(validCurrentStep) === null}
         onNext={handleNext}
         onPrevious={handlePrevious}

@@ -1282,6 +1282,9 @@ export default function StepForm({
                 if (question.key === 'client2FinancialAdvisors' && !hasSpouse) {
                   return null;
                 }
+                if (question.key === 'client2IsCameronSmithAdvisor' && !hasSpouse) {
+                  return null;
+                }
 
                 let customLabel = question.label;
                 if (question.key === 'client1UsesAccountant') {

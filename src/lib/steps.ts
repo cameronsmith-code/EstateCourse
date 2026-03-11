@@ -588,6 +588,10 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          return maritalStatus === 'married' || maritalStatus === 'common_law';
+        },
       },
       {
         key: 'client2SoleProprietorshipNature',
@@ -603,7 +607,11 @@ export const STEPS: Step[] = [
           { value: 'other', label: 'Other' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasSoleProprietorship === 'yes',
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          return hasSpouse && formData.client2HasSoleProprietorship === 'yes';
+        },
       },
       {
         key: 'client2SoleProprietorshipNatureOther',
@@ -611,7 +619,11 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter nature of business',
         required: false,
-        condition: (formData: Record<string, string>) => formData.client2SoleProprietorshipNature === 'other',
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          return hasSpouse && formData.client2SoleProprietorshipNature === 'other';
+        },
       },
       {
         key: 'client2SoleProprietorshipRevenue',
@@ -624,7 +636,11 @@ export const STEPS: Step[] = [
           { value: 'over_1m', label: 'Over $1,000,000' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasSoleProprietorship === 'yes',
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          return hasSpouse && formData.client2HasSoleProprietorship === 'yes';
+        },
       },
       {
         key: 'client2SoleProprietorshipAttributes',
@@ -642,7 +658,11 @@ export const STEPS: Step[] = [
           { value: 'other', label: 'Other' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasSoleProprietorship === 'yes',
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          return hasSpouse && formData.client2HasSoleProprietorship === 'yes';
+        },
       },
       {
         key: 'client2SoleProprietorshipAttributesOther',
@@ -651,8 +671,10 @@ export const STEPS: Step[] = [
         placeholder: 'Enter other attributes',
         required: false,
         condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
           const attributes = formData.client2SoleProprietorshipAttributes;
-          return formData.client2HasSoleProprietorship === 'yes' && attributes && attributes.includes('other');
+          return hasSpouse && formData.client2HasSoleProprietorship === 'yes' && attributes && attributes.includes('other');
         },
       },
       {
@@ -667,6 +689,10 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          return maritalStatus === 'married' || maritalStatus === 'common_law';
+        },
       },
     ],
   },

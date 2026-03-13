@@ -120,6 +120,20 @@ export default function Wizard() {
     setShowClearConfirm(false);
   };
 
+  const handleTabClick = async (targetStepId: number) => {
+    if (targetStepId === validCurrentStep) return;
+
+    if (targetStepId > validCurrentStep) {
+      for (let i = validCurrentStep; i < targetStepId; i++) {
+        await nextStep();
+      }
+    } else {
+      for (let i = validCurrentStep; i > targetStepId; i--) {
+        await previousStep();
+      }
+    }
+  };
+
   if (loading && !questionnaire) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -183,6 +197,29 @@ export default function Wizard() {
         currentStep={STEPS.filter(s => s.id <= validCurrentStep && isStepVisible(s.id)).length}
         totalSteps={STEPS.filter(s => isStepVisible(s.id)).length}
       />
+
+      <div className="mb-6 bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+        <div className="flex overflow-x-auto">
+          {STEPS.filter(step => isStepVisible(step.id)).map((step, index) => (
+            <button
+              key={step.id}
+              onClick={() => handleTabClick(step.id)}
+              className={`flex-shrink-0 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+                step.id === validCurrentStep
+                  ? 'bg-gray-700 text-white border-blue-500'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-750 border-transparent'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center text-xs">
+                  {index + 1}
+                </span>
+                <span className="whitespace-nowrap">{step.title}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <StepForm
         step={currentStepData}

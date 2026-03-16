@@ -3205,7 +3205,7 @@ export const generatePDF = (formData: FormData) => {
           checkPageBreak(40);
           doc.setFontSize(9);
           doc.setFont(undefined, 'normal');
-          const warningText = `${client1Name}, you indicated that your last Will was prepared in ${formData.client1WillYear}. There is no specific number of years after which a Will legally expires, but the sources emphasize that an out-of-date Will can sometimes be worse than having no Will at all. Most legal professionals and financial advisors recommend that a Will and estate plan should be professionally reviewed at least every three to five years. Reviewing your Will at these intervals ensures that the document remains valid, reflects your current intentions, and complies with any evolving tax or succession laws.`;
+          const warningText = `${client1Name}, you indicated that your last Will was prepared in ${formData.client1WillYear}. There is no specific number of years after which a Will legally expires, but many sources emphasize that an out-of-date Will can sometimes be worse than having no Will at all. Most legal professionals and financial advisors recommend that a Will and estate plan should be professionally reviewed at least every three to five years. Reviewing your Will at these intervals ensures that the document remains valid, reflects your current intentions, and complies with any evolving tax or succession laws.`;
           const warningLines = doc.splitTextToSize(warningText, fieldWidth);
           warningLines.forEach((line: string) => {
             checkPageBreak(6);
@@ -3302,7 +3302,7 @@ You should explore this as an option with your legal and CFP® professionals bec
           checkPageBreak(40);
           doc.setFontSize(9);
           doc.setFont(undefined, 'normal');
-          const warningText = `${client2Name}, you indicated that your last Will was prepared in ${formData.client2WillYear}. There is no specific number of years after which a Will legally expires, but the sources emphasize that an out-of-date Will can sometimes be worse than having no Will at all. Most legal professionals and financial advisors recommend that a Will and estate plan should be professionally reviewed at least every three to five years. Reviewing your Will at these intervals ensures that the document remains valid, reflects your current intentions, and complies with any evolving tax or succession laws.`;
+          const warningText = `${client2Name}, you indicated that your last Will was prepared in ${formData.client2WillYear}. There is no specific number of years after which a Will legally expires, but many sources emphasize that an out-of-date Will can sometimes be worse than having no Will at all. Most legal professionals and financial advisors recommend that a Will and estate plan should be professionally reviewed at least every three to five years. Reviewing your Will at these intervals ensures that the document remains valid, reflects your current intentions, and complies with any evolving tax or succession laws.`;
           const warningLines = doc.splitTextToSize(warningText, fieldWidth);
           warningLines.forEach((line: string) => {
             checkPageBreak(6);

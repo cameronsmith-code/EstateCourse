@@ -8,6 +8,7 @@ export type StepQuestion = {
   videoUrl?: string;
   description?: string;
   condition?: (formData: Record<string, string>) => boolean;
+  max?: number;
 };
 
 export type Step = {
@@ -761,6 +762,7 @@ export const STEPS: Step[] = [
         type: 'number',
         placeholder: 'Enter year',
         required: false,
+        max: new Date().getFullYear(),
         condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
       },
       {
@@ -939,6 +941,7 @@ export const STEPS: Step[] = [
         type: 'number',
         placeholder: 'Enter year',
         required: false,
+        max: new Date().getFullYear(),
         condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
       },
       {

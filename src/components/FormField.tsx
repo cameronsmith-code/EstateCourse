@@ -7,7 +7,7 @@ type FormFieldProps = {
 };
 
 export default function FormField({ question, value, onChange }: FormFieldProps) {
-  const { key, label, type, placeholder, options, required } = question;
+  const { key, label, type, placeholder, options, required, max } = question;
 
   const commonClasses =
     'w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all';
@@ -133,6 +133,7 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
+        max={max}
         className={commonClasses}
       />
     </div>

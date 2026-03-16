@@ -896,6 +896,27 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillSameTimeAndJurisdiction === 'no',
       },
       {
+        key: 'client1HasHensonTrust',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          const childrenData = answers.get(3)?.childrenData as any[];
+          const disabledChild = childrenData?.find((child: any) => child?.disabled === 'yes');
+          const disabledChildName = disabledChild?.name || 'your disabled child';
+          return `${client1Name}, with respect to ${disabledChildName}, have you included an 'Absolute Discretionary Trust' ("Henson Trust" in Ontario) in your Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const childrenData = formData.childrenData as any;
+          const hasDisabledChild = childrenData && Array.isArray(childrenData) && childrenData.some((child: any) => child?.disabled === 'yes');
+          return formData.client1HasWill === 'yes' && hasDisabledChild;
+        },
+      },
+      {
         key: 'client2HasWill',
         label: (answers) => {
           const client2Name = answers.get(1)?.spouseName || 'Client 2';

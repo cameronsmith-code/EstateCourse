@@ -216,6 +216,7 @@ interface FormData {
   client2EstateTrusteeKnowsWillLocation?: string;
   client1HasLivingWill?: string;
   client2HasLivingWill?: string;
+  client1HasHensonTrust?: string;
   bankingStructure?: string;
   jointBankCount?: string;
   jointInstitutionsData?: Array<{ name?: string }>;
@@ -3217,6 +3218,53 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.text(`${client1Name}'s secondary Will was prepared in ${formData.client1SecondaryWillJurisdiction}.`, margin, yPosition);
       yPosition += 6;
+    }
+
+    const hasDisabledChild = formData.childrenData && Array.isArray(formData.childrenData) &&
+      formData.childrenData.some((child: any) => child?.disabled === 'yes');
+
+    if (formData.client1HasWill === 'yes' && hasDisabledChild) {
+      checkPageBreak(30);
+
+      const disabledChild = formData.childrenData?.find((child: any) => child?.disabled === 'yes');
+      const disabledChildName = disabledChild?.name || 'their disabled child';
+
+      if (formData.client1HasHensonTrust === 'yes') {
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`${client1Name} indicated that they have included an Absolute Discretionary Trust ("Henson Trust" in Ontario) in their Will.`, margin, yPosition);
+        yPosition += 6;
+      } else if (formData.client1HasHensonTrust === 'no') {
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`${client1Name} indicated that they have not included an Absolute Discretionary Trust ("Henson Trust" in Ontario) in their Will.`, margin, yPosition);
+        yPosition += 6;
+      }
+
+      if (formData.client1HasHensonTrust) {
+        checkPageBreak(100);
+
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(11);
+        doc.text('Additional Reading - Absolute Discretionary Trusts ("Henson Trusts" in Ontario)', margin, yPosition);
+        yPosition += 8;
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(9);
+
+        const hensonText = `A Henson Trust is a very important tool for families who have a child with a disability. It is what experts call an "absolute discretionary trust," which means the person you choose to manage the money (the trustee) has the final say on when and how much money is paid out. The big advantage of this structure is that the child does not legally own the assets and has no power to demand payments from the trust. This is key because most provincial government programs have strict limits on how much wealth a person can have before they lose their help; because the child doesn't "own" the trust money, it usually won't be counted against them, allowing them to keep their government disability benefits.
+
+You should explore this as an option with your legal and CFP® professionals because if you simply leave money to a disabled child in a normal way, it could actually hurt them financially. Without a trust, an outright inheritance could push them over the asset limit, causing them to be disqualified from their monthly support check and other essentials like dental care and prescription drug coverage. A Henson Trust protects these benefits while still allowing the child to use the trust money for things that improve their quality of life, such as home care attendants or specialized medical equipment. It is a reliable way to ensure your loved one has financial security and is well taken care of even after you are gone.`;
+
+        const hensonLines = doc.splitTextToSize(hensonText, fieldWidth);
+        hensonLines.forEach((line: string) => {
+          checkPageBreak(6);
+          doc.text(line, margin, yPosition);
+          yPosition += 5;
+        });
+
+        yPosition += 10;
+      }
     }
 
     if (formData.client2HasWill === 'yes' && hasSpouse) {

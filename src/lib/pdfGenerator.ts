@@ -3474,7 +3474,6 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 6;
 
       const lawyerRows = [
-        { label: 'Estate Lawyer/Notary:', col2: 'Information:', col3: 'Other Details (If Applicable)' },
         { label: 'Name:' },
         { label: 'Firm:' },
         { label: 'City, Province:' },
@@ -3495,8 +3494,8 @@ You should explore this as an option with your legal and CFP® professionals bec
         }
 
         doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'normal');
         doc.setFontSize(8);
 
         const lawyerCol1X = margin;
@@ -3507,45 +3506,37 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.rect(lawyerCol2X, lawyerTableY, lawyerColWidths[1], lawyerCellHeight);
         doc.rect(lawyerCol3X, lawyerTableY, lawyerColWidths[2], lawyerCellHeight);
 
-        if (rowIndex === 0) {
-          doc.text('Estate Lawyer/Notary:', lawyerCol1X + 0.5, lawyerTableY + 4);
-          doc.text('Information:', lawyerCol2X + 0.5, lawyerTableY + 4);
-          doc.text('Other Details (If Applicable):', lawyerCol3X + 0.5, lawyerTableY + 4);
+        if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+          const labelField = new doc.AcroFormTextField();
+          labelField.fieldName = `lawyer_shared_${rowIndex}_col1`;
+          labelField.Rect = [lawyerCol1X + 0.3, lawyerTableY + 0.3, lawyerColWidths[0] - 0.6, lawyerCellHeight - 0.6];
+          labelField.fontSize = 8;
+          labelField.textColor = [0, 0, 0];
+          labelField.borderStyle = 'none';
+          labelField.value = row.label;
+          doc.addField(labelField);
         } else {
-          doc.setFont(undefined, 'normal');
-
-          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-            const labelField = new doc.AcroFormTextField();
-            labelField.fieldName = `lawyer_shared_${rowIndex}_col1`;
-            labelField.Rect = [lawyerCol1X + 0.3, lawyerTableY + 0.3, lawyerColWidths[0] - 0.6, lawyerCellHeight - 0.6];
-            labelField.fontSize = 8;
-            labelField.textColor = [0, 0, 0];
-            labelField.borderStyle = 'none';
-            labelField.value = row.label;
-            doc.addField(labelField);
-          } else {
-            doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
-          }
-
-          const lawyerField1 = new doc.AcroFormTextField();
-          lawyerField1.fieldName = `lawyer_shared_${rowIndex}_col2`;
-          lawyerField1.Rect = [lawyerCol2X + 0.3, lawyerTableY + 0.3, lawyerColWidths[1] - 0.6, lawyerCellHeight - 0.6];
-          lawyerField1.fontSize = 7;
-          lawyerField1.textColor = [0, 0, 0];
-          lawyerField1.borderStyle = 'none';
-          if (row.label === 'Will Location:' && formData.client1WillLocation) {
-            lawyerField1.value = formData.client1WillLocation;
-          }
-          doc.addField(lawyerField1);
-
-          const lawyerField2 = new doc.AcroFormTextField();
-          lawyerField2.fieldName = `lawyer_shared_${rowIndex}_col3`;
-          lawyerField2.Rect = [lawyerCol3X + 0.3, lawyerTableY + 0.3, lawyerColWidths[2] - 0.6, lawyerCellHeight - 0.6];
-          lawyerField2.fontSize = 7;
-          lawyerField2.textColor = [0, 0, 0];
-          lawyerField2.borderStyle = 'none';
-          doc.addField(lawyerField2);
+          doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
         }
+
+        const lawyerField1 = new doc.AcroFormTextField();
+        lawyerField1.fieldName = `lawyer_shared_${rowIndex}_col2`;
+        lawyerField1.Rect = [lawyerCol2X + 0.3, lawyerTableY + 0.3, lawyerColWidths[1] - 0.6, lawyerCellHeight - 0.6];
+        lawyerField1.fontSize = 7;
+        lawyerField1.textColor = [0, 0, 0];
+        lawyerField1.borderStyle = 'none';
+        if (row.label === 'Will Location:' && formData.client1WillLocation) {
+          lawyerField1.value = formData.client1WillLocation;
+        }
+        doc.addField(lawyerField1);
+
+        const lawyerField2 = new doc.AcroFormTextField();
+        lawyerField2.fieldName = `lawyer_shared_${rowIndex}_col3`;
+        lawyerField2.Rect = [lawyerCol3X + 0.3, lawyerTableY + 0.3, lawyerColWidths[2] - 0.6, lawyerCellHeight - 0.6];
+        lawyerField2.fontSize = 7;
+        lawyerField2.textColor = [0, 0, 0];
+        lawyerField2.borderStyle = 'none';
+        doc.addField(lawyerField2);
 
         lawyerTableY += lawyerCellHeight;
       });
@@ -3565,7 +3556,6 @@ You should explore this as an option with your legal and CFP® professionals bec
         yPosition += 6;
 
         const lawyerRows = [
-          { label: 'Estate Lawyer/Notary:', col2: 'Information:', col3: 'Other Details (If Applicable)' },
           { label: 'Name:' },
           { label: 'Firm:' },
           { label: 'City, Province:' },
@@ -3586,8 +3576,8 @@ You should explore this as an option with your legal and CFP® professionals bec
           }
 
           doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+          doc.setFillColor(255, 255, 255);
+          doc.setFont(undefined, 'normal');
           doc.setFontSize(8);
 
           const lawyerCol1X = margin;
@@ -3598,48 +3588,40 @@ You should explore this as an option with your legal and CFP® professionals bec
           doc.rect(lawyerCol2X, lawyerTableY, lawyerColWidths[1], lawyerCellHeight);
           doc.rect(lawyerCol3X, lawyerTableY, lawyerColWidths[2], lawyerCellHeight);
 
-          if (rowIndex === 0) {
-            doc.text('Estate Lawyer/Notary:', lawyerCol1X + 0.5, lawyerTableY + 4);
-            doc.text('Information:', lawyerCol2X + 0.5, lawyerTableY + 4);
-            doc.text('Other Details (If Applicable):', lawyerCol3X + 0.5, lawyerTableY + 4);
+          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
+            const labelField = new doc.AcroFormTextField();
+            labelField.fieldName = `lawyer_client${clientIndex + 1}_${rowIndex}_col1`;
+            labelField.Rect = [lawyerCol1X + 0.3, lawyerTableY + 0.3, lawyerColWidths[0] - 0.6, lawyerCellHeight - 0.6];
+            labelField.fontSize = 8;
+            labelField.textColor = [0, 0, 0];
+            labelField.borderStyle = 'none';
+            labelField.value = row.label;
+            doc.addField(labelField);
           } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `lawyer_client${clientIndex + 1}_${rowIndex}_col1`;
-              labelField.Rect = [lawyerCol1X + 0.3, lawyerTableY + 0.3, lawyerColWidths[0] - 0.6, lawyerCellHeight - 0.6];
-              labelField.fontSize = 8;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
-            }
-
-            const lawyerField1 = new doc.AcroFormTextField();
-            lawyerField1.fieldName = `lawyer_client${clientIndex + 1}_${rowIndex}_col2`;
-            lawyerField1.Rect = [lawyerCol2X + 0.3, lawyerTableY + 0.3, lawyerColWidths[1] - 0.6, lawyerCellHeight - 0.6];
-            lawyerField1.fontSize = 7;
-            lawyerField1.textColor = [0, 0, 0];
-            lawyerField1.borderStyle = 'none';
-            if (row.label === 'Will Location:') {
-              const willLocation = clientIndex === 0 ? formData.client1WillLocation : formData.client2WillLocation;
-              if (willLocation) {
-                lawyerField1.value = willLocation;
-              }
-            }
-            doc.addField(lawyerField1);
-
-            const lawyerField2 = new doc.AcroFormTextField();
-            lawyerField2.fieldName = `lawyer_client${clientIndex + 1}_${rowIndex}_col3`;
-            lawyerField2.Rect = [lawyerCol3X + 0.3, lawyerTableY + 0.3, lawyerColWidths[2] - 0.6, lawyerCellHeight - 0.6];
-            lawyerField2.fontSize = 7;
-            lawyerField2.textColor = [0, 0, 0];
-            lawyerField2.borderStyle = 'none';
-            doc.addField(lawyerField2);
+            doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
           }
+
+          const lawyerField1 = new doc.AcroFormTextField();
+          lawyerField1.fieldName = `lawyer_client${clientIndex + 1}_${rowIndex}_col2`;
+          lawyerField1.Rect = [lawyerCol2X + 0.3, lawyerTableY + 0.3, lawyerColWidths[1] - 0.6, lawyerCellHeight - 0.6];
+          lawyerField1.fontSize = 7;
+          lawyerField1.textColor = [0, 0, 0];
+          lawyerField1.borderStyle = 'none';
+          if (row.label === 'Will Location:') {
+            const willLocation = clientIndex === 0 ? formData.client1WillLocation : formData.client2WillLocation;
+            if (willLocation) {
+              lawyerField1.value = willLocation;
+            }
+          }
+          doc.addField(lawyerField1);
+
+          const lawyerField2 = new doc.AcroFormTextField();
+          lawyerField2.fieldName = `lawyer_client${clientIndex + 1}_${rowIndex}_col3`;
+          lawyerField2.Rect = [lawyerCol3X + 0.3, lawyerTableY + 0.3, lawyerColWidths[2] - 0.6, lawyerCellHeight - 0.6];
+          lawyerField2.fontSize = 7;
+          lawyerField2.textColor = [0, 0, 0];
+          lawyerField2.borderStyle = 'none';
+          doc.addField(lawyerField2);
 
           lawyerTableY += lawyerCellHeight;
         });
@@ -3661,7 +3643,6 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 6;
 
       const lawyerRows = [
-        { label: 'Estate Lawyer/Notary:', col2: 'Information:', col3: 'Other Details (If Applicable)' },
         { label: 'Name:' },
         { label: 'Firm:' },
         { label: 'City, Province:' },
@@ -3682,8 +3663,8 @@ You should explore this as an option with your legal and CFP® professionals bec
         }
 
         doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'normal');
         doc.setFontSize(8);
 
         const lawyerCol1X = margin;
@@ -3694,36 +3675,29 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.rect(lawyerCol2X, lawyerTableY, lawyerColWidths[1], lawyerCellHeight);
         doc.rect(lawyerCol3X, lawyerTableY, lawyerColWidths[2], lawyerCellHeight);
 
-        if (rowIndex === 0) {
-          doc.text('Estate Lawyer/Notary:', lawyerCol1X + 0.5, lawyerTableY + 4);
-          doc.text('Information:', lawyerCol2X + 0.5, lawyerTableY + 4);
-          doc.text('Other Details (If Applicable):', lawyerCol3X + 0.5, lawyerTableY + 4);
-        } else {
-          doc.setFont(undefined, 'normal');
-          doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
+        doc.text(row.label, lawyerCol1X + 0.5, lawyerTableY + 4);
 
-          const lawyerField1 = new doc.AcroFormTextField();
-          lawyerField1.fieldName = `lawyer_single_${rowIndex}_col2`;
-          lawyerField1.Rect = [lawyerCol2X + 0.3, lawyerTableY + 0.3, lawyerColWidths[1] - 0.6, lawyerCellHeight - 0.6];
-          lawyerField1.fontSize = 7;
-          lawyerField1.textColor = [0, 0, 0];
-          lawyerField1.borderStyle = 'none';
-          if (row.label === 'Will Location:') {
-            const willLocation = formData.client1HasWill === 'yes' ? formData.client1WillLocation : formData.client2WillLocation;
-            if (willLocation) {
-              lawyerField1.value = willLocation;
-            }
+        const lawyerField1 = new doc.AcroFormTextField();
+        lawyerField1.fieldName = `lawyer_single_${rowIndex}_col2`;
+        lawyerField1.Rect = [lawyerCol2X + 0.3, lawyerTableY + 0.3, lawyerColWidths[1] - 0.6, lawyerCellHeight - 0.6];
+        lawyerField1.fontSize = 7;
+        lawyerField1.textColor = [0, 0, 0];
+        lawyerField1.borderStyle = 'none';
+        if (row.label === 'Will Location:') {
+          const willLocation = formData.client1HasWill === 'yes' ? formData.client1WillLocation : formData.client2WillLocation;
+          if (willLocation) {
+            lawyerField1.value = willLocation;
           }
-          doc.addField(lawyerField1);
-
-          const lawyerField2 = new doc.AcroFormTextField();
-          lawyerField2.fieldName = `lawyer_single_${rowIndex}_col3`;
-          lawyerField2.Rect = [lawyerCol3X + 0.3, lawyerTableY + 0.3, lawyerColWidths[2] - 0.6, lawyerCellHeight - 0.6];
-          lawyerField2.fontSize = 7;
-          lawyerField2.textColor = [0, 0, 0];
-          lawyerField2.borderStyle = 'none';
-          doc.addField(lawyerField2);
         }
+        doc.addField(lawyerField1);
+
+        const lawyerField2 = new doc.AcroFormTextField();
+        lawyerField2.fieldName = `lawyer_single_${rowIndex}_col3`;
+        lawyerField2.Rect = [lawyerCol3X + 0.3, lawyerTableY + 0.3, lawyerColWidths[2] - 0.6, lawyerCellHeight - 0.6];
+        lawyerField2.fontSize = 7;
+        lawyerField2.textColor = [0, 0, 0];
+        lawyerField2.borderStyle = 'none';
+        doc.addField(lawyerField2);
 
         lawyerTableY += lawyerCellHeight;
       });

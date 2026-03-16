@@ -287,8 +287,32 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   }, [questionnaire, currentStep, answers, saveAnswers]);
 
   const previousStep = useCallback(() => {
-    setCurrentStep((prev) => Math.max(1, prev - 1));
-  }, []);
+    if (!questionnaire) return;
+
+    const newStep = Math.max(1, currentStep - 1);
+    setCurrentStep(newStep);
+
+    const updated = {
+      ...questionnaire,
+      current_step: newStep,
+      updated_at: new Date().toISOString(),
+    };
+    setQuestionnaire(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+    if (supabase) {
+      supabase
+        .from('questionnaires')
+        .update({ current_step: newStep, updated_at: new Date().toISOString() })
+        .eq('id', questionnaire.id)
+        .then(
+          () => {},
+          (err) => {
+            console.warn('Failed to update questionnaire step in database:', err);
+          }
+        );
+    }
+  }, [questionnaire, currentStep]);
 
   const completeQuestionnaire = useCallback(async () => {
     if (!questionnaire) return;

@@ -3174,6 +3174,60 @@ export const generatePDF = (formData: FormData) => {
   const hasSpouse = (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law');
 
   if (formData.client1HasWill === 'no' && (!hasSpouse || formData.client2HasWill === 'no')) {
+    checkPageBreak(100);
+
+    const clientsWithoutWill: string[] = [];
+    if (formData.client1HasWill === 'no') {
+      clientsWithoutWill.push(client1Name);
+    }
+    if (hasSpouse && formData.client2HasWill === 'no') {
+      clientsWithoutWill.push(client2Name);
+    }
+
+    const clientNameText = clientsWithoutWill.join(' and ');
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Why Having a Will is Essential (${clientNameText} indicated they don't have one)`, margin, yPosition);
+    yPosition += 8;
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    const introText = `If you pass away without a valid Will, you are considered to have died "intestate." This creates several serious problems for your loved ones:`;
+    const introLines = doc.splitTextToSize(introText, fieldWidth);
+    introLines.forEach((line: string) => {
+      checkPageBreak(6);
+      doc.text(line, margin, yPosition);
+      yPosition += 5;
+    });
+    yPosition += 3;
+
+    const bulletPoints = [
+      { title: 'The Government Decides:', text: 'Instead of you choosing who gets your money and property, provincial laws follow a rigid formula to distribute your assets.' },
+      { title: 'Loss of Control:', text: 'You lose the ability to choose your own executor. A court will appoint an administrator, and it may not be the person you would have wanted.' },
+      { title: 'Higher Taxes:', text: 'Without a Will, you cannot use tax-planning strategies (like trusts) that help keep more money in your family\'s pockets rather than the government\'s.' },
+      { title: 'Family Conflict:', text: 'Intestacy often leads to legal battles and arguments among family members who may disagree on who should get what.' },
+      { title: 'Delays and Costs:', text: 'Settling an estate without a Will is much slower and more expensive, meaning your family has to wait longer to receive their inheritance.' }
+    ];
+
+    bulletPoints.forEach((bullet) => {
+      checkPageBreak(15);
+      doc.setFont(undefined, 'bold');
+      doc.text('• ' + bullet.title, margin + 3, yPosition);
+      yPosition += 5;
+
+      doc.setFont(undefined, 'normal');
+      const bulletLines = doc.splitTextToSize(bullet.text, fieldWidth - 6);
+      bulletLines.forEach((line: string) => {
+        checkPageBreak(6);
+        doc.text(line, margin + 6, yPosition);
+        yPosition += 5;
+      });
+      yPosition += 2;
+    });
+
+    yPosition += 8;
+
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
     doc.text('Estate Lawyer / Notary:', margin, yPosition);

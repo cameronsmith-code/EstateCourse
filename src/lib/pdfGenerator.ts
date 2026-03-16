@@ -712,131 +712,117 @@ export const generatePDF = (formData: FormData) => {
 
       addSubsectionHeader(`${client1Name}'s Previous Relationship ${index + 1}`);
 
-      doc.setFontSize(9);
-      addField('Previous Partner Name:', `client1PrevRel${index}Name`, relationship.name || '');
-
-      const labelColumnWidth = 45;
       const tableWidth = fieldWidth;
-      const valueColumnWidth = tableWidth - labelColumnWidth;
-      const rowHeight = 6;
-      const largeRowHeight = 20;
+      const col1Width = tableWidth * 0.20;
+      const col2Width = tableWidth * 0.16;
+      const col3Width = tableWidth * 0.20;
+      const col4Width = tableWidth * 0.18;
+      const col5Width = tableWidth * 0.13;
+      const col6Width = tableWidth * 0.13;
+      const headerHeight = 12;
+      const dataRowHeight = 12;
 
-      checkPageBreak(rowHeight * 2 + largeRowHeight + 10);
-      yPosition += 2;
+      checkPageBreak(headerHeight + dataRowHeight + 20);
 
-      // Professional table styling
       doc.setDrawColor(...colors.borderGray);
       doc.setLineWidth(0.3);
-      doc.setFontSize(9);
+      doc.setFontSize(8);
 
-      // Email row
       doc.setFillColor(...colors.lightGray);
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
+      doc.rect(margin, yPosition, col1Width, headerHeight, 'FD');
+      doc.rect(margin + col1Width, yPosition, col2Width, headerHeight, 'FD');
+      doc.rect(margin + col1Width + col2Width, yPosition, col3Width, headerHeight, 'FD');
+      doc.rect(margin + col1Width + col2Width + col3Width, yPosition, col4Width, headerHeight, 'FD');
+      doc.rect(margin + col1Width + col2Width + col3Width + col4Width, yPosition, col5Width, headerHeight, 'FD');
+      doc.rect(margin + col1Width + col2Width + col3Width + col4Width + col5Width, yPosition, col6Width, headerHeight, 'FD');
+
       doc.setTextColor(...colors.darkText);
-      doc.text('Email Address:', margin + 2, yPosition + 4);
+      doc.text('Partner Name:', margin + 1, yPosition + 4, { maxWidth: col1Width - 2 });
+      doc.text('Spousal Support?', margin + col1Width + 1, yPosition + 4, { maxWidth: col2Width - 2 });
+      doc.text('Spousal Support Termination Date:', margin + col1Width + col2Width + 1, yPosition + 4, { maxWidth: col3Width - 2 });
+      doc.text('Document Location:', margin + col1Width + col2Width + col3Width + 1, yPosition + 4, { maxWidth: col4Width - 2 });
+      doc.text('Date of Separation:', margin + col1Width + col2Width + col3Width + col4Width + 1, yPosition + 4, { maxWidth: col5Width - 2 });
+      doc.text('Date of Divorce:', margin + col1Width + col2Width + col3Width + col4Width + col5Width + 1, yPosition + 4, { maxWidth: col6Width - 2 });
 
-      const emailField = new doc.AcroFormTextField();
-      emailField.fieldName = `client1PrevRel${index}Email`;
-      emailField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
-      emailField.value = relationship.email || '';
-      emailField.fontSize = 9;
-      emailField.textColor = colors.darkText;
-      doc.addField(emailField);
-      yPosition += rowHeight;
+      yPosition += headerHeight;
 
-      // Phone row
-      doc.setFillColor(...colors.lightGray);
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
-      doc.text('Phone Number:', margin + 2, yPosition + 4);
+      doc.rect(margin, yPosition, col1Width, dataRowHeight, 'D');
+      doc.rect(margin + col1Width, yPosition, col2Width, dataRowHeight, 'D');
+      doc.rect(margin + col1Width + col2Width, yPosition, col3Width, dataRowHeight, 'D');
+      doc.rect(margin + col1Width + col2Width + col3Width, yPosition, col4Width, dataRowHeight, 'D');
+      doc.rect(margin + col1Width + col2Width + col3Width + col4Width, yPosition, col5Width, dataRowHeight, 'D');
+      doc.rect(margin + col1Width + col2Width + col3Width + col4Width + col5Width, yPosition, col6Width, dataRowHeight, 'D');
 
-      const phoneField = new doc.AcroFormTextField();
-      phoneField.fieldName = `client1PrevRel${index}Phone`;
-      phoneField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
-      phoneField.value = relationship.phone || '';
-      phoneField.fontSize = 9;
-      phoneField.textColor = colors.darkText;
-      doc.addField(phoneField);
-      yPosition += rowHeight;
+      const partnerNameField = new doc.AcroFormTextField();
+      partnerNameField.fieldName = `client1PrevRel${index}Name`;
+      partnerNameField.Rect = [margin, yPosition, col1Width, dataRowHeight];
+      partnerNameField.value = relationship.name || '';
+      partnerNameField.fontSize = 8;
+      partnerNameField.textColor = colors.darkText;
+      doc.addField(partnerNameField);
 
-      // Date of Separation row
-      doc.setFillColor(...colors.lightGray);
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
-      doc.text('Date of Separation:', margin + 2, yPosition + 4);
+      const spousalSupportField = new doc.AcroFormTextField();
+      spousalSupportField.fieldName = `client1PrevRel${index}SpousalSupport`;
+      spousalSupportField.Rect = [margin + col1Width, yPosition, col2Width, dataRowHeight];
+      spousalSupportField.value = relationship.hasSpousalSupport === 'yes' ? 'Yes' : (relationship.hasSpousalSupport === 'no' ? 'No' : '');
+      spousalSupportField.fontSize = 8;
+      spousalSupportField.textColor = colors.darkText;
+      doc.addField(spousalSupportField);
+
+      const terminationDateField = new doc.AcroFormTextField();
+      terminationDateField.fieldName = `client1PrevRel${index}TerminationDate`;
+      terminationDateField.Rect = [margin + col1Width + col2Width, yPosition, col3Width, dataRowHeight];
+      terminationDateField.value = relationship.supportTerminationDate || '';
+      terminationDateField.fontSize = 8;
+      terminationDateField.textColor = colors.darkText;
+      doc.addField(terminationDateField);
+
+      const docLocationField = new doc.AcroFormTextField();
+      docLocationField.fieldName = `client1PrevRel${index}DocLocation`;
+      docLocationField.Rect = [margin + col1Width + col2Width + col3Width, yPosition, col4Width, dataRowHeight];
+      docLocationField.value = relationship.supportDocumentLocation || '';
+      docLocationField.fontSize = 8;
+      docLocationField.textColor = colors.darkText;
+      doc.addField(docLocationField);
 
       const dateOfSeparationField = new doc.AcroFormTextField();
       dateOfSeparationField.fieldName = `client1PrevRel${index}DateOfSeparation`;
-      dateOfSeparationField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
+      dateOfSeparationField.Rect = [margin + col1Width + col2Width + col3Width + col4Width, yPosition, col5Width, dataRowHeight];
       dateOfSeparationField.value = relationship.dateOfSeparation || '';
-      dateOfSeparationField.fontSize = 9;
+      dateOfSeparationField.fontSize = 8;
       dateOfSeparationField.textColor = colors.darkText;
       doc.addField(dateOfSeparationField);
-      yPosition += rowHeight;
-
-      // Date of Divorce row
-      doc.setFillColor(...colors.lightGray);
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
-      doc.text('Date of Divorce:', margin + 2, yPosition + 4);
 
       const dateOfDivorceField = new doc.AcroFormTextField();
       dateOfDivorceField.fieldName = `client1PrevRel${index}DateOfDivorce`;
-      dateOfDivorceField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
+      dateOfDivorceField.Rect = [margin + col1Width + col2Width + col3Width + col4Width + col5Width, yPosition, col6Width, dataRowHeight];
       dateOfDivorceField.value = relationship.dateOfDivorce || '';
-      dateOfDivorceField.fontSize = 9;
+      dateOfDivorceField.fontSize = 8;
       dateOfDivorceField.textColor = colors.darkText;
       doc.addField(dateOfDivorceField);
-      yPosition += rowHeight;
 
-      // Other information row
-      doc.setFillColor(...colors.lightGray);
-      doc.rect(margin, yPosition, labelColumnWidth, largeRowHeight, 'FD');
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight, 'D');
-      doc.text('Other Information:', margin + 2, yPosition + 4);
+      yPosition += dataRowHeight + 5;
+
+      checkPageBreak(25);
+      doc.setFontSize(9);
+      doc.setTextColor(...colors.darkText);
+      doc.text('Other Information:', margin, yPosition);
+      yPosition += 5;
+
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.3);
+      const otherInfoHeight = 20;
+      doc.rect(margin, yPosition, tableWidth, otherInfoHeight, 'D');
 
       const otherInfoField = new doc.AcroFormTextField();
       otherInfoField.fieldName = `client1PrevRel${index}OtherInfo`;
-      otherInfoField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight];
+      otherInfoField.Rect = [margin, yPosition, tableWidth, otherInfoHeight];
       otherInfoField.value = relationship.otherInfo || '';
       otherInfoField.fontSize = 9;
       otherInfoField.textColor = colors.darkText;
       otherInfoField.multiline = true;
       doc.addField(otherInfoField);
-      yPosition += largeRowHeight + 10;
-
-      if (relationship.hasSpousalSupport === 'no') {
-        checkPageBreak(15);
-        doc.setFontSize(9);
-        doc.setTextColor(...colors.darkText);
-        const labelText = `${client1Name} is not paying or receiving spousal support from a previous marriage or common law relationship with ${relationship.name || 'the indicated person'}.`;
-        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
-        yPosition += 12;
-      } else if (relationship.hasSpousalSupport === 'yes' && relationship.spousalSupportType) {
-        checkPageBreak(20);
-        const supportAction = relationship.spousalSupportType === 'paying' ? 'paying' : 'receiving';
-        const preposition = relationship.spousalSupportType === 'paying' ? 'to' : 'from';
-        doc.setFontSize(9);
-        doc.setTextColor(...colors.darkText);
-        const labelText = `${client1Name} is ${supportAction} spousal support ${preposition} ${relationship.name || 'the indicated person'}. This document outlining this arrangement is located:`;
-        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
-        yPosition += 10;
-
-        doc.setDrawColor(...colors.borderGray);
-        doc.setLineWidth(0.3);
-        doc.rect(margin, yPosition, fieldWidth, 6);
-
-        const supportDocField = new doc.AcroFormTextField();
-        supportDocField.fieldName = `client1PrevRel${index}SupportDocLocation`;
-        supportDocField.Rect = [margin, yPosition, fieldWidth, 6];
-        supportDocField.fontSize = 9;
-        supportDocField.textColor = colors.darkText;
-        supportDocField.value = relationship.supportDocumentLocation || '';
-        doc.addField(supportDocField);
-
-        yPosition += 14;
-      }
+      yPosition += otherInfoHeight + 5;
     });
   }
 
@@ -851,131 +837,117 @@ export const generatePDF = (formData: FormData) => {
 
       addSubsectionHeader(`${client2Name}'s Previous Relationship ${index + 1}`);
 
-      doc.setFontSize(9);
-      addField('Previous Partner Name:', `client2PrevRel${index}Name`, relationship.name || '');
-
-      const labelColumnWidth = 45;
       const tableWidth = fieldWidth;
-      const valueColumnWidth = tableWidth - labelColumnWidth;
-      const rowHeight = 6;
-      const largeRowHeight = 20;
+      const col1Width = tableWidth * 0.20;
+      const col2Width = tableWidth * 0.16;
+      const col3Width = tableWidth * 0.20;
+      const col4Width = tableWidth * 0.18;
+      const col5Width = tableWidth * 0.13;
+      const col6Width = tableWidth * 0.13;
+      const headerHeight = 12;
+      const dataRowHeight = 12;
 
-      checkPageBreak(rowHeight * 2 + largeRowHeight + 10);
-      yPosition += 2;
+      checkPageBreak(headerHeight + dataRowHeight + 20);
 
-      // Professional table styling
       doc.setDrawColor(...colors.borderGray);
       doc.setLineWidth(0.3);
-      doc.setFontSize(9);
+      doc.setFontSize(8);
 
-      // Email row
       doc.setFillColor(...colors.lightGray);
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
+      doc.rect(margin, yPosition, col1Width, headerHeight, 'FD');
+      doc.rect(margin + col1Width, yPosition, col2Width, headerHeight, 'FD');
+      doc.rect(margin + col1Width + col2Width, yPosition, col3Width, headerHeight, 'FD');
+      doc.rect(margin + col1Width + col2Width + col3Width, yPosition, col4Width, headerHeight, 'FD');
+      doc.rect(margin + col1Width + col2Width + col3Width + col4Width, yPosition, col5Width, headerHeight, 'FD');
+      doc.rect(margin + col1Width + col2Width + col3Width + col4Width + col5Width, yPosition, col6Width, headerHeight, 'FD');
+
       doc.setTextColor(...colors.darkText);
-      doc.text('Email Address:', margin + 2, yPosition + 4);
+      doc.text('Partner Name:', margin + 1, yPosition + 4, { maxWidth: col1Width - 2 });
+      doc.text('Spousal Support?', margin + col1Width + 1, yPosition + 4, { maxWidth: col2Width - 2 });
+      doc.text('Spousal Support Termination Date:', margin + col1Width + col2Width + 1, yPosition + 4, { maxWidth: col3Width - 2 });
+      doc.text('Document Location:', margin + col1Width + col2Width + col3Width + 1, yPosition + 4, { maxWidth: col4Width - 2 });
+      doc.text('Date of Separation:', margin + col1Width + col2Width + col3Width + col4Width + 1, yPosition + 4, { maxWidth: col5Width - 2 });
+      doc.text('Date of Divorce:', margin + col1Width + col2Width + col3Width + col4Width + col5Width + 1, yPosition + 4, { maxWidth: col6Width - 2 });
 
-      const emailField = new doc.AcroFormTextField();
-      emailField.fieldName = `client2PrevRel${index}Email`;
-      emailField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
-      emailField.value = relationship.email || '';
-      emailField.fontSize = 9;
-      emailField.textColor = colors.darkText;
-      doc.addField(emailField);
-      yPosition += rowHeight;
+      yPosition += headerHeight;
 
-      // Phone row
-      doc.setFillColor(...colors.lightGray);
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
-      doc.text('Phone Number:', margin + 2, yPosition + 4);
+      doc.rect(margin, yPosition, col1Width, dataRowHeight, 'D');
+      doc.rect(margin + col1Width, yPosition, col2Width, dataRowHeight, 'D');
+      doc.rect(margin + col1Width + col2Width, yPosition, col3Width, dataRowHeight, 'D');
+      doc.rect(margin + col1Width + col2Width + col3Width, yPosition, col4Width, dataRowHeight, 'D');
+      doc.rect(margin + col1Width + col2Width + col3Width + col4Width, yPosition, col5Width, dataRowHeight, 'D');
+      doc.rect(margin + col1Width + col2Width + col3Width + col4Width + col5Width, yPosition, col6Width, dataRowHeight, 'D');
 
-      const phoneField = new doc.AcroFormTextField();
-      phoneField.fieldName = `client2PrevRel${index}Phone`;
-      phoneField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
-      phoneField.value = relationship.phone || '';
-      phoneField.fontSize = 9;
-      phoneField.textColor = colors.darkText;
-      doc.addField(phoneField);
-      yPosition += rowHeight;
+      const partnerNameField = new doc.AcroFormTextField();
+      partnerNameField.fieldName = `client2PrevRel${index}Name`;
+      partnerNameField.Rect = [margin, yPosition, col1Width, dataRowHeight];
+      partnerNameField.value = relationship.name || '';
+      partnerNameField.fontSize = 8;
+      partnerNameField.textColor = colors.darkText;
+      doc.addField(partnerNameField);
 
-      // Date of Separation row
-      doc.setFillColor(...colors.lightGray);
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
-      doc.text('Date of Separation:', margin + 2, yPosition + 4);
+      const spousalSupportField = new doc.AcroFormTextField();
+      spousalSupportField.fieldName = `client2PrevRel${index}SpousalSupport`;
+      spousalSupportField.Rect = [margin + col1Width, yPosition, col2Width, dataRowHeight];
+      spousalSupportField.value = relationship.hasSpousalSupport === 'yes' ? 'Yes' : (relationship.hasSpousalSupport === 'no' ? 'No' : '');
+      spousalSupportField.fontSize = 8;
+      spousalSupportField.textColor = colors.darkText;
+      doc.addField(spousalSupportField);
+
+      const terminationDateField = new doc.AcroFormTextField();
+      terminationDateField.fieldName = `client2PrevRel${index}TerminationDate`;
+      terminationDateField.Rect = [margin + col1Width + col2Width, yPosition, col3Width, dataRowHeight];
+      terminationDateField.value = relationship.supportTerminationDate || '';
+      terminationDateField.fontSize = 8;
+      terminationDateField.textColor = colors.darkText;
+      doc.addField(terminationDateField);
+
+      const docLocationField = new doc.AcroFormTextField();
+      docLocationField.fieldName = `client2PrevRel${index}DocLocation`;
+      docLocationField.Rect = [margin + col1Width + col2Width + col3Width, yPosition, col4Width, dataRowHeight];
+      docLocationField.value = relationship.supportDocumentLocation || '';
+      docLocationField.fontSize = 8;
+      docLocationField.textColor = colors.darkText;
+      doc.addField(docLocationField);
 
       const dateOfSeparationField = new doc.AcroFormTextField();
       dateOfSeparationField.fieldName = `client2PrevRel${index}DateOfSeparation`;
-      dateOfSeparationField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
+      dateOfSeparationField.Rect = [margin + col1Width + col2Width + col3Width + col4Width, yPosition, col5Width, dataRowHeight];
       dateOfSeparationField.value = relationship.dateOfSeparation || '';
-      dateOfSeparationField.fontSize = 9;
+      dateOfSeparationField.fontSize = 8;
       dateOfSeparationField.textColor = colors.darkText;
       doc.addField(dateOfSeparationField);
-      yPosition += rowHeight;
-
-      // Date of Divorce row
-      doc.setFillColor(...colors.lightGray);
-      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
-      doc.text('Date of Divorce:', margin + 2, yPosition + 4);
 
       const dateOfDivorceField = new doc.AcroFormTextField();
       dateOfDivorceField.fieldName = `client2PrevRel${index}DateOfDivorce`;
-      dateOfDivorceField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
+      dateOfDivorceField.Rect = [margin + col1Width + col2Width + col3Width + col4Width + col5Width, yPosition, col6Width, dataRowHeight];
       dateOfDivorceField.value = relationship.dateOfDivorce || '';
-      dateOfDivorceField.fontSize = 9;
+      dateOfDivorceField.fontSize = 8;
       dateOfDivorceField.textColor = colors.darkText;
       doc.addField(dateOfDivorceField);
-      yPosition += rowHeight;
 
-      // Other information row
-      doc.setFillColor(...colors.lightGray);
-      doc.rect(margin, yPosition, labelColumnWidth, largeRowHeight, 'FD');
-      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight, 'D');
-      doc.text('Other Information:', margin + 2, yPosition + 4);
+      yPosition += dataRowHeight + 5;
+
+      checkPageBreak(25);
+      doc.setFontSize(9);
+      doc.setTextColor(...colors.darkText);
+      doc.text('Other Information:', margin, yPosition);
+      yPosition += 5;
+
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.3);
+      const otherInfoHeight = 20;
+      doc.rect(margin, yPosition, tableWidth, otherInfoHeight, 'D');
 
       const otherInfoField = new doc.AcroFormTextField();
       otherInfoField.fieldName = `client2PrevRel${index}OtherInfo`;
-      otherInfoField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, largeRowHeight];
+      otherInfoField.Rect = [margin, yPosition, tableWidth, otherInfoHeight];
       otherInfoField.value = relationship.otherInfo || '';
       otherInfoField.fontSize = 9;
       otherInfoField.textColor = colors.darkText;
       otherInfoField.multiline = true;
       doc.addField(otherInfoField);
-      yPosition += largeRowHeight + 10;
-
-      if (relationship.hasSpousalSupport === 'no') {
-        checkPageBreak(15);
-        doc.setFontSize(9);
-        doc.setTextColor(...colors.darkText);
-        const labelText = `${client2Name} is not paying or receiving spousal support from a previous marriage or common law relationship with ${relationship.name || 'the indicated person'}.`;
-        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
-        yPosition += 12;
-      } else if (relationship.hasSpousalSupport === 'yes' && relationship.spousalSupportType) {
-        checkPageBreak(20);
-        const supportAction = relationship.spousalSupportType === 'paying' ? 'paying' : 'receiving';
-        const preposition = relationship.spousalSupportType === 'paying' ? 'to' : 'from';
-        doc.setFontSize(9);
-        doc.setTextColor(...colors.darkText);
-        const labelText = `${client2Name} is ${supportAction} spousal support ${preposition} ${relationship.name || 'the indicated person'}. This document outlining this arrangement is located:`;
-        doc.text(labelText, margin, yPosition, { maxWidth: fieldWidth });
-        yPosition += 10;
-
-        doc.setDrawColor(...colors.borderGray);
-        doc.setLineWidth(0.3);
-        doc.rect(margin, yPosition, fieldWidth, 6);
-
-        const supportDocField = new doc.AcroFormTextField();
-        supportDocField.fieldName = `client2PrevRel${index}SupportDocLocation`;
-        supportDocField.Rect = [margin, yPosition, fieldWidth, 6];
-        supportDocField.fontSize = 9;
-        supportDocField.textColor = colors.darkText;
-        supportDocField.value = relationship.supportDocumentLocation || '';
-        doc.addField(supportDocField);
-
-        yPosition += 14;
-      }
+      yPosition += otherInfoHeight + 5;
     });
   }
 

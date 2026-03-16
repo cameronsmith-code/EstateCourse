@@ -3544,6 +3544,30 @@ export default function StepForm({
 
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Date of Separation
+                            </label>
+                            <input
+                              type="date"
+                              value={client1PreviousRelationshipsData[index]?.dateOfSeparation || ''}
+                              onChange={(e) => handleClient1PrevRelChange(index, 'dateOfSeparation', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Date of Divorce
+                            </label>
+                            <input
+                              type="date"
+                              value={client1PreviousRelationshipsData[index]?.dateOfDivorce || ''}
+                              onChange={(e) => handleClient1PrevRelChange(index, 'dateOfDivorce', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
                               Other Information
                             </label>
                             <textarea
@@ -3656,6 +3680,30 @@ export default function StepForm({
                               value={client2PreviousRelationshipsData[index]?.name || ''}
                               onChange={(e) => handleClient2PrevRelChange(index, 'name', e.target.value)}
                               placeholder="Enter name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Date of Separation
+                            </label>
+                            <input
+                              type="date"
+                              value={client2PreviousRelationshipsData[index]?.dateOfSeparation || ''}
+                              onChange={(e) => handleClient2PrevRelChange(index, 'dateOfSeparation', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Date of Divorce
+                            </label>
+                            <input
+                              type="date"
+                              value={client2PreviousRelationshipsData[index]?.dateOfDivorce || ''}
+                              onChange={(e) => handleClient2PrevRelChange(index, 'dateOfDivorce', e.target.value)}
                               className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                           </div>

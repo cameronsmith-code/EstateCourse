@@ -760,6 +760,36 @@ export const generatePDF = (formData: FormData) => {
       doc.addField(phoneField);
       yPosition += rowHeight;
 
+      // Date of Separation row
+      doc.setFillColor(...colors.lightGray);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
+      doc.text('Date of Separation:', margin + 2, yPosition + 4);
+
+      const dateOfSeparationField = new doc.AcroFormTextField();
+      dateOfSeparationField.fieldName = `client1PrevRel${index}DateOfSeparation`;
+      dateOfSeparationField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
+      dateOfSeparationField.value = relationship.dateOfSeparation || '';
+      dateOfSeparationField.fontSize = 9;
+      dateOfSeparationField.textColor = colors.darkText;
+      doc.addField(dateOfSeparationField);
+      yPosition += rowHeight;
+
+      // Date of Divorce row
+      doc.setFillColor(...colors.lightGray);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
+      doc.text('Date of Divorce:', margin + 2, yPosition + 4);
+
+      const dateOfDivorceField = new doc.AcroFormTextField();
+      dateOfDivorceField.fieldName = `client1PrevRel${index}DateOfDivorce`;
+      dateOfDivorceField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
+      dateOfDivorceField.value = relationship.dateOfDivorce || '';
+      dateOfDivorceField.fontSize = 9;
+      dateOfDivorceField.textColor = colors.darkText;
+      doc.addField(dateOfDivorceField);
+      yPosition += rowHeight;
+
       // Other information row
       doc.setFillColor(...colors.lightGray);
       doc.rect(margin, yPosition, labelColumnWidth, largeRowHeight, 'FD');
@@ -867,6 +897,36 @@ export const generatePDF = (formData: FormData) => {
       phoneField.fontSize = 9;
       phoneField.textColor = colors.darkText;
       doc.addField(phoneField);
+      yPosition += rowHeight;
+
+      // Date of Separation row
+      doc.setFillColor(...colors.lightGray);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
+      doc.text('Date of Separation:', margin + 2, yPosition + 4);
+
+      const dateOfSeparationField = new doc.AcroFormTextField();
+      dateOfSeparationField.fieldName = `client2PrevRel${index}DateOfSeparation`;
+      dateOfSeparationField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
+      dateOfSeparationField.value = relationship.dateOfSeparation || '';
+      dateOfSeparationField.fontSize = 9;
+      dateOfSeparationField.textColor = colors.darkText;
+      doc.addField(dateOfSeparationField);
+      yPosition += rowHeight;
+
+      // Date of Divorce row
+      doc.setFillColor(...colors.lightGray);
+      doc.rect(margin, yPosition, labelColumnWidth, rowHeight, 'FD');
+      doc.rect(margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight, 'D');
+      doc.text('Date of Divorce:', margin + 2, yPosition + 4);
+
+      const dateOfDivorceField = new doc.AcroFormTextField();
+      dateOfDivorceField.fieldName = `client2PrevRel${index}DateOfDivorce`;
+      dateOfDivorceField.Rect = [margin + labelColumnWidth, yPosition, valueColumnWidth, rowHeight];
+      dateOfDivorceField.value = relationship.dateOfDivorce || '';
+      dateOfDivorceField.fontSize = 9;
+      dateOfDivorceField.textColor = colors.darkText;
+      doc.addField(dateOfDivorceField);
       yPosition += rowHeight;
 
       // Other information row

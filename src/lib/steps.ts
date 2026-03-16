@@ -119,7 +119,10 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1HasPreviousRelationship',
-        label: 'Have you previously been married or in a common law relationship?',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, have you previously been married or in a common law relationship?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },

@@ -3228,6 +3228,55 @@ export const generatePDF = (formData: FormData) => {
 
     yPosition += 8;
 
+    const childrenData = formData.childrenData;
+    const hasDependentChildren = childrenData && Array.isArray(childrenData) && childrenData.some((child: any) => child?.financiallyIndependent === 'no');
+
+    if (hasDependentChildren) {
+      checkPageBreak(100);
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('Special Considerations for Minor or Dependent Children', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      const introText = `${clientNameText}, you have children who are under the age of majority or who rely on you for support, a Will is your only way to protect them:`;
+      const introLines = doc.splitTextToSize(introText, fieldWidth);
+      introLines.forEach((line: string) => {
+        checkPageBreak(6);
+        doc.text(line, margin, yPosition);
+        yPosition += 5;
+      });
+      yPosition += 3;
+
+      const childBulletPoints = [
+        { title: 'Choosing a Guardian:', text: 'You can name a guardian (called a "tutor" in Quebec) to raise your children if both parents are gone. Without this, a judge will decide who takes your children.' },
+        { title: 'Setting Up Trusts:', text: 'A Will allows you to create testamentary trusts. This means a trusted person manages the money for your kids so they don\'t receive a massive lump sum at age 18 or 19.' },
+        { title: 'Staging Inheritances:', text: 'You can decide that your children receive their inheritance in stages (for example, some at age 25 and the rest at 30) rather than all at once.' },
+        { title: 'Protecting Disability Benefits:', text: 'For children with special needs, you can set up a Henson Trust. This allows them to receive an inheritance without losing their government disability payments.' },
+        { title: 'Keeping the Government Out:', text: 'If you don\'t have a Will, the Public Trustee may take control of your children\'s money until they turn 18, which can be very restrictive and costly.' }
+      ];
+
+      childBulletPoints.forEach((bullet) => {
+        checkPageBreak(15);
+        doc.setFont(undefined, 'bold');
+        doc.text('• ' + bullet.title, margin + 3, yPosition);
+        yPosition += 5;
+
+        doc.setFont(undefined, 'normal');
+        const bulletLines = doc.splitTextToSize(bullet.text, fieldWidth - 6);
+        bulletLines.forEach((line: string) => {
+          checkPageBreak(6);
+          doc.text(line, margin + 6, yPosition);
+          yPosition += 5;
+        });
+        yPosition += 2;
+      });
+
+      yPosition += 8;
+    }
+
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
     doc.text('Estate Lawyer / Notary:', margin, yPosition);

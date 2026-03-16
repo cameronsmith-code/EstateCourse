@@ -595,7 +595,10 @@ export default function StepForm({
                   return null;
                 }
 
-                let customLabel = question.label;
+                let customLabel = typeof question.label === 'function'
+                  ? question.label(allAnswers || new Map())
+                  : question.label;
+
                 if (question.key === 'client1HasPreviousRelationship' && answers['maritalStatus'] === 'widowed') {
                   customLabel = 'Aside from your former spouse or common law partner\'s passing, have you previously been married or in a common law relationship with another person?';
                 }

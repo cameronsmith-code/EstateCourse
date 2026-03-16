@@ -1171,6 +1171,13 @@ export default function StepForm({
               <>
                 {step.questions.map((question) => {
 
+                if (question.key.startsWith('client2') && question.key.includes('Will') && !hasSpouse) {
+                  return null;
+                }
+                if (question.condition && !question.condition(answers)) {
+                  return null;
+                }
+
                 if (question.key === 'client2UsesAccountant' && !hasSpouse) {
                   return null;
                 }
@@ -1289,7 +1296,10 @@ export default function StepForm({
                   return null;
                 }
 
-                let customLabel = question.label;
+                let customLabel = typeof question.label === 'function'
+                  ? question.label(allAnswers || new Map())
+                  : question.label;
+
                 if (question.key === 'client1UsesAccountant') {
                   customLabel = `Do you (${client1Name}) use a professional accountant?`;
                 }

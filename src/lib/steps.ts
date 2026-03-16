@@ -740,6 +740,300 @@ export const STEPS: Step[] = [
     description: 'This section lists the core professionals who already know your history.',
     questions: [
       {
+        key: 'client1HasWill',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, do you have a Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1WillYear',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, in what year was your most recent Will prepared?`;
+        },
+        type: 'number',
+        placeholder: 'Enter year',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1WillPreparedInCanada',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, was your Will prepared in Canada?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1WillCountry',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `In what country was ${client1FirstName}'s Will prepared in?`;
+        },
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1WillPreparedInCanada === 'no',
+      },
+      {
+        key: 'client1WillProvince',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `In what Province/Territory was ${client1FirstName}'s Will prepared in?`;
+        },
+        type: 'text',
+        placeholder: 'Enter province/territory',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1WillPreparedInCanada === 'yes',
+      },
+      {
+        key: 'client1WillStorageLocation',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, where is your most recent Will stored ('wet ink'/original copy)?`;
+        },
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1HasDigitalWillCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, do you have a digital copy safely stored?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1DigitalWillLocation',
+        label: 'Where is the digital copy stored?',
+        type: 'text',
+        placeholder: 'Enter digital storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasDigitalWillCopy === 'yes',
+      },
+      {
+        key: 'client1HasSecondaryWill',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, do you have a Secondary Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1SecondaryWillSameTimeAndJurisdiction',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, was the Secondary Will prepared at the same time and same jurisdiction as the Primary Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes',
+      },
+      {
+        key: 'client1SecondaryWillJurisdiction',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, in what jurisdiction was your Secondary Will prepared in?`;
+        },
+        type: 'text',
+        placeholder: 'Enter jurisdiction',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillSameTimeAndJurisdiction === 'no',
+      },
+      {
+        key: 'client1SecondaryWillDate',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, what date was your Secondary Will prepared on?`;
+        },
+        type: 'date',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillSameTimeAndJurisdiction === 'no',
+      },
+      {
+        key: 'client2HasWill',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, do you have a Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2WillYear',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, in what year was your most recent Will prepared?`;
+        },
+        type: 'number',
+        placeholder: 'Enter year',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2WillPreparedInCanada',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, was your Will prepared in Canada?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2WillCountry',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `In what country was ${client2FirstName}'s Will prepared in?`;
+        },
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2WillPreparedInCanada === 'no',
+      },
+      {
+        key: 'client2WillProvince',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `In what Province/Territory was ${client2FirstName}'s Will prepared in?`;
+        },
+        type: 'text',
+        placeholder: 'Enter province/territory',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2WillPreparedInCanada === 'yes',
+      },
+      {
+        key: 'client2WillStorageLocation',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, where is your most recent Will stored ('wet ink'/original copy)?`;
+        },
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2HasDigitalWillCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, do you have a digital copy safely stored?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2DigitalWillLocation',
+        label: 'Where is the digital copy stored?',
+        type: 'text',
+        placeholder: 'Enter digital storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasDigitalWillCopy === 'yes',
+      },
+      {
+        key: 'client2HasSecondaryWill',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, do you have a Secondary Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2SecondaryWillSameTimeAndJurisdiction',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, was the Secondary Will prepared at the same time and same jurisdiction as the Primary Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasSecondaryWill === 'yes',
+      },
+      {
+        key: 'client2SecondaryWillJurisdiction',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, in what jurisdiction was your Secondary Will prepared in?`;
+        },
+        type: 'text',
+        placeholder: 'Enter jurisdiction',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillSameTimeAndJurisdiction === 'no',
+      },
+      {
+        key: 'client2SecondaryWillDate',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, what date was your Secondary Will prepared on?`;
+        },
+        type: 'date',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillSameTimeAndJurisdiction === 'no',
+      },
+      {
         key: 'client1HasFuneralArrangements',
         label: 'Have you made arrangements for Funeral or Cemetery services?',
         type: 'radio',

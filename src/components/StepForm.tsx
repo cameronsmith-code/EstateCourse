@@ -131,6 +131,53 @@ export default function StepForm({
     }
   }, [answers['client2HasSecondaryWill']]);
 
+  useEffect(() => {
+    if (answers['client1HasWill'] === 'no') {
+      const keysToClear = [
+        'client1WillYear',
+        'client1WillPreparedInCanada',
+        'client1WillCountry',
+        'client1WillProvince',
+        'client1WillStorageLocation',
+        'client1HasDigitalWillCopy',
+        'client1DigitalWillLocation',
+        'client1HasSecondaryWill',
+        'client1SecondaryWillSameTimeAndJurisdiction',
+        'client1SecondaryWillJurisdiction',
+        'client1SecondaryWillDate',
+        'client1HasHensonTrust'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasWill']]);
+
+  useEffect(() => {
+    if (answers['client2HasWill'] === 'no') {
+      const keysToClear = [
+        'client2WillYear',
+        'client2WillPreparedInCanada',
+        'client2WillCountry',
+        'client2WillProvince',
+        'client2WillStorageLocation',
+        'client2HasDigitalWillCopy',
+        'client2DigitalWillLocation',
+        'client2HasSecondaryWill',
+        'client2SecondaryWillSameTimeAndJurisdiction',
+        'client2SecondaryWillJurisdiction',
+        'client2SecondaryWillDate'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasWill']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');

@@ -101,16 +101,13 @@ export default function Wizard() {
     }
   };
 
-  const handlePrevious = async () => {
+  const handlePrevious = () => {
     const prevVisible = getPreviousVisibleStep(validCurrentStep);
 
     if (prevVisible !== null) {
-      if (prevVisible === validCurrentStep - 1) {
-        await previousStep();
-      } else {
-        for (let i = validCurrentStep - 1; i >= prevVisible; i--) {
-          await previousStep();
-        }
+      const stepsToGoBack = validCurrentStep - prevVisible;
+      for (let i = 0; i < stepsToGoBack; i++) {
+        previousStep();
       }
     }
   };
@@ -124,12 +121,14 @@ export default function Wizard() {
     if (targetStepId === validCurrentStep) return;
 
     if (targetStepId > validCurrentStep) {
-      for (let i = validCurrentStep; i < targetStepId; i++) {
+      const stepsToAdvance = targetStepId - validCurrentStep;
+      for (let i = 0; i < stepsToAdvance; i++) {
         await nextStep();
       }
     } else {
-      for (let i = validCurrentStep; i > targetStepId; i--) {
-        await previousStep();
+      const stepsToGoBack = validCurrentStep - targetStepId;
+      for (let i = 0; i < stepsToGoBack; i++) {
+        previousStep();
       }
     }
   };

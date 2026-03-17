@@ -10583,10 +10583,14 @@ You should explore this as an option with your legal and CFP® professionals bec
   if (formData.client1PreviousRelationshipsData && formData.client1PreviousRelationshipsData.length > 0) {
     formData.client1PreviousRelationshipsData.forEach((rel, index) => {
       if (rel.hasSpousalSupport === 'yes' && rel.supportDocumentLocation) {
+        const relationshipName = rel.name ? ` with ${rel.name}` : '';
+        const needsNameField = !rel.name;
         client1Documents.push({
-          type: `${client1Name} - Spousal Support Agreement (Relationship ${index + 1})`,
-          location: rel.supportDocumentLocation
-        });
+          type: `${client1Name} - Spousal Support Agreement${relationshipName}`,
+          location: rel.supportDocumentLocation,
+          needsNameField: needsNameField,
+          nameFieldId: `client1_spousal_support_name_${index}`
+        } as any);
       }
     });
   }
@@ -10648,10 +10652,14 @@ You should explore this as an option with your legal and CFP® professionals bec
     if (formData.client2PreviousRelationshipsData && formData.client2PreviousRelationshipsData.length > 0) {
       formData.client2PreviousRelationshipsData.forEach((rel, index) => {
         if (rel.hasSpousalSupport === 'yes' && rel.supportDocumentLocation) {
+          const relationshipName = rel.name ? ` with ${rel.name}` : '';
+          const needsNameField = !rel.name;
           client2Documents.push({
-            type: `${client2Name} - Spousal Support Agreement (Relationship ${index + 1})`,
-            location: rel.supportDocumentLocation
-          });
+            type: `${client2Name} - Spousal Support Agreement${relationshipName}`,
+            location: rel.supportDocumentLocation,
+            needsNameField: needsNameField,
+            nameFieldId: `client2_spousal_support_name_${index}`
+          } as any);
         }
       });
     }
@@ -10812,7 +10820,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     doc.setFont(undefined, 'normal');
     doc.setFontSize(8);
 
-    client1Documents.forEach((docItem) => {
+    client1Documents.forEach((docItem: any) => {
       if (yPosition > 270) {
         doc.addPage();
         yPosition = 12;
@@ -10822,8 +10830,24 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight);
       doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight);
 
-      const typeText = doc.splitTextToSize(docItem.type, docTableLabelWidth - 4);
-      doc.text(typeText, margin + 2, yPosition + 5);
+      if (docItem.needsNameField) {
+        // Create fillable text with "with _______" format
+        const baseText = `${docItem.type} with `;
+        const textWidth = doc.getTextWidth(baseText);
+        doc.text(baseText, margin + 2, yPosition + 5);
+
+        // Add fillable field for the name
+        const nameField = new doc.AcroFormTextField();
+        nameField.fieldName = docItem.nameFieldId;
+        nameField.Rect = [margin + 2 + textWidth, yPosition + 1, docTableLabelWidth - textWidth - 4, docTableCellHeight - 2];
+        nameField.fontSize = 8;
+        nameField.textColor = colors.darkText;
+        nameField.borderStyle = 'underline';
+        doc.addField(nameField);
+      } else {
+        const typeText = doc.splitTextToSize(docItem.type, docTableLabelWidth - 4);
+        doc.text(typeText, margin + 2, yPosition + 5);
+      }
 
       const locationField = new doc.AcroFormTextField();
       locationField.fieldName = `doc_location_${docItem.type.replace(/[^a-zA-Z0-9]/g, '_')}`;
@@ -10873,7 +10897,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     doc.setFont(undefined, 'normal');
     doc.setFontSize(8);
 
-    client2Documents.forEach((docItem) => {
+    client2Documents.forEach((docItem: any) => {
       if (yPosition > 270) {
         doc.addPage();
         yPosition = 12;
@@ -10883,8 +10907,24 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight);
       doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight);
 
-      const typeText = doc.splitTextToSize(docItem.type, docTableLabelWidth - 4);
-      doc.text(typeText, margin + 2, yPosition + 5);
+      if (docItem.needsNameField) {
+        // Create fillable text with "with _______" format
+        const baseText = `${docItem.type} with `;
+        const textWidth = doc.getTextWidth(baseText);
+        doc.text(baseText, margin + 2, yPosition + 5);
+
+        // Add fillable field for the name
+        const nameField = new doc.AcroFormTextField();
+        nameField.fieldName = docItem.nameFieldId;
+        nameField.Rect = [margin + 2 + textWidth, yPosition + 1, docTableLabelWidth - textWidth - 4, docTableCellHeight - 2];
+        nameField.fontSize = 8;
+        nameField.textColor = colors.darkText;
+        nameField.borderStyle = 'underline';
+        doc.addField(nameField);
+      } else {
+        const typeText = doc.splitTextToSize(docItem.type, docTableLabelWidth - 4);
+        doc.text(typeText, margin + 2, yPosition + 5);
+      }
 
       const locationField = new doc.AcroFormTextField();
       locationField.fieldName = `doc_location_${docItem.type.replace(/[^a-zA-Z0-9]/g, '_')}`;

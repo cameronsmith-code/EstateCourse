@@ -1252,6 +1252,36 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'client1HasAlternatePoaPersonalCare',
+        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCareCount',
+        label: 'How many alternate attorneys have you named?',
+        type: 'number',
+        placeholder: 'Enter number',
+        max: 5,
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
         key: 'client2HasPoaPersonalCare',
         label: (answers) => {
           const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
@@ -1416,6 +1446,36 @@ export const STEPS: Step[] = [
           const basicAnswers = allAnswers?.get(1) || {};
           const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
           return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2HasAlternatePoaPersonalCare',
+        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCareCount',
+        label: 'How many alternate attorneys have you named?',
+        type: 'number',
+        placeholder: 'Enter number',
+        max: 5,
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes';
         },
       },
       {

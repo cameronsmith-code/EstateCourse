@@ -737,6 +737,30 @@ export default function StepForm({
     onAnswerChange('client1PoaPersonalCareData', updated);
   };
 
+  const client1AlternatePoaPersonalCareCount = parseInt(answers['client1AlternatePoaPersonalCareCount'] as string) || 0;
+  const client1AlternatePoaPersonalCareData = (answers['client1AlternatePoaPersonalCareData'] as Array<Record<string, string>>) || Array(Math.max(0, client1AlternatePoaPersonalCareCount || 0)).fill(null).map(() => ({}));
+
+  const handleAlternatePoaPersonalCareChange = (index: number, field: string, value: string) => {
+    const updated = [...client1AlternatePoaPersonalCareData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client1AlternatePoaPersonalCareData', updated);
+  };
+
+  const client2AlternatePoaPersonalCareCount = parseInt(answers['client2AlternatePoaPersonalCareCount'] as string) || 0;
+  const client2AlternatePoaPersonalCareData = (answers['client2AlternatePoaPersonalCareData'] as Array<Record<string, string>>) || Array(Math.max(0, client2AlternatePoaPersonalCareCount || 0)).fill(null).map(() => ({}));
+
+  const handleClient2AlternatePoaPersonalCareChange = (index: number, field: string, value: string) => {
+    const updated = [...client2AlternatePoaPersonalCareData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
+    onAnswerChange('client2AlternatePoaPersonalCareData', updated);
+  };
+
   const client1PoaPropertyCount = parseInt(answers['client1PoaPropertyCount'] as string) || 0;
   const client1PoaPropertyData = (answers['client1PoaPropertyData'] as Array<Record<string, string>>) || Array(Math.max(0, client1PoaPropertyCount || 0)).fill(null).map(() => ({}));
 
@@ -1033,6 +1057,326 @@ export default function StepForm({
                   />
                 );
               })}
+
+              {answers['client1HasAlternatePoaPersonalCare'] === 'yes' && client1AlternatePoaPersonalCareCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Alternate Powers of Attorney for Personal Care - Client 1</h3>
+                  {Array.from({ length: client1AlternatePoaPersonalCareCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Alternate Attorney {index + 1}</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Name *</label>
+                          <input
+                            type="text"
+                            value={client1AlternatePoaPersonalCareData[index]?.name || ''}
+                            onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'name', e.target.value)}
+                            placeholder="Enter full name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
+                          <input
+                            type="tel"
+                            value={client1AlternatePoaPersonalCareData[index]?.phone || ''}
+                            onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
+                          <input
+                            type="email"
+                            value={client1AlternatePoaPersonalCareData[index]?.email || ''}
+                            onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Relationship to You *</label>
+                          <input
+                            type="text"
+                            value={client1AlternatePoaPersonalCareData[index]?.relationship || ''}
+                            onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'relationship', e.target.value)}
+                            placeholder="e.g., Spouse, Child, Sibling, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Is this person a resident of Canada? *</label>
+                          <div className="space-y-2">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="yes"
+                                checked={client1AlternatePoaPersonalCareData[index]?.isCanadaResident === 'yes'}
+                                onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'isCanadaResident', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">Yes</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="no"
+                                checked={client1AlternatePoaPersonalCareData[index]?.isCanadaResident === 'no'}
+                                onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'isCanadaResident', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">No</span>
+                            </label>
+                          </div>
+                        </div>
+                        {client1AlternatePoaPersonalCareData[index]?.isCanadaResident === 'no' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Country of Residence *</label>
+                            <input
+                              type="text"
+                              value={client1AlternatePoaPersonalCareData[index]?.country || ''}
+                              onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'country', e.target.value)}
+                              placeholder="Enter country"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        )}
+                        {client1AlternatePoaPersonalCareData[index]?.isCanadaResident === 'yes' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Province/Territory *</label>
+                            <select
+                              value={client1AlternatePoaPersonalCareData[index]?.province || ''}
+                              onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'province', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Select province/territory</option>
+                              <option value="Alberta">Alberta</option>
+                              <option value="British Columbia">British Columbia</option>
+                              <option value="Manitoba">Manitoba</option>
+                              <option value="New Brunswick">New Brunswick</option>
+                              <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                              <option value="Northwest Territories">Northwest Territories</option>
+                              <option value="Nova Scotia">Nova Scotia</option>
+                              <option value="Nunavut">Nunavut</option>
+                              <option value="Ontario">Ontario</option>
+                              <option value="Prince Edward Island">Prince Edward Island</option>
+                              <option value="Quebec">Quebec</option>
+                              <option value="Saskatchewan">Saskatchewan</option>
+                              <option value="Yukon">Yukon</option>
+                            </select>
+                          </div>
+                        )}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">City of Residence *</label>
+                          <input
+                            type="text"
+                            value={client1AlternatePoaPersonalCareData[index]?.city || ''}
+                            onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'city', e.target.value)}
+                            placeholder="Enter city"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Does this person have a copy of your most recent Power of Attorney for Personal Care document? *</label>
+                          <div className="space-y-2">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="yes_on_file"
+                                checked={client1AlternatePoaPersonalCareData[index]?.hasDocCopy === 'yes_on_file'}
+                                onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'hasDocCopy', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">Yes, on their files</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="no_can_access"
+                                checked={client1AlternatePoaPersonalCareData[index]?.hasDocCopy === 'no_can_access'}
+                                onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'hasDocCopy', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">No, but they know how to access the document if/when necessary</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="no_not_discussed"
+                                checked={client1AlternatePoaPersonalCareData[index]?.hasDocCopy === 'no_not_discussed'}
+                                onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'hasDocCopy', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">No, this has not been discussed</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {answers['client2HasAlternatePoaPersonalCare'] === 'yes' && client2AlternatePoaPersonalCareCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Alternate Powers of Attorney for Personal Care - Client 2</h3>
+                  {Array.from({ length: client2AlternatePoaPersonalCareCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Alternate Attorney {index + 1}</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Name *</label>
+                          <input
+                            type="text"
+                            value={client2AlternatePoaPersonalCareData[index]?.name || ''}
+                            onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'name', e.target.value)}
+                            placeholder="Enter full name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
+                          <input
+                            type="tel"
+                            value={client2AlternatePoaPersonalCareData[index]?.phone || ''}
+                            onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'phone', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
+                          <input
+                            type="email"
+                            value={client2AlternatePoaPersonalCareData[index]?.email || ''}
+                            onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'email', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Relationship to You *</label>
+                          <input
+                            type="text"
+                            value={client2AlternatePoaPersonalCareData[index]?.relationship || ''}
+                            onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'relationship', e.target.value)}
+                            placeholder="e.g., Spouse, Child, Sibling, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Is this person a resident of Canada? *</label>
+                          <div className="space-y-2">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="yes"
+                                checked={client2AlternatePoaPersonalCareData[index]?.isCanadaResident === 'yes'}
+                                onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'isCanadaResident', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">Yes</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="no"
+                                checked={client2AlternatePoaPersonalCareData[index]?.isCanadaResident === 'no'}
+                                onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'isCanadaResident', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">No</span>
+                            </label>
+                          </div>
+                        </div>
+                        {client2AlternatePoaPersonalCareData[index]?.isCanadaResident === 'no' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Country of Residence *</label>
+                            <input
+                              type="text"
+                              value={client2AlternatePoaPersonalCareData[index]?.country || ''}
+                              onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'country', e.target.value)}
+                              placeholder="Enter country"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        )}
+                        {client2AlternatePoaPersonalCareData[index]?.isCanadaResident === 'yes' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Province/Territory *</label>
+                            <select
+                              value={client2AlternatePoaPersonalCareData[index]?.province || ''}
+                              onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'province', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Select province/territory</option>
+                              <option value="Alberta">Alberta</option>
+                              <option value="British Columbia">British Columbia</option>
+                              <option value="Manitoba">Manitoba</option>
+                              <option value="New Brunswick">New Brunswick</option>
+                              <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                              <option value="Northwest Territories">Northwest Territories</option>
+                              <option value="Nova Scotia">Nova Scotia</option>
+                              <option value="Nunavut">Nunavut</option>
+                              <option value="Ontario">Ontario</option>
+                              <option value="Prince Edward Island">Prince Edward Island</option>
+                              <option value="Quebec">Quebec</option>
+                              <option value="Saskatchewan">Saskatchewan</option>
+                              <option value="Yukon">Yukon</option>
+                            </select>
+                          </div>
+                        )}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">City of Residence *</label>
+                          <input
+                            type="text"
+                            value={client2AlternatePoaPersonalCareData[index]?.city || ''}
+                            onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'city', e.target.value)}
+                            placeholder="Enter city"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Does this person have a copy of your most recent Power of Attorney for Personal Care document? *</label>
+                          <div className="space-y-2">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="yes_on_file"
+                                checked={client2AlternatePoaPersonalCareData[index]?.hasDocCopy === 'yes_on_file'}
+                                onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'hasDocCopy', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">Yes, on their files</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="no_can_access"
+                                checked={client2AlternatePoaPersonalCareData[index]?.hasDocCopy === 'no_can_access'}
+                                onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'hasDocCopy', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">No, but they know how to access the document if/when necessary</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="no_not_discussed"
+                                checked={client2AlternatePoaPersonalCareData[index]?.hasDocCopy === 'no_not_discussed'}
+                                onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'hasDocCopy', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">No, this has not been discussed</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
 

@@ -125,6 +125,9 @@ interface FormData {
   client1PoaPersonalCareProvince?: string;
   client1PoaPersonalCareCity?: string;
   client1PoaPersonalCareHasDocCopy?: string;
+  client1HasAlternatePoaPersonalCare?: string;
+  client1AlternatePoaPersonalCareCount?: string;
+  client1AlternatePoaPersonalCareData?: Array<Record<string, string>>;
   client1HasContingentPoaPersonalCare?: string;
   client1PoaPersonalCareCount?: string;
   client1PoaPersonalCareDocLocation?: string;
@@ -138,6 +141,8 @@ interface FormData {
     province?: string;
     city?: string;
     providedCopy?: string;
+    isCanadaResident?: string;
+    hasDocCopy?: string;
   }>;
   client1HasPoaProperty?: string;
   client1HasContingentPoaProperty?: string;
@@ -180,6 +185,9 @@ interface FormData {
   client2PoaPersonalCareProvince?: string;
   client2PoaPersonalCareCity?: string;
   client2PoaPersonalCareHasDocCopy?: string;
+  client2HasAlternatePoaPersonalCare?: string;
+  client2AlternatePoaPersonalCareCount?: string;
+  client2AlternatePoaPersonalCareData?: Array<Record<string, string>>;
   client2HasContingentPoaPersonalCare?: string;
   client2PoaPersonalCareCount?: string;
   client2PoaPersonalCareDocLocation?: string;
@@ -193,6 +201,8 @@ interface FormData {
     province?: string;
     city?: string;
     providedCopy?: string;
+    isCanadaResident?: string;
+    hasDocCopy?: string;
   }>;
   client2HasPoaProperty?: string;
   client2HasContingentPoaProperty?: string;
@@ -426,6 +436,49 @@ export const generatePDF = (formData: FormData) => {
     black: [0, 0, 0] as [number, number, number],
     borderGray: [200, 200, 200] as [number, number, number],
   };
+
+  // Transform POA Personal Care data: merge primary flat fields with alternates
+  if (formData.client1HasPoaPersonalCare === 'yes' && formData.client1SpouseIsPoaPersonalCare !== 'yes') {
+    const primaryPOA: Record<string, string | undefined> = {
+      name: formData.client1PoaPersonalCareName,
+      phone: formData.client1PoaPersonalCarePhone,
+      email: formData.client1PoaPersonalCareEmail,
+      relationship: formData.client1PoaPersonalCareRelationship,
+      isCanadaResident: formData.client1PoaPersonalCareIsCanadaResident,
+      country: formData.client1PoaPersonalCareCountry,
+      province: formData.client1PoaPersonalCareProvince,
+      city: formData.client1PoaPersonalCareCity,
+      hasDocCopy: formData.client1PoaPersonalCareHasDocCopy,
+    };
+
+    const alternates = (formData.client1AlternatePoaPersonalCareData as Array<Record<string, string>>) || [];
+    const allPOAs = [primaryPOA, ...alternates];
+
+    formData.client1PoaPersonalCareData = allPOAs;
+    formData.client1PoaPersonalCareCount = allPOAs.length.toString();
+    formData.client1HasContingentPoaPersonalCare = alternates.length > 0 ? 'yes' : 'no';
+  }
+
+  if (formData.client2HasPoaPersonalCare === 'yes' && formData.client2SpouseIsPoaPersonalCare !== 'yes') {
+    const primaryPOA: Record<string, string | undefined> = {
+      name: formData.client2PoaPersonalCareName,
+      phone: formData.client2PoaPersonalCarePhone,
+      email: formData.client2PoaPersonalCareEmail,
+      relationship: formData.client2PoaPersonalCareRelationship,
+      isCanadaResident: formData.client2PoaPersonalCareIsCanadaResident,
+      country: formData.client2PoaPersonalCareCountry,
+      province: formData.client2PoaPersonalCareProvince,
+      city: formData.client2PoaPersonalCareCity,
+      hasDocCopy: formData.client2PoaPersonalCareHasDocCopy,
+    };
+
+    const alternates = (formData.client2AlternatePoaPersonalCareData as Array<Record<string, string>>) || [];
+    const allPOAs = [primaryPOA, ...alternates];
+
+    formData.client2PoaPersonalCareData = allPOAs;
+    formData.client2PoaPersonalCareCount = allPOAs.length.toString();
+    formData.client2HasContingentPoaPersonalCare = alternates.length > 0 ? 'yes' : 'no';
+  }
 
   // Helper function: Add page header (for pages after the first)
   const addPageHeader = () => {
@@ -3506,7 +3559,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.text(`(${client1Name}) and (${client2Name}), indicated that they are each other's Powers of Attorney for Personal Care.`, margin, yPosition);
       yPosition += 6;
     } else if (formData.client1PoaPersonalCareName) {
-      doc.text(`${client1Name}'s Power of Attorney for Personal Care:`, margin, yPosition);
+      doc.text(`${client1Name}'s Primary Power of Attorney for Personal Care:`, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 8;
 
@@ -3607,18 +3660,18 @@ You should explore this as an option with your legal and CFP® professionals bec
     if (formData.client1HasContingentPoaPersonalCare === 'no') {
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      doc.text('Contingent Power(s) of Attorney:', margin, yPosition);
+      doc.text('Alternate Power(s) of Attorney for Personal Care:', margin, yPosition);
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name} indicated that they have not named other or contingent Power(s) of Attorney for Personal Care - consider updating this.`, margin, yPosition);
+      doc.text(`${client1Name} indicated that they have not named alternate Power(s) of Attorney for Personal Care.`, margin, yPosition);
       yPosition += 10;
     } else if (formData.client1HasContingentPoaPersonalCare === 'yes' && formData.client1PoaPersonalCareCount) {
       const poaCount = parseInt(formData.client1PoaPersonalCareCount, 10);
 
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      doc.text('Contingent Power(s) of Attorney:', margin, yPosition);
+      doc.text('Alternate Power(s) of Attorney for Personal Care:', margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 8;
 
@@ -3893,7 +3946,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.text(`(Note: (${client1Name}) and (${client2Name}), are each other's primary POA for Personal Care)`, margin, yPosition);
       yPosition += 6;
     } else if (formData.client2PoaPersonalCareName) {
-      doc.text(`${client2Name}'s Power of Attorney for Personal Care:`, margin, yPosition);
+      doc.text(`${client2Name}'s Primary Power of Attorney for Personal Care:`, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 8;
 
@@ -4002,11 +4055,11 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
-    doc.text('Contingent Power(s) of Attorney:', margin, yPosition);
+    doc.text('Alternate Power(s) of Attorney for Personal Care:', margin, yPosition);
     yPosition += 6;
     doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
-    doc.text(`${client2Name} indicated that they have not named other or contingent Power(s) of Attorney for Personal Care - consider updating this.`, margin, yPosition);
+    doc.text(`${client2Name} indicated that they have not named alternate Power(s) of Attorney for Personal Care.`, margin, yPosition);
     yPosition += 10;
   } else if (formData.client2HasContingentPoaPersonalCare === 'yes' && formData.client2PoaPersonalCareCount) {
     const poaCount = parseInt(formData.client2PoaPersonalCareCount, 10);
@@ -4018,7 +4071,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
-    doc.text('Contingent Power(s) of Attorney:', margin, yPosition);
+    doc.text('Alternate Power(s) of Attorney for Personal Care:', margin, yPosition);
     doc.setFont(undefined, 'normal');
     yPosition += 8;
 

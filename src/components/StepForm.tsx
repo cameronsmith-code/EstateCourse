@@ -1058,7 +1058,7 @@ export default function StepForm({
                 );
               })}
 
-              {answers['client1HasAlternatePoaPersonalCare'] === 'yes' && client1AlternatePoaPersonalCareCount > 0 && (
+              {false && answers['client1HasAlternatePoaPersonalCare'] === 'yes' && client1AlternatePoaPersonalCareCount > 0 && (
                 <div className="space-y-6 mt-6">
                   <h3 className="text-xl font-semibold text-white">Alternate Powers of Attorney for Personal Care - Client 1</h3>
                   {Array.from({ length: client1AlternatePoaPersonalCareCount }).map((_, index) => (
@@ -1218,7 +1218,7 @@ export default function StepForm({
                 </div>
               )}
 
-              {answers['client2HasAlternatePoaPersonalCare'] === 'yes' && client2AlternatePoaPersonalCareCount > 0 && (
+              {false && answers['client2HasAlternatePoaPersonalCare'] === 'yes' && client2AlternatePoaPersonalCareCount > 0 && (
                 <div className="space-y-6 mt-6">
                   <h3 className="text-xl font-semibold text-white">Alternate Powers of Attorney for Personal Care - Client 2</h3>
                   {Array.from({ length: client2AlternatePoaPersonalCareCount }).map((_, index) => (

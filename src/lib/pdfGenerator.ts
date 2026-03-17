@@ -451,7 +451,26 @@ export const generatePDF = (formData: FormData) => {
       hasDocCopy: formData.client1PoaPersonalCareHasDocCopy,
     };
 
-    const alternates = (formData.client1AlternatePoaPersonalCareData as Array<Record<string, string>>) || [];
+    const alternates: Array<Record<string, string | undefined>> = [];
+
+    // Collect alternates from flat fields (up to 5)
+    for (let i = 1; i <= 5; i++) {
+      const nameKey = `client1AlternatePoaPersonalCare${i}Name` as keyof typeof formData;
+      if (formData[nameKey]) {
+        alternates.push({
+          name: formData[`client1AlternatePoaPersonalCare${i}Name` as keyof typeof formData] as string,
+          phone: formData[`client1AlternatePoaPersonalCare${i}Phone` as keyof typeof formData] as string,
+          email: formData[`client1AlternatePoaPersonalCare${i}Email` as keyof typeof formData] as string,
+          relationship: formData[`client1AlternatePoaPersonalCare${i}Relationship` as keyof typeof formData] as string,
+          isCanadaResident: formData[`client1AlternatePoaPersonalCare${i}IsCanadaResident` as keyof typeof formData] as string,
+          country: formData[`client1AlternatePoaPersonalCare${i}Country` as keyof typeof formData] as string,
+          province: formData[`client1AlternatePoaPersonalCare${i}Province` as keyof typeof formData] as string,
+          city: formData[`client1AlternatePoaPersonalCare${i}City` as keyof typeof formData] as string,
+          hasDocCopy: formData[`client1AlternatePoaPersonalCare${i}HasDocCopy` as keyof typeof formData] as string,
+        });
+      }
+    }
+
     const allPOAs = [primaryPOA, ...alternates];
 
     formData.client1PoaPersonalCareData = allPOAs;
@@ -472,7 +491,26 @@ export const generatePDF = (formData: FormData) => {
       hasDocCopy: formData.client2PoaPersonalCareHasDocCopy,
     };
 
-    const alternates = (formData.client2AlternatePoaPersonalCareData as Array<Record<string, string>>) || [];
+    const alternates: Array<Record<string, string | undefined>> = [];
+
+    // Collect alternates from flat fields (up to 5)
+    for (let i = 1; i <= 5; i++) {
+      const nameKey = `client2AlternatePoaPersonalCare${i}Name` as keyof typeof formData;
+      if (formData[nameKey]) {
+        alternates.push({
+          name: formData[`client2AlternatePoaPersonalCare${i}Name` as keyof typeof formData] as string,
+          phone: formData[`client2AlternatePoaPersonalCare${i}Phone` as keyof typeof formData] as string,
+          email: formData[`client2AlternatePoaPersonalCare${i}Email` as keyof typeof formData] as string,
+          relationship: formData[`client2AlternatePoaPersonalCare${i}Relationship` as keyof typeof formData] as string,
+          isCanadaResident: formData[`client2AlternatePoaPersonalCare${i}IsCanadaResident` as keyof typeof formData] as string,
+          country: formData[`client2AlternatePoaPersonalCare${i}Country` as keyof typeof formData] as string,
+          province: formData[`client2AlternatePoaPersonalCare${i}Province` as keyof typeof formData] as string,
+          city: formData[`client2AlternatePoaPersonalCare${i}City` as keyof typeof formData] as string,
+          hasDocCopy: formData[`client2AlternatePoaPersonalCare${i}HasDocCopy` as keyof typeof formData] as string,
+        });
+      }
+    }
+
     const allPOAs = [primaryPOA, ...alternates];
 
     formData.client2PoaPersonalCareData = allPOAs;

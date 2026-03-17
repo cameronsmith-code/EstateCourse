@@ -10801,8 +10801,8 @@ You should explore this as an option with your legal and CFP® professionals bec
     yPosition += 6;
 
     const docTableCellHeight = 8;
-    const docTableLabelWidth = fieldWidth * 0.4;
-    const docTableValueWidth = fieldWidth * 0.6;
+    const docTableLabelWidth = fieldWidth * 0.667;
+    const docTableValueWidth = fieldWidth * 0.333;
 
     // Header row
     doc.setDrawColor(...colors.borderGray);
@@ -10878,8 +10878,8 @@ You should explore this as an option with your legal and CFP® professionals bec
     yPosition += 6;
 
     const docTableCellHeight = 8;
-    const docTableLabelWidth = fieldWidth * 0.4;
-    const docTableValueWidth = fieldWidth * 0.6;
+    const docTableLabelWidth = fieldWidth * 0.667;
+    const docTableValueWidth = fieldWidth * 0.333;
 
     // Header row
     doc.setDrawColor(...colors.borderGray);

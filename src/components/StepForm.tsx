@@ -178,6 +178,134 @@ export default function StepForm({
     }
   }, [answers['client2HasWill']]);
 
+  useEffect(() => {
+    if (answers['client1WillPreparedInCanada'] === 'yes') {
+      if (answers['client1WillCountry'] !== undefined) {
+        onAnswerChange('client1WillCountry', undefined);
+      }
+    } else if (answers['client1WillPreparedInCanada'] === 'no') {
+      if (answers['client1WillProvince'] !== undefined) {
+        onAnswerChange('client1WillProvince', undefined);
+      }
+    }
+  }, [answers['client1WillPreparedInCanada']]);
+
+  useEffect(() => {
+    if (answers['client2WillPreparedInCanada'] === 'yes') {
+      if (answers['client2WillCountry'] !== undefined) {
+        onAnswerChange('client2WillCountry', undefined);
+      }
+    } else if (answers['client2WillPreparedInCanada'] === 'no') {
+      if (answers['client2WillProvince'] !== undefined) {
+        onAnswerChange('client2WillProvince', undefined);
+      }
+    }
+  }, [answers['client2WillPreparedInCanada']]);
+
+  useEffect(() => {
+    if (answers['client1HasDigitalWillCopy'] === 'no') {
+      if (answers['client1DigitalWillLocation'] !== undefined) {
+        onAnswerChange('client1DigitalWillLocation', undefined);
+      }
+    }
+  }, [answers['client1HasDigitalWillCopy']]);
+
+  useEffect(() => {
+    if (answers['client2HasDigitalWillCopy'] === 'no') {
+      if (answers['client2DigitalWillLocation'] !== undefined) {
+        onAnswerChange('client2DigitalWillLocation', undefined);
+      }
+    }
+  }, [answers['client2HasDigitalWillCopy']]);
+
+  useEffect(() => {
+    if (answers['client1SecondaryWillSameTimeAndJurisdiction'] === 'yes') {
+      const keysToClear = [
+        'client1SecondaryWillJurisdiction',
+        'client1SecondaryWillDate'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1SecondaryWillSameTimeAndJurisdiction']]);
+
+  useEffect(() => {
+    if (answers['client2SecondaryWillSameTimeAndJurisdiction'] === 'yes') {
+      const keysToClear = [
+        'client2SecondaryWillJurisdiction',
+        'client2SecondaryWillDate'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2SecondaryWillSameTimeAndJurisdiction']]);
+
+  useEffect(() => {
+    if (answers['client1HasFuneralArrangements'] === 'no') {
+      if (answers['client1FuneralArrangementsLocation'] !== undefined) {
+        onAnswerChange('client1FuneralArrangementsLocation', undefined);
+      }
+    }
+  }, [answers['client1HasFuneralArrangements']]);
+
+  useEffect(() => {
+    if (answers['client2HasFuneralArrangements'] === 'no') {
+      if (answers['client2FuneralArrangementsLocation'] !== undefined) {
+        onAnswerChange('client2FuneralArrangementsLocation', undefined);
+      }
+    }
+  }, [answers['client2HasFuneralArrangements']]);
+
+  useEffect(() => {
+    if (answers['client1HasDiscussedFuneral'] === 'no') {
+      const keysToClear = [
+        'client1FuneralWrittenDown',
+        'client1FuneralDocLocation'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasDiscussedFuneral']]);
+
+  useEffect(() => {
+    if (answers['client2HasDiscussedFuneral'] === 'no') {
+      const keysToClear = [
+        'client2FuneralWrittenDown',
+        'client2FuneralDocLocation'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasDiscussedFuneral']]);
+
+  useEffect(() => {
+    if (answers['client1FuneralWrittenDown'] === 'no') {
+      if (answers['client1FuneralDocLocation'] !== undefined) {
+        onAnswerChange('client1FuneralDocLocation', undefined);
+      }
+    }
+  }, [answers['client1FuneralWrittenDown']]);
+
+  useEffect(() => {
+    if (answers['client2FuneralWrittenDown'] === 'no') {
+      if (answers['client2FuneralDocLocation'] !== undefined) {
+        onAnswerChange('client2FuneralDocLocation', undefined);
+      }
+    }
+  }, [answers['client2FuneralWrittenDown']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');

@@ -115,6 +115,16 @@ interface FormData {
     email?: string;
   }>;
   client1HasPoaPersonalCare?: string;
+  client1SpouseIsPoaPersonalCare?: string;
+  client1PoaPersonalCareName?: string;
+  client1PoaPersonalCarePhone?: string;
+  client1PoaPersonalCareEmail?: string;
+  client1PoaPersonalCareRelationship?: string;
+  client1PoaPersonalCareIsCanadaResident?: string;
+  client1PoaPersonalCareCountry?: string;
+  client1PoaPersonalCareProvince?: string;
+  client1PoaPersonalCareCity?: string;
+  client1PoaPersonalCareHasDocCopy?: string;
   client1HasContingentPoaPersonalCare?: string;
   client1PoaPersonalCareCount?: string;
   client1PoaPersonalCareDocLocation?: string;
@@ -160,8 +170,17 @@ interface FormData {
     providedCopy?: string;
   }>;
   client2HasPoaPersonalCare?: string;
-  client2HasContingentPoaPersonalCare?: string;
   client2SpouseIsPoaPersonalCare?: string;
+  client2PoaPersonalCareName?: string;
+  client2PoaPersonalCarePhone?: string;
+  client2PoaPersonalCareEmail?: string;
+  client2PoaPersonalCareRelationship?: string;
+  client2PoaPersonalCareIsCanadaResident?: string;
+  client2PoaPersonalCareCountry?: string;
+  client2PoaPersonalCareProvince?: string;
+  client2PoaPersonalCareCity?: string;
+  client2PoaPersonalCareHasDocCopy?: string;
+  client2HasContingentPoaPersonalCare?: string;
   client2PoaPersonalCareCount?: string;
   client2PoaPersonalCareDocLocation?: string;
   client2PoaPersonalCareData?: Array<{
@@ -3463,13 +3482,22 @@ You should explore this as an option with your legal and CFP® professionals bec
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
 
-    if (formData.spouseIsPoaPersonalCare === 'yes') {
-      doc.text(`${client1Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
+    if (formData.client1SpouseIsPoaPersonalCare === 'yes') {
+      doc.text(`${client1Name}'s Power of Attorney for Personal Care:`, margin, yPosition);
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
       doc.text(`${client1Name} indicated that ${client2Name} (spouse/common law partner) is their POA for Personal Care.`, margin, yPosition);
       yPosition += 6;
+
+      if (formData.client1PoaPersonalCareHasDocCopy) {
+        const docCopyLabel =
+          formData.client1PoaPersonalCareHasDocCopy === 'yes_on_file' ? 'Yes, on their files' :
+          formData.client1PoaPersonalCareHasDocCopy === 'no_can_access' ? 'No, but they know how to access the document if/when necessary' :
+          'No, this has not been discussed';
+        doc.text(`Document copy status: ${docCopyLabel}`, margin, yPosition);
+        yPosition += 6;
+      }
     } else if (formData.spousesPoaPersonalCare === 'yes') {
       doc.text('Powers of Attorney for Personal Care:', margin, yPosition);
       yPosition += 6;
@@ -3477,8 +3505,101 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.setFont(undefined, 'normal');
       doc.text(`(${client1Name}) and (${client2Name}), indicated that they are each other's Powers of Attorney for Personal Care.`, margin, yPosition);
       yPosition += 6;
+    } else if (formData.client1PoaPersonalCareName) {
+      doc.text(`${client1Name}'s Power of Attorney for Personal Care:`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text('Name:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      doc.text(formData.client1PoaPersonalCareName, margin + 30, yPosition);
+      yPosition += 5;
+
+      if (formData.client1PoaPersonalCarePhone) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Phone:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(formData.client1PoaPersonalCarePhone, margin + 30, yPosition);
+        yPosition += 5;
+      }
+
+      if (formData.client1PoaPersonalCareEmail) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Email:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(formData.client1PoaPersonalCareEmail, margin + 30, yPosition);
+        yPosition += 5;
+      }
+
+      if (formData.client1PoaPersonalCareRelationship) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Relationship:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(formData.client1PoaPersonalCareRelationship, margin + 30, yPosition);
+        yPosition += 5;
+      }
+
+      if (formData.client1PoaPersonalCareProvince) {
+        const provinceLabels: Record<string, string> = {
+          alberta: 'Alberta',
+          british_columbia: 'British Columbia',
+          manitoba: 'Manitoba',
+          new_brunswick: 'New Brunswick',
+          newfoundland_labrador: 'Newfoundland and Labrador',
+          northwest_territories: 'Northwest Territories',
+          nova_scotia: 'Nova Scotia',
+          nunavut: 'Nunavut',
+          ontario: 'Ontario',
+          prince_edward_island: 'Prince Edward Island',
+          quebec: 'Quebec',
+          saskatchewan: 'Saskatchewan',
+          yukon: 'Yukon'
+        };
+        const provinceLabel = provinceLabels[formData.client1PoaPersonalCareProvince] || formData.client1PoaPersonalCareProvince;
+
+        doc.setFont(undefined, 'bold');
+        doc.text('Location:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        const locationText = formData.client1PoaPersonalCareCity ?
+          `${formData.client1PoaPersonalCareCity}, ${provinceLabel}` :
+          provinceLabel;
+        doc.text(locationText, margin + 30, yPosition);
+        yPosition += 5;
+      } else if (formData.client1PoaPersonalCareCountry) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Location:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        const locationText = formData.client1PoaPersonalCareCity ?
+          `${formData.client1PoaPersonalCareCity}, ${formData.client1PoaPersonalCareCountry}` :
+          formData.client1PoaPersonalCareCountry;
+        doc.text(locationText, margin + 30, yPosition);
+        yPosition += 5;
+      }
+
+      if (formData.client1PoaPersonalCareHasDocCopy) {
+        const docCopyLabel =
+          formData.client1PoaPersonalCareHasDocCopy === 'yes_on_file' ? 'Yes, on their files' :
+          formData.client1PoaPersonalCareHasDocCopy === 'no_can_access' ? 'No, but they know how to access the document if/when necessary' :
+          'No, this has not been discussed';
+        doc.setFont(undefined, 'bold');
+        doc.text('Document copy:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(docCopyLabel, margin + 30, yPosition);
+        yPosition += 5;
+      }
+
+      yPosition += 3;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text('POA for Personal Care Type:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      doc.text('☐ Enduring/Continuing   ☐ Springing', margin + 55, yPosition);
+      yPosition += 8;
     } else {
-      doc.text(`${client1Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
+      doc.text(`${client1Name}'s Power of Attorney for Personal Care:`, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 8;
     }
@@ -3737,7 +3858,9 @@ You should explore this as an option with your legal and CFP® professionals bec
   }
 
   if (formData.client2HasPoaPersonalCare === 'yes') {
+    const client1Name = formData.fullName || 'Client 1';
     const client2Name = formData.spouseName || 'Client 2';
+
     if (yPosition > 230) {
       doc.addPage();
       yPosition = 12;
@@ -3747,23 +3870,123 @@ You should explore this as an option with your legal and CFP® professionals bec
     doc.setFont(undefined, 'bold');
 
     if (formData.client2SpouseIsPoaPersonalCare === 'yes') {
-      const client1Name = formData.fullName || 'Client 1';
-      doc.text(`${client2Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
+      doc.text(`${client2Name}'s Power of Attorney for Personal Care:`, margin, yPosition);
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
       doc.text(`${client2Name} indicated that ${client1Name} (spouse/common law partner) is their POA for Personal Care.`, margin, yPosition);
       yPosition += 6;
+
+      if (formData.client2PoaPersonalCareHasDocCopy) {
+        const docCopyLabel =
+          formData.client2PoaPersonalCareHasDocCopy === 'yes_on_file' ? 'Yes, on their files' :
+          formData.client2PoaPersonalCareHasDocCopy === 'no_can_access' ? 'No, but they know how to access the document if/when necessary' :
+          'No, this has not been discussed';
+        doc.text(`Document copy status: ${docCopyLabel}`, margin, yPosition);
+        yPosition += 6;
+      }
     } else if (formData.spousesPoaPersonalCare === 'yes') {
-      const client1Name = formData.fullName || 'Client 1';
-      doc.text(`${client2Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
+      doc.text(`${client2Name}'s Power of Attorney for Personal Care:`, margin, yPosition);
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
       doc.text(`(Note: (${client1Name}) and (${client2Name}), are each other's primary POA for Personal Care)`, margin, yPosition);
       yPosition += 6;
+    } else if (formData.client2PoaPersonalCareName) {
+      doc.text(`${client2Name}'s Power of Attorney for Personal Care:`, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 8;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text('Name:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      doc.text(formData.client2PoaPersonalCareName, margin + 30, yPosition);
+      yPosition += 5;
+
+      if (formData.client2PoaPersonalCarePhone) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Phone:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(formData.client2PoaPersonalCarePhone, margin + 30, yPosition);
+        yPosition += 5;
+      }
+
+      if (formData.client2PoaPersonalCareEmail) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Email:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(formData.client2PoaPersonalCareEmail, margin + 30, yPosition);
+        yPosition += 5;
+      }
+
+      if (formData.client2PoaPersonalCareRelationship) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Relationship:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(formData.client2PoaPersonalCareRelationship, margin + 30, yPosition);
+        yPosition += 5;
+      }
+
+      if (formData.client2PoaPersonalCareProvince) {
+        const provinceLabels: Record<string, string> = {
+          alberta: 'Alberta',
+          british_columbia: 'British Columbia',
+          manitoba: 'Manitoba',
+          new_brunswick: 'New Brunswick',
+          newfoundland_labrador: 'Newfoundland and Labrador',
+          northwest_territories: 'Northwest Territories',
+          nova_scotia: 'Nova Scotia',
+          nunavut: 'Nunavut',
+          ontario: 'Ontario',
+          prince_edward_island: 'Prince Edward Island',
+          quebec: 'Quebec',
+          saskatchewan: 'Saskatchewan',
+          yukon: 'Yukon'
+        };
+        const provinceLabel = provinceLabels[formData.client2PoaPersonalCareProvince] || formData.client2PoaPersonalCareProvince;
+
+        doc.setFont(undefined, 'bold');
+        doc.text('Location:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        const locationText = formData.client2PoaPersonalCareCity ?
+          `${formData.client2PoaPersonalCareCity}, ${provinceLabel}` :
+          provinceLabel;
+        doc.text(locationText, margin + 30, yPosition);
+        yPosition += 5;
+      } else if (formData.client2PoaPersonalCareCountry) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Location:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        const locationText = formData.client2PoaPersonalCareCity ?
+          `${formData.client2PoaPersonalCareCity}, ${formData.client2PoaPersonalCareCountry}` :
+          formData.client2PoaPersonalCareCountry;
+        doc.text(locationText, margin + 30, yPosition);
+        yPosition += 5;
+      }
+
+      if (formData.client2PoaPersonalCareHasDocCopy) {
+        const docCopyLabel =
+          formData.client2PoaPersonalCareHasDocCopy === 'yes_on_file' ? 'Yes, on their files' :
+          formData.client2PoaPersonalCareHasDocCopy === 'no_can_access' ? 'No, but they know how to access the document if/when necessary' :
+          'No, this has not been discussed';
+        doc.setFont(undefined, 'bold');
+        doc.text('Document copy:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(docCopyLabel, margin + 30, yPosition);
+        yPosition += 5;
+      }
+
+      yPosition += 3;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text('POA for Personal Care Type:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      doc.text('☐ Enduring/Continuing   ☐ Springing', margin + 55, yPosition);
+      yPosition += 8;
     } else {
-      doc.text(`${client2Name}'s Powers of Attorney for Personal Care:`, margin, yPosition);
+      doc.text(`${client2Name}'s Power of Attorney for Personal Care:`, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 8;
     }

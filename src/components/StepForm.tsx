@@ -306,6 +306,116 @@ export default function StepForm({
     }
   }, [answers['client2FuneralWrittenDown']]);
 
+  useEffect(() => {
+    if (answers['client1HasPoaPersonalCare'] === 'no') {
+      const keysToClear = [
+        'client1SpouseIsPoaPersonalCare',
+        'client1PoaPersonalCareName',
+        'client1PoaPersonalCarePhone',
+        'client1PoaPersonalCareEmail',
+        'client1PoaPersonalCareRelationship',
+        'client1PoaPersonalCareIsCanadaResident',
+        'client1PoaPersonalCareCountry',
+        'client1PoaPersonalCareProvince',
+        'client1PoaPersonalCareCity',
+        'client1PoaPersonalCareHasDocCopy'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasPoaPersonalCare']]);
+
+  useEffect(() => {
+    if (answers['client2HasPoaPersonalCare'] === 'no') {
+      const keysToClear = [
+        'client2SpouseIsPoaPersonalCare',
+        'client2PoaPersonalCareName',
+        'client2PoaPersonalCarePhone',
+        'client2PoaPersonalCareEmail',
+        'client2PoaPersonalCareRelationship',
+        'client2PoaPersonalCareIsCanadaResident',
+        'client2PoaPersonalCareCountry',
+        'client2PoaPersonalCareProvince',
+        'client2PoaPersonalCareCity',
+        'client2PoaPersonalCareHasDocCopy'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasPoaPersonalCare']]);
+
+  useEffect(() => {
+    if (answers['client1SpouseIsPoaPersonalCare'] === 'yes') {
+      const keysToClear = [
+        'client1PoaPersonalCareName',
+        'client1PoaPersonalCarePhone',
+        'client1PoaPersonalCareEmail',
+        'client1PoaPersonalCareRelationship',
+        'client1PoaPersonalCareIsCanadaResident',
+        'client1PoaPersonalCareCountry',
+        'client1PoaPersonalCareProvince',
+        'client1PoaPersonalCareCity',
+        'client1PoaPersonalCareHasDocCopy'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1SpouseIsPoaPersonalCare']]);
+
+  useEffect(() => {
+    if (answers['client2SpouseIsPoaPersonalCare'] === 'yes') {
+      const keysToClear = [
+        'client2PoaPersonalCareName',
+        'client2PoaPersonalCarePhone',
+        'client2PoaPersonalCareEmail',
+        'client2PoaPersonalCareRelationship',
+        'client2PoaPersonalCareIsCanadaResident',
+        'client2PoaPersonalCareCountry',
+        'client2PoaPersonalCareProvince',
+        'client2PoaPersonalCareCity',
+        'client2PoaPersonalCareHasDocCopy'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2SpouseIsPoaPersonalCare']]);
+
+  useEffect(() => {
+    if (answers['client1PoaPersonalCareIsCanadaResident'] === 'yes') {
+      if (answers['client1PoaPersonalCareCountry'] !== undefined) {
+        onAnswerChange('client1PoaPersonalCareCountry', undefined);
+      }
+    } else if (answers['client1PoaPersonalCareIsCanadaResident'] === 'no') {
+      if (answers['client1PoaPersonalCareProvince'] !== undefined) {
+        onAnswerChange('client1PoaPersonalCareProvince', undefined);
+      }
+    }
+  }, [answers['client1PoaPersonalCareIsCanadaResident']]);
+
+  useEffect(() => {
+    if (answers['client2PoaPersonalCareIsCanadaResident'] === 'yes') {
+      if (answers['client2PoaPersonalCareCountry'] !== undefined) {
+        onAnswerChange('client2PoaPersonalCareCountry', undefined);
+      }
+    } else if (answers['client2PoaPersonalCareIsCanadaResident'] === 'no') {
+      if (answers['client2PoaPersonalCareProvince'] !== undefined) {
+        onAnswerChange('client2PoaPersonalCareProvince', undefined);
+      }
+    }
+  }, [answers['client2PoaPersonalCareIsCanadaResident']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');

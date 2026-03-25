@@ -308,6 +308,14 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
+        key: 'soleProprietorshipName',
+        label: 'Business Name:',
+        type: 'text',
+        placeholder: 'Enter business name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasSoleProprietorship === 'yes',
+      },
+      {
         key: 'soleProprietorshipNature',
         label: 'Nature of Business:',
         type: 'select',
@@ -581,6 +589,14 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
+        key: 'partnershipName',
+        label: 'Business Name:',
+        type: 'text',
+        placeholder: 'Enter partnership name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasPartnership === 'yes',
+      },
+      {
         key: 'client2HasSoleProprietorship',
         label: (answers) => {
           const client2Name = answers.get(1)?.spouseName || 'Client 2';
@@ -595,6 +611,18 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => {
           const maritalStatus = formData.maritalStatus;
           return maritalStatus === 'married' || maritalStatus === 'common_law';
+        },
+      },
+      {
+        key: 'client2SoleProprietorshipName',
+        label: 'Business Name:',
+        type: 'text',
+        placeholder: 'Enter business name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          return hasSpouse && formData.client2HasSoleProprietorship === 'yes';
         },
       },
       {
@@ -696,6 +724,18 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => {
           const maritalStatus = formData.maritalStatus;
           return maritalStatus === 'married' || maritalStatus === 'common_law';
+        },
+      },
+      {
+        key: 'client2PartnershipName',
+        label: 'Business Name:',
+        type: 'text',
+        placeholder: 'Enter partnership name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          return hasSpouse && formData.client2HasPartnership === 'yes';
         },
       },
     ],

@@ -2302,6 +2302,7 @@ export const generatePDF = (formData: FormData) => {
     const revenueValue = revenueLabels[formData.soleProprietorshipRevenue || ''] || '';
 
     const soleProprietorshipRows = [
+      { label: 'Business Name:', value: formData.soleProprietorshipName || '' },
       { label: 'Nature of Business:', value: natureValue },
       { label: 'Approximate Annual Gross Revenue:', value: revenueValue },
     ];
@@ -2428,7 +2429,22 @@ export const generatePDF = (formData: FormData) => {
     doc.setFont(undefined, 'normal');
     doc.setTextColor(...colors.darkText);
     doc.text(`${businessClient1Name} has ownership interests in a partnership.`, margin, yPosition);
-    yPosition += 10;
+    yPosition += 8;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('Business Name:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 2;
+
+    const partnershipNameField = new doc.AcroFormTextField();
+    partnershipNameField.fieldName = 'partnershipName';
+    partnershipNameField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+    partnershipNameField.fontSize = 10;
+    partnershipNameField.textColor = colors.darkText;
+    partnershipNameField.value = formData.partnershipName || '';
+    doc.addField(partnershipNameField);
+
+    yPosition += 12;
   }
 
   if (hasSpouseForBusiness && (formData.client2HasSoleProprietorship === 'yes' || formData.client2HasPartnership === 'yes')) {
@@ -2464,6 +2480,7 @@ export const generatePDF = (formData: FormData) => {
       }).filter((text: string) => text).join(', ');
 
       const client2SoleProprietorshipRows = [
+        { label: 'Business Name:', value: formData.client2SoleProprietorshipName || '' },
         { label: 'Nature of Business:', value: client2NatureValue },
         { label: 'Approximate Annual Gross Revenue:', value: client2RevenueValue },
         { label: 'Business Attributes:', value: client2AttributesText },
@@ -2513,7 +2530,22 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'normal');
       doc.setTextColor(...colors.darkText);
       doc.text(`${businessClient2Name} has ownership interests in a partnership.`, margin, yPosition);
-      yPosition += 10;
+      yPosition += 8;
+
+      doc.setFont(undefined, 'bold');
+      doc.text('Business Name:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      const client2PartnershipNameField = new doc.AcroFormTextField();
+      client2PartnershipNameField.fieldName = 'client2PartnershipName';
+      client2PartnershipNameField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+      client2PartnershipNameField.fontSize = 10;
+      client2PartnershipNameField.textColor = colors.darkText;
+      client2PartnershipNameField.value = formData.client2PartnershipName || '';
+      doc.addField(client2PartnershipNameField);
+
+      yPosition += 12;
     }
   }
 

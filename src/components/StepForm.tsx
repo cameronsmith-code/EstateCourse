@@ -1788,6 +1788,51 @@ export default function StepForm({
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Is there a shareholder agreement? *
+                          </label>
+                          <div className="flex gap-4">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`hasShareholderAgreement-${index}`}
+                                value="yes"
+                                checked={corporationsData[index]?.hasShareholderAgreement === 'yes'}
+                                onChange={(e) => handleCorporationChange(index, 'hasShareholderAgreement', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-gray-300">Yes</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`hasShareholderAgreement-${index}`}
+                                value="no"
+                                checked={corporationsData[index]?.hasShareholderAgreement === 'no'}
+                                onChange={(e) => handleCorporationChange(index, 'hasShareholderAgreement', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-gray-300">No</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        {corporationsData[index]?.hasShareholderAgreement === 'yes' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Location of the shareholder agreement *
+                            </label>
+                            <input
+                              type="text"
+                              value={corporationsData[index]?.shareholderAgreementLocation || ''}
+                              onChange={(e) => handleCorporationChange(index, 'shareholderAgreementLocation', e.target.value)}
+                              placeholder="e.g., Home office filing cabinet, Safety deposit box, etc."
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

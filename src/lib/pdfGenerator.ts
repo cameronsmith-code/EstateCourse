@@ -383,6 +383,8 @@ interface FormData {
     minuteBookLocation?: string;
     hasOtherOwner?: string;
     otherOwners?: string;
+    hasShareholderAgreement?: string;
+    shareholderAgreementLocation?: string;
   }>;
   client1HasFuneralArrangements?: string;
   client1HasDiscussedFuneral?: string;
@@ -2604,6 +2606,10 @@ export const generatePDF = (formData: FormData) => {
         }
         const ownersValue = ownersArray.join(', ');
 
+        const shareholderAgreementValue = corporation?.hasShareholderAgreement === 'yes'
+          ? (corporation?.shareholderAgreementLocation || '')
+          : (corporation?.hasShareholderAgreement === 'no' ? 'No shareholder agreement' : '');
+
         const corpRows = [
           { label: `${ordinal} Corporation's Name:`, value: corporation?.legalName || '', fieldName: 'name' },
           { label: 'This company was incorporated in:', value: corporation?.jurisdiction || '', fieldName: 'jurisdiction' },
@@ -2611,6 +2617,7 @@ export const generatePDF = (formData: FormData) => {
           { label: 'Owner(s):', value: ownersValue, fieldName: 'owners' },
           { label: 'Location of the Articles of Incorporation:', value: corporation?.articlesLocation || '', fieldName: 'articlesLocation' },
           { label: 'Location of Corporate Minute Book:', value: corporation?.minuteBookLocation || '', fieldName: 'minuteBookLocation' },
+          { label: 'Shareholder Agreement:', value: shareholderAgreementValue, fieldName: 'shareholderAgreement' },
         ];
 
         if (corporation?.corporationType === 'Holding Company') {

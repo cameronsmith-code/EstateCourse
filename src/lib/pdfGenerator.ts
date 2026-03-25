@@ -15,6 +15,7 @@ interface ChildData {
   disabilityOther?: string;
   independent?: string;
   medications?: string;
+  medicationList?: string;
   allergies?: string;
   allergyList?: string;
   allergyMedication?: string;
@@ -1188,16 +1189,49 @@ export const generatePDF = (formData: FormData) => {
 
         if (child.medications === 'yes') {
           doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
           doc.text('Long-term Medications:', margin, yPosition);
-          yPosition += 2;
-          const medField = new doc.AcroFormTextField();
-          medField.fieldName = `child${index + 1}_medications`;
-          medField.Rect = [margin, yPosition, fieldWidth - 15, 8];
-          medField.multiline = true;
-          medField.fontSize = 8;
-          medField.textColor = [0, 0, 0];
-          doc.addField(medField);
-          yPosition += 12;
+          yPosition += 5;
+
+          doc.setFont(undefined, 'normal');
+
+          let medicationList: Array<{ description: string }> = [];
+          try {
+            medicationList = JSON.parse(child.medicationList || '[]');
+          } catch (e) {
+            medicationList = [];
+          }
+
+          if (medicationList.length > 0) {
+            medicationList.forEach((medication, medIndex) => {
+              if (yPosition > 270) {
+                doc.addPage();
+                yPosition = 12;
+              }
+
+              if (medIndex > 0) {
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'bold');
+                doc.text(`Medication #${medIndex + 1}:`, margin, yPosition);
+                doc.setFont(undefined, 'normal');
+                yPosition += 4;
+              }
+
+              doc.text('Description and Nature:', margin, yPosition);
+              yPosition += 2;
+              const medDescField = new doc.AcroFormTextField();
+              medDescField.fieldName = `child${index + 1}_medication${medIndex + 1}_description`;
+              medDescField.Rect = [margin, yPosition, fieldWidth - 15, 8];
+              medDescField.multiline = true;
+              medDescField.fontSize = 8;
+              medDescField.textColor = [0, 0, 0];
+              medDescField.value = medication.description || '';
+              doc.addField(medDescField);
+              yPosition += 11;
+            });
+          }
+
+          yPosition += 3;
         }
 
         if (child.allergies === 'yes') {

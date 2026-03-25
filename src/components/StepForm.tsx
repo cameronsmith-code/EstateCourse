@@ -4756,6 +4756,85 @@ export default function StepForm({
                           </div>
                         </div>
 
+                        {childrenData[index]?.medications === 'yes' && (
+                          <>
+                            {(() => {
+                              const medicationList = JSON.parse(childrenData[index]?.medicationList || '[]') as Array<{ description: string; hasAdditional?: string }>;
+
+                              const handleMedicationChange = (medIndex: number, field: 'description' | 'hasAdditional', value: string) => {
+                                const updated = [...medicationList];
+                                if (!updated[medIndex]) {
+                                  updated[medIndex] = { description: '', hasAdditional: '' };
+                                }
+                                updated[medIndex][field] = value;
+                                handleChildChange(index, 'medicationList', JSON.stringify(updated));
+                              };
+
+                              if (medicationList.length === 0) {
+                                medicationList.push({ description: '', hasAdditional: '' });
+                              }
+
+                              return medicationList.map((medication, medIndex) => (
+                                <div key={medIndex} className="space-y-4 border-l-2 border-blue-500 pl-4">
+                                  {medIndex > 0 && (
+                                    <div className="text-sm font-medium text-blue-400 -ml-4 pl-4">
+                                      Additional Medication #{medIndex + 1}
+                                    </div>
+                                  )}
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Describe the medications and nature:
+                                    </label>
+                                    <textarea
+                                      value={medication.description || ''}
+                                      onChange={(e) => handleMedicationChange(medIndex, 'description', e.target.value)}
+                                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      rows={3}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Are there any additional long-term medications?
+                                    </label>
+                                    <div className="flex gap-4">
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          name={`hasAdditionalMedication-${index}-${medIndex}`}
+                                          value="yes"
+                                          checked={medication.hasAdditional === 'yes'}
+                                          onChange={(e) => {
+                                            handleMedicationChange(medIndex, 'hasAdditional', e.target.value);
+                                            if (e.target.value === 'yes' && medIndex === medicationList.length - 1) {
+                                              const updated = [...medicationList, { description: '', hasAdditional: '' }];
+                                              handleChildChange(index, 'medicationList', JSON.stringify(updated));
+                                            }
+                                          }}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-gray-300">Yes</span>
+                                      </label>
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          name={`hasAdditionalMedication-${index}-${medIndex}`}
+                                          value="no"
+                                          checked={medication.hasAdditional === 'no'}
+                                          onChange={(e) => handleMedicationChange(medIndex, 'hasAdditional', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-gray-300">No</span>
+                                      </label>
+                                    </div>
+                                  </div>
+                                </div>
+                              ));
+                            })()}
+                          </>
+                        )}
+
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Do they have any allergies?

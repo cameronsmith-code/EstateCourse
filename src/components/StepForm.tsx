@@ -1728,23 +1728,29 @@ export default function StepForm({
                                           {otherIndex === otherOwners.length - 1 && ownerName && ownerName.trim() !== '' && (
                                             <div>
                                               <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                Does anyone else have an ownership stake in the company?
+                                                Are there any additional shareholders of this corporation?
                                               </label>
-                                              <div className="flex space-x-4">
-                                                <button
-                                                  type="button"
-                                                  onClick={handleAddMoreOwner}
-                                                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                                >
-                                                  Yes
-                                                </button>
-                                                <button
-                                                  type="button"
-                                                  onClick={() => {}}
-                                                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:outline-none"
-                                                >
-                                                  No
-                                                </button>
+                                              <div className="flex gap-4">
+                                                <label className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`additionalShareholders-${index}-${otherIndex}`}
+                                                    value="yes"
+                                                    onChange={() => handleAddMoreOwner()}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">Yes</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`additionalShareholders-${index}-${otherIndex}`}
+                                                    value="no"
+                                                    onChange={() => {}}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">No</span>
+                                                </label>
                                               </div>
                                             </div>
                                           )}

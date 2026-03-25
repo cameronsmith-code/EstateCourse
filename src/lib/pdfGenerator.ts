@@ -2586,7 +2586,23 @@ export const generatePDF = (formData: FormData) => {
           ? `${corporation.corporationType} - ${corporation.corporationTypeOther}`
           : (corporation?.corporationType || '');
 
-        const ownersValue = corporation?.owners ? corporation.owners.replace(/,/g, ', ') : '';
+        let ownersArray: string[] = [];
+        if (corporation?.owners) {
+          ownersArray = corporation.owners.split(',');
+        }
+        if (corporation?.otherOwners) {
+          try {
+            const otherOwnersList = typeof corporation.otherOwners === 'string'
+              ? JSON.parse(corporation.otherOwners)
+              : corporation.otherOwners;
+            if (Array.isArray(otherOwnersList)) {
+              ownersArray = [...ownersArray, ...otherOwnersList.filter((owner: string) => owner && owner.trim() !== '')];
+            }
+          } catch (e) {
+            console.error('Error parsing otherOwners:', e);
+          }
+        }
+        const ownersValue = ownersArray.join(', ');
 
         const corpRows = [
           { label: `${ordinal} Corporation's Name:`, value: corporation?.legalName || '', fieldName: 'name' },

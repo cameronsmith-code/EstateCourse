@@ -3606,7 +3606,9 @@ export default function StepForm({
 
               {step.id === 7 && client1FinancialAdvisorsCount > 0 && (
                 <div className="space-y-6 mt-6">
-                  <h3 className="text-xl font-semibold text-white">Your Financial Advisors Details</h3>
+                  <h3 className="text-xl font-semibold text-white">
+                    {allAnswers?.get(1)?.fullName || 'Client 1'}'s financial advisor's details:
+                  </h3>
                   {Array.from({ length: client1FinancialAdvisorsCount }).map((_, index) => (
                     <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
                       <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
@@ -3671,7 +3673,9 @@ export default function StepForm({
 
               {step.id === 7 && client2FinancialAdvisorsCount > 0 && (
                 <div className="space-y-6 mt-6">
-                  <h3 className="text-xl font-semibold text-white">Spouse's Financial Advisors Details</h3>
+                  <h3 className="text-xl font-semibold text-white">
+                    {allAnswers?.get(1)?.spouseName || 'Client 2'}'s financial advisor's details:
+                  </h3>
                   {Array.from({ length: client2FinancialAdvisorsCount }).map((_, index) => (
                     <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
                       <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>

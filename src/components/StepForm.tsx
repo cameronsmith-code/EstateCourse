@@ -2,7 +2,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { Step } from '../lib/steps';
 import FormField from './FormField';
 import VideoPlayer from './VideoPlayer';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Trash2 } from 'lucide-react';
 
 type StepFormProps = {
   step: Step;
@@ -13,6 +13,8 @@ type StepFormProps = {
   onNext: () => void;
   onPrevious: () => void;
   onAnswerChange: (key: string, value: unknown) => void;
+  onClearCurrentStep: () => void;
+  currentStepNumber: number;
 };
 
 export default function StepForm({
@@ -24,8 +26,11 @@ export default function StepForm({
   onNext,
   onPrevious,
   onAnswerChange,
+  onClearCurrentStep,
+  currentStepNumber,
 }: StepFormProps) {
   const [validationError, setValidationError] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   useEffect(() => {
     const client1IsCameronSmith = answers['client1IsCameronSmithAdvisor'];
@@ -6496,39 +6501,80 @@ export default function StepForm({
             </div>
           )}
 
-          <div className="flex justify-between items-center pt-6 border-t border-gray-600">
-            <button
-              type="button"
-              onClick={onPrevious}
-              disabled={isFirstStep}
-              className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
-                isFirstStep
-                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              <ChevronLeft className="w-5 h-5 mr-2" />
-              Previous
-            </button>
+          <div className="flex flex-col gap-4 pt-6 border-t border-gray-600">
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowClearConfirm(true)}
+                className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors text-sm"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear All Answers on ONLY this page
+              </button>
+            </div>
 
-            <button
-              type="submit"
-              className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              {isLastStep ? (
-                <>
-                  Complete
-                  <Check className="w-5 h-5 ml-2" />
-                </>
-              ) : (
-                <>
-                  Next
-                  <ChevronRight className="w-5 h-5 ml-2" />
-                </>
-              )}
-            </button>
+            <div className="flex justify-between items-center">
+              <button
+                type="button"
+                onClick={onPrevious}
+                disabled={isFirstStep}
+                className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
+                  isFirstStep
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                <ChevronLeft className="w-5 h-5 mr-2" />
+                Previous
+              </button>
+
+              <button
+                type="submit"
+                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                {isLastStep ? (
+                  <>
+                    Complete
+                    <Check className="w-5 h-5 ml-2" />
+                  </>
+                ) : (
+                  <>
+                    Next
+                    <ChevronRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
+
+        {showClearConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-md mx-4">
+              <h3 className="text-xl font-semibold text-white mb-4">Clear Page Answers?</h3>
+              <p className="text-gray-300 mb-6">
+                This will clear all answers on this page and any answers in subsequent pages that depend on this page's information. This action cannot be undone.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setShowClearConfirm(false)}
+                  className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    onClearCurrentStep();
+                    setShowClearConfirm(false);
+                  }}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Clear Answers
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

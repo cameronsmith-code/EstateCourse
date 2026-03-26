@@ -21,6 +21,7 @@ export default function Wizard() {
     previousStep,
     completeQuestionnaire,
     clearAllAnswers,
+    clearCurrentStepAnswers,
   } = useQuestionnaire();
 
   useEffect(() => {
@@ -229,6 +230,8 @@ export default function Wizard() {
         onNext={handleNext}
         onPrevious={handlePrevious}
         onAnswerChange={(key, value) => updateAnswer(validCurrentStep, key, value)}
+        onClearCurrentStep={() => clearCurrentStepAnswers(validCurrentStep)}
+        currentStepNumber={validCurrentStep}
       />
 
       {questionnaire?.status === 'completed' && (

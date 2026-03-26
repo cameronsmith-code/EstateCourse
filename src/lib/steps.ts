@@ -952,6 +952,17 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillSameTimeAndJurisdiction === 'no',
       },
       {
+        key: 'client1WillMeaningfulChanges',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, since creating your Will, have there been any meaningful changes in your life, family, or financial situation that could affect your wishes? Such as:\n- Marriage, separation, or divorce\n- Birth or adoption of children/grandchildren\n- Death or incapacity of a beneficiary, executor, or guardian\n- Significant changes in assets (real estate, business interests, investments)\n- Changes in residency or tax jurisdiction`;
+        },
+        type: 'textarea',
+        placeholder: 'Describe any meaningful changes, or enter "None"',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
         key: 'client1HasHensonTrust',
         label: (answers) => {
           const client1Name = answers.get(1)?.fullName as string || 'Client 1';
@@ -1138,6 +1149,18 @@ export const STEPS: Step[] = [
         type: 'date',
         required: false,
         condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillSameTimeAndJurisdiction === 'no',
+      },
+      {
+        key: 'client2WillMeaningfulChanges',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, since creating your Will, have there been any meaningful changes in your life, family, or financial situation that could affect your wishes? Such as:\n- Marriage, separation, or divorce\n- Birth or adoption of children/grandchildren\n- Death or incapacity of a beneficiary, executor, or guardian\n- Significant changes in assets (real estate, business interests, investments)\n- Changes in residency or tax jurisdiction`;
+        },
+        type: 'textarea',
+        placeholder: 'Describe any meaningful changes, or enter "None"',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
       },
       {
         key: 'client1HasPoaPersonalCare',

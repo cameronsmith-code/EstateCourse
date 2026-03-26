@@ -3529,6 +3529,23 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
     }
 
+    if (formData.client1HasWill === 'yes' && formData.client1WillMeaningfulChanges) {
+      checkPageBreak(20);
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Meaningful changes since creating Will:`, margin, yPosition);
+      yPosition += 6;
+
+      doc.setFont(undefined, 'normal');
+      const changesLines = doc.splitTextToSize(formData.client1WillMeaningfulChanges, fieldWidth);
+      changesLines.forEach((line: string) => {
+        checkPageBreak(6);
+        doc.text(line, margin, yPosition);
+        yPosition += 5;
+      });
+      yPosition += 5;
+    }
+
     const hasDisabledChild = formData.childrenData && Array.isArray(formData.childrenData) &&
       formData.childrenData.some((child: any) => child?.disabled === 'yes');
 
@@ -3642,6 +3659,23 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.setFont(undefined, 'normal');
       doc.text(`${client2Name}'s secondary Will was prepared in ${formData.client2SecondaryWillJurisdiction}.`, margin, yPosition);
       yPosition += 6;
+    }
+
+    if (formData.client2HasWill === 'yes' && formData.client2WillMeaningfulChanges && hasSpouse) {
+      checkPageBreak(20);
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Meaningful changes since creating Will:`, margin, yPosition);
+      yPosition += 6;
+
+      doc.setFont(undefined, 'normal');
+      const changesLines = doc.splitTextToSize(formData.client2WillMeaningfulChanges, fieldWidth);
+      changesLines.forEach((line: string) => {
+        checkPageBreak(6);
+        doc.text(line, margin, yPosition);
+        yPosition += 5;
+      });
+      yPosition += 5;
     }
 
     if ((formData.client1HasWill === 'yes' && (formData.client1WillJurisdiction || formData.client1WillLocation)) ||

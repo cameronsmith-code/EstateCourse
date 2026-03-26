@@ -1,9 +1,18 @@
+const generateYearOptions = () => {
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let year = currentYear; year >= 1900; year--) {
+    years.push({ value: year.toString(), label: year.toString() });
+  }
+  return years;
+};
+
 export type StepQuestion = {
   key: string;
   label: string | ((answers: Map<number, Record<string, unknown>>) => string);
   type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'email' | 'date' | 'number';
   placeholder?: string;
-  options?: Array<{ value: string; label: string }>;
+  options?: Array<{ value: string; label: string }> | (() => Array<{ value: string; label: string }>);
   required?: boolean;
   videoUrl?: string;
   description?: string;
@@ -804,10 +813,10 @@ export const STEPS: Step[] = [
           const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
           return `${client1FirstName}, in what year was your most recent Will prepared?`;
         },
-        type: 'number',
-        placeholder: 'Enter year',
+        type: 'select',
+        placeholder: 'Select year',
+        options: generateYearOptions,
         required: false,
-        max: new Date().getFullYear(),
         condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
       },
       {
@@ -983,10 +992,10 @@ export const STEPS: Step[] = [
           const client2FirstName = client2Name.split(' ')[0];
           return `${client2FirstName}, in what year was your most recent Will prepared?`;
         },
-        type: 'number',
-        placeholder: 'Enter year',
+        type: 'select',
+        placeholder: 'Select year',
+        options: generateYearOptions,
         required: false,
-        max: new Date().getFullYear(),
         condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
       },
       {

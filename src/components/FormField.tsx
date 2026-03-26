@@ -49,6 +49,7 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
   }
 
   if (type === 'select') {
+    const resolvedOptions = typeof options === 'function' ? options() : options;
     return (
       <div className="mb-6">
         <label htmlFor={key} className="block text-sm font-medium text-gray-300 mb-2">
@@ -63,7 +64,7 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
           className={commonClasses}
         >
           <option value="">Select an option</option>
-          {options?.map((opt) => (
+          {resolvedOptions?.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
@@ -74,6 +75,7 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
   }
 
   if (type === 'radio') {
+    const resolvedOptions = typeof options === 'function' ? options() : options;
     return (
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-300 mb-3">
@@ -81,7 +83,7 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
           {required && <span className="text-red-400 ml-1">*</span>}
         </label>
         <div className="space-y-2">
-          {options?.map((opt) => (
+          {resolvedOptions?.map((opt) => (
             <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
               <input
                 type="radio"

@@ -1366,10 +1366,8 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes';
         },
       },
       {
@@ -1902,10 +1900,8 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes';
         },
       },
       {

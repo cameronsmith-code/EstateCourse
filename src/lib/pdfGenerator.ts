@@ -3430,7 +3430,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name} indicated that ${client2Name} (spouse/common law partner) is their POA for Personal Care.`, margin, yPosition);
+      doc.text(`${client2Name} is the primary Power of Attorney for Personal Care.`, margin, yPosition);
       yPosition += 6;
 
       if (formData.client1PoaPersonalCareHasDocCopy) {
@@ -3817,7 +3817,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 6;
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name} indicated that ${client1Name} (spouse/common law partner) is their POA for Personal Care.`, margin, yPosition);
+      doc.text(`${client1Name} is the primary Power of Attorney for Personal Care.`, margin, yPosition);
       yPosition += 6;
 
       if (formData.client2PoaPersonalCareHasDocCopy) {

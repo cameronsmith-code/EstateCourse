@@ -1207,18 +1207,20 @@ export const STEPS: Step[] = [
       {
         key: 'client1SpouseIsPoaPersonalCare',
         label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
           const spouseName = answers.get(1)?.spouseName as string || 'your spouse or common law partner';
-          return `Is ${spouseName} your Power of Attorney for Personal Care?`;
+          return `${client1Name}, is ${spouseName} your Power of Attorney for Personal Care?`;
         },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
         ],
-        required: false,
+        required: true,
         condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
           const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          const maritalStatus = basicAnswers.maritalStatus as string;
+          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
           return formData.client1HasPoaPersonalCare === 'yes' && hasSpouse;
         },
       },
@@ -1740,18 +1742,20 @@ export const STEPS: Step[] = [
       {
         key: 'client2SpouseIsPoaPersonalCare',
         label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
           const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Is ${client1Name} your Power of Attorney for Personal Care?`;
+          return `${client2Name}, is ${client1Name} your Power of Attorney for Personal Care?`;
         },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
         ],
-        required: false,
+        required: true,
         condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
           const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          const maritalStatus = basicAnswers.maritalStatus as string;
+          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
           return formData.client2HasPoaPersonalCare === 'yes' && hasSpouse;
         },
       },

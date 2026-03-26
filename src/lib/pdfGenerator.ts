@@ -3529,16 +3529,25 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
     }
 
-    if (formData.client1HasWill === 'yes' && formData.client1WillMeaningfulChanges) {
+    if (formData.client1HasWill === 'yes' && formData.client1HasWillMeaningfulChanges === 'yes' && formData.client1WillMeaningfulChangesDetails) {
+      checkPageBreak(30);
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      const meaningfulChangesText = `${client1Name} indicated that they have had meaningful changes in their life. They indicated: ${formData.client1WillMeaningfulChangesDetails} Based on the major changes, it is recommended that they update their Will, so that these changes and ${client1Name}'s wishes are up to date.`;
+      const changesLines = doc.splitTextToSize(meaningfulChangesText, fieldWidth);
+      changesLines.forEach((line: string) => {
+        checkPageBreak(6);
+        doc.text(line, margin, yPosition);
+        yPosition += 5;
+      });
+      yPosition += 5;
+    } else if (formData.client1HasWill === 'yes' && formData.client1HasWillMeaningfulChanges === 'no') {
       checkPageBreak(20);
       doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text(`Meaningful changes since creating Will:`, margin, yPosition);
-      yPosition += 6;
-
       doc.setFont(undefined, 'normal');
-      const changesLines = doc.splitTextToSize(formData.client1WillMeaningfulChanges, fieldWidth);
-      changesLines.forEach((line: string) => {
+      const noChangesText = `${client1Name} indicated that there have been no meaningful changes in their life, family, or financial situation that could affect their wishes.`;
+      const noChangesLines = doc.splitTextToSize(noChangesText, fieldWidth);
+      noChangesLines.forEach((line: string) => {
         checkPageBreak(6);
         doc.text(line, margin, yPosition);
         yPosition += 5;
@@ -3661,16 +3670,25 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 6;
     }
 
-    if (formData.client2HasWill === 'yes' && formData.client2WillMeaningfulChanges && hasSpouse) {
+    if (formData.client2HasWill === 'yes' && formData.client2HasWillMeaningfulChanges === 'yes' && formData.client2WillMeaningfulChangesDetails && hasSpouse) {
+      checkPageBreak(30);
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      const meaningfulChangesText = `${client2Name} indicated that they have had meaningful changes in their life. They indicated: ${formData.client2WillMeaningfulChangesDetails} Based on the major changes, it is recommended that they update their Will, so that these changes and ${client2Name}'s wishes are up to date.`;
+      const changesLines = doc.splitTextToSize(meaningfulChangesText, fieldWidth);
+      changesLines.forEach((line: string) => {
+        checkPageBreak(6);
+        doc.text(line, margin, yPosition);
+        yPosition += 5;
+      });
+      yPosition += 5;
+    } else if (formData.client2HasWill === 'yes' && formData.client2HasWillMeaningfulChanges === 'no' && hasSpouse) {
       checkPageBreak(20);
       doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text(`Meaningful changes since creating Will:`, margin, yPosition);
-      yPosition += 6;
-
       doc.setFont(undefined, 'normal');
-      const changesLines = doc.splitTextToSize(formData.client2WillMeaningfulChanges, fieldWidth);
-      changesLines.forEach((line: string) => {
+      const noChangesText = `${client2Name} indicated that there have been no meaningful changes in their life, family, or financial situation that could affect their wishes.`;
+      const noChangesLines = doc.splitTextToSize(noChangesText, fieldWidth);
+      noChangesLines.forEach((line: string) => {
         checkPageBreak(6);
         doc.text(line, margin, yPosition);
         yPosition += 5;

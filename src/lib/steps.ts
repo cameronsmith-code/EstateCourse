@@ -1207,9 +1207,8 @@ export const STEPS: Step[] = [
       {
         key: 'client1SpouseIsPoaPersonalCare',
         label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
           const spouseName = answers.get(1)?.spouseName as string || 'your spouse or common law partner';
-          return `${client1Name}, is ${spouseName} your Power of Attorney for Personal Care?`;
+          return `Is ${spouseName} your Power of Attorney for Personal Care?`;
         },
         type: 'radio',
         options: [
@@ -1742,9 +1741,8 @@ export const STEPS: Step[] = [
       {
         key: 'client2SpouseIsPoaPersonalCare',
         label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
           const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `${client2Name}, is ${client1Name} your Power of Attorney for Personal Care?`;
+          return `Is ${client1Name} your Power of Attorney for Personal Care?`;
         },
         type: 'radio',
         options: [

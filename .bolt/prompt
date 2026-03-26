@@ -7,3 +7,5 @@ Use icons from lucide-react for logos.
 The questionnaire should not ask for ANY personal information. It is meant as a tool to determine what personal information to ask for in the PDF.
 
 Do not add anything to my questionnaire or PDF that i do not explicitly tell you to add.
+
+In the questionnaire, if an answer is made that generates conditional subsequent questions which they subsequently answer... then change the answer to the initial question (which would remove the subsequent questions), remove all answers to the conditional subsequent questions.

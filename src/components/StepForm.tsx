@@ -422,55 +422,6 @@ export default function StepForm({
   }, [answers['client2PoaPersonalCareIsCanadaResident']]);
 
   useEffect(() => {
-    const isSameAddress = answers['isSameAddressAsBeginning'];
-    const isPrimaryResidence = answers['isPrimaryResidence'];
-
-    if (isPrimaryResidence === 'yes' && isSameAddress === 'yes') {
-      const basicInfo = allAnswers?.get(1);
-      if (basicInfo) {
-        if (basicInfo.address && answers['primaryResidenceAddress'] !== basicInfo.address) {
-          onAnswerChange('primaryResidenceAddress', basicInfo.address);
-        }
-        if (basicInfo.city && answers['primaryResidenceCity'] !== basicInfo.city) {
-          onAnswerChange('primaryResidenceCity', basicInfo.city);
-        }
-        if (basicInfo.province && answers['primaryResidenceProvince'] !== basicInfo.province) {
-          onAnswerChange('primaryResidenceProvince', basicInfo.province);
-        }
-        if (basicInfo.postalCode && answers['primaryResidencePostalCode'] !== basicInfo.postalCode) {
-          onAnswerChange('primaryResidencePostalCode', basicInfo.postalCode);
-        }
-      }
-    } else if (isPrimaryResidence === 'yes' && isSameAddress === 'no') {
-      // Clear the fields when switching from "yes" to "no"
-      const keysToClear = [
-        'primaryResidenceAddress',
-        'primaryResidenceCity',
-        'primaryResidenceProvince',
-        'primaryResidencePostalCode'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    } else if (isPrimaryResidence !== 'yes' || isSameAddress === undefined) {
-      // Clear all primary residence address fields if the questions are no longer relevant
-      const keysToClear = [
-        'primaryResidenceAddress',
-        'primaryResidenceCity',
-        'primaryResidenceProvince',
-        'primaryResidencePostalCode'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['isSameAddressAsBeginning'], answers['isPrimaryResidence'], allAnswers]);
-
-  useEffect(() => {
     const ownsRealEstate = answers['ownsRealEstate'];
 
     if (ownsRealEstate === 'no') {
@@ -478,10 +429,6 @@ export default function StepForm({
         'primaryResidenceOwner',
         'isPrimaryResidence',
         'isSameAddressAsBeginning',
-        'primaryResidenceAddress',
-        'primaryResidenceCity',
-        'primaryResidenceProvince',
-        'primaryResidencePostalCode',
         'hasAdditionalRealEstate',
         'additionalPropertiesCount'
       ];
@@ -498,11 +445,7 @@ export default function StepForm({
 
     if (isPrimaryResidence === 'no') {
       const keysToClear = [
-        'isSameAddressAsBeginning',
-        'primaryResidenceAddress',
-        'primaryResidenceCity',
-        'primaryResidenceProvince',
-        'primaryResidencePostalCode'
+        'isSameAddressAsBeginning'
       ];
       keysToClear.forEach(key => {
         if (answers[key] !== undefined) {

@@ -421,39 +421,6 @@ export default function StepForm({
     }
   }, [answers['client2PoaPersonalCareIsCanadaResident']]);
 
-  useEffect(() => {
-    const ownsRealEstate = answers['ownsRealEstate'];
-
-    if (ownsRealEstate === 'no') {
-      const keysToClear = [
-        'primaryResidenceOwner',
-        'isPrimaryResidence',
-        'isSameAddressAsBeginning',
-        'hasAdditionalRealEstate',
-        'additionalPropertiesCount'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['ownsRealEstate']]);
-
-  useEffect(() => {
-    const isPrimaryResidence = answers['isPrimaryResidence'];
-
-    if (isPrimaryResidence === 'no') {
-      const keysToClear = [
-        'isSameAddressAsBeginning'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['isPrimaryResidence']]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -3786,9 +3753,6 @@ export default function StepForm({
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
             const bankingStructure = answers['bankingStructure'];
-            const realEstateAnswers = allAnswers?.get(9) || {};
-            const ownsRealEstate = realEstateAnswers['ownsRealEstate'];
-            const isPrimaryResidence = realEstateAnswers['isPrimaryResidence'];
 
             const renderInstitutions = (key: string, count: string, label: string) => {
               const institutionCount = parseInt(answers[count] as string) || 0;
@@ -4145,21 +4109,6 @@ export default function StepForm({
                     return null;
                   }
 
-                  if (question.key === 'primaryResidenceOwner' && ownsRealEstate !== 'yes') {
-                    return null;
-                  }
-                  if (question.key === 'isPrimaryResidence' && ownsRealEstate !== 'yes') {
-                    return null;
-                  }
-                  if (question.key === 'isSameAddressAsBeginning' && isPrimaryResidence !== 'yes') {
-                    return null;
-                  }
-                  if (question.key === 'hasAdditionalRealEstate' && (ownsRealEstate !== 'yes' || isPrimaryResidence !== 'yes')) {
-                    return null;
-                  }
-                  if (question.key === 'additionalPropertiesCount' && answers['hasAdditionalRealEstate'] !== 'yes') {
-                    return null;
-                  }
 
                   if (question.key === 'primaryResidenceOwner') {
                     const ownerOptions = [
@@ -4181,10 +4130,6 @@ export default function StepForm({
                   }
 
                   if (question.key === 'additionalPropertiesCount') {
-                    if (answers['hasAdditionalRealEstate'] !== 'yes') {
-                      return null;
-                    }
-
                     const propertyCount = parseInt(answers['additionalPropertiesCount'] as string) || 0;
                     const propertiesData = (answers['propertiesData'] as Array<Record<string, string>>) || Array(Math.max(0, propertyCount || 0)).fill(null).map(() => ({}));
 

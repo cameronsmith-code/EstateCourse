@@ -2765,7 +2765,7 @@ export const STEPS: Step[] = [
         placeholder: 'Enter street address',
         required: false,
         condition: (formData: Record<string, string>) => {
-          return formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
+          return formData.ownsRealEstate === 'yes' && formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
         },
       },
       {
@@ -2775,7 +2775,7 @@ export const STEPS: Step[] = [
         placeholder: 'Enter city',
         required: false,
         condition: (formData: Record<string, string>) => {
-          return formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
+          return formData.ownsRealEstate === 'yes' && formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
         },
       },
       {
@@ -2799,7 +2799,7 @@ export const STEPS: Step[] = [
         ],
         required: false,
         condition: (formData: Record<string, string>) => {
-          return formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
+          return formData.ownsRealEstate === 'yes' && formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
         },
       },
       {
@@ -2809,7 +2809,7 @@ export const STEPS: Step[] = [
         placeholder: 'Enter postal code',
         required: false,
         condition: (formData: Record<string, string>) => {
-          return formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
+          return formData.ownsRealEstate === 'yes' && formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
         },
       },
       {

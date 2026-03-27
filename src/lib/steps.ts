@@ -2757,6 +2757,60 @@ export const STEPS: Step[] = [
         dependsOn: { key: 'isPrimaryResidence', value: 'yes' },
       },
       {
+        key: 'primaryResidenceAddress',
+        label: 'Address:',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
+        },
+      },
+      {
+        key: 'primaryResidenceCity',
+        label: 'City:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
+        },
+      },
+      {
+        key: 'primaryResidenceProvince',
+        label: 'Province:',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
+        },
+      },
+      {
+        key: 'primaryResidencePostalCode',
+        label: 'Postal Code:',
+        type: 'text',
+        placeholder: 'Enter postal code',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.isPrimaryResidence === 'yes' && formData.isSameAddressAsBeginning === 'no';
+        },
+      },
+      {
         key: 'hasAdditionalRealEstate',
         label: 'Do you own additional properties?',
         type: 'radio',

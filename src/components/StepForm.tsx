@@ -442,7 +442,18 @@ export default function StepForm({
         }
       }
     } else if (isPrimaryResidence === 'yes' && isSameAddress === 'no') {
-      // Do nothing - allow manual entry
+      // Clear the fields when switching from "yes" to "no"
+      const keysToClear = [
+        'primaryResidenceAddress',
+        'primaryResidenceCity',
+        'primaryResidenceProvince',
+        'primaryResidencePostalCode'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
     } else if (isPrimaryResidence !== 'yes' || isSameAddress === undefined) {
       // Clear all primary residence address fields if the questions are no longer relevant
       const keysToClear = [

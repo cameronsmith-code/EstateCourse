@@ -2805,7 +2805,8 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => {
           const owners = formData.property1Owners;
-          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && owners && owners.includes('other');
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && ownersArray.includes('other');
         },
       },
       {
@@ -3080,7 +3081,8 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => {
           const owners = formData.property2Owners;
-          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && owners && owners.includes('other');
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && ownersArray.includes('other');
         },
       },
       {
@@ -3354,7 +3356,8 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => {
           const owners = formData.property3Owners;
-          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && owners && owners.includes('other');
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && ownersArray.includes('other');
         },
       },
       {
@@ -3628,7 +3631,8 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => {
           const owners = formData.property4Owners;
-          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && owners && owners.includes('other');
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && ownersArray.includes('other');
         },
       },
       {
@@ -3902,7 +3906,8 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => {
           const owners = formData.property5Owners;
-          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && owners && owners.includes('other');
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && ownersArray.includes('other');
         },
       },
       {
@@ -4176,7 +4181,8 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => {
           const owners = formData.property6Owners;
-          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && owners && owners.includes('other');
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && ownersArray.includes('other');
         },
       },
       {
@@ -4450,7 +4456,8 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => {
           const owners = formData.property7Owners;
-          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && owners && owners.includes('other');
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && ownersArray.includes('other');
         },
       },
       {
@@ -4724,7 +4731,8 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => {
           const owners = formData.property8Owners;
-          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && owners && owners.includes('other');
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && ownersArray.includes('other');
         },
       },
       {
@@ -4998,7 +5006,8 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => {
           const owners = formData.property9Owners;
-          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && owners && owners.includes('other');
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && ownersArray.includes('other');
         },
       },
       {

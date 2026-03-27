@@ -493,6 +493,25 @@ export default function StepForm({
     }
   }, [answers['ownsRealEstate']]);
 
+  useEffect(() => {
+    const isPrimaryResidence = answers['isPrimaryResidence'];
+
+    if (isPrimaryResidence === 'no') {
+      const keysToClear = [
+        'isSameAddressAsBeginning',
+        'primaryResidenceAddress',
+        'primaryResidenceCity',
+        'primaryResidenceProvince',
+        'primaryResidencePostalCode'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['isPrimaryResidence']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');

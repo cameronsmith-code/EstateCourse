@@ -2712,6 +2712,13 @@ export const STEPS: Step[] = [
         type: 'dynamic',
         required: false,
       },
+    ],
+  },
+  {
+    id: 9,
+    title: 'Real Estate',
+    description: 'Information about real estate you own',
+    questions: [
       {
         key: 'ownsRealEstate',
         label: 'Do you own any real estate?',
@@ -2780,7 +2787,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 9,
+    id: 10,
     title: 'Outstanding Debts',
     description: 'Information about any outstanding debts (not including credit cards)',
     questions: [
@@ -2797,7 +2804,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 10,
+    id: 11,
     title: 'Life Insurance',
     description: 'Information about life insurance, disability insurance, and critical illness policies',
     questions: [
@@ -2926,7 +2933,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 11,
+    id: 12,
     title: 'Property and Casualty Insurance',
     description: 'Information about home and property insurance',
     questions: [
@@ -3242,7 +3249,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 12,
+    id: 13,
     title: 'Pensions and Retirement Benefits',
     description: 'Information about pension plans',
     questions: [
@@ -3327,7 +3334,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 13,
+    id: 14,
     title: 'Professional Association Insurance',
     description: 'Insurance coverage through professional associations or alumni groups',
     questions: [

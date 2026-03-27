@@ -3786,8 +3786,9 @@ export default function StepForm({
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
             const bankingStructure = answers['bankingStructure'];
-            const ownsRealEstate = answers['ownsRealEstate'];
-            const isPrimaryResidence = answers['isPrimaryResidence'];
+            const realEstateAnswers = allAnswers?.get(9) || {};
+            const ownsRealEstate = realEstateAnswers['ownsRealEstate'];
+            const isPrimaryResidence = realEstateAnswers['isPrimaryResidence'];
 
             const renderInstitutions = (key: string, count: string, label: string) => {
               const institutionCount = parseInt(answers[count] as string) || 0;
@@ -5972,6 +5973,19 @@ export default function StepForm({
           })()}
 
           {step.id === 9 && (
+            <>
+              {step.questions.map((question) => (
+                <FormField
+                  key={question.key}
+                  question={question}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                />
+              ))}
+            </>
+          )}
+
+          {step.id === 10 && (
             <>
               {step.questions.map((question) => (
                 <FormField

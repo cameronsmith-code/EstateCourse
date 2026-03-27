@@ -3759,34 +3759,221 @@ export default function StepForm({
               const institutionCount = parseInt(answers[count] as string) || 0;
               if (institutionCount === 0) return null;
 
-              const institutionsData = (answers[key] as Array<Record<string, string>>) || Array(Math.max(0, institutionCount || 0)).fill(null).map(() => ({}));
+              const institutionsData = (answers[key] as Array<Record<string, unknown>>) || Array(Math.max(0, institutionCount || 0)).fill(null).map(() => ({}));
 
-              const handleInstitutionChange = (index: number, value: string) => {
+              const handleInstitutionFieldChange = (index: number, field: string, value: unknown) => {
                 const updated = [...institutionsData];
                 if (!updated[index]) {
                   updated[index] = {};
                 }
-                updated[index].name = value;
+                updated[index][field] = value;
                 onAnswerChange(key, updated);
               };
 
+              const handleAccountOwnerToggle = (index: number, owner: string) => {
+                const updated = [...institutionsData];
+                if (!updated[index]) {
+                  updated[index] = {};
+                }
+                const currentOwners = (updated[index].accountOwners as string[]) || [];
+                if (currentOwners.includes(owner)) {
+                  updated[index].accountOwners = currentOwners.filter(o => o !== owner);
+                } else {
+                  updated[index].accountOwners = [...currentOwners, owner];
+                }
+                onAnswerChange(key, updated);
+              };
+
+              const handleAdditionalOwnerChange = (institutionIndex: number, ownerIndex: number, value: string) => {
+                const updated = [...institutionsData];
+                if (!updated[institutionIndex]) {
+                  updated[institutionIndex] = {};
+                }
+                const additionalOwners = (updated[institutionIndex].additionalOwners as string[]) || [];
+                additionalOwners[ownerIndex] = value;
+                updated[institutionIndex].additionalOwners = additionalOwners;
+                onAnswerChange(key, updated);
+              };
+
+              const addAdditionalOwner = (institutionIndex: number) => {
+                const updated = [...institutionsData];
+                if (!updated[institutionIndex]) {
+                  updated[institutionIndex] = {};
+                }
+                const additionalOwners = (updated[institutionIndex].additionalOwners as string[]) || [];
+                updated[institutionIndex].additionalOwners = [...additionalOwners, ''];
+                onAnswerChange(key, updated);
+              };
+
+              const removeLastAdditionalOwner = (institutionIndex: number) => {
+                const updated = [...institutionsData];
+                if (!updated[institutionIndex]) {
+                  return;
+                }
+                const additionalOwners = (updated[institutionIndex].additionalOwners as string[]) || [];
+                if (additionalOwners.length > 0) {
+                  updated[institutionIndex].additionalOwners = additionalOwners.slice(0, -1);
+                  onAnswerChange(key, updated);
+                }
+              };
+
               return (
-                <div className="space-y-4 mt-6">
+                <div className="space-y-6 mt-6">
                   <h3 className="text-md font-semibold text-white">{label}</h3>
-                  {Array.from({ length: institutionCount }).map((_, index) => (
-                    <div key={index}>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Institution {index + 1} Name:
-                      </label>
-                      <input
-                        type="text"
-                        value={institutionsData[index]?.name || ''}
-                        onChange={(e) => handleInstitutionChange(index, e.target.value)}
-                        placeholder="e.g., TD Bank, RBC, Scotiabank"
-                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  ))}
+                  {Array.from({ length: institutionCount }).map((_, index) => {
+                    const institution = institutionsData[index] || {};
+                    const accountOwners = (institution.accountOwners as string[]) || [];
+                    const hasOtherOwner = accountOwners.includes('other');
+                    const additionalOwners = (institution.additionalOwners as string[]) || [];
+
+                    return (
+                      <div key={index} className="p-4 bg-gray-700 rounded-lg space-y-4">
+                        <h4 className="text-sm font-semibold text-gray-200">Institution {index + 1}</h4>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Institution Name:
+                          </label>
+                          <input
+                            type="text"
+                            value={(institution.name as string) || ''}
+                            onChange={(e) => handleInstitutionFieldChange(index, 'name', e.target.value)}
+                            placeholder="e.g., TD Bank, RBC, Scotiabank"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Account Type:
+                          </label>
+                          <input
+                            type="text"
+                            value={(institution.accountType as string) || ''}
+                            onChange={(e) => handleInstitutionFieldChange(index, 'accountType', e.target.value)}
+                            placeholder="e.g., Checking, Savings, TFSA"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-3">
+                            Account Owner:
+                          </label>
+                          <div className="space-y-2">
+                            <label className="flex items-center space-x-3 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={accountOwners.includes('client1')}
+                                onChange={() => handleAccountOwnerToggle(index, 'client1')}
+                                className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                              />
+                              <span className="text-white">{client1Name}</span>
+                            </label>
+                            {hasSpouse && (
+                              <label className="flex items-center space-x-3 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={accountOwners.includes('client2')}
+                                  onChange={() => handleAccountOwnerToggle(index, 'client2')}
+                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                />
+                                <span className="text-white">{client2Name}</span>
+                              </label>
+                            )}
+                            <label className="flex items-center space-x-3 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={hasOtherOwner}
+                                onChange={() => handleAccountOwnerToggle(index, 'other')}
+                                className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                              />
+                              <span className="text-white">Other:</span>
+                            </label>
+                            {hasOtherOwner && (
+                              <input
+                                type="text"
+                                value={(institution.otherOwnerName as string) || ''}
+                                onChange={(e) => handleInstitutionFieldChange(index, 'otherOwnerName', e.target.value)}
+                                placeholder="Enter owner name"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ml-7"
+                              />
+                            )}
+                          </div>
+                        </div>
+
+                        {hasOtherOwner && (institution.otherOwnerName as string) && (
+                          <div className="space-y-4 pl-4 border-l-2 border-gray-600">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Are there any other owners of this account?
+                              </label>
+                              <div className="flex space-x-4">
+                                <button
+                                  type="button"
+                                  onClick={() => addAdditionalOwner(index)}
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                                >
+                                  Yes
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (additionalOwners.length > 0) {
+                                      const updated = [...institutionsData];
+                                      updated[index].additionalOwners = [];
+                                      onAnswerChange(key, updated);
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            </div>
+
+                            {additionalOwners.map((owner, ownerIndex) => (
+                              <div key={ownerIndex} className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-300">
+                                  Additional Owner {ownerIndex + 1} Name:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={owner}
+                                  onChange={(e) => handleAdditionalOwnerChange(index, ownerIndex, e.target.value)}
+                                  placeholder="Enter owner name"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                                {ownerIndex === additionalOwners.length - 1 && (
+                                  <div className="mt-2">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Are there any other owners of this account?
+                                    </label>
+                                    <div className="flex space-x-4">
+                                      <button
+                                        type="button"
+                                        onClick={() => addAdditionalOwner(index)}
+                                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                                      >
+                                        Yes
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => removeLastAdditionalOwner(index)}
+                                        className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                                      >
+                                        No
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               );
             };

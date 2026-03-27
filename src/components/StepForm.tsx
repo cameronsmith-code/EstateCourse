@@ -5919,14 +5919,32 @@ export default function StepForm({
 
           {step.id === 9 && (
             <>
-              {step.questions.map((question) => (
-                <FormField
-                  key={question.key}
-                  question={question}
-                  value={answers[question.key]}
-                  onChange={(value) => onAnswerChange(question.key, value)}
-                />
-              ))}
+              {step.questions.map((question) => {
+                if (question.condition) {
+                  const allFormData = Object.fromEntries(
+                    Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                      Object.entries(stepAnswers)
+                    )
+                  );
+                  if (!question.condition(allFormData)) {
+                    return null;
+                  }
+                }
+
+                const displayLabel = typeof question.label === 'function'
+                  ? question.label(allAnswers || new Map())
+                  : question.label;
+
+                return (
+                  <FormField
+                    key={question.key}
+                    question={{ ...question, label: displayLabel }}
+                    value={answers[question.key]}
+                    onChange={(value) => onAnswerChange(question.key, value)}
+                    answers={allAnswers}
+                  />
+                );
+              })}
             </>
           )}
 

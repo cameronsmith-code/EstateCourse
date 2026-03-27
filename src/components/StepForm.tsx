@@ -470,6 +470,29 @@ export default function StepForm({
     }
   }, [answers['isSameAddressAsBeginning'], answers['isPrimaryResidence'], allAnswers]);
 
+  useEffect(() => {
+    const ownsRealEstate = answers['ownsRealEstate'];
+
+    if (ownsRealEstate === 'no') {
+      const keysToClear = [
+        'primaryResidenceOwner',
+        'isPrimaryResidence',
+        'isSameAddressAsBeginning',
+        'primaryResidenceAddress',
+        'primaryResidenceCity',
+        'primaryResidenceProvince',
+        'primaryResidencePostalCode',
+        'hasAdditionalRealEstate',
+        'additionalPropertiesCount'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['ownsRealEstate']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');

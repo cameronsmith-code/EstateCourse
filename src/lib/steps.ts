@@ -2734,6 +2734,7 @@ export const STEPS: Step[] = [
           { value: 'other', label: 'Other' },
         ],
         required: false,
+        dependsOn: { key: 'ownsRealEstate', value: 'yes' },
       },
       {
         key: 'isPrimaryResidence',
@@ -2744,6 +2745,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+        dependsOn: { key: 'ownsRealEstate', value: 'yes' },
       },
       {
         key: 'isSameAddressAsBeginning',
@@ -2819,6 +2821,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+        dependsOn: { key: 'ownsRealEstate', value: 'yes' },
       },
       {
         key: 'additionalPropertiesCount',
@@ -2826,6 +2829,7 @@ export const STEPS: Step[] = [
         type: 'number',
         placeholder: '0',
         required: false,
+        dependsOn: { key: 'ownsRealEstate', value: 'yes' },
       },
     ],
   },

@@ -2718,7 +2718,2493 @@ export const STEPS: Step[] = [
     id: 9,
     title: 'Real Estate',
     description: 'Information about real estate you own',
-    questions: [],
+    questions: [
+      {
+        key: 'hasRealEstate',
+        label: 'Do you own any real estate?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'propertyCount',
+        label: 'How many properties do you own?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes',
+      },
+      {
+        key: 'property1Name',
+        label: 'Property Name:',
+        type: 'text',
+        placeholder: 'Enter property name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1PurchaseYear',
+        label: 'Purchase Year:',
+        type: 'select',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1OwnersLabel',
+        label: 'Who owns the property?',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1Owners',
+        label: 'Select all that apply:',
+        type: 'checkbox',
+        options: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const maritalStatus = answers.get(1)?.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
+
+          const baseOptions = [
+            { value: 'client1', label: client1Name },
+          ];
+
+          if (hasSpouse) {
+            baseOptions.push({ value: 'client2', label: client2Name });
+          }
+
+          const trustCount = parseInt(String(answers.get(4)?.trustCount || '0'));
+          for (let i = 1; i <= trustCount; i++) {
+            const trustName = answers.get(4)?.[`trust${i}Name`] || `Trust ${i}`;
+            baseOptions.push({ value: `trust${i}`, label: String(trustName) });
+          }
+
+          const corpCount = parseInt(String(answers.get(6)?.corporationCount || '0'));
+          for (let i = 1; i <= corpCount; i++) {
+            const corpName = answers.get(6)?.[`corporation${i}Name`] || `Corporation ${i}`;
+            baseOptions.push({ value: `corp${i}`, label: String(corpName) });
+          }
+
+          baseOptions.push({ value: 'other', label: 'Other' });
+
+          return baseOptions;
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1OtherOwner',
+        label: 'Enter name of other owner:',
+        type: 'text',
+        placeholder: 'Enter owner name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property1Owners;
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && owners && owners.includes('other');
+        },
+      },
+      {
+        key: 'property1OwnershipStructure',
+        label: 'Describe the ownership structure:',
+        type: 'radio',
+        options: [
+          { value: 'joint', label: 'Joint with Right of Survivorship' },
+          { value: 'tenants', label: 'Tenants in Common' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1AddressLabel',
+        label: (answers) => {
+          const propertyName = answers.get(9)?.property1Name || 'this property';
+          return `What is the address for ${propertyName}?`;
+        },
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1Address',
+        label: 'Address Line:',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1City',
+        label: 'City:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1Province',
+        label: 'Province/State:',
+        type: 'text',
+        placeholder: 'Enter province or state',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1Country',
+        label: 'Country:',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1PostalCode',
+        label: 'Postal Code:',
+        type: 'text',
+        placeholder: 'Enter postal code',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1RecordsLabel',
+        label: 'Please indicate what records you have and where they are stored.',
+        type: 'label',
+        description: 'These records help determine the tax cost of your property and can significantly impact taxes owing when it is sold or transferred.',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1RecordPurchaseDocs',
+        label: 'Do you have Original Purchase Documents?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1RecordPurchaseDocsLocation',
+        label: 'Storage Location for Purchase Documents:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && formData.property1RecordPurchaseDocs === 'yes',
+      },
+      {
+        key: 'property1RecordLegalFees',
+        label: 'Do you have Legal Fees and Land Transfer Tax Paid at Purchase?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1RecordLegalFeesLocation',
+        label: 'Storage Location for Legal Fees and Land Transfer Tax:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && formData.property1RecordLegalFees === 'yes',
+      },
+      {
+        key: 'property1RecordImprovements',
+        label: 'Do you have Capital Improvements records (e.g., renovations, additions, major upgrades)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1RecordImprovementsLocation',
+        label: 'Storage Location for Capital Improvements:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && formData.property1RecordImprovements === 'yes',
+      },
+      {
+        key: 'property1RecordAppraisals',
+        label: 'Do you have Appraisals or Valuations?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1RecordAppraisalsLocation',
+        label: 'Storage Location for Appraisals or Valuations:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && formData.property1RecordAppraisals === 'yes',
+      },
+      {
+        key: 'property1IsRental',
+        label: 'Is this a rental property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1LeaseStorage',
+        label: 'Where do you keep lease contracts?',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && formData.property1IsRental === 'yes',
+      },
+      {
+        key: 'property1LawyerLabel',
+        label: 'Lawyer who handled the purchase:',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1LawyerName',
+        label: 'Lawyer Name:',
+        type: 'text',
+        placeholder: 'Enter lawyer name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1LawyerFirm',
+        label: 'Law Firm Name:',
+        type: 'text',
+        placeholder: 'Enter law firm name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1LawyerPhone',
+        label: 'Phone Number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+      {
+        key: 'property1LawyerEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1,
+      },
+
+      {
+        key: 'property2Name',
+        label: 'Property Name:',
+        type: 'text',
+        placeholder: 'Enter property name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2PurchaseYear',
+        label: 'Purchase Year:',
+        type: 'select',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2OwnersLabel',
+        label: 'Who owns the property?',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2Owners',
+        label: 'Select all that apply:',
+        type: 'checkbox',
+        options: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const maritalStatus = answers.get(1)?.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
+
+          const baseOptions = [
+            { value: 'client1', label: client1Name },
+          ];
+
+          if (hasSpouse) {
+            baseOptions.push({ value: 'client2', label: client2Name });
+          }
+
+          const trustCount = parseInt(String(answers.get(4)?.trustCount || '0'));
+          for (let i = 1; i <= trustCount; i++) {
+            const trustName = answers.get(4)?.[`trust${i}Name`] || `Trust ${i}`;
+            baseOptions.push({ value: `trust${i}`, label: String(trustName) });
+          }
+
+          const corpCount = parseInt(String(answers.get(6)?.corporationCount || '0'));
+          for (let i = 1; i <= corpCount; i++) {
+            const corpName = answers.get(6)?.[`corporation${i}Name`] || `Corporation ${i}`;
+            baseOptions.push({ value: `corp${i}`, label: String(corpName) });
+          }
+
+          baseOptions.push({ value: 'other', label: 'Other' });
+
+          return baseOptions;
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2OtherOwner',
+        label: 'Enter name of other owner:',
+        type: 'text',
+        placeholder: 'Enter owner name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property2Owners;
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && owners && owners.includes('other');
+        },
+      },
+      {
+        key: 'property2OwnershipStructure',
+        label: 'Describe the ownership structure:',
+        type: 'radio',
+        options: [
+          { value: 'joint', label: 'Joint with Right of Survivorship' },
+          { value: 'tenants', label: 'Tenants in Common' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2AddressLabel',
+        label: (answers) => {
+          const propertyName = answers.get(9)?.property2Name || 'this property';
+          return `What is the address for ${propertyName}?`;
+        },
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2Address',
+        label: 'Address Line:',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2City',
+        label: 'City:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2Province',
+        label: 'Province/State:',
+        type: 'text',
+        placeholder: 'Enter province or state',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2Country',
+        label: 'Country:',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2PostalCode',
+        label: 'Postal Code:',
+        type: 'text',
+        placeholder: 'Enter postal code',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2RecordsLabel',
+        label: 'Please indicate what records you have and where they are stored.',
+        type: 'label',
+        description: 'These records help determine the tax cost of your property and can significantly impact taxes owing when it is sold or transferred.',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2RecordPurchaseDocs',
+        label: 'Do you have Original Purchase Documents?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2RecordPurchaseDocsLocation',
+        label: 'Storage Location for Purchase Documents:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && formData.property2RecordPurchaseDocs === 'yes',
+      },
+      {
+        key: 'property2RecordLegalFees',
+        label: 'Do you have Legal Fees and Land Transfer Tax Paid at Purchase?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2RecordLegalFeesLocation',
+        label: 'Storage Location for Legal Fees and Land Transfer Tax:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && formData.property2RecordLegalFees === 'yes',
+      },
+      {
+        key: 'property2RecordImprovements',
+        label: 'Do you have Capital Improvements records (e.g., renovations, additions, major upgrades)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2RecordImprovementsLocation',
+        label: 'Storage Location for Capital Improvements:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && formData.property2RecordImprovements === 'yes',
+      },
+      {
+        key: 'property2RecordAppraisals',
+        label: 'Do you have Appraisals or Valuations?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2RecordAppraisalsLocation',
+        label: 'Storage Location for Appraisals or Valuations:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && formData.property2RecordAppraisals === 'yes',
+      },
+      {
+        key: 'property2IsRental',
+        label: 'Is this a rental property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2LeaseStorage',
+        label: 'Where do you keep lease contracts?',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && formData.property2IsRental === 'yes',
+      },
+      {
+        key: 'property2LawyerLabel',
+        label: 'Lawyer who handled the purchase:',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2LawyerName',
+        label: 'Lawyer Name:',
+        type: 'text',
+        placeholder: 'Enter lawyer name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2LawyerFirm',
+        label: 'Law Firm Name:',
+        type: 'text',
+        placeholder: 'Enter law firm name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2LawyerPhone',
+        label: 'Phone Number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property2LawyerEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2,
+      },
+      {
+        key: 'property3Name',
+        label: 'Property Name:',
+        type: 'text',
+        placeholder: 'Enter property name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3PurchaseYear',
+        label: 'Purchase Year:',
+        type: 'select',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3OwnersLabel',
+        label: 'Who owns the property?',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3Owners',
+        label: 'Select all that apply:',
+        type: 'checkbox',
+        options: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const maritalStatus = answers.get(1)?.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
+
+          const baseOptions = [
+            { value: 'client1', label: client1Name },
+          ];
+
+          if (hasSpouse) {
+            baseOptions.push({ value: 'client2', label: client2Name });
+          }
+
+          const trustCount = parseInt(String(answers.get(4)?.trustCount || '0'));
+          for (let i = 1; i <= trustCount; i++) {
+            const trustName = answers.get(4)?.[`trust${i}Name`] || `Trust ${i}`;
+            baseOptions.push({ value: `trust${i}`, label: String(trustName) });
+          }
+
+          const corpCount = parseInt(String(answers.get(6)?.corporationCount || '0'));
+          for (let i = 1; i <= corpCount; i++) {
+            const corpName = answers.get(6)?.[`corporation${i}Name`] || `Corporation ${i}`;
+            baseOptions.push({ value: `corp${i}`, label: String(corpName) });
+          }
+
+          baseOptions.push({ value: 'other', label: 'Other' });
+
+          return baseOptions;
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3OtherOwner',
+        label: 'Enter name of other owner:',
+        type: 'text',
+        placeholder: 'Enter owner name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property3Owners;
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && owners && owners.includes('other');
+        },
+      },
+      {
+        key: 'property3OwnershipStructure',
+        label: 'Describe the ownership structure:',
+        type: 'radio',
+        options: [
+          { value: 'joint', label: 'Joint with Right of Survivorship' },
+          { value: 'tenants', label: 'Tenants in Common' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3AddressLabel',
+        label: (answers) => {
+          const propertyName = answers.get(9)?.property3Name || 'this property';
+          return `What is the address for ${propertyName}?`;
+        },
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3Address',
+        label: 'Address Line:',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3City',
+        label: 'City:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3Province',
+        label: 'Province/State:',
+        type: 'text',
+        placeholder: 'Enter province or state',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3Country',
+        label: 'Country:',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3PostalCode',
+        label: 'Postal Code:',
+        type: 'text',
+        placeholder: 'Enter postal code',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3RecordsLabel',
+        label: 'Please indicate what records you have and where they are stored.',
+        type: 'label',
+        description: 'These records help determine the tax cost of your property and can significantly impact taxes owing when it is sold or transferred.',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3RecordPurchaseDocs',
+        label: 'Do you have Original Purchase Documents?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3RecordPurchaseDocsLocation',
+        label: 'Storage Location for Purchase Documents:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && formData.property3RecordPurchaseDocs === 'yes',
+      },
+      {
+        key: 'property3RecordLegalFees',
+        label: 'Do you have Legal Fees and Land Transfer Tax Paid at Purchase?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3RecordLegalFeesLocation',
+        label: 'Storage Location for Legal Fees and Land Transfer Tax:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && formData.property3RecordLegalFees === 'yes',
+      },
+      {
+        key: 'property3RecordImprovements',
+        label: 'Do you have Capital Improvements records (e.g., renovations, additions, major upgrades)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3RecordImprovementsLocation',
+        label: 'Storage Location for Capital Improvements:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && formData.property3RecordImprovements === 'yes',
+      },
+      {
+        key: 'property3RecordAppraisals',
+        label: 'Do you have Appraisals or Valuations?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3RecordAppraisalsLocation',
+        label: 'Storage Location for Appraisals or Valuations:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && formData.property3RecordAppraisals === 'yes',
+      },
+      {
+        key: 'property3IsRental',
+        label: 'Is this a rental property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3LeaseStorage',
+        label: 'Where do you keep lease contracts?',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && formData.property3IsRental === 'yes',
+      },
+      {
+        key: 'property3LawyerLabel',
+        label: 'Lawyer who handled the purchase:',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3LawyerName',
+        label: 'Lawyer Name:',
+        type: 'text',
+        placeholder: 'Enter lawyer name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3LawyerFirm',
+        label: 'Law Firm Name:',
+        type: 'text',
+        placeholder: 'Enter law firm name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3LawyerPhone',
+        label: 'Phone Number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property3LawyerEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3,
+      },
+      {
+        key: 'property4Name',
+        label: 'Property Name:',
+        type: 'text',
+        placeholder: 'Enter property name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4PurchaseYear',
+        label: 'Purchase Year:',
+        type: 'select',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4OwnersLabel',
+        label: 'Who owns the property?',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4Owners',
+        label: 'Select all that apply:',
+        type: 'checkbox',
+        options: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const maritalStatus = answers.get(1)?.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
+
+          const baseOptions = [
+            { value: 'client1', label: client1Name },
+          ];
+
+          if (hasSpouse) {
+            baseOptions.push({ value: 'client2', label: client2Name });
+          }
+
+          const trustCount = parseInt(String(answers.get(4)?.trustCount || '0'));
+          for (let i = 1; i <= trustCount; i++) {
+            const trustName = answers.get(4)?.[`trust${i}Name`] || `Trust ${i}`;
+            baseOptions.push({ value: `trust${i}`, label: String(trustName) });
+          }
+
+          const corpCount = parseInt(String(answers.get(6)?.corporationCount || '0'));
+          for (let i = 1; i <= corpCount; i++) {
+            const corpName = answers.get(6)?.[`corporation${i}Name`] || `Corporation ${i}`;
+            baseOptions.push({ value: `corp${i}`, label: String(corpName) });
+          }
+
+          baseOptions.push({ value: 'other', label: 'Other' });
+
+          return baseOptions;
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4OtherOwner',
+        label: 'Enter name of other owner:',
+        type: 'text',
+        placeholder: 'Enter owner name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property4Owners;
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && owners && owners.includes('other');
+        },
+      },
+      {
+        key: 'property4OwnershipStructure',
+        label: 'Describe the ownership structure:',
+        type: 'radio',
+        options: [
+          { value: 'joint', label: 'Joint with Right of Survivorship' },
+          { value: 'tenants', label: 'Tenants in Common' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4AddressLabel',
+        label: (answers) => {
+          const propertyName = answers.get(9)?.property4Name || 'this property';
+          return `What is the address for ${propertyName}?`;
+        },
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4Address',
+        label: 'Address Line:',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4City',
+        label: 'City:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4Province',
+        label: 'Province/State:',
+        type: 'text',
+        placeholder: 'Enter province or state',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4Country',
+        label: 'Country:',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4PostalCode',
+        label: 'Postal Code:',
+        type: 'text',
+        placeholder: 'Enter postal code',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4RecordsLabel',
+        label: 'Please indicate what records you have and where they are stored.',
+        type: 'label',
+        description: 'These records help determine the tax cost of your property and can significantly impact taxes owing when it is sold or transferred.',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4RecordPurchaseDocs',
+        label: 'Do you have Original Purchase Documents?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4RecordPurchaseDocsLocation',
+        label: 'Storage Location for Purchase Documents:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && formData.property4RecordPurchaseDocs === 'yes',
+      },
+      {
+        key: 'property4RecordLegalFees',
+        label: 'Do you have Legal Fees and Land Transfer Tax Paid at Purchase?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4RecordLegalFeesLocation',
+        label: 'Storage Location for Legal Fees and Land Transfer Tax:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && formData.property4RecordLegalFees === 'yes',
+      },
+      {
+        key: 'property4RecordImprovements',
+        label: 'Do you have Capital Improvements records (e.g., renovations, additions, major upgrades)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4RecordImprovementsLocation',
+        label: 'Storage Location for Capital Improvements:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && formData.property4RecordImprovements === 'yes',
+      },
+      {
+        key: 'property4RecordAppraisals',
+        label: 'Do you have Appraisals or Valuations?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4RecordAppraisalsLocation',
+        label: 'Storage Location for Appraisals or Valuations:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && formData.property4RecordAppraisals === 'yes',
+      },
+      {
+        key: 'property4IsRental',
+        label: 'Is this a rental property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4LeaseStorage',
+        label: 'Where do you keep lease contracts?',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && formData.property4IsRental === 'yes',
+      },
+      {
+        key: 'property4LawyerLabel',
+        label: 'Lawyer who handled the purchase:',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4LawyerName',
+        label: 'Lawyer Name:',
+        type: 'text',
+        placeholder: 'Enter lawyer name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4LawyerFirm',
+        label: 'Law Firm Name:',
+        type: 'text',
+        placeholder: 'Enter law firm name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4LawyerPhone',
+        label: 'Phone Number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property4LawyerEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4,
+      },
+      {
+        key: 'property5Name',
+        label: 'Property Name:',
+        type: 'text',
+        placeholder: 'Enter property name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5PurchaseYear',
+        label: 'Purchase Year:',
+        type: 'select',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5OwnersLabel',
+        label: 'Who owns the property?',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5Owners',
+        label: 'Select all that apply:',
+        type: 'checkbox',
+        options: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const maritalStatus = answers.get(1)?.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
+
+          const baseOptions = [
+            { value: 'client1', label: client1Name },
+          ];
+
+          if (hasSpouse) {
+            baseOptions.push({ value: 'client2', label: client2Name });
+          }
+
+          const trustCount = parseInt(String(answers.get(4)?.trustCount || '0'));
+          for (let i = 1; i <= trustCount; i++) {
+            const trustName = answers.get(4)?.[`trust${i}Name`] || `Trust ${i}`;
+            baseOptions.push({ value: `trust${i}`, label: String(trustName) });
+          }
+
+          const corpCount = parseInt(String(answers.get(6)?.corporationCount || '0'));
+          for (let i = 1; i <= corpCount; i++) {
+            const corpName = answers.get(6)?.[`corporation${i}Name`] || `Corporation ${i}`;
+            baseOptions.push({ value: `corp${i}`, label: String(corpName) });
+          }
+
+          baseOptions.push({ value: 'other', label: 'Other' });
+
+          return baseOptions;
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5OtherOwner',
+        label: 'Enter name of other owner:',
+        type: 'text',
+        placeholder: 'Enter owner name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property5Owners;
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && owners && owners.includes('other');
+        },
+      },
+      {
+        key: 'property5OwnershipStructure',
+        label: 'Describe the ownership structure:',
+        type: 'radio',
+        options: [
+          { value: 'joint', label: 'Joint with Right of Survivorship' },
+          { value: 'tenants', label: 'Tenants in Common' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5AddressLabel',
+        label: (answers) => {
+          const propertyName = answers.get(9)?.property5Name || 'this property';
+          return `What is the address for ${propertyName}?`;
+        },
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5Address',
+        label: 'Address Line:',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5City',
+        label: 'City:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5Province',
+        label: 'Province/State:',
+        type: 'text',
+        placeholder: 'Enter province or state',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5Country',
+        label: 'Country:',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5PostalCode',
+        label: 'Postal Code:',
+        type: 'text',
+        placeholder: 'Enter postal code',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5RecordsLabel',
+        label: 'Please indicate what records you have and where they are stored.',
+        type: 'label',
+        description: 'These records help determine the tax cost of your property and can significantly impact taxes owing when it is sold or transferred.',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5RecordPurchaseDocs',
+        label: 'Do you have Original Purchase Documents?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5RecordPurchaseDocsLocation',
+        label: 'Storage Location for Purchase Documents:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && formData.property5RecordPurchaseDocs === 'yes',
+      },
+      {
+        key: 'property5RecordLegalFees',
+        label: 'Do you have Legal Fees and Land Transfer Tax Paid at Purchase?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5RecordLegalFeesLocation',
+        label: 'Storage Location for Legal Fees and Land Transfer Tax:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && formData.property5RecordLegalFees === 'yes',
+      },
+      {
+        key: 'property5RecordImprovements',
+        label: 'Do you have Capital Improvements records (e.g., renovations, additions, major upgrades)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5RecordImprovementsLocation',
+        label: 'Storage Location for Capital Improvements:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && formData.property5RecordImprovements === 'yes',
+      },
+      {
+        key: 'property5RecordAppraisals',
+        label: 'Do you have Appraisals or Valuations?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5RecordAppraisalsLocation',
+        label: 'Storage Location for Appraisals or Valuations:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && formData.property5RecordAppraisals === 'yes',
+      },
+      {
+        key: 'property5IsRental',
+        label: 'Is this a rental property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5LeaseStorage',
+        label: 'Where do you keep lease contracts?',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && formData.property5IsRental === 'yes',
+      },
+      {
+        key: 'property5LawyerLabel',
+        label: 'Lawyer who handled the purchase:',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5LawyerName',
+        label: 'Lawyer Name:',
+        type: 'text',
+        placeholder: 'Enter lawyer name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5LawyerFirm',
+        label: 'Law Firm Name:',
+        type: 'text',
+        placeholder: 'Enter law firm name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5LawyerPhone',
+        label: 'Phone Number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property5LawyerEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5,
+      },
+      {
+        key: 'property6Name',
+        label: 'Property Name:',
+        type: 'text',
+        placeholder: 'Enter property name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6PurchaseYear',
+        label: 'Purchase Year:',
+        type: 'select',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6OwnersLabel',
+        label: 'Who owns the property?',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6Owners',
+        label: 'Select all that apply:',
+        type: 'checkbox',
+        options: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const maritalStatus = answers.get(1)?.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
+
+          const baseOptions = [
+            { value: 'client1', label: client1Name },
+          ];
+
+          if (hasSpouse) {
+            baseOptions.push({ value: 'client2', label: client2Name });
+          }
+
+          const trustCount = parseInt(String(answers.get(4)?.trustCount || '0'));
+          for (let i = 1; i <= trustCount; i++) {
+            const trustName = answers.get(4)?.[`trust${i}Name`] || `Trust ${i}`;
+            baseOptions.push({ value: `trust${i}`, label: String(trustName) });
+          }
+
+          const corpCount = parseInt(String(answers.get(6)?.corporationCount || '0'));
+          for (let i = 1; i <= corpCount; i++) {
+            const corpName = answers.get(6)?.[`corporation${i}Name`] || `Corporation ${i}`;
+            baseOptions.push({ value: `corp${i}`, label: String(corpName) });
+          }
+
+          baseOptions.push({ value: 'other', label: 'Other' });
+
+          return baseOptions;
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6OtherOwner',
+        label: 'Enter name of other owner:',
+        type: 'text',
+        placeholder: 'Enter owner name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property6Owners;
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && owners && owners.includes('other');
+        },
+      },
+      {
+        key: 'property6OwnershipStructure',
+        label: 'Describe the ownership structure:',
+        type: 'radio',
+        options: [
+          { value: 'joint', label: 'Joint with Right of Survivorship' },
+          { value: 'tenants', label: 'Tenants in Common' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6AddressLabel',
+        label: (answers) => {
+          const propertyName = answers.get(9)?.property6Name || 'this property';
+          return `What is the address for ${propertyName}?`;
+        },
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6Address',
+        label: 'Address Line:',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6City',
+        label: 'City:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6Province',
+        label: 'Province/State:',
+        type: 'text',
+        placeholder: 'Enter province or state',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6Country',
+        label: 'Country:',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6PostalCode',
+        label: 'Postal Code:',
+        type: 'text',
+        placeholder: 'Enter postal code',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6RecordsLabel',
+        label: 'Please indicate what records you have and where they are stored.',
+        type: 'label',
+        description: 'These records help determine the tax cost of your property and can significantly impact taxes owing when it is sold or transferred.',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6RecordPurchaseDocs',
+        label: 'Do you have Original Purchase Documents?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6RecordPurchaseDocsLocation',
+        label: 'Storage Location for Purchase Documents:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && formData.property6RecordPurchaseDocs === 'yes',
+      },
+      {
+        key: 'property6RecordLegalFees',
+        label: 'Do you have Legal Fees and Land Transfer Tax Paid at Purchase?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6RecordLegalFeesLocation',
+        label: 'Storage Location for Legal Fees and Land Transfer Tax:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && formData.property6RecordLegalFees === 'yes',
+      },
+      {
+        key: 'property6RecordImprovements',
+        label: 'Do you have Capital Improvements records (e.g., renovations, additions, major upgrades)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6RecordImprovementsLocation',
+        label: 'Storage Location for Capital Improvements:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && formData.property6RecordImprovements === 'yes',
+      },
+      {
+        key: 'property6RecordAppraisals',
+        label: 'Do you have Appraisals or Valuations?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6RecordAppraisalsLocation',
+        label: 'Storage Location for Appraisals or Valuations:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && formData.property6RecordAppraisals === 'yes',
+      },
+      {
+        key: 'property6IsRental',
+        label: 'Is this a rental property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6LeaseStorage',
+        label: 'Where do you keep lease contracts?',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && formData.property6IsRental === 'yes',
+      },
+      {
+        key: 'property6LawyerLabel',
+        label: 'Lawyer who handled the purchase:',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6LawyerName',
+        label: 'Lawyer Name:',
+        type: 'text',
+        placeholder: 'Enter lawyer name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6LawyerFirm',
+        label: 'Law Firm Name:',
+        type: 'text',
+        placeholder: 'Enter law firm name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6LawyerPhone',
+        label: 'Phone Number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property6LawyerEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6,
+      },
+      {
+        key: 'property7Name',
+        label: 'Property Name:',
+        type: 'text',
+        placeholder: 'Enter property name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7PurchaseYear',
+        label: 'Purchase Year:',
+        type: 'select',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7OwnersLabel',
+        label: 'Who owns the property?',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7Owners',
+        label: 'Select all that apply:',
+        type: 'checkbox',
+        options: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const maritalStatus = answers.get(1)?.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
+
+          const baseOptions = [
+            { value: 'client1', label: client1Name },
+          ];
+
+          if (hasSpouse) {
+            baseOptions.push({ value: 'client2', label: client2Name });
+          }
+
+          const trustCount = parseInt(String(answers.get(4)?.trustCount || '0'));
+          for (let i = 1; i <= trustCount; i++) {
+            const trustName = answers.get(4)?.[`trust${i}Name`] || `Trust ${i}`;
+            baseOptions.push({ value: `trust${i}`, label: String(trustName) });
+          }
+
+          const corpCount = parseInt(String(answers.get(6)?.corporationCount || '0'));
+          for (let i = 1; i <= corpCount; i++) {
+            const corpName = answers.get(6)?.[`corporation${i}Name`] || `Corporation ${i}`;
+            baseOptions.push({ value: `corp${i}`, label: String(corpName) });
+          }
+
+          baseOptions.push({ value: 'other', label: 'Other' });
+
+          return baseOptions;
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7OtherOwner',
+        label: 'Enter name of other owner:',
+        type: 'text',
+        placeholder: 'Enter owner name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property7Owners;
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && owners && owners.includes('other');
+        },
+      },
+      {
+        key: 'property7OwnershipStructure',
+        label: 'Describe the ownership structure:',
+        type: 'radio',
+        options: [
+          { value: 'joint', label: 'Joint with Right of Survivorship' },
+          { value: 'tenants', label: 'Tenants in Common' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7AddressLabel',
+        label: (answers) => {
+          const propertyName = answers.get(9)?.property7Name || 'this property';
+          return `What is the address for ${propertyName}?`;
+        },
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7Address',
+        label: 'Address Line:',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7City',
+        label: 'City:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7Province',
+        label: 'Province/State:',
+        type: 'text',
+        placeholder: 'Enter province or state',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7Country',
+        label: 'Country:',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7PostalCode',
+        label: 'Postal Code:',
+        type: 'text',
+        placeholder: 'Enter postal code',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7RecordsLabel',
+        label: 'Please indicate what records you have and where they are stored.',
+        type: 'label',
+        description: 'These records help determine the tax cost of your property and can significantly impact taxes owing when it is sold or transferred.',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7RecordPurchaseDocs',
+        label: 'Do you have Original Purchase Documents?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7RecordPurchaseDocsLocation',
+        label: 'Storage Location for Purchase Documents:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && formData.property7RecordPurchaseDocs === 'yes',
+      },
+      {
+        key: 'property7RecordLegalFees',
+        label: 'Do you have Legal Fees and Land Transfer Tax Paid at Purchase?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7RecordLegalFeesLocation',
+        label: 'Storage Location for Legal Fees and Land Transfer Tax:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && formData.property7RecordLegalFees === 'yes',
+      },
+      {
+        key: 'property7RecordImprovements',
+        label: 'Do you have Capital Improvements records (e.g., renovations, additions, major upgrades)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7RecordImprovementsLocation',
+        label: 'Storage Location for Capital Improvements:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && formData.property7RecordImprovements === 'yes',
+      },
+      {
+        key: 'property7RecordAppraisals',
+        label: 'Do you have Appraisals or Valuations?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7RecordAppraisalsLocation',
+        label: 'Storage Location for Appraisals or Valuations:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && formData.property7RecordAppraisals === 'yes',
+      },
+      {
+        key: 'property7IsRental',
+        label: 'Is this a rental property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7LeaseStorage',
+        label: 'Where do you keep lease contracts?',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && formData.property7IsRental === 'yes',
+      },
+      {
+        key: 'property7LawyerLabel',
+        label: 'Lawyer who handled the purchase:',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7LawyerName',
+        label: 'Lawyer Name:',
+        type: 'text',
+        placeholder: 'Enter lawyer name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7LawyerFirm',
+        label: 'Law Firm Name:',
+        type: 'text',
+        placeholder: 'Enter law firm name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7LawyerPhone',
+        label: 'Phone Number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property7LawyerEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7,
+      },
+      {
+        key: 'property8Name',
+        label: 'Property Name:',
+        type: 'text',
+        placeholder: 'Enter property name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8PurchaseYear',
+        label: 'Purchase Year:',
+        type: 'select',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8OwnersLabel',
+        label: 'Who owns the property?',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8Owners',
+        label: 'Select all that apply:',
+        type: 'checkbox',
+        options: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const maritalStatus = answers.get(1)?.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
+
+          const baseOptions = [
+            { value: 'client1', label: client1Name },
+          ];
+
+          if (hasSpouse) {
+            baseOptions.push({ value: 'client2', label: client2Name });
+          }
+
+          const trustCount = parseInt(String(answers.get(4)?.trustCount || '0'));
+          for (let i = 1; i <= trustCount; i++) {
+            const trustName = answers.get(4)?.[`trust${i}Name`] || `Trust ${i}`;
+            baseOptions.push({ value: `trust${i}`, label: String(trustName) });
+          }
+
+          const corpCount = parseInt(String(answers.get(6)?.corporationCount || '0'));
+          for (let i = 1; i <= corpCount; i++) {
+            const corpName = answers.get(6)?.[`corporation${i}Name`] || `Corporation ${i}`;
+            baseOptions.push({ value: `corp${i}`, label: String(corpName) });
+          }
+
+          baseOptions.push({ value: 'other', label: 'Other' });
+
+          return baseOptions;
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8OtherOwner',
+        label: 'Enter name of other owner:',
+        type: 'text',
+        placeholder: 'Enter owner name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property8Owners;
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && owners && owners.includes('other');
+        },
+      },
+      {
+        key: 'property8OwnershipStructure',
+        label: 'Describe the ownership structure:',
+        type: 'radio',
+        options: [
+          { value: 'joint', label: 'Joint with Right of Survivorship' },
+          { value: 'tenants', label: 'Tenants in Common' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8AddressLabel',
+        label: (answers) => {
+          const propertyName = answers.get(9)?.property8Name || 'this property';
+          return `What is the address for ${propertyName}?`;
+        },
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8Address',
+        label: 'Address Line:',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8City',
+        label: 'City:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8Province',
+        label: 'Province/State:',
+        type: 'text',
+        placeholder: 'Enter province or state',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8Country',
+        label: 'Country:',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8PostalCode',
+        label: 'Postal Code:',
+        type: 'text',
+        placeholder: 'Enter postal code',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8RecordsLabel',
+        label: 'Please indicate what records you have and where they are stored.',
+        type: 'label',
+        description: 'These records help determine the tax cost of your property and can significantly impact taxes owing when it is sold or transferred.',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8RecordPurchaseDocs',
+        label: 'Do you have Original Purchase Documents?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8RecordPurchaseDocsLocation',
+        label: 'Storage Location for Purchase Documents:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && formData.property8RecordPurchaseDocs === 'yes',
+      },
+      {
+        key: 'property8RecordLegalFees',
+        label: 'Do you have Legal Fees and Land Transfer Tax Paid at Purchase?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8RecordLegalFeesLocation',
+        label: 'Storage Location for Legal Fees and Land Transfer Tax:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && formData.property8RecordLegalFees === 'yes',
+      },
+      {
+        key: 'property8RecordImprovements',
+        label: 'Do you have Capital Improvements records (e.g., renovations, additions, major upgrades)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8RecordImprovementsLocation',
+        label: 'Storage Location for Capital Improvements:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && formData.property8RecordImprovements === 'yes',
+      },
+      {
+        key: 'property8RecordAppraisals',
+        label: 'Do you have Appraisals or Valuations?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8RecordAppraisalsLocation',
+        label: 'Storage Location for Appraisals or Valuations:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && formData.property8RecordAppraisals === 'yes',
+      },
+      {
+        key: 'property8IsRental',
+        label: 'Is this a rental property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8LeaseStorage',
+        label: 'Where do you keep lease contracts?',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && formData.property8IsRental === 'yes',
+      },
+      {
+        key: 'property8LawyerLabel',
+        label: 'Lawyer who handled the purchase:',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8LawyerName',
+        label: 'Lawyer Name:',
+        type: 'text',
+        placeholder: 'Enter lawyer name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8LawyerFirm',
+        label: 'Law Firm Name:',
+        type: 'text',
+        placeholder: 'Enter law firm name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8LawyerPhone',
+        label: 'Phone Number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property8LawyerEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8,
+      },
+      {
+        key: 'property9Name',
+        label: 'Property Name:',
+        type: 'text',
+        placeholder: 'Enter property name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9PurchaseYear',
+        label: 'Purchase Year:',
+        type: 'select',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9OwnersLabel',
+        label: 'Who owns the property?',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9Owners',
+        label: 'Select all that apply:',
+        type: 'checkbox',
+        options: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const maritalStatus = answers.get(1)?.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          const client2Name = answers.get(1)?.spouseFullName || 'Client 2';
+
+          const baseOptions = [
+            { value: 'client1', label: client1Name },
+          ];
+
+          if (hasSpouse) {
+            baseOptions.push({ value: 'client2', label: client2Name });
+          }
+
+          const trustCount = parseInt(String(answers.get(4)?.trustCount || '0'));
+          for (let i = 1; i <= trustCount; i++) {
+            const trustName = answers.get(4)?.[`trust${i}Name`] || `Trust ${i}`;
+            baseOptions.push({ value: `trust${i}`, label: String(trustName) });
+          }
+
+          const corpCount = parseInt(String(answers.get(6)?.corporationCount || '0'));
+          for (let i = 1; i <= corpCount; i++) {
+            const corpName = answers.get(6)?.[`corporation${i}Name`] || `Corporation ${i}`;
+            baseOptions.push({ value: `corp${i}`, label: String(corpName) });
+          }
+
+          baseOptions.push({ value: 'other', label: 'Other' });
+
+          return baseOptions;
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9OtherOwner',
+        label: 'Enter name of other owner:',
+        type: 'text',
+        placeholder: 'Enter owner name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property9Owners;
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && owners && owners.includes('other');
+        },
+      },
+      {
+        key: 'property9OwnershipStructure',
+        label: 'Describe the ownership structure:',
+        type: 'radio',
+        options: [
+          { value: 'joint', label: 'Joint with Right of Survivorship' },
+          { value: 'tenants', label: 'Tenants in Common' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9AddressLabel',
+        label: (answers) => {
+          const propertyName = answers.get(9)?.property9Name || 'this property';
+          return `What is the address for ${propertyName}?`;
+        },
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9Address',
+        label: 'Address Line:',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9City',
+        label: 'City:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9Province',
+        label: 'Province/State:',
+        type: 'text',
+        placeholder: 'Enter province or state',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9Country',
+        label: 'Country:',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9PostalCode',
+        label: 'Postal Code:',
+        type: 'text',
+        placeholder: 'Enter postal code',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9RecordsLabel',
+        label: 'Please indicate what records you have and where they are stored.',
+        type: 'label',
+        description: 'These records help determine the tax cost of your property and can significantly impact taxes owing when it is sold or transferred.',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9RecordPurchaseDocs',
+        label: 'Do you have Original Purchase Documents?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9RecordPurchaseDocsLocation',
+        label: 'Storage Location for Purchase Documents:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && formData.property9RecordPurchaseDocs === 'yes',
+      },
+      {
+        key: 'property9RecordLegalFees',
+        label: 'Do you have Legal Fees and Land Transfer Tax Paid at Purchase?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9RecordLegalFeesLocation',
+        label: 'Storage Location for Legal Fees and Land Transfer Tax:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && formData.property9RecordLegalFees === 'yes',
+      },
+      {
+        key: 'property9RecordImprovements',
+        label: 'Do you have Capital Improvements records (e.g., renovations, additions, major upgrades)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9RecordImprovementsLocation',
+        label: 'Storage Location for Capital Improvements:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && formData.property9RecordImprovements === 'yes',
+      },
+      {
+        key: 'property9RecordAppraisals',
+        label: 'Do you have Appraisals or Valuations?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9RecordAppraisalsLocation',
+        label: 'Storage Location for Appraisals or Valuations:',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && formData.property9RecordAppraisals === 'yes',
+      },
+      {
+        key: 'property9IsRental',
+        label: 'Is this a rental property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9LeaseStorage',
+        label: 'Where do you keep lease contracts?',
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && formData.property9IsRental === 'yes',
+      },
+      {
+        key: 'property9LawyerLabel',
+        label: 'Lawyer who handled the purchase:',
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9LawyerName',
+        label: 'Lawyer Name:',
+        type: 'text',
+        placeholder: 'Enter lawyer name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9LawyerFirm',
+        label: 'Law Firm Name:',
+        type: 'text',
+        placeholder: 'Enter law firm name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9LawyerPhone',
+        label: 'Phone Number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+      {
+        key: 'property9LawyerEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9,
+      },
+    ],
   },
   {
     id: 10,

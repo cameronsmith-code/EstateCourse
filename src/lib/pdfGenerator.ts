@@ -8240,6 +8240,334 @@ You should explore this as an option with your legal and CFP® professionals bec
     yPosition = storageTableY + 10;
   }
 
+
+  if (formData.hasRealEstate === 'yes') {
+    const propertyCount = parseInt(formData.propertyCount || '0');
+
+    for (let propNum = 1; propNum <= propertyCount; propNum++) {
+      const propertyName = formData[`property${propNum}Name`] || `Property ${propNum}`;
+      const purchaseYear = formData[`property${propNum}PurchaseYear`];
+      const owners = formData[`property${propNum}Owners`] || [];
+      const otherOwner = formData[`property${propNum}OtherOwner`];
+      const ownershipStructure = formData[`property${propNum}OwnershipStructure`];
+      const address = formData[`property${propNum}Address`];
+      const city = formData[`property${propNum}City`];
+      const province = formData[`property${propNum}Province`];
+      const country = formData[`property${propNum}Country`];
+      const postalCode = formData[`property${propNum}PostalCode`];
+      const isRental = formData[`property${propNum}IsRental`];
+      const leaseStorage = formData[`property${propNum}LeaseStorage`];
+      const lawyerName = formData[`property${propNum}LawyerName`];
+      const lawyerFirm = formData[`property${propNum}LawyerFirm`];
+      const lawyerPhone = formData[`property${propNum}LawyerPhone`];
+      const lawyerEmail = formData[`property${propNum}LawyerEmail`];
+
+      addSectionHeader(`Real Estate: ${propertyName}`);
+
+      doc.setFontSize(9);
+      doc.setTextColor(...colors.mediumGray);
+      doc.text('Information about real estate you own', margin, yPosition);
+      yPosition += 12;
+      doc.setTextColor(...colors.darkText);
+
+      if (yPosition > 180) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Property Overview', margin, yPosition);
+      yPosition += 5;
+      doc.setFont(undefined, 'normal');
+
+      const tableStartY = yPosition;
+      const rowHeight = 8;
+      const col1Width = 70;
+      const col2Width = pageWidth - margin * 2 - col1Width;
+
+      const overviewRows = [];
+
+      if (purchaseYear) {
+        overviewRows.push(['Purchase Year', purchaseYear]);
+      }
+
+      if (ownershipStructure) {
+        const structureLabel = ownershipStructure === 'joint' ? 'Joint with Right of Survivorship' : 'Tenants in Common';
+        overviewRows.push(['Ownership Structure', structureLabel]);
+      }
+
+      if (owners && owners.length > 0) {
+        const ownersList = Array.isArray(owners) ? owners : [owners];
+        const ownersDisplay = ownersList.map(o => {
+          if (o === 'client1') return formData.fullName || 'Client 1';
+          if (o === 'client2') return formData.spouseFullName || 'Client 2';
+          if (o.startsWith('trust')) {
+            const trustNum = o.replace('trust', '');
+            return formData[`trust${trustNum}Name`] || `Trust ${trustNum}`;
+          }
+          if (o.startsWith('corp')) {
+            const corpNum = o.replace('corp', '');
+            return formData[`corporation${corpNum}Name`] || `Corporation ${corpNum}`;
+          }
+          if (o === 'other' && otherOwner) return otherOwner;
+          return o;
+        }).join(', ');
+        overviewRows.push(['Owners', ownersDisplay]);
+      }
+
+      let currentY = tableStartY;
+      overviewRows.forEach(([label, value]) => {
+        if (currentY > 260) {
+          doc.addPage();
+          currentY = 12;
+        }
+
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setFillColor(...colors.tableHeader);
+        doc.rect(margin, currentY, col1Width, rowHeight, 'FD');
+        doc.setTextColor(...colors.darkText);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.text(label, margin + 2, currentY + 5);
+
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin + col1Width, currentY, col2Width, rowHeight, 'FD');
+        doc.setFont(undefined, 'normal');
+        const wrappedText = doc.splitTextToSize(value || '', col2Width - 4);
+        doc.text(wrappedText, margin + col1Width + 2, currentY + 5);
+
+        currentY += rowHeight;
+      });
+
+      yPosition = currentY + 8;
+
+      if (yPosition > 180) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Address', margin, yPosition);
+      yPosition += 5;
+      doc.setFont(undefined, 'normal');
+
+      const addressLines = [];
+      if (address) addressLines.push(address);
+      if (city || province || postalCode) {
+        const cityLine = [city, province, postalCode].filter(Boolean).join(', ');
+        addressLines.push(cityLine);
+      }
+      if (country) addressLines.push(country);
+
+      if (addressLines.length > 0) {
+        const addressStartY = yPosition;
+        addressLines.forEach(line => {
+          if (yPosition > 260) {
+            doc.addPage();
+            yPosition = 12;
+          }
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, pageWidth - margin * 2, rowHeight, 'FD');
+          doc.setFontSize(8);
+          doc.text(line, margin + 2, yPosition + 5);
+          yPosition += rowHeight;
+        });
+      }
+
+      yPosition += 8;
+
+      if (yPosition > 180) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Records & Tax Information', margin, yPosition);
+      yPosition += 5;
+      doc.setFont(undefined, 'normal');
+
+      doc.setFontSize(8);
+      doc.setTextColor(...colors.mediumGray);
+      doc.text('These records help determine the tax cost of your property and can significantly impact', margin, yPosition);
+      yPosition += 4;
+      doc.text('taxes owing when it is sold or transferred.', margin, yPosition);
+      yPosition += 8;
+      doc.setTextColor(...colors.darkText);
+
+      const recordsStartY = yPosition;
+      const recordTypes = [
+        { key: 'RecordPurchaseDocs', label: 'Original Purchase Documents' },
+        { key: 'RecordLegalFees', label: 'Legal Fees and Land Transfer Tax' },
+        { key: 'RecordImprovements', label: 'Capital Improvements' },
+        { key: 'RecordAppraisals', label: 'Appraisals or Valuations' }
+      ];
+
+      const recordCol1 = 60;
+      const recordCol2 = 25;
+      const recordCol3 = pageWidth - margin * 2 - recordCol1 - recordCol2;
+
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(margin, yPosition, recordCol1, rowHeight, 'FD');
+      doc.setFont(undefined, 'bold');
+      doc.text('Record Type', margin + 2, yPosition + 5);
+
+      doc.rect(margin + recordCol1, yPosition, recordCol2, rowHeight, 'FD');
+      doc.text('Available', margin + recordCol1 + 2, yPosition + 5);
+
+      doc.rect(margin + recordCol1 + recordCol2, yPosition, recordCol3, rowHeight, 'FD');
+      doc.text('Storage Location', margin + recordCol1 + recordCol2 + 2, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+
+      yPosition += rowHeight;
+
+      recordTypes.forEach(({ key, label }) => {
+        if (yPosition > 260) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        const hasRecord = formData[`property${propNum}${key}`] === 'yes';
+        const location = formData[`property${propNum}${key}Location`] || '';
+
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin, yPosition, recordCol1, rowHeight, 'FD');
+        doc.text(label, margin + 2, yPosition + 5);
+
+        doc.rect(margin + recordCol1, yPosition, recordCol2, rowHeight, 'FD');
+        doc.text(hasRecord ? 'Yes' : 'No', margin + recordCol1 + 2, yPosition + 5);
+
+        doc.rect(margin + recordCol1 + recordCol2, yPosition, recordCol3, rowHeight, 'FD');
+        if (hasRecord && location) {
+          const wrappedLocation = doc.splitTextToSize(location, recordCol3 - 4);
+          doc.text(wrappedLocation, margin + recordCol1 + recordCol2 + 2, yPosition + 5);
+        }
+
+        yPosition += rowHeight;
+      });
+
+      yPosition += 8;
+
+      if (isRental === 'yes') {
+        if (yPosition > 180) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text('Rental Information', margin, yPosition);
+        yPosition += 5;
+        doc.setFont(undefined, 'normal');
+
+        const rentalStartY = yPosition;
+        doc.setFillColor(...colors.tableHeader);
+        doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.text('Rental Property', margin + 2, yPosition + 5);
+
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
+        doc.setFont(undefined, 'normal');
+        doc.text('Yes', margin + col1Width + 2, yPosition + 5);
+        yPosition += rowHeight;
+
+        if (leaseStorage) {
+          doc.setFillColor(...colors.tableHeader);
+          doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
+          doc.setFont(undefined, 'bold');
+          doc.text('Lease Storage Location', margin + 2, yPosition + 5);
+
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
+          doc.setFont(undefined, 'normal');
+          const wrappedLease = doc.splitTextToSize(leaseStorage, col2Width - 4);
+          doc.text(wrappedLease, margin + col1Width + 2, yPosition + 5);
+          yPosition += rowHeight;
+        }
+
+        yPosition += 8;
+      }
+
+      if (lawyerName || lawyerFirm || lawyerPhone || lawyerEmail) {
+        if (yPosition > 180) {
+          doc.addPage();
+          yPosition = 12;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text('Legal Contact', margin, yPosition);
+        yPosition += 5;
+        doc.setFont(undefined, 'normal');
+
+        const lawyerRows = [];
+        if (lawyerName) lawyerRows.push(['Lawyer Name', lawyerName]);
+        if (lawyerFirm) lawyerRows.push(['Firm Name', lawyerFirm]);
+        if (lawyerPhone) lawyerRows.push(['Phone Number', lawyerPhone]);
+        if (lawyerEmail) lawyerRows.push(['Email Address', lawyerEmail]);
+
+        lawyerRows.forEach(([label, value]) => {
+          if (yPosition > 260) {
+            doc.addPage();
+            yPosition = 12;
+          }
+
+          doc.setFillColor(...colors.tableHeader);
+          doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.text(label, margin + 2, yPosition + 5);
+
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
+          doc.setFont(undefined, 'normal');
+          const wrappedValue = doc.splitTextToSize(value, col2Width - 4);
+          doc.text(wrappedValue, margin + col1Width + 2, yPosition + 5);
+
+          yPosition += rowHeight;
+        });
+
+        yPosition += 8;
+      }
+
+      if (yPosition > 220) {
+        doc.addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Additional Notes or Missing Information', margin, yPosition);
+      yPosition += 5;
+      doc.setFont(undefined, 'normal');
+
+      const notesBoxHeight = 30;
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, yPosition, pageWidth - margin * 2, notesBoxHeight, 'FD');
+
+      const notesField = new doc.AcroFormTextField();
+      notesField.fieldName = `property_${propNum}_additional_notes`;
+      notesField.Rect = [margin + 0.3, yPosition + 0.3, pageWidth - margin * 2 - 0.6, notesBoxHeight - 0.6];
+      notesField.multiline = true;
+      notesField.fontSize = 8;
+      notesField.textColor = [0, 0, 0];
+      notesField.borderStyle = 'none';
+      doc.addField(notesField);
+
+      yPosition += notesBoxHeight + 15;
+
+      if (propNum < propertyCount && yPosition > 220) {
+        doc.addPage();
+        yPosition = 12;
+      }
+    }
+  }
   if (formData.hasDebts === 'yes' && formData.debtsData && formData.debtsData.length > 0) {
     addSectionHeader('Outstanding Debts');
 

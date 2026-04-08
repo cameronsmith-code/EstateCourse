@@ -86,9 +86,11 @@ interface FormData {
     emailAddress?: string;
   }>;
   hasSoleProprietorship?: string;
+  soleProprietorshipCount?: string;
   hasPartnership?: string;
   partnershipName?: string;
   client2HasSoleProprietorship?: string;
+  client2SoleProprietorshipCount?: string;
   client2HasPartnership?: string;
   client2PartnershipName?: string;
   spousesPoaPersonalCare?: string;
@@ -2283,6 +2285,13 @@ export const generatePDF = (formData: FormData) => {
       doc.setTextColor(...colors.darkText);
       doc.text(`${businessClient1Name} has ownership in a sole proprietorship.`, margin, yPosition);
       yPosition += 8;
+      if (formData.soleProprietorshipCount) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Number of Sole Proprietorships:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(` ${formData.soleProprietorshipCount}`, margin + 58, yPosition);
+        yPosition += 8;
+      }
     }
 
     if (formData.hasPartnership === 'yes') {
@@ -2323,6 +2332,13 @@ export const generatePDF = (formData: FormData) => {
       doc.setTextColor(...colors.darkText);
       doc.text(`${businessClient2Name} has ownership in a sole proprietorship.`, margin, yPosition);
       yPosition += 8;
+      if (formData.client2SoleProprietorshipCount) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Number of Sole Proprietorships:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(` ${formData.client2SoleProprietorshipCount}`, margin + 58, yPosition);
+        yPosition += 8;
+      }
     }
 
     if (formData.client2HasPartnership === 'yes') {

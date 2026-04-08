@@ -136,6 +136,7 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
         placeholder={placeholder}
         required={required}
         max={max}
+        min={type === 'number' ? 0 : undefined}
         className={commonClasses}
       />
     </div>

@@ -317,6 +317,14 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
+        key: 'soleProprietorshipCount',
+        label: 'How many sole proprietorships do you own?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasSoleProprietorship === 'yes',
+      },
+      {
         key: 'hasPartnership',
         label: (answers) => {
           const client1Name = answers.get(1)?.fullName || 'Client 1';
@@ -352,6 +360,18 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => {
           const maritalStatus = formData.maritalStatus;
           return maritalStatus === 'married' || maritalStatus === 'common_law';
+        },
+      },
+      {
+        key: 'client2SoleProprietorshipCount',
+        label: 'How many sole proprietorships do you own?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          return hasSpouse && formData.client2HasSoleProprietorship === 'yes';
         },
       },
       {

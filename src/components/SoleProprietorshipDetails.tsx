@@ -16,6 +16,19 @@ type OnlinePersona = {
   credentialsLocation: string;
 };
 
+type BusinessAsset = {
+  name: string;
+  type: string;
+  recordsLocation: string;
+};
+
+type BusinessLiability = {
+  lenderName: string;
+  liabilityType: string;
+  lenderContact: string;
+  documentationLocation: string;
+};
+
 export type SoleProprietorshipData = {
   registeredName: string;
   natureOfBusiness: string;
@@ -35,6 +48,10 @@ export type SoleProprietorshipData = {
   domainCredentialsLocation: string;
   socialAccounts: SocialAccount[];
   onlinePersonas: OnlinePersona[];
+  hasMajorAssets: string;
+  assets: BusinessAsset[];
+  hasLiabilities: string;
+  liabilities: BusinessLiability[];
 };
 
 type Props = {
@@ -53,6 +70,38 @@ export default function SoleProprietorshipDetails({ index, data, onChange, clien
   const licenses: License[] = data.licenses || [];
   const socialAccounts: SocialAccount[] = data.socialAccounts || [];
   const onlinePersonas: OnlinePersona[] = data.onlinePersonas || [];
+  const assets: BusinessAsset[] = data.assets || [];
+  const liabilities: BusinessLiability[] = data.liabilities || [];
+
+  const updateAsset = (i: number, field: keyof BusinessAsset, value: string) => {
+    const updated = [...assets];
+    if (!updated[i]) updated[i] = { name: '', type: '', recordsLocation: '' };
+    updated[i] = { ...updated[i], [field]: value };
+    onChange('assets', updated);
+  };
+
+  const addAsset = () => {
+    onChange('assets', [...assets, { name: '', type: '', recordsLocation: '' }]);
+  };
+
+  const removeAsset = (i: number) => {
+    onChange('assets', assets.filter((_, idx) => idx !== i));
+  };
+
+  const updateLiability = (i: number, field: keyof BusinessLiability, value: string) => {
+    const updated = [...liabilities];
+    if (!updated[i]) updated[i] = { lenderName: '', liabilityType: '', lenderContact: '', documentationLocation: '' };
+    updated[i] = { ...updated[i], [field]: value };
+    onChange('liabilities', updated);
+  };
+
+  const addLiability = () => {
+    onChange('liabilities', [...liabilities, { lenderName: '', liabilityType: '', lenderContact: '', documentationLocation: '' }]);
+  };
+
+  const removeLiability = (i: number) => {
+    onChange('liabilities', liabilities.filter((_, idx) => idx !== i));
+  };
 
   const updateLicense = (i: number, field: keyof License, value: string) => {
     const updated = [...licenses];
@@ -495,6 +544,194 @@ export default function SoleProprietorshipDetails({ index, data, onChange, clien
             </div>
           </div>
         )}
+      </div>
+
+      <div className="border-t border-gray-600 pt-4">
+        <h4 className="text-base font-semibold text-blue-300 mb-4 uppercase tracking-wide">
+          Asset and Liability Inventory
+        </h4>
+
+        <div className="space-y-4">
+          <div>
+            <label className={labelClass}>Do you have any major assets (business assets, equipment, inventory, accounts receivable, etc.)?</label>
+            <div className="space-y-2">
+              {['yes', 'no'].map((opt) => (
+                <label key={opt} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`hasMajorAssets-${index}`}
+                    value={opt}
+                    checked={data.hasMajorAssets === opt}
+                    onChange={() => {
+                      onChange('hasMajorAssets', opt);
+                      if (opt === 'no') onChange('assets', []);
+                    }}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-300 capitalize">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {data.hasMajorAssets === 'yes' && (
+            <div className="space-y-4 pl-4 border-l-2 border-blue-500">
+              {(assets.length === 0 ? [{ name: '', type: '', recordsLocation: '' }] : assets).map((asset, i) => (
+                <div key={i} className="border border-gray-600 rounded-lg p-4 bg-gray-700 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-300">Asset {i + 1}</span>
+                    {assets.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeAsset(i)}
+                        className="text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                  <div>
+                    <label className={labelClass}>Asset Name:</label>
+                    <input
+                      type="text"
+                      value={assets[i]?.name || ''}
+                      onChange={(e) => updateAsset(i, 'name', e.target.value)}
+                      placeholder="Enter asset name"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Asset Type:</label>
+                    <input
+                      type="text"
+                      value={assets[i]?.type || ''}
+                      onChange={(e) => updateAsset(i, 'type', e.target.value)}
+                      placeholder="e.g., equipment, inventory, accounts receivable"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Location of Records:</label>
+                    <input
+                      type="text"
+                      value={assets[i]?.recordsLocation || ''}
+                      onChange={(e) => updateAsset(i, 'recordsLocation', e.target.value)}
+                      placeholder="Enter location of records"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addAsset}
+                className="flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+              >
+                <Plus size={16} />
+                Do you have any other major assets?
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-4 mt-4">
+          <div>
+            <label className={labelClass}>Do you have any outstanding liabilities or debts related to the business?</label>
+            <div className="space-y-2">
+              {['yes', 'no'].map((opt) => (
+                <label key={opt} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`hasLiabilities-${index}`}
+                    value={opt}
+                    checked={data.hasLiabilities === opt}
+                    onChange={() => {
+                      onChange('hasLiabilities', opt);
+                      if (opt === 'no') onChange('liabilities', []);
+                    }}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-300 capitalize">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {data.hasLiabilities === 'yes' && (
+            <div className="space-y-4 pl-4 border-l-2 border-blue-500">
+              {(liabilities.length === 0 ? [{ lenderName: '', liabilityType: '', lenderContact: '', documentationLocation: '' }] : liabilities).map((liability, i) => (
+                <div key={i} className="border border-gray-600 rounded-lg p-4 bg-gray-700 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-300">Liability {i + 1}</span>
+                    {liabilities.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeLiability(i)}
+                        className="text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                  <div>
+                    <label className={labelClass}>Lender Name:</label>
+                    <input
+                      type="text"
+                      value={liabilities[i]?.lenderName || ''}
+                      onChange={(e) => updateLiability(i, 'lenderName', e.target.value)}
+                      placeholder="Enter lender name"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Liability Type:</label>
+                    <input
+                      type="text"
+                      value={liabilities[i]?.liabilityType || ''}
+                      onChange={(e) => updateLiability(i, 'liabilityType', e.target.value)}
+                      placeholder="e.g., business loan, line of credit, mortgage"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Lender Contact Information:</label>
+                    <input
+                      type="text"
+                      value={liabilities[i]?.lenderContact || ''}
+                      onChange={(e) => updateLiability(i, 'lenderContact', e.target.value)}
+                      placeholder="Enter lender contact details"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Location of Documentation:</label>
+                    <input
+                      type="text"
+                      value={liabilities[i]?.documentationLocation || ''}
+                      onChange={(e) => updateLiability(i, 'documentationLocation', e.target.value)}
+                      placeholder="Enter location of documentation"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addLiability}
+                className="flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+              >
+                <Plus size={16} />
+                Are there any additional liabilities or business debts?
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="border-t border-gray-600 pt-4">
+        <h4 className="text-base font-semibold text-blue-300 mb-4 uppercase tracking-wide">
+          Business Continuity and Succession
+        </h4>
       </div>
     </div>
   );

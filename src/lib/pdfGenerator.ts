@@ -47,6 +47,19 @@ interface SolePropOnlinePersona {
   credentialsLocation?: string;
 }
 
+interface SolePropAsset {
+  name?: string;
+  type?: string;
+  recordsLocation?: string;
+}
+
+interface SolePropLiability {
+  lenderName?: string;
+  liabilityType?: string;
+  lenderContact?: string;
+  documentationLocation?: string;
+}
+
 interface SolePropData {
   registeredName?: string;
   natureOfBusiness?: string;
@@ -66,6 +79,10 @@ interface SolePropData {
   domainCredentialsLocation?: string;
   socialAccounts?: SolePropSocialAccount[];
   onlinePersonas?: SolePropOnlinePersona[];
+  hasMajorAssets?: string;
+  assets?: SolePropAsset[];
+  hasLiabilities?: string;
+  liabilities?: SolePropLiability[];
 }
 
 interface FormData {
@@ -2515,6 +2532,87 @@ export const generatePDF = (formData: FormData) => {
         });
       }
     }
+
+    checkPage(10);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.text('ASSET AND LIABILITY INVENTORY', margin, yPosition);
+    yPosition += 7;
+    doc.setFontSize(10);
+
+    if (sp.hasMajorAssets === 'no') {
+      checkPage(7);
+      doc.setFont(undefined, 'normal');
+      doc.text('No major assets.', margin, yPosition);
+      yPosition += 7;
+    } else if (sp.hasMajorAssets === 'yes' && sp.assets && sp.assets.length > 0) {
+      checkPage(8);
+      doc.setFont(undefined, 'bold');
+      doc.text('Major Assets:', margin, yPosition);
+      yPosition += 6;
+      sp.assets.forEach((asset, ai) => {
+        checkPage(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Asset ${ai + 1}:`, margin + 4, yPosition);
+        yPosition += 6;
+        const assetFields: [string, string | undefined][] = [
+          ['Asset Name:', asset.name],
+          ['Asset Type:', asset.type],
+          ['Location of Records:', asset.recordsLocation],
+        ];
+        assetFields.forEach(([label, val]) => {
+          if (val) {
+            checkPage(7);
+            doc.setFont(undefined, 'bold');
+            doc.text(label, margin + 8, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(val, margin + 8 + doc.getTextWidth(label) + 2, yPosition);
+            yPosition += 6;
+          }
+        });
+      });
+    }
+
+    if (sp.hasLiabilities === 'no') {
+      checkPage(7);
+      doc.setFont(undefined, 'normal');
+      doc.text('No outstanding liabilities or debts.', margin, yPosition);
+      yPosition += 7;
+    } else if (sp.hasLiabilities === 'yes' && sp.liabilities && sp.liabilities.length > 0) {
+      checkPage(8);
+      doc.setFont(undefined, 'bold');
+      doc.text('Outstanding Liabilities / Debts:', margin, yPosition);
+      yPosition += 6;
+      sp.liabilities.forEach((liability, li) => {
+        checkPage(18);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Liability ${li + 1}:`, margin + 4, yPosition);
+        yPosition += 6;
+        const liabilityFields: [string, string | undefined][] = [
+          ['Lender Name:', liability.lenderName],
+          ['Liability Type:', liability.liabilityType],
+          ['Lender Contact:', liability.lenderContact],
+          ['Location of Documentation:', liability.documentationLocation],
+        ];
+        liabilityFields.forEach(([label, val]) => {
+          if (val) {
+            checkPage(7);
+            doc.setFont(undefined, 'bold');
+            doc.text(label, margin + 8, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(val, margin + 8 + doc.getTextWidth(label) + 2, yPosition);
+            yPosition += 6;
+          }
+        });
+      });
+    }
+
+    checkPage(10);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.text('BUSINESS CONTINUITY AND SUCCESSION', margin, yPosition);
+    yPosition += 7;
+    doc.setFontSize(10);
   };
 
   if (formData.hasSoleProprietorship === 'yes' || formData.hasPartnership === 'yes') {

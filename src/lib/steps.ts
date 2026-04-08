@@ -299,6 +299,63 @@ export const STEPS: Step[] = [
     ],
   },
   {
+    id: 5,
+    title: 'Sole Proprietorships and Partnerships',
+    description: 'Information about any non-incorporated businesses you have an interest in.',
+    questions: [
+      {
+        key: 'hasPartnership',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, do you have ownership interests in a partnership?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'partnershipName',
+        label: 'Business Name:',
+        type: 'text',
+        placeholder: 'Enter partnership name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasPartnership === 'yes',
+      },
+      {
+        key: 'client2HasPartnership',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, do you have ownership interests in a partnership?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          return maritalStatus === 'married' || maritalStatus === 'common_law';
+        },
+      },
+      {
+        key: 'client2PartnershipName',
+        label: 'Business Name:',
+        type: 'text',
+        placeholder: 'Enter partnership name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+          return hasSpouse && formData.client2HasPartnership === 'yes';
+        },
+      },
+    ],
+  },
+  {
     id: 6,
     title: 'Corporate Information',
     description: 'Information about corporations you own',

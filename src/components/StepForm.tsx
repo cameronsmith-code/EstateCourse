@@ -567,6 +567,158 @@ export default function StepForm({
     }
   }, [answers['client2HasPension']]);
 
+  useEffect(() => {
+    const count = parseInt(answers['trustBeneficiariesCount'] as string) || 0;
+    const data = answers['trustBeneficiariesData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('trustBeneficiariesData', data.slice(0, count));
+    }
+  }, [answers['trustBeneficiariesCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['numberOfCorporations'] as string) || 0;
+    const data = answers['corporationsData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('corporationsData', data.slice(0, count));
+    }
+  }, [answers['numberOfCorporations']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['client1PoaPersonalCareCount'] as string) || 0;
+    const data = answers['client1PoaPersonalCareData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client1PoaPersonalCareData', data.slice(0, count));
+    }
+  }, [answers['client1PoaPersonalCareCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['client1AlternatePoaPersonalCareCount'] as string) || 0;
+    const data = answers['client1AlternatePoaPersonalCareData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client1AlternatePoaPersonalCareData', data.slice(0, count));
+    }
+  }, [answers['client1AlternatePoaPersonalCareCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['client1PoaPropertyCount'] as string) || 0;
+    const data = answers['client1PoaPropertyData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client1PoaPropertyData', data.slice(0, count));
+    }
+  }, [answers['client1PoaPropertyCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
+    const data = answers['client1FinancialAdvisorsData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client1FinancialAdvisorsData', data.slice(0, count));
+    }
+  }, [answers['client1FinancialAdvisors']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['client2PoaPersonalCareCount'] as string) || 0;
+    const data = answers['client2PoaPersonalCareData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client2PoaPersonalCareData', data.slice(0, count));
+    }
+  }, [answers['client2PoaPersonalCareCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['client2AlternatePoaPersonalCareCount'] as string) || 0;
+    const data = answers['client2AlternatePoaPersonalCareData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client2AlternatePoaPersonalCareData', data.slice(0, count));
+    }
+  }, [answers['client2AlternatePoaPersonalCareCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['client2PoaPropertyCount'] as string) || 0;
+    const data = answers['client2PoaPropertyData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client2PoaPropertyData', data.slice(0, count));
+    }
+  }, [answers['client2PoaPropertyCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
+    const data = answers['client2FinancialAdvisorsData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client2FinancialAdvisorsData', data.slice(0, count));
+    }
+  }, [answers['client2FinancialAdvisors']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['client1EstateTrusteeCount'] as string) || 0;
+    const data = answers['client1EstateTrusteeData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client1EstateTrusteeData', data.slice(0, count));
+    }
+  }, [answers['client1EstateTrusteeCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['client2EstateTrusteeCount'] as string) || 0;
+    const data = answers['client2EstateTrusteeData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client2EstateTrusteeData', data.slice(0, count));
+    }
+  }, [answers['client2EstateTrusteeCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['mixedJointBankCount'] as string) || 0;
+    const data = answers['mixedJointInstitutionsData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('mixedJointInstitutionsData', data.slice(0, count));
+    }
+  }, [answers['mixedJointBankCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['mixedClient1BankCount'] as string) || 0;
+    const data = answers['mixedClient1InstitutionsData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('mixedClient1InstitutionsData', data.slice(0, count));
+    }
+  }, [answers['mixedClient1BankCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['mixedClient2BankCount'] as string) || 0;
+    const data = answers['mixedClient2InstitutionsData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('mixedClient2InstitutionsData', data.slice(0, count));
+    }
+  }, [answers['mixedClient2BankCount']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['additionalPropertiesCount'] as string) || 0;
+    const data = answers['propertiesData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('propertiesData', data.slice(0, count));
+    }
+  }, [answers['additionalPropertiesCount']]);
+
+  useEffect(() => {
+    const count = parseInt((allAnswers?.get(1) || {})['numberOfChildren'] as string) || 0;
+    const data = answers['childrenData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('childrenData', data.slice(0, count));
+    }
+  }, [(allAnswers?.get(1) || {})['numberOfChildren']]);
+
+  useEffect(() => {
+    const count = parseInt((allAnswers?.get(1) || {})['client1NumberOfPreviousRelationships'] as string) || 0;
+    const data = answers['client1PreviousRelationshipsData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client1PreviousRelationshipsData', data.slice(0, count));
+    }
+  }, [(allAnswers?.get(1) || {})['client1NumberOfPreviousRelationships']]);
+
+  useEffect(() => {
+    const count = parseInt((allAnswers?.get(1) || {})['client2NumberOfPreviousRelationships'] as string) || 0;
+    const data = answers['client2PreviousRelationshipsData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('client2PreviousRelationshipsData', data.slice(0, count));
+    }
+  }, [(allAnswers?.get(1) || {})['client2NumberOfPreviousRelationships']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');

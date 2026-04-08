@@ -1352,7 +1352,7 @@ export default function StepForm({
                   ? question.label(allAnswers || new Map())
                   : question.label;
 
-                return (
+                const fieldElement = (
                   <FormField
                     key={question.key}
                     question={{ ...question, label: displayLabel }}
@@ -1360,61 +1360,71 @@ export default function StepForm({
                     onChange={(value) => onAnswerChange(question.key, value)}
                   />
                 );
+
+                if (question.key === 'soleProprietorshipCount' && answers['hasSoleProprietorship'] === 'yes') {
+                  const count = parseInt(answers['soleProprietorshipCount'] as string) || 0;
+                  const client1Name = (allAnswers?.get(1)?.['fullName'] as string) || 'Client 1';
+                  const spData = (answers['client1SolePropsData'] as Array<Partial<SoleProprietorshipData>>) || [];
+                  return (
+                    <React.Fragment key={question.key}>
+                      {fieldElement}
+                      {count > 0 && (
+                        <div className="space-y-6 mt-2">
+                          {Array.from({ length: count }).map((_, i) => (
+                            <SoleProprietorshipDetails
+                              key={i}
+                              index={i}
+                              data={spData[i] || {}}
+                              clientName={client1Name}
+                              onChange={(field, value) => {
+                                const updated = [...spData];
+                                if (!updated[i]) updated[i] = {};
+                                updated[i] = { ...updated[i], [field]: value };
+                                onAnswerChange('client1SolePropsData', updated);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                }
+
+                if (question.key === 'client2SoleProprietorshipCount') {
+                  const maritalStatus = (allAnswers?.get(1)?.['maritalStatus'] as string);
+                  const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+                  if (hasSpouse && answers['client2HasSoleProprietorship'] === 'yes') {
+                    const count = parseInt(answers['client2SoleProprietorshipCount'] as string) || 0;
+                    const client2Name = (allAnswers?.get(1)?.['spouseName'] as string) || 'Client 2';
+                    const spData = (answers['client2SolePropsData'] as Array<Partial<SoleProprietorshipData>>) || [];
+                    return (
+                      <React.Fragment key={question.key}>
+                        {fieldElement}
+                        {count > 0 && (
+                          <div className="space-y-6 mt-2">
+                            {Array.from({ length: count }).map((_, i) => (
+                              <SoleProprietorshipDetails
+                                key={i}
+                                index={i}
+                                data={spData[i] || {}}
+                                clientName={client2Name}
+                                onChange={(field, value) => {
+                                  const updated = [...spData];
+                                  if (!updated[i]) updated[i] = {};
+                                  updated[i] = { ...updated[i], [field]: value };
+                                  onAnswerChange('client2SolePropsData', updated);
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+                  }
+                }
+
+                return fieldElement;
               })}
-
-              {answers['hasSoleProprietorship'] === 'yes' && (() => {
-                const count = parseInt(answers['soleProprietorshipCount'] as string) || 0;
-                if (count === 0) return null;
-                const client1Name = (allAnswers?.get(1)?.['fullName'] as string) || 'Client 1';
-                const spData = (answers['client1SolePropsData'] as Array<Partial<SoleProprietorshipData>>) || [];
-                return (
-                  <div className="space-y-6 mt-6">
-                    {Array.from({ length: count }).map((_, i) => (
-                      <SoleProprietorshipDetails
-                        key={i}
-                        index={i}
-                        data={spData[i] || {}}
-                        clientName={client1Name}
-                        onChange={(field, value) => {
-                          const updated = [...spData];
-                          if (!updated[i]) updated[i] = {};
-                          updated[i] = { ...updated[i], [field]: value };
-                          onAnswerChange('client1SolePropsData', updated);
-                        }}
-                      />
-                    ))}
-                  </div>
-                );
-              })()}
-
-              {(() => {
-                const maritalStatus = (allAnswers?.get(1)?.['maritalStatus'] as string);
-                const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
-                if (!hasSpouse) return null;
-                if (answers['client2HasSoleProprietorship'] !== 'yes') return null;
-                const count = parseInt(answers['client2SoleProprietorshipCount'] as string) || 0;
-                if (count === 0) return null;
-                const client2Name = (allAnswers?.get(1)?.['spouseName'] as string) || 'Client 2';
-                const spData = (answers['client2SolePropsData'] as Array<Partial<SoleProprietorshipData>>) || [];
-                return (
-                  <div className="space-y-6 mt-6">
-                    {Array.from({ length: count }).map((_, i) => (
-                      <SoleProprietorshipDetails
-                        key={i}
-                        index={i}
-                        data={spData[i] || {}}
-                        clientName={client2Name}
-                        onChange={(field, value) => {
-                          const updated = [...spData];
-                          if (!updated[i]) updated[i] = {};
-                          updated[i] = { ...updated[i], [field]: value };
-                          onAnswerChange('client2SolePropsData', updated);
-                        }}
-                      />
-                    ))}
-                  </div>
-                );
-              })()}
 
               {false && answers['client1HasAlternatePoaPersonalCare'] === 'yes' && client1AlternatePoaPersonalCareCount > 0 && (
                 <div className="space-y-6 mt-6">

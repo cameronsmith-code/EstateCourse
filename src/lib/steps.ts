@@ -304,6 +304,19 @@ export const STEPS: Step[] = [
     description: 'Information about any non-incorporated businesses you have an interest in.',
     questions: [
       {
+        key: 'hasSoleProprietorship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, do you have ownership in a sole proprietorship?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
         key: 'hasPartnership',
         label: (answers) => {
           const client1Name = answers.get(1)?.fullName || 'Client 1';
@@ -323,6 +336,23 @@ export const STEPS: Step[] = [
         placeholder: 'Enter partnership name',
         required: false,
         condition: (formData: Record<string, string>) => formData.hasPartnership === 'yes',
+      },
+      {
+        key: 'client2HasSoleProprietorship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, do you have ownership in a sole proprietorship?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const maritalStatus = formData.maritalStatus;
+          return maritalStatus === 'married' || maritalStatus === 'common_law';
+        },
       },
       {
         key: 'client2HasPartnership',

@@ -27,6 +27,7 @@ export type SoleProprietorshipData = {
   bookkeeperPhone: string;
   bookkeeperEmail: string;
   bookkeeperWebsite: string;
+  accountingRecordsLocation: string;
   hasDigitalAssets: string;
   website: string;
   websiteCredentialsLocation: string;
@@ -312,6 +313,19 @@ export default function SoleProprietorshipDetails({ index, data, onChange, clien
                 className={inputClass}
               />
             </div>
+          </div>
+        )}
+
+        {data.bookkeeper && (
+          <div>
+            <label className={labelClass}>Where are your accounting records kept?</label>
+            <input
+              type="text"
+              value={data.accountingRecordsLocation || ''}
+              onChange={(e) => onChange('accountingRecordsLocation', e.target.value)}
+              placeholder="Enter location of accounting records"
+              className={inputClass}
+            />
           </div>
         )}
       </div>

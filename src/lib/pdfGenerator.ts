@@ -58,6 +58,7 @@ interface SolePropData {
   bookkeeperPhone?: string;
   bookkeeperEmail?: string;
   bookkeeperWebsite?: string;
+  accountingRecordsLocation?: string;
   hasDigitalAssets?: string;
   website?: string;
   websiteCredentialsLocation?: string;
@@ -2412,6 +2413,15 @@ export const generatePDF = (formData: FormData) => {
           yPosition += 7;
         }
       });
+    }
+
+    if (sp.accountingRecordsLocation) {
+      checkPage(8);
+      doc.setFont(undefined, 'bold');
+      doc.text('Accounting Records Location:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      doc.text(sp.accountingRecordsLocation, margin + doc.getTextWidth('Accounting Records Location:') + 2, yPosition);
+      yPosition += 8;
     }
 
     if (sp.hasDigitalAssets === 'yes') {

@@ -58,6 +58,7 @@ type Props = {
   index: number;
   data: Partial<SoleProprietorshipData>;
   onChange: (field: keyof SoleProprietorshipData, value: unknown) => void;
+  onMultiChange?: (updates: Partial<SoleProprietorshipData>) => void;
   clientName: string;
 };
 
@@ -66,7 +67,7 @@ const inputClass =
 
 const labelClass = 'block text-sm font-medium text-gray-300 mb-2';
 
-export default function SoleProprietorshipDetails({ index, data, onChange, clientName }: Props) {
+export default function SoleProprietorshipDetails({ index, data, onChange, onMultiChange, clientName }: Props) {
   const licenses: License[] = data.licenses || [];
   const socialAccounts: SocialAccount[] = data.socialAccounts || [];
   const onlinePersonas: OnlinePersona[] = data.onlinePersonas || [];
@@ -198,8 +199,11 @@ export default function SoleProprietorshipDetails({ index, data, onChange, clien
                   value={opt}
                   checked={data.hasLicenses === opt}
                   onChange={() => {
-                    onChange('hasLicenses', opt);
-                    if (opt === 'no') onChange('licenses', []);
+                    if (opt === 'no' && onMultiChange) {
+                      onMultiChange({ hasLicenses: 'no', licenses: [] });
+                    } else {
+                      onChange('hasLicenses', opt);
+                    }
                   }}
                   className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                 />
@@ -563,8 +567,11 @@ export default function SoleProprietorshipDetails({ index, data, onChange, clien
                     value={opt}
                     checked={data.hasMajorAssets === opt}
                     onChange={() => {
-                      onChange('hasMajorAssets', opt);
-                      if (opt === 'no') onChange('assets', []);
+                      if (opt === 'no' && onMultiChange) {
+                        onMultiChange({ hasMajorAssets: 'no', assets: [] });
+                      } else {
+                        onChange('hasMajorAssets', opt);
+                      }
                     }}
                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                   />
@@ -646,8 +653,11 @@ export default function SoleProprietorshipDetails({ index, data, onChange, clien
                     value={opt}
                     checked={data.hasLiabilities === opt}
                     onChange={() => {
-                      onChange('hasLiabilities', opt);
-                      if (opt === 'no') onChange('liabilities', []);
+                      if (opt === 'no' && onMultiChange) {
+                        onMultiChange({ hasLiabilities: 'no', liabilities: [] });
+                      } else {
+                        onChange('hasLiabilities', opt);
+                      }
                     }}
                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                   />

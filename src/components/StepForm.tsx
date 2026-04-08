@@ -1382,6 +1382,12 @@ export default function StepForm({
                                 updated[i] = { ...updated[i], [field]: value };
                                 onAnswerChange('client1SolePropsData', updated);
                               }}
+                              onMultiChange={(updates) => {
+                                const updated = [...spData];
+                                if (!updated[i]) updated[i] = {};
+                                updated[i] = { ...updated[i], ...updates };
+                                onAnswerChange('client1SolePropsData', updated);
+                              }}
                             />
                           ))}
                         </div>
@@ -1412,6 +1418,12 @@ export default function StepForm({
                                   const updated = [...spData];
                                   if (!updated[i]) updated[i] = {};
                                   updated[i] = { ...updated[i], [field]: value };
+                                  onAnswerChange('client2SolePropsData', updated);
+                                }}
+                                onMultiChange={(updates) => {
+                                  const updated = [...spData];
+                                  if (!updated[i]) updated[i] = {};
+                                  updated[i] = { ...updated[i], ...updates };
                                   onAnswerChange('client2SolePropsData', updated);
                                 }}
                               />

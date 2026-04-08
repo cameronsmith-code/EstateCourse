@@ -32,6 +32,41 @@ interface ChildData {
   [key: string]: string | undefined;
 }
 
+interface SolePropLicense {
+  nature?: string;
+  documentLocation?: string;
+}
+
+interface SolePropSocialAccount {
+  platform?: string;
+  credentialsLocation?: string;
+}
+
+interface SolePropOnlinePersona {
+  name?: string;
+  credentialsLocation?: string;
+}
+
+interface SolePropData {
+  registeredName?: string;
+  natureOfBusiness?: string;
+  hasLicenses?: string;
+  licenses?: SolePropLicense[];
+  bookkeeper?: string;
+  bookkeeperFirm?: string;
+  bookkeeperContact?: string;
+  bookkeeperPhone?: string;
+  bookkeeperEmail?: string;
+  bookkeeperWebsite?: string;
+  hasDigitalAssets?: string;
+  website?: string;
+  websiteCredentialsLocation?: string;
+  domainProvider?: string;
+  domainCredentialsLocation?: string;
+  socialAccounts?: SolePropSocialAccount[];
+  onlinePersonas?: SolePropOnlinePersona[];
+}
+
 interface FormData {
   fullName?: string;
   dateOfBirth?: string;
@@ -87,10 +122,12 @@ interface FormData {
   }>;
   hasSoleProprietorship?: string;
   soleProprietorshipCount?: string;
+  client1SolePropsData?: SolePropData[];
   hasPartnership?: string;
   partnershipCount?: string;
   client2HasSoleProprietorship?: string;
   client2SoleProprietorshipCount?: string;
+  client2SolePropsData?: SolePropData[];
   client2HasPartnership?: string;
   client2PartnershipCount?: string;
   spousesPoaPersonalCare?: string;
@@ -2271,6 +2308,205 @@ export const generatePDF = (formData: FormData) => {
   const businessClient1Name = formData.fullName || 'Client 1';
   const businessClient2Name = formData.spouseName || 'Client 2';
 
+  const renderSolePropDetails = (sp: SolePropData, idx: number, clientName: string) => {
+    const pageHeight = doc.internal.pageSize.height;
+    const checkPage = (needed: number) => {
+      if (yPosition + needed > pageHeight - 15) {
+        doc.addPage();
+        yPosition = 15;
+      }
+    };
+
+    checkPage(30);
+    yPosition += 6;
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.darkText);
+    doc.text(`${clientName} — Sole Proprietorship ${idx + 1}`, margin, yPosition);
+    yPosition += 8;
+
+    checkPage(16);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.navyBlue);
+    doc.text('Business Identification and Records', margin, yPosition);
+    yPosition += 8;
+    doc.setTextColor(...colors.darkText);
+
+    if (sp.registeredName) {
+      checkPage(8);
+      doc.setFont(undefined, 'bold');
+      doc.text('Registered Name of the Business:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      const rnLines = doc.splitTextToSize(sp.registeredName, fieldWidth - 70);
+      doc.text(rnLines[0], margin + 68, yPosition);
+      yPosition += 8;
+    }
+
+    if (sp.natureOfBusiness) {
+      checkPage(8);
+      doc.setFont(undefined, 'bold');
+      doc.text('Nature of the Business:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      const nbLines = doc.splitTextToSize(sp.natureOfBusiness, fieldWidth - 50);
+      doc.text(nbLines[0], margin + 50, yPosition);
+      yPosition += 8;
+    }
+
+    if (sp.hasLicenses === 'no') {
+      checkPage(10);
+      doc.setFont(undefined, 'normal');
+      const noLicText = `${clientName} indicated that they do not have any professional or municipal licenses related to ${sp.registeredName || `Sole Proprietorship ${idx + 1}`}.`;
+      const noLicLines = doc.splitTextToSize(noLicText, fieldWidth);
+      doc.text(noLicLines, margin, yPosition);
+      yPosition += noLicLines.length * 6 + 4;
+    } else if (sp.hasLicenses === 'yes' && sp.licenses && sp.licenses.length > 0) {
+      sp.licenses.forEach((lic, li) => {
+        checkPage(20);
+        doc.setFont(undefined, 'bold');
+        doc.text(`License ${li + 1}`, margin, yPosition);
+        yPosition += 6;
+        if (lic.nature) {
+          doc.setFont(undefined, 'bold');
+          doc.text('Nature of License:', margin + 4, yPosition);
+          doc.setFont(undefined, 'normal');
+          const natLines = doc.splitTextToSize(lic.nature, fieldWidth - 42);
+          doc.text(natLines[0], margin + 42, yPosition);
+          yPosition += 6;
+        }
+        if (lic.documentLocation) {
+          doc.setFont(undefined, 'bold');
+          doc.text('Location of Original Documents:', margin + 4, yPosition);
+          doc.setFont(undefined, 'normal');
+          const locLines = doc.splitTextToSize(lic.documentLocation, fieldWidth - 64);
+          doc.text(locLines[0], margin + 64, yPosition);
+          yPosition += 6;
+        }
+      });
+    }
+
+    if (sp.bookkeeper === 'no') {
+      checkPage(8);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${clientName} does their own bookkeeping and accounting.`, margin, yPosition);
+      yPosition += 8;
+    } else if (sp.bookkeeper === 'yes') {
+      checkPage(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Accountant / Bookkeeper', margin, yPosition);
+      yPosition += 7;
+      const bookkeeperFields: [string, string | undefined][] = [
+        ["Firm Name:", sp.bookkeeperFirm],
+        ["Key Contact:", sp.bookkeeperContact],
+        ["Phone Number:", sp.bookkeeperPhone],
+        ["Email Address:", sp.bookkeeperEmail],
+        ["Website:", sp.bookkeeperWebsite],
+      ];
+      bookkeeperFields.forEach(([label, val]) => {
+        if (val) {
+          checkPage(7);
+          doc.setFont(undefined, 'bold');
+          doc.text(label, margin + 4, yPosition);
+          doc.setFont(undefined, 'normal');
+          doc.text(val, margin + 4 + doc.getTextWidth(label) + 2, yPosition);
+          yPosition += 7;
+        }
+      });
+    }
+
+    if (sp.hasDigitalAssets === 'yes') {
+      checkPage(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Digital Assets', margin, yPosition);
+      yPosition += 7;
+
+      if (sp.website) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Website:', margin + 4, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(sp.website, margin + 22, yPosition);
+        yPosition += 6;
+      }
+      if (sp.websiteCredentialsLocation) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Website Credentials Location:', margin + 4, yPosition);
+        doc.setFont(undefined, 'normal');
+        const wcLines = doc.splitTextToSize(sp.websiteCredentialsLocation, fieldWidth - 64);
+        doc.text(wcLines[0], margin + 64, yPosition);
+        yPosition += 6;
+      }
+      if (sp.domainProvider) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Domain Provider:', margin + 4, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(sp.domainProvider, margin + 36, yPosition);
+        yPosition += 6;
+      }
+      if (sp.domainCredentialsLocation) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Domain Credentials Location:', margin + 4, yPosition);
+        doc.setFont(undefined, 'normal');
+        const dcLines = doc.splitTextToSize(sp.domainCredentialsLocation, fieldWidth - 62);
+        doc.text(dcLines[0], margin + 62, yPosition);
+        yPosition += 6;
+      }
+
+      if (sp.socialAccounts && sp.socialAccounts.length > 0) {
+        checkPage(8);
+        doc.setFont(undefined, 'bold');
+        doc.text('Social Media Accounts:', margin + 4, yPosition);
+        yPosition += 6;
+        sp.socialAccounts.forEach((sa, si) => {
+          checkPage(12);
+          if (sa.platform) {
+            doc.setFont(undefined, 'bold');
+            doc.text(`Account ${si + 1}:`, margin + 8, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(sa.platform, margin + 8 + doc.getTextWidth(`Account ${si + 1}:`) + 2, yPosition);
+            yPosition += 6;
+          }
+          if (sa.credentialsLocation) {
+            doc.setFont(undefined, 'bold');
+            doc.text('Credentials Location:', margin + 8, yPosition);
+            doc.setFont(undefined, 'normal');
+            const saLines = doc.splitTextToSize(sa.credentialsLocation, fieldWidth - 52);
+            doc.text(saLines[0], margin + 52, yPosition);
+            yPosition += 6;
+          }
+        });
+      }
+
+      if (sp.onlinePersonas && sp.onlinePersonas.length > 0) {
+        checkPage(8);
+        doc.setFont(undefined, 'bold');
+        doc.text('Online Personas:', margin + 4, yPosition);
+        yPosition += 6;
+        sp.onlinePersonas.forEach((op, oi) => {
+          checkPage(12);
+          if (op.name) {
+            doc.setFont(undefined, 'bold');
+            doc.text(`Persona ${oi + 1}:`, margin + 8, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(op.name, margin + 8 + doc.getTextWidth(`Persona ${oi + 1}:`) + 2, yPosition);
+            yPosition += 6;
+          }
+          if (op.credentialsLocation) {
+            doc.setFont(undefined, 'bold');
+            doc.text('Credentials Location:', margin + 8, yPosition);
+            doc.setFont(undefined, 'normal');
+            const opLines = doc.splitTextToSize(op.credentialsLocation, fieldWidth - 52);
+            doc.text(opLines[0], margin + 52, yPosition);
+            yPosition += 6;
+          }
+        });
+      }
+    }
+  };
+
   if (formData.hasSoleProprietorship === 'yes' || formData.hasPartnership === 'yes') {
     yPosition += 6;
     doc.setFontSize(11);
@@ -2291,6 +2527,12 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'normal');
         doc.text(` ${formData.soleProprietorshipCount}`, margin + 58, yPosition);
         yPosition += 8;
+      }
+
+      const c1SoleProps = formData.client1SolePropsData || [];
+      const c1Count = parseInt(formData.soleProprietorshipCount || '0') || 0;
+      for (let i = 0; i < c1Count; i++) {
+        renderSolePropDetails(c1SoleProps[i] || {}, i, businessClient1Name);
       }
     }
 
@@ -2330,6 +2572,12 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'normal');
         doc.text(` ${formData.client2SoleProprietorshipCount}`, margin + 58, yPosition);
         yPosition += 8;
+      }
+
+      const c2SoleProps = formData.client2SolePropsData || [];
+      const c2Count = parseInt(formData.client2SoleProprietorshipCount || '0') || 0;
+      for (let i = 0; i < c2Count; i++) {
+        renderSolePropDetails(c2SoleProps[i] || {}, i, businessClient2Name);
       }
     }
 

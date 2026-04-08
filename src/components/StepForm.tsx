@@ -2,6 +2,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { Step } from '../lib/steps';
 import FormField from './FormField';
 import VideoPlayer from './VideoPlayer';
+import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprietorshipDetails';
 import { ChevronLeft, ChevronRight, Check, Trash2 } from 'lucide-react';
 
 type StepFormProps = {
@@ -1360,6 +1361,60 @@ export default function StepForm({
                   />
                 );
               })}
+
+              {answers['hasSoleProprietorship'] === 'yes' && (() => {
+                const count = parseInt(answers['soleProprietorshipCount'] as string) || 0;
+                if (count === 0) return null;
+                const client1Name = (allAnswers?.get(1)?.['fullName'] as string) || 'Client 1';
+                const spData = (answers['client1SolePropsData'] as Array<Partial<SoleProprietorshipData>>) || [];
+                return (
+                  <div className="space-y-6 mt-6">
+                    {Array.from({ length: count }).map((_, i) => (
+                      <SoleProprietorshipDetails
+                        key={i}
+                        index={i}
+                        data={spData[i] || {}}
+                        clientName={client1Name}
+                        onChange={(field, value) => {
+                          const updated = [...spData];
+                          if (!updated[i]) updated[i] = {};
+                          updated[i] = { ...updated[i], [field]: value };
+                          onAnswerChange('client1SolePropsData', updated);
+                        }}
+                      />
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {(() => {
+                const maritalStatus = (allAnswers?.get(1)?.['maritalStatus'] as string);
+                const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+                if (!hasSpouse) return null;
+                if (answers['client2HasSoleProprietorship'] !== 'yes') return null;
+                const count = parseInt(answers['client2SoleProprietorshipCount'] as string) || 0;
+                if (count === 0) return null;
+                const client2Name = (allAnswers?.get(1)?.['spouseName'] as string) || 'Client 2';
+                const spData = (answers['client2SolePropsData'] as Array<Partial<SoleProprietorshipData>>) || [];
+                return (
+                  <div className="space-y-6 mt-6">
+                    {Array.from({ length: count }).map((_, i) => (
+                      <SoleProprietorshipDetails
+                        key={i}
+                        index={i}
+                        data={spData[i] || {}}
+                        clientName={client2Name}
+                        onChange={(field, value) => {
+                          const updated = [...spData];
+                          if (!updated[i]) updated[i] = {};
+                          updated[i] = { ...updated[i], [field]: value };
+                          onAnswerChange('client2SolePropsData', updated);
+                        }}
+                      />
+                    ))}
+                  </div>
+                );
+              })()}
 
               {false && answers['client1HasAlternatePoaPersonalCare'] === 'yes' && client1AlternatePoaPersonalCareCount > 0 && (
                 <div className="space-y-6 mt-6">

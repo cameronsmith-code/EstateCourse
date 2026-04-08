@@ -143,17 +143,18 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateAnswer = useCallback((step: number, key: string, value: unknown) => {
-    console.log(`=== CONTEXT - UPDATE ANSWER ===`);
-    console.log(`Step: ${step}, Key: ${key}, Value:`, value);
-
     setAnswers((prev) => {
       const updated = new Map(prev);
       if (!updated.has(step)) {
         updated.set(step, {});
       }
-      const stepData = updated.get(step)!;
-      stepData[key] = value;
-
+      const stepData = { ...updated.get(step)! };
+      if (value === undefined) {
+        delete stepData[key];
+      } else {
+        stepData[key] = value;
+      }
+      updated.set(step, stepData);
       return updated;
     });
   }, []);

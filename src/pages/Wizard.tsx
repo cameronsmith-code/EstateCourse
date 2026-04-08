@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuestionnaire } from '../context/QuestionnaireContext';
 import { STEPS } from '../lib/steps';
@@ -24,31 +24,7 @@ export default function Wizard() {
     clearCurrentStepAnswers,
   } = useQuestionnaire();
 
-  useEffect(() => {
-    initQuestionnaire();
-  }, [initQuestionnaire]);
-
-  useEffect(() => {
-    if (!loading && currentStep > 1 && !isStepVisible(currentStep)) {
-      const nextVisible = getNextVisibleStep(currentStep - 1);
-      if (nextVisible !== null && nextVisible !== currentStep) {
-        for (let i = 0; i < nextVisible - currentStep; i++) {
-          nextStep();
-        }
-      }
-    }
-  }, [currentStep, loading]);
-
-  if (!STEPS || STEPS.length === 0) {
-    return (
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-red-900 border border-red-700 rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-red-300 mb-2">Configuration Error</h2>
-          <p className="text-red-200">The questionnaire steps could not be loaded. Please refresh the page.</p>
-        </div>
-      </div>
-    );
-  }
+  const prevStepVisibility = useRef<Record<number, boolean>>({});
 
   const isStepVisible = (stepId: number) => {
     const basicAnswers = answers.get(1) || {};
@@ -64,6 +40,48 @@ export default function Wizard() {
     }
     return true;
   };
+
+  useEffect(() => {
+    initQuestionnaire();
+  }, [initQuestionnaire]);
+
+  useEffect(() => {
+    if (!loading && currentStep > 1 && !isStepVisible(currentStep)) {
+      const nextVisible = getNextVisibleStep(currentStep - 1);
+      if (nextVisible !== null && nextVisible !== currentStep) {
+        for (let i = 0; i < nextVisible - currentStep; i++) {
+          nextStep();
+        }
+      }
+    }
+  }, [currentStep, loading]);
+
+  useEffect(() => {
+    STEPS.forEach(step => {
+      const wasVisible = prevStepVisibility.current[step.id];
+      const isVisible = isStepVisible(step.id);
+      if (wasVisible === true && isVisible === false) {
+        const stepAnswers = answers.get(step.id);
+        if (stepAnswers && Object.keys(stepAnswers).length > 0) {
+          Object.keys(stepAnswers).forEach(key => {
+            updateAnswer(step.id, key, undefined);
+          });
+        }
+      }
+      prevStepVisibility.current[step.id] = isVisible;
+    });
+  }, [answers]);
+
+  if (!STEPS || STEPS.length === 0) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-red-900 border border-red-700 rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-red-300 mb-2">Configuration Error</h2>
+          <p className="text-red-200">The questionnaire steps could not be loaded. Please refresh the page.</p>
+        </div>
+      </div>
+    );
+  }
 
   const getNextVisibleStep = (fromStep: number): number | null => {
     for (let i = fromStep + 1; i <= STEPS.length; i++) {

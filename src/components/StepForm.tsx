@@ -421,6 +421,151 @@ export default function StepForm({
     }
   }, [answers['client2PoaPersonalCareIsCanadaResident']]);
 
+  useEffect(() => {
+    const isMarried = answers['maritalStatus'] === 'married' || answers['maritalStatus'] === 'common_law';
+    if (!isMarried) {
+      const keysToClear = [
+        'spouseName', 'spouseDateOfBirth', 'spouseEmail', 'spousePhone',
+        'spouseSameAddress', 'spouseAddress', 'spouseCity', 'spouseProvince', 'spousePostalCode',
+        'hasMarriageContract', 'marriageContractLocation',
+        'client2HasPreviousRelationship', 'client2NumberOfPreviousRelationships'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['maritalStatus']]);
+
+  useEffect(() => {
+    if (answers['hasMarriageContract'] !== 'yes') {
+      if (answers['marriageContractLocation'] !== undefined) {
+        onAnswerChange('marriageContractLocation', undefined);
+      }
+    }
+  }, [answers['hasMarriageContract']]);
+
+  useEffect(() => {
+    if (answers['hasChildren'] !== 'yes') {
+      if (answers['numberOfChildren'] !== undefined) {
+        onAnswerChange('numberOfChildren', undefined);
+      }
+    }
+  }, [answers['hasChildren']]);
+
+  useEffect(() => {
+    if (answers['client1HasPreviousRelationship'] !== 'yes') {
+      if (answers['client1NumberOfPreviousRelationships'] !== undefined) {
+        onAnswerChange('client1NumberOfPreviousRelationships', undefined);
+      }
+    }
+  }, [answers['client1HasPreviousRelationship']]);
+
+  useEffect(() => {
+    if (answers['client2HasPreviousRelationship'] !== 'yes') {
+      if (answers['client2NumberOfPreviousRelationships'] !== undefined) {
+        onAnswerChange('client2NumberOfPreviousRelationships', undefined);
+      }
+    }
+  }, [answers['client2HasPreviousRelationship']]);
+
+  useEffect(() => {
+    if (answers['hasFamilyTrust'] !== 'yes') {
+      const keysToClear = [
+        'trustLegalName', 'trustDeedLocation', 'trustYearEstablished',
+        'trustBeneficiariesCount', 'trustBeneficiariesData'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['hasFamilyTrust']]);
+
+  useEffect(() => {
+    if (answers['ownsCorporation'] !== 'yes') {
+      const keysToClear = ['numberOfCorporations', 'corporationsData'];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['ownsCorporation']]);
+
+  useEffect(() => {
+    if (answers['client1HasPoaProperty'] === 'no') {
+      const keysToClear = [
+        'client1SpouseIsPoaProperty',
+        'client1PoaPropertyCount',
+        'client1PoaPropertyData',
+        'client1AlternatePoaPropertyCount',
+        'client1AlternatePoaPropertyData'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasPoaProperty']]);
+
+  useEffect(() => {
+    if (answers['client2HasPoaProperty'] === 'no') {
+      const keysToClear = [
+        'client2SpouseIsPoaProperty',
+        'client2PoaPropertyCount',
+        'client2PoaPropertyData',
+        'client2AlternatePoaPropertyCount',
+        'client2AlternatePoaPropertyData'
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasPoaProperty']]);
+
+  useEffect(() => {
+    if (answers['client1HasAlternatePoaPersonalCare'] !== 'yes') {
+      const keysToClear = ['client1AlternatePoaPersonalCareCount', 'client1AlternatePoaPersonalCareData'];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasAlternatePoaPersonalCare']]);
+
+  useEffect(() => {
+    if (answers['client2HasAlternatePoaPersonalCare'] !== 'yes') {
+      const keysToClear = ['client2AlternatePoaPersonalCareCount', 'client2AlternatePoaPersonalCareData'];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasAlternatePoaPersonalCare']]);
+
+  useEffect(() => {
+    if (answers['client1HasPension'] !== 'yes') {
+      if (answers['client1PensionsData'] !== undefined) {
+        onAnswerChange('client1PensionsData', undefined);
+      }
+    }
+  }, [answers['client1HasPension']]);
+
+  useEffect(() => {
+    if (answers['client2HasPension'] !== 'yes') {
+      if (answers['client2PensionsData'] !== undefined) {
+        onAnswerChange('client2PensionsData', undefined);
+      }
+    }
+  }, [answers['client2HasPension']]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

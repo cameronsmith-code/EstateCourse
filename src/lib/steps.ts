@@ -338,10 +338,10 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
-        key: 'partnershipName',
-        label: 'Business Name:',
-        type: 'text',
-        placeholder: 'Enter partnership name',
+        key: 'partnershipCount',
+        label: 'How many partnerships do you own?',
+        type: 'number',
+        placeholder: '0',
         required: false,
         condition: (formData: Record<string, string>) => formData.hasPartnership === 'yes',
       },
@@ -392,10 +392,10 @@ export const STEPS: Step[] = [
         },
       },
       {
-        key: 'client2PartnershipName',
-        label: 'Business Name:',
-        type: 'text',
-        placeholder: 'Enter partnership name',
+        key: 'client2PartnershipCount',
+        label: 'How many partnerships do you own?',
+        type: 'number',
+        placeholder: '0',
         required: false,
         condition: (formData: Record<string, string>) => {
           const maritalStatus = formData.maritalStatus;

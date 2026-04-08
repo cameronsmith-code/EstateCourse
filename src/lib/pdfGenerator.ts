@@ -88,11 +88,11 @@ interface FormData {
   hasSoleProprietorship?: string;
   soleProprietorshipCount?: string;
   hasPartnership?: string;
-  partnershipName?: string;
+  partnershipCount?: string;
   client2HasSoleProprietorship?: string;
   client2SoleProprietorshipCount?: string;
   client2HasPartnership?: string;
-  client2PartnershipName?: string;
+  client2PartnershipCount?: string;
   spousesPoaPersonalCare?: string;
   spouseIsPoaPersonalCare?: string;
   spousesPoaProperty?: string;
@@ -2300,21 +2300,13 @@ export const generatePDF = (formData: FormData) => {
       doc.setTextColor(...colors.darkText);
       doc.text(`${businessClient1Name} has ownership interests in a partnership.`, margin, yPosition);
       yPosition += 8;
-
-      doc.setFont(undefined, 'bold');
-      doc.text('Business Name:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 2;
-
-      const partnershipNameField = new doc.AcroFormTextField();
-      partnershipNameField.fieldName = 'partnershipName';
-      partnershipNameField.Rect = [margin, yPosition, fieldWidth - 15, 6];
-      partnershipNameField.fontSize = 10;
-      partnershipNameField.textColor = colors.darkText;
-      partnershipNameField.value = formData.partnershipName || '';
-      doc.addField(partnershipNameField);
-
-      yPosition += 12;
+      if (formData.partnershipCount) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Number of Partnerships:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(` ${formData.partnershipCount}`, margin + 46, yPosition);
+        yPosition += 8;
+      }
     }
   }
 
@@ -2347,21 +2339,13 @@ export const generatePDF = (formData: FormData) => {
       doc.setTextColor(...colors.darkText);
       doc.text(`${businessClient2Name} has ownership interests in a partnership.`, margin, yPosition);
       yPosition += 8;
-
-      doc.setFont(undefined, 'bold');
-      doc.text('Business Name:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 2;
-
-      const client2PartnershipNameField = new doc.AcroFormTextField();
-      client2PartnershipNameField.fieldName = 'client2PartnershipName';
-      client2PartnershipNameField.Rect = [margin, yPosition, fieldWidth - 15, 6];
-      client2PartnershipNameField.fontSize = 10;
-      client2PartnershipNameField.textColor = colors.darkText;
-      client2PartnershipNameField.value = formData.client2PartnershipName || '';
-      doc.addField(client2PartnershipNameField);
-
-      yPosition += 12;
+      if (formData.client2PartnershipCount) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Number of Partnerships:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(` ${formData.client2PartnershipCount}`, margin + 46, yPosition);
+        yPosition += 8;
+      }
     }
   }
 

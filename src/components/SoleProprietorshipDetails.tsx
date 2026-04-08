@@ -52,6 +52,8 @@ export type SoleProprietorshipData = {
   assets: BusinessAsset[];
   hasLiabilities: string;
   liabilities: BusinessLiability[];
+  dissolutionPlan: string;
+  dissolutionPlanDocLocation: string;
 };
 
 type Props = {
@@ -742,6 +744,46 @@ export default function SoleProprietorshipDetails({ index, data, onChange, onMul
         <h4 className="text-base font-semibold text-blue-300 mb-4 uppercase tracking-wide">
           Business Continuity and Succession
         </h4>
+
+        <div className="space-y-4">
+          <div>
+            <label className={labelClass}>
+              Since a sole proprietorship dissolves on death, do you have a plan for the orderly disposal of business assets and liabilities?
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: 'yes', label: 'Yes' },
+                { value: 'no', label: 'No' },
+                { value: 'beneficiary', label: 'I intend for a beneficiary to carry on the business' },
+              ].map((opt) => (
+                <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`dissolutionPlan-${index}`}
+                    value={opt.value}
+                    checked={data.dissolutionPlan === opt.value}
+                    onChange={() => onChange('dissolutionPlan', opt.value)}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-300">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {(data.dissolutionPlan === 'yes' || data.dissolutionPlan === 'beneficiary') && (
+            <div>
+              <label className={labelClass}>Location of the documentation:</label>
+              <input
+                type="text"
+                value={data.dissolutionPlanDocLocation || ''}
+                onChange={(e) => onChange('dissolutionPlanDocLocation', e.target.value)}
+                placeholder="Enter location of documentation"
+                className={inputClass}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

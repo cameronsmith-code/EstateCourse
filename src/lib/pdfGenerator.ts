@@ -83,6 +83,8 @@ interface SolePropData {
   assets?: SolePropAsset[];
   hasLiabilities?: string;
   liabilities?: SolePropLiability[];
+  dissolutionPlan?: string;
+  dissolutionPlanDocLocation?: string;
 }
 
 interface FormData {
@@ -2612,6 +2614,63 @@ export const generatePDF = (formData: FormData) => {
     doc.setFontSize(10);
     doc.text('BUSINESS CONTINUITY AND SUCCESSION', margin, yPosition);
     yPosition += 7;
+    doc.setFontSize(10);
+
+    const businessName = sp.registeredName || `Business ${idx + 1}`;
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(9);
+    const dissolutionQuestion = 'Since a sole proprietorship dissolves on death, do you have a plan for the orderly disposal of business assets and liabilities?';
+    const dissolutionLines = doc.splitTextToSize(dissolutionQuestion, pageWidth - margin * 2);
+    checkPage(dissolutionLines.length * 5 + 10);
+    doc.text(dissolutionLines, margin, yPosition);
+    yPosition += dissolutionLines.length * 5 + 2;
+
+    doc.setFont(undefined, 'normal');
+    if (sp.dissolutionPlan === 'yes') {
+      doc.text('Yes', margin + 4, yPosition);
+      yPosition += 6;
+      if (sp.dissolutionPlanDocLocation) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Location of Documentation:', margin + 4, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(` ${sp.dissolutionPlanDocLocation}`, margin + 4 + doc.getTextWidth('Location of Documentation:') + 1, yPosition);
+        yPosition += 6;
+      }
+    } else if (sp.dissolutionPlan === 'beneficiary') {
+      const beneficiaryLines = doc.splitTextToSize('I intend for a beneficiary to carry on the business', pageWidth - margin * 2 - 4);
+      checkPage(beneficiaryLines.length * 5 + 10);
+      doc.text(beneficiaryLines, margin + 4, yPosition);
+      yPosition += beneficiaryLines.length * 5 + 2;
+      if (sp.dissolutionPlanDocLocation) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Location of Documentation:', margin + 4, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(` ${sp.dissolutionPlanDocLocation}`, margin + 4 + doc.getTextWidth('Location of Documentation:') + 1, yPosition);
+        yPosition += 6;
+      }
+    } else if (sp.dissolutionPlan === 'no' || !sp.dissolutionPlan) {
+      doc.text('No', margin + 4, yPosition);
+      yPosition += 6;
+      checkPage(12);
+      doc.setFillColor(255, 255, 200);
+      const todoText = `TO DO: Develop a plan for the disposal of ${businessName}'s assets and liabilities.`;
+      const todoLines = doc.splitTextToSize(todoText, pageWidth - margin * 2 - 12);
+      const todoBoxHeight = todoLines.length * 5 + 6;
+      doc.rect(margin, yPosition, pageWidth - margin * 2, todoBoxHeight, 'F');
+      doc.setDrawColor(180, 140, 0);
+      doc.rect(margin, yPosition, pageWidth - margin * 2, todoBoxHeight, 'S');
+      doc.setTextColor(80, 60, 0);
+      doc.setFont(undefined, 'bold');
+      doc.text(todoLines, margin + 4, yPosition + 5);
+      doc.setTextColor(...colors.darkText);
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(200, 200, 200);
+      yPosition += todoBoxHeight + 4;
+    }
+
     doc.setFontSize(10);
   };
 

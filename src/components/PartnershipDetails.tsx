@@ -5,6 +5,13 @@ export type PartnershipData = {
   hasWrittenAgreement: string;
   agreementDocLocation: string;
   agreementHasDeathProvisions: string;
+  continuityContinues: string;
+  hasBuySellAgreement: string;
+  buySellDocLocation: string;
+  buySellFundedByInsurance: string;
+  buySellInsuranceDocLocation: string;
+  hasValuationMethod: string;
+  valuationMethodDocLocation: string;
 };
 
 type Props = {
@@ -30,6 +37,41 @@ export default function PartnershipDetails({ index, data, onChange, onMultiChang
       });
     } else {
       onChange('hasWrittenAgreement', value);
+    }
+  };
+
+  const handleBuySellChange = (value: string) => {
+    if (value === 'no') {
+      onMultiChange({
+        hasBuySellAgreement: 'no',
+        buySellDocLocation: undefined,
+        buySellFundedByInsurance: undefined,
+        buySellInsuranceDocLocation: undefined,
+      });
+    } else {
+      onChange('hasBuySellAgreement', value);
+    }
+  };
+
+  const handleBuySellInsuranceChange = (value: string) => {
+    if (value === 'no') {
+      onMultiChange({
+        buySellFundedByInsurance: 'no',
+        buySellInsuranceDocLocation: undefined,
+      });
+    } else {
+      onChange('buySellFundedByInsurance', value);
+    }
+  };
+
+  const handleValuationMethodChange = (value: string) => {
+    if (value === 'no') {
+      onMultiChange({
+        hasValuationMethod: 'no',
+        valuationMethodDocLocation: undefined,
+      });
+    } else {
+      onChange('hasValuationMethod', value);
     }
   };
 
@@ -166,6 +208,158 @@ export default function PartnershipDetails({ index, data, onChange, onMultiChang
         <h4 className="text-base font-semibold text-blue-300 mb-4 uppercase tracking-wide">
           Continuity and Buy-Sell Provisions
         </h4>
+
+        <div className="space-y-4">
+          <div>
+            <label className={labelClass}>
+              Does the partnership agreement specify that the business continues with the remaining partners, or is it to be wound up upon your death or incapacity?
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: 'continues', label: 'Continues with remaining partners' },
+                { value: 'wound_up', label: 'Wound up' },
+                { value: 'unsure', label: "I'm not sure" },
+              ].map((opt) => (
+                <label
+                  key={opt.value}
+                  className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name={`continuityContinues-${index}`}
+                    value={opt.value}
+                    checked={data.continuityContinues === opt.value}
+                    onChange={() => onChange('continuityContinues', opt.value)}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-300">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>
+              Is there a buy-sell agreement that obliges the remaining partners to purchase your interest?
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: 'yes', label: 'Yes' },
+                { value: 'no', label: 'No' },
+              ].map((opt) => (
+                <label
+                  key={opt.value}
+                  className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name={`hasBuySellAgreement-${index}`}
+                    value={opt.value}
+                    checked={data.hasBuySellAgreement === opt.value}
+                    onChange={() => handleBuySellChange(opt.value)}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-300">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {data.hasBuySellAgreement === 'yes' && (
+            <>
+              <div>
+                <label className={labelClass}>Location of the buy/sell document:</label>
+                <input
+                  type="text"
+                  value={data.buySellDocLocation || ''}
+                  onChange={(e) => onChange('buySellDocLocation', e.target.value)}
+                  placeholder="Enter location of buy/sell document"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  Is the buy/sell agreement funded by life insurance?
+                </label>
+                <div className="space-y-2">
+                  {[
+                    { value: 'yes', label: 'Yes' },
+                    { value: 'no', label: 'No' },
+                  ].map((opt) => (
+                    <label
+                      key={opt.value}
+                      className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name={`buySellFundedByInsurance-${index}`}
+                        value={opt.value}
+                        checked={data.buySellFundedByInsurance === opt.value}
+                        onChange={() => handleBuySellInsuranceChange(opt.value)}
+                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="ml-3 text-gray-300">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {data.buySellFundedByInsurance === 'yes' && (
+                <div>
+                  <label className={labelClass}>Location of the buy/sell life insurance documentation:</label>
+                  <input
+                    type="text"
+                    value={data.buySellInsuranceDocLocation || ''}
+                    onChange={(e) => onChange('buySellInsuranceDocLocation', e.target.value)}
+                    placeholder="Enter location of life insurance documentation"
+                    className={inputClass}
+                  />
+                </div>
+              )}
+            </>
+          )}
+
+          <div>
+            <label className={labelClass}>
+              Is there a written valuation method for how your partnership interest would be valued for sale? (e.g., a pre-set price, a formula, or a formal independent valuation)
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: 'yes', label: 'Yes' },
+                { value: 'no', label: 'No' },
+              ].map((opt) => (
+                <label
+                  key={opt.value}
+                  className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name={`hasValuationMethod-${index}`}
+                    value={opt.value}
+                    checked={data.hasValuationMethod === opt.value}
+                    onChange={() => handleValuationMethodChange(opt.value)}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-300">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {data.hasValuationMethod === 'yes' && (
+            <div>
+              <label className={labelClass}>Location of the valuation method documentation:</label>
+              <input
+                type="text"
+                value={data.valuationMethodDocLocation || ''}
+                onChange={(e) => onChange('valuationMethodDocLocation', e.target.value)}
+                placeholder="Enter location of valuation method documentation"
+                className={inputClass}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

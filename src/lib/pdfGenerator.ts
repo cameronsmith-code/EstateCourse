@@ -2383,24 +2383,29 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 8;
     doc.setTextColor(...colors.darkText);
 
-    if (sp.registeredName) {
-      checkPage(8);
-      doc.setFont(undefined, 'bold');
-      doc.text('Registered Name of the Business:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      const rnLines = doc.splitTextToSize(sp.registeredName, fieldWidth - 70);
-      doc.text(rnLines[0], margin + 68, yPosition);
-      yPosition += 8;
-    }
-
-    if (sp.natureOfBusiness) {
-      checkPage(8);
-      doc.setFont(undefined, 'bold');
-      doc.text('Nature of the Business:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      const nbLines = doc.splitTextToSize(sp.natureOfBusiness, fieldWidth - 50);
-      doc.text(nbLines[0], margin + 50, yPosition);
-      yPosition += 8;
+    {
+      const spIdRows: [string, string][] = [];
+      if (sp.registeredName !== undefined) spIdRows.push(['Registered Name of the Business:', sp.registeredName]);
+      if (sp.natureOfBusiness !== undefined) spIdRows.push(['Nature of Business:', sp.natureOfBusiness]);
+      if (spIdRows.length > 0) {
+        const labelColW = 70;
+        const valueColW = fieldWidth - labelColW;
+        const rowH = 8;
+        checkPage(spIdRows.length * rowH + 2);
+        spIdRows.forEach(([label, val]) => {
+          doc.setDrawColor(180, 180, 180);
+          doc.rect(margin, yPosition, labelColW, rowH);
+          doc.rect(margin + labelColW, yPosition, valueColW, rowH);
+          doc.setFont(undefined, 'bold');
+          doc.setFontSize(9);
+          doc.text(label, margin + 2, yPosition + 5.5);
+          doc.setFont(undefined, 'normal');
+          const valLines = doc.splitTextToSize(val, valueColW - 4);
+          doc.text(valLines[0], margin + labelColW + 2, yPosition + 5.5);
+          yPosition += rowH;
+        });
+        yPosition += 4;
+      }
     }
 
     if (sp.hasLicenses === 'no') {
@@ -2980,27 +2985,30 @@ export const generatePDF = (formData: FormData) => {
     yPosition += 7;
     doc.setFontSize(9);
 
-    const idFields: [string, string | undefined][] = [
-      ['Registered Name:', p.registeredName],
-      ['Nature of the Business:', p.natureOfBusiness],
-    ];
-    idFields.forEach(([label, val]) => {
-      if (val) {
-        checkPage(7);
-        doc.setFont(undefined, 'bold');
-        doc.text(label, margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const valLines = doc.splitTextToSize(val, pageWidth - margin * 2 - doc.getTextWidth(label) - 4);
-        if (valLines.length === 1) {
-          doc.text(val, margin + doc.getTextWidth(label) + 2, yPosition);
-          yPosition += 6;
-        } else {
-          yPosition += 6;
-          doc.text(valLines, margin + 4, yPosition);
-          yPosition += valLines.length * 5 + 2;
-        }
+    {
+      const pIdRows: [string, string][] = [];
+      if (p.registeredName !== undefined) pIdRows.push(['Registered Name of the Business:', p.registeredName]);
+      if (p.natureOfBusiness !== undefined) pIdRows.push(['Nature of Business:', p.natureOfBusiness]);
+      if (pIdRows.length > 0) {
+        const labelColW = 70;
+        const valueColW = fieldWidth - labelColW;
+        const rowH = 8;
+        checkPage(pIdRows.length * rowH + 2);
+        pIdRows.forEach(([label, val]) => {
+          doc.setDrawColor(180, 180, 180);
+          doc.rect(margin, yPosition, labelColW, rowH);
+          doc.rect(margin + labelColW, yPosition, valueColW, rowH);
+          doc.setFont(undefined, 'bold');
+          doc.setFontSize(9);
+          doc.text(label, margin + 2, yPosition + 5.5);
+          doc.setFont(undefined, 'normal');
+          const valLines = doc.splitTextToSize(val, valueColW - 4);
+          doc.text(valLines[0], margin + labelColW + 2, yPosition + 5.5);
+          yPosition += rowH;
+        });
+        yPosition += 4;
       }
-    });
+    }
 
     if (p.partnershipType) {
       checkPage(7);

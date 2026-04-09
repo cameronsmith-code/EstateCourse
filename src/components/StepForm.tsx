@@ -3,6 +3,7 @@ import { Step } from '../lib/steps';
 import FormField from './FormField';
 import VideoPlayer from './VideoPlayer';
 import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprietorshipDetails';
+import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
 import { ChevronLeft, ChevronRight, Check, Trash2 } from 'lucide-react';
 
 type StepFormProps = {
@@ -1425,6 +1426,68 @@ export default function StepForm({
                                   if (!updated[i]) updated[i] = {};
                                   updated[i] = { ...updated[i], ...updates };
                                   onAnswerChange('client2SolePropsData', updated);
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+                  }
+                }
+
+                if (question.key === 'partnershipCount' && answers['hasPartnership'] === 'yes') {
+                  const count = parseInt(answers['partnershipCount'] as string) || 0;
+                  const client1Name = (allAnswers?.get(1)?.['fullName'] as string) || 'Client 1';
+                  const pData = (answers['client1PartnershipsData'] as Array<Partial<PartnershipData>>) || [];
+                  return (
+                    <React.Fragment key={question.key}>
+                      {fieldElement}
+                      {count > 0 && (
+                        <div className="space-y-6 mt-2">
+                          {Array.from({ length: count }).map((_, i) => (
+                            <PartnershipDetails
+                              key={i}
+                              index={i}
+                              data={pData[i] || {}}
+                              clientName={client1Name}
+                              onChange={(field, value) => {
+                                const updated = [...pData];
+                                if (!updated[i]) updated[i] = {};
+                                updated[i] = { ...updated[i], [field]: value };
+                                onAnswerChange('client1PartnershipsData', updated);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                }
+
+                if (question.key === 'client2PartnershipCount') {
+                  const maritalStatus = (allAnswers?.get(1)?.['maritalStatus'] as string);
+                  const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+                  if (hasSpouse && answers['client2HasPartnership'] === 'yes') {
+                    const count = parseInt(answers['client2PartnershipCount'] as string) || 0;
+                    const client2Name = (allAnswers?.get(1)?.['spouseName'] as string) || 'Client 2';
+                    const pData = (answers['client2PartnershipsData'] as Array<Partial<PartnershipData>>) || [];
+                    return (
+                      <React.Fragment key={question.key}>
+                        {fieldElement}
+                        {count > 0 && (
+                          <div className="space-y-6 mt-2">
+                            {Array.from({ length: count }).map((_, i) => (
+                              <PartnershipDetails
+                                key={i}
+                                index={i}
+                                data={pData[i] || {}}
+                                clientName={client2Name}
+                                onChange={(field, value) => {
+                                  const updated = [...pData];
+                                  if (!updated[i]) updated[i] = {};
+                                  updated[i] = { ...updated[i], [field]: value };
+                                  onAnswerChange('client2PartnershipsData', updated);
                                 }}
                               />
                             ))}

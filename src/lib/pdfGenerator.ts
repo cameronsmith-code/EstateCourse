@@ -88,6 +88,15 @@ interface SolePropData {
   executorAuthority?: string;
 }
 
+interface PartnershipItem {
+  registeredName?: string;
+  natureOfBusiness?: string;
+  partnershipType?: string;
+  hasWrittenAgreement?: string;
+  agreementDocLocation?: string;
+  agreementHasDeathProvisions?: string;
+}
+
 interface FormData {
   fullName?: string;
   dateOfBirth?: string;
@@ -146,11 +155,13 @@ interface FormData {
   client1SolePropsData?: SolePropData[];
   hasPartnership?: string;
   partnershipCount?: string;
+  client1PartnershipsData?: PartnershipItem[];
   client2HasSoleProprietorship?: string;
   client2SoleProprietorshipCount?: string;
   client2SolePropsData?: SolePropData[];
   client2HasPartnership?: string;
   client2PartnershipCount?: string;
+  client2PartnershipsData?: PartnershipItem[];
   spousesPoaPersonalCare?: string;
   spouseIsPoaPersonalCare?: string;
   spousesPoaProperty?: string;
@@ -2703,6 +2714,104 @@ export const generatePDF = (formData: FormData) => {
     doc.setFontSize(10);
   };
 
+  const renderPartnershipDetails = (p: PartnershipItem, idx: number, clientName: string) => {
+    const businessName = p.registeredName || `Partnership ${idx + 1}`;
+
+    checkPage(12);
+    yPosition += 4;
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(11);
+    doc.text(`${clientName}'s Partnership ${idx + 1}: ${businessName}`, margin, yPosition);
+    yPosition += 8;
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.text('BUSINESS IDENTIFICATION AND RECORDS', margin, yPosition);
+    yPosition += 7;
+    doc.setFontSize(9);
+
+    const idFields: [string, string | undefined][] = [
+      ['Registered Name:', p.registeredName],
+      ['Nature of the Business:', p.natureOfBusiness],
+    ];
+    idFields.forEach(([label, val]) => {
+      if (val) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text(label, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        const valLines = doc.splitTextToSize(val, pageWidth - margin * 2 - doc.getTextWidth(label) - 4);
+        if (valLines.length === 1) {
+          doc.text(val, margin + doc.getTextWidth(label) + 2, yPosition);
+          yPosition += 6;
+        } else {
+          yPosition += 6;
+          doc.text(valLines, margin + 4, yPosition);
+          yPosition += valLines.length * 5 + 2;
+        }
+      }
+    });
+
+    if (p.partnershipType) {
+      checkPage(7);
+      doc.setFont(undefined, 'bold');
+      doc.text('Type of Partnership:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      const typeLabel = p.partnershipType === 'general'
+        ? 'General Partner (with unlimited personal liability)'
+        : 'Limited Partner (with limited liability)';
+      const typeLines = doc.splitTextToSize(typeLabel, pageWidth - margin * 2 - doc.getTextWidth('Type of Partnership:') - 4);
+      if (typeLines.length === 1) {
+        doc.text(typeLabel, margin + doc.getTextWidth('Type of Partnership:') + 2, yPosition);
+        yPosition += 6;
+      } else {
+        yPosition += 6;
+        doc.text(typeLines, margin + 4, yPosition);
+        yPosition += typeLines.length * 5 + 2;
+      }
+    }
+
+    checkPage(7);
+    doc.setFont(undefined, 'bold');
+    doc.text('Written Partnership Agreement:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    doc.text(p.hasWrittenAgreement === 'yes' ? 'Yes' : p.hasWrittenAgreement === 'no' ? 'No' : 'Not answered', margin + doc.getTextWidth('Written Partnership Agreement:') + 2, yPosition);
+    yPosition += 6;
+
+    if (p.hasWrittenAgreement === 'yes') {
+      if (p.agreementDocLocation) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Location of Original Document:', margin + 4, yPosition);
+        doc.setFont(undefined, 'normal');
+        const locLines = doc.splitTextToSize(p.agreementDocLocation, pageWidth - margin * 2 - doc.getTextWidth('Location of Original Document:') - 8);
+        if (locLines.length === 1) {
+          doc.text(p.agreementDocLocation, margin + 4 + doc.getTextWidth('Location of Original Document:') + 2, yPosition);
+          yPosition += 6;
+        } else {
+          yPosition += 6;
+          doc.text(locLines, margin + 8, yPosition);
+          yPosition += locLines.length * 5 + 2;
+        }
+      }
+
+      if (p.agreementHasDeathProvisions) {
+        checkPage(7);
+        const provisionLabels: Record<string, string> = { yes: 'Yes', no: 'No', unsure: "I'm not sure" };
+        doc.setFont(undefined, 'bold');
+        const provQ = 'Contains provisions for death or incapacity of a partner:';
+        const provQLines = doc.splitTextToSize(provQ, pageWidth - margin * 2 - 4);
+        doc.text(provQLines, margin + 4, yPosition);
+        yPosition += provQLines.length * 5 + 1;
+        doc.setFont(undefined, 'normal');
+        doc.text(provisionLabels[p.agreementHasDeathProvisions] || p.agreementHasDeathProvisions, margin + 8, yPosition);
+        yPosition += 6;
+      }
+    }
+
+    doc.setFontSize(10);
+  };
+
   if (formData.hasSoleProprietorship === 'yes' || formData.hasPartnership === 'yes') {
     yPosition += 6;
     doc.setFontSize(11);
@@ -2744,6 +2853,12 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'normal');
         doc.text(` ${formData.partnershipCount}`, margin + 46, yPosition);
         yPosition += 8;
+      }
+
+      const c1Partnerships = formData.client1PartnershipsData || [];
+      const c1PCount = parseInt(formData.partnershipCount || '0') || 0;
+      for (let i = 0; i < c1PCount; i++) {
+        renderPartnershipDetails(c1Partnerships[i] || {}, i, businessClient1Name);
       }
     }
   }
@@ -2789,6 +2904,12 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'normal');
         doc.text(` ${formData.client2PartnershipCount}`, margin + 46, yPosition);
         yPosition += 8;
+      }
+
+      const c2Partnerships = formData.client2PartnershipsData || [];
+      const c2PCount = parseInt(formData.client2PartnershipCount || '0') || 0;
+      for (let i = 0; i < c2PCount; i++) {
+        renderPartnershipDetails(c2Partnerships[i] || {}, i, businessClient2Name);
       }
     }
   }

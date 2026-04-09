@@ -161,6 +161,12 @@ export default function PartnershipDetails({ index, data, onChange, onMultiChang
           )}
         </div>
       </div>
+
+      <div className="border-t border-gray-600 pt-4">
+        <h4 className="text-base font-semibold text-blue-300 mb-4 uppercase tracking-wide">
+          Continuity and Buy-Sell Provisions
+        </h4>
+      </div>
     </div>
   );
 }

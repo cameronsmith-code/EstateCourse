@@ -2392,7 +2392,7 @@ export const generatePDF = (formData: FormData) => {
         const valueColW = fieldWidth - labelColW;
         const rowH = 8;
         checkPage(spIdRows.length * rowH + 2);
-        spIdRows.forEach(([label, val]) => {
+        spIdRows.forEach(([label, val], rowIdx) => {
           doc.setDrawColor(180, 180, 180);
           doc.rect(margin, yPosition, labelColW, rowH);
           doc.rect(margin + labelColW, yPosition, valueColW, rowH);
@@ -2401,7 +2401,14 @@ export const generatePDF = (formData: FormData) => {
           doc.text(label, margin + 2, yPosition + 5.5);
           doc.setFont(undefined, 'normal');
           const valLines = doc.splitTextToSize(val, valueColW - 4);
-          doc.text(valLines[0], margin + labelColW + 2, yPosition + 5.5);
+          const fldSpIdVal = new doc.AcroFormTextField();
+          fldSpIdVal.fieldName = `sp_id_val_${idx}_row_${rowIdx}`;
+          fldSpIdVal.Rect = [margin + labelColW + 0.5, yPosition + 0.5, valueColW - 1, rowH - 1];
+          fldSpIdVal.fontSize = 9;
+          fldSpIdVal.textColor = colors.darkText;
+          fldSpIdVal.borderStyle = 'none';
+          fldSpIdVal.value = valLines[0] || '';
+          doc.addField(fldSpIdVal);
           yPosition += rowH;
         });
         yPosition += 4;
@@ -2426,7 +2433,14 @@ export const generatePDF = (formData: FormData) => {
           doc.text('Nature of License:', margin + 4, yPosition);
           doc.setFont(undefined, 'normal');
           const natLines = doc.splitTextToSize(lic.nature, fieldWidth - 42);
-          doc.text(natLines[0], margin + 42, yPosition);
+          const fldLicNature = new doc.AcroFormTextField();
+          fldLicNature.fieldName = `sp_lic_nature_${idx}_${li}`;
+          fldLicNature.Rect = [margin + 42, yPosition - 5.5, pageWidth - (margin + 42) - margin, 7];
+          fldLicNature.fontSize = 9;
+          fldLicNature.textColor = colors.darkText;
+          fldLicNature.borderStyle = 'none';
+          fldLicNature.value = natLines[0] || '';
+          doc.addField(fldLicNature);
           yPosition += 6;
         }
         if (lic.documentLocation) {
@@ -2434,7 +2448,14 @@ export const generatePDF = (formData: FormData) => {
           doc.text('Location of Original Documents:', margin + 4, yPosition);
           doc.setFont(undefined, 'normal');
           const locLines = doc.splitTextToSize(lic.documentLocation, fieldWidth - 64);
-          doc.text(locLines[0], margin + 64, yPosition);
+          const fldLicLoc = new doc.AcroFormTextField();
+          fldLicLoc.fieldName = `sp_lic_loc_${idx}_${li}`;
+          fldLicLoc.Rect = [margin + 64, yPosition - 5.5, pageWidth - (margin + 64) - margin, 7];
+          fldLicLoc.fontSize = 9;
+          fldLicLoc.textColor = colors.darkText;
+          fldLicLoc.borderStyle = 'none';
+          fldLicLoc.value = locLines[0] || '';
+          doc.addField(fldLicLoc);
           yPosition += 6;
         }
       });
@@ -2522,7 +2543,14 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'bold');
         doc.text('Website:', margin + 4, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(sp.website, margin + 22, yPosition);
+        const fldWebsite = new doc.AcroFormTextField();
+        fldWebsite.fieldName = `sp_website_${idx}`;
+        fldWebsite.Rect = [margin + 22, yPosition - 5.5, pageWidth - (margin + 22) - margin, 7];
+        fldWebsite.fontSize = 9;
+        fldWebsite.textColor = colors.darkText;
+        fldWebsite.borderStyle = 'none';
+        fldWebsite.value = sp.website || '';
+        doc.addField(fldWebsite);
         yPosition += 6;
       }
       if (sp.websiteCredentialsLocation) {
@@ -2531,7 +2559,14 @@ export const generatePDF = (formData: FormData) => {
         doc.text('Website Credentials Location:', margin + 4, yPosition);
         doc.setFont(undefined, 'normal');
         const wcLines = doc.splitTextToSize(sp.websiteCredentialsLocation, fieldWidth - 64);
-        doc.text(wcLines[0], margin + 64, yPosition);
+        const fldWebsiteCreds = new doc.AcroFormTextField();
+        fldWebsiteCreds.fieldName = `sp_website_creds_${idx}`;
+        fldWebsiteCreds.Rect = [margin + 64, yPosition - 5.5, pageWidth - (margin + 64) - margin, 7];
+        fldWebsiteCreds.fontSize = 9;
+        fldWebsiteCreds.textColor = colors.darkText;
+        fldWebsiteCreds.borderStyle = 'none';
+        fldWebsiteCreds.value = wcLines[0] || '';
+        doc.addField(fldWebsiteCreds);
         yPosition += 6;
       }
       if (sp.domainProvider) {
@@ -2539,7 +2574,14 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'bold');
         doc.text('Domain Provider:', margin + 4, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(sp.domainProvider, margin + 36, yPosition);
+        const fldDomain = new doc.AcroFormTextField();
+        fldDomain.fieldName = `sp_domain_${idx}`;
+        fldDomain.Rect = [margin + 36, yPosition - 5.5, pageWidth - (margin + 36) - margin, 7];
+        fldDomain.fontSize = 9;
+        fldDomain.textColor = colors.darkText;
+        fldDomain.borderStyle = 'none';
+        fldDomain.value = sp.domainProvider || '';
+        doc.addField(fldDomain);
         yPosition += 6;
       }
       if (sp.domainCredentialsLocation) {
@@ -2548,7 +2590,14 @@ export const generatePDF = (formData: FormData) => {
         doc.text('Domain Credentials Location:', margin + 4, yPosition);
         doc.setFont(undefined, 'normal');
         const dcLines = doc.splitTextToSize(sp.domainCredentialsLocation, fieldWidth - 62);
-        doc.text(dcLines[0], margin + 62, yPosition);
+        const fldDomainCreds = new doc.AcroFormTextField();
+        fldDomainCreds.fieldName = `sp_domain_creds_${idx}`;
+        fldDomainCreds.Rect = [margin + 62, yPosition - 5.5, pageWidth - (margin + 62) - margin, 7];
+        fldDomainCreds.fontSize = 9;
+        fldDomainCreds.textColor = colors.darkText;
+        fldDomainCreds.borderStyle = 'none';
+        fldDomainCreds.value = dcLines[0] || '';
+        doc.addField(fldDomainCreds);
         yPosition += 6;
       }
 
@@ -2563,7 +2612,14 @@ export const generatePDF = (formData: FormData) => {
             doc.setFont(undefined, 'bold');
             doc.text(`Account ${si + 1}:`, margin + 8, yPosition);
             doc.setFont(undefined, 'normal');
-            doc.text(sa.platform, margin + 8 + doc.getTextWidth(`Account ${si + 1}:`) + 2, yPosition);
+            const fldSocialPlatform = new doc.AcroFormTextField();
+            fldSocialPlatform.fieldName = `sp_social_platform_${idx}_${si}`;
+            fldSocialPlatform.Rect = [margin + 8 + doc.getTextWidth(`Account ${si + 1}:`) + 2, yPosition - 5.5, pageWidth - (margin + 8 + doc.getTextWidth(`Account ${si + 1}:`) + 2) - margin, 7];
+            fldSocialPlatform.fontSize = 9;
+            fldSocialPlatform.textColor = colors.darkText;
+            fldSocialPlatform.borderStyle = 'none';
+            fldSocialPlatform.value = sa.platform || '';
+            doc.addField(fldSocialPlatform);
             yPosition += 6;
           }
           if (sa.credentialsLocation) {
@@ -2571,7 +2627,14 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Credentials Location:', margin + 8, yPosition);
             doc.setFont(undefined, 'normal');
             const saLines = doc.splitTextToSize(sa.credentialsLocation, fieldWidth - 52);
-            doc.text(saLines[0], margin + 52, yPosition);
+            const fldSocialCreds = new doc.AcroFormTextField();
+            fldSocialCreds.fieldName = `sp_social_creds_${idx}_${si}`;
+            fldSocialCreds.Rect = [margin + 52, yPosition - 5.5, pageWidth - (margin + 52) - margin, 7];
+            fldSocialCreds.fontSize = 9;
+            fldSocialCreds.textColor = colors.darkText;
+            fldSocialCreds.borderStyle = 'none';
+            fldSocialCreds.value = saLines[0] || '';
+            doc.addField(fldSocialCreds);
             yPosition += 6;
           }
         });
@@ -2588,7 +2651,14 @@ export const generatePDF = (formData: FormData) => {
             doc.setFont(undefined, 'bold');
             doc.text(`Persona ${oi + 1}:`, margin + 8, yPosition);
             doc.setFont(undefined, 'normal');
-            doc.text(op.name, margin + 8 + doc.getTextWidth(`Persona ${oi + 1}:`) + 2, yPosition);
+            const fldPersonaName = new doc.AcroFormTextField();
+            fldPersonaName.fieldName = `sp_persona_name_${idx}_${oi}`;
+            fldPersonaName.Rect = [margin + 8 + doc.getTextWidth(`Persona ${oi + 1}:`) + 2, yPosition - 5.5, pageWidth - (margin + 8 + doc.getTextWidth(`Persona ${oi + 1}:`) + 2) - margin, 7];
+            fldPersonaName.fontSize = 9;
+            fldPersonaName.textColor = colors.darkText;
+            fldPersonaName.borderStyle = 'none';
+            fldPersonaName.value = op.name || '';
+            doc.addField(fldPersonaName);
             yPosition += 6;
           }
           if (op.credentialsLocation) {
@@ -2596,7 +2666,14 @@ export const generatePDF = (formData: FormData) => {
             doc.text('Credentials Location:', margin + 8, yPosition);
             doc.setFont(undefined, 'normal');
             const opLines = doc.splitTextToSize(op.credentialsLocation, fieldWidth - 52);
-            doc.text(opLines[0], margin + 52, yPosition);
+            const fldPersonaCreds = new doc.AcroFormTextField();
+            fldPersonaCreds.fieldName = `sp_persona_creds_${idx}_${oi}`;
+            fldPersonaCreds.Rect = [margin + 52, yPosition - 5.5, pageWidth - (margin + 52) - margin, 7];
+            fldPersonaCreds.fontSize = 9;
+            fldPersonaCreds.textColor = colors.darkText;
+            fldPersonaCreds.borderStyle = 'none';
+            fldPersonaCreds.value = opLines[0] || '';
+            doc.addField(fldPersonaCreds);
             yPosition += 6;
           }
         });
@@ -2630,13 +2707,20 @@ export const generatePDF = (formData: FormData) => {
           ['Asset Type:', asset.type],
           ['Location of Records:', asset.recordsLocation],
         ];
-        assetFields.forEach(([label, val]) => {
+        assetFields.forEach(([label, val], fieldIdx) => {
           if (val) {
             checkPage(7);
             doc.setFont(undefined, 'bold');
             doc.text(label, margin + 8, yPosition);
             doc.setFont(undefined, 'normal');
-            doc.text(val, margin + 8 + doc.getTextWidth(label) + 2, yPosition);
+            const fldAssetVal = new doc.AcroFormTextField();
+            fldAssetVal.fieldName = `sp_asset_val_${idx}_${ai}_${fieldIdx}`;
+            fldAssetVal.Rect = [margin + 8 + doc.getTextWidth(label) + 2, yPosition - 5.5, pageWidth - (margin + 8 + doc.getTextWidth(label) + 2) - margin, 7];
+            fldAssetVal.fontSize = 9;
+            fldAssetVal.textColor = colors.darkText;
+            fldAssetVal.borderStyle = 'none';
+            fldAssetVal.value = val || '';
+            doc.addField(fldAssetVal);
             yPosition += 6;
           }
         });
@@ -2664,13 +2748,20 @@ export const generatePDF = (formData: FormData) => {
           ['Lender Contact:', liability.lenderContact],
           ['Location of Documentation:', liability.documentationLocation],
         ];
-        liabilityFields.forEach(([label, val]) => {
+        liabilityFields.forEach(([label, val], fieldIdx) => {
           if (val) {
             checkPage(7);
             doc.setFont(undefined, 'bold');
             doc.text(label, margin + 8, yPosition);
             doc.setFont(undefined, 'normal');
-            doc.text(val, margin + 8 + doc.getTextWidth(label) + 2, yPosition);
+            const fldLiabVal = new doc.AcroFormTextField();
+            fldLiabVal.fieldName = `sp_liab_val_${idx}_${li}_${fieldIdx}`;
+            fldLiabVal.Rect = [margin + 8 + doc.getTextWidth(label) + 2, yPosition - 5.5, pageWidth - (margin + 8 + doc.getTextWidth(label) + 2) - margin, 7];
+            fldLiabVal.fontSize = 9;
+            fldLiabVal.textColor = colors.darkText;
+            fldLiabVal.borderStyle = 'none';
+            fldLiabVal.value = val || '';
+            doc.addField(fldLiabVal);
             yPosition += 6;
           }
         });
@@ -2703,7 +2794,14 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'bold');
         doc.text('Location of Documentation:', margin + 4, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(` ${sp.dissolutionPlanDocLocation}`, margin + 4 + doc.getTextWidth('Location of Documentation:') + 1, yPosition);
+        const fldDissolutionLoc1 = new doc.AcroFormTextField();
+        fldDissolutionLoc1.fieldName = `sp_dissolution_loc_${idx}`;
+        fldDissolutionLoc1.Rect = [margin + 4 + doc.getTextWidth('Location of Documentation:') + 1, yPosition - 5.5, pageWidth - (margin + 4 + doc.getTextWidth('Location of Documentation:') + 1) - margin, 7];
+        fldDissolutionLoc1.fontSize = 9;
+        fldDissolutionLoc1.textColor = colors.darkText;
+        fldDissolutionLoc1.borderStyle = 'none';
+        fldDissolutionLoc1.value = sp.dissolutionPlanDocLocation || '';
+        doc.addField(fldDissolutionLoc1);
         yPosition += 6;
       }
     } else if (sp.dissolutionPlan === 'beneficiary') {
@@ -2716,7 +2814,14 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'bold');
         doc.text('Location of Documentation:', margin + 4, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(` ${sp.dissolutionPlanDocLocation}`, margin + 4 + doc.getTextWidth('Location of Documentation:') + 1, yPosition);
+        const fldDissolutionLoc2 = new doc.AcroFormTextField();
+        fldDissolutionLoc2.fieldName = `sp_dissolution_loc_${idx}`;
+        fldDissolutionLoc2.Rect = [margin + 4 + doc.getTextWidth('Location of Documentation:') + 1, yPosition - 5.5, pageWidth - (margin + 4 + doc.getTextWidth('Location of Documentation:') + 1) - margin, 7];
+        fldDissolutionLoc2.fontSize = 9;
+        fldDissolutionLoc2.textColor = colors.darkText;
+        fldDissolutionLoc2.borderStyle = 'none';
+        fldDissolutionLoc2.value = sp.dissolutionPlanDocLocation || '';
+        doc.addField(fldDissolutionLoc2);
         yPosition += 6;
       }
     } else if (sp.dissolutionPlan === 'no' || !sp.dissolutionPlan) {
@@ -2973,7 +3078,7 @@ export const generatePDF = (formData: FormData) => {
         const valueColW = fieldWidth - labelColW;
         const rowH = 8;
         checkPage(pIdRows.length * rowH + 2);
-        pIdRows.forEach(([label, val]) => {
+        pIdRows.forEach(([label, val], rowIdx) => {
           doc.setDrawColor(180, 180, 180);
           doc.rect(margin, yPosition, labelColW, rowH);
           doc.rect(margin + labelColW, yPosition, valueColW, rowH);
@@ -2982,7 +3087,14 @@ export const generatePDF = (formData: FormData) => {
           doc.text(label, margin + 2, yPosition + 5.5);
           doc.setFont(undefined, 'normal');
           const valLines = doc.splitTextToSize(val, valueColW - 4);
-          doc.text(valLines[0], margin + labelColW + 2, yPosition + 5.5);
+          const fldPIdVal = new doc.AcroFormTextField();
+          fldPIdVal.fieldName = `p_id_val_${idx}_row_${rowIdx}`;
+          fldPIdVal.Rect = [margin + labelColW + 0.5, yPosition + 0.5, valueColW - 1, rowH - 1];
+          fldPIdVal.fontSize = 9;
+          fldPIdVal.textColor = colors.darkText;
+          fldPIdVal.borderStyle = 'none';
+          fldPIdVal.value = valLines[0] || '';
+          doc.addField(fldPIdVal);
           yPosition += rowH;
         });
         yPosition += 4;
@@ -2999,11 +3111,25 @@ export const generatePDF = (formData: FormData) => {
         : 'Limited Partner (with limited liability)';
       const typeLines = doc.splitTextToSize(typeLabel, pageWidth - margin * 2 - doc.getTextWidth('Type of Partnership:') - 4);
       if (typeLines.length === 1) {
-        doc.text(typeLabel, margin + doc.getTextWidth('Type of Partnership:') + 2, yPosition);
+        const fldPType = new doc.AcroFormTextField();
+        fldPType.fieldName = `p_type_${idx}`;
+        fldPType.Rect = [margin + doc.getTextWidth('Type of Partnership:') + 2, yPosition - 5.5, pageWidth - (margin + doc.getTextWidth('Type of Partnership:') + 2) - margin, 7];
+        fldPType.fontSize = 9;
+        fldPType.textColor = colors.darkText;
+        fldPType.borderStyle = 'none';
+        fldPType.value = typeLabel || '';
+        doc.addField(fldPType);
         yPosition += 6;
       } else {
         yPosition += 6;
-        doc.text(typeLines, margin + 4, yPosition);
+        const fldPType = new doc.AcroFormTextField();
+        fldPType.fieldName = `p_type_${idx}`;
+        fldPType.Rect = [margin + 4, yPosition - 5.5, pageWidth - (margin + 4) - margin, 7];
+        fldPType.fontSize = 9;
+        fldPType.textColor = colors.darkText;
+        fldPType.borderStyle = 'none';
+        fldPType.value = typeLines[0] || '';
+        doc.addField(fldPType);
         yPosition += typeLines.length * 5 + 2;
       }
     }
@@ -3012,7 +3138,14 @@ export const generatePDF = (formData: FormData) => {
     doc.setFont(undefined, 'bold');
     doc.text('Written Partnership Agreement:', margin, yPosition);
     doc.setFont(undefined, 'normal');
-    doc.text(p.hasWrittenAgreement === 'yes' ? 'Yes' : p.hasWrittenAgreement === 'no' ? 'No' : 'Not answered', margin + doc.getTextWidth('Written Partnership Agreement:') + 2, yPosition);
+    const fldAgreementYesNo = new doc.AcroFormTextField();
+    fldAgreementYesNo.fieldName = `p_agreement_yesno_${idx}`;
+    fldAgreementYesNo.Rect = [margin + doc.getTextWidth('Written Partnership Agreement:') + 2, yPosition - 5.5, pageWidth - (margin + doc.getTextWidth('Written Partnership Agreement:') + 2) - margin, 7];
+    fldAgreementYesNo.fontSize = 9;
+    fldAgreementYesNo.textColor = colors.darkText;
+    fldAgreementYesNo.borderStyle = 'none';
+    fldAgreementYesNo.value = (p.hasWrittenAgreement === 'yes' ? 'Yes' : p.hasWrittenAgreement === 'no' ? 'No' : 'Not answered') || '';
+    doc.addField(fldAgreementYesNo);
     yPosition += 6;
 
     if (p.hasWrittenAgreement === 'yes') {
@@ -3023,11 +3156,25 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'normal');
         const locLines = doc.splitTextToSize(p.agreementDocLocation, pageWidth - margin * 2 - doc.getTextWidth('Location of Original Document:') - 8);
         if (locLines.length === 1) {
-          doc.text(p.agreementDocLocation, margin + 4 + doc.getTextWidth('Location of Original Document:') + 2, yPosition);
+          const fldAgreementLoc = new doc.AcroFormTextField();
+          fldAgreementLoc.fieldName = `p_agreement_loc_${idx}`;
+          fldAgreementLoc.Rect = [margin + 4 + doc.getTextWidth('Location of Original Document:') + 2, yPosition - 5.5, pageWidth - (margin + 4 + doc.getTextWidth('Location of Original Document:') + 2) - margin, 7];
+          fldAgreementLoc.fontSize = 9;
+          fldAgreementLoc.textColor = colors.darkText;
+          fldAgreementLoc.borderStyle = 'none';
+          fldAgreementLoc.value = p.agreementDocLocation || '';
+          doc.addField(fldAgreementLoc);
           yPosition += 6;
         } else {
           yPosition += 6;
-          doc.text(locLines, margin + 8, yPosition);
+          const fldAgreementLoc = new doc.AcroFormTextField();
+          fldAgreementLoc.fieldName = `p_agreement_loc_${idx}`;
+          fldAgreementLoc.Rect = [margin + 8, yPosition - 5.5, pageWidth - (margin + 8) - margin, 7];
+          fldAgreementLoc.fontSize = 9;
+          fldAgreementLoc.textColor = colors.darkText;
+          fldAgreementLoc.borderStyle = 'none';
+          fldAgreementLoc.value = locLines[0] || '';
+          doc.addField(fldAgreementLoc);
           yPosition += locLines.length * 5 + 2;
         }
       }
@@ -3041,7 +3188,14 @@ export const generatePDF = (formData: FormData) => {
         doc.text(provQLines, margin + 4, yPosition);
         yPosition += provQLines.length * 5 + 1;
         doc.setFont(undefined, 'normal');
-        doc.text(provisionLabels[p.agreementHasDeathProvisions] || p.agreementHasDeathProvisions, margin + 8, yPosition);
+        const fldProvisions = new doc.AcroFormTextField();
+        fldProvisions.fieldName = `p_agreement_provisions_${idx}`;
+        fldProvisions.Rect = [margin + 8, yPosition - 5.5, pageWidth - (margin + 8) - margin, 7];
+        fldProvisions.fontSize = 9;
+        fldProvisions.textColor = colors.darkText;
+        fldProvisions.borderStyle = 'none';
+        fldProvisions.value = (provisionLabels[p.agreementHasDeathProvisions] || p.agreementHasDeathProvisions) || '';
+        doc.addField(fldProvisions);
         yPosition += 6;
       }
     }
@@ -3067,7 +3221,14 @@ export const generatePDF = (formData: FormData) => {
       doc.text(contQLines, margin, yPosition);
       yPosition += contQLines.length * 5 + 1;
       doc.setFont(undefined, 'normal');
-      doc.text(continuityLabels[p.continuityContinues] || p.continuityContinues, margin + 4, yPosition);
+      const fld_p_continuity = new doc.AcroFormTextField();
+      fld_p_continuity.fieldName = `p_continuity_${idx}`;
+      fld_p_continuity.Rect = [margin + 4, yPosition - 4.5, pageWidth - margin - (margin + 4), 6];
+      fld_p_continuity.fontSize = 9;
+      fld_p_continuity.textColor = colors.darkText;
+      fld_p_continuity.borderStyle = 'none';
+      fld_p_continuity.value = continuityLabels[p.continuityContinues] || p.continuityContinues || '';
+      doc.addField(fld_p_continuity);
       yPosition += 6;
     }
 
@@ -3077,7 +3238,14 @@ export const generatePDF = (formData: FormData) => {
       doc.text('Buy-sell agreement obliging remaining partners to purchase interest:', margin, yPosition);
       yPosition += 5;
       doc.setFont(undefined, 'normal');
-      doc.text(p.hasBuySellAgreement === 'yes' ? 'Yes' : 'No', margin + 4, yPosition);
+      const fld_p_buysell_yesno = new doc.AcroFormTextField();
+      fld_p_buysell_yesno.fieldName = `p_buysell_yesno_${idx}`;
+      fld_p_buysell_yesno.Rect = [margin + 4, yPosition - 4.5, pageWidth - margin - (margin + 4), 6];
+      fld_p_buysell_yesno.fontSize = 9;
+      fld_p_buysell_yesno.textColor = colors.darkText;
+      fld_p_buysell_yesno.borderStyle = 'none';
+      fld_p_buysell_yesno.value = p.hasBuySellAgreement === 'yes' ? 'Yes' : 'No';
+      doc.addField(fld_p_buysell_yesno);
       yPosition += 6;
     }
 
@@ -3089,11 +3257,25 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'normal');
         const bsLines = doc.splitTextToSize(p.buySellDocLocation, pageWidth - margin * 2 - doc.getTextWidth('Location of buy/sell document:') - 8);
         if (bsLines.length === 1) {
-          doc.text(p.buySellDocLocation, margin + 4 + doc.getTextWidth('Location of buy/sell document:') + 2, yPosition);
+          const fld_p_buysell_loc_s = new doc.AcroFormTextField();
+          fld_p_buysell_loc_s.fieldName = `p_buysell_loc_${idx}`;
+          fld_p_buysell_loc_s.Rect = [margin + 4 + doc.getTextWidth('Location of buy/sell document:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 4 + doc.getTextWidth('Location of buy/sell document:') + 2), 6];
+          fld_p_buysell_loc_s.fontSize = 9;
+          fld_p_buysell_loc_s.textColor = colors.darkText;
+          fld_p_buysell_loc_s.borderStyle = 'none';
+          fld_p_buysell_loc_s.value = p.buySellDocLocation || '';
+          doc.addField(fld_p_buysell_loc_s);
           yPosition += 6;
         } else {
           yPosition += 6;
-          doc.text(bsLines, margin + 8, yPosition);
+          const fld_p_buysell_loc_m = new doc.AcroFormTextField();
+          fld_p_buysell_loc_m.fieldName = `p_buysell_loc_${idx}`;
+          fld_p_buysell_loc_m.Rect = [margin + 8, yPosition - 4.5, pageWidth - margin - (margin + 8), 6];
+          fld_p_buysell_loc_m.fontSize = 9;
+          fld_p_buysell_loc_m.textColor = colors.darkText;
+          fld_p_buysell_loc_m.borderStyle = 'none';
+          fld_p_buysell_loc_m.value = p.buySellDocLocation || '';
+          doc.addField(fld_p_buysell_loc_m);
           yPosition += bsLines.length * 5 + 2;
         }
       }
@@ -3102,7 +3284,14 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'bold');
         doc.text('Buy/sell agreement funded by life insurance:', margin + 4, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(p.buySellFundedByInsurance === 'yes' ? 'Yes' : 'No', margin + 4 + doc.getTextWidth('Buy/sell agreement funded by life insurance:') + 2, yPosition);
+        const fld_p_buysell_insurance_yesno = new doc.AcroFormTextField();
+        fld_p_buysell_insurance_yesno.fieldName = `p_buysell_insurance_yesno_${idx}`;
+        fld_p_buysell_insurance_yesno.Rect = [margin + 4 + doc.getTextWidth('Buy/sell agreement funded by life insurance:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 4 + doc.getTextWidth('Buy/sell agreement funded by life insurance:') + 2), 6];
+        fld_p_buysell_insurance_yesno.fontSize = 9;
+        fld_p_buysell_insurance_yesno.textColor = colors.darkText;
+        fld_p_buysell_insurance_yesno.borderStyle = 'none';
+        fld_p_buysell_insurance_yesno.value = p.buySellFundedByInsurance === 'yes' ? 'Yes' : 'No';
+        doc.addField(fld_p_buysell_insurance_yesno);
         yPosition += 6;
       }
       if (p.buySellFundedByInsurance === 'yes' && p.buySellInsuranceDocLocation) {
@@ -3112,7 +3301,14 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 5;
         doc.setFont(undefined, 'normal');
         const insLines = doc.splitTextToSize(p.buySellInsuranceDocLocation, pageWidth - margin * 2 - 16);
-        doc.text(insLines, margin + 12, yPosition);
+        const fld_p_buysell_insurance_loc = new doc.AcroFormTextField();
+        fld_p_buysell_insurance_loc.fieldName = `p_buysell_insurance_loc_${idx}`;
+        fld_p_buysell_insurance_loc.Rect = [margin + 12, yPosition - 4.5, pageWidth - margin - (margin + 12), 6];
+        fld_p_buysell_insurance_loc.fontSize = 9;
+        fld_p_buysell_insurance_loc.textColor = colors.darkText;
+        fld_p_buysell_insurance_loc.borderStyle = 'none';
+        fld_p_buysell_insurance_loc.value = p.buySellInsuranceDocLocation || '';
+        doc.addField(fld_p_buysell_insurance_loc);
         yPosition += insLines.length * 5 + 2;
       }
     }
@@ -3123,7 +3319,14 @@ export const generatePDF = (formData: FormData) => {
       doc.text('Written valuation method for partnership interest:', margin, yPosition);
       yPosition += 5;
       doc.setFont(undefined, 'normal');
-      doc.text(p.hasValuationMethod === 'yes' ? 'Yes' : 'No', margin + 4, yPosition);
+      const fld_p_valuation_yesno = new doc.AcroFormTextField();
+      fld_p_valuation_yesno.fieldName = `p_valuation_yesno_${idx}`;
+      fld_p_valuation_yesno.Rect = [margin + 4, yPosition - 4.5, pageWidth - margin - (margin + 4), 6];
+      fld_p_valuation_yesno.fontSize = 9;
+      fld_p_valuation_yesno.textColor = colors.darkText;
+      fld_p_valuation_yesno.borderStyle = 'none';
+      fld_p_valuation_yesno.value = p.hasValuationMethod === 'yes' ? 'Yes' : 'No';
+      doc.addField(fld_p_valuation_yesno);
       yPosition += 6;
     }
 
@@ -3134,7 +3337,14 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 5;
       doc.setFont(undefined, 'normal');
       const valLines2 = doc.splitTextToSize(p.valuationMethodDocLocation, pageWidth - margin * 2 - 8);
-      doc.text(valLines2, margin + 8, yPosition);
+      const fld_p_valuation_loc = new doc.AcroFormTextField();
+      fld_p_valuation_loc.fieldName = `p_valuation_loc_${idx}`;
+      fld_p_valuation_loc.Rect = [margin + 8, yPosition - 4.5, pageWidth - margin - (margin + 8), 6];
+      fld_p_valuation_loc.fontSize = 9;
+      fld_p_valuation_loc.textColor = colors.darkText;
+      fld_p_valuation_loc.borderStyle = 'none';
+      fld_p_valuation_loc.value = p.valuationMethodDocLocation || '';
+      doc.addField(fld_p_valuation_loc);
       yPosition += valLines2.length * 5 + 2;
     }
 
@@ -3169,11 +3379,25 @@ export const generatePDF = (formData: FormData) => {
           doc.setFont(undefined, 'normal');
           const debtLines = doc.splitTextToSize(g.natureOfDebt, pageWidth - margin * 2 - doc.getTextWidth('Nature of the debt:') - 12);
           if (debtLines.length === 1) {
-            doc.text(g.natureOfDebt, margin + 8 + doc.getTextWidth('Nature of the debt:') + 2, yPosition);
+            const fld_p_guarantee_debt_s = new doc.AcroFormTextField();
+            fld_p_guarantee_debt_s.fieldName = `p_guarantee_debt_${idx}_${gIdx}`;
+            fld_p_guarantee_debt_s.Rect = [margin + 8 + doc.getTextWidth('Nature of the debt:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 8 + doc.getTextWidth('Nature of the debt:') + 2), 6];
+            fld_p_guarantee_debt_s.fontSize = 9;
+            fld_p_guarantee_debt_s.textColor = colors.darkText;
+            fld_p_guarantee_debt_s.borderStyle = 'none';
+            fld_p_guarantee_debt_s.value = g.natureOfDebt || '';
+            doc.addField(fld_p_guarantee_debt_s);
             yPosition += 6;
           } else {
             yPosition += 6;
-            doc.text(debtLines, margin + 12, yPosition);
+            const fld_p_guarantee_debt_m = new doc.AcroFormTextField();
+            fld_p_guarantee_debt_m.fieldName = `p_guarantee_debt_${idx}_${gIdx}`;
+            fld_p_guarantee_debt_m.Rect = [margin + 12, yPosition - 4.5, pageWidth - margin - (margin + 12), 6];
+            fld_p_guarantee_debt_m.fontSize = 9;
+            fld_p_guarantee_debt_m.textColor = colors.darkText;
+            fld_p_guarantee_debt_m.borderStyle = 'none';
+            fld_p_guarantee_debt_m.value = g.natureOfDebt || '';
+            doc.addField(fld_p_guarantee_debt_m);
             yPosition += debtLines.length * 5 + 2;
           }
         }
@@ -3185,11 +3409,25 @@ export const generatePDF = (formData: FormData) => {
           doc.setFont(undefined, 'normal');
           const docLines = doc.splitTextToSize(g.documentationLocation, pageWidth - margin * 2 - doc.getTextWidth('Documentation location:') - 12);
           if (docLines.length === 1) {
-            doc.text(g.documentationLocation, margin + 8 + doc.getTextWidth('Documentation location:') + 2, yPosition);
+            const fld_p_guarantee_doc_s = new doc.AcroFormTextField();
+            fld_p_guarantee_doc_s.fieldName = `p_guarantee_doc_${idx}_${gIdx}`;
+            fld_p_guarantee_doc_s.Rect = [margin + 8 + doc.getTextWidth('Documentation location:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 8 + doc.getTextWidth('Documentation location:') + 2), 6];
+            fld_p_guarantee_doc_s.fontSize = 9;
+            fld_p_guarantee_doc_s.textColor = colors.darkText;
+            fld_p_guarantee_doc_s.borderStyle = 'none';
+            fld_p_guarantee_doc_s.value = g.documentationLocation || '';
+            doc.addField(fld_p_guarantee_doc_s);
             yPosition += 6;
           } else {
             yPosition += 6;
-            doc.text(docLines, margin + 12, yPosition);
+            const fld_p_guarantee_doc_m = new doc.AcroFormTextField();
+            fld_p_guarantee_doc_m.fieldName = `p_guarantee_doc_${idx}_${gIdx}`;
+            fld_p_guarantee_doc_m.Rect = [margin + 12, yPosition - 4.5, pageWidth - margin - (margin + 12), 6];
+            fld_p_guarantee_doc_m.fontSize = 9;
+            fld_p_guarantee_doc_m.textColor = colors.darkText;
+            fld_p_guarantee_doc_m.borderStyle = 'none';
+            fld_p_guarantee_doc_m.value = g.documentationLocation || '';
+            doc.addField(fld_p_guarantee_doc_m);
             yPosition += docLines.length * 5 + 2;
           }
         }
@@ -3201,7 +3439,14 @@ export const generatePDF = (formData: FormData) => {
       doc.setFont(undefined, 'bold');
       doc.text('Professional partnership (law, accounting, etc.):', margin, yPosition);
       doc.setFont(undefined, 'normal');
-      doc.text(p.isProfessionalPartnership === 'yes' ? 'Yes' : 'No', margin + doc.getTextWidth('Professional partnership (law, accounting, etc.):') + 2, yPosition);
+      const fld_p_professional_yesno = new doc.AcroFormTextField();
+      fld_p_professional_yesno.fieldName = `p_professional_yesno_${idx}`;
+      fld_p_professional_yesno.Rect = [margin + doc.getTextWidth('Professional partnership (law, accounting, etc.):') + 2, yPosition - 4.5, pageWidth - margin - (margin + doc.getTextWidth('Professional partnership (law, accounting, etc.):') + 2), 6];
+      fld_p_professional_yesno.fontSize = 9;
+      fld_p_professional_yesno.textColor = colors.darkText;
+      fld_p_professional_yesno.borderStyle = 'none';
+      fld_p_professional_yesno.value = p.isProfessionalPartnership === 'yes' ? 'Yes' : 'No';
+      doc.addField(fld_p_professional_yesno);
       yPosition += 6;
     }
 
@@ -3211,7 +3456,14 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'bold');
         doc.text('Liability or errors and omissions insurance:', margin + 4, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(p.hasLiabilityInsurance === 'yes' ? 'Yes' : 'No', margin + 4 + doc.getTextWidth('Liability or errors and omissions insurance:') + 2, yPosition);
+        const fld_p_liability_insurance_yesno = new doc.AcroFormTextField();
+        fld_p_liability_insurance_yesno.fieldName = `p_liability_insurance_yesno_${idx}`;
+        fld_p_liability_insurance_yesno.Rect = [margin + 4 + doc.getTextWidth('Liability or errors and omissions insurance:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 4 + doc.getTextWidth('Liability or errors and omissions insurance:') + 2), 6];
+        fld_p_liability_insurance_yesno.fontSize = 9;
+        fld_p_liability_insurance_yesno.textColor = colors.darkText;
+        fld_p_liability_insurance_yesno.borderStyle = 'none';
+        fld_p_liability_insurance_yesno.value = p.hasLiabilityInsurance === 'yes' ? 'Yes' : 'No';
+        doc.addField(fld_p_liability_insurance_yesno);
         yPosition += 6;
       }
 
@@ -3228,11 +3480,25 @@ export const generatePDF = (formData: FormData) => {
             doc.setFont(undefined, 'normal');
             const descLines = doc.splitTextToSize(pol.description, pageWidth - margin * 2 - doc.getTextWidth('Description:') - 16);
             if (descLines.length === 1) {
-              doc.text(pol.description, margin + 12 + doc.getTextWidth('Description:') + 2, yPosition);
+              const fld_p_policy_desc_s = new doc.AcroFormTextField();
+              fld_p_policy_desc_s.fieldName = `p_policy_desc_${idx}_${pIdx}`;
+              fld_p_policy_desc_s.Rect = [margin + 12 + doc.getTextWidth('Description:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 12 + doc.getTextWidth('Description:') + 2), 6];
+              fld_p_policy_desc_s.fontSize = 9;
+              fld_p_policy_desc_s.textColor = colors.darkText;
+              fld_p_policy_desc_s.borderStyle = 'none';
+              fld_p_policy_desc_s.value = pol.description || '';
+              doc.addField(fld_p_policy_desc_s);
               yPosition += 6;
             } else {
               yPosition += 6;
-              doc.text(descLines, margin + 16, yPosition);
+              const fld_p_policy_desc_m = new doc.AcroFormTextField();
+              fld_p_policy_desc_m.fieldName = `p_policy_desc_${idx}_${pIdx}`;
+              fld_p_policy_desc_m.Rect = [margin + 16, yPosition - 4.5, pageWidth - margin - (margin + 16), 6];
+              fld_p_policy_desc_m.fontSize = 9;
+              fld_p_policy_desc_m.textColor = colors.darkText;
+              fld_p_policy_desc_m.borderStyle = 'none';
+              fld_p_policy_desc_m.value = pol.description || '';
+              doc.addField(fld_p_policy_desc_m);
               yPosition += descLines.length * 5 + 2;
             }
           }
@@ -3244,11 +3510,25 @@ export const generatePDF = (formData: FormData) => {
             doc.setFont(undefined, 'normal');
             const polDocLines = doc.splitTextToSize(pol.documentationLocation, pageWidth - margin * 2 - doc.getTextWidth('Documentation location:') - 16);
             if (polDocLines.length === 1) {
-              doc.text(pol.documentationLocation, margin + 12 + doc.getTextWidth('Documentation location:') + 2, yPosition);
+              const fld_p_policy_doc_s = new doc.AcroFormTextField();
+              fld_p_policy_doc_s.fieldName = `p_policy_doc_${idx}_${pIdx}`;
+              fld_p_policy_doc_s.Rect = [margin + 12 + doc.getTextWidth('Documentation location:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 12 + doc.getTextWidth('Documentation location:') + 2), 6];
+              fld_p_policy_doc_s.fontSize = 9;
+              fld_p_policy_doc_s.textColor = colors.darkText;
+              fld_p_policy_doc_s.borderStyle = 'none';
+              fld_p_policy_doc_s.value = pol.documentationLocation || '';
+              doc.addField(fld_p_policy_doc_s);
               yPosition += 6;
             } else {
               yPosition += 6;
-              doc.text(polDocLines, margin + 16, yPosition);
+              const fld_p_policy_doc_m = new doc.AcroFormTextField();
+              fld_p_policy_doc_m.fieldName = `p_policy_doc_${idx}_${pIdx}`;
+              fld_p_policy_doc_m.Rect = [margin + 16, yPosition - 4.5, pageWidth - margin - (margin + 16), 6];
+              fld_p_policy_doc_m.fontSize = 9;
+              fld_p_policy_doc_m.textColor = colors.darkText;
+              fld_p_policy_doc_m.borderStyle = 'none';
+              fld_p_policy_doc_m.value = pol.documentationLocation || '';
+              doc.addField(fld_p_policy_doc_m);
               yPosition += polDocLines.length * 5 + 2;
             }
           }
@@ -4404,14 +4684,28 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.setFont(undefined, 'bold');
       doc.text('Name:', margin, yPosition);
       doc.setFont(undefined, 'normal');
-      doc.text(formData.client1PoaPersonalCareName, margin + 30, yPosition);
+      const fld_c1_poa_pc_name = new doc.AcroFormTextField();
+      fld_c1_poa_pc_name.fieldName = 'c1_poa_pc_name';
+      fld_c1_poa_pc_name.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+      fld_c1_poa_pc_name.fontSize = 9;
+      fld_c1_poa_pc_name.textColor = colors.darkText;
+      fld_c1_poa_pc_name.borderStyle = 'none';
+      fld_c1_poa_pc_name.value = formData.client1PoaPersonalCareName || '';
+      doc.addField(fld_c1_poa_pc_name);
       yPosition += 5;
 
       if (formData.client1PoaPersonalCarePhone) {
         doc.setFont(undefined, 'bold');
         doc.text('Phone:', margin, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(formData.client1PoaPersonalCarePhone, margin + 30, yPosition);
+        const fld_c1_poa_pc_phone = new doc.AcroFormTextField();
+        fld_c1_poa_pc_phone.fieldName = 'c1_poa_pc_phone';
+        fld_c1_poa_pc_phone.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c1_poa_pc_phone.fontSize = 9;
+        fld_c1_poa_pc_phone.textColor = colors.darkText;
+        fld_c1_poa_pc_phone.borderStyle = 'none';
+        fld_c1_poa_pc_phone.value = formData.client1PoaPersonalCarePhone || '';
+        doc.addField(fld_c1_poa_pc_phone);
         yPosition += 5;
       }
 
@@ -4419,7 +4713,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.setFont(undefined, 'bold');
         doc.text('Email:', margin, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(formData.client1PoaPersonalCareEmail, margin + 30, yPosition);
+        const fld_c1_poa_pc_email = new doc.AcroFormTextField();
+        fld_c1_poa_pc_email.fieldName = 'c1_poa_pc_email';
+        fld_c1_poa_pc_email.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c1_poa_pc_email.fontSize = 9;
+        fld_c1_poa_pc_email.textColor = colors.darkText;
+        fld_c1_poa_pc_email.borderStyle = 'none';
+        fld_c1_poa_pc_email.value = formData.client1PoaPersonalCareEmail || '';
+        doc.addField(fld_c1_poa_pc_email);
         yPosition += 5;
       }
 
@@ -4427,7 +4728,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.setFont(undefined, 'bold');
         doc.text('Relationship:', margin, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(formData.client1PoaPersonalCareRelationship, margin + 30, yPosition);
+        const fld_c1_poa_pc_relationship = new doc.AcroFormTextField();
+        fld_c1_poa_pc_relationship.fieldName = 'c1_poa_pc_relationship';
+        fld_c1_poa_pc_relationship.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c1_poa_pc_relationship.fontSize = 9;
+        fld_c1_poa_pc_relationship.textColor = colors.darkText;
+        fld_c1_poa_pc_relationship.borderStyle = 'none';
+        fld_c1_poa_pc_relationship.value = formData.client1PoaPersonalCareRelationship || '';
+        doc.addField(fld_c1_poa_pc_relationship);
         yPosition += 5;
       }
 
@@ -4455,7 +4763,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         const locationText = formData.client1PoaPersonalCareCity ?
           `${formData.client1PoaPersonalCareCity}, ${provinceLabel}` :
           provinceLabel;
-        doc.text(locationText, margin + 30, yPosition);
+        const fld_c1_poa_pc_location_province = new doc.AcroFormTextField();
+        fld_c1_poa_pc_location_province.fieldName = 'c1_poa_pc_location_province';
+        fld_c1_poa_pc_location_province.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c1_poa_pc_location_province.fontSize = 9;
+        fld_c1_poa_pc_location_province.textColor = colors.darkText;
+        fld_c1_poa_pc_location_province.borderStyle = 'none';
+        fld_c1_poa_pc_location_province.value = locationText || '';
+        doc.addField(fld_c1_poa_pc_location_province);
         yPosition += 5;
       } else if (formData.client1PoaPersonalCareCountry) {
         doc.setFont(undefined, 'bold');
@@ -4464,7 +4779,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         const locationText = formData.client1PoaPersonalCareCity ?
           `${formData.client1PoaPersonalCareCity}, ${formData.client1PoaPersonalCareCountry}` :
           formData.client1PoaPersonalCareCountry;
-        doc.text(locationText, margin + 30, yPosition);
+        const fld_c1_poa_pc_location_country = new doc.AcroFormTextField();
+        fld_c1_poa_pc_location_country.fieldName = 'c1_poa_pc_location_country';
+        fld_c1_poa_pc_location_country.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c1_poa_pc_location_country.fontSize = 9;
+        fld_c1_poa_pc_location_country.textColor = colors.darkText;
+        fld_c1_poa_pc_location_country.borderStyle = 'none';
+        fld_c1_poa_pc_location_country.value = locationText || '';
+        doc.addField(fld_c1_poa_pc_location_country);
         yPosition += 5;
       }
 
@@ -4476,7 +4798,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.setFont(undefined, 'bold');
         doc.text('Document copy:', margin, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(docCopyLabel, margin + 30, yPosition);
+        const fld_c1_poa_pc_doc_copy = new doc.AcroFormTextField();
+        fld_c1_poa_pc_doc_copy.fieldName = 'c1_poa_pc_doc_copy';
+        fld_c1_poa_pc_doc_copy.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c1_poa_pc_doc_copy.fontSize = 9;
+        fld_c1_poa_pc_doc_copy.textColor = colors.darkText;
+        fld_c1_poa_pc_doc_copy.borderStyle = 'none';
+        fld_c1_poa_pc_doc_copy.value = docCopyLabel || '';
+        doc.addField(fld_c1_poa_pc_doc_copy);
         yPosition += 5;
       }
 
@@ -4791,14 +5120,28 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.setFont(undefined, 'bold');
       doc.text('Name:', margin, yPosition);
       doc.setFont(undefined, 'normal');
-      doc.text(formData.client2PoaPersonalCareName, margin + 30, yPosition);
+      const fld_c2_poa_pc_name = new doc.AcroFormTextField();
+      fld_c2_poa_pc_name.fieldName = 'c2_poa_pc_name';
+      fld_c2_poa_pc_name.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+      fld_c2_poa_pc_name.fontSize = 9;
+      fld_c2_poa_pc_name.textColor = colors.darkText;
+      fld_c2_poa_pc_name.borderStyle = 'none';
+      fld_c2_poa_pc_name.value = formData.client2PoaPersonalCareName || '';
+      doc.addField(fld_c2_poa_pc_name);
       yPosition += 5;
 
       if (formData.client2PoaPersonalCarePhone) {
         doc.setFont(undefined, 'bold');
         doc.text('Phone:', margin, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(formData.client2PoaPersonalCarePhone, margin + 30, yPosition);
+        const fld_c2_poa_pc_phone = new doc.AcroFormTextField();
+        fld_c2_poa_pc_phone.fieldName = 'c2_poa_pc_phone';
+        fld_c2_poa_pc_phone.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c2_poa_pc_phone.fontSize = 9;
+        fld_c2_poa_pc_phone.textColor = colors.darkText;
+        fld_c2_poa_pc_phone.borderStyle = 'none';
+        fld_c2_poa_pc_phone.value = formData.client2PoaPersonalCarePhone || '';
+        doc.addField(fld_c2_poa_pc_phone);
         yPosition += 5;
       }
 
@@ -4806,7 +5149,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.setFont(undefined, 'bold');
         doc.text('Email:', margin, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(formData.client2PoaPersonalCareEmail, margin + 30, yPosition);
+        const fld_c2_poa_pc_email = new doc.AcroFormTextField();
+        fld_c2_poa_pc_email.fieldName = 'c2_poa_pc_email';
+        fld_c2_poa_pc_email.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c2_poa_pc_email.fontSize = 9;
+        fld_c2_poa_pc_email.textColor = colors.darkText;
+        fld_c2_poa_pc_email.borderStyle = 'none';
+        fld_c2_poa_pc_email.value = formData.client2PoaPersonalCareEmail || '';
+        doc.addField(fld_c2_poa_pc_email);
         yPosition += 5;
       }
 
@@ -4814,7 +5164,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.setFont(undefined, 'bold');
         doc.text('Relationship:', margin, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(formData.client2PoaPersonalCareRelationship, margin + 30, yPosition);
+        const fld_c2_poa_pc_relationship = new doc.AcroFormTextField();
+        fld_c2_poa_pc_relationship.fieldName = 'c2_poa_pc_relationship';
+        fld_c2_poa_pc_relationship.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c2_poa_pc_relationship.fontSize = 9;
+        fld_c2_poa_pc_relationship.textColor = colors.darkText;
+        fld_c2_poa_pc_relationship.borderStyle = 'none';
+        fld_c2_poa_pc_relationship.value = formData.client2PoaPersonalCareRelationship || '';
+        doc.addField(fld_c2_poa_pc_relationship);
         yPosition += 5;
       }
 
@@ -4842,7 +5199,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         const locationText = formData.client2PoaPersonalCareCity ?
           `${formData.client2PoaPersonalCareCity}, ${provinceLabel}` :
           provinceLabel;
-        doc.text(locationText, margin + 30, yPosition);
+        const fld_c2_poa_pc_location_province = new doc.AcroFormTextField();
+        fld_c2_poa_pc_location_province.fieldName = 'c2_poa_pc_location_province';
+        fld_c2_poa_pc_location_province.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c2_poa_pc_location_province.fontSize = 9;
+        fld_c2_poa_pc_location_province.textColor = colors.darkText;
+        fld_c2_poa_pc_location_province.borderStyle = 'none';
+        fld_c2_poa_pc_location_province.value = locationText || '';
+        doc.addField(fld_c2_poa_pc_location_province);
         yPosition += 5;
       } else if (formData.client2PoaPersonalCareCountry) {
         doc.setFont(undefined, 'bold');
@@ -4851,7 +5215,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         const locationText = formData.client2PoaPersonalCareCity ?
           `${formData.client2PoaPersonalCareCity}, ${formData.client2PoaPersonalCareCountry}` :
           formData.client2PoaPersonalCareCountry;
-        doc.text(locationText, margin + 30, yPosition);
+        const fld_c2_poa_pc_location_country = new doc.AcroFormTextField();
+        fld_c2_poa_pc_location_country.fieldName = 'c2_poa_pc_location_country';
+        fld_c2_poa_pc_location_country.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c2_poa_pc_location_country.fontSize = 9;
+        fld_c2_poa_pc_location_country.textColor = colors.darkText;
+        fld_c2_poa_pc_location_country.borderStyle = 'none';
+        fld_c2_poa_pc_location_country.value = locationText || '';
+        doc.addField(fld_c2_poa_pc_location_country);
         yPosition += 5;
       }
 
@@ -4863,7 +5234,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.setFont(undefined, 'bold');
         doc.text('Document copy:', margin, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.text(docCopyLabel, margin + 30, yPosition);
+        const fld_c2_poa_pc_doc_copy = new doc.AcroFormTextField();
+        fld_c2_poa_pc_doc_copy.fieldName = 'c2_poa_pc_doc_copy';
+        fld_c2_poa_pc_doc_copy.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
+        fld_c2_poa_pc_doc_copy.fontSize = 9;
+        fld_c2_poa_pc_doc_copy.textColor = colors.darkText;
+        fld_c2_poa_pc_doc_copy.borderStyle = 'none';
+        fld_c2_poa_pc_doc_copy.value = docCopyLabel || '';
+        doc.addField(fld_c2_poa_pc_doc_copy);
         yPosition += 5;
       }
 
@@ -9269,7 +9647,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       }
 
       let currentY = tableStartY;
-      overviewRows.forEach(([label, value]) => {
+      overviewRows.forEach(([label, value], rowIdx) => {
         if (currentY > 260) {
           doc.addPage();
           currentY = 12;
@@ -9286,8 +9664,14 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.setFillColor(255, 255, 255);
         doc.rect(margin + col1Width, currentY, col2Width, rowHeight, 'FD');
         doc.setFont(undefined, 'normal');
-        const wrappedText = doc.splitTextToSize(value || '', col2Width - 4);
-        doc.text(wrappedText, margin + col1Width + 2, currentY + 5);
+        const fldPropOverview = new doc.AcroFormTextField();
+        fldPropOverview.fieldName = `prop${propNum}_overview_${rowIdx}`;
+        fldPropOverview.Rect = [margin + col1Width + 0.5, currentY + 0.5, col2Width - 1, rowHeight - 1];
+        fldPropOverview.fontSize = 8;
+        fldPropOverview.textColor = colors.darkText;
+        fldPropOverview.borderStyle = 'none';
+        fldPropOverview.value = value || '';
+        doc.addField(fldPropOverview);
 
         currentY += rowHeight;
       });
@@ -9315,7 +9699,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       if (addressLines.length > 0) {
         const addressStartY = yPosition;
-        addressLines.forEach(line => {
+        addressLines.forEach((line, addrIdx) => {
           if (yPosition > 260) {
             doc.addPage();
             yPosition = 12;
@@ -9324,7 +9708,14 @@ You should explore this as an option with your legal and CFP® professionals bec
           doc.setFillColor(255, 255, 255);
           doc.rect(margin, yPosition, pageWidth - margin * 2, rowHeight, 'FD');
           doc.setFontSize(8);
-          doc.text(line, margin + 2, yPosition + 5);
+          const fldAddr = new doc.AcroFormTextField();
+          fldAddr.fieldName = `prop${propNum}_address_${addrIdx}`;
+          fldAddr.Rect = [margin + 0.5, yPosition + 0.5, pageWidth - margin * 2 - 1, rowHeight - 1];
+          fldAddr.fontSize = 8;
+          fldAddr.textColor = colors.darkText;
+          fldAddr.borderStyle = 'none';
+          fldAddr.value = line || '';
+          doc.addField(fldAddr);
           yPosition += rowHeight;
         });
       }
@@ -9393,9 +9784,15 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.text(hasRecord ? 'Yes' : 'No', margin + recordCol1 + 2, yPosition + 5);
 
         doc.rect(margin + recordCol1 + recordCol2, yPosition, recordCol3, rowHeight, 'FD');
-        if (hasRecord && location) {
-          const wrappedLocation = doc.splitTextToSize(location, recordCol3 - 4);
-          doc.text(wrappedLocation, margin + recordCol1 + recordCol2 + 2, yPosition + 5);
+        {
+          const fldRecLoc = new doc.AcroFormTextField();
+          fldRecLoc.fieldName = `prop${propNum}_rec_${key}_loc`;
+          fldRecLoc.Rect = [margin + recordCol1 + recordCol2 + 0.5, yPosition + 0.5, recordCol3 - 1, rowHeight - 1];
+          fldRecLoc.fontSize = 8;
+          fldRecLoc.textColor = colors.darkText;
+          fldRecLoc.borderStyle = 'none';
+          fldRecLoc.value = (hasRecord && location) ? location : '';
+          doc.addField(fldRecLoc);
         }
 
         yPosition += rowHeight;
@@ -9437,8 +9834,14 @@ You should explore this as an option with your legal and CFP® professionals bec
           doc.setFillColor(255, 255, 255);
           doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
           doc.setFont(undefined, 'normal');
-          const wrappedLease = doc.splitTextToSize(leaseStorage, col2Width - 4);
-          doc.text(wrappedLease, margin + col1Width + 2, yPosition + 5);
+          const fldLease = new doc.AcroFormTextField();
+          fldLease.fieldName = `prop${propNum}_lease_storage`;
+          fldLease.Rect = [margin + col1Width + 0.5, yPosition + 0.5, col2Width - 1, rowHeight - 1];
+          fldLease.fontSize = 8;
+          fldLease.textColor = colors.darkText;
+          fldLease.borderStyle = 'none';
+          fldLease.value = leaseStorage || '';
+          doc.addField(fldLease);
           yPosition += rowHeight;
         }
 
@@ -9463,7 +9866,7 @@ You should explore this as an option with your legal and CFP® professionals bec
         if (lawyerPhone) lawyerRows.push(['Phone Number', lawyerPhone]);
         if (lawyerEmail) lawyerRows.push(['Email Address', lawyerEmail]);
 
-        lawyerRows.forEach(([label, value]) => {
+        lawyerRows.forEach(([label, value], lawyerRowIdx) => {
           if (yPosition > 260) {
             doc.addPage();
             yPosition = 12;
@@ -9478,8 +9881,14 @@ You should explore this as an option with your legal and CFP® professionals bec
           doc.setFillColor(255, 255, 255);
           doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
           doc.setFont(undefined, 'normal');
-          const wrappedValue = doc.splitTextToSize(value, col2Width - 4);
-          doc.text(wrappedValue, margin + col1Width + 2, yPosition + 5);
+          const fldLawyer = new doc.AcroFormTextField();
+          fldLawyer.fieldName = `prop${propNum}_lawyer_${lawyerRowIdx}`;
+          fldLawyer.Rect = [margin + col1Width + 0.5, yPosition + 0.5, col2Width - 1, rowHeight - 1];
+          fldLawyer.fontSize = 8;
+          fldLawyer.textColor = colors.darkText;
+          fldLawyer.borderStyle = 'none';
+          fldLawyer.value = value || '';
+          doc.addField(fldLawyer);
 
           yPosition += rowHeight;
         });

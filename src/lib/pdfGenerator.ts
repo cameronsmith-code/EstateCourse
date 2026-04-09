@@ -522,6 +522,8 @@ export const generatePDF = (formData: FormData) => {
     darkText: [40, 40, 40] as [number, number, number],
     black: [0, 0, 0] as [number, number, number],
     borderGray: [200, 200, 200] as [number, number, number],
+    tableBorder: [180, 180, 180] as [number, number, number],
+    tableHeader: [220, 230, 242] as [number, number, number],
   };
 
   // Transform POA Personal Care data: merge primary flat fields with alternates

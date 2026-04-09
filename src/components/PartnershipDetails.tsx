@@ -489,9 +489,21 @@ export default function PartnershipDetails({ index, data, onChange, onMultiChang
             <div className="space-y-4">
               {guarantees.map((g, gIdx) => (
                 <div key={gIdx} className="border border-gray-500 rounded-lg p-4 bg-gray-750 space-y-3">
-                  <p className="text-sm font-semibold text-gray-200">
-                    Personal Guarantee {gIdx + 1}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-gray-200">Personal Guarantee {gIdx + 1}</p>
+                    {guarantees.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = guarantees.filter((_, i) => i !== gIdx);
+                          onMultiChange({ personalGuarantees: updated });
+                        }}
+                        className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                   <div>
                     <label className={labelClass}>What is the nature of the debt?</label>
                     <input
@@ -515,47 +527,13 @@ export default function PartnershipDetails({ index, data, onChange, onMultiChang
                 </div>
               ))}
 
-              <div>
-                <label className={labelClass}>
-                  Are there any additional personal guarantees on partnership debts or bank loans?
-                </label>
-                <div className="space-y-2">
-                  {[
-                    { value: 'add', label: 'Yes' },
-                    { value: 'done', label: 'No' },
-                  ].map((opt) => (
-                    <label
-                      key={opt.value}
-                      className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name={`addMoreGuarantees-${index}`}
-                        value={opt.value}
-                        checked={
-                          opt.value === 'add'
-                            ? false
-                            : opt.value === 'done'
-                            ? true
-                            : false
-                        }
-                        onChange={() => {
-                          if (opt.value === 'add') addGuarantee();
-                        }}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-3 text-gray-300">{opt.label}</span>
-                    </label>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={addGuarantee}
-                  className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  + Add Another Personal Guarantee
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={addGuarantee}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                + Add Another Personal Guarantee
+              </button>
             </div>
           )}
 
@@ -619,9 +597,21 @@ export default function PartnershipDetails({ index, data, onChange, onMultiChang
                 <div className="space-y-4">
                   {policies.map((pol, pIdx) => (
                     <div key={pIdx} className="border border-gray-500 rounded-lg p-4 bg-gray-750 space-y-3">
-                      <p className="text-sm font-semibold text-gray-200">
-                        Policy {pIdx + 1}
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-gray-200">Policy {pIdx + 1}</p>
+                        {policies.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = policies.filter((_, i) => i !== pIdx);
+                              onMultiChange({ liabilityInsurancePolicies: updated });
+                            }}
+                            className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
                       <div>
                         <label className={labelClass}>Describe the insurance:</label>
                         <input
@@ -645,41 +635,13 @@ export default function PartnershipDetails({ index, data, onChange, onMultiChang
                     </div>
                   ))}
 
-                  <div>
-                    <label className={labelClass}>
-                      Do you have additional policies related to this partnership?
-                    </label>
-                    <div className="space-y-2">
-                      {[
-                        { value: 'add', label: 'Yes' },
-                        { value: 'done', label: 'No' },
-                      ].map((opt) => (
-                        <label
-                          key={opt.value}
-                          className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
-                        >
-                          <input
-                            type="radio"
-                            name={`addMorePolicies-${index}`}
-                            value={opt.value}
-                            checked={false}
-                            onChange={() => {
-                              if (opt.value === 'add') addPolicy();
-                            }}
-                            className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="ml-3 text-gray-300">{opt.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={addPolicy}
-                      className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-                    >
-                      + Add Another Policy
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={addPolicy}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    + Add Another Policy
+                  </button>
                 </div>
               )}
             </div>

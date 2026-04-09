@@ -2372,7 +2372,7 @@ export const generatePDF = (formData: FormData) => {
     doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
     doc.setTextColor(...colors.darkText);
-    doc.text(`${clientName} — Sole Proprietorship ${idx + 1}`, margin, yPosition);
+    doc.text(`${clientName} — ${sp.registeredName || `Sole Proprietorship ${idx + 1}`}`, margin, yPosition);
     yPosition += 8;
 
     checkPage(16);

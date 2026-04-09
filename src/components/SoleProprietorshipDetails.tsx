@@ -54,6 +54,7 @@ export type SoleProprietorshipData = {
   liabilities: BusinessLiability[];
   dissolutionPlan: string;
   dissolutionPlanDocLocation: string;
+  executorAuthority: string;
 };
 
 type Props = {
@@ -783,6 +784,40 @@ export default function SoleProprietorshipDetails({ index, data, onChange, onMul
               />
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="border-t border-gray-600 pt-4">
+        <h4 className="text-base font-semibold text-blue-300 mb-4 uppercase tracking-wide">
+          Executor Instructions and Authority
+        </h4>
+
+        <div className="space-y-4">
+          <div>
+            <label className={labelClass}>
+              Does your will authorize your executor to own, manage, and operate business assets until they can be sold or distributed? (without this authority, succession legislation may force an estate trustee to liquidate risky business shares at 'fire-sale' prices)
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: 'yes', label: 'Yes' },
+                { value: 'no', label: 'No' },
+                { value: 'unsure', label: "I'm not sure" },
+                { value: 'not_applicable', label: "The business doesn't have any assets of significant value to worry about" },
+              ].map((opt) => (
+                <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`executorAuthority-${index}`}
+                    value={opt.value}
+                    checked={data.executorAuthority === opt.value}
+                    onChange={() => onChange('executorAuthority', opt.value)}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-300">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

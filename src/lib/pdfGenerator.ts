@@ -85,6 +85,7 @@ interface SolePropData {
   liabilities?: SolePropLiability[];
   dissolutionPlan?: string;
   dissolutionPlanDocLocation?: string;
+  executorAuthority?: string;
 }
 
 interface FormData {
@@ -2669,6 +2670,34 @@ export const generatePDF = (formData: FormData) => {
       doc.setFillColor(255, 255, 255);
       doc.setDrawColor(200, 200, 200);
       yPosition += todoBoxHeight + 4;
+    }
+
+    checkPage(10);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.text('EXECUTOR INSTRUCTIONS AND AUTHORITY', margin, yPosition);
+    yPosition += 7;
+    doc.setFontSize(9);
+
+    const executorQuestion = "Does your will authorize your executor to own, manage, and operate business assets until they can be sold or distributed? (without this authority, succession legislation may force an estate trustee to liquidate risky business shares at 'fire-sale' prices)";
+    const executorQuestionLines = doc.splitTextToSize(executorQuestion, pageWidth - margin * 2);
+    checkPage(executorQuestionLines.length * 5 + 10);
+    doc.text(executorQuestionLines, margin, yPosition);
+    yPosition += executorQuestionLines.length * 5 + 2;
+
+    doc.setFont(undefined, 'normal');
+    const executorAuthorityLabels: Record<string, string> = {
+      yes: 'Yes',
+      no: 'No',
+      unsure: "I'm not sure",
+      not_applicable: "The business doesn't have any assets of significant value to worry about",
+    };
+    if (sp.executorAuthority && executorAuthorityLabels[sp.executorAuthority]) {
+      const authorityText = executorAuthorityLabels[sp.executorAuthority];
+      const authorityLines = doc.splitTextToSize(authorityText, pageWidth - margin * 2 - 4);
+      checkPage(authorityLines.length * 5 + 6);
+      doc.text(authorityLines, margin + 4, yPosition);
+      yPosition += authorityLines.length * 5 + 4;
     }
 
     doc.setFontSize(10);

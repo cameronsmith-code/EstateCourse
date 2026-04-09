@@ -2734,6 +2734,177 @@ export const generatePDF = (formData: FormData) => {
     }
 
     doc.setFontSize(10);
+
+    // Document Summary Table
+    type DocRow = { document: string; description: string; location: string };
+    const docRows: DocRow[] = [];
+
+    if (sp.hasLicenses === 'yes' && sp.licenses && sp.licenses.length > 0) {
+      sp.licenses.forEach((lic, li) => {
+        docRows.push({
+          document: `License ${li + 1}`,
+          description: lic.nature || '—',
+          location: lic.documentLocation || '—',
+        });
+      });
+    }
+
+    if (sp.accountingRecordsLocation) {
+      docRows.push({
+        document: 'Accounting Records',
+        description: sp.bookkeeperFirm ? `Maintained by ${sp.bookkeeperFirm}` : 'Business accounting records',
+        location: sp.accountingRecordsLocation,
+      });
+    }
+
+    if (sp.hasDigitalAssets === 'yes') {
+      if (sp.websiteCredentialsLocation) {
+        docRows.push({
+          document: 'Website Credentials',
+          description: sp.website ? `Login credentials for ${sp.website}` : 'Business website credentials',
+          location: sp.websiteCredentialsLocation,
+        });
+      }
+      if (sp.domainCredentialsLocation) {
+        docRows.push({
+          document: 'Domain Credentials',
+          description: sp.domainProvider ? `Domain registrar credentials (${sp.domainProvider})` : 'Domain registrar credentials',
+          location: sp.domainCredentialsLocation,
+        });
+      }
+      if (sp.socialAccounts && sp.socialAccounts.length > 0) {
+        sp.socialAccounts.forEach((sa) => {
+          if (sa.credentialsLocation) {
+            docRows.push({
+              document: 'Social Media Credentials',
+              description: sa.platform ? `Login credentials for ${sa.platform}` : 'Social media account credentials',
+              location: sa.credentialsLocation,
+            });
+          }
+        });
+      }
+      if (sp.onlinePersonas && sp.onlinePersonas.length > 0) {
+        sp.onlinePersonas.forEach((op) => {
+          if (op.credentialsLocation) {
+            docRows.push({
+              document: 'Online Persona Credentials',
+              description: op.name ? `Credentials for persona: ${op.name}` : 'Online persona credentials',
+              location: op.credentialsLocation,
+            });
+          }
+        });
+      }
+    }
+
+    if (sp.hasMajorAssets === 'yes' && sp.assets && sp.assets.length > 0) {
+      sp.assets.forEach((asset) => {
+        if (asset.recordsLocation) {
+          docRows.push({
+            document: 'Asset Records',
+            description: asset.name ? `${asset.name}${asset.type ? ` (${asset.type})` : ''}` : 'Business asset records',
+            location: asset.recordsLocation,
+          });
+        }
+      });
+    }
+
+    if (sp.hasLiabilities === 'yes' && sp.liabilities && sp.liabilities.length > 0) {
+      sp.liabilities.forEach((liability) => {
+        if (liability.documentationLocation) {
+          docRows.push({
+            document: 'Liability Documentation',
+            description: liability.lenderName
+              ? `${liability.liabilityType ? `${liability.liabilityType} — ` : ''}${liability.lenderName}`
+              : liability.liabilityType || 'Outstanding debt/liability',
+            location: liability.documentationLocation,
+          });
+        }
+      });
+    }
+
+    if (sp.dissolutionPlanDocLocation && (sp.dissolutionPlan === 'yes' || sp.dissolutionPlan === 'beneficiary')) {
+      docRows.push({
+        document: 'Dissolution / Succession Plan',
+        description: sp.dissolutionPlan === 'beneficiary'
+          ? 'Plan for beneficiary to carry on the business'
+          : 'Plan for orderly disposal of business assets and liabilities',
+        location: sp.dissolutionPlanDocLocation,
+      });
+    }
+
+    if (docRows.length > 0) {
+      checkPage(30);
+      yPosition += 4;
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(10);
+      doc.setFillColor(...colors.navyBlue);
+      doc.rect(margin, yPosition - 4, fieldWidth, 10, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.text('DOCUMENT SUMMARY', margin + 3, yPosition + 2);
+      doc.setTextColor(...colors.darkText);
+      yPosition += 10;
+
+      const colWidths = [45, 65, fieldWidth - 45 - 65];
+      const colX = [margin, margin + 45, margin + 45 + 65];
+      const rowHeight = 7;
+      const headerHeight = 8;
+
+      checkPage(headerHeight + rowHeight);
+      doc.setFillColor(220, 228, 240);
+      doc.rect(margin, yPosition, fieldWidth, headerHeight, 'F');
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, yPosition, fieldWidth, headerHeight, 'S');
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...colors.navyBlue);
+      const headers = ['Document', 'Description', 'Location'];
+      headers.forEach((h, hi) => {
+        doc.text(h, colX[hi] + 2, yPosition + 5.5);
+        if (hi < 2) {
+          doc.setDrawColor(...colors.borderGray);
+          doc.line(colX[hi + 1], yPosition, colX[hi + 1], yPosition + headerHeight);
+        }
+      });
+      yPosition += headerHeight;
+
+      docRows.forEach((row, ri) => {
+        const cellTexts = [
+          doc.splitTextToSize(row.document, colWidths[0] - 4),
+          doc.splitTextToSize(row.description, colWidths[1] - 4),
+          doc.splitTextToSize(row.location, colWidths[2] - 4),
+        ];
+        const maxLines = Math.max(...cellTexts.map((t) => t.length));
+        const cellHeight = maxLines * 5 + 4;
+
+        checkPage(cellHeight + 2);
+        if (ri % 2 === 0) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(margin, yPosition, fieldWidth, cellHeight, 'F');
+        }
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.2);
+        doc.rect(margin, yPosition, fieldWidth, cellHeight, 'S');
+        cellTexts.forEach((lines, ci) => {
+          if (ci < 2) {
+            doc.line(colX[ci + 1], yPosition, colX[ci + 1], yPosition + cellHeight);
+          }
+        });
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...colors.darkText);
+        cellTexts.forEach((lines, ci) => {
+          lines.forEach((line: string, li: number) => {
+            doc.text(line, colX[ci] + 2, yPosition + 5 + li * 5);
+          });
+        });
+        yPosition += cellHeight;
+      });
+
+      yPosition += 6;
+      doc.setFontSize(10);
+    }
   };
 
   const renderPartnershipDetails = (p: PartnershipItem, idx: number, clientName: string) => {
@@ -3042,6 +3213,143 @@ export const generatePDF = (formData: FormData) => {
     }
 
     doc.setFontSize(10);
+
+    // Document Summary Table
+    type PDocRow = { document: string; description: string; location: string };
+    const pDocRows: PDocRow[] = [];
+
+    if (p.agreementDocLocation && p.hasWrittenAgreement === 'yes') {
+      pDocRows.push({
+        document: 'Partnership Agreement',
+        description: p.agreementHasDeathProvisions === 'yes'
+          ? 'Written agreement including death/incapacity provisions'
+          : 'Written partnership agreement',
+        location: p.agreementDocLocation,
+      });
+    }
+
+    if (p.buySellDocLocation && p.hasBuySellAgreement === 'yes') {
+      pDocRows.push({
+        document: 'Buy-Sell Agreement',
+        description: p.buySellFundedByInsurance === 'yes'
+          ? 'Buy-sell agreement (funded by life insurance)'
+          : 'Buy-sell agreement',
+        location: p.buySellDocLocation,
+      });
+    }
+
+    if (p.buySellInsuranceDocLocation && p.buySellFundedByInsurance === 'yes') {
+      pDocRows.push({
+        document: 'Buy-Sell Life Insurance',
+        description: 'Life insurance funding the buy-sell agreement',
+        location: p.buySellInsuranceDocLocation,
+      });
+    }
+
+    if (p.valuationMethodDocLocation && p.hasValuationMethod === 'yes') {
+      pDocRows.push({
+        document: 'Valuation Method',
+        description: 'Written method for valuing partnership interest',
+        location: p.valuationMethodDocLocation,
+      });
+    }
+
+    if (p.hasPersonalGuarantees === 'yes' && p.personalGuarantees && p.personalGuarantees.length > 0) {
+      p.personalGuarantees.forEach((g, gi) => {
+        if (g.documentationLocation) {
+          pDocRows.push({
+            document: `Personal Guarantee ${gi + 1}`,
+            description: g.natureOfDebt ? `Guarantee on: ${g.natureOfDebt}` : 'Personal guarantee on partnership debt',
+            location: g.documentationLocation,
+          });
+        }
+      });
+    }
+
+    if (p.hasLiabilityInsurance === 'yes' && p.liabilityInsurancePolicies && p.liabilityInsurancePolicies.length > 0) {
+      p.liabilityInsurancePolicies.forEach((pol, pi) => {
+        if (pol.documentationLocation) {
+          pDocRows.push({
+            document: `Liability Insurance Policy ${pi + 1}`,
+            description: pol.description || 'Liability / errors and omissions insurance policy',
+            location: pol.documentationLocation,
+          });
+        }
+      });
+    }
+
+    if (pDocRows.length > 0) {
+      checkPage(30);
+      yPosition += 4;
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(10);
+      doc.setFillColor(...colors.navyBlue);
+      doc.rect(margin, yPosition - 4, fieldWidth, 10, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.text('DOCUMENT SUMMARY', margin + 3, yPosition + 2);
+      doc.setTextColor(...colors.darkText);
+      yPosition += 10;
+
+      const pColWidths = [45, 65, fieldWidth - 45 - 65];
+      const pColX = [margin, margin + 45, margin + 45 + 65];
+      const pHeaderHeight = 8;
+
+      checkPage(pHeaderHeight + 7);
+      doc.setFillColor(220, 228, 240);
+      doc.rect(margin, yPosition, fieldWidth, pHeaderHeight, 'F');
+      doc.setDrawColor(...colors.borderGray);
+      doc.setLineWidth(0.3);
+      doc.rect(margin, yPosition, fieldWidth, pHeaderHeight, 'S');
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...colors.navyBlue);
+      const pHeaders = ['Document', 'Description', 'Location'];
+      pHeaders.forEach((h, hi) => {
+        doc.text(h, pColX[hi] + 2, yPosition + 5.5);
+        if (hi < 2) {
+          doc.setDrawColor(...colors.borderGray);
+          doc.line(pColX[hi + 1], yPosition, pColX[hi + 1], yPosition + pHeaderHeight);
+        }
+      });
+      yPosition += pHeaderHeight;
+
+      pDocRows.forEach((row, ri) => {
+        const cellTexts = [
+          doc.splitTextToSize(row.document, pColWidths[0] - 4),
+          doc.splitTextToSize(row.description, pColWidths[1] - 4),
+          doc.splitTextToSize(row.location, pColWidths[2] - 4),
+        ];
+        const maxLines = Math.max(...cellTexts.map((t) => t.length));
+        const cellHeight = maxLines * 5 + 4;
+
+        checkPage(cellHeight + 2);
+        if (ri % 2 === 0) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(margin, yPosition, fieldWidth, cellHeight, 'F');
+        }
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.2);
+        doc.rect(margin, yPosition, fieldWidth, cellHeight, 'S');
+        cellTexts.forEach((lines, ci) => {
+          if (ci < 2) {
+            doc.line(pColX[ci + 1], yPosition, pColX[ci + 1], yPosition + cellHeight);
+          }
+        });
+
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...colors.darkText);
+        cellTexts.forEach((lines, ci) => {
+          lines.forEach((line: string, li: number) => {
+            doc.text(line, pColX[ci] + 2, yPosition + 5 + li * 5);
+          });
+        });
+        yPosition += cellHeight;
+      });
+
+      yPosition += 6;
+      doc.setFontSize(10);
+    }
   };
 
   if (formData.hasSoleProprietorship === 'yes' || formData.hasPartnership === 'yes') {

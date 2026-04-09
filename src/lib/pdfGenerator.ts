@@ -2441,27 +2441,81 @@ export const generatePDF = (formData: FormData) => {
       doc.text(`${clientName} does their own bookkeeping and accounting.`, margin, yPosition);
       yPosition += 8;
     } else if (sp.bookkeeper === 'yes') {
-      checkPage(10);
+      checkPage(55);
       doc.setFont(undefined, 'bold');
       doc.text('Accountant / Bookkeeper', margin, yPosition);
-      yPosition += 7;
-      const bookkeeperFields: [string, string | undefined][] = [
-        ["Firm Name:", sp.bookkeeperFirm],
-        ["Key Contact:", sp.bookkeeperContact],
-        ["Phone Number:", sp.bookkeeperPhone],
-        ["Email Address:", sp.bookkeeperEmail],
-        ["Website:", sp.bookkeeperWebsite],
+      yPosition += 5;
+
+      const bkRows = [
+        "Accountant/Book Keeper's Firm Name:",
+        "Key Contact:",
+        "Phone Number:",
+        "Email Address:",
+        "Website:",
+        "Other:",
       ];
-      bookkeeperFields.forEach(([label, val]) => {
-        if (val) {
-          checkPage(7);
-          doc.setFont(undefined, 'bold');
-          doc.text(label, margin + 4, yPosition);
-          doc.setFont(undefined, 'normal');
-          doc.text(val, margin + 4 + doc.getTextWidth(label) + 2, yPosition);
-          yPosition += 7;
-        }
+      const bkFieldNames = [
+        `sp_bookkeeper_firm`,
+        `sp_bookkeeper_contact`,
+        `sp_bookkeeper_phone`,
+        `sp_bookkeeper_email`,
+        `sp_bookkeeper_website`,
+        `sp_bookkeeper_other`,
+      ];
+      const bkCellHeight = 8;
+      const bkColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
+      const bkCol1X = margin;
+      const bkCol2X = margin + bkColWidths[0];
+      const bkCol3X = margin + bkColWidths[0] + bkColWidths[1];
+
+      doc.setFontSize(7);
+      doc.setFont(undefined, 'bold');
+      doc.setDrawColor(...colors.tableBorder);
+
+      doc.rect(bkCol1X, yPosition, bkColWidths[0], bkCellHeight);
+      doc.rect(bkCol2X, yPosition, bkColWidths[1], bkCellHeight);
+      doc.rect(bkCol3X, yPosition, bkColWidths[2], bkCellHeight);
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(bkCol1X, yPosition, bkColWidths[0], bkCellHeight, 'F');
+      doc.rect(bkCol2X, yPosition, bkColWidths[1], bkCellHeight, 'F');
+      doc.rect(bkCol3X, yPosition, bkColWidths[2], bkCellHeight, 'F');
+      doc.setTextColor(...colors.darkText);
+      doc.text('Contact Information:', bkCol1X + 1, yPosition + 5);
+      doc.text('Contact Details:', bkCol2X + 1, yPosition + 5);
+      doc.text('Other Information:', bkCol3X + 1, yPosition + 5);
+      yPosition += bkCellHeight;
+
+      bkRows.forEach((label, idx) => {
+        doc.setDrawColor(...colors.tableBorder);
+        doc.rect(bkCol1X, yPosition, bkColWidths[0], bkCellHeight);
+        doc.rect(bkCol2X, yPosition, bkColWidths[1], bkCellHeight);
+        doc.rect(bkCol3X, yPosition, bkColWidths[2], bkCellHeight);
+
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...colors.darkText);
+        doc.text(label, bkCol1X + 1, yPosition + 5);
+
+        const bkField2 = new doc.AcroFormTextField();
+        bkField2.fieldName = `${bkFieldNames[idx]}_col2`;
+        bkField2.Rect = [bkCol2X + 0.3, yPosition + 0.3, bkColWidths[1] - 0.6, bkCellHeight - 0.6];
+        bkField2.fontSize = 7;
+        bkField2.textColor = [0, 0, 0];
+        bkField2.borderStyle = 'none';
+        doc.addField(bkField2);
+
+        const bkField3 = new doc.AcroFormTextField();
+        bkField3.fieldName = `${bkFieldNames[idx]}_col3`;
+        bkField3.Rect = [bkCol3X + 0.3, yPosition + 0.3, bkColWidths[2] - 0.6, bkCellHeight - 0.6];
+        bkField3.fontSize = 7;
+        bkField3.textColor = [0, 0, 0];
+        bkField3.borderStyle = 'none';
+        doc.addField(bkField3);
+
+        yPosition += bkCellHeight;
       });
+
+      doc.setFontSize(9);
+      yPosition += 4;
     }
 
     if (sp.accountingRecordsLocation) {

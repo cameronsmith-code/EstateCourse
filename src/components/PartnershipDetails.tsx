@@ -1,3 +1,13 @@
+export type PersonalGuarantee = {
+  natureOfDebt: string;
+  documentationLocation: string;
+};
+
+export type LiabilityInsurancePolicy = {
+  description: string;
+  documentationLocation: string;
+};
+
 export type PartnershipData = {
   registeredName: string;
   natureOfBusiness: string;
@@ -12,6 +22,11 @@ export type PartnershipData = {
   buySellInsuranceDocLocation: string;
   hasValuationMethod: string;
   valuationMethodDocLocation: string;
+  hasPersonalGuarantees: string;
+  personalGuarantees: PersonalGuarantee[];
+  isProfessionalPartnership: string;
+  hasLiabilityInsurance: string;
+  liabilityInsurancePolicies: LiabilityInsurancePolicy[];
 };
 
 type Props = {
@@ -75,12 +90,85 @@ export default function PartnershipDetails({ index, data, onChange, onMultiChang
     }
   };
 
+  const guarantees: PersonalGuarantee[] = data.personalGuarantees || [];
+
+  const updateGuarantee = (gIdx: number, field: keyof PersonalGuarantee, value: string) => {
+    const updated = [...guarantees];
+    if (!updated[gIdx]) updated[gIdx] = { natureOfDebt: '', documentationLocation: '' };
+    updated[gIdx] = { ...updated[gIdx], [field]: value };
+    onMultiChange({ personalGuarantees: updated });
+  };
+
+  const handleHasPersonalGuaranteesChange = (value: string) => {
+    if (value === 'no') {
+      onMultiChange({ hasPersonalGuarantees: 'no', personalGuarantees: [] });
+    } else {
+      const initial: PersonalGuarantee[] = [{ natureOfDebt: '', documentationLocation: '' }];
+      onMultiChange({ hasPersonalGuarantees: 'yes', personalGuarantees: initial });
+    }
+  };
+
+  const addGuarantee = () => {
+    onMultiChange({ personalGuarantees: [...guarantees, { natureOfDebt: '', documentationLocation: '' }] });
+  };
+
+  const removeLastGuarantee = () => {
+    if (guarantees.length <= 1) {
+      onMultiChange({ hasPersonalGuarantees: 'no', personalGuarantees: [] });
+    } else {
+      onMultiChange({ personalGuarantees: guarantees.slice(0, -1) });
+    }
+  };
+
+  const policies: LiabilityInsurancePolicy[] = data.liabilityInsurancePolicies || [];
+
+  const updatePolicy = (pIdx: number, field: keyof LiabilityInsurancePolicy, value: string) => {
+    const updated = [...policies];
+    if (!updated[pIdx]) updated[pIdx] = { description: '', documentationLocation: '' };
+    updated[pIdx] = { ...updated[pIdx], [field]: value };
+    onMultiChange({ liabilityInsurancePolicies: updated });
+  };
+
+  const handleHasLiabilityInsuranceChange = (value: string) => {
+    if (value === 'no') {
+      onMultiChange({ hasLiabilityInsurance: 'no', liabilityInsurancePolicies: [] });
+    } else {
+      const initial: LiabilityInsurancePolicy[] = [{ description: '', documentationLocation: '' }];
+      onMultiChange({ hasLiabilityInsurance: 'yes', liabilityInsurancePolicies: initial });
+    }
+  };
+
+  const addPolicy = () => {
+    onMultiChange({ liabilityInsurancePolicies: [...policies, { description: '', documentationLocation: '' }] });
+  };
+
+  const removeLastPolicy = () => {
+    if (policies.length <= 1) {
+      onMultiChange({ hasLiabilityInsurance: 'no', liabilityInsurancePolicies: [] });
+    } else {
+      onMultiChange({ liabilityInsurancePolicies: policies.slice(0, -1) });
+    }
+  };
+
+  const handleIsProfessionalChange = (value: string) => {
+    if (value === 'no') {
+      onMultiChange({
+        isProfessionalPartnership: 'no',
+        hasLiabilityInsurance: undefined,
+        liabilityInsurancePolicies: [],
+      });
+    } else {
+      onChange('isProfessionalPartnership', value);
+    }
+  };
+
   return (
     <div className="border border-gray-600 rounded-xl p-6 bg-gray-800 space-y-6">
       <h3 className="text-lg font-semibold text-white">
         {clientName}'s Partnership {index + 1}
       </h3>
 
+      {/* Business Identification and Records */}
       <div className="border-t border-gray-600 pt-4">
         <h4 className="text-base font-semibold text-blue-300 mb-4 uppercase tracking-wide">
           Business Identification and Records
@@ -204,6 +292,7 @@ export default function PartnershipDetails({ index, data, onChange, onMultiChang
         </div>
       </div>
 
+      {/* Continuity and Buy-Sell Provisions */}
       <div className="border-t border-gray-600 pt-4">
         <h4 className="text-base font-semibold text-blue-300 mb-4 uppercase tracking-wide">
           Continuity and Buy-Sell Provisions
@@ -357,6 +446,242 @@ export default function PartnershipDetails({ index, data, onChange, onMultiChang
                 placeholder="Enter location of valuation method documentation"
                 className={inputClass}
               />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Liability and Fiduciary Risks */}
+      <div className="border-t border-gray-600 pt-4">
+        <h4 className="text-base font-semibold text-blue-300 mb-4 uppercase tracking-wide">
+          Liability and Fiduciary Risks
+        </h4>
+
+        <div className="space-y-4">
+          <div>
+            <label className={labelClass}>
+              Have you provided personal guarantees for partnership debts or bank loans?
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: 'yes', label: 'Yes' },
+                { value: 'no', label: 'No' },
+              ].map((opt) => (
+                <label
+                  key={opt.value}
+                  className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name={`hasPersonalGuarantees-${index}`}
+                    value={opt.value}
+                    checked={data.hasPersonalGuarantees === opt.value}
+                    onChange={() => handleHasPersonalGuaranteesChange(opt.value)}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-300">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {data.hasPersonalGuarantees === 'yes' && guarantees.length > 0 && (
+            <div className="space-y-4">
+              {guarantees.map((g, gIdx) => (
+                <div key={gIdx} className="border border-gray-500 rounded-lg p-4 bg-gray-750 space-y-3">
+                  <p className="text-sm font-semibold text-gray-200">
+                    Personal Guarantee {gIdx + 1}
+                  </p>
+                  <div>
+                    <label className={labelClass}>What is the nature of the debt?</label>
+                    <input
+                      type="text"
+                      value={g.natureOfDebt || ''}
+                      onChange={(e) => updateGuarantee(gIdx, 'natureOfDebt', e.target.value)}
+                      placeholder="Describe the nature of the debt"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Where is the documentation stored?</label>
+                    <input
+                      type="text"
+                      value={g.documentationLocation || ''}
+                      onChange={(e) => updateGuarantee(gIdx, 'documentationLocation', e.target.value)}
+                      placeholder="Enter location of documentation"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              ))}
+
+              <div>
+                <label className={labelClass}>
+                  Are there any additional personal guarantees on partnership debts or bank loans?
+                </label>
+                <div className="space-y-2">
+                  {[
+                    { value: 'add', label: 'Yes' },
+                    { value: 'done', label: 'No' },
+                  ].map((opt) => (
+                    <label
+                      key={opt.value}
+                      className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name={`addMoreGuarantees-${index}`}
+                        value={opt.value}
+                        checked={
+                          opt.value === 'add'
+                            ? false
+                            : opt.value === 'done'
+                            ? true
+                            : false
+                        }
+                        onChange={() => {
+                          if (opt.value === 'add') addGuarantee();
+                        }}
+                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="ml-3 text-gray-300">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={addGuarantee}
+                  className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  + Add Another Personal Guarantee
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className={labelClass}>
+              Is this a professional partnership (e.g., law, accounting, etc...)?
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: 'yes', label: 'Yes' },
+                { value: 'no', label: 'No' },
+              ].map((opt) => (
+                <label
+                  key={opt.value}
+                  className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name={`isProfessionalPartnership-${index}`}
+                    value={opt.value}
+                    checked={data.isProfessionalPartnership === opt.value}
+                    onChange={() => handleIsProfessionalChange(opt.value)}
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-300">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {data.isProfessionalPartnership === 'yes' && (
+            <div className="space-y-4">
+              <div>
+                <label className={labelClass}>
+                  Do you have liability or errors and omissions insurance?
+                </label>
+                <div className="space-y-2">
+                  {[
+                    { value: 'yes', label: 'Yes' },
+                    { value: 'no', label: 'No' },
+                  ].map((opt) => (
+                    <label
+                      key={opt.value}
+                      className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name={`hasLiabilityInsurance-${index}`}
+                        value={opt.value}
+                        checked={data.hasLiabilityInsurance === opt.value}
+                        onChange={() => handleHasLiabilityInsuranceChange(opt.value)}
+                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="ml-3 text-gray-300">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {data.hasLiabilityInsurance === 'yes' && policies.length > 0 && (
+                <div className="space-y-4">
+                  {policies.map((pol, pIdx) => (
+                    <div key={pIdx} className="border border-gray-500 rounded-lg p-4 bg-gray-750 space-y-3">
+                      <p className="text-sm font-semibold text-gray-200">
+                        Policy {pIdx + 1}
+                      </p>
+                      <div>
+                        <label className={labelClass}>Describe the insurance:</label>
+                        <input
+                          type="text"
+                          value={pol.description || ''}
+                          onChange={(e) => updatePolicy(pIdx, 'description', e.target.value)}
+                          placeholder="Describe the insurance policy"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Location of the documentation:</label>
+                        <input
+                          type="text"
+                          value={pol.documentationLocation || ''}
+                          onChange={(e) => updatePolicy(pIdx, 'documentationLocation', e.target.value)}
+                          placeholder="Enter location of documentation"
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  <div>
+                    <label className={labelClass}>
+                      Do you have additional policies related to this partnership?
+                    </label>
+                    <div className="space-y-2">
+                      {[
+                        { value: 'add', label: 'Yes' },
+                        { value: 'done', label: 'No' },
+                      ].map((opt) => (
+                        <label
+                          key={opt.value}
+                          className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer"
+                        >
+                          <input
+                            type="radio"
+                            name={`addMorePolicies-${index}`}
+                            value={opt.value}
+                            checked={false}
+                            onChange={() => {
+                              if (opt.value === 'add') addPolicy();
+                            }}
+                            className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-3 text-gray-300">{opt.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addPolicy}
+                      className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      + Add Another Policy
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

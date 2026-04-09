@@ -88,6 +88,16 @@ interface SolePropData {
   executorAuthority?: string;
 }
 
+interface PersonalGuaranteePdf {
+  natureOfDebt?: string;
+  documentationLocation?: string;
+}
+
+interface LiabilityInsurancePolicyPdf {
+  description?: string;
+  documentationLocation?: string;
+}
+
 interface PartnershipItem {
   registeredName?: string;
   natureOfBusiness?: string;
@@ -95,6 +105,18 @@ interface PartnershipItem {
   hasWrittenAgreement?: string;
   agreementDocLocation?: string;
   agreementHasDeathProvisions?: string;
+  continuityContinues?: string;
+  hasBuySellAgreement?: string;
+  buySellDocLocation?: string;
+  buySellFundedByInsurance?: string;
+  buySellInsuranceDocLocation?: string;
+  hasValuationMethod?: string;
+  valuationMethodDocLocation?: string;
+  hasPersonalGuarantees?: string;
+  personalGuarantees?: PersonalGuaranteePdf[];
+  isProfessionalPartnership?: string;
+  hasLiabilityInsurance?: string;
+  liabilityInsurancePolicies?: LiabilityInsurancePolicyPdf[];
 }
 
 interface FormData {
@@ -2806,6 +2828,216 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'normal');
         doc.text(provisionLabels[p.agreementHasDeathProvisions] || p.agreementHasDeathProvisions, margin + 8, yPosition);
         yPosition += 6;
+      }
+    }
+
+    checkPage(10);
+    yPosition += 3;
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.text('CONTINUITY AND BUY-SELL PROVISIONS', margin, yPosition);
+    yPosition += 7;
+    doc.setFontSize(9);
+
+    if (p.continuityContinues) {
+      checkPage(12);
+      const continuityLabels: Record<string, string> = {
+        continues: 'Continues with remaining partners',
+        wound_up: 'Wound up',
+        unsure: "I'm not sure",
+      };
+      doc.setFont(undefined, 'bold');
+      const contQ = 'Business continuation upon death or incapacity:';
+      const contQLines = doc.splitTextToSize(contQ, pageWidth - margin * 2);
+      doc.text(contQLines, margin, yPosition);
+      yPosition += contQLines.length * 5 + 1;
+      doc.setFont(undefined, 'normal');
+      doc.text(continuityLabels[p.continuityContinues] || p.continuityContinues, margin + 4, yPosition);
+      yPosition += 6;
+    }
+
+    if (p.hasBuySellAgreement) {
+      checkPage(7);
+      doc.setFont(undefined, 'bold');
+      doc.text('Buy-sell agreement obliging remaining partners to purchase interest:', margin, yPosition);
+      yPosition += 5;
+      doc.setFont(undefined, 'normal');
+      doc.text(p.hasBuySellAgreement === 'yes' ? 'Yes' : 'No', margin + 4, yPosition);
+      yPosition += 6;
+    }
+
+    if (p.hasBuySellAgreement === 'yes') {
+      if (p.buySellDocLocation) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Location of buy/sell document:', margin + 4, yPosition);
+        doc.setFont(undefined, 'normal');
+        const bsLines = doc.splitTextToSize(p.buySellDocLocation, pageWidth - margin * 2 - doc.getTextWidth('Location of buy/sell document:') - 8);
+        if (bsLines.length === 1) {
+          doc.text(p.buySellDocLocation, margin + 4 + doc.getTextWidth('Location of buy/sell document:') + 2, yPosition);
+          yPosition += 6;
+        } else {
+          yPosition += 6;
+          doc.text(bsLines, margin + 8, yPosition);
+          yPosition += bsLines.length * 5 + 2;
+        }
+      }
+      if (p.buySellFundedByInsurance) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Buy/sell agreement funded by life insurance:', margin + 4, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(p.buySellFundedByInsurance === 'yes' ? 'Yes' : 'No', margin + 4 + doc.getTextWidth('Buy/sell agreement funded by life insurance:') + 2, yPosition);
+        yPosition += 6;
+      }
+      if (p.buySellFundedByInsurance === 'yes' && p.buySellInsuranceDocLocation) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Location of buy/sell life insurance documentation:', margin + 8, yPosition);
+        yPosition += 5;
+        doc.setFont(undefined, 'normal');
+        const insLines = doc.splitTextToSize(p.buySellInsuranceDocLocation, pageWidth - margin * 2 - 16);
+        doc.text(insLines, margin + 12, yPosition);
+        yPosition += insLines.length * 5 + 2;
+      }
+    }
+
+    if (p.hasValuationMethod) {
+      checkPage(7);
+      doc.setFont(undefined, 'bold');
+      doc.text('Written valuation method for partnership interest:', margin, yPosition);
+      yPosition += 5;
+      doc.setFont(undefined, 'normal');
+      doc.text(p.hasValuationMethod === 'yes' ? 'Yes' : 'No', margin + 4, yPosition);
+      yPosition += 6;
+    }
+
+    if (p.hasValuationMethod === 'yes' && p.valuationMethodDocLocation) {
+      checkPage(7);
+      doc.setFont(undefined, 'bold');
+      doc.text('Location of valuation method documentation:', margin + 4, yPosition);
+      yPosition += 5;
+      doc.setFont(undefined, 'normal');
+      const valLines2 = doc.splitTextToSize(p.valuationMethodDocLocation, pageWidth - margin * 2 - 8);
+      doc.text(valLines2, margin + 8, yPosition);
+      yPosition += valLines2.length * 5 + 2;
+    }
+
+    checkPage(10);
+    yPosition += 3;
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.text('LIABILITY AND FIDUCIARY RISKS', margin, yPosition);
+    yPosition += 7;
+    doc.setFontSize(9);
+
+    if (p.hasPersonalGuarantees) {
+      checkPage(7);
+      doc.setFont(undefined, 'bold');
+      doc.text('Personal guarantees for partnership debts or bank loans:', margin, yPosition);
+      yPosition += 5;
+      doc.setFont(undefined, 'normal');
+      doc.text(p.hasPersonalGuarantees === 'yes' ? 'Yes' : 'No', margin + 4, yPosition);
+      yPosition += 6;
+    }
+
+    if (p.hasPersonalGuarantees === 'yes' && p.personalGuarantees && p.personalGuarantees.length > 0) {
+      p.personalGuarantees.forEach((g, gIdx) => {
+        checkPage(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Personal Guarantee ${gIdx + 1}:`, margin + 4, yPosition);
+        yPosition += 6;
+
+        if (g.natureOfDebt) {
+          doc.setFont(undefined, 'bold');
+          doc.text('Nature of the debt:', margin + 8, yPosition);
+          doc.setFont(undefined, 'normal');
+          const debtLines = doc.splitTextToSize(g.natureOfDebt, pageWidth - margin * 2 - doc.getTextWidth('Nature of the debt:') - 12);
+          if (debtLines.length === 1) {
+            doc.text(g.natureOfDebt, margin + 8 + doc.getTextWidth('Nature of the debt:') + 2, yPosition);
+            yPosition += 6;
+          } else {
+            yPosition += 6;
+            doc.text(debtLines, margin + 12, yPosition);
+            yPosition += debtLines.length * 5 + 2;
+          }
+        }
+
+        if (g.documentationLocation) {
+          checkPage(7);
+          doc.setFont(undefined, 'bold');
+          doc.text('Documentation location:', margin + 8, yPosition);
+          doc.setFont(undefined, 'normal');
+          const docLines = doc.splitTextToSize(g.documentationLocation, pageWidth - margin * 2 - doc.getTextWidth('Documentation location:') - 12);
+          if (docLines.length === 1) {
+            doc.text(g.documentationLocation, margin + 8 + doc.getTextWidth('Documentation location:') + 2, yPosition);
+            yPosition += 6;
+          } else {
+            yPosition += 6;
+            doc.text(docLines, margin + 12, yPosition);
+            yPosition += docLines.length * 5 + 2;
+          }
+        }
+      });
+    }
+
+    if (p.isProfessionalPartnership) {
+      checkPage(7);
+      doc.setFont(undefined, 'bold');
+      doc.text('Professional partnership (law, accounting, etc.):', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      doc.text(p.isProfessionalPartnership === 'yes' ? 'Yes' : 'No', margin + doc.getTextWidth('Professional partnership (law, accounting, etc.):') + 2, yPosition);
+      yPosition += 6;
+    }
+
+    if (p.isProfessionalPartnership === 'yes') {
+      if (p.hasLiabilityInsurance) {
+        checkPage(7);
+        doc.setFont(undefined, 'bold');
+        doc.text('Liability or errors and omissions insurance:', margin + 4, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(p.hasLiabilityInsurance === 'yes' ? 'Yes' : 'No', margin + 4 + doc.getTextWidth('Liability or errors and omissions insurance:') + 2, yPosition);
+        yPosition += 6;
+      }
+
+      if (p.hasLiabilityInsurance === 'yes' && p.liabilityInsurancePolicies && p.liabilityInsurancePolicies.length > 0) {
+        p.liabilityInsurancePolicies.forEach((pol, pIdx) => {
+          checkPage(14);
+          doc.setFont(undefined, 'bold');
+          doc.text(`Policy ${pIdx + 1}:`, margin + 8, yPosition);
+          yPosition += 6;
+
+          if (pol.description) {
+            doc.setFont(undefined, 'bold');
+            doc.text('Description:', margin + 12, yPosition);
+            doc.setFont(undefined, 'normal');
+            const descLines = doc.splitTextToSize(pol.description, pageWidth - margin * 2 - doc.getTextWidth('Description:') - 16);
+            if (descLines.length === 1) {
+              doc.text(pol.description, margin + 12 + doc.getTextWidth('Description:') + 2, yPosition);
+              yPosition += 6;
+            } else {
+              yPosition += 6;
+              doc.text(descLines, margin + 16, yPosition);
+              yPosition += descLines.length * 5 + 2;
+            }
+          }
+
+          if (pol.documentationLocation) {
+            checkPage(7);
+            doc.setFont(undefined, 'bold');
+            doc.text('Documentation location:', margin + 12, yPosition);
+            doc.setFont(undefined, 'normal');
+            const polDocLines = doc.splitTextToSize(pol.documentationLocation, pageWidth - margin * 2 - doc.getTextWidth('Documentation location:') - 16);
+            if (polDocLines.length === 1) {
+              doc.text(pol.documentationLocation, margin + 12 + doc.getTextWidth('Documentation location:') + 2, yPosition);
+              yPosition += 6;
+            } else {
+              yPosition += 6;
+              doc.text(polDocLines, margin + 16, yPosition);
+              yPosition += polDocLines.length * 5 + 2;
+            }
+          }
+        });
       }
     }
 

@@ -2903,6 +2903,13 @@ export const generatePDF = (formData: FormData) => {
 
   const renderPartnershipDetails = (p: PartnershipItem, idx: number, clientName: string) => {
     const businessName = p.registeredName || `Partnership ${idx + 1}`;
+    const pageHeight = doc.internal.pageSize.height;
+    const checkPage = (needed: number) => {
+      if (yPosition + needed > pageHeight - 15) {
+        doc.addPage();
+        yPosition = 15;
+      }
+    };
 
     checkPage(12);
     yPosition += 4;

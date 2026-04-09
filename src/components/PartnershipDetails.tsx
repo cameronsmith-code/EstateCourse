@@ -11,6 +11,7 @@ type Props = {
   index: number;
   data: Partial<PartnershipData>;
   onChange: (field: keyof PartnershipData, value: string) => void;
+  onMultiChange: (updates: Partial<PartnershipData>) => void;
   clientName: string;
 };
 
@@ -19,7 +20,19 @@ const inputClass =
 
 const labelClass = 'block text-sm font-medium text-gray-300 mb-2';
 
-export default function PartnershipDetails({ index, data, onChange, clientName }: Props) {
+export default function PartnershipDetails({ index, data, onChange, onMultiChange, clientName }: Props) {
+  const handleAgreementChange = (value: string) => {
+    if (value === 'no') {
+      onMultiChange({
+        hasWrittenAgreement: 'no',
+        agreementDocLocation: undefined,
+        agreementHasDeathProvisions: undefined,
+      });
+    } else {
+      onChange('hasWrittenAgreement', value);
+    }
+  };
+
   return (
     <div className="border border-gray-600 rounded-xl p-6 bg-gray-800 space-y-6">
       <h3 className="text-lg font-semibold text-white">
@@ -95,7 +108,7 @@ export default function PartnershipDetails({ index, data, onChange, clientName }
                     name={`hasWrittenAgreement-${index}`}
                     value={opt.value}
                     checked={data.hasWrittenAgreement === opt.value}
-                    onChange={() => onChange('hasWrittenAgreement', opt.value)}
+                    onChange={() => handleAgreementChange(opt.value)}
                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-3 text-gray-300">{opt.label}</span>

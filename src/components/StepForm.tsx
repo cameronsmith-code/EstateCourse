@@ -721,6 +721,28 @@ export default function StepForm({
     }
   }, [(allAnswers?.get(1) || {})['client2NumberOfPreviousRelationships']]);
 
+  useEffect(() => {
+    if (answers['hasPartnership'] !== 'yes') {
+      const keysToClear = ['partnershipCount', 'client1PartnershipsData'];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['hasPartnership']]);
+
+  useEffect(() => {
+    if (answers['client2HasPartnership'] !== 'yes') {
+      const keysToClear = ['client2PartnershipCount', 'client2PartnershipsData'];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasPartnership']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');
@@ -1457,6 +1479,12 @@ export default function StepForm({
                                 updated[i] = { ...updated[i], [field]: value };
                                 onAnswerChange('client1PartnershipsData', updated);
                               }}
+                              onMultiChange={(updates) => {
+                                const updated = [...pData];
+                                if (!updated[i]) updated[i] = {};
+                                updated[i] = { ...updated[i], ...updates };
+                                onAnswerChange('client1PartnershipsData', updated);
+                              }}
                             />
                           ))}
                         </div>
@@ -1487,6 +1515,12 @@ export default function StepForm({
                                   const updated = [...pData];
                                   if (!updated[i]) updated[i] = {};
                                   updated[i] = { ...updated[i], [field]: value };
+                                  onAnswerChange('client2PartnershipsData', updated);
+                                }}
+                                onMultiChange={(updates) => {
+                                  const updated = [...pData];
+                                  if (!updated[i]) updated[i] = {};
+                                  updated[i] = { ...updated[i], ...updates };
                                   onAnswerChange('client2PartnershipsData', updated);
                                 }}
                               />

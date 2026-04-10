@@ -2423,41 +2423,44 @@ export const generatePDF = (formData: FormData) => {
       doc.text(noLicLines, margin, yPosition);
       yPosition += noLicLines.length * 6 + 4;
     } else if (sp.hasLicenses === 'yes' && sp.licenses && sp.licenses.length > 0) {
+      const licLabelColW = 65;
+      const licValueColW = fieldWidth - licLabelColW;
+      const licRowH = 8;
+
       sp.licenses.forEach((lic, li) => {
-        checkPage(20);
+        checkPage(licRowH * 3 + 10);
         doc.setFont(undefined, 'bold');
+        doc.setFontSize(9);
         doc.text(`License ${li + 1}`, margin, yPosition);
-        yPosition += 6;
-        if (lic.nature) {
-          doc.setFont(undefined, 'bold');
-          doc.text('Nature of License:', margin + 4, yPosition);
+        yPosition += 5;
+
+        const licRows: [string, string, string][] = [
+          ['Nature of License:', lic.nature || '', `sp_lic_nature_${idx}_${li}`],
+          ['Location of Original Documents:', lic.documentLocation || '', `sp_lic_loc_${idx}_${li}`],
+          ['Other Information:', '', `sp_lic_other_${idx}_${li}`],
+        ];
+
+        licRows.forEach(([label, value, fieldName]) => {
+          doc.setDrawColor(180, 180, 180);
+          doc.rect(margin, yPosition, licLabelColW, licRowH);
+          doc.rect(margin + licLabelColW, yPosition, licValueColW, licRowH);
           doc.setFont(undefined, 'normal');
-          const natLines = doc.splitTextToSize(lic.nature, fieldWidth - 42);
-          const fldLicNature = new doc.AcroFormTextField();
-          fldLicNature.fieldName = `sp_lic_nature_${idx}_${li}`;
-          fldLicNature.Rect = [margin + 42, yPosition - 5.5, pageWidth - (margin + 42) - margin, 7];
-          fldLicNature.fontSize = 9;
-          fldLicNature.textColor = colors.darkText;
-          fldLicNature.borderStyle = 'none';
-          fldLicNature.value = natLines[0] || '';
-          doc.addField(fldLicNature);
-          yPosition += 6;
-        }
-        if (lic.documentLocation) {
-          doc.setFont(undefined, 'bold');
-          doc.text('Location of Original Documents:', margin + 4, yPosition);
-          doc.setFont(undefined, 'normal');
-          const locLines = doc.splitTextToSize(lic.documentLocation, fieldWidth - 64);
-          const fldLicLoc = new doc.AcroFormTextField();
-          fldLicLoc.fieldName = `sp_lic_loc_${idx}_${li}`;
-          fldLicLoc.Rect = [margin + 64, yPosition - 5.5, pageWidth - (margin + 64) - margin, 7];
-          fldLicLoc.fontSize = 9;
-          fldLicLoc.textColor = colors.darkText;
-          fldLicLoc.borderStyle = 'none';
-          fldLicLoc.value = locLines[0] || '';
-          doc.addField(fldLicLoc);
-          yPosition += 6;
-        }
+          doc.setFontSize(8);
+          doc.setTextColor(...colors.darkText);
+          doc.text(label, margin + 2, yPosition + 5.5);
+          const licField = new doc.AcroFormTextField();
+          licField.fieldName = fieldName;
+          licField.Rect = [margin + licLabelColW + 0.5, yPosition + 0.5, licValueColW - 1, licRowH - 1];
+          licField.fontSize = 8;
+          licField.textColor = colors.darkText;
+          licField.borderStyle = 'none';
+          licField.value = value;
+          doc.addField(licField);
+          yPosition += licRowH;
+        });
+
+        doc.setFontSize(9);
+        yPosition += 4;
       });
     }
 

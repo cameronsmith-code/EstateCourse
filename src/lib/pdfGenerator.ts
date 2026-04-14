@@ -2,6 +2,7 @@ import { jsPDF } from 'jspdf';
 
 interface ChildData {
   name?: string;
+  nickname?: string;
   dateOfBirth?: string;
   parentsOption?: string;
   otherParentName?: string;
@@ -1178,6 +1179,21 @@ export const generatePDF = (formData: FormData) => {
       childNameField.textColor = colors.darkText;
       childNameField.value = child.name || '';
       doc.addField(childNameField);
+
+      yPosition += 10;
+
+      doc.setFont(undefined, 'bold');
+      doc.text('Preferred Name/Nickname:', margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 2;
+
+      const childNicknameField = new doc.AcroFormTextField();
+      childNicknameField.fieldName = `child${index + 1}_nickname`;
+      childNicknameField.Rect = [margin, yPosition, fieldWidth - 15, 6];
+      childNicknameField.fontSize = 9;
+      childNicknameField.textColor = colors.darkText;
+      childNicknameField.value = child.nickname || '';
+      doc.addField(childNicknameField);
 
       yPosition += 10;
 

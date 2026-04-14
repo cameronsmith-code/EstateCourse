@@ -1160,9 +1160,121 @@ export const generatePDF = (formData: FormData) => {
     const childCount = formData.numberOfChildren === '6+' ? 6 : parseInt(formData.numberOfChildren || '0');
     const childrenToProcess = formData.childrenData.slice(0, childCount);
 
-    childrenToProcess.forEach((_child, index) => {
-      addSubsectionHeader(`Child ${index + 1}`);
-      yPosition += 4;
+    const provinces18 = ['Alberta', 'Manitoba', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'];
+    const provinces19 = ['British Columbia', 'New Brunswick', 'Newfoundland and Labrador', 'Northwest Territories', 'Nova Scotia', 'Nunavut', 'Yukon'];
+
+    const getAgeOfMajorityText = (child: ChildData): string => {
+      let parentProvince = '';
+      if (child.parentsOption === 'both' || child.parentsOption === 'client1-other') {
+        parentProvince = formData.province || '';
+      } else if (child.parentsOption === 'client2-other') {
+        parentProvince = formData.spouseProvince || formData.province || '';
+      } else {
+        parentProvince = formData.province || '';
+      }
+
+      const nickname = child.nickname || child.name || 'the child';
+
+      if (!parentProvince || !child.dateOfBirth) return '';
+
+      const isProvince18 = provinces18.some(p => parentProvince.toLowerCase() === p.toLowerCase());
+      const isProvince19 = provinces19.some(p => parentProvince.toLowerCase() === p.toLowerCase());
+
+      if (!isProvince18 && !isProvince19) return '';
+
+      const majorityAge = isProvince18 ? 18 : 19;
+      const dob = new Date(child.dateOfBirth);
+      const majorityDate = new Date(dob);
+      majorityDate.setFullYear(majorityDate.getFullYear() + majorityAge);
+
+      const today = new Date();
+      const normalizedProvince = [...provinces18, ...provinces19].find(
+        p => p.toLowerCase() === parentProvince.toLowerCase()
+      ) || parentProvince;
+
+      if (today >= majorityDate) {
+        return `${nickname} has reached the age of majority.`;
+      }
+
+      const yyyy = majorityDate.getFullYear();
+      const mm = String(majorityDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(majorityDate.getDate()).padStart(2, '0');
+      const formattedDate = `${yyyy}/${mm}/${dd}`;
+
+      return `${nickname} will reach the age of majority in ${normalizedProvince} on ${formattedDate}.`;
+    };
+
+    const childTableCellHeight = 8;
+    const childLabelWidth = fieldWidth * 0.35;
+    const childValueWidth = fieldWidth * 0.65;
+
+    childrenToProcess.forEach((child, index) => {
+      const nickname = child.nickname || child.name || `Child ${index + 1}`;
+      const subheaderTitle = `(${nickname}) Guardian Information:`;
+      checkPageBreak(70);
+      addSubsectionHeader(subheaderTitle);
+      yPosition += 2;
+
+      let parentLabel = '';
+      if (child.parentsOption === 'both') {
+        const c1 = formData.fullName || 'Client 1';
+        const c2 = formData.spouseName || 'Client 2';
+        parentLabel = `${c1} and ${c2}`;
+      } else if (child.parentsOption === 'client1-other') {
+        const c1 = formData.fullName || 'Client 1';
+        parentLabel = `${c1} and ${child.otherParentName || 'other'}`;
+      } else if (child.parentsOption === 'client2-other') {
+        const c2 = formData.spouseName || 'Client 2';
+        parentLabel = `${c2} and ${child.otherParentName || 'other'}`;
+      }
+
+      const ageOfMajorityText = getAgeOfMajorityText(child);
+
+      const childRows = [
+        { label: 'Preferred name/nickname:', value: child.nickname || '' },
+        { label: 'Citizenship(s):', value: '' },
+        { label: 'Child of:', value: parentLabel },
+        { label: 'Date of Birth (YYYY/MM/DD):', value: child.dateOfBirth || '' },
+        { label: 'Age of Majority:', value: ageOfMajorityText },
+      ];
+
+      childRows.forEach((row, rowIndex) => {
+        const rowY = yPosition;
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, rowY, childLabelWidth, childTableCellHeight);
+        doc.rect(margin + childLabelWidth, rowY, childValueWidth, childTableCellHeight);
+
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(row.label, margin + 1, rowY + 5);
+
+        if (row.label === 'Age of Majority:' && row.value) {
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(8);
+          doc.text(row.value, margin + childLabelWidth + 1, rowY + 5);
+        } else if (row.label !== 'Citizenship(s):') {
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          if (row.value) {
+            doc.text(row.value, margin + childLabelWidth + 1, rowY + 5);
+          }
+        } else {
+          const citizenshipField = new doc.AcroFormTextField();
+          citizenshipField.fieldName = `child_${index}_citizenship_${rowIndex}`;
+          citizenshipField.Rect = [margin + childLabelWidth + 0.5, rowY + 0.5, childValueWidth - 1, childTableCellHeight - 1];
+          citizenshipField.fontSize = 9;
+          citizenshipField.textColor = colors.darkText;
+          citizenshipField.borderStyle = 'none';
+          citizenshipField.value = '';
+          doc.addField(citizenshipField);
+        }
+
+        yPosition += childTableCellHeight;
+      });
+
+      yPosition += 6;
     });
 
     const hasChildSupport = childrenToProcess.some(child =>

@@ -1155,7 +1155,7 @@ export const generatePDF = (formData: FormData) => {
   if (formData.hasChildren === 'yes' && formData.childrenData && formData.childrenData.length > 0) {
     doc.addPage();
     yPosition = 12;
-    addSectionHeader('Children Information');
+    addSectionHeader('Guardian Roadmap');
 
     const childCount = formData.numberOfChildren === '6+' ? 6 : parseInt(formData.numberOfChildren || '0');
     const childrenToProcess = formData.childrenData.slice(0, childCount);

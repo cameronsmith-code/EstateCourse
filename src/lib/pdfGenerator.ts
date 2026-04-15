@@ -1250,26 +1250,14 @@ export const generatePDF = (formData: FormData) => {
         doc.setTextColor(...colors.darkText);
         doc.text(row.label, margin + 1, rowY + 5);
 
-        if (row.label === 'Age of Majority:' && row.value) {
-          doc.setFont(undefined, 'normal');
-          doc.setFontSize(8);
-          doc.text(row.value, margin + childLabelWidth + 1, rowY + 5);
-        } else if (row.label !== 'Citizenship(s):') {
-          doc.setFont(undefined, 'normal');
-          doc.setFontSize(9);
-          if (row.value) {
-            doc.text(row.value, margin + childLabelWidth + 1, rowY + 5);
-          }
-        } else {
-          const citizenshipField = new doc.AcroFormTextField();
-          citizenshipField.fieldName = `child_${index}_citizenship_${rowIndex}`;
-          citizenshipField.Rect = [margin + childLabelWidth + 0.5, rowY + 0.5, childValueWidth - 1, childTableCellHeight - 1];
-          citizenshipField.fontSize = 9;
-          citizenshipField.textColor = colors.darkText;
-          citizenshipField.borderStyle = 'none';
-          citizenshipField.value = '';
-          doc.addField(citizenshipField);
-        }
+        const valueField = new doc.AcroFormTextField();
+        valueField.fieldName = `child_${index}_row_${rowIndex}`;
+        valueField.Rect = [margin + childLabelWidth + 0.5, rowY + 0.5, childValueWidth - 1, childTableCellHeight - 1];
+        valueField.fontSize = 9;
+        valueField.textColor = colors.darkText;
+        valueField.borderStyle = 'none';
+        valueField.value = row.value || '';
+        doc.addField(valueField);
 
         yPosition += childTableCellHeight;
       });

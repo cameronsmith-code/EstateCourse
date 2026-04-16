@@ -23,6 +23,9 @@ interface ChildData {
   allergyMedicationDescription?: string;
   medicalIssues?: string;
   medicalIssuesDescription?: string;
+  attendingSchool?: string;
+  additionalEducationInfo?: string;
+  additionalEducationDetails?: string;
   canadianResident?: string;
   provinceTerritory?: string;
   overAgeMajority?: string;
@@ -1244,6 +1247,7 @@ export const generatePDF = (formData: FormData) => {
         { label: 'Financially Independent:', value: independentLabel },
         { label: 'On Long-Term Medications:', value: medicationsLabel },
         { label: `Does ${nickname} have any allergies?`, value: allergiesLabel },
+        ...(child.independent !== 'yes' ? [{ label: `Is ${nickname} attending school?`, value: child.attendingSchool === 'yes' ? 'Yes' : child.attendingSchool === 'no' ? 'No' : '' }] : []),
       ];
 
       childRows.forEach((row, rowIndex) => {
@@ -1604,6 +1608,78 @@ export const generatePDF = (formData: FormData) => {
           doc.addField(addlMedField);
 
           yPosition += addlMedRowH + 6;
+        }
+
+        if ((isMinor || isNotFinanciallyIndependent) && child.attendingSchool !== undefined) {
+          checkPageBreak(20);
+          addSubsectionHeader(`(${nickname}) Educational Information:`);
+          yPosition += 2;
+
+          const eduLabelWidth = fieldWidth * 0.40;
+          const eduValueWidth = fieldWidth * 0.60;
+          const eduRowH = 8;
+          const eduLargeRowH = 20;
+
+          if (child.attendingSchool === 'yes') {
+            const eduRows = [
+              { label: 'School Name:', large: false },
+              { label: 'School Contact Information:', large: false },
+              { label: 'Is there an individual education plan? (Provide Details):', large: true },
+              { label: 'Learning style notes or concerns:', large: true },
+              { label: 'Behavioural considerations (e.g., anxiety, ADHD triggers)', large: true },
+              { label: 'Additional details:', large: true },
+            ];
+
+            eduRows.forEach((row, rowIndex) => {
+              const rh = row.large ? eduLargeRowH : eduRowH;
+              checkPageBreak(rh + 2);
+              const rowY = yPosition;
+              doc.setDrawColor(...colors.borderGray);
+              doc.setLineWidth(0.5);
+              doc.rect(margin, rowY, eduLabelWidth, rh);
+              doc.rect(margin + eduLabelWidth, rowY, eduValueWidth, rh);
+
+              doc.setFontSize(8.5);
+              doc.setFont(undefined, 'bold');
+              doc.setTextColor(...colors.darkText);
+              const labelLines = doc.splitTextToSize(row.label, eduLabelWidth - 2);
+              doc.text(labelLines, margin + 1, rowY + 4.5);
+
+              const eduField = new doc.AcroFormTextField();
+              eduField.fieldName = `child_${index}_edu_${rowIndex}`;
+              eduField.Rect = [margin + eduLabelWidth + 0.5, rowY + 0.5, eduValueWidth - 1, rh - 1];
+              eduField.fontSize = 9;
+              eduField.textColor = colors.darkText;
+              eduField.borderStyle = 'none';
+              eduField.multiline = row.large;
+              eduField.value = '';
+              doc.addField(eduField);
+
+              yPosition += rh;
+            });
+
+            yPosition += 6;
+          } else if (child.attendingSchool === 'no' && child.additionalEducationInfo === 'yes') {
+            checkPageBreak(20);
+            const addlEduRowH = Math.max(16, Math.ceil((child.additionalEducationDetails?.length || 0) / 80) * 5 + 10);
+            const rowY = yPosition;
+            checkPageBreak(addlEduRowH + 2);
+            doc.setDrawColor(...colors.borderGray);
+            doc.setLineWidth(0.5);
+            doc.rect(margin, rowY, fieldWidth, addlEduRowH);
+
+            const addlEduField = new doc.AcroFormTextField();
+            addlEduField.fieldName = `child_${index}_additionalEducationDetails`;
+            addlEduField.Rect = [margin + 0.5, rowY + 0.5, fieldWidth - 1, addlEduRowH - 1];
+            addlEduField.fontSize = 9;
+            addlEduField.textColor = colors.darkText;
+            addlEduField.borderStyle = 'none';
+            addlEduField.multiline = true;
+            addlEduField.value = child.additionalEducationDetails || '';
+            doc.addField(addlEduField);
+
+            yPosition += addlEduRowH + 6;
+          }
         }
 
         addSubsectionHeader(`(${nickname}) Document Checklist:`);

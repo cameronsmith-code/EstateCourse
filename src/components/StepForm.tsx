@@ -1017,6 +1017,15 @@ export default function StepForm({
       updated[index].medicalIssuesDescription = undefined;
     }
 
+    if (field === 'attendingSchool' && value === 'yes') {
+      updated[index].additionalEducationInfo = undefined;
+      updated[index].additionalEducationDetails = undefined;
+    }
+
+    if (field === 'additionalEducationInfo' && value === 'no') {
+      updated[index].additionalEducationDetails = undefined;
+    }
+
     onAnswerChange('childrenData', updated);
   };
 
@@ -5935,6 +5944,87 @@ export default function StepForm({
                             />
                           </div>
                         )}
+
+                        <div className="mt-6 pt-6 border-t border-gray-600">
+                          <h4 className="text-md font-semibold text-white mb-4">Educational Information</h4>
+
+                          <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Is {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} attending school?
+                            </label>
+                            <div className="flex gap-4">
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`attendingSchool-${index}`}
+                                  value="yes"
+                                  checked={childrenData[index]?.attendingSchool === 'yes'}
+                                  onChange={(e) => handleChildChange(index, 'attendingSchool', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">Yes</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`attendingSchool-${index}`}
+                                  value="no"
+                                  checked={childrenData[index]?.attendingSchool === 'no'}
+                                  onChange={(e) => handleChildChange(index, 'attendingSchool', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">No</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {childrenData[index]?.attendingSchool === 'no' && (
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Is there any additional information regarding {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} and education?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`additionalEducationInfo-${index}`}
+                                    value="yes"
+                                    checked={childrenData[index]?.additionalEducationInfo === 'yes'}
+                                    onChange={(e) => handleChildChange(index, 'additionalEducationInfo', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`additionalEducationInfo-${index}`}
+                                    value="no"
+                                    checked={childrenData[index]?.additionalEducationInfo === 'no'}
+                                    onChange={(e) => handleChildChange(index, 'additionalEducationInfo', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+
+                          {childrenData[index]?.attendingSchool === 'no' && childrenData[index]?.additionalEducationInfo === 'yes' && (
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Please provide details:
+                              </label>
+                              <textarea
+                                value={childrenData[index]?.additionalEducationDetails || ''}
+                                onChange={(e) => handleChildChange(index, 'additionalEducationDetails', e.target.value)}
+                                placeholder="Provide any additional educational information"
+                                rows={4}
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                              />
+                            </div>
+                          )}
+                        </div>
 
                         <div className="mt-6 pt-6 border-t border-gray-600">
                           <h4 className="text-md font-semibold text-white mb-2">Digital Identity and Access</h4>

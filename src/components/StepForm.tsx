@@ -1007,6 +1007,12 @@ export default function StepForm({
       updated[index].medicationList = undefined;
     }
 
+    if (field === 'allergies' && value === 'no') {
+      updated[index].allergyList = undefined;
+      updated[index].allergyMedication = undefined;
+      updated[index].allergyMedicationDescription = undefined;
+    }
+
     onAnswerChange('childrenData', updated);
   };
 

@@ -1420,8 +1420,72 @@ export const generatePDF = (formData: FormData) => {
       const showDisabilityDocs = isDisabled && (child.disabilityTaxCredit === 'yes' || child.disabilityTaxCredit === 'not-looked');
 
       if (showChecklist) {
-        checkPageBreak(60);
+        checkPageBreak(80);
         yPosition += 4;
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(`(${nickname}) - Medical and Care:`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const medColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
+        const medColX = [
+          margin,
+          margin + medColWidths[0],
+          margin + medColWidths[0] + medColWidths[1],
+          margin + medColWidths[0] + medColWidths[1] + medColWidths[2],
+        ];
+        const medHeaderHeight = 10;
+        const medRowH = 8;
+
+        const medHeaders = ['Contact Name:', 'Office Address:', 'Office Phone:', 'Other Details:'];
+        const medContactRows = ['Family Doctor:', 'Dentist:', 'Optometrist:', 'Other:', 'Other:', 'Other:'];
+
+        const medHeaderY = yPosition;
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.5);
+        medHeaders.forEach((h, ci) => {
+          doc.rect(medColX[ci], medHeaderY, medColWidths[ci], medHeaderHeight);
+          doc.text(h, medColX[ci] + 1, medHeaderY + 6);
+        });
+        doc.setFont(undefined, 'normal');
+        yPosition += medHeaderHeight;
+
+        medContactRows.forEach((rowLabel, ri) => {
+          const rowY = yPosition;
+          checkPageBreak(medRowH + 2);
+          doc.setFontSize(8);
+          doc.setDrawColor(...colors.borderGray);
+          doc.setLineWidth(0.5);
+          medColWidths.forEach((w, ci) => {
+            doc.rect(medColX[ci], rowY, w, medRowH);
+          });
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          doc.text(rowLabel, medColX[0] + 1, rowY + 5);
+
+          for (let ci = 1; ci < 4; ci++) {
+            const valueField = new doc.AcroFormTextField();
+            valueField.fieldName = `child_${index}_med_${ri}_col${ci}`;
+            valueField.Rect = [medColX[ci] + 0.5, rowY + 0.5, medColWidths[ci] - 1, medRowH - 1];
+            valueField.fontSize = 8;
+            valueField.textColor = colors.darkText;
+            valueField.borderStyle = 'none';
+            valueField.value = '';
+            doc.addField(valueField);
+          }
+
+          yPosition += medRowH;
+        });
+
+        yPosition += 6;
+
+        checkPageBreak(60);
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');

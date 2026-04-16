@@ -1269,63 +1269,6 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition += 6;
 
-      if (child.medications === 'yes' && child.medicationList) {
-        type MedEntry = { name: string; treats: string; prescription: string; prescribedBy: string; hasAdditional: string };
-        const medList = JSON.parse(child.medicationList || '[]') as MedEntry[];
-        if (medList.length > 0) {
-          medList.forEach((med, mi) => {
-            const hasPrescription = med.prescription === 'yes';
-            const chartRows: { label: string; fieldKey: string; value: string }[] = [
-              { label: 'Name of medication:', fieldKey: 'name', value: med.name || '' },
-              { label: 'What does it treat?', fieldKey: 'treats', value: med.treats || '' },
-              { label: 'Does it require a prescription?', fieldKey: 'prescription', value: med.prescription === 'yes' ? 'Yes' : med.prescription === 'no' ? 'No' : '' },
-            ];
-            if (hasPrescription) {
-              chartRows.push({ label: 'Prescribed by:', fieldKey: 'prescribedBy', value: med.prescribedBy || '' });
-            }
-            const medRowH = 8;
-            const titleH = 10;
-            checkPageBreak(titleH + chartRows.length * medRowH + 8);
-
-            doc.setFontSize(10);
-            doc.setFont(undefined, 'bold');
-            doc.setTextColor(...colors.darkText);
-            doc.text(`Medication Information${medList.length > 1 ? ` #${mi + 1}` : ''}:`, margin, yPosition);
-            doc.setFont(undefined, 'normal');
-            yPosition += 6;
-
-            const medLabelWidth = fieldWidth * 0.45;
-            const medValueWidth = fieldWidth * 0.55;
-
-            chartRows.forEach((row) => {
-              const rowY = yPosition;
-              doc.setDrawColor(...colors.borderGray);
-              doc.setLineWidth(0.5);
-              doc.rect(margin, rowY, medLabelWidth, medRowH);
-              doc.rect(margin + medLabelWidth, rowY, medValueWidth, medRowH);
-
-              doc.setFontSize(8.5);
-              doc.setFont(undefined, 'normal');
-              doc.setTextColor(...colors.darkText);
-              doc.text(row.label, margin + 1, rowY + 5);
-
-              const valField = new doc.AcroFormTextField();
-              valField.fieldName = `child_${index}_med_${mi}_${row.fieldKey}`;
-              valField.Rect = [margin + medLabelWidth + 0.5, rowY + 0.5, medValueWidth - 1, medRowH - 1];
-              valField.fontSize = 8.5;
-              valField.textColor = colors.darkText;
-              valField.borderStyle = 'none';
-              valField.value = row.value || '';
-              doc.addField(valField);
-
-              yPosition += medRowH;
-            });
-
-            yPosition += 6;
-          });
-        }
-      }
-
       if (child.disabled === 'yes') {
         checkPageBreak(20);
         const disabilitySubheading = `(${nickname}) Disability Information`;
@@ -1477,15 +1420,7 @@ export const generatePDF = (formData: FormData) => {
       const showDisabilityDocs = isDisabled && (child.disabilityTaxCredit === 'yes' || child.disabilityTaxCredit === 'not-looked');
 
       if (showChecklist) {
-        checkPageBreak(80);
-        yPosition += 4;
-
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...colors.darkText);
-        doc.text(`(${nickname}) - Medical and Care:`, margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 6;
+        addSubsectionHeader(`(${nickname}) Medical and Care:`);
 
         const medColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
         const medColX = [
@@ -1541,6 +1476,57 @@ export const generatePDF = (formData: FormData) => {
         });
 
         yPosition += 6;
+
+        if (child.medications === 'yes' && child.medicationList) {
+          type MedEntry = { name: string; treats: string; prescription: string; prescribedBy: string; hasAdditional: string };
+          const medList = JSON.parse(child.medicationList || '[]') as MedEntry[];
+          if (medList.length > 0) {
+            medList.forEach((med, mi) => {
+              const hasPrescription = med.prescription === 'yes';
+              const chartRows: { label: string; fieldKey: string; value: string }[] = [
+                { label: 'Name of medication:', fieldKey: 'name', value: med.name || '' },
+                { label: 'What does it treat?', fieldKey: 'treats', value: med.treats || '' },
+                { label: 'Does it require a prescription?', fieldKey: 'prescription', value: med.prescription === 'yes' ? 'Yes' : med.prescription === 'no' ? 'No' : '' },
+              ];
+              if (hasPrescription) {
+                chartRows.push({ label: 'Prescribed by:', fieldKey: 'prescribedBy', value: med.prescribedBy || '' });
+              }
+              const medInfoRowH = 8;
+              checkPageBreak(16 + chartRows.length * medInfoRowH + 8);
+
+              addSubsectionHeader(`Medication Information${medList.length > 1 ? ` #${mi + 1}` : ''}:`);
+
+              const medLabelWidth = fieldWidth * 0.45;
+              const medValueWidth = fieldWidth * 0.55;
+
+              chartRows.forEach((row) => {
+                const rowY = yPosition;
+                doc.setDrawColor(...colors.borderGray);
+                doc.setLineWidth(0.5);
+                doc.rect(margin, rowY, medLabelWidth, medInfoRowH);
+                doc.rect(margin + medLabelWidth, rowY, medValueWidth, medInfoRowH);
+
+                doc.setFontSize(8.5);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(...colors.darkText);
+                doc.text(row.label, margin + 1, rowY + 5);
+
+                const valField = new doc.AcroFormTextField();
+                valField.fieldName = `child_${index}_medinfo_${mi}_${row.fieldKey}`;
+                valField.Rect = [margin + medLabelWidth + 0.5, rowY + 0.5, medValueWidth - 1, medInfoRowH - 1];
+                valField.fontSize = 8.5;
+                valField.textColor = colors.darkText;
+                valField.borderStyle = 'none';
+                valField.value = row.value || '';
+                doc.addField(valField);
+
+                yPosition += medInfoRowH;
+              });
+
+              yPosition += 6;
+            });
+          }
+        }
 
         checkPageBreak(60);
 

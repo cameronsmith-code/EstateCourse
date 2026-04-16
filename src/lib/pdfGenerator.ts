@@ -1275,20 +1275,13 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 
-        const dtcParagraphs = [
-          'The Disability Tax Credit (DTC) is a non-refundable tax credit in Canada designed to help reduce the income tax liability for individuals with disabilities or their supporting persons.',
-          'Tax Credit Amount: The DTC amount varies each year and is comprised of a federal and, in most cases provincial component. It is a non-refundable tax credit, meaning it can reduce the amount of income tax the individual owes, but it will not result in a refund if the individual does not owe any tax.',
-          'Transfer to a Supporting Person: If the person with the disability does not have taxable income or cannot use the entire credit amount, it can be transferred, or a portion of it can be transferred, to a spouse, common-law partner, or another supporting person (such as a parent or other relative).',
-          'Other Benefits: Being eligible for the DTC can open the door to other government programs and benefits, such as the RDSP, the Child Disability Benefit, and certain tax credits and deductions for medical expenses.',
-          'Application Process: To apply, the individual or their legal representative must complete and submit FORM 2201 to the CRA. After reviewing the form, the CRA will notify the individual if their application is approved.',
-          'Periodic Review: The CRA may approve the DTC for a specific number of years, after which the individual might need to reapply or provide updated medical information.',
-          'Benefit Amount:',
-          'For the July 2023 \u2013 June 2024 year, people 18 and older can claim a tax credit of $9,428 (the disability amount), and those under 18 can claim $9,428 plus an extra $5,500 (supplement for children), so $14,928 total.',
-          'Any unused amount can be transferred to a supporting family member \u2013 so if parents or guardians are supporting a disabled child, the benefit can be claimed by the parents on their tax return.',
-          'This will show up on line 31800 of your tax returns \u2013 \u2018Disability Amount Transferred from a Dependent\u2019.',
-          'Claiming for past years:',
-          'If you were eligible for the DTC in past years but did not claim the disability amount, you may be able to claim it going back up to 10 years. This will require a doctor to certify that the disability existed prior to the time that you applied for the DTC.',
-          'More Information: https://www.canada.ca/en/revenue-agency/services/tax/individuals/segments/tax-credits-deductions-persons-disabilities/disability-tax-credit/claiming-dtc.html#h-2',
+        const dtcParagraphs: { label?: string; body: string }[] = [
+          { body: 'The Disability Tax Credit (DTC) is a non-refundable tax credit in Canada designed to help reduce the income tax liability for individuals with disabilities or their supporting persons.' },
+          { label: 'Tax Credit Amount:', body: ' The DTC amount varies each year and is comprised of a federal and, in most cases provincial component.  It is a non-refundable tax credit, meaning it can reduce the amount of income tax the individual owes, but it will not result in a refund if the individual does not owe any tax.' },
+          { label: 'Transfer to a Supporting Person:', body: ' If the person with the disability does not have taxable income or cannot use the entire credit amount, it can be transferred, or a portion of it can be transferred, to a spouse, common-law partner, or another supporting person (such as a parent or other relative).' },
+          { label: 'Other Benefits:', body: ' Being eligible for the DTC can open the door to other government programs and benefits, such as the RDSP, the Child Disability Benefit, and certain tax credits and deductions for medical expenses.' },
+          { label: 'Application Process:', body: ' To apply, the individual must have a medical doctor or another qualified health professional complete and submit Form 2201 (Disability Tax Certificate) to the CRA.  After reviewing the form, the CRA will notify the individual if their application is approved.' },
+          { label: 'Periodic Review:', body: ' The CRA may approve the DTC for a specific number of years, after which the individual might need to reapply or provide updated medical information.' },
         ];
 
         const dtcBoxX = margin;
@@ -1302,15 +1295,33 @@ export const generatePDF = (formData: FormData) => {
         const dtcLineH = 5;
         const dtcPad = 3;
 
-        dtcParagraphs.forEach((para, pi) => {
-          const isBold = pi === 6 || pi === 10;
-          doc.setFont(undefined, isBold ? 'bold' : 'normal');
-          const lines = doc.splitTextToSize(para, dtcBoxWidth - dtcPad * 2);
+        dtcParagraphs.forEach(({ label, body }) => {
+          const fullText = (label || '') + body;
+          const lines = doc.splitTextToSize(fullText, dtcBoxWidth - dtcPad * 2);
           checkPageBreak(lines.length * dtcLineH + 4);
-          lines.forEach((line: string) => {
-            doc.text(line, dtcBoxX + dtcPad, dtcTextY);
-            dtcTextY += dtcLineH;
-          });
+
+          if (label) {
+            const labelWidth = doc.getTextWidth(label);
+            lines.forEach((line: string, li: number) => {
+              if (li === 0) {
+                doc.setFont(undefined, 'bold');
+                doc.text(label, dtcBoxX + dtcPad, dtcTextY);
+                doc.setFont(undefined, 'normal');
+                const rest = line.slice(label.length);
+                if (rest) doc.text(rest, dtcBoxX + dtcPad + labelWidth, dtcTextY);
+              } else {
+                doc.setFont(undefined, 'normal');
+                doc.text(line, dtcBoxX + dtcPad, dtcTextY);
+              }
+              dtcTextY += dtcLineH;
+            });
+          } else {
+            doc.setFont(undefined, 'normal');
+            lines.forEach((line: string) => {
+              doc.text(line, dtcBoxX + dtcPad, dtcTextY);
+              dtcTextY += dtcLineH;
+            });
+          }
           dtcTextY += 2;
         });
 

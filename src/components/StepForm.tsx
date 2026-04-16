@@ -5348,6 +5348,17 @@ export default function StepForm({
                             />
                             <span className="text-gray-300">No</span>
                           </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`disabilityTaxCredit-${index}`}
+                              value="not-looked"
+                              checked={childrenData[index]?.disabilityTaxCredit === 'not-looked'}
+                              onChange={(e) => handleChildChange(index, 'disabilityTaxCredit', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">I/we haven't looked into this</span>
+                          </label>
                         </div>
                       </div>
                     )}

@@ -1436,6 +1436,7 @@ export const generatePDF = (formData: FormData) => {
           'Health Card:',
           'Social Insurance Number:',
           'Passport:',
+          ...(isMinor || isNotFinanciallyIndependent ? ['Location of Immunization Records:'] : []),
         ];
 
         const col1W = fieldWidth * 0.25;

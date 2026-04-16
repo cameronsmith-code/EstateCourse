@@ -1528,14 +1528,7 @@ export const generatePDF = (formData: FormData) => {
           }
         }
 
-        checkPageBreak(60);
-
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...colors.darkText);
-        doc.text(`(${nickname}) - Document Checklist:`, margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 6;
+        addSubsectionHeader(`(${nickname}) Document Checklist:`);
 
         const checklistRows = [
           'Birth Certificate:',

@@ -1003,6 +1003,10 @@ export default function StepForm({
       updated[index].disabilityOther = undefined;
     }
 
+    if (field === 'medications' && value === 'no') {
+      updated[index].medicationList = undefined;
+    }
+
     onAnswerChange('childrenData', updated);
   };
 
@@ -5683,7 +5687,11 @@ export default function StepForm({
                                           name={`hasAdditionalMedication-${index}-${medIndex}`}
                                           value="no"
                                           checked={medication.hasAdditional === 'no'}
-                                          onChange={(e) => handleMedicationChange(medIndex, 'hasAdditional', e.target.value)}
+                                          onChange={(e) => {
+                                            const trimmed = medicationList.slice(0, medIndex + 1);
+                                            trimmed[medIndex] = { ...trimmed[medIndex], hasAdditional: 'no' };
+                                            handleChildChange(index, 'medicationList', JSON.stringify(trimmed));
+                                          }}
                                           className="mr-2"
                                         />
                                         <span className="text-gray-300">No</span>

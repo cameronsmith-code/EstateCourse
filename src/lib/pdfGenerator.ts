@@ -1412,6 +1412,7 @@ export const generatePDF = (formData: FormData) => {
       const isDisabled = child.disabled === 'yes';
       const isNotFinanciallyIndependent = child.independent === 'no';
       const showChecklist = (isMinor || isDisabled) && isNotFinanciallyIndependent;
+      const showDisabilityDocs = isDisabled && (child.disabilityTaxCredit === 'yes' || child.disabilityTaxCredit === 'not-looked');
 
       if (showChecklist) {
         checkPageBreak(60);
@@ -1483,6 +1484,59 @@ export const generatePDF = (formData: FormData) => {
 
           yPosition += rowH;
         });
+
+        if (showDisabilityDocs) {
+          yPosition += 4;
+          checkPageBreak(50);
+
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'bolditalic');
+          doc.setTextColor(...colors.darkText);
+          doc.text('Disability Related Documentation:', margin, yPosition);
+          doc.setFont(undefined, 'normal');
+          yPosition += 5;
+
+          const disDocRows = [
+            'Location of approved Form T2001',
+            'Location of CRA approved Notice of Determination:',
+          ];
+
+          disDocRows.forEach((docLabel, ri) => {
+            const labelLines = doc.splitTextToSize(docLabel, col1W - 2);
+            const neededH = Math.max(rowH, labelLines.length * 4.5 + 3);
+            checkPageBreak(neededH + 2);
+            const rowY = yPosition;
+
+            doc.setFontSize(8);
+            doc.setDrawColor(...colors.borderGray);
+            doc.setLineWidth(0.5);
+
+            colWidths.forEach((w, ci) => {
+              doc.rect(colX[ci], rowY, w, neededH);
+            });
+
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            let labelTextY = rowY + 4.5;
+            labelLines.forEach((ll: string) => {
+              doc.text(ll, colX[0] + 1, labelTextY);
+              labelTextY += 4.5;
+            });
+
+            for (let ci = 1; ci < 4; ci++) {
+              const cellField = new doc.AcroFormTextField();
+              cellField.fieldName = `child_${index}_disdoc_${ri}_col${ci}`;
+              cellField.Rect = [colX[ci] + 0.5, rowY + 0.5, colWidths[ci] - 1, neededH - 1];
+              cellField.fontSize = 8;
+              cellField.textColor = colors.darkText;
+              cellField.borderStyle = 'none';
+              cellField.value = '';
+              doc.addField(cellField);
+            }
+
+            yPosition += neededH;
+          });
+        }
 
         yPosition += 6;
       }

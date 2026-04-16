@@ -1232,6 +1232,7 @@ export const generatePDF = (formData: FormData) => {
 
       const independentLabel = child.independent === 'yes' ? 'Yes' : child.independent === 'no' ? 'No' : '';
       const medicationsLabel = child.medications === 'yes' ? 'Yes' : child.medications === 'no' ? 'No' : '';
+      const allergiesLabel = child.allergies === 'yes' ? 'Yes' : child.allergies === 'no' ? 'No' : '';
 
       const childRows = [
         { label: 'Preferred name/nickname:', value: child.nickname || '' },
@@ -1241,6 +1242,7 @@ export const generatePDF = (formData: FormData) => {
         { label: 'Age of Majority:', value: ageOfMajorityText },
         { label: 'Financially Independent:', value: independentLabel },
         { label: 'On Long-Term Medications:', value: medicationsLabel },
+        { label: `Does ${nickname} have any allergies?`, value: allergiesLabel },
       ];
 
       childRows.forEach((row, rowIndex) => {
@@ -1521,6 +1523,57 @@ export const generatePDF = (formData: FormData) => {
                 doc.addField(valField);
 
                 yPosition += medInfoRowH;
+              });
+
+              yPosition += 6;
+            });
+          }
+        }
+
+        if (child.allergies === 'yes' && child.allergyList) {
+          type AllergyEntry = { details: string; severity: string; medications: string; epipen: string; requiredFor: string; otherInfo: string; hasAdditional?: string };
+          const allergyList = JSON.parse(child.allergyList || '[]') as AllergyEntry[];
+          if (allergyList.length > 0) {
+            allergyList.forEach((allergy, ai) => {
+              const allergyChartRows: { label: string; fieldKey: string; value: string }[] = [
+                { label: 'Allergic to:', fieldKey: 'details', value: allergy.details || '' },
+                { label: 'Severity:', fieldKey: 'severity', value: allergy.severity || '' },
+                { label: 'Medications:', fieldKey: 'medications', value: allergy.medications || '' },
+                { label: 'Carry an EpiPen?', fieldKey: 'epipen', value: allergy.epipen || '' },
+                { label: 'Required for (School, activities, etc.)', fieldKey: 'requiredFor', value: allergy.requiredFor || '' },
+                { label: 'Other Information:', fieldKey: 'otherInfo', value: allergy.otherInfo || '' },
+              ];
+              const allergyRowH = 8;
+              checkPageBreak(16 + allergyChartRows.length * allergyRowH + 8);
+
+              addSubsectionHeader(`(${nickname}) Allergy Information${allergyList.length > 1 ? ` #${ai + 1}` : ''}:`);
+
+              const allergyLabelWidth = fieldWidth * 0.45;
+              const allergyValueWidth = fieldWidth * 0.55;
+
+              allergyChartRows.forEach((row) => {
+                const rowY = yPosition;
+                checkPageBreak(allergyRowH + 2);
+                doc.setDrawColor(...colors.borderGray);
+                doc.setLineWidth(0.5);
+                doc.rect(margin, rowY, allergyLabelWidth, allergyRowH);
+                doc.rect(margin + allergyLabelWidth, rowY, allergyValueWidth, allergyRowH);
+
+                doc.setFontSize(8.5);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(...colors.darkText);
+                doc.text(row.label, margin + 1, rowY + 5);
+
+                const valField = new doc.AcroFormTextField();
+                valField.fieldName = `child_${index}_allergy_${ai}_${row.fieldKey}`;
+                valField.Rect = [margin + allergyLabelWidth + 0.5, rowY + 0.5, allergyValueWidth - 1, allergyRowH - 1];
+                valField.fontSize = 8.5;
+                valField.textColor = colors.darkText;
+                valField.borderStyle = 'none';
+                valField.value = row.value || '';
+                doc.addField(valField);
+
+                yPosition += allergyRowH;
               });
 
               yPosition += 6;

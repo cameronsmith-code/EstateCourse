@@ -994,8 +994,12 @@ export default function StepForm({
     if (field === 'disabled' && value === 'no') {
       updated[index].disabilityTaxCredit = undefined;
       updated[index].disabilityNature = undefined;
+      updated[index].disabilityFormalDiagnosis = undefined;
+      updated[index].disabilityCoordinator = undefined;
+      updated[index].disabilityLongTermPlan = undefined;
+      updated[index].disabilityFunding = undefined;
+      updated[index].disabilitySeverity = undefined;
       updated[index].disabilityCare = undefined;
-      updated[index].disabilityContacts = undefined;
       updated[index].disabilityOther = undefined;
     }
 
@@ -5376,50 +5380,115 @@ export default function StepForm({
                       <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Nature of the disability and severity
+                            Nature of disability
                           </label>
                           <textarea
                             value={childrenData[index]?.disabilityNature || ''}
                             onChange={(e) => handleChildChange(index, 'disabilityNature', e.target.value)}
-                            placeholder="Describe the nature and severity of the disability"
+                            placeholder="Describe the nature of the disability"
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             rows={3}
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Care and assistance provided
+                            Formal diagnosis? (yes/no)
+                          </label>
+                          <div className="flex gap-4">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`disabilityFormalDiagnosis-${index}`}
+                                value="yes"
+                                checked={childrenData[index]?.disabilityFormalDiagnosis === 'yes'}
+                                onChange={(e) => handleChildChange(index, 'disabilityFormalDiagnosis', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-gray-300">Yes</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`disabilityFormalDiagnosis-${index}`}
+                                value="no"
+                                checked={childrenData[index]?.disabilityFormalDiagnosis === 'no'}
+                                onChange={(e) => handleChildChange(index, 'disabilityFormalDiagnosis', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-gray-300">No</span>
+                            </label>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Who is the primary coordinator of care today?
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityCoordinator || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityCoordinator', e.target.value)}
+                            placeholder="Who coordinates care today?"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Is there a long-term plan already in place?
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityLongTermPlan || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityLongTermPlan', e.target.value)}
+                            placeholder="Describe any long-term plan already in place"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Any funding tied to residency or caregiver status?
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityFunding || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityFunding', e.target.value)}
+                            placeholder="Describe any funding tied to residency or caregiver status"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Describe the nature and severity of the disability
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilitySeverity || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilitySeverity', e.target.value)}
+                            placeholder="Describe the nature and severity of the disability"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={4}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Describe any care and assistance provided
                           </label>
                           <textarea
                             value={childrenData[index]?.disabilityCare || ''}
                             onChange={(e) => handleChildChange(index, 'disabilityCare', e.target.value)}
                             placeholder="Describe the care and assistance provided"
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            rows={3}
+                            rows={4}
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Key contacts and support including a description of their roles
-                          </label>
-                          <textarea
-                            value={childrenData[index]?.disabilityContacts || ''}
-                            onChange={(e) => handleChildChange(index, 'disabilityContacts', e.target.value)}
-                            placeholder="Describe key contacts and their roles"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            rows={3}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Other information that would assist a potential guardian
+                            Other information that would help support a potential guardian
                           </label>
                           <textarea
                             value={childrenData[index]?.disabilityOther || ''}
                             onChange={(e) => handleChildChange(index, 'disabilityOther', e.target.value)}
-                            placeholder="Any other information that would be helpful"
+                            placeholder="Any other information that would help support a potential guardian"
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            rows={3}
+                            rows={4}
                           />
                         </div>
                       </div>

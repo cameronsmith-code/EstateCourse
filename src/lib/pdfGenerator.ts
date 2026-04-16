@@ -1264,72 +1264,138 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition += 6;
 
-      if (child.disabled === 'yes' && child.disabilityTaxCredit === 'not-looked') {
-        checkPageBreak(120);
-        yPosition += 4;
+      if (child.disabled === 'yes') {
+        checkPageBreak(20);
+        const disabilitySubheading = `(${nickname}) Disability Information`;
+        addSubsectionHeader(disabilitySubheading);
+        yPosition += 2;
 
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...colors.darkText);
-        doc.text('Additional Reading - Disability Tax Credit', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 6;
+        const disLabelWidth = fieldWidth * 0.40;
+        const disValueWidth = fieldWidth * 0.60;
+        const disRowH = 8;
+        const disLargeRowH = 28;
 
-        const dtcParagraphs: { label?: string; body: string }[] = [
-          { body: 'The Disability Tax Credit (DTC) is a non-refundable tax credit in Canada designed to help reduce the income tax liability for individuals with disabilities or their supporting persons.' },
-          { label: 'Tax Credit Amount:', body: ' The DTC amount varies each year and is comprised of a federal and, in most cases provincial component.  It is a non-refundable tax credit, meaning it can reduce the amount of income tax the individual owes, but it will not result in a refund if the individual does not owe any tax.' },
-          { label: 'Transfer to a Supporting Person:', body: ' If the person with the disability does not have taxable income or cannot use the entire credit amount, it can be transferred, or a portion of it can be transferred, to a spouse, common-law partner, or another supporting person (such as a parent or other relative).' },
-          { label: 'Other Benefits:', body: ' Being eligible for the DTC can open the door to other government programs and benefits, such as the RDSP, the Child Disability Benefit, and certain tax credits and deductions for medical expenses.' },
-          { label: 'Application Process:', body: ' To apply, the individual must have a medical doctor or another qualified health professional complete and submit Form 2201 (Disability Tax Certificate) to the CRA.  After reviewing the form, the CRA will notify the individual if their application is approved.' },
-          { label: 'Periodic Review:', body: ' The CRA may approve the DTC for a specific number of years, after which the individual might need to reapply or provide updated medical information.' },
+        const dtcValue = (() => {
+          if (child.disabilityTaxCredit === 'yes') return 'Yes';
+          if (child.disabilityTaxCredit === 'no') return 'No';
+          if (child.disabilityTaxCredit === 'not-looked') return "I/we haven't looked into this";
+          return '';
+        })();
+
+        const disRows: { label: string; value: string; large?: boolean }[] = [
+          { label: 'Nature of disability:', value: child.disabilityNature || '' },
+          { label: 'Formal diagnosis? (yes/no)', value: child.disabilityFormalDiagnosis || '' },
+          { label: 'Do they qualify for the Disability Tax Credit (DTC)?', value: dtcValue },
+          { label: 'Who is the primary coordinator of care today?', value: child.disabilityCoordinator || '' },
+          { label: 'Is there a long-term plan already in place?', value: child.disabilityLongTermPlan || '' },
+          { label: 'Any funding tied to residency or caregiver status?', value: child.disabilityFunding || '' },
+          { label: 'Describe the nature and severity of the disability:', value: child.disabilitySeverity || '', large: true },
+          { label: 'Describe any care and assistance provided:', value: child.disabilityCare || '', large: true },
+          { label: 'Other information that would help support a potential guardian:', value: child.disabilityOther || '', large: true },
         ];
 
-        const dtcBoxX = margin;
-        const dtcBoxWidth = fieldWidth;
-        const dtcBoxStartY = yPosition;
+        disRows.forEach((row, ri) => {
+          const rowH = row.large ? disLargeRowH : disRowH;
+          checkPageBreak(rowH + 2);
+          const rowY = yPosition;
 
-        doc.setFontSize(8.5);
-        doc.setTextColor(...colors.darkText);
+          doc.setDrawColor(...colors.borderGray);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, rowY, disLabelWidth, rowH);
+          doc.rect(margin + disLabelWidth, rowY, disValueWidth, rowH);
 
-        let dtcTextY = dtcBoxStartY + 4;
-        const dtcLineH = 5;
-        const dtcPad = 3;
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          const labelLines = doc.splitTextToSize(row.label, disLabelWidth - 2);
+          let labelTextY = rowY + 5;
+          labelLines.forEach((ll: string) => {
+            doc.text(ll, margin + 1, labelTextY);
+            labelTextY += 4.5;
+          });
 
-        dtcParagraphs.forEach(({ label, body }) => {
-          const fullText = (label || '') + body;
-          const lines = doc.splitTextToSize(fullText, dtcBoxWidth - dtcPad * 2);
-          checkPageBreak(lines.length * dtcLineH + 4);
+          const valField = new doc.AcroFormTextField();
+          valField.fieldName = `child_${index}_dis_${ri}`;
+          valField.Rect = [margin + disLabelWidth + 0.5, rowY + 0.5, disValueWidth - 1, rowH - 1];
+          valField.fontSize = 8.5;
+          valField.textColor = colors.darkText;
+          valField.borderStyle = 'none';
+          valField.value = row.value || '';
+          if (row.large) valField.multiline = true;
+          doc.addField(valField);
 
-          if (label) {
-            const labelWidth = doc.getTextWidth(label);
-            lines.forEach((line: string, li: number) => {
-              if (li === 0) {
-                doc.setFont(undefined, 'bold');
-                doc.text(label, dtcBoxX + dtcPad, dtcTextY);
-                doc.setFont(undefined, 'normal');
-                const rest = line.slice(label.length);
-                if (rest) doc.text(rest, dtcBoxX + dtcPad + labelWidth, dtcTextY);
-              } else {
-                doc.setFont(undefined, 'normal');
-                doc.text(line, dtcBoxX + dtcPad, dtcTextY);
-              }
-              dtcTextY += dtcLineH;
-            });
-          } else {
-            doc.setFont(undefined, 'normal');
-            lines.forEach((line: string) => {
-              doc.text(line, dtcBoxX + dtcPad, dtcTextY);
-              dtcTextY += dtcLineH;
-            });
-          }
-          dtcTextY += 2;
+          yPosition += rowH;
         });
 
-        doc.setDrawColor(...colors.borderGray);
-        doc.setLineWidth(0.5);
-        doc.rect(dtcBoxX, dtcBoxStartY, dtcBoxWidth, dtcTextY - dtcBoxStartY + 2);
+        yPosition += 6;
 
-        yPosition = dtcTextY + 6;
+        if (child.disabilityTaxCredit === 'not-looked') {
+          checkPageBreak(120);
+          yPosition += 4;
+
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.text('Additional Reading - Disability Tax Credit', margin, yPosition);
+          doc.setFont(undefined, 'normal');
+          yPosition += 6;
+
+          const dtcParagraphs: { label?: string; body: string }[] = [
+            { body: 'The Disability Tax Credit (DTC) is a non-refundable tax credit in Canada designed to help reduce the income tax liability for individuals with disabilities or their supporting persons.' },
+            { label: 'Tax Credit Amount:', body: ' The DTC amount varies each year and is comprised of a federal and, in most cases provincial component.  It is a non-refundable tax credit, meaning it can reduce the amount of income tax the individual owes, but it will not result in a refund if the individual does not owe any tax.' },
+            { label: 'Transfer to a Supporting Person:', body: ' If the person with the disability does not have taxable income or cannot use the entire credit amount, it can be transferred, or a portion of it can be transferred, to a spouse, common-law partner, or another supporting person (such as a parent or other relative).' },
+            { label: 'Other Benefits:', body: ' Being eligible for the DTC can open the door to other government programs and benefits, such as the RDSP, the Child Disability Benefit, and certain tax credits and deductions for medical expenses.' },
+            { label: 'Application Process:', body: ' To apply, the individual must have a medical doctor or another qualified health professional complete and submit Form 2201 (Disability Tax Certificate) to the CRA.  After reviewing the form, the CRA will notify the individual if their application is approved.' },
+            { label: 'Periodic Review:', body: ' The CRA may approve the DTC for a specific number of years, after which the individual might need to reapply or provide updated medical information.' },
+          ];
+
+          const dtcBoxX = margin;
+          const dtcBoxWidth = fieldWidth;
+          const dtcBoxStartY = yPosition;
+
+          doc.setFontSize(8.5);
+          doc.setTextColor(...colors.darkText);
+
+          let dtcTextY = dtcBoxStartY + 4;
+          const dtcLineH = 5;
+          const dtcPad = 3;
+
+          dtcParagraphs.forEach(({ label, body }) => {
+            const fullText = (label || '') + body;
+            const lines = doc.splitTextToSize(fullText, dtcBoxWidth - dtcPad * 2);
+            checkPageBreak(lines.length * dtcLineH + 4);
+
+            if (label) {
+              const labelWidth = doc.getTextWidth(label);
+              lines.forEach((line: string, li: number) => {
+                if (li === 0) {
+                  doc.setFont(undefined, 'bold');
+                  doc.text(label, dtcBoxX + dtcPad, dtcTextY);
+                  doc.setFont(undefined, 'normal');
+                  const rest = line.slice(label.length);
+                  if (rest) doc.text(rest, dtcBoxX + dtcPad + labelWidth, dtcTextY);
+                } else {
+                  doc.setFont(undefined, 'normal');
+                  doc.text(line, dtcBoxX + dtcPad, dtcTextY);
+                }
+                dtcTextY += dtcLineH;
+              });
+            } else {
+              doc.setFont(undefined, 'normal');
+              lines.forEach((line: string) => {
+                doc.text(line, dtcBoxX + dtcPad, dtcTextY);
+                dtcTextY += dtcLineH;
+              });
+            }
+            dtcTextY += 2;
+          });
+
+          doc.setDrawColor(...colors.borderGray);
+          doc.setLineWidth(0.5);
+          doc.rect(dtcBoxX, dtcBoxStartY, dtcBoxWidth, dtcTextY - dtcBoxStartY + 2);
+
+          yPosition = dtcTextY + 6;
+        }
       }
 
       const isMinor = (() => {

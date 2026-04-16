@@ -5363,7 +5363,7 @@ export default function StepForm({
                       </div>
                     )}
 
-                    {childrenData[index]?.disabilityTaxCredit === 'yes' && (
+                    {childrenData[index]?.disabilityTaxCredit !== undefined && childrenData[index]?.disabilityTaxCredit !== '' && (
                       <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">

@@ -990,6 +990,22 @@ export default function StepForm({
       updated[index] = {};
     }
     updated[index][field] = value;
+
+    if (field === 'disabled' && value === 'no') {
+      updated[index].disabilityTaxCredit = undefined;
+      updated[index].disabilityNature = undefined;
+      updated[index].disabilityCare = undefined;
+      updated[index].disabilityContacts = undefined;
+      updated[index].disabilityOther = undefined;
+    }
+
+    if (field === 'disabilityTaxCredit' && value === 'no') {
+      updated[index].disabilityNature = undefined;
+      updated[index].disabilityCare = undefined;
+      updated[index].disabilityContacts = undefined;
+      updated[index].disabilityOther = undefined;
+    }
+
     onAnswerChange('childrenData', updated);
   };
 
@@ -5363,7 +5379,7 @@ export default function StepForm({
                       </div>
                     )}
 
-                    {childrenData[index]?.disabilityTaxCredit !== undefined && childrenData[index]?.disabilityTaxCredit !== '' && (
+                    {(childrenData[index]?.disabilityTaxCredit === 'yes' || childrenData[index]?.disabilityTaxCredit === 'not-looked') && (
                       <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">

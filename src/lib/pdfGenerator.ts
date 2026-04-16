@@ -26,6 +26,12 @@ interface ChildData {
   attendingSchool?: string;
   additionalEducationInfo?: string;
   additionalEducationDetails?: string;
+  schoolName?: string;
+  schoolContact?: string;
+  individualEducationPlan?: string;
+  learningStyleNotes?: string;
+  behaviouralConsiderations?: string;
+  educationAdditionalDetails?: string;
   canadianResident?: string;
   provinceTerritory?: string;
   overAgeMajority?: string;
@@ -1622,12 +1628,12 @@ export const generatePDF = (formData: FormData) => {
 
           if (child.attendingSchool === 'yes') {
             const eduRows = [
-              { label: 'School Name:', large: false },
-              { label: 'School Contact Information:', large: false },
-              { label: 'Is there an individual education plan? (Provide Details):', large: true },
-              { label: 'Learning style notes or concerns:', large: true },
-              { label: 'Behavioural considerations (e.g., anxiety, ADHD triggers)', large: true },
-              { label: 'Additional details:', large: true },
+              { label: 'School Name:', large: false, value: child.schoolName || '' },
+              { label: 'School Contact Information:', large: false, value: child.schoolContact || '' },
+              { label: 'Is there an individual education plan? (Provide Details):', large: true, value: child.individualEducationPlan || '' },
+              { label: 'Learning style notes or concerns:', large: true, value: child.learningStyleNotes || '' },
+              { label: 'Behavioural considerations (e.g., anxiety, ADHD triggers)', large: true, value: child.behaviouralConsiderations || '' },
+              { label: 'Additional details:', large: true, value: child.educationAdditionalDetails || '' },
             ];
 
             eduRows.forEach((row, rowIndex) => {
@@ -1652,7 +1658,7 @@ export const generatePDF = (formData: FormData) => {
               eduField.textColor = colors.darkText;
               eduField.borderStyle = 'none';
               eduField.multiline = row.large;
-              eduField.value = '';
+              eduField.value = row.value;
               doc.addField(eduField);
 
               yPosition += rh;

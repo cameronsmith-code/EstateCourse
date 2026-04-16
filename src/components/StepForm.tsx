@@ -1022,6 +1022,15 @@ export default function StepForm({
       updated[index].additionalEducationDetails = undefined;
     }
 
+    if (field === 'attendingSchool' && value === 'no') {
+      updated[index].schoolName = undefined;
+      updated[index].schoolContact = undefined;
+      updated[index].individualEducationPlan = undefined;
+      updated[index].learningStyleNotes = undefined;
+      updated[index].behaviouralConsiderations = undefined;
+      updated[index].educationAdditionalDetails = undefined;
+    }
+
     if (field === 'additionalEducationInfo' && value === 'no') {
       updated[index].additionalEducationDetails = undefined;
     }
@@ -5977,6 +5986,83 @@ export default function StepForm({
                               </label>
                             </div>
                           </div>
+
+                          {childrenData[index]?.attendingSchool === 'yes' && (
+                            <div className="space-y-4 mb-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  School Name:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={childrenData[index]?.schoolName || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolName', e.target.value)}
+                                  placeholder="Enter school name"
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  School Contact Information:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={childrenData[index]?.schoolContact || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolContact', e.target.value)}
+                                  placeholder="e.g., phone number, address, website"
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Is there an individual education plan? (Provide Details):
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.individualEducationPlan || ''}
+                                  onChange={(e) => handleChildChange(index, 'individualEducationPlan', e.target.value)}
+                                  placeholder="Provide details if applicable"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Learning style notes or concerns:
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.learningStyleNotes || ''}
+                                  onChange={(e) => handleChildChange(index, 'learningStyleNotes', e.target.value)}
+                                  placeholder="Describe any learning style notes or concerns"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Behavioural considerations (e.g., anxiety, ADHD triggers):
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.behaviouralConsiderations || ''}
+                                  onChange={(e) => handleChildChange(index, 'behaviouralConsiderations', e.target.value)}
+                                  placeholder="Describe any behavioural considerations"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Additional details:
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.educationAdditionalDetails || ''}
+                                  onChange={(e) => handleChildChange(index, 'educationAdditionalDetails', e.target.value)}
+                                  placeholder="Any other educational information a guardian should know"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
+                            </div>
+                          )}
 
                           {childrenData[index]?.attendingSchool === 'no' && (
                             <div className="mb-4">

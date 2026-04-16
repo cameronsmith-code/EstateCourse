@@ -5909,69 +5909,6 @@ export default function StepForm({
                             </select>
                           </div>
 
-                          {childrenData[index]?.provinceTerritory && ['Alberta', 'Manitoba', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'].includes(childrenData[index]?.provinceTerritory) && (
-                            <div className="mt-4">
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Is this child over the age of 18?
-                              </label>
-                              <div className="flex gap-4">
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    name={`overAgeMajority-${index}`}
-                                    value="yes"
-                                    checked={childrenData[index]?.overAgeMajority === 'yes'}
-                                    onChange={(e) => handleChildChange(index, 'overAgeMajority', e.target.value)}
-                                    className="mr-2"
-                                  />
-                                  <span className="text-gray-300">Yes</span>
-                                </label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    name={`overAgeMajority-${index}`}
-                                    value="no"
-                                    checked={childrenData[index]?.overAgeMajority === 'no'}
-                                    onChange={(e) => handleChildChange(index, 'overAgeMajority', e.target.value)}
-                                    className="mr-2"
-                                  />
-                                  <span className="text-gray-300">No</span>
-                                </label>
-                              </div>
-                            </div>
-                          )}
-
-                          {childrenData[index]?.provinceTerritory && ['British Columbia', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Northwest Territories', 'Nunavut', 'Yukon'].includes(childrenData[index]?.provinceTerritory) && (
-                            <div className="mt-4">
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Is this child over the age of 19?
-                              </label>
-                              <div className="flex gap-4">
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    name={`overAgeMajority-${index}`}
-                                    value="yes"
-                                    checked={childrenData[index]?.overAgeMajority === 'yes'}
-                                    onChange={(e) => handleChildChange(index, 'overAgeMajority', e.target.value)}
-                                    className="mr-2"
-                                  />
-                                  <span className="text-gray-300">Yes</span>
-                                </label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    name={`overAgeMajority-${index}`}
-                                    value="no"
-                                    checked={childrenData[index]?.overAgeMajority === 'no'}
-                                    onChange={(e) => handleChildChange(index, 'overAgeMajority', e.target.value)}
-                                    className="mr-2"
-                                  />
-                                  <span className="text-gray-300">No</span>
-                                </label>
-                              </div>
-                            </div>
-                          )}
                         </>
                       )}
 

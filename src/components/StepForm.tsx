@@ -5559,19 +5559,24 @@ export default function StepForm({
                         {childrenData[index]?.medications === 'yes' && (
                           <>
                             {(() => {
-                              const medicationList = JSON.parse(childrenData[index]?.medicationList || '[]') as Array<{ description: string; hasAdditional?: string }>;
+                              type MedEntry = { name: string; treats: string; prescription: string; prescribedBy: string; hasAdditional: string };
+                              const medicationList = JSON.parse(childrenData[index]?.medicationList || '[]') as MedEntry[];
 
-                              const handleMedicationChange = (medIndex: number, field: 'description' | 'hasAdditional', value: string) => {
+                              const handleMedicationChange = (medIndex: number, field: keyof MedEntry, value: string) => {
                                 const updated = [...medicationList];
                                 if (!updated[medIndex]) {
-                                  updated[medIndex] = { description: '', hasAdditional: '' };
+                                  updated[medIndex] = { name: '', treats: '', prescription: '', prescribedBy: '', hasAdditional: '' };
                                 }
-                                updated[medIndex][field] = value;
+                                if (field === 'prescription' && value === 'no') {
+                                  updated[medIndex] = { ...updated[medIndex], prescription: 'no', prescribedBy: '' };
+                                } else {
+                                  updated[medIndex][field] = value;
+                                }
                                 handleChildChange(index, 'medicationList', JSON.stringify(updated));
                               };
 
                               if (medicationList.length === 0) {
-                                medicationList.push({ description: '', hasAdditional: '' });
+                                medicationList.push({ name: '', treats: '', prescription: '', prescribedBy: '', hasAdditional: '' });
                               }
 
                               return medicationList.map((medication, medIndex) => (
@@ -5584,15 +5589,71 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Describe the medications and nature:
+                                      Name of Medication:
                                     </label>
-                                    <textarea
-                                      value={medication.description || ''}
-                                      onChange={(e) => handleMedicationChange(medIndex, 'description', e.target.value)}
+                                    <input
+                                      type="text"
+                                      value={medication.name || ''}
+                                      onChange={(e) => handleMedicationChange(medIndex, 'name', e.target.value)}
                                       className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      rows={3}
                                     />
                                   </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      What does it treat?
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={medication.treats || ''}
+                                      onChange={(e) => handleMedicationChange(medIndex, 'treats', e.target.value)}
+                                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Does it require a prescription?
+                                    </label>
+                                    <div className="flex gap-4">
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          name={`medPrescription-${index}-${medIndex}`}
+                                          value="yes"
+                                          checked={medication.prescription === 'yes'}
+                                          onChange={(e) => handleMedicationChange(medIndex, 'prescription', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-gray-300">Yes</span>
+                                      </label>
+                                      <label className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          name={`medPrescription-${index}-${medIndex}`}
+                                          value="no"
+                                          checked={medication.prescription === 'no'}
+                                          onChange={(e) => handleMedicationChange(medIndex, 'prescription', e.target.value)}
+                                          className="mr-2"
+                                        />
+                                        <span className="text-gray-300">No</span>
+                                      </label>
+                                    </div>
+                                  </div>
+
+                                  {medication.prescription === 'yes' && (
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Prescribed by:
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={medication.prescribedBy || ''}
+                                        onChange={(e) => handleMedicationChange(medIndex, 'prescribedBy', e.target.value)}
+                                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                  )}
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -5608,7 +5669,7 @@ export default function StepForm({
                                           onChange={(e) => {
                                             handleMedicationChange(medIndex, 'hasAdditional', e.target.value);
                                             if (e.target.value === 'yes' && medIndex === medicationList.length - 1) {
-                                              const updated = [...medicationList, { description: '', hasAdditional: '' }];
+                                              const updated = [...medicationList, { name: '', treats: '', prescription: '', prescribedBy: '', hasAdditional: '' }];
                                               handleChildChange(index, 'medicationList', JSON.stringify(updated));
                                             }
                                           }}

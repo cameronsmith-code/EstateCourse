@@ -1230,12 +1230,17 @@ export const generatePDF = (formData: FormData) => {
 
       const ageOfMajorityText = getAgeOfMajorityText(child);
 
+      const independentLabel = child.independent === 'yes' ? 'Yes' : child.independent === 'no' ? 'No' : '';
+      const medicationsLabel = child.medications === 'yes' ? 'Yes' : child.medications === 'no' ? 'No' : '';
+
       const childRows = [
         { label: 'Preferred name/nickname:', value: child.nickname || '' },
         { label: 'Citizenship(s):', value: '' },
         { label: 'Child of:', value: parentLabel },
         { label: 'Date of Birth (YYYY/MM/DD):', value: child.dateOfBirth || '' },
         { label: 'Age of Majority:', value: ageOfMajorityText },
+        { label: 'Financially Independent:', value: independentLabel },
+        { label: 'On Long-Term Medications:', value: medicationsLabel },
       ];
 
       childRows.forEach((row, rowIndex) => {

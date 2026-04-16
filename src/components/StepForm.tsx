@@ -999,13 +999,6 @@ export default function StepForm({
       updated[index].disabilityOther = undefined;
     }
 
-    if (field === 'disabilityTaxCredit' && value === 'no') {
-      updated[index].disabilityNature = undefined;
-      updated[index].disabilityCare = undefined;
-      updated[index].disabilityContacts = undefined;
-      updated[index].disabilityOther = undefined;
-    }
-
     onAnswerChange('childrenData', updated);
   };
 
@@ -5379,7 +5372,7 @@ export default function StepForm({
                       </div>
                     )}
 
-                    {(childrenData[index]?.disabilityTaxCredit === 'yes' || childrenData[index]?.disabilityTaxCredit === 'not-looked') && (
+                    {(childrenData[index]?.disabilityTaxCredit === 'yes' || childrenData[index]?.disabilityTaxCredit === 'no' || childrenData[index]?.disabilityTaxCredit === 'not-looked') && (
                       <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">

@@ -1263,6 +1263,95 @@ export const generatePDF = (formData: FormData) => {
       });
 
       yPosition += 6;
+
+      const isMinor = (() => {
+        if (child.dateOfBirth) {
+          const dob = new Date(child.dateOfBirth);
+          const today = new Date();
+          const age = today.getFullYear() - dob.getFullYear() -
+            (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
+          return age < 18;
+        }
+        return child.overAgeMajority === 'no';
+      })();
+
+      const isDisabled = child.disabled === 'yes';
+      const isNotFinanciallyIndependent = child.independent === 'no';
+      const showChecklist = (isMinor || isDisabled) && isNotFinanciallyIndependent;
+
+      if (showChecklist) {
+        checkPageBreak(60);
+        yPosition += 4;
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text(`(${nickname}) - Document Checklist:`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const checklistRows = [
+          'Birth Certificate:',
+          'Citizenship Certificate (if applicable):',
+          'Health Card:',
+          'Social Insurance Number:',
+          'Passport:',
+        ];
+
+        const col1W = fieldWidth * 0.25;
+        const col2W = fieldWidth * 0.25;
+        const col3W = fieldWidth * 0.25;
+        const col4W = fieldWidth * 0.25;
+        const colX = [margin, margin + col1W, margin + col1W + col2W, margin + col1W + col2W + col3W];
+        const colWidths = [col1W, col2W, col3W, col4W];
+        const headerHeight = 10;
+        const rowH = 8;
+
+        const headers = ['Document Type:', 'Document Location:', 'Who can access it?', 'Backup copy (and location)?'];
+        const headerRowY = yPosition;
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.setDrawColor(...colors.borderGray);
+        doc.setLineWidth(0.5);
+        headers.forEach((h, ci) => {
+          doc.rect(colX[ci], headerRowY, colWidths[ci], headerHeight);
+          doc.text(h, colX[ci] + 1, headerRowY + 6);
+        });
+        doc.setFont(undefined, 'normal');
+        yPosition += headerHeight;
+
+        checklistRows.forEach((docLabel, ri) => {
+          const rowY = yPosition;
+          checkPageBreak(rowH + 2);
+          doc.setFontSize(8);
+          doc.setDrawColor(...colors.borderGray);
+          doc.setLineWidth(0.5);
+
+          colWidths.forEach((w, ci) => {
+            doc.rect(colX[ci], rowY, w, rowH);
+          });
+
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          doc.text(docLabel, colX[0] + 1, rowY + 5);
+
+          for (let ci = 1; ci < 4; ci++) {
+            const cellField = new doc.AcroFormTextField();
+            cellField.fieldName = `child_${index}_checklist_${ri}_col${ci}`;
+            cellField.Rect = [colX[ci] + 0.5, rowY + 0.5, colWidths[ci] - 1, rowH - 1];
+            cellField.fontSize = 8;
+            cellField.textColor = colors.darkText;
+            cellField.borderStyle = 'none';
+            cellField.value = '';
+            doc.addField(cellField);
+          }
+
+          yPosition += rowH;
+        });
+
+        yPosition += 6;
+      }
     });
 
     const hasChildSupport = childrenToProcess.some(child =>

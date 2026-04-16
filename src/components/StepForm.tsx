@@ -1013,6 +1013,10 @@ export default function StepForm({
       updated[index].allergyMedicationDescription = undefined;
     }
 
+    if (field === 'medicalIssues' && value === 'no') {
+      updated[index].medicalIssuesDescription = undefined;
+    }
+
     onAnswerChange('childrenData', updated);
   };
 
@@ -5889,7 +5893,7 @@ export default function StepForm({
 
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Do they have any past or current medical issues or needs?
+                            Are there any additional medical related information that a guardian should be aware of with respect to {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}?
                           </label>
                           <div className="flex gap-4">
                             <label className="flex items-center">
@@ -5916,6 +5920,21 @@ export default function StepForm({
                             </label>
                           </div>
                         </div>
+
+                        {childrenData[index]?.medicalIssues === 'yes' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Please provide details:
+                            </label>
+                            <textarea
+                              value={childrenData[index]?.medicalIssuesDescription || ''}
+                              onChange={(e) => handleChildChange(index, 'medicalIssuesDescription', e.target.value)}
+                              placeholder="Describe any additional medical information a guardian should be aware of"
+                              rows={4}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                            />
+                          </div>
+                        )}
 
                         <div className="mt-6 pt-6 border-t border-gray-600">
                           <h4 className="text-md font-semibold text-white mb-2">Digital Identity and Access</h4>

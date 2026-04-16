@@ -22,6 +22,7 @@ interface ChildData {
   allergyMedication?: string;
   allergyMedicationDescription?: string;
   medicalIssues?: string;
+  medicalIssuesDescription?: string;
   canadianResident?: string;
   provinceTerritory?: string;
   overAgeMajority?: string;
@@ -1579,6 +1580,30 @@ export const generatePDF = (formData: FormData) => {
               yPosition += 6;
             });
           }
+        }
+
+        if (child.medicalIssues === 'yes') {
+          checkPageBreak(40);
+          addSubsectionHeader(`(${nickname}) Additional Medical Information:`);
+
+          const addlMedRowH = Math.max(16, Math.ceil((child.medicalIssuesDescription?.length || 0) / 80) * 5 + 10);
+          const rowY = yPosition;
+          checkPageBreak(addlMedRowH + 2);
+          doc.setDrawColor(...colors.borderGray);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, rowY, fieldWidth, addlMedRowH);
+
+          const addlMedField = new doc.AcroFormTextField();
+          addlMedField.fieldName = `child_${index}_medicalIssuesDescription`;
+          addlMedField.Rect = [margin + 0.5, rowY + 0.5, fieldWidth - 1, addlMedRowH - 1];
+          addlMedField.fontSize = 9;
+          addlMedField.textColor = colors.darkText;
+          addlMedField.borderStyle = 'none';
+          addlMedField.multiline = true;
+          addlMedField.value = child.medicalIssuesDescription || '';
+          doc.addField(addlMedField);
+
+          yPosition += addlMedRowH + 6;
         }
 
         addSubsectionHeader(`(${nickname}) Document Checklist:`);

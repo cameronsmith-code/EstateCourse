@@ -5591,13 +5591,13 @@ export default function StepForm({
                         {childrenData[index]?.medications === 'yes' && (
                           <>
                             {(() => {
-                              type MedEntry = { name: string; treats: string; prescription: string; prescribedBy: string; hasAdditional: string };
+                              type MedEntry = { name: string; treats: string; prescription: string; prescribedBy: string; otherInfo: string; hasAdditional: string };
                               const medicationList = JSON.parse(childrenData[index]?.medicationList || '[]') as MedEntry[];
 
                               const handleMedicationChange = (medIndex: number, field: keyof MedEntry, value: string) => {
                                 const updated = [...medicationList];
                                 if (!updated[medIndex]) {
-                                  updated[medIndex] = { name: '', treats: '', prescription: '', prescribedBy: '', hasAdditional: '' };
+                                  updated[medIndex] = { name: '', treats: '', prescription: '', prescribedBy: '', otherInfo: '', hasAdditional: '' };
                                 }
                                 if (field === 'prescription' && value === 'no') {
                                   updated[medIndex] = { ...updated[medIndex], prescription: 'no', prescribedBy: '' };
@@ -5608,7 +5608,7 @@ export default function StepForm({
                               };
 
                               if (medicationList.length === 0) {
-                                medicationList.push({ name: '', treats: '', prescription: '', prescribedBy: '', hasAdditional: '' });
+                                medicationList.push({ name: '', treats: '', prescription: '', prescribedBy: '', otherInfo: '', hasAdditional: '' });
                               }
 
                               return medicationList.map((medication, medIndex) => (
@@ -5689,6 +5689,18 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Other information:
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={medication.otherInfo || ''}
+                                      onChange={(e) => handleMedicationChange(medIndex, 'otherInfo', e.target.value)}
+                                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Are there any additional long-term medications?
                                     </label>
                                     <div className="flex gap-4">
@@ -5701,7 +5713,7 @@ export default function StepForm({
                                           onChange={(e) => {
                                             handleMedicationChange(medIndex, 'hasAdditional', e.target.value);
                                             if (e.target.value === 'yes' && medIndex === medicationList.length - 1) {
-                                              const updated = [...medicationList, { name: '', treats: '', prescription: '', prescribedBy: '', hasAdditional: '' }];
+                                              const updated = [...medicationList, { name: '', treats: '', prescription: '', prescribedBy: '', otherInfo: '', hasAdditional: '' }];
                                               handleChildChange(index, 'medicationList', JSON.stringify(updated));
                                             }
                                           }}

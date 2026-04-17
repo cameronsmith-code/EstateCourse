@@ -1497,7 +1497,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 6;
 
         if (child.medications === 'yes' && child.medicationList) {
-          type MedEntry = { name: string; treats: string; prescription: string; prescribedBy: string; hasAdditional: string };
+          type MedEntry = { name: string; treats: string; prescription: string; prescribedBy: string; otherInfo: string; hasAdditional: string };
           const medList = JSON.parse(child.medicationList || '[]') as MedEntry[];
           if (medList.length > 0) {
             medList.forEach((med, mi) => {
@@ -1510,6 +1510,7 @@ export const generatePDF = (formData: FormData) => {
               if (hasPrescription) {
                 chartRows.push({ label: 'Prescribed by:', fieldKey: 'prescribedBy', value: med.prescribedBy || '' });
               }
+              chartRows.push({ label: 'Other information:', fieldKey: 'otherInfo', value: med.otherInfo || '' });
               const medInfoRowH = 8;
               checkPageBreak(16 + chartRows.length * medInfoRowH + 8);
 

@@ -6504,7 +6504,7 @@ export default function StepForm({
                             <textarea
                               value={childrenData[index]?.importantRoutines || ''}
                               onChange={(e) => handleChildChange(index, 'importantRoutines', e.target.value)}
-                              placeholder="e.g., bedtime rituals, meals, weekend traditions, after-school habits"
+                              placeholder="e.g., bedtime rituals, meals, weekend traditions, after-school habits, Friday movie nights, annual camping trip"
                               rows={3}
                               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                             />

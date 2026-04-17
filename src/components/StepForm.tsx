@@ -6326,6 +6326,111 @@ export default function StepForm({
                         </div>
 
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                          <h4 className="text-base font-semibold text-blue-400">Social Snapshot</h4>
+                        </div>
+                        <p className="text-sm text-gray-400 mb-4 mt-2">
+                          This section helps a guardian preserve the child's relationships, routines, and emotional stability during a period of major life disruption.
+                        </p>
+                        <div className="mt-2 space-y-4 mb-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Who are {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s closest friends, and how do they typically stay in touch?
+                            </label>
+                            <textarea
+                              value={childrenData[index]?.closestFriends || ''}
+                              onChange={(e) => handleChildChange(index, 'closestFriends', e.target.value)}
+                              placeholder="e.g., names, how they connect (in person, phone, online)"
+                              rows={3}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Are there any important adults outside the immediate family (e.g., coaches, mentors, extended family) who play a meaningful role in {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s life?
+                            </label>
+                            <textarea
+                              value={childrenData[index]?.importantAdults || ''}
+                              onChange={(e) => handleChildChange(index, 'importantAdults', e.target.value)}
+                              placeholder="e.g., names, relationship, how often they connect"
+                              rows={3}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What daily or weekly routines are most important to {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s sense of stability?
+                            </label>
+                            <textarea
+                              value={childrenData[index]?.importantRoutines || ''}
+                              onChange={(e) => handleChildChange(index, 'importantRoutines', e.target.value)}
+                              placeholder="e.g., bedtime rituals, meals, weekend traditions, after-school habits"
+                              rows={3}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What extracurricular activities, hobbies, or interests are most important to {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}?
+                            </label>
+                            <textarea
+                              value={childrenData[index]?.extracurriculars || ''}
+                              onChange={(e) => handleChildChange(index, 'extracurriculars', e.target.value)}
+                              placeholder="e.g., sports, music, art, clubs, recreational programs"
+                              rows={3}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              How does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} typically express or manage difficult emotions?
+                            </label>
+                            <textarea
+                              value={childrenData[index]?.emotionalExpression || ''}
+                              onChange={(e) => handleChildChange(index, 'emotionalExpression', e.target.value)}
+                              placeholder="e.g., withdraws, talks it out, physical activity, art, needs space"
+                              rows={3}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              What comforts {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} when they are upset, scared, or overwhelmed?
+                            </label>
+                            <textarea
+                              value={childrenData[index]?.comfortStrategies || ''}
+                              onChange={(e) => handleChildChange(index, 'comfortStrategies', e.target.value)}
+                              placeholder="e.g., specific people, objects, activities, words of reassurance"
+                              rows={3}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Are there any social or emotional challenges a guardian should be aware of?
+                            </label>
+                            <textarea
+                              value={childrenData[index]?.socialChallenges || ''}
+                              onChange={(e) => handleChildChange(index, 'socialChallenges', e.target.value)}
+                              placeholder="e.g., social anxiety, difficulty with transitions, peer conflicts, sensitivities"
+                              rows={3}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Additional notes about {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s social and emotional world:
+                            </label>
+                            <textarea
+                              value={childrenData[index]?.socialAdditionalNotes || ''}
+                              onChange={(e) => handleChildChange(index, 'socialAdditionalNotes', e.target.value)}
+                              placeholder="Any other information that would help a guardian maintain relationships and emotional stability"
+                              rows={3}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                           <h4 className="text-base font-semibold text-blue-400">Digital Identity and Access</h4>
                         </div>
                         <div className="mt-2">

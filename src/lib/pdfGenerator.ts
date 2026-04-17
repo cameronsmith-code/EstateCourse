@@ -1761,6 +1761,69 @@ export const generatePDF = (formData: FormData) => {
           }
         }
 
+        if (isMinor || isNotFinanciallyIndependent) {
+          checkPageBreak(30);
+          addSubsectionHeader(`(${nickname}) Social Snapshot:`);
+
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'italic');
+          doc.setTextColor(...colors.mediumGray);
+          const socialDescLines = doc.splitTextToSize(
+            "This section helps a guardian preserve the child\u2019s relationships, routines, and emotional stability during a period of major life disruption.",
+            fieldWidth
+          );
+          doc.text(socialDescLines, margin, yPosition);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          yPosition += socialDescLines.length * 5 + 4;
+
+          const socialLabelWidth = fieldWidth * 0.40;
+          const socialValueWidth = fieldWidth * 0.60;
+          const socialRowH = 8;
+          const socialLargeRowH = 20;
+
+          const socialRows = [
+            { label: `Who are ${nickname}'s closest friends, and how do they typically stay in touch?`, large: true, value: child.closestFriends || '' },
+            { label: `Are there any important adults outside the immediate family who play a meaningful role in ${nickname}'s life?`, large: true, value: child.importantAdults || '' },
+            { label: `What daily or weekly routines are most important to ${nickname}'s sense of stability?`, large: true, value: child.importantRoutines || '' },
+            { label: `What extracurricular activities, hobbies, or interests are most important to ${nickname}?`, large: true, value: child.extracurriculars || '' },
+            { label: `How does ${nickname} typically express or manage difficult emotions?`, large: true, value: child.emotionalExpression || '' },
+            { label: `What comforts ${nickname} when they are upset, scared, or overwhelmed?`, large: true, value: child.comfortStrategies || '' },
+            { label: 'Are there any social or emotional challenges a guardian should be aware of?', large: true, value: child.socialChallenges || '' },
+            { label: 'Additional notes about social and emotional world:', large: true, value: child.socialAdditionalNotes || '' },
+          ];
+
+          socialRows.forEach((row, rowIndex) => {
+            const rh = row.large ? socialLargeRowH : socialRowH;
+            const rowY = yPosition;
+            checkPageBreak(rh + 2);
+            doc.setDrawColor(...colors.borderGray);
+            doc.setLineWidth(0.5);
+            doc.rect(margin, rowY, socialLabelWidth, rh);
+            doc.rect(margin + socialLabelWidth, rowY, socialValueWidth, rh);
+
+            doc.setFontSize(8.5);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(...colors.darkText);
+            const labelLines = doc.splitTextToSize(row.label, socialLabelWidth - 2);
+            doc.text(labelLines, margin + 1, rowY + 4.5);
+
+            const socialField = new doc.AcroFormTextField();
+            socialField.fieldName = `child_${index}_social_${rowIndex}`;
+            socialField.Rect = [margin + socialLabelWidth + 0.5, rowY + 0.5, socialValueWidth - 1, rh - 1];
+            socialField.fontSize = 9;
+            socialField.textColor = colors.darkText;
+            socialField.borderStyle = 'none';
+            socialField.multiline = row.large;
+            socialField.value = row.value;
+            doc.addField(socialField);
+
+            yPosition += rh;
+          });
+
+          yPosition += 6;
+        }
+
         addSubsectionHeader(`(${nickname}) Document Checklist:`);
 
         const checklistRows: Array<{ label: string; prefill?: string }> = [

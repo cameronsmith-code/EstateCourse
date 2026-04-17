@@ -1694,7 +1694,7 @@ export const generatePDF = (formData: FormData) => {
               { label: 'Where do they typically need extra support?', large: true, value: child.schoolExtraSupport || '' },
               { label: `What helps ${nickname} stay focused?`, large: true, value: child.schoolFocusHelps || '' },
               { label: 'What tends to distract or overwhelm them?', large: true, value: child.schoolDistractions || '' },
-              { label: 'Is there an individual education plan?', large: false, value: child.hasIEP ? (child.hasIEP === 'yes' ? 'Yes' : 'No') : '' },
+              { label: 'Is there an Individual Education Plan (IEP)?', large: false, value: child.hasIEP ? (child.hasIEP === 'yes' ? 'Yes' : 'No') : '' },
               ...(child.hasIEP === 'yes' ? [
                 { label: 'IEP Details:', large: true, value: child.individualEducationPlan || '' },
               ] : []),

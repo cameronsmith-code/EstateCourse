@@ -6132,7 +6132,7 @@ export default function StepForm({
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Is there an individual education plan?
+                                  Is there an Individual Education Plan (IEP)?
                                 </label>
                                 <div className="flex gap-4">
                                   <label className="flex items-center">

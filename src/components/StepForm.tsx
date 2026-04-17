@@ -5356,6 +5356,237 @@ export default function StepForm({
                       />
                     </div>
 
+                    <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                      <h4 className="text-base font-semibold text-blue-400">Residency &amp; Family Status</h4>
+                    </div>
+
+                    <div className="mt-2 space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Are they a resident of Canada?
+                        </label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`canadianResident-${index}`}
+                              value="yes"
+                              checked={childrenData[index]?.canadianResident === 'yes'}
+                              onChange={(e) => handleChildChange(index, 'canadianResident', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">Yes</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`canadianResident-${index}`}
+                              value="no"
+                              checked={childrenData[index]?.canadianResident === 'no'}
+                              onChange={(e) => handleChildChange(index, 'canadianResident', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">No</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {childrenData[index]?.canadianResident === 'yes' && (
+                        <>
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Province/Territory of Residence
+                            </label>
+                            <select
+                              value={childrenData[index]?.provinceTerritory || ''}
+                              onChange={(e) => handleChildChange(index, 'provinceTerritory', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Select province/territory</option>
+                              <option value="Alberta">Alberta</option>
+                              <option value="British Columbia">British Columbia</option>
+                              <option value="Manitoba">Manitoba</option>
+                              <option value="New Brunswick">New Brunswick</option>
+                              <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                              <option value="Northwest Territories">Northwest Territories</option>
+                              <option value="Nova Scotia">Nova Scotia</option>
+                              <option value="Nunavut">Nunavut</option>
+                              <option value="Ontario">Ontario</option>
+                              <option value="Prince Edward Island">Prince Edward Island</option>
+                              <option value="Quebec">Quebec</option>
+                              <option value="Saskatchewan">Saskatchewan</option>
+                              <option value="Yukon">Yukon</option>
+                            </select>
+                          </div>
+
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              City of residence:
+                            </label>
+                            <input
+                              type="text"
+                              value={childrenData[index]?.cityOfResidence || ''}
+                              onChange={(e) => handleChildChange(index, 'cityOfResidence', e.target.value)}
+                              placeholder="Enter city of residence"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                        </>
+                      )}
+
+                      {childrenData[index]?.canadianResident === 'no' && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            In what country is this child a resident of?
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.countryOfResidence || ''}
+                            onChange={(e) => handleChildChange(index, 'countryOfResidence', e.target.value)}
+                            placeholder="Enter country of residence"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
+
+                      {childrenData[index]?.canadianResident === 'no' && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            City of residence:
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.cityOfResidence || ''}
+                            onChange={(e) => handleChildChange(index, 'cityOfResidence', e.target.value)}
+                            placeholder="Enter city of residence"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Do they have a spouse or common law partner?
+                        </label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`hasSpouse-${index}`}
+                              value="yes"
+                              checked={childrenData[index]?.hasSpouse === 'yes'}
+                              onChange={(e) => handleChildChange(index, 'hasSpouse', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">Yes</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`hasSpouse-${index}`}
+                              value="no"
+                              checked={childrenData[index]?.hasSpouse === 'no'}
+                              onChange={(e) => handleChildChange(index, 'hasSpouse', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">No</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {childrenData[index]?.hasSpouse === 'yes' && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Enter the spouse or common law partner's name:
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.spouseName || ''}
+                            onChange={(e) => handleChildChange(index, 'spouseName', e.target.value)}
+                            placeholder="Enter spouse/partner's name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Does {childrenData[index]?.name || 'this child'} have any children?
+                        </label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`hasChildren-${index}`}
+                              value="yes"
+                              checked={childrenData[index]?.hasChildren === 'yes'}
+                              onChange={(e) => handleChildChange(index, 'hasChildren', e.target.value)}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">Yes</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`hasChildren-${index}`}
+                              value="no"
+                              checked={childrenData[index]?.hasChildren === 'no'}
+                              onChange={(e) => {
+                                handleChildChange(index, 'hasChildren', e.target.value);
+                                const count = parseInt(childrenData[index]?.numberOfGrandchildren || '0');
+                                handleChildChange(index, 'numberOfGrandchildren', '');
+                                for (let i = 1; i <= Math.max(count, 20); i++) {
+                                  handleChildChange(index, `grandchild${i}Name`, '');
+                                }
+                              }}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">No</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {childrenData[index]?.hasChildren === 'yes' && (
+                        <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              How many?
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="20"
+                              value={childrenData[index]?.numberOfGrandchildren || ''}
+                              onChange={(e) => handleChildChange(index, 'numberOfGrandchildren', e.target.value)}
+                              placeholder="Enter number of grandchildren"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
+                          {childrenData[index]?.numberOfGrandchildren && parseInt(childrenData[index]?.numberOfGrandchildren || '0') > 0 && (
+                            <div className="space-y-3">
+                              <p className="text-sm font-medium text-gray-300">Grandchildren's Names:</p>
+                              {Array.from({ length: Math.min(parseInt(childrenData[index]?.numberOfGrandchildren || '0'), 20) }).map((_, gcIndex) => (
+                                <div key={gcIndex}>
+                                  <label className="block text-xs text-gray-400 mb-1">
+                                    Grandchild {gcIndex + 1}:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={childrenData[index]?.[`grandchild${gcIndex + 1}Name`] || ''}
+                                    onChange={(e) => handleChildChange(index, `grandchild${gcIndex + 1}Name`, e.target.value)}
+                                    placeholder={`Enter grandchild ${gcIndex + 1}'s name`}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         Are they disabled?
@@ -6844,236 +7075,6 @@ export default function StepForm({
                       </>
                     )}
 
-                    <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
-                      <h4 className="text-base font-semibold text-blue-400">Residency &amp; Family Status</h4>
-                    </div>
-
-                    <div className="mt-2 space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Are they a resident of Canada?
-                        </label>
-                        <div className="flex gap-4">
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name={`canadianResident-${index}`}
-                              value="yes"
-                              checked={childrenData[index]?.canadianResident === 'yes'}
-                              onChange={(e) => handleChildChange(index, 'canadianResident', e.target.value)}
-                              className="mr-2"
-                            />
-                            <span className="text-gray-300">Yes</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name={`canadianResident-${index}`}
-                              value="no"
-                              checked={childrenData[index]?.canadianResident === 'no'}
-                              onChange={(e) => handleChildChange(index, 'canadianResident', e.target.value)}
-                              className="mr-2"
-                            />
-                            <span className="text-gray-300">No</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      {childrenData[index]?.canadianResident === 'yes' && (
-                        <>
-                          <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Province/Territory of Residence
-                            </label>
-                            <select
-                              value={childrenData[index]?.provinceTerritory || ''}
-                              onChange={(e) => handleChildChange(index, 'provinceTerritory', e.target.value)}
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                              <option value="">Select province/territory</option>
-                              <option value="Alberta">Alberta</option>
-                              <option value="British Columbia">British Columbia</option>
-                              <option value="Manitoba">Manitoba</option>
-                              <option value="New Brunswick">New Brunswick</option>
-                              <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
-                              <option value="Northwest Territories">Northwest Territories</option>
-                              <option value="Nova Scotia">Nova Scotia</option>
-                              <option value="Nunavut">Nunavut</option>
-                              <option value="Ontario">Ontario</option>
-                              <option value="Prince Edward Island">Prince Edward Island</option>
-                              <option value="Quebec">Quebec</option>
-                              <option value="Saskatchewan">Saskatchewan</option>
-                              <option value="Yukon">Yukon</option>
-                            </select>
-                          </div>
-
-                          <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              City of residence:
-                            </label>
-                            <input
-                              type="text"
-                              value={childrenData[index]?.cityOfResidence || ''}
-                              onChange={(e) => handleChildChange(index, 'cityOfResidence', e.target.value)}
-                              placeholder="Enter city of residence"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-
-                        </>
-                      )}
-
-                      {childrenData[index]?.canadianResident === 'no' && (
-                        <div className="mt-4">
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            In what country is this child a resident of?
-                          </label>
-                          <input
-                            type="text"
-                            value={childrenData[index]?.countryOfResidence || ''}
-                            onChange={(e) => handleChildChange(index, 'countryOfResidence', e.target.value)}
-                            placeholder="Enter country of residence"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-                      )}
-
-                      {childrenData[index]?.canadianResident === 'no' && (
-                        <div className="mt-4">
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            City of residence:
-                          </label>
-                          <input
-                            type="text"
-                            value={childrenData[index]?.cityOfResidence || ''}
-                            onChange={(e) => handleChildChange(index, 'cityOfResidence', e.target.value)}
-                            placeholder="Enter city of residence"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-                      )}
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Do they have a spouse or common law partner?
-                        </label>
-                        <div className="flex gap-4">
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name={`hasSpouse-${index}`}
-                              value="yes"
-                              checked={childrenData[index]?.hasSpouse === 'yes'}
-                              onChange={(e) => handleChildChange(index, 'hasSpouse', e.target.value)}
-                              className="mr-2"
-                            />
-                            <span className="text-gray-300">Yes</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name={`hasSpouse-${index}`}
-                              value="no"
-                              checked={childrenData[index]?.hasSpouse === 'no'}
-                              onChange={(e) => handleChildChange(index, 'hasSpouse', e.target.value)}
-                              className="mr-2"
-                            />
-                            <span className="text-gray-300">No</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      {childrenData[index]?.hasSpouse === 'yes' && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Enter the spouse or common law partner's name:
-                          </label>
-                          <input
-                            type="text"
-                            value={childrenData[index]?.spouseName || ''}
-                            onChange={(e) => handleChildChange(index, 'spouseName', e.target.value)}
-                            placeholder="Enter spouse/partner's name"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-                      )}
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Does {childrenData[index]?.name || 'this child'} have any children?
-                        </label>
-                        <div className="flex gap-4">
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name={`hasChildren-${index}`}
-                              value="yes"
-                              checked={childrenData[index]?.hasChildren === 'yes'}
-                              onChange={(e) => handleChildChange(index, 'hasChildren', e.target.value)}
-                              className="mr-2"
-                            />
-                            <span className="text-gray-300">Yes</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name={`hasChildren-${index}`}
-                              value="no"
-                              checked={childrenData[index]?.hasChildren === 'no'}
-                              onChange={(e) => {
-                                handleChildChange(index, 'hasChildren', e.target.value);
-                                const count = parseInt(childrenData[index]?.numberOfGrandchildren || '0');
-                                handleChildChange(index, 'numberOfGrandchildren', '');
-                                for (let i = 1; i <= Math.max(count, 20); i++) {
-                                  handleChildChange(index, `grandchild${i}Name`, '');
-                                }
-                              }}
-                              className="mr-2"
-                            />
-                            <span className="text-gray-300">No</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      {childrenData[index]?.hasChildren === 'yes' && (
-                        <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              How many?
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              max="20"
-                              value={childrenData[index]?.numberOfGrandchildren || ''}
-                              onChange={(e) => handleChildChange(index, 'numberOfGrandchildren', e.target.value)}
-                              placeholder="Enter number of grandchildren"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-
-                          {childrenData[index]?.numberOfGrandchildren && parseInt(childrenData[index]?.numberOfGrandchildren || '0') > 0 && (
-                            <div className="space-y-3">
-                              <p className="text-sm font-medium text-gray-300">Grandchildren's Names:</p>
-                              {Array.from({ length: Math.min(parseInt(childrenData[index]?.numberOfGrandchildren || '0'), 20) }).map((_, gcIndex) => (
-                                <div key={gcIndex}>
-                                  <label className="block text-xs text-gray-400 mb-1">
-                                    Grandchild {gcIndex + 1}:
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={childrenData[index]?.[`grandchild${gcIndex + 1}Name`] || ''}
-                                    onChange={(e) => handleChildChange(index, `grandchild${gcIndex + 1}Name`, e.target.value)}
-                                    placeholder={`Enter grandchild ${gcIndex + 1}'s name`}
-                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
               ))}

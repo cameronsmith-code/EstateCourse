@@ -892,47 +892,43 @@ export const generatePDF = (formData: FormData) => {
   const c1Name = formData.fullName || 'Client 1';
   const c2Name = formData.spouseName || 'Client 2';
 
-  if (isCouple && sameAddress) {
-    const jointRows = [
-      { label: 'Full Name:', value: c1Name },
-      { label: 'Date of Birth:', value: formData.dateOfBirth || '' },
-      { label: 'Email Address:', value: formData.email || '' },
-      { label: 'Phone Number:', value: formData.phone || '' },
+  const client1Rows = [
+    { label: 'Full Name:', value: c1Name },
+    { label: 'Date of Birth:', value: formData.dateOfBirth || '' },
+    { label: 'Email Address:', value: formData.email || '' },
+    { label: 'Phone Number:', value: formData.phone || '' },
+    ...(!sameAddress ? [
+      { label: 'Address:', value: formData.address || '' },
+      { label: 'City:', value: formData.city || '' },
+      { label: 'Province:', value: formData.province || '' },
+      { label: 'Postal Code:', value: formData.postalCode || '' },
+    ] : []),
+  ];
+  renderBasicChart(`(${c1Name}) Contact Information:`, client1Rows, 'basic_client1');
+
+  if (isCouple) {
+    const client2Rows = [
       { label: 'Spouse/Partner Name:', value: c2Name },
       { label: 'Date of Birth:', value: formData.spouseDateOfBirth || '' },
       { label: 'Email Address:', value: formData.spouseEmail || '' },
       { label: 'Phone Number:', value: formData.spousePhone || '' },
-      { label: 'Address:', value: formData.address || '' },
-      { label: 'City:', value: formData.city || '' },
-      { label: 'Province:', value: formData.province || '' },
-      { label: 'Postal Code:', value: formData.postalCode || '' },
-    ];
-    renderBasicChart(`(${c1Name}) and (${c2Name}) Address Information:`, jointRows, 'basic_joint');
-  } else {
-    const client1Rows = [
-      { label: 'Full Name:', value: c1Name },
-      { label: 'Date of Birth:', value: formData.dateOfBirth || '' },
-      { label: 'Address:', value: formData.address || '' },
-      { label: 'City:', value: formData.city || '' },
-      { label: 'Province:', value: formData.province || '' },
-      { label: 'Postal Code:', value: formData.postalCode || '' },
-      { label: 'Email Address:', value: formData.email || '' },
-      { label: 'Phone Number:', value: formData.phone || '' },
-    ];
-    renderBasicChart(`(${c1Name}) Contact Information:`, client1Rows, 'basic_client1');
-
-    if (isCouple) {
-      const client2Rows = [
-        { label: 'Spouse/Partner Name:', value: c2Name },
-        { label: 'Date of Birth:', value: formData.spouseDateOfBirth || '' },
+      ...(!sameAddress ? [
         { label: 'Address:', value: formData.spouseAddress || '' },
         { label: 'City:', value: formData.spouseCity || '' },
         { label: 'Province:', value: formData.spouseProvince || '' },
         { label: 'Postal Code:', value: formData.spousePostalCode || '' },
-        { label: 'Email Address:', value: formData.spouseEmail || '' },
-        { label: 'Phone Number:', value: formData.spousePhone || '' },
+      ] : []),
+    ];
+    renderBasicChart(`(${c2Name}) Contact Information:`, client2Rows, 'basic_client2');
+
+    if (sameAddress) {
+      const jointRows = [
+        { label: 'Address:', value: formData.address || '' },
+        { label: 'City:', value: formData.city || '' },
+        { label: 'Province:', value: formData.province || '' },
+        { label: 'Postal Code:', value: formData.postalCode || '' },
       ];
-      renderBasicChart(`(${c2Name}) Contact Information:`, client2Rows, 'basic_client2');
+      renderBasicChart(`(${c1Name}) and (${c2Name}) Address Information:`, jointRows, 'basic_joint');
     }
   }
 

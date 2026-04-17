@@ -1476,6 +1476,7 @@ export const generatePDF = (formData: FormData) => {
 
         medContactRows.forEach((rowLabel, ri) => {
           const rowY = yPosition;
+          const isOtherRow = rowLabel === 'Other:';
           doc.setFontSize(8);
           doc.setDrawColor(...colors.borderGray);
           doc.setLineWidth(0.5);
@@ -1484,7 +1485,19 @@ export const generatePDF = (formData: FormData) => {
           });
           doc.setFont(undefined, 'normal');
           doc.setTextColor(...colors.darkText);
-          doc.text(rowLabel, medColX[0] + 1, rowY + 5);
+
+          if (isOtherRow) {
+            const col0Field = new doc.AcroFormTextField();
+            col0Field.fieldName = `child_${index}_med_${ri}_col0`;
+            col0Field.Rect = [medColX[0] + 0.5, rowY + 0.5, medColWidths[0] - 1, medRowH - 1];
+            col0Field.fontSize = 8;
+            col0Field.textColor = colors.darkText;
+            col0Field.borderStyle = 'none';
+            col0Field.value = '';
+            doc.addField(col0Field);
+          } else {
+            doc.text(rowLabel, medColX[0] + 1, rowY + 5);
+          }
 
           for (let ci = 1; ci < 4; ci++) {
             const valueField = new doc.AcroFormTextField();

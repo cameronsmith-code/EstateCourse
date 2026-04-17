@@ -1284,6 +1284,18 @@ export const generatePDF = (formData: FormData) => {
         ...(!hideMedAllergy ? [{ label: 'On Long-Term Medications:', value: medicationsLabel }] : []),
         ...(!hideMedAllergy ? [{ label: `Does ${nickname} have any allergies?`, value: allergiesLabel }] : []),
         ...(child.independent !== 'yes' ? [{ label: `Is ${nickname} attending school?`, value: child.attendingSchool === 'yes' ? 'Yes' : child.attendingSchool === 'no' ? 'No' : '' }] : []),
+        { label: 'Spouse or Common Law Partner:', value: child.hasSpouse === 'yes' ? `Yes - ${child.spouseName || ''}`.trim() : child.hasSpouse === 'no' ? 'No' : '' },
+        (() => {
+          if (child.hasChildren !== 'yes') {
+            return { label: `Does ${nickname} have any children?`, value: child.hasChildren === 'no' ? 'No' : '' };
+          }
+          const count = parseInt(child.numberOfGrandchildren || '0');
+          const names = Array.from({ length: Math.min(count, 20) })
+            .map((_, i) => child[`grandchild${i + 1}Name`] || '')
+            .filter(Boolean)
+            .join(', ');
+          return { label: `Does ${nickname} have any children?`, value: names ? `Yes - ${names}` : 'Yes' };
+        })(),
       ];
 
       childRows.forEach((row, rowIndex) => {

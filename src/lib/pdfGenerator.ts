@@ -852,69 +852,120 @@ export const generatePDF = (formData: FormData) => {
 
   addSectionHeader('Contact Information');
 
-  addField('Full Name:', 'fullName', formData.fullName || '');
-  addField('Date of Birth:', 'dateOfBirth', formData.dateOfBirth || '');
-  addField('Address:', 'address', formData.address || '');
-  addField('City:', 'city', formData.city || '');
-  addField('Province:', 'province', formData.province || '');
-  addField('Postal Code:', 'postalCode', formData.postalCode || '');
-  addField('Email Address:', 'email', formData.email || '');
-  addField('Phone Number:', 'phone', formData.phone || '');
+  const basicTableCellHeight = 8;
+  const basicLabelWidth = fieldWidth * 0.35;
+  const basicValueWidth = fieldWidth * 0.65;
 
-  if ((formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law')) {
-    addSectionHeader('Spouse/Partner Information');
-
-    addField('Spouse/Partner Name:', 'spouseName', formData.spouseName || '');
-    addField('Date of Birth:', 'spouseDateOfBirth', formData.spouseDateOfBirth || '');
-
-    if (formData.spouseSameAddress === 'yes') {
-      addField('Address:', 'spouseAddress', formData.address || '');
-      addField('City:', 'spouseCity', formData.city || '');
-      addField('Province:', 'spouseProvince', formData.province || '');
-      addField('Postal Code:', 'spousePostalCode', formData.postalCode || '');
-    } else {
-      addField('Address:', 'spouseAddress', formData.spouseAddress || '');
-      addField('City:', 'spouseCity', formData.spouseCity || '');
-      addField('Province:', 'spouseProvince', formData.spouseProvince || '');
-      addField('Postal Code:', 'spousePostalCode', formData.spousePostalCode || '');
-    }
-
-    addField('Email Address:', 'spouseEmail', formData.spouseEmail || '');
-    addField('Phone Number:', 'spousePhone', formData.spousePhone || '');
-
-    if (formData.hasMarriageContract === 'yes') {
-      checkPageBreak(25);
-      yPosition += 8;
-
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(...colors.mediumGray);
-      doc.text('Marriage Contract:', margin, yPosition);
-      yPosition += 6;
-
-      doc.setFont(undefined, 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(...colors.darkText);
-      const client1Name = formData.fullName || 'Client 1';
-      const client2Name = formData.spouseName || 'Client 2';
-      const labelText = `(${client1Name}) and (${client2Name}), have a marriage contract, and the document is located:`;
-      doc.text(labelText, margin, yPosition);
-      yPosition += 6;
-
+  const renderBasicChart = (title: string, rows: { label: string; value: string }[], prefix: string) => {
+    const totalH = rows.length * basicTableCellHeight;
+    checkPageBreak(20 + totalH);
+    addSubsectionHeader(title);
+    yPosition += 2;
+    rows.forEach((row, rowIndex) => {
+      const rowY = yPosition;
       doc.setDrawColor(...colors.borderGray);
-      doc.setLineWidth(0.3);
-      doc.rect(margin, yPosition, fieldWidth, 6);
+      doc.setLineWidth(0.5);
+      doc.rect(margin, rowY, basicLabelWidth, basicTableCellHeight);
+      doc.rect(margin + basicLabelWidth, rowY, basicValueWidth, basicTableCellHeight);
 
-      const marriageContractField = new doc.AcroFormTextField();
-      marriageContractField.fieldName = 'marriageContractLocation';
-      marriageContractField.Rect = [margin, yPosition, fieldWidth, 6];
-      marriageContractField.fontSize = 9;
-      marriageContractField.textColor = colors.darkText;
-      marriageContractField.value = formData.marriageContractLocation || '';
-      doc.addField(marriageContractField);
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      doc.text(row.label, margin + 1, rowY + 5);
 
-      yPosition += 10;
+      const vf = new doc.AcroFormTextField();
+      vf.fieldName = `${prefix}_row_${rowIndex}`;
+      vf.Rect = [margin + basicLabelWidth + 0.5, rowY + 0.5, basicValueWidth - 1, basicTableCellHeight - 1];
+      vf.fontSize = 9;
+      vf.textColor = colors.darkText;
+      vf.borderStyle = 'none';
+      vf.value = row.value || '';
+      doc.addField(vf);
+
+      yPosition += basicTableCellHeight;
+    });
+    yPosition += 6;
+  };
+
+  const isCouple = formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law';
+  const sameAddress = formData.spouseSameAddress === 'yes';
+  const c1Name = formData.fullName || 'Client 1';
+  const c2Name = formData.spouseName || 'Client 2';
+
+  if (isCouple && sameAddress) {
+    const jointRows = [
+      { label: 'Full Name:', value: c1Name },
+      { label: 'Date of Birth:', value: formData.dateOfBirth || '' },
+      { label: 'Email Address:', value: formData.email || '' },
+      { label: 'Phone Number:', value: formData.phone || '' },
+      { label: 'Spouse/Partner Name:', value: c2Name },
+      { label: 'Date of Birth:', value: formData.spouseDateOfBirth || '' },
+      { label: 'Email Address:', value: formData.spouseEmail || '' },
+      { label: 'Phone Number:', value: formData.spousePhone || '' },
+      { label: 'Address:', value: formData.address || '' },
+      { label: 'City:', value: formData.city || '' },
+      { label: 'Province:', value: formData.province || '' },
+      { label: 'Postal Code:', value: formData.postalCode || '' },
+    ];
+    renderBasicChart(`(${c1Name}) and (${c2Name}) Address Information:`, jointRows, 'basic_joint');
+  } else {
+    const client1Rows = [
+      { label: 'Full Name:', value: c1Name },
+      { label: 'Date of Birth:', value: formData.dateOfBirth || '' },
+      { label: 'Address:', value: formData.address || '' },
+      { label: 'City:', value: formData.city || '' },
+      { label: 'Province:', value: formData.province || '' },
+      { label: 'Postal Code:', value: formData.postalCode || '' },
+      { label: 'Email Address:', value: formData.email || '' },
+      { label: 'Phone Number:', value: formData.phone || '' },
+    ];
+    renderBasicChart(`(${c1Name}) Contact Information:`, client1Rows, 'basic_client1');
+
+    if (isCouple) {
+      const client2Rows = [
+        { label: 'Spouse/Partner Name:', value: c2Name },
+        { label: 'Date of Birth:', value: formData.spouseDateOfBirth || '' },
+        { label: 'Address:', value: formData.spouseAddress || '' },
+        { label: 'City:', value: formData.spouseCity || '' },
+        { label: 'Province:', value: formData.spouseProvince || '' },
+        { label: 'Postal Code:', value: formData.spousePostalCode || '' },
+        { label: 'Email Address:', value: formData.spouseEmail || '' },
+        { label: 'Phone Number:', value: formData.spousePhone || '' },
+      ];
+      renderBasicChart(`(${c2Name}) Contact Information:`, client2Rows, 'basic_client2');
     }
+  }
+
+  if (isCouple && formData.hasMarriageContract === 'yes') {
+    checkPageBreak(25);
+    yPosition += 8;
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('Marriage Contract:', margin, yPosition);
+    yPosition += 6;
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...colors.darkText);
+    const labelText = `(${c1Name}) and (${c2Name}), have a marriage contract, and the document is located:`;
+    doc.text(labelText, margin, yPosition);
+    yPosition += 6;
+
+    doc.setDrawColor(...colors.borderGray);
+    doc.setLineWidth(0.3);
+    doc.rect(margin, yPosition, fieldWidth, 6);
+
+    const marriageContractField = new doc.AcroFormTextField();
+    marriageContractField.fieldName = 'marriageContractLocation';
+    marriageContractField.Rect = [margin, yPosition, fieldWidth, 6];
+    marriageContractField.fontSize = 9;
+    marriageContractField.textColor = colors.darkText;
+    marriageContractField.value = formData.marriageContractLocation || '';
+    doc.addField(marriageContractField);
+
+    yPosition += 10;
   }
 
   const client1Name = formData.fullName || 'Client 1';

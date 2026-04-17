@@ -1034,6 +1034,9 @@ export default function StepForm({
       updated[index].hasIEP = undefined;
       updated[index].individualEducationPlan = undefined;
       updated[index].iepDocumentLocation = undefined;
+      updated[index].schoolActivitiesImportant = undefined;
+      updated[index].homeworkRoutines = undefined;
+      updated[index].educationHopes = undefined;
       updated[index].learningStyleNotes = undefined;
       updated[index].behaviouralConsiderations = undefined;
       updated[index].educationAdditionalDetails = undefined;
@@ -6187,6 +6190,42 @@ export default function StepForm({
                                   </div>
                                 </>
                               )}
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Which school activities are most important for your child's confidence and social life?
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.schoolActivitiesImportant || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolActivitiesImportant', e.target.value)}
+                                  placeholder="e.g., sports teams, drama, art club, recess friendships"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  What are your homework routines?
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.homeworkRoutines || ''}
+                                  onChange={(e) => handleChildChange(index, 'homeworkRoutines', e.target.value)}
+                                  placeholder="e.g., time, location, who helps, any challenges"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  What are your hopes or expectations for your child's education over the next few years?
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.educationHopes || ''}
+                                  onChange={(e) => handleChildChange(index, 'educationHopes', e.target.value)}
+                                  placeholder="e.g., post-secondary goals, skill development, personal growth"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Learning style notes or concerns:

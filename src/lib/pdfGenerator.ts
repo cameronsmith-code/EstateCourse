@@ -42,6 +42,9 @@ interface ChildData {
   hasIEP?: string;
   individualEducationPlan?: string;
   iepDocumentLocation?: string;
+  schoolActivitiesImportant?: string;
+  homeworkRoutines?: string;
+  educationHopes?: string;
   learningStyleNotes?: string;
   behaviouralConsiderations?: string;
   educationAdditionalDetails?: string;
@@ -1698,6 +1701,9 @@ export const generatePDF = (formData: FormData) => {
               ...(child.hasIEP === 'yes' ? [
                 { label: 'IEP Details:', large: true, value: child.individualEducationPlan || '' },
               ] : []),
+              { label: "Which school activities are most important for your child's confidence and social life?", large: true, value: child.schoolActivitiesImportant || '' },
+              { label: 'What are your homework routines?', large: true, value: child.homeworkRoutines || '' },
+              { label: "What are your hopes or expectations for your child's education over the next few years?", large: true, value: child.educationHopes || '' },
               { label: 'Learning style notes or concerns:', large: true, value: child.learningStyleNotes || '' },
               { label: 'Behavioural considerations (e.g., anxiety, ADHD triggers)', large: true, value: child.behaviouralConsiderations || '' },
               { label: `If ${nickname} is having a difficult day at school, what strategies work best to calm or support them?`, large: true, value: child.schoolCalmingStrategies || '' },

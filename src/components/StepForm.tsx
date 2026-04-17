@@ -6907,6 +6907,19 @@ export default function StepForm({
                             </select>
                           </div>
 
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              City of residence:
+                            </label>
+                            <input
+                              type="text"
+                              value={childrenData[index]?.cityOfResidence || ''}
+                              onChange={(e) => handleChildChange(index, 'cityOfResidence', e.target.value)}
+                              placeholder="Enter city of residence"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+
                         </>
                       )}
 
@@ -6920,6 +6933,21 @@ export default function StepForm({
                             value={childrenData[index]?.countryOfResidence || ''}
                             onChange={(e) => handleChildChange(index, 'countryOfResidence', e.target.value)}
                             placeholder="Enter country of residence"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
+
+                      {childrenData[index]?.canadianResident === 'no' && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            City of residence:
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.cityOfResidence || ''}
+                            onChange={(e) => handleChildChange(index, 'cityOfResidence', e.target.value)}
+                            placeholder="Enter city of residence"
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>

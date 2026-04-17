@@ -1277,6 +1277,18 @@ export const generatePDF = (formData: FormData) => {
         { label: "Child's Full Name:", value: child.name || '' },
         { label: 'Preferred name/nickname:', value: child.nickname || '' },
         { label: 'Citizenship(s):', value: '' },
+        (() => {
+          const city = child.cityOfResidence || '';
+          let residesIn = '';
+          if (child.canadianResident === 'yes') {
+            const province = child.provinceTerritory || '';
+            residesIn = [city, province, 'Canada'].filter(Boolean).join(', ');
+          } else {
+            const country = child.countryOfResidence || '';
+            residesIn = [city, country].filter(Boolean).join(', ');
+          }
+          return { label: 'Resides in:', value: residesIn };
+        })(),
         { label: 'Child of:', value: parentLabel },
         { label: 'Date of Birth (YYYY/MM/DD):', value: child.dateOfBirth || '' },
         { label: 'Age of Majority:', value: ageOfMajorityText },

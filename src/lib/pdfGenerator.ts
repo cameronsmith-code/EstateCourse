@@ -39,7 +39,9 @@ interface ChildData {
   schoolFocusHelps?: string;
   schoolDistractions?: string;
   schoolCalmingStrategies?: string;
+  hasIEP?: string;
   individualEducationPlan?: string;
+  iepDocumentLocation?: string;
   learningStyleNotes?: string;
   behaviouralConsiderations?: string;
   educationAdditionalDetails?: string;
@@ -1692,7 +1694,10 @@ export const generatePDF = (formData: FormData) => {
               { label: 'Where do they typically need extra support?', large: true, value: child.schoolExtraSupport || '' },
               { label: `What helps ${nickname} stay focused?`, large: true, value: child.schoolFocusHelps || '' },
               { label: 'What tends to distract or overwhelm them?', large: true, value: child.schoolDistractions || '' },
-              { label: 'Is there an individual education plan? (Provide Details):', large: true, value: child.individualEducationPlan || '' },
+              { label: 'Is there an individual education plan?', large: false, value: child.hasIEP ? (child.hasIEP === 'yes' ? 'Yes' : 'No') : '' },
+              ...(child.hasIEP === 'yes' ? [
+                { label: 'IEP Details:', large: true, value: child.individualEducationPlan || '' },
+              ] : []),
               { label: 'Learning style notes or concerns:', large: true, value: child.learningStyleNotes || '' },
               { label: 'Behavioural considerations (e.g., anxiety, ADHD triggers)', large: true, value: child.behaviouralConsiderations || '' },
               { label: `If ${nickname} is having a difficult day at school, what strategies work best to calm or support them?`, large: true, value: child.schoolCalmingStrategies || '' },
@@ -1752,13 +1757,14 @@ export const generatePDF = (formData: FormData) => {
 
         addSubsectionHeader(`(${nickname}) Document Checklist:`);
 
-        const checklistRows = [
-          'Birth Certificate:',
-          'Citizenship Certificate (if applicable):',
-          'Health Card:',
-          'Social Insurance Number:',
-          'Passport:',
-          ...(isMinor || isNotFinanciallyIndependent ? ['Location of Immunization Records:'] : []),
+        const checklistRows: Array<{ label: string; prefill?: string }> = [
+          { label: 'Birth Certificate:' },
+          { label: 'Citizenship Certificate (if applicable):' },
+          { label: 'Health Card:' },
+          { label: 'Social Insurance Number:' },
+          { label: 'Passport:' },
+          ...(isMinor || isNotFinanciallyIndependent ? [{ label: 'Location of Immunization Records:' }] : []),
+          ...(child.hasIEP === 'yes' ? [{ label: 'IEP Document:', prefill: child.iepDocumentLocation || '' }] : []),
         ];
 
         const col1W = fieldWidth * 0.25;
@@ -1786,7 +1792,7 @@ export const generatePDF = (formData: FormData) => {
         doc.setFont(undefined, 'normal');
         yPosition += headerHeight;
 
-        checklistRows.forEach((docLabel, ri) => {
+        checklistRows.forEach((row, ri) => {
           const rowY = yPosition;
           doc.setFontSize(8);
           doc.setDrawColor(...colors.borderGray);
@@ -1798,7 +1804,7 @@ export const generatePDF = (formData: FormData) => {
 
           doc.setFont(undefined, 'normal');
           doc.setTextColor(...colors.darkText);
-          doc.text(docLabel, colX[0] + 1, rowY + 5);
+          doc.text(row.label, colX[0] + 1, rowY + 5);
 
           for (let ci = 1; ci < 4; ci++) {
             const cellField = new doc.AcroFormTextField();
@@ -1807,7 +1813,7 @@ export const generatePDF = (formData: FormData) => {
             cellField.fontSize = 8;
             cellField.textColor = colors.darkText;
             cellField.borderStyle = 'none';
-            cellField.value = '';
+            cellField.value = ci === 1 && row.prefill ? row.prefill : '';
             doc.addField(cellField);
           }
 

@@ -1031,7 +1031,9 @@ export default function StepForm({
       updated[index].schoolFocusHelps = undefined;
       updated[index].schoolDistractions = undefined;
       updated[index].schoolCalmingStrategies = undefined;
+      updated[index].hasIEP = undefined;
       updated[index].individualEducationPlan = undefined;
+      updated[index].iepDocumentLocation = undefined;
       updated[index].learningStyleNotes = undefined;
       updated[index].behaviouralConsiderations = undefined;
       updated[index].educationAdditionalDetails = undefined;
@@ -1039,6 +1041,11 @@ export default function StepForm({
 
     if (field === 'additionalEducationInfo' && value === 'no') {
       updated[index].additionalEducationDetails = undefined;
+    }
+
+    if (field === 'hasIEP' && value === 'no') {
+      updated[index].individualEducationPlan = undefined;
+      updated[index].iepDocumentLocation = undefined;
     }
 
     onAnswerChange('childrenData', updated);
@@ -6125,16 +6132,61 @@ export default function StepForm({
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Is there an individual education plan? (Provide Details):
+                                  Is there an individual education plan?
                                 </label>
-                                <textarea
-                                  value={childrenData[index]?.individualEducationPlan || ''}
-                                  onChange={(e) => handleChildChange(index, 'individualEducationPlan', e.target.value)}
-                                  placeholder="Provide details if applicable"
-                                  rows={3}
-                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
-                                />
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`hasIEP-${index}`}
+                                      value="yes"
+                                      checked={childrenData[index]?.hasIEP === 'yes'}
+                                      onChange={(e) => handleChildChange(index, 'hasIEP', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">Yes</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`hasIEP-${index}`}
+                                      value="no"
+                                      checked={childrenData[index]?.hasIEP === 'no'}
+                                      onChange={(e) => handleChildChange(index, 'hasIEP', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">No</span>
+                                  </label>
+                                </div>
                               </div>
+                              {childrenData[index]?.hasIEP === 'yes' && (
+                                <>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Provide Details:
+                                    </label>
+                                    <textarea
+                                      value={childrenData[index]?.individualEducationPlan || ''}
+                                      onChange={(e) => handleChildChange(index, 'individualEducationPlan', e.target.value)}
+                                      placeholder="Provide details about the individual education plan"
+                                      rows={3}
+                                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Location of the IEP document:
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={childrenData[index]?.iepDocumentLocation || ''}
+                                      onChange={(e) => handleChildChange(index, 'iepDocumentLocation', e.target.value)}
+                                      placeholder="e.g., filing cabinet, school office, digital folder"
+                                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                    />
+                                  </div>
+                                </>
+                              )}
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Learning style notes or concerns:

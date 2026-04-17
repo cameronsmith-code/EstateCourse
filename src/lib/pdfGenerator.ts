@@ -1260,6 +1260,19 @@ export const generatePDF = (formData: FormData) => {
       const medicationsLabel = child.medications === 'yes' ? 'Yes' : child.medications === 'no' ? 'No' : '';
       const allergiesLabel = child.allergies === 'yes' ? 'Yes' : child.allergies === 'no' ? 'No' : '';
 
+      const isAboveAgeOfMajority = (() => {
+        if (child.dateOfBirth) {
+          const dob = new Date(child.dateOfBirth);
+          const today = new Date();
+          const age = today.getFullYear() - dob.getFullYear() -
+            (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
+          return age >= 18;
+        }
+        return child.overAgeMajority === 'yes';
+      })();
+      const isFinanciallyIndependent = child.independent === 'yes';
+      const hideMedAllergy = isAboveAgeOfMajority && isFinanciallyIndependent;
+
       const childRows = [
         { label: "Child's Full Name:", value: child.name || '' },
         { label: 'Preferred name/nickname:', value: child.nickname || '' },
@@ -1268,8 +1281,8 @@ export const generatePDF = (formData: FormData) => {
         { label: 'Date of Birth (YYYY/MM/DD):', value: child.dateOfBirth || '' },
         { label: 'Age of Majority:', value: ageOfMajorityText },
         { label: 'Financially Independent:', value: independentLabel },
-        { label: 'On Long-Term Medications:', value: medicationsLabel },
-        { label: `Does ${nickname} have any allergies?`, value: allergiesLabel },
+        ...(!hideMedAllergy ? [{ label: 'On Long-Term Medications:', value: medicationsLabel }] : []),
+        ...(!hideMedAllergy ? [{ label: `Does ${nickname} have any allergies?`, value: allergiesLabel }] : []),
         ...(child.independent !== 'yes' ? [{ label: `Is ${nickname} attending school?`, value: child.attendingSchool === 'yes' ? 'Yes' : child.attendingSchool === 'no' ? 'No' : '' }] : []),
       ];
 

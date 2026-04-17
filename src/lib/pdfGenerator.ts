@@ -1548,6 +1548,30 @@ export const generatePDF = (formData: FormData) => {
           }
         }
 
+        if (isMinor || isNotFinanciallyIndependent) {
+          checkPageBreak(16 + 8 + 6);
+          addSubsectionHeader(`(${nickname}) Blood Type:`);
+          const btRowH = 8;
+          const btLabelWidth = fieldWidth * 0.45;
+          const btValueWidth = fieldWidth * 0.55;
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.setDrawColor(...colors.borderGray);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, yPosition, btLabelWidth, btRowH);
+          doc.text('Blood Type:', margin + 2, yPosition + 5.5);
+          doc.rect(margin + btLabelWidth, yPosition, btValueWidth, btRowH);
+          doc.setFont(undefined, 'normal');
+          const btField = new doc.AcroFormTextField();
+          btField.fieldName = `child_${index}_blood_type`;
+          btField.Rect = [margin + btLabelWidth + 0.5, yPosition + 0.5, btValueWidth - 1, btRowH - 1];
+          btField.fontSize = 8;
+          btField.value = '';
+          doc.addField(btField);
+          yPosition += btRowH + 6;
+        }
+
         if (child.allergies === 'yes' && child.allergyList) {
           type AllergyEntry = { details: string; severity: string; medications: string; epipen: string; requiredFor: string; otherInfo: string; hasAdditional?: string };
           const allergyList = JSON.parse(child.allergyList || '[]') as AllergyEntry[];

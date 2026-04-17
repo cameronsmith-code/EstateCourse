@@ -5201,9 +5201,14 @@ export default function StepForm({
               <div className="space-y-8">
                 {Array.from({ length: childCount }).map((_, index) => (
                   <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-4">Child {index + 1}</h3>
+                    <h3 className="text-xl font-bold text-white mb-6">
+                      {childrenData[index]?.name ? childrenData[index].name : `Child ${index + 1}`}
+                    </h3>
 
                     <div className="space-y-4">
+                      <div className="pb-2 border-b border-gray-500 mb-2">
+                        <h4 className="text-base font-semibold text-blue-400">Guardian Information</h4>
+                      </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                           Child's Full Name *
@@ -5366,10 +5371,14 @@ export default function StepForm({
                     </div>
 
                     {childrenData[index]?.disabled === 'yes' && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Do they qualify for the disability tax credit?
-                        </label>
+                      <>
+                        <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                          <h4 className="text-base font-semibold text-blue-400">Disability Information</h4>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Do they qualify for the disability tax credit?
+                          </label>
                         <div className="flex gap-4">
                           <label className="flex items-center">
                             <input
@@ -5406,10 +5415,9 @@ export default function StepForm({
                           </label>
                         </div>
                       </div>
-                    )}
 
-                    {(childrenData[index]?.disabilityTaxCredit === 'yes' || childrenData[index]?.disabilityTaxCredit === 'no' || childrenData[index]?.disabilityTaxCredit === 'not-looked') && (
-                      <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
+                      {(childrenData[index]?.disabilityTaxCredit === 'yes' || childrenData[index]?.disabilityTaxCredit === 'no' || childrenData[index]?.disabilityTaxCredit === 'not-looked') && (
+                        <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Nature of disability
@@ -5525,6 +5533,12 @@ export default function StepForm({
                         </div>
                       </div>
                     )}
+                    </>
+                    )}
+
+                    <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                      <h4 className="text-base font-semibold text-blue-400">Financial Independence</h4>
+                    </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -5558,6 +5572,14 @@ export default function StepForm({
 
 {childrenData[index]?.independent !== 'yes' && (
                       <>
+                        <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                          <h4 className="text-base font-semibold text-blue-400">Medical &amp; Care</h4>
+                        </div>
+
+                        <div className="mt-2 pb-1 border-b border-gray-600 mb-2">
+                          <h5 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Medications</h5>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Are they on any long-term medications?
@@ -5744,6 +5766,10 @@ export default function StepForm({
                           </>
                         )}
 
+                        <div className="mt-6 pb-1 border-b border-gray-600 mb-2">
+                          <h5 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Allergies</h5>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Do they have any allergies?
@@ -5921,6 +5947,10 @@ export default function StepForm({
                           </>
                         )}
 
+                        <div className="mt-6 pb-1 border-b border-gray-600 mb-2">
+                          <h5 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Additional Medical Information</h5>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Are there any additional medical related information that a guardian should be aware of with respect to {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}?
@@ -5966,8 +5996,10 @@ export default function StepForm({
                           </div>
                         )}
 
-                        <div className="mt-6 pt-6 border-t border-gray-600">
-                          <h4 className="text-md font-semibold text-white mb-4">Educational Information</h4>
+                        <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                          <h4 className="text-base font-semibold text-blue-400">Educational Information</h4>
+                        </div>
+                        <div className="mt-2">
 
                           <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -6124,8 +6156,10 @@ export default function StepForm({
                           )}
                         </div>
 
-                        <div className="mt-6 pt-6 border-t border-gray-600">
-                          <h4 className="text-md font-semibold text-white mb-2">Digital Identity and Access</h4>
+                        <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                          <h4 className="text-base font-semibold text-blue-400">Digital Identity and Access</h4>
+                        </div>
+                        <div className="mt-2">
                           <p className="text-sm text-gray-400 mb-4">
                             Modern parenting includes school portals, social accounts and gaming platforms that guardians must manage. Provide the information that you believe would best assist a potential guardian:
                           </p>
@@ -6136,7 +6170,11 @@ export default function StepForm({
                       </>
                     )}
 
-                    <div className="mt-6 pt-6 border-t border-gray-600">
+                    <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                      <h4 className="text-base font-semibold text-blue-400">Residency &amp; Family Status</h4>
+                    </div>
+
+                    <div className="mt-2 space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                           Are they a resident of Canada?

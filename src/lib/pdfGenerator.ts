@@ -1245,6 +1245,7 @@ export const generatePDF = (formData: FormData) => {
       const allergiesLabel = child.allergies === 'yes' ? 'Yes' : child.allergies === 'no' ? 'No' : '';
 
       const childRows = [
+        { label: "Child's Full Name:", value: child.name || '' },
         { label: 'Preferred name/nickname:', value: child.nickname || '' },
         { label: 'Citizenship(s):', value: '' },
         { label: 'Child of:', value: parentLabel },

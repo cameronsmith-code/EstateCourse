@@ -36,6 +36,9 @@ interface ChildData {
   schoolContact?: string;
   schoolStrengths?: string;
   schoolExtraSupport?: string;
+  schoolFocusHelps?: string;
+  schoolDistractions?: string;
+  schoolCalmingStrategies?: string;
   individualEducationPlan?: string;
   learningStyleNotes?: string;
   behaviouralConsiderations?: string;
@@ -1687,9 +1690,12 @@ export const generatePDF = (formData: FormData) => {
               { label: 'School Contact Information:', large: false, value: child.schoolContact || '' },
               { label: `What subjects does ${nickname} naturally enjoy or succeed in?`, large: true, value: child.schoolStrengths || '' },
               { label: 'Where do they typically need extra support?', large: true, value: child.schoolExtraSupport || '' },
+              { label: `What helps ${nickname} stay focused?`, large: true, value: child.schoolFocusHelps || '' },
+              { label: 'What tends to distract or overwhelm them?', large: true, value: child.schoolDistractions || '' },
               { label: 'Is there an individual education plan? (Provide Details):', large: true, value: child.individualEducationPlan || '' },
               { label: 'Learning style notes or concerns:', large: true, value: child.learningStyleNotes || '' },
               { label: 'Behavioural considerations (e.g., anxiety, ADHD triggers)', large: true, value: child.behaviouralConsiderations || '' },
+              { label: `If ${nickname} is having a difficult day at school, what strategies work best to calm or support them?`, large: true, value: child.schoolCalmingStrategies || '' },
               { label: 'Additional details:', large: true, value: child.educationAdditionalDetails || '' },
             ];
 

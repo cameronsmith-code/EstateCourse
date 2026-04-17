@@ -1028,6 +1028,9 @@ export default function StepForm({
       updated[index].schoolContact = undefined;
       updated[index].schoolStrengths = undefined;
       updated[index].schoolExtraSupport = undefined;
+      updated[index].schoolFocusHelps = undefined;
+      updated[index].schoolDistractions = undefined;
+      updated[index].schoolCalmingStrategies = undefined;
       updated[index].individualEducationPlan = undefined;
       updated[index].learningStyleNotes = undefined;
       updated[index].behaviouralConsiderations = undefined;
@@ -6098,6 +6101,30 @@ export default function StepForm({
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  What helps {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} stay focused?
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.schoolFocusHelps || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolFocusHelps', e.target.value)}
+                                  placeholder="Describe what helps them stay focused"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  What tends to distract or overwhelm them?
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.schoolDistractions || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolDistractions', e.target.value)}
+                                  placeholder="Describe what tends to distract or overwhelm them"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Is there an individual education plan? (Provide Details):
                                 </label>
                                 <textarea
@@ -6128,6 +6155,18 @@ export default function StepForm({
                                   value={childrenData[index]?.behaviouralConsiderations || ''}
                                   onChange={(e) => handleChildChange(index, 'behaviouralConsiderations', e.target.value)}
                                   placeholder="Describe any behavioural considerations"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  If {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} is having a difficult day at school, what strategies work best to calm or support them?
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.schoolCalmingStrategies || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolCalmingStrategies', e.target.value)}
+                                  placeholder="Describe strategies that work best to calm or support them"
                                   rows={3}
                                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                                 />

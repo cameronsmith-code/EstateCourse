@@ -1895,8 +1895,8 @@ export const generatePDF = (formData: FormData) => {
           }
 
           const socialRows = [
-            { label: `Are there any important adults outside the immediate family who play a meaningful role in ${nickname}'s life?`, large: true, value: child.importantAdults || '' },
             { label: `What daily or weekly routines are most important to ${nickname}'s sense of stability?`, large: true, value: child.importantRoutines || '' },
+            { label: `Are there any important adults outside the immediate family who play a meaningful role in ${nickname}'s life?`, large: true, value: child.importantAdults || '' },
             { label: `How does ${nickname} typically express or manage difficult emotions?`, large: true, value: child.emotionalExpression || '' },
             { label: `What comforts ${nickname} when they are upset, scared, or overwhelmed?`, large: true, value: child.comfortStrategies || '' },
             { label: 'Are there any social or emotional challenges a guardian should be aware of?', large: true, value: child.socialChallenges || '' },

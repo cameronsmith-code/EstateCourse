@@ -6509,18 +6509,277 @@ export default function StepForm({
                               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                             />
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              What extracurricular activities, hobbies, or interests are most important to {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}?
-                            </label>
-                            <textarea
-                              value={childrenData[index]?.extracurriculars || ''}
-                              onChange={(e) => handleChildChange(index, 'extracurriculars', e.target.value)}
-                              placeholder="e.g., sports, music, art, clubs, recreational programs"
-                              rows={3}
-                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
-                            />
-                          </div>
+                          {(() => {
+                            type ActivityFriendEntry = {
+                              friendName: string;
+                              relationship: string;
+                              cityLocation: string;
+                              parentGuardianName: string;
+                              parentPhone: string;
+                              parentEmail: string;
+                              whyImportant: string;
+                              activitiesTogether: string;
+                              hasAdditional: string;
+                            };
+                            type ActivityEntry = {
+                              activityName: string;
+                              activityType: string;
+                              importanceLevel: string;
+                              frequency: string;
+                              hasSharedFriends: string;
+                              sharedFriendIds: string[];
+                              otherFriends: ActivityFriendEntry[];
+                              hasAdditional: string;
+                            };
+                            const activityList = JSON.parse(childrenData[index]?.activityList || '[]') as ActivityEntry[];
+                            if (activityList.length === 0) {
+                              activityList.push({ activityName: '', activityType: '', importanceLevel: '', frequency: '', hasSharedFriends: '', sharedFriendIds: [], otherFriends: [], hasAdditional: '' });
+                            }
+                            const existingFriends = JSON.parse(childrenData[index]?.friendList || '[]') as Array<{ friendName: string }>;
+                            const childName = childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`;
+
+                            const handleActivityChange = (ai: number, field: keyof ActivityEntry, value: string | string[]) => {
+                              const updated = [...activityList];
+                              if (!updated[ai]) {
+                                updated[ai] = { activityName: '', activityType: '', importanceLevel: '', frequency: '', hasSharedFriends: '', sharedFriendIds: [], otherFriends: [], hasAdditional: '' };
+                              }
+                              (updated[ai] as Record<string, unknown>)[field] = value;
+                              if (field === 'hasAdditional' && value === 'yes' && ai === activityList.length - 1) {
+                                updated.push({ activityName: '', activityType: '', importanceLevel: '', frequency: '', hasSharedFriends: '', sharedFriendIds: [], otherFriends: [], hasAdditional: '' });
+                              }
+                              if (field === 'hasAdditional' && value === 'no') {
+                                const trimmed = updated.slice(0, ai + 1);
+                                trimmed[ai] = { ...trimmed[ai], hasAdditional: 'no' };
+                                handleChildChange(index, 'activityList', JSON.stringify(trimmed));
+                                return;
+                              }
+                              handleChildChange(index, 'activityList', JSON.stringify(updated));
+                            };
+
+                            const handleActivityOtherFriendChange = (ai: number, fi: number, field: keyof ActivityFriendEntry, value: string) => {
+                              const updated = [...activityList];
+                              const friends = [...(updated[ai].otherFriends || [])];
+                              if (!friends[fi]) {
+                                friends[fi] = { friendName: '', relationship: '', cityLocation: '', parentGuardianName: '', parentPhone: '', parentEmail: '', whyImportant: '', activitiesTogether: '', hasAdditional: '' };
+                              }
+                              friends[fi][field] = value;
+                              if (field === 'hasAdditional' && value === 'yes' && fi === friends.length - 1) {
+                                friends.push({ friendName: '', relationship: '', cityLocation: '', parentGuardianName: '', parentPhone: '', parentEmail: '', whyImportant: '', activitiesTogether: '', hasAdditional: '' });
+                              }
+                              if (field === 'hasAdditional' && value === 'no') {
+                                const trimmed = friends.slice(0, fi + 1);
+                                trimmed[fi] = { ...trimmed[fi], hasAdditional: 'no' };
+                                updated[ai] = { ...updated[ai], otherFriends: trimmed };
+                                handleChildChange(index, 'activityList', JSON.stringify(updated));
+                                return;
+                              }
+                              updated[ai] = { ...updated[ai], otherFriends: friends };
+                              handleChildChange(index, 'activityList', JSON.stringify(updated));
+                            };
+
+                            const toggleSharedFriend = (ai: number, friendName: string) => {
+                              const updated = [...activityList];
+                              const current = updated[ai].sharedFriendIds || [];
+                              const next = current.includes(friendName)
+                                ? current.filter(f => f !== friendName)
+                                : [...current, friendName];
+                              updated[ai] = { ...updated[ai], sharedFriendIds: next };
+                              handleChildChange(index, 'activityList', JSON.stringify(updated));
+                            };
+
+                            return (
+                              <div className="space-y-4">
+                                <div className="pb-1">
+                                  <label className="block text-sm font-medium text-gray-300">
+                                    What extracurricular activities, hobbies, interests or identity anchors are most important to {childName}?
+                                  </label>
+                                </div>
+                                {activityList.map((activity, ai) => (
+                                  <div key={ai} className="bg-gray-750 border border-gray-600 rounded-lg p-4 space-y-4">
+                                    {ai > 0 && (
+                                      <div className="pb-2 border-b border-gray-600 mb-2">
+                                        <span className="text-sm font-semibold text-gray-300">Identity Anchor #{ai + 1}</span>
+                                      </div>
+                                    )}
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">Activity Name:</label>
+                                      <input
+                                        type="text"
+                                        value={activity.activityName}
+                                        onChange={(e) => handleActivityChange(ai, 'activityName', e.target.value)}
+                                        placeholder="Enter activity name"
+                                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">Type:</label>
+                                      <input
+                                        type="text"
+                                        value={activity.activityType}
+                                        onChange={(e) => handleActivityChange(ai, 'activityType', e.target.value)}
+                                        placeholder="e.g., sport / music / art / academic / social"
+                                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">Importance Level:</label>
+                                      <div className="flex gap-4 flex-wrap">
+                                        {['Critical', 'Important', 'Nice to have'].map((level) => (
+                                          <label key={level} className="flex items-center cursor-pointer">
+                                            <input
+                                              type="radio"
+                                              name={`importanceLevel-${index}-${ai}`}
+                                              value={level}
+                                              checked={activity.importanceLevel === level}
+                                              onChange={(e) => handleActivityChange(ai, 'importanceLevel', e.target.value)}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">{level}</span>
+                                          </label>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">Frequency:</label>
+                                      <input
+                                        type="text"
+                                        value={activity.frequency}
+                                        onChange={(e) => handleActivityChange(ai, 'frequency', e.target.value)}
+                                        placeholder="e.g., weekly, every Saturday, daily"
+                                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">Do they participate with specific friends?</label>
+                                      <div className="flex gap-4">
+                                        {['yes', 'no'].map((val) => (
+                                          <label key={val} className="flex items-center cursor-pointer">
+                                            <input
+                                              type="radio"
+                                              name={`hasSharedFriends-${index}-${ai}`}
+                                              value={val}
+                                              checked={activity.hasSharedFriends === val}
+                                              onChange={(e) => handleActivityChange(ai, 'hasSharedFriends', e.target.value)}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300 capitalize">{val}</span>
+                                          </label>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    {activity.hasSharedFriends === 'yes' && (
+                                      <div className="space-y-3 pl-4 border-l border-gray-600">
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">Select friends who participate:</label>
+                                        <div className="space-y-2">
+                                          {existingFriends.filter(f => f.friendName).map((f, fi) => (
+                                            <label key={fi} className="flex items-center cursor-pointer">
+                                              <input
+                                                type="checkbox"
+                                                checked={(activity.sharedFriendIds || []).includes(f.friendName)}
+                                                onChange={() => toggleSharedFriend(ai, f.friendName)}
+                                                className="mr-2"
+                                              />
+                                              <span className="text-gray-300">{f.friendName}</span>
+                                            </label>
+                                          ))}
+                                          <label className="flex items-center cursor-pointer">
+                                            <input
+                                              type="checkbox"
+                                              checked={(activity.sharedFriendIds || []).includes('__other__')}
+                                              onChange={() => toggleSharedFriend(ai, '__other__')}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Other</span>
+                                          </label>
+                                        </div>
+                                        {(activity.sharedFriendIds || []).includes('__other__') && (
+                                          <div className="space-y-4 mt-3">
+                                            {(activity.otherFriends?.length ? activity.otherFriends : [{ friendName: '', relationship: '', cityLocation: '', parentGuardianName: '', parentPhone: '', parentEmail: '', whyImportant: '', activitiesTogether: '', hasAdditional: '' }]).map((otherFriend, ofi) => (
+                                              <div key={ofi} className="bg-gray-700 border border-gray-600 rounded-lg p-4 space-y-3">
+                                                {ofi > 0 && <div className="pb-1 border-b border-gray-600"><span className="text-xs font-semibold text-gray-400">Additional Friend #{ofi + 1}</span></div>}
+                                                {[
+                                                  { field: 'friendName' as keyof ActivityFriendEntry, label: "Friend's Name:", placeholder: "Enter friend's name" },
+                                                  { field: 'relationship' as keyof ActivityFriendEntry, label: 'Relationship:', placeholder: 'e.g., best friend, teammate, neighbor, cousin' },
+                                                  { field: 'cityLocation' as keyof ActivityFriendEntry, label: 'City / Location:', placeholder: 'City or general location' },
+                                                  { field: 'parentGuardianName' as keyof ActivityFriendEntry, label: 'Parent / Guardian Name:', placeholder: 'Enter parent or guardian name' },
+                                                  { field: 'parentPhone' as keyof ActivityFriendEntry, label: 'Parent Phone Number:', placeholder: 'Enter parent phone number' },
+                                                  { field: 'parentEmail' as keyof ActivityFriendEntry, label: 'Parent Email:', placeholder: 'Enter parent email address' },
+                                                ].map(({ field, label, placeholder }) => (
+                                                  <div key={field}>
+                                                    <label className="block text-xs font-medium text-gray-400 mb-1">{label}</label>
+                                                    <input
+                                                      type="text"
+                                                      value={otherFriend[field] as string}
+                                                      onChange={(e) => handleActivityOtherFriendChange(ai, ofi, field, e.target.value)}
+                                                      placeholder={placeholder}
+                                                      className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+                                                    />
+                                                  </div>
+                                                ))}
+                                                {[
+                                                  { field: 'whyImportant' as keyof ActivityFriendEntry, label: `Why is this relationship important to ${childName}?`, placeholder: 'Describe why this relationship matters' },
+                                                  { field: 'activitiesTogether' as keyof ActivityFriendEntry, label: 'What clubs, activities, camps, etc. do they do together?', placeholder: 'e.g., soccer team, art camp, chess club' },
+                                                ].map(({ field, label, placeholder }) => (
+                                                  <div key={field}>
+                                                    <label className="block text-xs font-medium text-gray-400 mb-1">{label}</label>
+                                                    <textarea
+                                                      value={otherFriend[field] as string}
+                                                      onChange={(e) => handleActivityOtherFriendChange(ai, ofi, field, e.target.value)}
+                                                      placeholder={placeholder}
+                                                      rows={2}
+                                                      className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none text-sm"
+                                                    />
+                                                  </div>
+                                                ))}
+                                                <div>
+                                                  <label className="block text-xs font-medium text-gray-400 mb-1">Are there additional friends to add for this activity?</label>
+                                                  <div className="flex gap-4">
+                                                    {['yes', 'no'].map((val) => (
+                                                      <label key={val} className="flex items-center cursor-pointer">
+                                                        <input
+                                                          type="radio"
+                                                          name={`activityOtherFriendAdditional-${index}-${ai}-${ofi}`}
+                                                          value={val}
+                                                          checked={otherFriend.hasAdditional === val}
+                                                          onChange={(e) => handleActivityOtherFriendChange(ai, ofi, 'hasAdditional', e.target.value)}
+                                                          className="mr-2"
+                                                        />
+                                                        <span className="text-gray-300 capitalize text-sm">{val}</span>
+                                                      </label>
+                                                    ))}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Are there any additional identity anchors we should add?
+                                      </label>
+                                      <div className="flex gap-4">
+                                        {['yes', 'no'].map((val) => (
+                                          <label key={val} className="flex items-center cursor-pointer">
+                                            <input
+                                              type="radio"
+                                              name={`activityHasAdditional-${index}-${ai}`}
+                                              value={val}
+                                              checked={activity.hasAdditional === val}
+                                              onChange={(e) => handleActivityChange(ai, 'hasAdditional', e.target.value)}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300 capitalize">{val}</span>
+                                          </label>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })()}
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
                               How does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} typically express or manage difficult emotions?

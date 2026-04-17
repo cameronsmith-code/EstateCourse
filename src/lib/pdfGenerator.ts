@@ -1837,10 +1837,66 @@ export const generatePDF = (formData: FormData) => {
             });
           }
 
+          const activityList: Array<{ activityName: string; activityType: string; importanceLevel: string; frequency: string; hasSharedFriends: string; sharedFriendIds: string[]; otherFriends: Array<{ friendName: string; relationship: string; cityLocation: string; parentGuardianName: string; parentPhone: string; parentEmail: string; whyImportant: string; activitiesTogether: string }>; }> = JSON.parse(child.activityList || '[]');
+
+          if (activityList.length > 0) {
+            checkPageBreak(12);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bolditalic');
+            doc.setTextColor(...colors.darkText);
+            doc.text(`Extracurricular Activities, Hobbies & Identity Anchors:`, margin, yPosition);
+            doc.setFont(undefined, 'normal');
+            yPosition += 6;
+
+            const actColWidths = [fieldWidth * 0.22, fieldWidth * 0.16, fieldWidth * 0.14, fieldWidth * 0.16, fieldWidth * 0.32];
+            const actColX = [margin, margin + actColWidths[0], margin + actColWidths[0] + actColWidths[1], margin + actColWidths[0] + actColWidths[1] + actColWidths[2], margin + actColWidths[0] + actColWidths[1] + actColWidths[2] + actColWidths[3]];
+            const actHeaders = ['Activity Name', 'Type', 'Importance', 'Frequency', 'Participating Friends'];
+            const actHeaderH = 9;
+            checkPageBreak(actHeaderH + 2);
+            doc.setFontSize(7.5);
+            doc.setFont(undefined, 'bold');
+            doc.setDrawColor(...colors.borderGray);
+            doc.setLineWidth(0.5);
+            actHeaders.forEach((h, ci) => {
+              doc.rect(actColX[ci], yPosition, actColWidths[ci], actHeaderH);
+              doc.text(h, actColX[ci] + 1, yPosition + 6);
+            });
+            doc.setFont(undefined, 'normal');
+            yPosition += actHeaderH;
+
+            activityList.forEach((act, ai) => {
+              const friendNames = [
+                ...(act.sharedFriendIds || []).filter(id => id !== '__other__'),
+                ...(act.otherFriends || []).map(f => f.friendName).filter(Boolean),
+              ].join(', ');
+              const actRowH = 10;
+              checkPageBreak(actRowH + 2);
+              const rowY = yPosition;
+              doc.setDrawColor(...colors.borderGray);
+              doc.setLineWidth(0.5);
+              actColWidths.forEach((w, ci) => {
+                doc.rect(actColX[ci], rowY, w, actRowH);
+              });
+              doc.setFontSize(7.5);
+              doc.setTextColor(...colors.darkText);
+              [act.activityName || '', act.activityType || '', act.importanceLevel || '', act.frequency || '', friendNames].forEach((val, ci) => {
+                const actField = new doc.AcroFormTextField();
+                actField.fieldName = `child_${index}_activity_${ai}_col${ci}`;
+                actField.Rect = [actColX[ci] + 0.5, rowY + 0.5, actColWidths[ci] - 1, actRowH - 1];
+                actField.fontSize = 7.5;
+                actField.textColor = colors.darkText;
+                actField.borderStyle = 'none';
+                actField.value = val;
+                doc.addField(actField);
+              });
+              yPosition += actRowH;
+            });
+            yPosition += 4;
+          }
+
           const socialRows = [
             { label: `Are there any important adults outside the immediate family who play a meaningful role in ${nickname}'s life?`, large: true, value: child.importantAdults || '' },
             { label: `What daily or weekly routines are most important to ${nickname}'s sense of stability?`, large: true, value: child.importantRoutines || '' },
-            { label: `What extracurricular activities, hobbies, or interests are most important to ${nickname}?`, large: true, value: child.extracurriculars || '' },
             { label: `How does ${nickname} typically express or manage difficult emotions?`, large: true, value: child.emotionalExpression || '' },
             { label: `What comforts ${nickname} when they are upset, scared, or overwhelmed?`, large: true, value: child.comfortStrategies || '' },
             { label: 'Are there any social or emotional challenges a guardian should be aware of?', large: true, value: child.socialChallenges || '' },
@@ -2002,6 +2058,72 @@ export const generatePDF = (formData: FormData) => {
         }
 
         yPosition += 6;
+
+        const allFriends: Array<{ friendName: string; relationship: string; cityLocation: string; parentGuardianName: string; parentPhone: string; parentEmail: string; whyImportant: string; activitiesTogether: string; source: string }> = [];
+
+        const mainFriendList: Array<{ friendName: string; relationship: string; cityLocation: string; parentGuardianName: string; parentPhone: string; parentEmail: string; whyImportant: string; activitiesTogether: string }> = JSON.parse(child.friendList || '[]');
+        mainFriendList.forEach(f => {
+          if (f.friendName) allFriends.push({ ...f, source: 'Key Relationship' });
+        });
+
+        const actListForContacts: Array<{ activityName: string; sharedFriendIds: string[]; otherFriends: Array<{ friendName: string; relationship: string; cityLocation: string; parentGuardianName: string; parentPhone: string; parentEmail: string; whyImportant: string; activitiesTogether: string }> }> = JSON.parse(child.activityList || '[]');
+        actListForContacts.forEach(act => {
+          (act.otherFriends || []).forEach(f => {
+            if (f.friendName && !allFriends.some(af => af.friendName === f.friendName)) {
+              allFriends.push({ ...f, source: act.activityName || 'Activity' });
+            }
+          });
+        });
+
+        if (allFriends.length > 0) {
+          checkPageBreak(20);
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'bolditalic');
+          doc.setTextColor(...colors.darkText);
+          doc.text('Friends and Contacts:', margin, yPosition);
+          doc.setFont(undefined, 'normal');
+          yPosition += 6;
+
+          const fcColWidths = [fieldWidth * 0.16, fieldWidth * 0.13, fieldWidth * 0.13, fieldWidth * 0.16, fieldWidth * 0.14, fieldWidth * 0.14, fieldWidth * 0.14];
+          const fcColX: number[] = [];
+          fcColWidths.reduce((acc, w, i) => { fcColX[i] = acc; return acc + w; }, margin);
+          const fcHeaders = ['Name', 'Relationship', 'City/Location', 'Parent/Guardian', 'Phone', 'Email', 'Activities Together'];
+          const fcHeaderH = 9;
+          checkPageBreak(fcHeaderH + 2);
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'bold');
+          doc.setDrawColor(...colors.borderGray);
+          doc.setLineWidth(0.5);
+          fcHeaders.forEach((h, ci) => {
+            doc.rect(fcColX[ci], yPosition, fcColWidths[ci], fcHeaderH);
+            doc.text(h, fcColX[ci] + 1, yPosition + 6);
+          });
+          doc.setFont(undefined, 'normal');
+          yPosition += fcHeaderH;
+
+          allFriends.forEach((f, fi) => {
+            const fcRowH = 10;
+            checkPageBreak(fcRowH + 2);
+            const rowY = yPosition;
+            doc.setDrawColor(...colors.borderGray);
+            doc.setLineWidth(0.5);
+            fcColWidths.forEach((w, ci) => {
+              doc.rect(fcColX[ci], rowY, w, fcRowH);
+            });
+            [f.friendName || '', f.relationship || '', f.cityLocation || '', f.parentGuardianName || '', f.parentPhone || '', f.parentEmail || '', f.activitiesTogether || ''].forEach((val, ci) => {
+              const fcField = new doc.AcroFormTextField();
+              fcField.fieldName = `child_${index}_fc_${fi}_col${ci}`;
+              fcField.Rect = [fcColX[ci] + 0.5, rowY + 0.5, fcColWidths[ci] - 1, fcRowH - 1];
+              fcField.fontSize = 7;
+              fcField.textColor = colors.darkText;
+              fcField.borderStyle = 'none';
+              fcField.value = val;
+              doc.addField(fcField);
+            });
+            yPosition += fcRowH;
+          });
+          yPosition += 6;
+        }
       }
     });
 

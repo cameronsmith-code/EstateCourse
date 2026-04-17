@@ -11,6 +11,12 @@ interface ChildData {
   disabled?: string;
   disabilityTaxCredit?: string;
   disabilityNature?: string;
+  disabilityFormalDiagnosis?: string;
+  disabilityCoordinator?: string;
+  disabilityLongTermPlan?: string;
+  disabilityLongTermPlanDoc?: string;
+  disabilityFunding?: string;
+  disabilitySeverity?: string;
   disabilityCare?: string;
   disabilityContacts?: string;
   disabilityOther?: string;
@@ -1799,7 +1805,12 @@ export const generatePDF = (formData: FormData) => {
           const disDocRows = [
             'Location of approved Form T2001',
             'Location of CRA approved Notice of Determination:',
+            'Location of long-term care plan document:',
           ];
+
+          const disDocPrefill: Record<number, string> = {
+            2: child.disabilityLongTermPlanDoc || '',
+          };
 
           disDocRows.forEach((docLabel, ri) => {
             const labelLines = doc.splitTextToSize(docLabel, col1W - 2);
@@ -1830,7 +1841,7 @@ export const generatePDF = (formData: FormData) => {
               cellField.fontSize = 8;
               cellField.textColor = colors.darkText;
               cellField.borderStyle = 'none';
-              cellField.value = '';
+              cellField.value = ci === 1 ? (disDocPrefill[ri] || '') : '';
               doc.addField(cellField);
             }
 

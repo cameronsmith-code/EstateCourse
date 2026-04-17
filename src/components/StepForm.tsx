@@ -997,6 +997,7 @@ export default function StepForm({
       updated[index].disabilityFormalDiagnosis = undefined;
       updated[index].disabilityCoordinator = undefined;
       updated[index].disabilityLongTermPlan = undefined;
+      updated[index].disabilityLongTermPlanDoc = undefined;
       updated[index].disabilityFunding = undefined;
       updated[index].disabilitySeverity = undefined;
       updated[index].disabilityCare = undefined;
@@ -5481,6 +5482,18 @@ export default function StepForm({
                             placeholder="Describe any long-term plan already in place"
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             rows={2}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Location of long-term care plan document
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.disabilityLongTermPlanDoc || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityLongTermPlanDoc', e.target.value)}
+                            placeholder="Enter document location"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
                         <div>

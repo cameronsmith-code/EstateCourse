@@ -904,7 +904,7 @@ export const generatePDF = (formData: FormData) => {
       { label: 'Postal Code:', value: formData.postalCode || '' },
     ] : []),
   ];
-  renderBasicChart(`(${c1Name}) Contact Information:`, client1Rows, 'basic_client1');
+  renderBasicChart(`${c1Name} Contact Information:`, client1Rows, 'basic_client1');
 
   if (isCouple) {
     const client2Rows = [
@@ -919,7 +919,7 @@ export const generatePDF = (formData: FormData) => {
         { label: 'Postal Code:', value: formData.spousePostalCode || '' },
       ] : []),
     ];
-    renderBasicChart(`(${c2Name}) Contact Information:`, client2Rows, 'basic_client2');
+    renderBasicChart(`${c2Name} Contact Information:`, client2Rows, 'basic_client2');
 
     if (sameAddress) {
       const jointRows = [
@@ -928,7 +928,7 @@ export const generatePDF = (formData: FormData) => {
         { label: 'Province:', value: formData.province || '' },
         { label: 'Postal Code:', value: formData.postalCode || '' },
       ];
-      renderBasicChart(`(${c1Name}) and (${c2Name}) Address Information:`, jointRows, 'basic_joint');
+      renderBasicChart(`${c1Name} and ${c2Name} Address Information:`, jointRows, 'basic_joint');
     }
   }
 

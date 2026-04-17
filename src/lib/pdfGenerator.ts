@@ -1894,6 +1894,14 @@ export const generatePDF = (formData: FormData) => {
             yPosition += 4;
           }
 
+          checkPageBreak(12);
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'bolditalic');
+          doc.setTextColor(...colors.darkText);
+          doc.text(`Understanding How ${nickname} Experiences and Processes the World:`, margin, yPosition);
+          doc.setFont(undefined, 'normal');
+          yPosition += 6;
+
           const socialRows = [
             { label: `What daily or weekly routines are most important to ${nickname}'s sense of stability?`, large: true, value: child.importantRoutines || '' },
             { label: `Are there any important adults outside the immediate family who play a meaningful role in ${nickname}'s life?`, large: true, value: child.importantAdults || '' },

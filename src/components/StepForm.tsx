@@ -6992,7 +6992,14 @@ export default function StepForm({
                               name={`hasChildren-${index}`}
                               value="no"
                               checked={childrenData[index]?.hasChildren === 'no'}
-                              onChange={(e) => handleChildChange(index, 'hasChildren', e.target.value)}
+                              onChange={(e) => {
+                                handleChildChange(index, 'hasChildren', e.target.value);
+                                const count = parseInt(childrenData[index]?.numberOfGrandchildren || '0');
+                                handleChildChange(index, 'numberOfGrandchildren', '');
+                                for (let i = 1; i <= Math.max(count, 20); i++) {
+                                  handleChildChange(index, `grandchild${i}Name`, '');
+                                }
+                              }}
                               className="mr-2"
                             />
                             <span className="text-gray-300">No</span>

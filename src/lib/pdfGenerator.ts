@@ -1283,7 +1283,7 @@ export const generatePDF = (formData: FormData) => {
 
     childrenToProcess.forEach((child, index) => {
       const nickname = child.nickname || child.name || `Child ${index + 1}`;
-      const subheaderTitle = `(${nickname}) Guardian Information:`;
+      const subheaderTitle = `${nickname} Guardian Information:`;
       checkPageBreak(70);
       addSubsectionHeader(subheaderTitle);
       yPosition += 2;
@@ -1390,7 +1390,7 @@ export const generatePDF = (formData: FormData) => {
         ];
         const disPreviewH = disRows_preview.reduce((acc, r) => acc + (r.large ? 28 : 8), 0);
         checkPageBreak(20 + disPreviewH + 4);
-        const disabilitySubheading = `(${nickname}) Disability Information`;
+        const disabilitySubheading = `${nickname} Disability Information`;
         addSubsectionHeader(disabilitySubheading);
         yPosition += 2;
 
@@ -1538,7 +1538,7 @@ export const generatePDF = (formData: FormData) => {
       const showDisabilityDocs = isDisabled && (child.disabilityTaxCredit === 'yes' || child.disabilityTaxCredit === 'not-looked');
 
       if (showChecklist) {
-        addSubsectionHeader(`(${nickname}) Medical and Care:`);
+        addSubsectionHeader(`${nickname} Medical and Care:`);
 
         const medColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
         const medColX = [
@@ -1663,7 +1663,7 @@ export const generatePDF = (formData: FormData) => {
 
         if (isMinor || isNotFinanciallyIndependent) {
           checkPageBreak(16 + 8 + 6);
-          addSubsectionHeader(`(${nickname}) Blood Type:`);
+          addSubsectionHeader(`${nickname} Blood Type:`);
           const btRowH = 8;
           const btLabelWidth = fieldWidth * 0.45;
           const btValueWidth = fieldWidth * 0.55;
@@ -1701,7 +1701,7 @@ export const generatePDF = (formData: FormData) => {
               const allergyRowH = 8;
               checkPageBreak(16 + allergyChartRows.length * allergyRowH + 8);
 
-              addSubsectionHeader(`(${nickname}) Allergy Information${allergyList.length > 1 ? ` #${ai + 1}` : ''}:`);
+              addSubsectionHeader(`${nickname} Allergy Information${allergyList.length > 1 ? ` #${ai + 1}` : ''}:`);
 
               const allergyLabelWidth = fieldWidth * 0.45;
               const allergyValueWidth = fieldWidth * 0.55;
@@ -1738,7 +1738,7 @@ export const generatePDF = (formData: FormData) => {
 
         if (child.medicalIssues === 'yes') {
           checkPageBreak(40);
-          addSubsectionHeader(`(${nickname}) Additional Medical Information:`);
+          addSubsectionHeader(`${nickname} Additional Medical Information:`);
 
           const addlMedRowH = Math.max(16, Math.ceil((child.medicalIssuesDescription?.length || 0) / 80) * 5 + 10);
           const rowY = yPosition;
@@ -1765,7 +1765,7 @@ export const generatePDF = (formData: FormData) => {
             ? (8 + 8 + 20 + 20 + 20 + 20)
             : 20;
           checkPageBreak(20 + eduPreviewH + 4);
-          addSubsectionHeader(`(${nickname}) Academic Snapshot:`);
+          addSubsectionHeader(`${nickname} Academic Snapshot:`);
           yPosition += 2;
 
           const eduLabelWidth = fieldWidth * 0.40;
@@ -1847,7 +1847,7 @@ export const generatePDF = (formData: FormData) => {
 
         if (isMinor || isNotFinanciallyIndependent) {
           checkPageBreak(30);
-          addSubsectionHeader(`(${nickname}) Social Snapshot:`);
+          addSubsectionHeader(`${nickname} Social Snapshot:`);
 
           doc.setFontSize(9);
           doc.setFont(undefined, 'italic');
@@ -2026,7 +2026,7 @@ export const generatePDF = (formData: FormData) => {
           yPosition += 6;
         }
 
-        addSubsectionHeader(`(${nickname}) Document Checklist:`);
+        addSubsectionHeader(`${nickname} Document Checklist:`);
 
         const checklistRows: Array<{ label: string; prefill?: string }> = [
           { label: 'Birth Certificate:' },

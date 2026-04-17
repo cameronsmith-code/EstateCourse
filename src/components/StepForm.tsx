@@ -6332,18 +6332,159 @@ export default function StepForm({
                           This section helps a guardian preserve the child's relationships, routines, and emotional stability during a period of major life disruption.
                         </p>
                         <div className="mt-2 space-y-4 mb-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Who are {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s closest friends, and how do they typically stay in touch?
-                            </label>
-                            <textarea
-                              value={childrenData[index]?.closestFriends || ''}
-                              onChange={(e) => handleChildChange(index, 'closestFriends', e.target.value)}
-                              placeholder="e.g., names, how they connect (in person, phone, online)"
-                              rows={3}
-                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
-                            />
-                          </div>
+                          {(() => {
+                            type FriendEntry = {
+                              friendName: string;
+                              relationship: string;
+                              cityLocation: string;
+                              parentGuardianName: string;
+                              parentPhone: string;
+                              parentEmail: string;
+                              whyImportant: string;
+                              activitiesTogether: string;
+                              hasAdditional: string;
+                            };
+                            const friendList = JSON.parse(childrenData[index]?.friendList || '[]') as FriendEntry[];
+                            if (friendList.length === 0) {
+                              friendList.push({ friendName: '', relationship: '', cityLocation: '', parentGuardianName: '', parentPhone: '', parentEmail: '', whyImportant: '', activitiesTogether: '', hasAdditional: '' });
+                            }
+                            const handleFriendChange = (friendIndex: number, field: keyof FriendEntry, value: string) => {
+                              const updated = [...friendList];
+                              if (!updated[friendIndex]) {
+                                updated[friendIndex] = { friendName: '', relationship: '', cityLocation: '', parentGuardianName: '', parentPhone: '', parentEmail: '', whyImportant: '', activitiesTogether: '', hasAdditional: '' };
+                              }
+                              updated[friendIndex][field] = value;
+                              if (field === 'hasAdditional' && value === 'yes' && friendIndex === friendList.length - 1) {
+                                updated.push({ friendName: '', relationship: '', cityLocation: '', parentGuardianName: '', parentPhone: '', parentEmail: '', whyImportant: '', activitiesTogether: '', hasAdditional: '' });
+                              }
+                              if (field === 'hasAdditional' && value === 'no') {
+                                const trimmed = updated.slice(0, friendIndex + 1);
+                                trimmed[friendIndex] = { ...trimmed[friendIndex], hasAdditional: 'no' };
+                                handleChildChange(index, 'friendList', JSON.stringify(trimmed));
+                                return;
+                              }
+                              handleChildChange(index, 'friendList', JSON.stringify(updated));
+                            };
+                            const childName = childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`;
+                            return friendList.map((friend, friendIndex) => (
+                              <div key={friendIndex} className="bg-gray-750 border border-gray-600 rounded-lg p-4 space-y-4">
+                                {friendIndex > 0 && (
+                                  <div className="pb-2 border-b border-gray-600 mb-2">
+                                    <span className="text-sm font-semibold text-gray-300">Friend / Key Relationship #{friendIndex + 1}</span>
+                                  </div>
+                                )}
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Friend's Name:</label>
+                                  <input
+                                    type="text"
+                                    value={friend.friendName}
+                                    onChange={(e) => handleFriendChange(friendIndex, 'friendName', e.target.value)}
+                                    placeholder="Enter friend's name"
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Relationship:</label>
+                                  <input
+                                    type="text"
+                                    value={friend.relationship}
+                                    onChange={(e) => handleFriendChange(friendIndex, 'relationship', e.target.value)}
+                                    placeholder="e.g., best friend, teammate, neighbor, cousin"
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">City / Location:</label>
+                                  <input
+                                    type="text"
+                                    value={friend.cityLocation}
+                                    onChange={(e) => handleFriendChange(friendIndex, 'cityLocation', e.target.value)}
+                                    placeholder="City or general location"
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Parent / Guardian Name:</label>
+                                  <input
+                                    type="text"
+                                    value={friend.parentGuardianName}
+                                    onChange={(e) => handleFriendChange(friendIndex, 'parentGuardianName', e.target.value)}
+                                    placeholder="Enter parent or guardian name"
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Parent Phone Number:</label>
+                                  <input
+                                    type="text"
+                                    value={friend.parentPhone}
+                                    onChange={(e) => handleFriendChange(friendIndex, 'parentPhone', e.target.value)}
+                                    placeholder="Enter parent phone number"
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Parent Email:</label>
+                                  <input
+                                    type="text"
+                                    value={friend.parentEmail}
+                                    onChange={(e) => handleFriendChange(friendIndex, 'parentEmail', e.target.value)}
+                                    placeholder="Enter parent email address"
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Why is this relationship important to {childName}?</label>
+                                  <textarea
+                                    value={friend.whyImportant}
+                                    onChange={(e) => handleFriendChange(friendIndex, 'whyImportant', e.target.value)}
+                                    placeholder="Describe why this relationship matters"
+                                    rows={3}
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">What clubs, activities, camps, etc. do they do together?</label>
+                                  <textarea
+                                    value={friend.activitiesTogether}
+                                    onChange={(e) => handleFriendChange(friendIndex, 'activitiesTogether', e.target.value)}
+                                    placeholder="e.g., soccer team, art camp, chess club"
+                                    rows={3}
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Are there any additional friends and key relationships that the guardian should know about?
+                                  </label>
+                                  <div className="flex gap-4">
+                                    <label className="flex items-center">
+                                      <input
+                                        type="radio"
+                                        name={`friendHasAdditional-${index}-${friendIndex}`}
+                                        value="yes"
+                                        checked={friend.hasAdditional === 'yes'}
+                                        onChange={(e) => handleFriendChange(friendIndex, 'hasAdditional', e.target.value)}
+                                        className="mr-2"
+                                      />
+                                      <span className="text-gray-300">Yes</span>
+                                    </label>
+                                    <label className="flex items-center">
+                                      <input
+                                        type="radio"
+                                        name={`friendHasAdditional-${index}-${friendIndex}`}
+                                        value="no"
+                                        checked={friend.hasAdditional === 'no'}
+                                        onChange={(e) => handleFriendChange(friendIndex, 'hasAdditional', e.target.value)}
+                                        className="mr-2"
+                                      />
+                                      <span className="text-gray-300">No</span>
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          })()}
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
                               Are there any important adults outside the immediate family (e.g., coaches, mentors, extended family) who play a meaningful role in {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s life?

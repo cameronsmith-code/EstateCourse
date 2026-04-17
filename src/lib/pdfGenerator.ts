@@ -1782,8 +1782,62 @@ export const generatePDF = (formData: FormData) => {
           const socialRowH = 8;
           const socialLargeRowH = 20;
 
+          const friendList: Array<{ friendName: string; relationship: string; cityLocation: string; parentGuardianName: string; parentPhone: string; parentEmail: string; whyImportant: string; activitiesTogether: string; hasAdditional: string }> = JSON.parse(child.friendList || '[]');
+
+          if (friendList.length > 0) {
+            friendList.forEach((friend, fi) => {
+              checkPageBreak(20);
+              doc.setFontSize(9);
+              doc.setFont(undefined, 'bolditalic');
+              doc.setTextColor(...colors.darkText);
+              doc.text(`Friend / Key Relationship #${fi + 1}`, margin, yPosition);
+              doc.setFont(undefined, 'normal');
+              yPosition += 6;
+
+              const friendRows = [
+                { label: "Friend's Name:", value: friend.friendName || '' },
+                { label: 'Relationship:', value: friend.relationship || '' },
+                { label: 'City / Location:', value: friend.cityLocation || '' },
+                { label: 'Parent / Guardian Name:', value: friend.parentGuardianName || '' },
+                { label: 'Parent Phone Number:', value: friend.parentPhone || '' },
+                { label: 'Parent Email:', value: friend.parentEmail || '' },
+                { label: `Why is this relationship important to ${nickname}?`, value: friend.whyImportant || '', large: true },
+                { label: 'What clubs, activities, camps, etc. do they do together?', value: friend.activitiesTogether || '', large: true },
+              ];
+
+              friendRows.forEach((row, ri) => {
+                const rh = (row as { large?: boolean }).large ? socialLargeRowH : socialRowH;
+                const rowY = yPosition;
+                checkPageBreak(rh + 2);
+                doc.setDrawColor(...colors.borderGray);
+                doc.setLineWidth(0.5);
+                doc.rect(margin, rowY, socialLabelWidth, rh);
+                doc.rect(margin + socialLabelWidth, rowY, socialValueWidth, rh);
+
+                doc.setFontSize(8.5);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(...colors.darkText);
+                const labelLines = doc.splitTextToSize(row.label, socialLabelWidth - 2);
+                doc.text(labelLines, margin + 1, rowY + 4.5);
+
+                const friendField = new doc.AcroFormTextField();
+                friendField.fieldName = `child_${index}_friend_${fi}_${ri}`;
+                friendField.Rect = [margin + socialLabelWidth + 0.5, rowY + 0.5, socialValueWidth - 1, rh - 1];
+                friendField.fontSize = 9;
+                friendField.textColor = colors.darkText;
+                friendField.borderStyle = 'none';
+                friendField.multiline = !!(row as { large?: boolean }).large;
+                friendField.value = row.value;
+                doc.addField(friendField);
+
+                yPosition += rh;
+              });
+
+              yPosition += 4;
+            });
+          }
+
           const socialRows = [
-            { label: `Who are ${nickname}'s closest friends, and how do they typically stay in touch?`, large: true, value: child.closestFriends || '' },
             { label: `Are there any important adults outside the immediate family who play a meaningful role in ${nickname}'s life?`, large: true, value: child.importantAdults || '' },
             { label: `What daily or weekly routines are most important to ${nickname}'s sense of stability?`, large: true, value: child.importantRoutines || '' },
             { label: `What extracurricular activities, hobbies, or interests are most important to ${nickname}?`, large: true, value: child.extracurriculars || '' },

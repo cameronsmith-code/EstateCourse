@@ -893,7 +893,7 @@ export const generatePDF = (formData: FormData) => {
   const c2Name = formData.spouseName || 'Client 2';
 
   const client1Rows = [
-    { label: 'Full Name:', value: c1Name },
+    { label: "Client 1's Full Name:", value: c1Name },
     { label: 'Date of Birth:', value: formData.dateOfBirth || '' },
     { label: 'Email Address:', value: formData.email || '' },
     { label: 'Phone Number:', value: formData.phone || '' },
@@ -908,7 +908,7 @@ export const generatePDF = (formData: FormData) => {
 
   if (isCouple) {
     const client2Rows = [
-      { label: 'Spouse/Partner Name:', value: c2Name },
+      { label: "Client 2's Full Name:", value: c2Name },
       { label: 'Date of Birth:', value: formData.spouseDateOfBirth || '' },
       { label: 'Email Address:', value: formData.spouseEmail || '' },
       { label: 'Phone Number:', value: formData.spousePhone || '' },

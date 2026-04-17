@@ -34,6 +34,8 @@ interface ChildData {
   additionalEducationDetails?: string;
   schoolName?: string;
   schoolContact?: string;
+  schoolStrengths?: string;
+  schoolExtraSupport?: string;
   individualEducationPlan?: string;
   learningStyleNotes?: string;
   behaviouralConsiderations?: string;
@@ -1671,7 +1673,7 @@ export const generatePDF = (formData: FormData) => {
             ? (8 + 8 + 20 + 20 + 20 + 20)
             : 20;
           checkPageBreak(20 + eduPreviewH + 4);
-          addSubsectionHeader(`(${nickname}) Educational Information:`);
+          addSubsectionHeader(`(${nickname}) Academic Snapshot:`);
           yPosition += 2;
 
           const eduLabelWidth = fieldWidth * 0.40;
@@ -1683,6 +1685,8 @@ export const generatePDF = (formData: FormData) => {
             const eduRows = [
               { label: 'School Name:', large: false, value: child.schoolName || '' },
               { label: 'School Contact Information:', large: false, value: child.schoolContact || '' },
+              { label: `What subjects does ${nickname} naturally enjoy or succeed in?`, large: true, value: child.schoolStrengths || '' },
+              { label: 'Where do they typically need extra support?', large: true, value: child.schoolExtraSupport || '' },
               { label: 'Is there an individual education plan? (Provide Details):', large: true, value: child.individualEducationPlan || '' },
               { label: 'Learning style notes or concerns:', large: true, value: child.learningStyleNotes || '' },
               { label: 'Behavioural considerations (e.g., anxiety, ADHD triggers)', large: true, value: child.behaviouralConsiderations || '' },

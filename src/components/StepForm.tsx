@@ -1026,6 +1026,8 @@ export default function StepForm({
     if (field === 'attendingSchool' && value === 'no') {
       updated[index].schoolName = undefined;
       updated[index].schoolContact = undefined;
+      updated[index].schoolStrengths = undefined;
+      updated[index].schoolExtraSupport = undefined;
       updated[index].individualEducationPlan = undefined;
       updated[index].learningStyleNotes = undefined;
       updated[index].behaviouralConsiderations = undefined;
@@ -6010,7 +6012,7 @@ export default function StepForm({
                         )}
 
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
-                          <h4 className="text-base font-semibold text-blue-400">Educational Information</h4>
+                          <h4 className="text-base font-semibold text-blue-400">Academic Snapshot</h4>
                         </div>
                         <div className="mt-2">
 
@@ -6068,6 +6070,30 @@ export default function StepForm({
                                   onChange={(e) => handleChildChange(index, 'schoolContact', e.target.value)}
                                   placeholder="e.g., phone number, address, website"
                                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  What subjects does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} naturally enjoy or succeed in?
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.schoolStrengths || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolStrengths', e.target.value)}
+                                  placeholder="Describe subjects or areas they naturally enjoy or excel at"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Where do they typically need extra support?
+                                </label>
+                                <textarea
+                                  value={childrenData[index]?.schoolExtraSupport || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolExtraSupport', e.target.value)}
+                                  placeholder="Describe areas where they typically need extra support"
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                                 />
                               </div>
                               <div>

@@ -1283,7 +1283,12 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 6;
 
       if (child.disabled === 'yes') {
-        checkPageBreak(20);
+        const disRows_preview: { large?: boolean }[] = [
+          {}, {}, {}, {}, {}, {},
+          { large: true }, { large: true }, { large: true },
+        ];
+        const disPreviewH = disRows_preview.reduce((acc, r) => acc + (r.large ? 28 : 8), 0);
+        checkPageBreak(20 + disPreviewH + 4);
         const disabilitySubheading = `(${nickname}) Disability Information`;
         addSubsectionHeader(disabilitySubheading);
         yPosition += 2;
@@ -1314,7 +1319,6 @@ export const generatePDF = (formData: FormData) => {
 
         disRows.forEach((row, ri) => {
           const rowH = row.large ? disLargeRowH : disRowH;
-          checkPageBreak(rowH + 2);
           const rowY = yPosition;
 
           doc.setDrawColor(...colors.borderGray);
@@ -1448,6 +1452,8 @@ export const generatePDF = (formData: FormData) => {
         const medHeaders = ['Contact Name:', 'Office Address:', 'Office Phone:', 'Other Details:'];
         const medContactRows = ['Family Doctor:', 'Dentist:', 'Optometrist:', 'Other:', 'Other:', 'Other:'];
 
+        checkPageBreak(medHeaderHeight + medContactRows.length * medRowH + 4);
+
         const medHeaderY = yPosition;
         doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
@@ -1463,7 +1469,6 @@ export const generatePDF = (formData: FormData) => {
 
         medContactRows.forEach((rowLabel, ri) => {
           const rowY = yPosition;
-          checkPageBreak(medRowH + 2);
           doc.setFontSize(8);
           doc.setDrawColor(...colors.borderGray);
           doc.setLineWidth(0.5);
@@ -1617,7 +1622,10 @@ export const generatePDF = (formData: FormData) => {
         }
 
         if ((isMinor || isNotFinanciallyIndependent) && child.attendingSchool !== undefined) {
-          checkPageBreak(20);
+          const eduPreviewH = child.attendingSchool === 'yes'
+            ? (8 + 8 + 20 + 20 + 20 + 20)
+            : 20;
+          checkPageBreak(20 + eduPreviewH + 4);
           addSubsectionHeader(`(${nickname}) Educational Information:`);
           yPosition += 2;
 
@@ -1638,7 +1646,6 @@ export const generatePDF = (formData: FormData) => {
 
             eduRows.forEach((row, rowIndex) => {
               const rh = row.large ? eduLargeRowH : eduRowH;
-              checkPageBreak(rh + 2);
               const rowY = yPosition;
               doc.setDrawColor(...colors.borderGray);
               doc.setLineWidth(0.5);
@@ -1708,6 +1715,8 @@ export const generatePDF = (formData: FormData) => {
         const headerHeight = 10;
         const rowH = 8;
 
+        checkPageBreak(headerHeight + checklistRows.length * rowH + 4);
+
         const headers = ['Document Type:', 'Document Location:', 'Who can access it?', 'Backup copy (and location)?'];
         const headerRowY = yPosition;
         doc.setFontSize(8);
@@ -1724,7 +1733,6 @@ export const generatePDF = (formData: FormData) => {
 
         checklistRows.forEach((docLabel, ri) => {
           const rowY = yPosition;
-          checkPageBreak(rowH + 2);
           doc.setFontSize(8);
           doc.setDrawColor(...colors.borderGray);
           doc.setLineWidth(0.5);
@@ -1927,11 +1935,7 @@ export const generatePDF = (formData: FormData) => {
     for (let i = 0; i < beneficiaryCount; i++) {
       const beneficiary = formData.trustBeneficiariesData?.[i];
 
-      // Check if we need a new page (5 rows * 6 height + 8 margin)
-      if (yPosition + 38 > pageHeight - margin) {
-        doc.addPage();
-        yPosition = 12;
-      }
+      checkPageBreak(6 + 5 * beneCellHeight + 8);
 
       // Beneficiary header
       doc.setFontSize(10);
@@ -4474,10 +4478,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const client1Name = formData.fullName || 'Client 1';
     const client2Name = formData.spouseName || 'Client 2';
 
-    if (yPosition > 210) {
-      doc.addPage();
-      yPosition = 12;
-    }
+    checkPageBreak(40);
 
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
@@ -4672,6 +4673,8 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 8;
 
       const poaCellHeight = 6;
+      const totalPoaRows = poaCount + (formData.spouseIsPoaPersonalCare === 'yes' ? 1 : 0);
+      checkPageBreak(poaCellHeight + totalPoaRows * poaCellHeight + 4);
       const poaColWidths = [fieldWidth * 0.22, fieldWidth * 0.18, fieldWidth * 0.22, fieldWidth * 0.23, fieldWidth * 0.15];
       let poaTableY = yPosition;
 
@@ -4701,10 +4704,6 @@ You should explore this as an option with your legal and CFP® professionals bec
       poaTableY += poaCellHeight;
 
       if (formData.spouseIsPoaPersonalCare === 'yes') {
-        if (poaTableY > 275) {
-          doc.addPage();
-          poaTableY = 12;
-        }
 
         doc.setFillColor(255, 255, 255);
         doc.setFont(undefined, 'normal');
@@ -4764,11 +4763,6 @@ You should explore this as an option with your legal and CFP® professionals bec
       }
 
       for (let i = 0; i < poaCount; i++) {
-        if (poaTableY > 275) {
-          doc.addPage();
-          poaTableY = 12;
-        }
-
         const poaData = formData.client1PoaPersonalCareData?.[i];
 
         doc.setFillColor(255, 255, 255);
@@ -4910,10 +4904,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const client1Name = formData.fullName || 'Client 1';
     const client2Name = formData.spouseName || 'Client 2';
 
-    if (yPosition > 230) {
-      doc.addPage();
-      yPosition = 12;
-    }
+    checkPageBreak(40);
 
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
@@ -5109,10 +5100,8 @@ You should explore this as an option with your legal and CFP® professionals bec
   } else if (formData.client2HasContingentPoaPersonalCare === 'yes' && formData.client2PoaPersonalCareCount) {
     const poaCount = parseInt(formData.client2PoaPersonalCareCount, 10);
 
-    if (yPosition > 210) {
-      doc.addPage();
-      yPosition = 12;
-    }
+    const poaCellHeight = 6;
+    checkPageBreak(8 + poaCellHeight + poaCount * poaCellHeight + 4);
 
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
@@ -5120,7 +5109,6 @@ You should explore this as an option with your legal and CFP® professionals bec
     doc.setFont(undefined, 'normal');
     yPosition += 8;
 
-    const poaCellHeight = 6;
     const poaColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
     let poaTableY = yPosition;
 
@@ -5147,11 +5135,6 @@ You should explore this as an option with your legal and CFP® professionals bec
     poaTableY += poaCellHeight;
 
     for (let i = 0; i < poaCount; i++) {
-      if (poaTableY > 275) {
-        doc.addPage();
-        poaTableY = 12;
-      }
-
       const poaData = formData.client2PoaPersonalCareData?.[i];
 
       doc.setFillColor(255, 255, 255);
@@ -9119,11 +9102,6 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   // Real Estate section removed
 
-  if (yPosition > 200) {
-    doc.addPage();
-    yPosition = 12;
-  }
-
   addSectionHeader('Vehicles and Major Personal Property');
 
   const vehicleItems = [
@@ -9137,6 +9115,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     ];
 
     const vehicleCellHeight = 10;
+    checkPageBreak(vehicleCellHeight + vehicleItems.length * vehicleCellHeight + 4);
     const col1Width = fieldWidth * 0.25;
     const col2Width = fieldWidth * 0.25;
     const col3Width = fieldWidth * 0.25;
@@ -9163,11 +9142,6 @@ You should explore this as an option with your legal and CFP® professionals bec
     vehicleTableY += vehicleCellHeight;
 
     vehicleItems.forEach((item, index) => {
-      if (vehicleTableY > 275) {
-        doc.addPage();
-        vehicleTableY = 12;
-      }
-
       doc.setFont(undefined, 'normal');
       doc.setFontSize(7);
 
@@ -9210,11 +9184,6 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     yPosition = vehicleTableY + 15;
 
-    if (yPosition > 200) {
-      doc.addPage();
-      yPosition = 12;
-    }
-
     checkPageBreak(30);
     addSectionHeader('High-Value Effects and Sentimental Heirlooms');
 
@@ -9228,6 +9197,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     yPosition += 4;
 
     const heirloomCellHeight = 10;
+    checkPageBreak(heirloomCellHeight + 4);
     const hCol1Width = fieldWidth * 0.25;
     const hCol2Width = fieldWidth * 0.25;
     const hCol3Width = fieldWidth * 0.25;
@@ -9254,9 +9224,12 @@ You should explore this as an option with your legal and CFP® professionals bec
     heirloomTableY += heirloomCellHeight;
 
     for (let i = 0; i < 12; i++) {
-      if (heirloomTableY > 275) {
+      if (heirloomTableY + heirloomCellHeight > pageHeight - 20) {
+        addPageFooter();
         doc.addPage();
-        heirloomTableY = 12;
+        pageNumber++;
+        heirloomTableY = 25;
+        addPageHeader();
       }
 
       doc.setFont(undefined, 'normal');
@@ -9303,11 +9276,6 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     yPosition = heirloomTableY + 15;
 
-    if (yPosition > 200) {
-      doc.addPage();
-      yPosition = 12;
-    }
-
     checkPageBreak(30);
     addSectionHeader('Secure Access and Storage');
 
@@ -9329,6 +9297,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     ];
 
     const storageCellHeight = 10;
+    checkPageBreak(storageCellHeight + storageItems.length * storageCellHeight + 4);
     const sCol1Width = fieldWidth * 0.25;
     const sCol2Width = fieldWidth * 0.25;
     const sCol3Width = fieldWidth * 0.25;
@@ -9355,11 +9324,6 @@ You should explore this as an option with your legal and CFP® professionals bec
     storageTableY += storageCellHeight;
 
     storageItems.forEach((item, index) => {
-      if (storageTableY > 275) {
-        doc.addPage();
-        storageTableY = 12;
-      }
-
       doc.setFont(undefined, 'normal');
       doc.setFontSize(7);
 
@@ -11149,11 +11113,6 @@ You should explore this as an option with your legal and CFP® professionals bec
   });
   yPosition += 5;
 
-  if (yPosition > 200) {
-    doc.addPage();
-    yPosition = 12;
-  }
-
   // Financial table
   const financialHeaders = ['Service or Asset Name:', 'URL/Provider:', 'Account Number:', 'Username / Password:'];
   const financialRows = [
@@ -11170,6 +11129,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   ];
 
   const financialCellHeight = 7;
+  checkPageBreak(financialCellHeight + financialRows.length * financialCellHeight + 4);
   const financialColWidth = fieldWidth / 4;
   let financialTableY = yPosition;
 
@@ -11190,11 +11150,6 @@ You should explore this as an option with your legal and CFP® professionals bec
   doc.setFillColor(255, 255, 255);
 
   financialRows.forEach((rowLabel, rowIndex) => {
-    if (financialTableY > 270) {
-      doc.addPage();
-      financialTableY = 12;
-    }
-
     // First column (label)
     doc.rect(margin, financialTableY, financialColWidth, financialCellHeight);
 
@@ -11256,6 +11211,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 10;
 
       const pensionCellHeight = 10;
+      checkPageBreak(pensionCellHeight + client1PensionsData.length * pensionCellHeight + 4);
       const pensionCol1Width = fieldWidth * 0.35;
       const pensionCol2Width = fieldWidth * 0.25;
       const pensionCol3Width = fieldWidth * 0.40;
@@ -11281,10 +11237,6 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       // Data rows
       for (let i = 0; i < client1PensionsData.length; i++) {
-        if (pensionTableY > 275) {
-          doc.addPage();
-          pensionTableY = 12;
-        }
 
         const pension = client1PensionsData[i];
 
@@ -11337,6 +11289,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 10;
 
       const pensionCellHeight = 10;
+      checkPageBreak(pensionCellHeight + client2PensionsData.length * pensionCellHeight + 4);
       const pensionCol1Width = fieldWidth * 0.35;
       const pensionCol2Width = fieldWidth * 0.25;
       const pensionCol3Width = fieldWidth * 0.40;
@@ -11362,10 +11315,6 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       // Data rows
       for (let i = 0; i < client2PensionsData.length; i++) {
-        if (pensionTableY > 275) {
-          doc.addPage();
-          pensionTableY = 12;
-        }
 
         const pension = client2PensionsData[i];
 

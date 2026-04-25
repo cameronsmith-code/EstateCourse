@@ -2655,13 +2655,17 @@ export const generatePDF = (formData: FormData) => {
     doc.text(`${clientName} — ${sp.registeredName || `Sole Proprietorship ${idx + 1}`}`, margin, yPosition);
     yPosition += 8;
 
-    checkPage(16);
-    doc.setFontSize(10);
+    checkPage(15);
+    yPosition += 10;
+    doc.setFillColor(...colors.navyBlue);
+    doc.rect(margin, yPosition - 3, 2, 8, 'F');
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.navyBlue);
-    doc.text('Business Identification and Records', margin, yPosition);
-    yPosition += 8;
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('Business Identification and Records', margin + 5, yPosition + 3);
+    doc.setFont(undefined, 'normal');
     doc.setTextColor(...colors.darkText);
+    yPosition += 10;
 
     {
       const spIdRows: [string, string][] = [];
@@ -3126,12 +3130,18 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 4;
     }
 
-    checkPage(10);
+    checkPage(15);
+    yPosition += 10;
+    doc.setFillColor(...colors.navyBlue);
+    doc.rect(margin, yPosition - 3, 2, 8, 'F');
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
-    doc.setFontSize(10);
-    doc.text('BUSINESS CONTINUITY AND SUCCESSION', margin, yPosition);
-    yPosition += 7;
-    doc.setFontSize(10);
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('Business Continuity and Succession', margin + 5, yPosition + 3);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.darkText);
+    yPosition += 10;
+    doc.setFontSize(9);
 
     const businessName = sp.registeredName || `Business ${idx + 1}`;
 
@@ -3330,14 +3340,15 @@ export const generatePDF = (formData: FormData) => {
     }
 
     if (docRows.length > 0) {
-      checkPage(30);
-      yPosition += 4;
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(10);
+      checkPage(15);
+      yPosition += 10;
       doc.setFillColor(...colors.navyBlue);
-      doc.rect(margin, yPosition - 4, fieldWidth, 10, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.text('DOCUMENT SUMMARY', margin + 3, yPosition + 2);
+      doc.rect(margin, yPosition - 3, 2, 8, 'F');
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.mediumGray);
+      doc.text('Document Summary', margin + 5, yPosition + 3);
+      doc.setFont(undefined, 'normal');
       doc.setTextColor(...colors.darkText);
       yPosition += 10;
 
@@ -3421,10 +3432,17 @@ export const generatePDF = (formData: FormData) => {
     doc.text(`${clientName}'s Partnership ${idx + 1}: ${businessName}`, margin, yPosition);
     yPosition += 8;
 
+    checkPage(15);
+    yPosition += 10;
+    doc.setFillColor(...colors.navyBlue);
+    doc.rect(margin, yPosition - 3, 2, 8, 'F');
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
-    doc.setFontSize(10);
-    doc.text('BUSINESS IDENTIFICATION AND RECORDS', margin, yPosition);
-    yPosition += 7;
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('Business Identification and Records', margin + 5, yPosition + 3);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.darkText);
+    yPosition += 10;
     doc.setFontSize(9);
 
     {
@@ -3558,12 +3576,17 @@ export const generatePDF = (formData: FormData) => {
       }
     }
 
-    checkPage(10);
-    yPosition += 3;
+    checkPage(15);
+    yPosition += 10;
+    doc.setFillColor(...colors.navyBlue);
+    doc.rect(margin, yPosition - 3, 2, 8, 'F');
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
-    doc.setFontSize(10);
-    doc.text('CONTINUITY AND BUY-SELL PROVISIONS', margin, yPosition);
-    yPosition += 7;
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('Continuity and Buy-Sell Provisions', margin + 5, yPosition + 3);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.darkText);
+    yPosition += 10;
     doc.setFontSize(9);
 
     if (p.continuityContinues) {
@@ -3706,12 +3729,17 @@ export const generatePDF = (formData: FormData) => {
       yPosition += valLines2.length * 5 + 2;
     }
 
-    checkPage(10);
-    yPosition += 3;
+    checkPage(15);
+    yPosition += 10;
+    doc.setFillColor(...colors.navyBlue);
+    doc.rect(margin, yPosition - 3, 2, 8, 'F');
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
-    doc.setFontSize(10);
-    doc.text('LIABILITY AND FIDUCIARY RISKS', margin, yPosition);
-    yPosition += 7;
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('Liability and Fiduciary Risks', margin + 5, yPosition + 3);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.darkText);
+    yPosition += 10;
     doc.setFontSize(9);
 
     if (p.hasPersonalGuarantees) {
@@ -3961,14 +3989,15 @@ export const generatePDF = (formData: FormData) => {
     }
 
     if (pDocRows.length > 0) {
-      checkPage(30);
-      yPosition += 4;
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(10);
+      checkPage(15);
+      yPosition += 10;
       doc.setFillColor(...colors.navyBlue);
-      doc.rect(margin, yPosition - 4, fieldWidth, 10, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.text('DOCUMENT SUMMARY', margin + 3, yPosition + 2);
+      doc.rect(margin, yPosition - 3, 2, 8, 'F');
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.mediumGray);
+      doc.text('Document Summary', margin + 5, yPosition + 3);
+      doc.setFont(undefined, 'normal');
       doc.setTextColor(...colors.darkText);
       yPosition += 10;
 

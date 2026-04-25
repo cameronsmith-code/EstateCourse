@@ -1493,29 +1493,34 @@ export const generatePDF = (formData: FormData) => {
           const dtcPad = 3;
 
           dtcParagraphs.forEach(({ label, body }) => {
-            const fullText = (label || '') + body;
-            const lines = doc.splitTextToSize(fullText, dtcBoxWidth - dtcPad * 2);
-            checkPageBreak(lines.length * dtcLineH + 4);
+            const textX = dtcBoxX + dtcPad;
+            const maxW = dtcBoxWidth - dtcPad * 2;
 
             if (label) {
-              const labelWidth = doc.getTextWidth(label);
-              lines.forEach((line: string, li: number) => {
-                if (li === 0) {
-                  doc.setFont(undefined, 'bold');
-                  doc.text(label, dtcBoxX + dtcPad, dtcTextY);
-                  doc.setFont(undefined, 'normal');
-                  const rest = line.slice(label.length);
-                  if (rest) doc.text(rest, dtcBoxX + dtcPad + labelWidth, dtcTextY);
-                } else {
-                  doc.setFont(undefined, 'normal');
-                  doc.text(line, dtcBoxX + dtcPad, dtcTextY);
-                }
+              doc.setFont(undefined, 'bold');
+              const labelW = doc.getTextWidth(label);
+              const bodyLines = doc.splitTextToSize(body, maxW - labelW);
+              const totalLines = [label + bodyLines[0], ...bodyLines.slice(1)];
+              checkPageBreak(totalLines.length * dtcLineH + 4);
+
+              // First line: bold label + normal body continuation
+              doc.setFont(undefined, 'bold');
+              doc.text(label, textX, dtcTextY);
+              doc.setFont(undefined, 'normal');
+              if (bodyLines[0]) doc.text(bodyLines[0], textX + labelW, dtcTextY);
+              dtcTextY += dtcLineH;
+
+              // Remaining lines are purely body text
+              for (let li = 1; li < bodyLines.length; li++) {
+                doc.text(bodyLines[li], textX, dtcTextY);
                 dtcTextY += dtcLineH;
-              });
+              }
             } else {
+              const lines = doc.splitTextToSize(body, maxW);
+              checkPageBreak(lines.length * dtcLineH + 4);
               doc.setFont(undefined, 'normal');
               lines.forEach((line: string) => {
-                doc.text(line, dtcBoxX + dtcPad, dtcTextY);
+                doc.text(line, textX, dtcTextY);
                 dtcTextY += dtcLineH;
               });
             }

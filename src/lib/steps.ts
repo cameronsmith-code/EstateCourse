@@ -289,13 +289,6 @@ export const STEPS: Step[] = [
         placeholder: 'Enter year (e.g., 2020)',
         required: false,
       },
-      {
-        key: 'trustBeneficiariesCount',
-        label: 'How many beneficiaries are there for the Trust?',
-        type: 'number',
-        placeholder: 'Enter number of beneficiaries',
-        required: false,
-      },
     ],
   },
   {

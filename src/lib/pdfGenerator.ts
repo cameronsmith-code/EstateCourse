@@ -2289,7 +2289,6 @@ export const generatePDF = (formData: FormData) => {
       { label: 'Trust 1 - Legal Name:', value: formData.trustLegalName || '' },
       { label: 'Trust Deed Location:', value: formData.trustDeedLocation || '' },
       { label: 'Year Established:', value: formData.trustYearEstablished || '' },
-      { label: 'Number of Beneficiaries:', value: formData.trustBeneficiariesCount || '' },
     ];
 
     const cellHeight = 8;
@@ -2323,67 +2322,83 @@ export const generatePDF = (formData: FormData) => {
 
     yPosition += 8;
 
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.darkText);
-    doc.text('Trust Beneficiaries:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 6;
-
-    const beneficiaryCount = parseInt(formData.trustBeneficiariesCount || '0');
-    const beneCellHeight = 6;
-    const beneLabelWidth = fieldWidth * 0.35;
-    const beneValueWidth = fieldWidth * 0.65;
-
-    for (let i = 0; i < beneficiaryCount; i++) {
-      const beneficiary = formData.trustBeneficiariesData?.[i];
-
-      checkPageBreak(6 + 5 * beneCellHeight + 8);
-
-      // Beneficiary header
+    const beneficiaries = formData.trustBeneficiariesData || [];
+    if (beneficiaries.length > 0) {
+      // Subheading
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(...colors.darkText);
-      doc.text(`Beneficiary ${i + 1}:`, margin, yPosition);
+      doc.text('Beneficiary Information', margin, yPosition);
       yPosition += 6;
 
-      const beneFields = [
-        { label: 'Beneficiary Name:', value: beneficiary?.beneficiaryName || '', fieldName: 'name' },
-        { label: 'Relationship to Settlor:', value: beneficiary?.relationshipToSettlor || '', fieldName: 'relationship' },
-        { label: 'Country of Residence:', value: beneficiary?.countryOfResidence || '', fieldName: 'country' },
-        { label: 'Phone Number:', value: beneficiary?.phoneNumber || '', fieldName: 'phone' },
-        { label: 'Email Address:', value: beneficiary?.emailAddress || '', fieldName: 'email' },
-      ];
+      // Table header
+      const colWidths = [fieldWidth * 0.22, fieldWidth * 0.20, fieldWidth * 0.20, fieldWidth * 0.19, fieldWidth * 0.19];
+      const colHeaders = ['Name', 'Relationship', 'Country', 'Phone', 'Email'];
+      const tableHeaderHeight = 7;
+      const tableRowHeight = 7;
 
-      beneFields.forEach((field) => {
-        const rowY = yPosition;
+      checkPageBreak(tableHeaderHeight + beneficiaries.length * tableRowHeight + 8);
 
+      // Draw header row
+      doc.setFillColor(230, 236, 245);
+      let colX = margin;
+      colWidths.forEach((w) => {
         doc.setDrawColor(...colors.borderGray);
         doc.setLineWidth(0.5);
-        doc.rect(margin, rowY, beneLabelWidth, beneCellHeight);
-        doc.rect(margin + beneLabelWidth, rowY, beneValueWidth, beneCellHeight);
+        doc.rect(colX, yPosition, w, tableHeaderHeight, 'FD');
+        colX += w;
+      });
+      colX = margin;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      colHeaders.forEach((h, ci) => {
+        doc.text(h, colX + 1.5, yPosition + 4.8);
+        colX += colWidths[ci];
+      });
+      yPosition += tableHeaderHeight;
 
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
+      // Draw data rows
+      beneficiaries.forEach((b, i) => {
+        const effectiveName = b?.beneficiaryName || (b?._selectedPerson !== '__other__' ? b?._selectedPerson : '') || '';
+        const rowValues = [
+          effectiveName,
+          b?.relationshipToSettlor || '',
+          b?.countryOfResidence || '',
+          b?.phoneNumber || '',
+          b?.emailAddress || '',
+        ];
+
+        checkPageBreak(tableRowHeight);
+
+        const rowY = yPosition;
+        colX = margin;
+        doc.setFillColor(i % 2 === 0 ? 255 : 248, i % 2 === 0 ? 255 : 250, i % 2 === 0 ? 255 : 252);
+        colWidths.forEach((w) => {
+          doc.setDrawColor(...colors.borderGray);
+          doc.setLineWidth(0.4);
+          doc.rect(colX, rowY, w, tableRowHeight, 'FD');
+          colX += w;
+        });
+
+        colX = margin;
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
         doc.setTextColor(...colors.darkText);
-        doc.text(field.label, margin + 1, rowY + 4);
+        rowValues.forEach((val, ci) => {
+          const maxW = colWidths[ci] - 3;
+          const truncated = doc.splitTextToSize(val, maxW)[0] || '';
+          doc.text(truncated, colX + 1.5, rowY + 4.8);
+          colX += colWidths[ci];
+        });
 
-        const inputField = new doc.AcroFormTextField();
-        inputField.fieldName = `trust_beneficiary_${i + 1}_${field.fieldName}`;
-        inputField.Rect = [margin + beneLabelWidth + 0.5, rowY + 0.5, beneValueWidth - 1, beneCellHeight - 1];
-        inputField.fontSize = 8;
-        inputField.textColor = colors.darkText;
-        inputField.borderStyle = 'none';
-        inputField.value = field.value;
-        doc.addField(inputField);
-
-        yPosition += beneCellHeight;
+        yPosition += tableRowHeight;
       });
 
-      yPosition += 8;
+      yPosition += 10;
     }
 
-    yPosition += 8;
+    yPosition += 4;
 
     if (yPosition + 80 > pageHeight - margin) {
       doc.addPage();

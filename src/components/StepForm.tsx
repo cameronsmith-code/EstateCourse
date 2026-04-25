@@ -814,30 +814,17 @@ export default function StepForm({
       }
     } else if (step.id === 4) {
       if (answers['hasFamilyTrust'] === 'yes') {
-        if (!answers['trustBeneficiariesCount']) {
-          setValidationError('Please specify the number of beneficiaries for the trust.');
-          return;
-        }
-
-        const beneficiariesCount = parseInt(answers['trustBeneficiariesCount'] as string);
         const trustBeneficiariesData = answers['trustBeneficiariesData'] as Array<Record<string, string>> | undefined;
+        const beneficiaries = trustBeneficiariesData || [];
 
-        if (beneficiariesCount > 0) {
-          if (!trustBeneficiariesData || trustBeneficiariesData.length < beneficiariesCount) {
-            setValidationError('Please fill in details for all beneficiaries.');
+        for (let i = 0; i < beneficiaries.length; i++) {
+          const beneficiary = beneficiaries[i];
+          const effectiveName = beneficiary?.beneficiaryName || beneficiary?._selectedPerson;
+          const effectiveRelationship = beneficiary?.relationshipToSettlor;
+          const isKnownPerson = beneficiary?._selectedPerson && beneficiary?._selectedPerson !== '__other__';
+          if (effectiveName && !isKnownPerson && !effectiveRelationship) {
+            setValidationError(`Please fill in the relationship for beneficiary ${i + 1}.`);
             return;
-          }
-
-          for (let i = 0; i < beneficiariesCount; i++) {
-            const beneficiary = trustBeneficiariesData[i];
-            const effectiveName = beneficiary?.beneficiaryName || beneficiary?._selectedPerson;
-            const effectiveRelationship = beneficiary?.relationshipToSettlor;
-            // Known-person selections have relationship pre-filled; only "Other" needs it manually
-            const isKnownPerson = beneficiary?._selectedPerson && beneficiary?._selectedPerson !== '__other__';
-            if (!effectiveName || (!isKnownPerson && !effectiveRelationship)) {
-              setValidationError(`Please fill in name and relationship for beneficiary ${i + 1}.`);
-              return;
-            }
           }
         }
       }

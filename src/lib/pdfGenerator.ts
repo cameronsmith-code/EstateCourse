@@ -2052,8 +2052,8 @@ export const generatePDF = (formData: FormData) => {
           ...(child.hasIEP === 'yes' ? [{ label: 'IEP Document:', prefill: child.iepDocumentLocation || '' }] : []),
         ];
 
-        const col1W = fieldWidth * 0.25;
-        const col2W = fieldWidth * 0.25;
+        const col1W = fieldWidth * 0.30;
+        const col2W = fieldWidth * 0.20;
         const col3W = fieldWidth * 0.25;
         const col4W = fieldWidth * 0.25;
         const colX = [margin, margin + col1W, margin + col1W + col2W, margin + col1W + col2W + col3W];

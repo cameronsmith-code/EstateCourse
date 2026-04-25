@@ -2749,16 +2749,17 @@ export const generatePDF = (formData: FormData) => {
       const acctValueColW = fieldWidth - acctLabelColW;
       const acctRowH = 8;
 
-      checkPage(14);
+      checkPage(15);
+      yPosition += 10;
+      doc.setFillColor(...colors.navyBlue);
+      doc.rect(margin, yPosition - 3, 2, 8, 'F');
+      doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
-      doc.setFontSize(10);
+      doc.setTextColor(...colors.mediumGray);
+      doc.text('Accounting Information', margin + 5, yPosition + 3);
+      doc.setFont(undefined, 'normal');
       doc.setTextColor(...colors.darkText);
-      const acctHeading = 'Accounting Information:';
-      doc.text(acctHeading, margin, yPosition);
-      const acctHeadingWidth = doc.getTextWidth(acctHeading);
-      doc.setLineWidth(0.4);
-      doc.line(margin, yPosition + 1, margin + acctHeadingWidth, yPosition + 1);
-      yPosition += 6;
+      yPosition += 10;
       doc.setFontSize(9);
 
       if (sp.bookkeeper === 'no') {
@@ -2816,239 +2817,313 @@ export const generatePDF = (formData: FormData) => {
     }
 
     if (sp.hasDigitalAssets === 'yes') {
-      checkPage(10);
+      checkPage(15);
+      yPosition += 10;
+      doc.setFillColor(...colors.navyBlue);
+      doc.rect(margin, yPosition - 3, 2, 8, 'F');
+      doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
-      doc.text('Digital Assets', margin, yPosition);
-      yPosition += 7;
+      doc.setTextColor(...colors.mediumGray);
+      doc.text('Digital Assets', margin + 5, yPosition + 3);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
+      yPosition += 10;
 
-      if (sp.website) {
-        checkPage(7);
-        doc.setFont(undefined, 'bold');
-        doc.text('Website:', margin + 4, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fldWebsite = new doc.AcroFormTextField();
-        fldWebsite.fieldName = `sp_website_${idx}`;
-        fldWebsite.Rect = [margin + 22, yPosition - 5.5, pageWidth - (margin + 22) - margin, 7];
-        fldWebsite.fontSize = 9;
-        fldWebsite.textColor = colors.darkText;
-        fldWebsite.borderStyle = 'none';
-        fldWebsite.value = sp.website || '';
-        doc.addField(fldWebsite);
-        yPosition += 6;
-      }
-      if (sp.websiteCredentialsLocation) {
-        checkPage(7);
-        doc.setFont(undefined, 'bold');
-        doc.text('Website Credentials Location:', margin + 4, yPosition);
-        doc.setFont(undefined, 'normal');
-        const wcLines = doc.splitTextToSize(sp.websiteCredentialsLocation, fieldWidth - 64);
-        const fldWebsiteCreds = new doc.AcroFormTextField();
-        fldWebsiteCreds.fieldName = `sp_website_creds_${idx}`;
-        fldWebsiteCreds.Rect = [margin + 64, yPosition - 5.5, pageWidth - (margin + 64) - margin, 7];
-        fldWebsiteCreds.fontSize = 9;
-        fldWebsiteCreds.textColor = colors.darkText;
-        fldWebsiteCreds.borderStyle = 'none';
-        fldWebsiteCreds.value = wcLines[0] || '';
-        doc.addField(fldWebsiteCreds);
-        yPosition += 6;
-      }
-      if (sp.domainProvider) {
-        checkPage(7);
-        doc.setFont(undefined, 'bold');
-        doc.text('Domain Provider:', margin + 4, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fldDomain = new doc.AcroFormTextField();
-        fldDomain.fieldName = `sp_domain_${idx}`;
-        fldDomain.Rect = [margin + 36, yPosition - 5.5, pageWidth - (margin + 36) - margin, 7];
-        fldDomain.fontSize = 9;
-        fldDomain.textColor = colors.darkText;
-        fldDomain.borderStyle = 'none';
-        fldDomain.value = sp.domainProvider || '';
-        doc.addField(fldDomain);
-        yPosition += 6;
-      }
-      if (sp.domainCredentialsLocation) {
-        checkPage(7);
-        doc.setFont(undefined, 'bold');
-        doc.text('Domain Credentials Location:', margin + 4, yPosition);
-        doc.setFont(undefined, 'normal');
-        const dcLines = doc.splitTextToSize(sp.domainCredentialsLocation, fieldWidth - 62);
-        const fldDomainCreds = new doc.AcroFormTextField();
-        fldDomainCreds.fieldName = `sp_domain_creds_${idx}`;
-        fldDomainCreds.Rect = [margin + 62, yPosition - 5.5, pageWidth - (margin + 62) - margin, 7];
-        fldDomainCreds.fontSize = 9;
-        fldDomainCreds.textColor = colors.darkText;
-        fldDomainCreds.borderStyle = 'none';
-        fldDomainCreds.value = dcLines[0] || '';
-        doc.addField(fldDomainCreds);
-        yPosition += 6;
+      // Build digital asset rows for chart
+      const digitalAssetRows: [string, string, string][] = [];
+      if (sp.website !== undefined) digitalAssetRows.push(['Website:', sp.website || '', `sp_da_website_${idx}`]);
+      if (sp.websiteCredentialsLocation !== undefined) digitalAssetRows.push(['Website Credentials Location:', sp.websiteCredentialsLocation || '', `sp_da_website_creds_${idx}`]);
+      if (sp.domainProvider !== undefined) digitalAssetRows.push(['Domain Provider:', sp.domainProvider || '', `sp_da_domain_${idx}`]);
+      if (sp.domainCredentialsLocation !== undefined) digitalAssetRows.push(['Domain Credentials Location:', sp.domainCredentialsLocation || '', `sp_da_domain_creds_${idx}`]);
+
+      if (digitalAssetRows.length > 0) {
+        const daLabelW = 70;
+        const daValueW = fieldWidth - daLabelW;
+        const daRowH = 8;
+        checkPage(digitalAssetRows.length * daRowH + 2);
+        digitalAssetRows.forEach(([label, prefill, fieldName]) => {
+          doc.setDrawColor(180, 180, 180);
+          doc.rect(margin, yPosition, daLabelW, daRowH);
+          doc.rect(margin + daLabelW, yPosition, daValueW, daRowH);
+          doc.setFont(undefined, 'bold');
+          doc.setFontSize(9);
+          doc.text(label, margin + 2, yPosition + 5.5);
+          const daField = new doc.AcroFormTextField();
+          daField.fieldName = fieldName;
+          daField.Rect = [margin + daLabelW + 0.5, yPosition + 0.5, daValueW - 1, daRowH - 1];
+          daField.fontSize = 8;
+          daField.textColor = colors.darkText;
+          daField.borderStyle = 'none';
+          daField.value = prefill;
+          doc.addField(daField);
+          yPosition += daRowH;
+        });
+        yPosition += 4;
       }
 
       if (sp.socialAccounts && sp.socialAccounts.length > 0) {
-        checkPage(8);
+        const socialHeaders = ['Account', 'Platform / URL', 'Credentials Location'];
+        const socialColWidths = [fieldWidth * 0.12, fieldWidth * 0.38, fieldWidth * 0.50];
+        const socialColX = [margin, margin + socialColWidths[0], margin + socialColWidths[0] + socialColWidths[1]];
+        const socialRowH = 8;
+
+        checkPage(socialRowH * (sp.socialAccounts.length + 1) + 6);
         doc.setFont(undefined, 'bold');
-        doc.text('Social Media Accounts:', margin + 4, yPosition);
-        yPosition += 6;
-        sp.socialAccounts.forEach((sa, si) => {
-          checkPage(12);
-          if (sa.platform) {
-            doc.setFont(undefined, 'bold');
-            doc.text(`Account ${si + 1}:`, margin + 8, yPosition);
-            doc.setFont(undefined, 'normal');
-            const fldSocialPlatform = new doc.AcroFormTextField();
-            fldSocialPlatform.fieldName = `sp_social_platform_${idx}_${si}`;
-            fldSocialPlatform.Rect = [margin + 8 + doc.getTextWidth(`Account ${si + 1}:`) + 2, yPosition - 5.5, pageWidth - (margin + 8 + doc.getTextWidth(`Account ${si + 1}:`) + 2) - margin, 7];
-            fldSocialPlatform.fontSize = 9;
-            fldSocialPlatform.textColor = colors.darkText;
-            fldSocialPlatform.borderStyle = 'none';
-            fldSocialPlatform.value = sa.platform || '';
-            doc.addField(fldSocialPlatform);
-            yPosition += 6;
-          }
-          if (sa.credentialsLocation) {
-            doc.setFont(undefined, 'bold');
-            doc.text('Credentials Location:', margin + 8, yPosition);
-            doc.setFont(undefined, 'normal');
-            const saLines = doc.splitTextToSize(sa.credentialsLocation, fieldWidth - 52);
-            const fldSocialCreds = new doc.AcroFormTextField();
-            fldSocialCreds.fieldName = `sp_social_creds_${idx}_${si}`;
-            fldSocialCreds.Rect = [margin + 52, yPosition - 5.5, pageWidth - (margin + 52) - margin, 7];
-            fldSocialCreds.fontSize = 9;
-            fldSocialCreds.textColor = colors.darkText;
-            fldSocialCreds.borderStyle = 'none';
-            fldSocialCreds.value = saLines[0] || '';
-            doc.addField(fldSocialCreds);
-            yPosition += 6;
-          }
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.darkText);
+        doc.text('Social Media Accounts', margin, yPosition);
+        yPosition += 5;
+
+        // Header row
+        doc.setDrawColor(180, 180, 180);
+        socialHeaders.forEach((h, ci) => {
+          doc.rect(socialColX[ci], yPosition, socialColWidths[ci], socialRowH);
+          doc.setFont(undefined, 'bold');
+          doc.setFontSize(8);
+          doc.text(h, socialColX[ci] + 2, yPosition + 5.5);
         });
+        yPosition += socialRowH;
+
+        sp.socialAccounts.forEach((sa, si) => {
+          checkPage(socialRowH);
+          doc.setDrawColor(180, 180, 180);
+          socialColWidths.forEach((w, ci) => doc.rect(socialColX[ci], yPosition, w, socialRowH));
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(8);
+          doc.text(`${si + 1}`, socialColX[0] + 2, yPosition + 5.5);
+
+          const fldPlatform = new doc.AcroFormTextField();
+          fldPlatform.fieldName = `sp_social_platform_${idx}_${si}`;
+          fldPlatform.Rect = [socialColX[1] + 0.5, yPosition + 0.5, socialColWidths[1] - 1, socialRowH - 1];
+          fldPlatform.fontSize = 8;
+          fldPlatform.textColor = colors.darkText;
+          fldPlatform.borderStyle = 'none';
+          fldPlatform.value = sa.platform || '';
+          doc.addField(fldPlatform);
+
+          const fldCreds = new doc.AcroFormTextField();
+          fldCreds.fieldName = `sp_social_creds_${idx}_${si}`;
+          fldCreds.Rect = [socialColX[2] + 0.5, yPosition + 0.5, socialColWidths[2] - 1, socialRowH - 1];
+          fldCreds.fontSize = 8;
+          fldCreds.textColor = colors.darkText;
+          fldCreds.borderStyle = 'none';
+          fldCreds.value = sa.credentialsLocation || '';
+          doc.addField(fldCreds);
+
+          yPosition += socialRowH;
+        });
+        yPosition += 4;
       }
 
       if (sp.onlinePersonas && sp.onlinePersonas.length > 0) {
-        checkPage(8);
+        const personaHeaders = ['Persona', 'Name', 'Credentials Location'];
+        const personaColWidths = [fieldWidth * 0.12, fieldWidth * 0.38, fieldWidth * 0.50];
+        const personaColX = [margin, margin + personaColWidths[0], margin + personaColWidths[0] + personaColWidths[1]];
+        const personaRowH = 8;
+
+        checkPage(personaRowH * (sp.onlinePersonas.length + 1) + 6);
         doc.setFont(undefined, 'bold');
-        doc.text('Online Personas:', margin + 4, yPosition);
-        yPosition += 6;
-        sp.onlinePersonas.forEach((op, oi) => {
-          checkPage(12);
-          if (op.name) {
-            doc.setFont(undefined, 'bold');
-            doc.text(`Persona ${oi + 1}:`, margin + 8, yPosition);
-            doc.setFont(undefined, 'normal');
-            const fldPersonaName = new doc.AcroFormTextField();
-            fldPersonaName.fieldName = `sp_persona_name_${idx}_${oi}`;
-            fldPersonaName.Rect = [margin + 8 + doc.getTextWidth(`Persona ${oi + 1}:`) + 2, yPosition - 5.5, pageWidth - (margin + 8 + doc.getTextWidth(`Persona ${oi + 1}:`) + 2) - margin, 7];
-            fldPersonaName.fontSize = 9;
-            fldPersonaName.textColor = colors.darkText;
-            fldPersonaName.borderStyle = 'none';
-            fldPersonaName.value = op.name || '';
-            doc.addField(fldPersonaName);
-            yPosition += 6;
-          }
-          if (op.credentialsLocation) {
-            doc.setFont(undefined, 'bold');
-            doc.text('Credentials Location:', margin + 8, yPosition);
-            doc.setFont(undefined, 'normal');
-            const opLines = doc.splitTextToSize(op.credentialsLocation, fieldWidth - 52);
-            const fldPersonaCreds = new doc.AcroFormTextField();
-            fldPersonaCreds.fieldName = `sp_persona_creds_${idx}_${oi}`;
-            fldPersonaCreds.Rect = [margin + 52, yPosition - 5.5, pageWidth - (margin + 52) - margin, 7];
-            fldPersonaCreds.fontSize = 9;
-            fldPersonaCreds.textColor = colors.darkText;
-            fldPersonaCreds.borderStyle = 'none';
-            fldPersonaCreds.value = opLines[0] || '';
-            doc.addField(fldPersonaCreds);
-            yPosition += 6;
-          }
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.darkText);
+        doc.text('Online Personas', margin, yPosition);
+        yPosition += 5;
+
+        // Header row
+        doc.setDrawColor(180, 180, 180);
+        personaHeaders.forEach((h, ci) => {
+          doc.rect(personaColX[ci], yPosition, personaColWidths[ci], personaRowH);
+          doc.setFont(undefined, 'bold');
+          doc.setFontSize(8);
+          doc.text(h, personaColX[ci] + 2, yPosition + 5.5);
         });
+        yPosition += personaRowH;
+
+        sp.onlinePersonas.forEach((op, oi) => {
+          checkPage(personaRowH);
+          doc.setDrawColor(180, 180, 180);
+          personaColWidths.forEach((w, ci) => doc.rect(personaColX[ci], yPosition, w, personaRowH));
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(8);
+          doc.text(`${oi + 1}`, personaColX[0] + 2, yPosition + 5.5);
+
+          const fldPersonaName = new doc.AcroFormTextField();
+          fldPersonaName.fieldName = `sp_persona_name_${idx}_${oi}`;
+          fldPersonaName.Rect = [personaColX[1] + 0.5, yPosition + 0.5, personaColWidths[1] - 1, personaRowH - 1];
+          fldPersonaName.fontSize = 8;
+          fldPersonaName.textColor = colors.darkText;
+          fldPersonaName.borderStyle = 'none';
+          fldPersonaName.value = op.name || '';
+          doc.addField(fldPersonaName);
+
+          const fldPersonaCreds = new doc.AcroFormTextField();
+          fldPersonaCreds.fieldName = `sp_persona_creds_${idx}_${oi}`;
+          fldPersonaCreds.Rect = [personaColX[2] + 0.5, yPosition + 0.5, personaColWidths[2] - 1, personaRowH - 1];
+          fldPersonaCreds.fontSize = 8;
+          fldPersonaCreds.textColor = colors.darkText;
+          fldPersonaCreds.borderStyle = 'none';
+          fldPersonaCreds.value = op.credentialsLocation || '';
+          doc.addField(fldPersonaCreds);
+
+          yPosition += personaRowH;
+        });
+        yPosition += 4;
       }
     }
 
-    checkPage(10);
+    checkPage(15);
+    yPosition += 10;
+    doc.setFillColor(...colors.navyBlue);
+    doc.rect(margin, yPosition - 3, 2, 8, 'F');
+    doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
-    doc.setFontSize(10);
-    doc.text('ASSET AND LIABILITY INVENTORY', margin, yPosition);
-    yPosition += 7;
-    doc.setFontSize(10);
+    doc.setTextColor(...colors.mediumGray);
+    doc.text('Asset and Liability Inventory', margin + 5, yPosition + 3);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.darkText);
+    yPosition += 10;
 
     if (sp.hasMajorAssets === 'no') {
       checkPage(7);
       doc.setFont(undefined, 'normal');
+      doc.setFontSize(9);
       doc.text('No major assets.', margin, yPosition);
       yPosition += 7;
     } else if (sp.hasMajorAssets === 'yes' && sp.assets && sp.assets.length > 0) {
-      checkPage(8);
+      const assetHeaders = ['Asset Name', 'Asset Type', 'Location of Records'];
+      const assetColWidths = [fieldWidth * 0.35, fieldWidth * 0.25, fieldWidth * 0.40];
+      const assetColX = [margin, margin + assetColWidths[0], margin + assetColWidths[0] + assetColWidths[1]];
+      const assetRowH = 8;
+
+      checkPage(assetRowH * (sp.assets.length + 1) + 8);
       doc.setFont(undefined, 'bold');
-      doc.text('Major Assets:', margin, yPosition);
-      yPosition += 6;
-      sp.assets.forEach((asset, ai) => {
-        checkPage(14);
+      doc.setFontSize(9);
+      doc.setTextColor(...colors.darkText);
+      doc.text('Major Assets', margin, yPosition);
+      yPosition += 5;
+
+      doc.setDrawColor(180, 180, 180);
+      assetHeaders.forEach((h, ci) => {
+        doc.rect(assetColX[ci], yPosition, assetColWidths[ci], assetRowH);
         doc.setFont(undefined, 'bold');
-        doc.text(`Asset ${ai + 1}:`, margin + 4, yPosition);
-        yPosition += 6;
-        const assetFields: [string, string | undefined][] = [
-          ['Asset Name:', asset.name],
-          ['Asset Type:', asset.type],
-          ['Location of Records:', asset.recordsLocation],
-        ];
-        assetFields.forEach(([label, val], fieldIdx) => {
-          if (val) {
-            checkPage(7);
-            doc.setFont(undefined, 'bold');
-            doc.text(label, margin + 8, yPosition);
-            doc.setFont(undefined, 'normal');
-            const fldAssetVal = new doc.AcroFormTextField();
-            fldAssetVal.fieldName = `sp_asset_val_${idx}_${ai}_${fieldIdx}`;
-            fldAssetVal.Rect = [margin + 8 + doc.getTextWidth(label) + 2, yPosition - 5.5, pageWidth - (margin + 8 + doc.getTextWidth(label) + 2) - margin, 7];
-            fldAssetVal.fontSize = 9;
-            fldAssetVal.textColor = colors.darkText;
-            fldAssetVal.borderStyle = 'none';
-            fldAssetVal.value = val || '';
-            doc.addField(fldAssetVal);
-            yPosition += 6;
-          }
-        });
+        doc.setFontSize(8);
+        doc.text(h, assetColX[ci] + 2, yPosition + 5.5);
       });
+      yPosition += assetRowH;
+
+      sp.assets.forEach((asset, ai) => {
+        checkPage(assetRowH);
+        doc.setDrawColor(180, 180, 180);
+        assetColWidths.forEach((w, ci) => doc.rect(assetColX[ci], yPosition, w, assetRowH));
+
+        const fldAssetName = new doc.AcroFormTextField();
+        fldAssetName.fieldName = `sp_asset_name_${idx}_${ai}`;
+        fldAssetName.Rect = [assetColX[0] + 0.5, yPosition + 0.5, assetColWidths[0] - 1, assetRowH - 1];
+        fldAssetName.fontSize = 8;
+        fldAssetName.textColor = colors.darkText;
+        fldAssetName.borderStyle = 'none';
+        fldAssetName.value = asset.name || '';
+        doc.addField(fldAssetName);
+
+        const fldAssetType = new doc.AcroFormTextField();
+        fldAssetType.fieldName = `sp_asset_type_${idx}_${ai}`;
+        fldAssetType.Rect = [assetColX[1] + 0.5, yPosition + 0.5, assetColWidths[1] - 1, assetRowH - 1];
+        fldAssetType.fontSize = 8;
+        fldAssetType.textColor = colors.darkText;
+        fldAssetType.borderStyle = 'none';
+        fldAssetType.value = asset.type || '';
+        doc.addField(fldAssetType);
+
+        const fldAssetRecords = new doc.AcroFormTextField();
+        fldAssetRecords.fieldName = `sp_asset_records_${idx}_${ai}`;
+        fldAssetRecords.Rect = [assetColX[2] + 0.5, yPosition + 0.5, assetColWidths[2] - 1, assetRowH - 1];
+        fldAssetRecords.fontSize = 8;
+        fldAssetRecords.textColor = colors.darkText;
+        fldAssetRecords.borderStyle = 'none';
+        fldAssetRecords.value = asset.recordsLocation || '';
+        doc.addField(fldAssetRecords);
+
+        yPosition += assetRowH;
+      });
+      yPosition += 4;
     }
 
     if (sp.hasLiabilities === 'no') {
       checkPage(7);
       doc.setFont(undefined, 'normal');
+      doc.setFontSize(9);
       doc.text('No outstanding liabilities or debts.', margin, yPosition);
       yPosition += 7;
     } else if (sp.hasLiabilities === 'yes' && sp.liabilities && sp.liabilities.length > 0) {
-      checkPage(8);
+      const liabHeaders = ['Lender Name', 'Liability Type', 'Lender Contact', 'Location of Documentation'];
+      const liabColWidths = [fieldWidth * 0.25, fieldWidth * 0.20, fieldWidth * 0.25, fieldWidth * 0.30];
+      const liabColX = [
+        margin,
+        margin + liabColWidths[0],
+        margin + liabColWidths[0] + liabColWidths[1],
+        margin + liabColWidths[0] + liabColWidths[1] + liabColWidths[2],
+      ];
+      const liabRowH = 8;
+
+      checkPage(liabRowH * (sp.liabilities.length + 1) + 8);
       doc.setFont(undefined, 'bold');
-      doc.text('Outstanding Liabilities / Debts:', margin, yPosition);
-      yPosition += 6;
-      sp.liabilities.forEach((liability, li) => {
-        checkPage(18);
+      doc.setFontSize(9);
+      doc.setTextColor(...colors.darkText);
+      doc.text('Outstanding Liabilities / Debts', margin, yPosition);
+      yPosition += 5;
+
+      doc.setDrawColor(180, 180, 180);
+      liabHeaders.forEach((h, ci) => {
+        doc.rect(liabColX[ci], yPosition, liabColWidths[ci], liabRowH);
         doc.setFont(undefined, 'bold');
-        doc.text(`Liability ${li + 1}:`, margin + 4, yPosition);
-        yPosition += 6;
-        const liabilityFields: [string, string | undefined][] = [
-          ['Lender Name:', liability.lenderName],
-          ['Liability Type:', liability.liabilityType],
-          ['Lender Contact:', liability.lenderContact],
-          ['Location of Documentation:', liability.documentationLocation],
-        ];
-        liabilityFields.forEach(([label, val], fieldIdx) => {
-          if (val) {
-            checkPage(7);
-            doc.setFont(undefined, 'bold');
-            doc.text(label, margin + 8, yPosition);
-            doc.setFont(undefined, 'normal');
-            const fldLiabVal = new doc.AcroFormTextField();
-            fldLiabVal.fieldName = `sp_liab_val_${idx}_${li}_${fieldIdx}`;
-            fldLiabVal.Rect = [margin + 8 + doc.getTextWidth(label) + 2, yPosition - 5.5, pageWidth - (margin + 8 + doc.getTextWidth(label) + 2) - margin, 7];
-            fldLiabVal.fontSize = 9;
-            fldLiabVal.textColor = colors.darkText;
-            fldLiabVal.borderStyle = 'none';
-            fldLiabVal.value = val || '';
-            doc.addField(fldLiabVal);
-            yPosition += 6;
-          }
-        });
+        doc.setFontSize(8);
+        doc.text(h, liabColX[ci] + 2, yPosition + 5.5);
       });
+      yPosition += liabRowH;
+
+      sp.liabilities.forEach((liability, li) => {
+        checkPage(liabRowH);
+        doc.setDrawColor(180, 180, 180);
+        liabColWidths.forEach((w, ci) => doc.rect(liabColX[ci], yPosition, w, liabRowH));
+
+        const fldLiabLender = new doc.AcroFormTextField();
+        fldLiabLender.fieldName = `sp_liab_lender_${idx}_${li}`;
+        fldLiabLender.Rect = [liabColX[0] + 0.5, yPosition + 0.5, liabColWidths[0] - 1, liabRowH - 1];
+        fldLiabLender.fontSize = 8;
+        fldLiabLender.textColor = colors.darkText;
+        fldLiabLender.borderStyle = 'none';
+        fldLiabLender.value = liability.lenderName || '';
+        doc.addField(fldLiabLender);
+
+        const fldLiabType = new doc.AcroFormTextField();
+        fldLiabType.fieldName = `sp_liab_type_${idx}_${li}`;
+        fldLiabType.Rect = [liabColX[1] + 0.5, yPosition + 0.5, liabColWidths[1] - 1, liabRowH - 1];
+        fldLiabType.fontSize = 8;
+        fldLiabType.textColor = colors.darkText;
+        fldLiabType.borderStyle = 'none';
+        fldLiabType.value = liability.liabilityType || '';
+        doc.addField(fldLiabType);
+
+        const fldLiabContact = new doc.AcroFormTextField();
+        fldLiabContact.fieldName = `sp_liab_contact_${idx}_${li}`;
+        fldLiabContact.Rect = [liabColX[2] + 0.5, yPosition + 0.5, liabColWidths[2] - 1, liabRowH - 1];
+        fldLiabContact.fontSize = 8;
+        fldLiabContact.textColor = colors.darkText;
+        fldLiabContact.borderStyle = 'none';
+        fldLiabContact.value = liability.lenderContact || '';
+        doc.addField(fldLiabContact);
+
+        const fldLiabDoc = new doc.AcroFormTextField();
+        fldLiabDoc.fieldName = `sp_liab_doc_${idx}_${li}`;
+        fldLiabDoc.Rect = [liabColX[3] + 0.5, yPosition + 0.5, liabColWidths[3] - 1, liabRowH - 1];
+        fldLiabDoc.fontSize = 8;
+        fldLiabDoc.textColor = colors.darkText;
+        fldLiabDoc.borderStyle = 'none';
+        fldLiabDoc.value = liability.documentationLocation || '';
+        doc.addField(fldLiabDoc);
+
+        yPosition += liabRowH;
+      });
+      yPosition += 4;
     }
 
     checkPage(10);

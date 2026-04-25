@@ -198,6 +198,15 @@ interface FormData {
     countryOfResidence?: string;
     phoneNumber?: string;
     emailAddress?: string;
+    _selectedPerson?: string;
+  }>;
+  trustTrusteesData?: Array<{
+    trusteeName?: string;
+    relationshipToSettlor?: string;
+    countryOfResidence?: string;
+    phoneNumber?: string;
+    emailAddress?: string;
+    _selectedPerson?: string;
   }>;
   hasSoleProprietorship?: string;
   soleProprietorshipCount?: string;
@@ -2486,55 +2495,72 @@ export const generatePDF = (formData: FormData) => {
     doc.text('Trustee Information:', margin, yPosition);
     yPosition += 8;
 
-    const tiRowHeight = 10;
-    const tiHeaderHeight = 12;
-    const tiRowCount = 6;
-    const tiCol1Width = fieldWidth * 0.40;
-    const tiCol2Width = fieldWidth * 0.30;
-    const tiCol3Width = fieldWidth * 0.30;
+    const trustees = formData.trustTrusteesData || [];
+    if (trustees.length > 0) {
+      const tiColWidths = [fieldWidth * 0.22, fieldWidth * 0.20, fieldWidth * 0.20, fieldWidth * 0.19, fieldWidth * 0.19];
+      const tiColHeaders = ['Name', 'Relationship', 'Country', 'Phone', 'Email'];
+      const tiHeaderH = 7;
+      const tiRowH = 7;
 
-    const tiHeaders = ['Trustee Name:', 'Phone Number:', 'Email Address:'];
+      checkPageBreak(tiHeaderH + trustees.length * tiRowH + 8);
 
-    currentY = yPosition;
-    doc.setLineWidth(0.5);
-
-    tiHeaders.forEach((header, colIdx) => {
-      const colWidths = [tiCol1Width, tiCol2Width, tiCol3Width];
-      const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-      doc.setDrawColor(180, 180, 180);
-      doc.setFillColor(250, 250, 250);
-      doc.rect(xPos, currentY, colWidths[colIdx], tiHeaderHeight, 'FD');
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(0, 0, 0);
-      const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
-      const textY = currentY + (tiHeaderHeight - lines.length * 2.5) / 2 + 2.5;
-      doc.text(lines, xPos + 1, textY);
-    });
-
-    currentY += tiHeaderHeight;
-
-    for (let rowIdx = 0; rowIdx < tiRowCount; rowIdx++) {
-      const rowY = currentY;
-      [tiCol1Width, tiCol2Width, tiCol3Width].forEach((colWidth, colIdx) => {
-        const xPos = margin + [0, tiCol1Width, tiCol1Width + tiCol2Width][colIdx];
+      // Header row
+      doc.setFillColor(230, 236, 245);
+      let tiColX = margin;
+      tiColWidths.forEach((w) => {
         doc.setDrawColor(...colors.borderGray);
         doc.setLineWidth(0.5);
-        doc.rect(xPos, rowY, colWidth, tiRowHeight);
+        doc.rect(tiColX, yPosition, w, tiHeaderH, 'FD');
+        tiColX += w;
+      });
+      tiColX = margin;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
+      tiColHeaders.forEach((h, ci) => {
+        doc.text(h, tiColX + 1.5, yPosition + 4.8);
+        tiColX += tiColWidths[ci];
+      });
+      yPosition += tiHeaderH;
 
-        const field = new doc.AcroFormTextField();
-        field.fieldName = `trust_trustee_${rowIdx}_${colIdx}`;
-        field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, tiRowHeight - 1];
-        field.fontSize = 8;
-        field.textColor = colors.darkText;
-        field.borderStyle = 'none';
-        doc.addField(field);
+      // Data rows
+      trustees.forEach((t, i) => {
+        const effectiveName = t?.trusteeName || (t?._selectedPerson !== '__other__' ? t?._selectedPerson : '') || '';
+        const rowValues = [
+          effectiveName,
+          t?.relationshipToSettlor || '',
+          t?.countryOfResidence || '',
+          t?.phoneNumber || '',
+          t?.emailAddress || '',
+        ];
+
+        checkPageBreak(tiRowH);
+        const rowY = yPosition;
+        tiColX = margin;
+        doc.setFillColor(i % 2 === 0 ? 255 : 248, i % 2 === 0 ? 255 : 250, i % 2 === 0 ? 255 : 252);
+        tiColWidths.forEach((w) => {
+          doc.setDrawColor(...colors.borderGray);
+          doc.setLineWidth(0.4);
+          doc.rect(tiColX, rowY, w, tiRowH, 'FD');
+          tiColX += w;
+        });
+        tiColX = margin;
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...colors.darkText);
+        rowValues.forEach((val, ci) => {
+          const maxW = tiColWidths[ci] - 3;
+          const truncated = doc.splitTextToSize(val, maxW)[0] || '';
+          doc.text(truncated, tiColX + 1.5, rowY + 4.8);
+          tiColX += tiColWidths[ci];
+        });
+        yPosition += tiRowH;
       });
 
-      currentY += tiRowHeight;
+      yPosition += 12;
+    } else {
+      yPosition += 4;
     }
-
-    yPosition = currentY + 12;
 
     if (yPosition + 100 > pageHeight - margin) {
       doc.addPage();

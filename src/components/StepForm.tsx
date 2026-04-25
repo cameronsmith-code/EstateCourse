@@ -476,7 +476,7 @@ export default function StepForm({
     if (answers['hasFamilyTrust'] !== 'yes') {
       const keysToClear = [
         'trustLegalName', 'trustDeedLocation', 'trustYearEstablished',
-        'trustBeneficiariesData'
+        'trustBeneficiariesData', 'trustTrusteesData'
       ];
       keysToClear.forEach(key => {
         if (answers[key] !== undefined) {
@@ -1213,6 +1213,47 @@ export default function StepForm({
     }
   };
 
+  const trustTrusteesData: Array<Record<string, string>> = (answers['trustTrusteesData'] as Array<Record<string, string>>) || [{}];
+
+  const handleTrusteeChange = (index: number, field: string, value: string) => {
+    const updated = [...trustTrusteesData];
+    if (!updated[index]) updated[index] = {};
+    updated[index][field] = value;
+    onAnswerChange('trustTrusteesData', updated);
+  };
+
+  const handleTrusteeSelect = (index: number, selectedName: string) => {
+    const updated = [...trustTrusteesData];
+    if (!updated[index]) updated[index] = {};
+    if (selectedName === '__other__') {
+      updated[index] = { ...updated[index], trusteeName: '', _selectedPerson: '__other__' };
+    } else {
+      const person = knownPeople.find((p) => p.name === selectedName);
+      if (person) {
+        updated[index] = {
+          ...updated[index],
+          trusteeName: person.name,
+          relationshipToSettlor: person.relationship,
+          _selectedPerson: selectedName,
+          ...(person.phoneNumber ? { phoneNumber: person.phoneNumber } : {}),
+          ...(person.emailAddress ? { emailAddress: person.emailAddress } : {}),
+          ...(person.countryOfResidence ? { countryOfResidence: person.countryOfResidence } : {}),
+        };
+      }
+    }
+    onAnswerChange('trustTrusteesData', updated);
+  };
+
+  const handleAddTrustee = () => {
+    onAnswerChange('trustTrusteesData', [...trustTrusteesData, {}]);
+  };
+
+  const handleRemoveLastTrustee = () => {
+    if (trustTrusteesData.length > 1) {
+      onAnswerChange('trustTrusteesData', trustTrusteesData.slice(0, -1));
+    }
+  };
+
   // Collect all named people from previous steps for the beneficiary dropdown
   type KnownPerson = {
     name: string;
@@ -1456,7 +1497,8 @@ export default function StepForm({
               })}
 
               {answers['hasFamilyTrust'] === 'yes' && (
-                <div className="space-y-6 mt-6">
+                <div className="space-y-10 mt-6">
+                  <div className="space-y-6">
                   <h3 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Beneficiary Information:</h3>
                   {trustBeneficiariesData.map((_, index) => {
                     const bData = trustBeneficiariesData[index] || {};
@@ -1612,6 +1654,162 @@ export default function StepForm({
                       </div>
                     );
                   })}
+                  </div>
+
+                  {/* Trustee Information */}
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Trustee Information:</h3>
+                    {trustTrusteesData.map((_, index) => {
+                      const tData = trustTrusteesData[index] || {};
+                      const selectedPerson = tData._selectedPerson as string | undefined;
+                      const isOther = !selectedPerson || selectedPerson === '__other__';
+                      const knownPerson = !isOther ? knownPeople.find((p) => p.name === selectedPerson) : null;
+                      const isLast = index === trustTrusteesData.length - 1;
+
+                      return (
+                        <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700 space-y-4">
+                          {trustTrusteesData.length > 1 && (
+                            <h4 className="text-base font-semibold text-white">Trustee {index + 1}</h4>
+                          )}
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Trustee Name *
+                            </label>
+                            {knownPeople.length > 0 ? (
+                              <select
+                                value={selectedPerson || ''}
+                                onChange={(e) => handleTrusteeSelect(index, e.target.value)}
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              >
+                                <option value="">Select a trustee...</option>
+                                {knownPeople.map((p) => (
+                                  <option key={p.name} value={p.name}>{p.name}</option>
+                                ))}
+                                <option value="__other__">Other</option>
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                value={tData.trusteeName || ''}
+                                onChange={(e) => handleTrusteeChange(index, 'trusteeName', e.target.value)}
+                                placeholder="Enter trustee name"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            )}
+                          </div>
+
+                          {knownPeople.length > 0 && isOther && selectedPerson === '__other__' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Full Name *
+                              </label>
+                              <input
+                                type="text"
+                                value={tData.trusteeName || ''}
+                                onChange={(e) => handleTrusteeChange(index, 'trusteeName', e.target.value)}
+                                placeholder="Enter trustee name"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          )}
+
+                          {selectedPerson && (
+                            <>
+                              {(!knownPerson || !knownPerson.relationship) && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Relationship to Settlor *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={tData.relationshipToSettlor || ''}
+                                    onChange={(e) => handleTrusteeChange(index, 'relationshipToSettlor', e.target.value)}
+                                    placeholder="e.g., Daughter, Son, Spouse, etc."
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                              )}
+
+                              {(!knownPerson || !knownPerson.hasCountry) && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Country of Residence
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={tData.countryOfResidence || ''}
+                                    onChange={(e) => handleTrusteeChange(index, 'countryOfResidence', e.target.value)}
+                                    placeholder="Enter country of residence"
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                              )}
+
+                              {(!knownPerson || !knownPerson.hasPhone) && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Phone Number
+                                  </label>
+                                  <input
+                                    type="tel"
+                                    value={tData.phoneNumber || ''}
+                                    onChange={(e) => handleTrusteeChange(index, 'phoneNumber', e.target.value)}
+                                    placeholder="Enter phone number"
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                              )}
+
+                              {(!knownPerson || !knownPerson.hasEmail) && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Email Address
+                                  </label>
+                                  <input
+                                    type="email"
+                                    value={tData.emailAddress || ''}
+                                    onChange={(e) => handleTrusteeChange(index, 'emailAddress', e.target.value)}
+                                    placeholder="Enter email address"
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                              )}
+
+                              {isLast && (
+                                <div className="pt-2 border-t border-gray-600">
+                                  <p className="text-sm font-medium text-gray-300 mb-3">
+                                    Are there any additional trustees?
+                                  </p>
+                                  <div className="flex gap-3">
+                                    <button
+                                      type="button"
+                                      onClick={handleAddTrustee}
+                                      className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
+                                    >
+                                      Yes
+                                    </button>
+                                    {trustTrusteesData.length > 1 && (
+                                      <button
+                                        type="button"
+                                        onClick={handleRemoveLastTrustee}
+                                        className="px-5 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm font-medium rounded-lg transition-colors"
+                                      >
+                                        Remove
+                                      </button>
+                                    )}
+                                    <span className="px-5 py-2 text-gray-400 text-sm font-medium">
+                                      No
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </>

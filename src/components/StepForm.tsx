@@ -1345,6 +1345,20 @@ export default function StepForm({
       }
     });
 
+    // Enrich people with any data already collected in trustBeneficiariesData
+    const beneficiaryEntries = (allData['trustBeneficiariesData'] as Array<Record<string, string>>) || [];
+    beneficiaryEntries.forEach((entry) => {
+      const entryName = entry?.beneficiaryName || (entry?._selectedPerson !== '__other__' ? entry?._selectedPerson : '');
+      if (!entryName) return;
+      const existing = people.find((p) => p.name === entryName);
+      if (existing) {
+        if (entry.countryOfResidence) existing.countryOfResidence = entry.countryOfResidence;
+        if (entry.phoneNumber) existing.phoneNumber = entry.phoneNumber;
+        if (entry.emailAddress) existing.emailAddress = entry.emailAddress;
+        if (entry.relationshipToSettlor) existing.relationship = entry.relationshipToSettlor;
+      }
+    });
+
     // Deduplicate by name
     const seen = new Set<string>();
     return people.filter((p) => {
@@ -1575,7 +1589,7 @@ export default function StepForm({
                               </div>
                             )}
 
-                            {(!knownPerson || !knownPerson.hasCountry) && (
+                            {(!knownPerson || !knownPerson.countryOfResidence) && (
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Country of Residence
@@ -1590,7 +1604,7 @@ export default function StepForm({
                               </div>
                             )}
 
-                            {(!knownPerson || !knownPerson.hasPhone) && (
+                            {(!knownPerson || !knownPerson.phoneNumber) && (
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Phone Number
@@ -1605,7 +1619,7 @@ export default function StepForm({
                               </div>
                             )}
 
-                            {(!knownPerson || !knownPerson.hasEmail) && (
+                            {(!knownPerson || !knownPerson.emailAddress) && (
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Email Address
@@ -1731,7 +1745,7 @@ export default function StepForm({
                                 </div>
                               )}
 
-                              {(!knownPerson || !knownPerson.hasCountry) && (
+                              {(!knownPerson || !knownPerson.countryOfResidence) && (
                                 <div>
                                   <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Country of Residence
@@ -1746,7 +1760,7 @@ export default function StepForm({
                                 </div>
                               )}
 
-                              {(!knownPerson || !knownPerson.hasPhone) && (
+                              {(!knownPerson || !knownPerson.phoneNumber) && (
                                 <div>
                                   <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Phone Number
@@ -1761,7 +1775,7 @@ export default function StepForm({
                                 </div>
                               )}
 
-                              {(!knownPerson || !knownPerson.hasEmail) && (
+                              {(!knownPerson || !knownPerson.emailAddress) && (
                                 <div>
                                   <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Email Address

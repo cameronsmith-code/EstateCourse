@@ -476,7 +476,7 @@ export default function StepForm({
     if (answers['hasFamilyTrust'] !== 'yes') {
       const keysToClear = [
         'trustLegalName', 'trustDeedLocation', 'trustYearEstablished',
-        'trustBeneficiariesData', 'trustTrusteesData'
+        'trustBeneficiariesCount', 'trustBeneficiariesData'
       ];
       keysToClear.forEach(key => {
         if (answers[key] !== undefined) {
@@ -568,6 +568,14 @@ export default function StepForm({
       }
     }
   }, [answers['client2HasPension']]);
+
+  useEffect(() => {
+    const count = parseInt(answers['trustBeneficiariesCount'] as string) || 0;
+    const data = answers['trustBeneficiariesData'] as Array<unknown> | undefined;
+    if (data && data.length > count) {
+      onAnswerChange('trustBeneficiariesData', data.slice(0, count));
+    }
+  }, [answers['trustBeneficiariesCount']]);
 
   useEffect(() => {
     const count = parseInt(answers['numberOfCorporations'] as string) || 0;
@@ -814,17 +822,26 @@ export default function StepForm({
       }
     } else if (step.id === 4) {
       if (answers['hasFamilyTrust'] === 'yes') {
-        const trustBeneficiariesData = answers['trustBeneficiariesData'] as Array<Record<string, string>> | undefined;
-        const beneficiaries = trustBeneficiariesData || [];
+        if (!answers['trustBeneficiariesCount']) {
+          setValidationError('Please specify the number of beneficiaries for the trust.');
+          return;
+        }
 
-        for (let i = 0; i < beneficiaries.length; i++) {
-          const beneficiary = beneficiaries[i];
-          const effectiveName = beneficiary?.beneficiaryName || beneficiary?._selectedPerson;
-          const effectiveRelationship = beneficiary?.relationshipToSettlor;
-          const isKnownPerson = beneficiary?._selectedPerson && beneficiary?._selectedPerson !== '__other__';
-          if (effectiveName && !isKnownPerson && !effectiveRelationship) {
-            setValidationError(`Please fill in the relationship for beneficiary ${i + 1}.`);
+        const beneficiariesCount = parseInt(answers['trustBeneficiariesCount'] as string);
+        const trustBeneficiariesData = answers['trustBeneficiariesData'] as Array<Record<string, string>> | undefined;
+
+        if (beneficiariesCount > 0) {
+          if (!trustBeneficiariesData || trustBeneficiariesData.length < beneficiariesCount) {
+            setValidationError('Please fill in details for all beneficiaries.');
             return;
+          }
+
+          for (let i = 0; i < beneficiariesCount; i++) {
+            const beneficiary = trustBeneficiariesData[i];
+            if (!beneficiary?.beneficiaryName || !beneficiary?.relationshipToSettlor) {
+              setValidationError(`Please fill in name and relationship for beneficiary ${i + 1}.`);
+              return;
+            }
           }
         }
       }
@@ -1192,7 +1209,8 @@ export default function StepForm({
     onAnswerChange('client2FinancialAdvisorsData', updated);
   };
 
-  const trustBeneficiariesData: Array<Record<string, string>> = (answers['trustBeneficiariesData'] as Array<Record<string, string>>) || [{}];
+  const trustBeneficiariesCount = parseInt(answers['trustBeneficiariesCount'] as string) || 0;
+  const trustBeneficiariesData = (answers['trustBeneficiariesData'] as Array<Record<string, string>>) || Array(Math.max(0, trustBeneficiariesCount || 0)).fill(null).map(() => ({}));
 
   const handleBeneficiaryChange = (index: number, field: string, value: string) => {
     const updated = [...trustBeneficiariesData];
@@ -1200,196 +1218,6 @@ export default function StepForm({
       updated[index] = {};
     }
     updated[index][field] = value;
-    onAnswerChange('trustBeneficiariesData', updated);
-  };
-
-  const handleAddBeneficiary = () => {
-    onAnswerChange('trustBeneficiariesData', [...trustBeneficiariesData, {}]);
-  };
-
-  const handleRemoveLastBeneficiary = () => {
-    if (trustBeneficiariesData.length > 1) {
-      onAnswerChange('trustBeneficiariesData', trustBeneficiariesData.slice(0, -1));
-    }
-  };
-
-  const trustTrusteesData: Array<Record<string, string>> = (answers['trustTrusteesData'] as Array<Record<string, string>>) || [{}];
-
-  const handleTrusteeChange = (index: number, field: string, value: string) => {
-    const updated = [...trustTrusteesData];
-    if (!updated[index]) updated[index] = {};
-    updated[index][field] = value;
-    onAnswerChange('trustTrusteesData', updated);
-  };
-
-  const handleTrusteeSelect = (index: number, selectedName: string) => {
-    const updated = [...trustTrusteesData];
-    if (!updated[index]) updated[index] = {};
-    if (selectedName === '__other__') {
-      updated[index] = { ...updated[index], trusteeName: '', _selectedPerson: '__other__' };
-    } else {
-      const person = knownPeople.find((p) => p.name === selectedName);
-      if (person) {
-        updated[index] = {
-          ...updated[index],
-          trusteeName: person.name,
-          relationshipToSettlor: person.relationship,
-          _selectedPerson: selectedName,
-          ...(person.phoneNumber ? { phoneNumber: person.phoneNumber } : {}),
-          ...(person.emailAddress ? { emailAddress: person.emailAddress } : {}),
-          ...(person.countryOfResidence ? { countryOfResidence: person.countryOfResidence } : {}),
-        };
-      }
-    }
-    onAnswerChange('trustTrusteesData', updated);
-  };
-
-  const handleAddTrustee = () => {
-    onAnswerChange('trustTrusteesData', [...trustTrusteesData, {}]);
-  };
-
-  const handleRemoveLastTrustee = () => {
-    if (trustTrusteesData.length > 1) {
-      onAnswerChange('trustTrusteesData', trustTrusteesData.slice(0, -1));
-    }
-  };
-
-  // Collect all named people from previous steps for the beneficiary dropdown
-  type KnownPerson = {
-    name: string;
-    relationship: string;
-    countryOfResidence?: string;
-    phoneNumber?: string;
-    emailAddress?: string;
-    // Fields that have already been collected for this person
-    hasPhone: boolean;
-    hasEmail: boolean;
-    hasCountry: boolean;
-  };
-
-  const getKnownPeople = (): KnownPerson[] => {
-    const people: KnownPerson[] = [];
-    const allData = allAnswers
-      ? Object.fromEntries(Array.from(allAnswers.entries()).flatMap(([, s]) => Object.entries(s)))
-      : {};
-
-    // Spouse / partner
-    const spouseName = (allData['spouseName'] as string) || '';
-    if (spouseName) {
-      people.push({
-        name: spouseName,
-        relationship: 'Spouse/Partner',
-        phoneNumber: (allData['spousePhone'] as string) || '',
-        emailAddress: (allData['spouseEmail'] as string) || '',
-        countryOfResidence: '',
-        hasPhone: !!(allData['spousePhone'] as string),
-        hasEmail: !!(allData['spouseEmail'] as string),
-        hasCountry: false,
-      });
-    }
-
-    // Former spouses (client 1)
-    const c1Prev = (allData['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
-    c1Prev.forEach((rel) => {
-      if (rel?.name) {
-        people.push({
-          name: rel.name,
-          relationship: 'Former Spouse/Partner',
-          hasPhone: false,
-          hasEmail: false,
-          hasCountry: false,
-        });
-      }
-    });
-
-    // Former spouses (client 2)
-    const c2Prev = (allData['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
-    c2Prev.forEach((rel) => {
-      if (rel?.name) {
-        people.push({
-          name: rel.name,
-          relationship: 'Former Spouse/Partner',
-          hasPhone: false,
-          hasEmail: false,
-          hasCountry: false,
-        });
-      }
-    });
-
-    // Children
-    const childrenData = (allData['childrenData'] as Array<Record<string, string>>) || [];
-    childrenData.forEach((child) => {
-      if (child?.name) {
-        people.push({
-          name: child.name,
-          relationship: 'Child',
-          hasPhone: false,
-          hasEmail: false,
-          hasCountry: !!(child.countryOfResidence || child.provinceTerritory),
-          countryOfResidence: child.countryOfResidence || (child.canadianResident === 'yes' ? 'Canada' : ''),
-        });
-        // Grandchildren
-        const gcCount = parseInt(child.numberOfGrandchildren) || 0;
-        for (let gi = 1; gi <= gcCount; gi++) {
-          const gcName = child[`grandchild${gi}Name`] as string;
-          if (gcName) {
-            people.push({
-              name: gcName,
-              relationship: 'Grandchild',
-              hasPhone: false,
-              hasEmail: false,
-              hasCountry: false,
-            });
-          }
-        }
-      }
-    });
-
-    // Enrich people with any data already collected in trustBeneficiariesData
-    const beneficiaryEntries = (allData['trustBeneficiariesData'] as Array<Record<string, string>>) || [];
-    beneficiaryEntries.forEach((entry) => {
-      const entryName = entry?.beneficiaryName || (entry?._selectedPerson !== '__other__' ? entry?._selectedPerson : '');
-      if (!entryName) return;
-      const existing = people.find((p) => p.name === entryName);
-      if (existing) {
-        if (entry.countryOfResidence) existing.countryOfResidence = entry.countryOfResidence;
-        if (entry.phoneNumber) existing.phoneNumber = entry.phoneNumber;
-        if (entry.emailAddress) existing.emailAddress = entry.emailAddress;
-        if (entry.relationshipToSettlor) existing.relationship = entry.relationshipToSettlor;
-      }
-    });
-
-    // Deduplicate by name
-    const seen = new Set<string>();
-    return people.filter((p) => {
-      if (seen.has(p.name)) return false;
-      seen.add(p.name);
-      return true;
-    });
-  };
-
-  const knownPeople = getKnownPeople();
-
-  const handleBeneficiarySelect = (index: number, selectedName: string) => {
-    const updated = [...trustBeneficiariesData];
-    if (!updated[index]) updated[index] = {};
-
-    if (selectedName === '__other__') {
-      updated[index] = { ...updated[index], beneficiaryName: '', _selectedPerson: '__other__' };
-    } else {
-      const person = knownPeople.find((p) => p.name === selectedName);
-      if (person) {
-        updated[index] = {
-          ...updated[index],
-          beneficiaryName: person.name,
-          relationshipToSettlor: person.relationship,
-          _selectedPerson: selectedName,
-          ...(person.phoneNumber ? { phoneNumber: person.phoneNumber } : {}),
-          ...(person.emailAddress ? { emailAddress: person.emailAddress } : {}),
-          ...(person.countryOfResidence ? { countryOfResidence: person.countryOfResidence } : {}),
-        };
-      }
-    }
     onAnswerChange('trustBeneficiariesData', updated);
   };
 
@@ -1496,7 +1324,7 @@ export default function StepForm({
                 if (question.key === 'trustYearEstablished' && answers['hasFamilyTrust'] !== 'yes') {
                   return null;
                 }
-                if (question.key === 'trustBeneficiariesCount') {
+                if (question.key === 'trustBeneficiariesCount' && answers['hasFamilyTrust'] !== 'yes') {
                   return null;
                 }
 
@@ -1510,320 +1338,81 @@ export default function StepForm({
                 );
               })}
 
-              {answers['hasFamilyTrust'] === 'yes' && (
-                <div className="space-y-10 mt-6">
-                  <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Beneficiary Information:</h3>
-                  {trustBeneficiariesData.map((_, index) => {
-                    const bData = trustBeneficiariesData[index] || {};
-                    const selectedPerson = bData._selectedPerson as string | undefined;
-                    const isOther = !selectedPerson || selectedPerson === '__other__';
-                    const knownPerson = !isOther ? knownPeople.find((p) => p.name === selectedPerson) : null;
-                    const isLast = index === trustBeneficiariesData.length - 1;
+              {answers['hasFamilyTrust'] === 'yes' && trustBeneficiariesCount > 0 && (
+                <div className="space-y-6 mt-6">
+                  <h3 className="text-xl font-semibold text-white">Trust Beneficiaries</h3>
+                  {Array.from({ length: trustBeneficiariesCount }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white mb-4">Beneficiary {index + 1}</h4>
 
-                    return (
-                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700 space-y-4">
-                        {trustBeneficiariesData.length > 1 && (
-                          <h4 className="text-base font-semibold text-white">Beneficiary {index + 1}</h4>
-                        )}
-
-                        {/* Beneficiary selector */}
+                      <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Beneficiary Name *
                           </label>
-                          {knownPeople.length > 0 ? (
-                            <select
-                              value={selectedPerson || ''}
-                              onChange={(e) => handleBeneficiarySelect(index, e.target.value)}
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                              <option value="">Select a beneficiary...</option>
-                              {knownPeople.map((p) => (
-                                <option key={p.name} value={p.name}>{p.name}</option>
-                              ))}
-                              <option value="__other__">Other</option>
-                            </select>
-                          ) : (
-                            <input
-                              type="text"
-                              value={bData.beneficiaryName || ''}
-                              onChange={(e) => handleBeneficiaryChange(index, 'beneficiaryName', e.target.value)}
-                              placeholder="Enter beneficiary name"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          )}
+                          <input
+                            type="text"
+                            value={trustBeneficiariesData[index]?.beneficiaryName || ''}
+                            onChange={(e) => handleBeneficiaryChange(index, 'beneficiaryName', e.target.value)}
+                            placeholder="Enter beneficiary name"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
                         </div>
 
-                        {/* Name text field only shown for "Other" */}
-                        {knownPeople.length > 0 && isOther && selectedPerson === '__other__' && (
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Full Name *
-                            </label>
-                            <input
-                              type="text"
-                              value={bData.beneficiaryName || ''}
-                              onChange={(e) => handleBeneficiaryChange(index, 'beneficiaryName', e.target.value)}
-                              placeholder="Enter beneficiary name"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                        )}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Relationship to Settlor *
+                          </label>
+                          <input
+                            type="text"
+                            value={trustBeneficiariesData[index]?.relationshipToSettlor || ''}
+                            onChange={(e) => handleBeneficiaryChange(index, 'relationshipToSettlor', e.target.value)}
+                            placeholder="e.g., Daughter, Son, Spouse, etc."
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
 
-                        {/* Only show fields once a selection has been made */}
-                        {selectedPerson && (
-                          <>
-                            {(!knownPerson || !knownPerson.relationship) && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Relationship to Settlor *
-                                </label>
-                                <input
-                                  type="text"
-                                  value={bData.relationshipToSettlor || ''}
-                                  onChange={(e) => handleBeneficiaryChange(index, 'relationshipToSettlor', e.target.value)}
-                                  placeholder="e.g., Daughter, Son, Spouse, etc."
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
-                            )}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Country of Residence
+                          </label>
+                          <input
+                            type="text"
+                            value={trustBeneficiariesData[index]?.countryOfResidence || ''}
+                            onChange={(e) => handleBeneficiaryChange(index, 'countryOfResidence', e.target.value)}
+                            placeholder="Enter country of residence"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
 
-                            {(!knownPerson || !knownPerson.countryOfResidence) && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Country of Residence
-                                </label>
-                                <input
-                                  type="text"
-                                  value={bData.countryOfResidence || ''}
-                                  onChange={(e) => handleBeneficiaryChange(index, 'countryOfResidence', e.target.value)}
-                                  placeholder="Enter country of residence"
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
-                            )}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Phone Number
+                          </label>
+                          <input
+                            type="tel"
+                            value={trustBeneficiariesData[index]?.phoneNumber || ''}
+                            onChange={(e) => handleBeneficiaryChange(index, 'phoneNumber', e.target.value)}
+                            placeholder="Enter phone number"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
 
-                            {(!knownPerson || !knownPerson.phoneNumber) && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Phone Number
-                                </label>
-                                <input
-                                  type="tel"
-                                  value={bData.phoneNumber || ''}
-                                  onChange={(e) => handleBeneficiaryChange(index, 'phoneNumber', e.target.value)}
-                                  placeholder="Enter phone number"
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
-                            )}
-
-                            {(!knownPerson || !knownPerson.emailAddress) && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Email Address
-                                </label>
-                                <input
-                                  type="email"
-                                  value={bData.emailAddress || ''}
-                                  onChange={(e) => handleBeneficiaryChange(index, 'emailAddress', e.target.value)}
-                                  placeholder="Enter email address"
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
-                            )}
-
-                            {/* "Are there any additional beneficiaries?" — only on the last card */}
-                            {isLast && (
-                              <div className="pt-2 border-t border-gray-600">
-                                <p className="text-sm font-medium text-gray-300 mb-3">
-                                  Are there any additional beneficiaries?
-                                </p>
-                                <div className="flex gap-3">
-                                  <button
-                                    type="button"
-                                    onClick={handleAddBeneficiary}
-                                    className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
-                                  >
-                                    Yes
-                                  </button>
-                                  {trustBeneficiariesData.length > 1 && (
-                                    <button
-                                      type="button"
-                                      onClick={handleRemoveLastBeneficiary}
-                                      className="px-5 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm font-medium rounded-lg transition-colors"
-                                    >
-                                      Remove
-                                    </button>
-                                  )}
-                                  <span className="px-5 py-2 text-gray-400 text-sm font-medium">
-                                    No
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </>
-                        )}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Email Address
+                          </label>
+                          <input
+                            type="email"
+                            value={trustBeneficiariesData[index]?.emailAddress || ''}
+                            onChange={(e) => handleBeneficiaryChange(index, 'emailAddress', e.target.value)}
+                            placeholder="Enter email address"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
                       </div>
-                    );
-                  })}
-                  </div>
-
-                  {/* Trustee Information */}
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Trustee Information:</h3>
-                    {trustTrusteesData.map((_, index) => {
-                      const tData = trustTrusteesData[index] || {};
-                      const selectedPerson = tData._selectedPerson as string | undefined;
-                      const isOther = !selectedPerson || selectedPerson === '__other__';
-                      const knownPerson = !isOther ? knownPeople.find((p) => p.name === selectedPerson) : null;
-                      const isLast = index === trustTrusteesData.length - 1;
-
-                      return (
-                        <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700 space-y-4">
-                          {trustTrusteesData.length > 1 && (
-                            <h4 className="text-base font-semibold text-white">Trustee {index + 1}</h4>
-                          )}
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Trustee Name *
-                            </label>
-                            {knownPeople.length > 0 ? (
-                              <select
-                                value={selectedPerson || ''}
-                                onChange={(e) => handleTrusteeSelect(index, e.target.value)}
-                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              >
-                                <option value="">Select a trustee...</option>
-                                {knownPeople.map((p) => (
-                                  <option key={p.name} value={p.name}>{p.name}</option>
-                                ))}
-                                <option value="__other__">Other</option>
-                              </select>
-                            ) : (
-                              <input
-                                type="text"
-                                value={tData.trusteeName || ''}
-                                onChange={(e) => handleTrusteeChange(index, 'trusteeName', e.target.value)}
-                                placeholder="Enter trustee name"
-                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              />
-                            )}
-                          </div>
-
-                          {knownPeople.length > 0 && isOther && selectedPerson === '__other__' && (
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Full Name *
-                              </label>
-                              <input
-                                type="text"
-                                value={tData.trusteeName || ''}
-                                onChange={(e) => handleTrusteeChange(index, 'trusteeName', e.target.value)}
-                                placeholder="Enter trustee name"
-                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              />
-                            </div>
-                          )}
-
-                          {selectedPerson && (
-                            <>
-                              {(!knownPerson || !knownPerson.relationship) && (
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Relationship to Settlor *
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={tData.relationshipToSettlor || ''}
-                                    onChange={(e) => handleTrusteeChange(index, 'relationshipToSettlor', e.target.value)}
-                                    placeholder="e.g., Daughter, Son, Spouse, etc."
-                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  />
-                                </div>
-                              )}
-
-                              {(!knownPerson || !knownPerson.countryOfResidence) && (
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Country of Residence
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={tData.countryOfResidence || ''}
-                                    onChange={(e) => handleTrusteeChange(index, 'countryOfResidence', e.target.value)}
-                                    placeholder="Enter country of residence"
-                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  />
-                                </div>
-                              )}
-
-                              {(!knownPerson || !knownPerson.phoneNumber) && (
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Phone Number
-                                  </label>
-                                  <input
-                                    type="tel"
-                                    value={tData.phoneNumber || ''}
-                                    onChange={(e) => handleTrusteeChange(index, 'phoneNumber', e.target.value)}
-                                    placeholder="Enter phone number"
-                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  />
-                                </div>
-                              )}
-
-                              {(!knownPerson || !knownPerson.emailAddress) && (
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Email Address
-                                  </label>
-                                  <input
-                                    type="email"
-                                    value={tData.emailAddress || ''}
-                                    onChange={(e) => handleTrusteeChange(index, 'emailAddress', e.target.value)}
-                                    placeholder="Enter email address"
-                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  />
-                                </div>
-                              )}
-
-                              {isLast && (
-                                <div className="pt-2 border-t border-gray-600">
-                                  <p className="text-sm font-medium text-gray-300 mb-3">
-                                    Are there any additional trustees?
-                                  </p>
-                                  <div className="flex gap-3">
-                                    <button
-                                      type="button"
-                                      onClick={handleAddTrustee}
-                                      className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
-                                    >
-                                      Yes
-                                    </button>
-                                    {trustTrusteesData.length > 1 && (
-                                      <button
-                                        type="button"
-                                        onClick={handleRemoveLastTrustee}
-                                        className="px-5 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm font-medium rounded-lg transition-colors"
-                                      >
-                                        Remove
-                                      </button>
-                                    )}
-                                    <span className="px-5 py-2 text-gray-400 text-sm font-medium">
-                                      No
-                                    </span>
-                                  </div>
-                                </div>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </>
@@ -6119,6 +5708,18 @@ export default function StepForm({
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Describe the nature and severity of the disability
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilitySeverity || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilitySeverity', e.target.value)}
+                            placeholder="Describe the nature and severity of the disability"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={4}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
                             Who is the primary coordinator of care today?
                           </label>
                           <textarea
@@ -6163,18 +5764,6 @@ export default function StepForm({
                             placeholder="Describe any funding tied to residency or caregiver status"
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             rows={2}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Describe the nature and severity of the disability
-                          </label>
-                          <textarea
-                            value={childrenData[index]?.disabilitySeverity || ''}
-                            onChange={(e) => handleChildChange(index, 'disabilitySeverity', e.target.value)}
-                            placeholder="Describe the nature and severity of the disability"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            rows={4}
                           />
                         </div>
                         <div>

@@ -198,15 +198,6 @@ interface FormData {
     countryOfResidence?: string;
     phoneNumber?: string;
     emailAddress?: string;
-    _selectedPerson?: string;
-  }>;
-  trustTrusteesData?: Array<{
-    trusteeName?: string;
-    relationshipToSettlor?: string;
-    countryOfResidence?: string;
-    phoneNumber?: string;
-    emailAddress?: string;
-    _selectedPerson?: string;
   }>;
   hasSoleProprietorship?: string;
   soleProprietorshipCount?: string;
@@ -643,36 +634,30 @@ export const generatePDF = (formData: FormData) => {
     formData.client2HasContingentPoaPersonalCare = alternates.length > 0 ? 'yes' : 'no';
   }
 
-  // Helper function: Add page header (for pages after the first)
-  const addPageHeader = () => {
-    const currentY = yPosition;
+  // Add a new page, increment counter, and stamp page number top-right
+  const addPage = () => {
+    doc.addPage();
+    pageNumber++;
     doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
     doc.setTextColor(...colors.mediumGray);
-    doc.text('Estate Planning Questionnaire', margin, 12);
-    doc.setTextColor(...colors.mediumGray);
-    doc.text(`Page ${pageNumber}`, pageWidth - margin, 12, { align: 'right' });
-    doc.setDrawColor(...colors.borderGray);
-    doc.setLineWidth(0.3);
-    doc.line(margin, 14, pageWidth - margin, 14);
-    yPosition = currentY;
-  };
-
-  // Helper function: Add page footer
-  const addPageFooter = () => {
-    doc.setFontSize(8);
-    doc.setTextColor(...colors.mediumGray);
-    doc.text('Confidential & Proprietary', pageWidth / 2, pageHeight - 10, { align: 'center' });
+    const numStr = String(pageNumber);
+    doc.setFont(undefined, 'bold');
+    const numWidth = doc.getTextWidth(numStr);
+    doc.setFont(undefined, 'normal');
+    doc.text('Page | ', pageWidth - margin - numWidth, 12, { align: 'right' });
+    doc.setFont(undefined, 'bold');
+    doc.text(numStr, pageWidth - margin, 12, { align: 'right' });
+    doc.setFont(undefined, 'normal');
+    doc.setFillColor(255, 255, 255);
+    doc.setTextColor(...colors.darkText);
   };
 
   // Helper function: Check if new page is needed
   const checkPageBreak = (spaceNeeded: number) => {
     if (yPosition + spaceNeeded > pageHeight - 20) {
-      addPageFooter();
-      doc.addPage();
-      pageNumber++;
+      addPage();
       yPosition = 22;
-      addPageHeader();
-      yPosition = 25;
       return true;
     }
     return false;
@@ -700,6 +685,7 @@ export const generatePDF = (formData: FormData) => {
 
     doc.setFont(undefined, 'normal');
     doc.setTextColor(...colors.darkText);
+    doc.setFillColor(255, 255, 255);
     yPosition += 14;
   };
 
@@ -719,6 +705,7 @@ export const generatePDF = (formData: FormData) => {
 
     doc.setFont(undefined, 'normal');
     doc.setTextColor(...colors.darkText);
+    doc.setFillColor(255, 255, 255);
     yPosition += 10;
   };
 
@@ -802,12 +789,8 @@ export const generatePDF = (formData: FormData) => {
       const lines = doc.splitTextToSize(paragraph, fieldWidth);
       lines.forEach((line: string) => {
         if (yPosition > pageHeight - 30) {
-          addPageFooter();
-          doc.addPage();
-          pageNumber++;
+          addPage();
           yPosition = 22;
-          addPageHeader();
-          yPosition = 25;
         }
         doc.text(line, margin, yPosition);
         yPosition += 5;
@@ -815,12 +798,8 @@ export const generatePDF = (formData: FormData) => {
     }
   });
 
-  // Add footer to introduction page
-  addPageFooter();
-
   // Start new page for questionnaire content
-  doc.addPage();
-  pageNumber++;
+  addPage();
   yPosition = 35;
 
   // Instructions
@@ -871,29 +850,203 @@ export const generatePDF = (formData: FormData) => {
     addSubsectionHeader(title);
     yPosition += 2;
     rows.forEach((row, rowIndex) => {
-      const rowY = yPosition;
-      doc.setDrawColor(...colors.borderGray);
-      doc.setLineWidth(0.5);
-      doc.rect(margin, rowY, basicLabelWidth, basicTableCellHeight);
-      doc.rect(margin + basicLabelWidth, rowY, basicValueWidth, basicTableCellHeight);
-
       doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
+      doc.setFont(undefined, 'normal');
+      const labelLines = doc.splitTextToSize(row.label, basicLabelWidth - 3);
+      const dynH = Math.max(basicTableCellHeight, labelLines.length * 5 + 3);
+      const rowY = yPosition;
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, rowY, basicLabelWidth, dynH, 'FD');
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(margin + basicLabelWidth, rowY, basicValueWidth, dynH, 'FD');
+
       doc.setTextColor(...colors.darkText);
-      doc.text(row.label, margin + 1, rowY + 5);
+      doc.text(labelLines, margin + 1, rowY + 5);
 
       const vf = new doc.AcroFormTextField();
       vf.fieldName = `${prefix}_row_${rowIndex}`;
-      vf.Rect = [margin + basicLabelWidth + 0.5, rowY + 0.5, basicValueWidth - 1, basicTableCellHeight - 1];
+      vf.Rect = [margin + basicLabelWidth + 0.5, rowY + 0.5, basicValueWidth - 1, dynH - 1];
       vf.fontSize = 9;
       vf.textColor = colors.darkText;
       vf.borderStyle = 'none';
       vf.value = row.value || '';
       doc.addField(vf);
 
-      yPosition += basicTableCellHeight;
+      yPosition += dynH;
     });
     yPosition += 6;
+  };
+
+  const estLabelWidth = fieldWidth * 0.40;
+  const estValueWidth = fieldWidth * 0.60;
+  const estRowH = 8;
+
+  const renderEstateRow = (label: string, value: string, fieldName: string) => {
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+    const labelLines = doc.splitTextToSize(label, estLabelWidth - 4);
+    const dynH = Math.max(estRowH, labelLines.length * 5 + 3);
+    checkPageBreak(dynH + 2);
+    const rowY = yPosition;
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
+    doc.rect(margin, rowY, estLabelWidth, dynH, 'FD');
+    doc.setFillColor(...colors.tableHeader);
+    doc.rect(margin + estLabelWidth, rowY, estValueWidth, dynH, 'FD');
+    doc.setTextColor(...colors.darkText);
+    doc.text(labelLines, margin + 2, rowY + 5.5);
+    const f = new doc.AcroFormTextField();
+    f.fieldName = fieldName;
+    f.Rect = [margin + estLabelWidth + 0.5, rowY + 0.5, estValueWidth - 1, dynH - 1];
+    f.fontSize = 9;
+    f.textColor = colors.darkText;
+    f.borderStyle = 'none';
+    f.value = value;
+    doc.addField(f);
+    yPosition += dynH;
+  };
+
+  const acctLabelWidth = fieldWidth * 0.30;
+  const acctCol2Width = fieldWidth * 0.23;
+  const acctCol3Width = fieldWidth * 0.23;
+  const acctCol4Width = fieldWidth * 0.24;
+  const acctRowH = 8;
+
+  const renderAccountRow = (label: string, fieldName: string, isEditable: boolean, col2Val = '', col3Val = '', col4Val = '') => {
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+    const labelLines = doc.splitTextToSize(label, acctLabelWidth - 4);
+    const dynH = Math.max(acctRowH, labelLines.length * 5 + 3);
+    checkPageBreak(dynH + 2);
+    const rowY = yPosition;
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
+    doc.rect(margin, rowY, acctLabelWidth, dynH, 'FD');
+    doc.setFillColor(...colors.tableHeader);
+    doc.rect(margin + acctLabelWidth, rowY, acctCol2Width, dynH, 'FD');
+    doc.rect(margin + acctLabelWidth + acctCol2Width, rowY, acctCol3Width, dynH, 'FD');
+    doc.rect(margin + acctLabelWidth + acctCol2Width + acctCol3Width, rowY, acctCol4Width, dynH, 'FD');
+    doc.setTextColor(...colors.darkText);
+    if (isEditable) {
+      const lf = new doc.AcroFormTextField();
+      lf.fieldName = `${fieldName}_col1`;
+      lf.Rect = [margin + 0.5, rowY + 0.5, acctLabelWidth - 1, dynH - 1];
+      lf.fontSize = 9; lf.textColor = colors.darkText; lf.borderStyle = 'none'; lf.value = label;
+      doc.addField(lf);
+    } else {
+      doc.text(labelLines, margin + 2, rowY + 5.5);
+    }
+    const f2 = new doc.AcroFormTextField();
+    f2.fieldName = `${fieldName}_col2`;
+    f2.Rect = [margin + acctLabelWidth + 0.5, rowY + 0.5, acctCol2Width - 1, dynH - 1];
+    f2.fontSize = 9; f2.textColor = colors.darkText; f2.borderStyle = 'none'; f2.value = col2Val;
+    doc.addField(f2);
+    const f3 = new doc.AcroFormTextField();
+    f3.fieldName = `${fieldName}_col3`;
+    f3.Rect = [margin + acctLabelWidth + acctCol2Width + 0.5, rowY + 0.5, acctCol3Width - 1, dynH - 1];
+    f3.fontSize = 9; f3.textColor = colors.darkText; f3.borderStyle = 'none'; f3.value = col3Val;
+    doc.addField(f3);
+    const f4 = new doc.AcroFormTextField();
+    f4.fieldName = `${fieldName}_col4`;
+    f4.Rect = [margin + acctLabelWidth + acctCol2Width + acctCol3Width + 0.5, rowY + 0.5, acctCol4Width - 1, dynH - 1];
+    f4.fontSize = 9; f4.textColor = colors.darkText; f4.borderStyle = 'none'; f4.value = col4Val;
+    doc.addField(f4);
+    yPosition += dynH;
+  };
+
+  const renderAccountTable = (prefix: string, rows: { label: string; editable?: boolean }[]) => {
+    const headerLabels = ['Account Type', 'Institution', 'Last 4 Digits', 'Beneficiary'];
+    checkPageBreak(10);
+    const hRowY = yPosition;
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
+    doc.rect(margin, hRowY, acctLabelWidth, acctRowH, 'FD');
+    doc.rect(margin + acctLabelWidth, hRowY, acctCol2Width, acctRowH, 'FD');
+    doc.rect(margin + acctLabelWidth + acctCol2Width, hRowY, acctCol3Width, acctRowH, 'FD');
+    doc.rect(margin + acctLabelWidth + acctCol2Width + acctCol3Width, hRowY, acctCol4Width, acctRowH, 'FD');
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...colors.darkText);
+    doc.text(headerLabels[0], margin + 2, hRowY + 5.5);
+    doc.text(headerLabels[1], margin + acctLabelWidth + 2, hRowY + 5.5);
+    doc.text(headerLabels[2], margin + acctLabelWidth + acctCol2Width + 2, hRowY + 5.5);
+    doc.text(headerLabels[3], margin + acctLabelWidth + acctCol2Width + acctCol3Width + 2, hRowY + 5.5);
+    yPosition += acctRowH;
+    rows.forEach((row, i) => {
+      renderAccountRow(row.label, `${prefix}_row${i}`, !!row.editable);
+    });
+    yPosition += 4;
+  };
+
+  const renderBankTable = (prefix: string, data?: { name?: string; branch?: string; accountType?: string; last4?: string; contact?: string; onlineBanking?: string }) => {
+    renderEstateRow('Institution Name:', data?.name || '', `${prefix}_name`);
+    renderEstateRow('Branch/Location:', data?.branch || '', `${prefix}_branch`);
+    renderEstateRow('Account Type:', data?.accountType || '', `${prefix}_type`);
+    renderEstateRow('Last 4 Digits of Account Number:', data?.last4 || '', `${prefix}_last4`);
+    renderEstateRow('Primary Contact Person:', data?.contact || '', `${prefix}_contact`);
+    renderEstateRow('Online Banking Access:', data?.onlineBanking || '', `${prefix}_online`);
+    renderEstateRow('Other Details:', '', `${prefix}_other`);
+    yPosition += 4;
+  };
+
+  const render4ColTableHeader = (headers: [string, string, string, string], cellH: number) => {
+    const cw = fieldWidth / 4;
+    checkPageBreak(cellH + 2);
+    const rowY = yPosition;
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
+    doc.rect(margin, rowY, cw, cellH, 'FD');
+    doc.rect(margin + cw, rowY, cw, cellH, 'FD');
+    doc.rect(margin + cw * 2, rowY, cw, cellH, 'FD');
+    doc.rect(margin + cw * 3, rowY, cw, cellH, 'FD');
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...colors.darkText);
+    headers.forEach((h, idx) => {
+      const lines = h.split('\n');
+      lines.forEach((line, li) => doc.text(line, margin + cw * idx + 2, rowY + 3.5 + li * 3.5));
+    });
+    yPosition += cellH;
+  };
+
+  const render4ColTableRow = (labelLines: string[], fieldNames: [string, string, string], cellH: number, isEditable = false) => {
+    const cw = fieldWidth / 4;
+    checkPageBreak(cellH + 2);
+    const rowY = yPosition;
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
+    doc.rect(margin, rowY, cw, cellH, 'FD');
+    doc.rect(margin + cw, rowY, cw, cellH, 'FD');
+    doc.rect(margin + cw * 2, rowY, cw, cellH, 'FD');
+    doc.rect(margin + cw * 3, rowY, cw, cellH, 'FD');
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...colors.darkText);
+    if (isEditable) {
+      const lf = new doc.AcroFormTextField();
+      lf.fieldName = `${fieldNames[0]}_label`;
+      lf.Rect = [margin + 0.5, rowY + 0.5, cw - 1, cellH - 1];
+      lf.fontSize = 8; lf.textColor = colors.darkText; lf.borderStyle = 'none';
+      lf.value = labelLines.join(' ');
+      doc.addField(lf);
+    } else {
+      labelLines.forEach((line, li) => doc.text(line, margin + 2, rowY + 3.5 + li * 3.5));
+    }
+    [fieldNames[0], fieldNames[1], fieldNames[2]].forEach((fn, idx) => {
+      const f = new doc.AcroFormTextField();
+      f.fieldName = fn;
+      f.Rect = [margin + cw * (idx + 1) + 0.5, rowY + 0.5, cw - 1, cellH - 1];
+      f.fontSize = 8; f.textColor = colors.darkText; f.borderStyle = 'none';
+      doc.addField(f);
+    });
+    yPosition += cellH;
   };
 
   const isCouple = formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law';
@@ -1235,7 +1388,7 @@ export const generatePDF = (formData: FormData) => {
   }
 
   if (formData.hasChildren === 'yes' && formData.childrenData && formData.childrenData.length > 0) {
-    doc.addPage();
+    addPage();
     yPosition = 12;
     addSectionHeader('Guardian Roadmap');
 
@@ -1367,27 +1520,31 @@ export const generatePDF = (formData: FormData) => {
       ];
 
       childRows.forEach((row, rowIndex) => {
-        const rowY = yPosition;
-        doc.setDrawColor(...colors.borderGray);
-        doc.setLineWidth(0.5);
-        doc.rect(margin, rowY, childLabelWidth, childTableCellHeight);
-        doc.rect(margin + childLabelWidth, rowY, childValueWidth, childTableCellHeight);
-
         doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
+        doc.setFont(undefined, 'normal');
+        const labelLines = doc.splitTextToSize(row.label, childLabelWidth - 3);
+        const dynH = Math.max(childTableCellHeight, labelLines.length * 5 + 3);
+        const rowY = yPosition;
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin, rowY, childLabelWidth, dynH, 'FD');
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin + childLabelWidth, rowY, childValueWidth, dynH, 'FD');
+
         doc.setTextColor(...colors.darkText);
-        doc.text(row.label, margin + 1, rowY + 5);
+        doc.text(labelLines, margin + 1, rowY + 5);
 
         const valueField = new doc.AcroFormTextField();
         valueField.fieldName = `child_${index}_row_${rowIndex}`;
-        valueField.Rect = [margin + childLabelWidth + 0.5, rowY + 0.5, childValueWidth - 1, childTableCellHeight - 1];
+        valueField.Rect = [margin + childLabelWidth + 0.5, rowY + 0.5, childValueWidth - 1, dynH - 1];
         valueField.fontSize = 9;
         valueField.textColor = colors.darkText;
         valueField.borderStyle = 'none';
         valueField.value = row.value || '';
         doc.addField(valueField);
 
-        yPosition += childTableCellHeight;
+        yPosition += dynH;
       });
 
       yPosition += 6;
@@ -1418,33 +1575,32 @@ export const generatePDF = (formData: FormData) => {
         const disRows: { label: string; value: string; large?: boolean }[] = [
           { label: 'Nature of disability:', value: child.disabilityNature || '' },
           { label: 'Formal diagnosis? (yes/no)', value: child.disabilityFormalDiagnosis || '' },
+          { label: 'Describe the nature and severity of the disability:', value: child.disabilitySeverity || '', large: true },
           { label: 'Do they qualify for the Disability Tax Credit (DTC)?', value: dtcValue },
           { label: 'Who is the primary coordinator of care today?', value: child.disabilityCoordinator || '' },
           { label: 'Is there a long-term plan already in place?', value: child.disabilityLongTermPlan || '' },
           { label: 'Any funding tied to residency or caregiver status?', value: child.disabilityFunding || '' },
-          { label: 'Describe the nature and severity of the disability:', value: child.disabilitySeverity || '', large: true },
           { label: 'Describe any care and assistance provided:', value: child.disabilityCare || '', large: true },
           { label: 'Other information that would help support a potential guardian:', value: child.disabilityOther || '', large: true },
         ];
 
         disRows.forEach((row, ri) => {
-          const rowH = row.large ? disLargeRowH : disRowH;
-          const rowY = yPosition;
-
-          doc.setDrawColor(...colors.borderGray);
-          doc.setLineWidth(0.5);
-          doc.rect(margin, rowY, disLabelWidth, rowH);
-          doc.rect(margin + disLabelWidth, rowY, disValueWidth, rowH);
-
           doc.setFontSize(8.5);
           doc.setFont(undefined, 'normal');
-          doc.setTextColor(...colors.darkText);
           const labelLines = doc.splitTextToSize(row.label, disLabelWidth - 2);
-          let labelTextY = rowY + 5;
-          labelLines.forEach((ll: string) => {
-            doc.text(ll, margin + 1, labelTextY);
-            labelTextY += 4.5;
-          });
+          const baseH = row.large ? disLargeRowH : disRowH;
+          const rowH = Math.max(baseH, labelLines.length * 5 + 3);
+          const rowY = yPosition;
+
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, rowY, disLabelWidth, rowH, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + disLabelWidth, rowY, disValueWidth, rowH, 'FD');
+
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 1, rowY + 5);
 
           const valField = new doc.AcroFormTextField();
           valField.fieldName = `child_${index}_dis_${ri}`;
@@ -1476,7 +1632,7 @@ export const generatePDF = (formData: FormData) => {
             { body: 'The Disability Tax Credit (DTC) is a non-refundable tax credit in Canada designed to help reduce the income tax liability for individuals with disabilities or their supporting persons.' },
             { label: 'Tax Credit Amount:', body: ' The DTC amount varies each year and is comprised of a federal and, in most cases provincial component.  It is a non-refundable tax credit, meaning it can reduce the amount of income tax the individual owes, but it will not result in a refund if the individual does not owe any tax.' },
             { label: 'Transfer to a Supporting Person:', body: ' If the person with the disability does not have taxable income or cannot use the entire credit amount, it can be transferred, or a portion of it can be transferred, to a spouse, common-law partner, or another supporting person (such as a parent or other relative).' },
-            { label: 'Other Benefits:', body: ' Being eligible for the DTC can open the door to other government programs and benefits, such as the RDSP, the Child Disability Benefit, and certain tax credits and deductions for medical expenses.  It also opens the door to provincial assistance programs as well.' },
+            { label: 'Other Benefits:', body: ' Being eligible for the DTC can open the door to other government programs and benefits, such as the RDSP, the Child Disability Benefit, and certain tax credits and deductions for medical expenses.' },
             { label: 'Application Process:', body: ' To apply, the individual must have a medical doctor or another qualified health professional complete and submit Form 2201 (Disability Tax Certificate) to the CRA.  After reviewing the form, the CRA will notify the individual if their application is approved.' },
             { label: 'Periodic Review:', body: ' The CRA may approve the DTC for a specific number of years, after which the individual might need to reapply or provide updated medical information.' },
           ];
@@ -1493,42 +1649,37 @@ export const generatePDF = (formData: FormData) => {
           const dtcPad = 3;
 
           dtcParagraphs.forEach(({ label, body }) => {
-            const textX = dtcBoxX + dtcPad;
-            const maxW = dtcBoxWidth - dtcPad * 2;
+            const fullText = (label || '') + body;
+            const lines = doc.splitTextToSize(fullText, dtcBoxWidth - dtcPad * 2);
+            checkPageBreak(lines.length * dtcLineH + 4);
 
             if (label) {
-              doc.setFont(undefined, 'bold');
-              const labelW = doc.getTextWidth(label);
-              const bodyLines = doc.splitTextToSize(body, maxW - labelW);
-              const totalLines = [label + bodyLines[0], ...bodyLines.slice(1)];
-              checkPageBreak(totalLines.length * dtcLineH + 4);
-
-              // First line: bold label + normal body continuation
-              doc.setFont(undefined, 'bold');
-              doc.text(label, textX, dtcTextY);
-              doc.setFont(undefined, 'normal');
-              if (bodyLines[0]) doc.text(bodyLines[0], textX + labelW, dtcTextY);
-              dtcTextY += dtcLineH;
-
-              // Remaining lines are purely body text
-              for (let li = 1; li < bodyLines.length; li++) {
-                doc.text(bodyLines[li], textX, dtcTextY);
+              const labelWidth = doc.getTextWidth(label);
+              lines.forEach((line: string, li: number) => {
+                if (li === 0) {
+                  doc.setFont(undefined, 'bold');
+                  doc.text(label, dtcBoxX + dtcPad, dtcTextY);
+                  doc.setFont(undefined, 'normal');
+                  const rest = line.slice(label.length);
+                  if (rest) doc.text(rest, dtcBoxX + dtcPad + labelWidth, dtcTextY);
+                } else {
+                  doc.setFont(undefined, 'normal');
+                  doc.text(line, dtcBoxX + dtcPad, dtcTextY);
+                }
                 dtcTextY += dtcLineH;
-              }
+              });
             } else {
-              const lines = doc.splitTextToSize(body, maxW);
-              checkPageBreak(lines.length * dtcLineH + 4);
               doc.setFont(undefined, 'normal');
               lines.forEach((line: string) => {
-                doc.text(line, textX, dtcTextY);
+                doc.text(line, dtcBoxX + dtcPad, dtcTextY);
                 dtcTextY += dtcLineH;
               });
             }
             dtcTextY += 2;
           });
 
-          doc.setDrawColor(...colors.borderGray);
-          doc.setLineWidth(0.5);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
           doc.rect(dtcBoxX, dtcBoxStartY, dtcBoxWidth, dtcTextY - dtcBoxStartY + 2);
 
           yPosition = dtcTextY + 6;
@@ -1573,8 +1724,8 @@ export const generatePDF = (formData: FormData) => {
         doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(...colors.darkText);
-        doc.setDrawColor(...colors.borderGray);
-        doc.setLineWidth(0.5);
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
         medHeaders.forEach((h, ci) => {
           doc.rect(medColX[ci], medHeaderY, medColWidths[ci], medHeaderHeight);
           doc.text(h, medColX[ci] + 1, medHeaderY + 6);
@@ -1586,8 +1737,8 @@ export const generatePDF = (formData: FormData) => {
           const rowY = yPosition;
           const isOtherRow = rowLabel === 'Other:';
           doc.setFontSize(8);
-          doc.setDrawColor(...colors.borderGray);
-          doc.setLineWidth(0.5);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
           medColWidths.forEach((w, ci) => {
             doc.rect(medColX[ci], rowY, w, medRowH);
           });
@@ -1647,27 +1798,31 @@ export const generatePDF = (formData: FormData) => {
               const medValueWidth = fieldWidth * 0.55;
 
               chartRows.forEach((row) => {
-                const rowY = yPosition;
-                doc.setDrawColor(...colors.borderGray);
-                doc.setLineWidth(0.5);
-                doc.rect(margin, rowY, medLabelWidth, medInfoRowH);
-                doc.rect(margin + medLabelWidth, rowY, medValueWidth, medInfoRowH);
-
                 doc.setFontSize(8.5);
                 doc.setFont(undefined, 'normal');
+                const labelLines = doc.splitTextToSize(row.label, medLabelWidth - 3);
+                const dynH = Math.max(medInfoRowH, labelLines.length * 5 + 3);
+                const rowY = yPosition;
+                doc.setDrawColor(...colors.tableBorder);
+                doc.setLineWidth(0.3);
+                doc.setFillColor(255, 255, 255);
+                doc.rect(margin, rowY, medLabelWidth, dynH, 'FD');
+                doc.setFillColor(255, 255, 255);
+                doc.rect(margin + medLabelWidth, rowY, medValueWidth, dynH, 'FD');
+
                 doc.setTextColor(...colors.darkText);
-                doc.text(row.label, margin + 1, rowY + 5);
+                doc.text(labelLines, margin + 1, rowY + 5);
 
                 const valField = new doc.AcroFormTextField();
                 valField.fieldName = `child_${index}_medinfo_${mi}_${row.fieldKey}`;
-                valField.Rect = [margin + medLabelWidth + 0.5, rowY + 0.5, medValueWidth - 1, medInfoRowH - 1];
+                valField.Rect = [margin + medLabelWidth + 0.5, rowY + 0.5, medValueWidth - 1, dynH - 1];
                 valField.fontSize = 8.5;
                 valField.textColor = colors.darkText;
                 valField.borderStyle = 'none';
                 valField.value = row.value || '';
                 doc.addField(valField);
 
-                yPosition += medInfoRowH;
+                yPosition += dynH;
               });
 
               yPosition += 6;
@@ -1684,11 +1839,13 @@ export const generatePDF = (formData: FormData) => {
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(...colors.darkText);
-          doc.setDrawColor(...colors.borderGray);
-          doc.setLineWidth(0.5);
-          doc.rect(margin, yPosition, btLabelWidth, btRowH);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, btLabelWidth, btRowH, 'FD');
           doc.text('Blood Type:', margin + 2, yPosition + 5.5);
-          doc.rect(margin + btLabelWidth, yPosition, btValueWidth, btRowH);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + btLabelWidth, yPosition, btValueWidth, btRowH, 'FD');
           doc.setFont(undefined, 'normal');
           const btField = new doc.AcroFormTextField();
           btField.fieldName = `child_${index}_blood_type`;
@@ -1721,28 +1878,32 @@ export const generatePDF = (formData: FormData) => {
               const allergyValueWidth = fieldWidth * 0.55;
 
               allergyChartRows.forEach((row) => {
-                const rowY = yPosition;
-                checkPageBreak(allergyRowH + 2);
-                doc.setDrawColor(...colors.borderGray);
-                doc.setLineWidth(0.5);
-                doc.rect(margin, rowY, allergyLabelWidth, allergyRowH);
-                doc.rect(margin + allergyLabelWidth, rowY, allergyValueWidth, allergyRowH);
-
                 doc.setFontSize(8.5);
                 doc.setFont(undefined, 'normal');
+                const labelLines = doc.splitTextToSize(row.label, allergyLabelWidth - 3);
+                const dynH = Math.max(allergyRowH, labelLines.length * 5 + 3);
+                const rowY = yPosition;
+                checkPageBreak(dynH + 2);
+                doc.setDrawColor(...colors.tableBorder);
+                doc.setLineWidth(0.3);
+                doc.setFillColor(255, 255, 255);
+                doc.rect(margin, rowY, allergyLabelWidth, dynH, 'FD');
+                doc.setFillColor(255, 255, 255);
+                doc.rect(margin + allergyLabelWidth, rowY, allergyValueWidth, dynH, 'FD');
+
                 doc.setTextColor(...colors.darkText);
-                doc.text(row.label, margin + 1, rowY + 5);
+                doc.text(labelLines, margin + 1, rowY + 5);
 
                 const valField = new doc.AcroFormTextField();
                 valField.fieldName = `child_${index}_allergy_${ai}_${row.fieldKey}`;
-                valField.Rect = [margin + allergyLabelWidth + 0.5, rowY + 0.5, allergyValueWidth - 1, allergyRowH - 1];
+                valField.Rect = [margin + allergyLabelWidth + 0.5, rowY + 0.5, allergyValueWidth - 1, dynH - 1];
                 valField.fontSize = 8.5;
                 valField.textColor = colors.darkText;
                 valField.borderStyle = 'none';
                 valField.value = row.value || '';
                 doc.addField(valField);
 
-                yPosition += allergyRowH;
+                yPosition += dynH;
               });
 
               yPosition += 6;
@@ -1757,8 +1918,8 @@ export const generatePDF = (formData: FormData) => {
           const addlMedRowH = Math.max(16, Math.ceil((child.medicalIssuesDescription?.length || 0) / 80) * 5 + 10);
           const rowY = yPosition;
           checkPageBreak(addlMedRowH + 2);
-          doc.setDrawColor(...colors.borderGray);
-          doc.setLineWidth(0.5);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
           doc.rect(margin, rowY, fieldWidth, addlMedRowH);
 
           const addlMedField = new doc.AcroFormTextField();
@@ -1809,17 +1970,20 @@ export const generatePDF = (formData: FormData) => {
             ];
 
             eduRows.forEach((row, rowIndex) => {
-              const rh = row.large ? eduLargeRowH : eduRowH;
-              const rowY = yPosition;
-              doc.setDrawColor(...colors.borderGray);
-              doc.setLineWidth(0.5);
-              doc.rect(margin, rowY, eduLabelWidth, rh);
-              doc.rect(margin + eduLabelWidth, rowY, eduValueWidth, rh);
-
               doc.setFontSize(8.5);
-              doc.setFont(undefined, 'bold');
-              doc.setTextColor(...colors.darkText);
+              doc.setFont(undefined, 'normal');
               const labelLines = doc.splitTextToSize(row.label, eduLabelWidth - 2);
+              const baseRh = row.large ? eduLargeRowH : eduRowH;
+              const rh = Math.max(baseRh, labelLines.length * 5 + 3);
+              const rowY = yPosition;
+              doc.setDrawColor(...colors.tableBorder);
+              doc.setLineWidth(0.3);
+              doc.setFillColor(255, 255, 255);
+              doc.rect(margin, rowY, eduLabelWidth, rh, 'FD');
+              doc.setFillColor(255, 255, 255);
+              doc.rect(margin + eduLabelWidth, rowY, eduValueWidth, rh, 'FD');
+
+              doc.setTextColor(...colors.darkText);
               doc.text(labelLines, margin + 1, rowY + 4.5);
 
               const eduField = new doc.AcroFormTextField();
@@ -1841,8 +2005,8 @@ export const generatePDF = (formData: FormData) => {
             const addlEduRowH = Math.max(16, Math.ceil((child.additionalEducationDetails?.length || 0) / 80) * 5 + 10);
             const rowY = yPosition;
             checkPageBreak(addlEduRowH + 2);
-            doc.setDrawColor(...colors.borderGray);
-            doc.setLineWidth(0.5);
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
             doc.rect(margin, rowY, fieldWidth, addlEduRowH);
 
             const addlEduField = new doc.AcroFormTextField();
@@ -1904,18 +2068,21 @@ export const generatePDF = (formData: FormData) => {
               ];
 
               friendRows.forEach((row, ri) => {
-                const rh = (row as { large?: boolean }).large ? socialLargeRowH : socialRowH;
+                doc.setFontSize(8.5);
+                doc.setFont(undefined, 'normal');
+                const labelLines = doc.splitTextToSize(row.label, socialLabelWidth - 2);
+                const baseRh = (row as { large?: boolean }).large ? socialLargeRowH : socialRowH;
+                const rh = Math.max(baseRh, labelLines.length * 5 + 3);
                 const rowY = yPosition;
                 checkPageBreak(rh + 2);
-                doc.setDrawColor(...colors.borderGray);
-                doc.setLineWidth(0.5);
-                doc.rect(margin, rowY, socialLabelWidth, rh);
-                doc.rect(margin + socialLabelWidth, rowY, socialValueWidth, rh);
+                doc.setDrawColor(...colors.tableBorder);
+                doc.setLineWidth(0.3);
+                doc.setFillColor(255, 255, 255);
+                doc.rect(margin, rowY, socialLabelWidth, rh, 'FD');
+                doc.setFillColor(255, 255, 255);
+                doc.rect(margin + socialLabelWidth, rowY, socialValueWidth, rh, 'FD');
 
-                doc.setFontSize(8.5);
-                doc.setFont(undefined, 'bold');
                 doc.setTextColor(...colors.darkText);
-                const labelLines = doc.splitTextToSize(row.label, socialLabelWidth - 2);
                 doc.text(labelLines, margin + 1, rowY + 4.5);
 
                 const friendField = new doc.AcroFormTextField();
@@ -1953,8 +2120,8 @@ export const generatePDF = (formData: FormData) => {
             checkPageBreak(actHeaderH + 2);
             doc.setFontSize(7.5);
             doc.setFont(undefined, 'bold');
-            doc.setDrawColor(...colors.borderGray);
-            doc.setLineWidth(0.5);
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
             actHeaders.forEach((h, ci) => {
               doc.rect(actColX[ci], yPosition, actColWidths[ci], actHeaderH);
               doc.text(h, actColX[ci] + 1, yPosition + 6);
@@ -1970,8 +2137,8 @@ export const generatePDF = (formData: FormData) => {
               const actRowH = 10;
               checkPageBreak(actRowH + 2);
               const rowY = yPosition;
-              doc.setDrawColor(...colors.borderGray);
-              doc.setLineWidth(0.5);
+              doc.setDrawColor(...colors.tableBorder);
+              doc.setLineWidth(0.3);
               actColWidths.forEach((w, ci) => {
                 doc.rect(actColX[ci], rowY, w, actRowH);
               });
@@ -2010,18 +2177,21 @@ export const generatePDF = (formData: FormData) => {
           ];
 
           socialRows.forEach((row, rowIndex) => {
-            const rh = row.large ? socialLargeRowH : socialRowH;
+            doc.setFontSize(8.5);
+            doc.setFont(undefined, 'normal');
+            const labelLines = doc.splitTextToSize(row.label, socialLabelWidth - 2);
+            const baseRh = row.large ? socialLargeRowH : socialRowH;
+            const rh = Math.max(baseRh, labelLines.length * 5 + 3);
             const rowY = yPosition;
             checkPageBreak(rh + 2);
-            doc.setDrawColor(...colors.borderGray);
-            doc.setLineWidth(0.5);
-            doc.rect(margin, rowY, socialLabelWidth, rh);
-            doc.rect(margin + socialLabelWidth, rowY, socialValueWidth, rh);
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(margin, rowY, socialLabelWidth, rh, 'FD');
+            doc.setFillColor(255, 255, 255);
+            doc.rect(margin + socialLabelWidth, rowY, socialValueWidth, rh, 'FD');
 
-            doc.setFontSize(8.5);
-            doc.setFont(undefined, 'bold');
             doc.setTextColor(...colors.darkText);
-            const labelLines = doc.splitTextToSize(row.label, socialLabelWidth - 2);
             doc.text(labelLines, margin + 1, rowY + 4.5);
 
             const socialField = new doc.AcroFormTextField();
@@ -2052,8 +2222,8 @@ export const generatePDF = (formData: FormData) => {
           ...(child.hasIEP === 'yes' ? [{ label: 'IEP Document:', prefill: child.iepDocumentLocation || '' }] : []),
         ];
 
-        const col1W = fieldWidth * 0.30;
-        const col2W = fieldWidth * 0.20;
+        const col1W = fieldWidth * 0.25;
+        const col2W = fieldWidth * 0.25;
         const col3W = fieldWidth * 0.25;
         const col4W = fieldWidth * 0.25;
         const colX = [margin, margin + col1W, margin + col1W + col2W, margin + col1W + col2W + col3W];
@@ -2068,8 +2238,8 @@ export const generatePDF = (formData: FormData) => {
         doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(...colors.darkText);
-        doc.setDrawColor(...colors.borderGray);
-        doc.setLineWidth(0.5);
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
         headers.forEach((h, ci) => {
           doc.rect(colX[ci], headerRowY, colWidths[ci], headerHeight);
           doc.text(h, colX[ci] + 1, headerRowY + 6);
@@ -2080,8 +2250,8 @@ export const generatePDF = (formData: FormData) => {
         checklistRows.forEach((row, ri) => {
           const rowY = yPosition;
           doc.setFontSize(8);
-          doc.setDrawColor(...colors.borderGray);
-          doc.setLineWidth(0.5);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
 
           colWidths.forEach((w, ci) => {
             doc.rect(colX[ci], rowY, w, rowH);
@@ -2133,8 +2303,8 @@ export const generatePDF = (formData: FormData) => {
             const rowY = yPosition;
 
             doc.setFontSize(8);
-            doc.setDrawColor(...colors.borderGray);
-            doc.setLineWidth(0.5);
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
 
             colWidths.forEach((w, ci) => {
               doc.rect(colX[ci], rowY, w, neededH);
@@ -2198,8 +2368,8 @@ export const generatePDF = (formData: FormData) => {
           checkPageBreak(fcHeaderH + 2);
           doc.setFontSize(7);
           doc.setFont(undefined, 'bold');
-          doc.setDrawColor(...colors.borderGray);
-          doc.setLineWidth(0.5);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
           fcHeaders.forEach((h, ci) => {
             doc.rect(fcColX[ci], yPosition, fcColWidths[ci], fcHeaderH);
             doc.text(h, fcColX[ci] + 1, yPosition + 6);
@@ -2211,8 +2381,8 @@ export const generatePDF = (formData: FormData) => {
             const fcRowH = 10;
             checkPageBreak(fcRowH + 2);
             const rowY = yPosition;
-            doc.setDrawColor(...colors.borderGray);
-            doc.setLineWidth(0.5);
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
             fcColWidths.forEach((w, ci) => {
               doc.rect(fcColX[ci], rowY, w, fcRowH);
             });
@@ -2244,7 +2414,7 @@ export const generatePDF = (formData: FormData) => {
 
     if (hasChildSupport || hasSpousalSupport) {
       if (yPosition > 150) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -2283,7 +2453,7 @@ export const generatePDF = (formData: FormData) => {
 
       supportText.forEach(line => {
         if (yPosition > 280) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
         doc.text(line, margin, yPosition);
@@ -2295,7 +2465,7 @@ export const generatePDF = (formData: FormData) => {
   }
 
   if (formData.hasFamilyTrust === 'yes') {
-    doc.addPage();
+    addPage();
     yPosition = 12;
     addSectionHeader('Family Trust Information');
 
@@ -2303,6 +2473,7 @@ export const generatePDF = (formData: FormData) => {
       { label: 'Trust 1 - Legal Name:', value: formData.trustLegalName || '' },
       { label: 'Trust Deed Location:', value: formData.trustDeedLocation || '' },
       { label: 'Year Established:', value: formData.trustYearEstablished || '' },
+      { label: 'Number of Beneficiaries:', value: formData.trustBeneficiariesCount || '' },
     ];
 
     const cellHeight = 8;
@@ -2310,21 +2481,25 @@ export const generatePDF = (formData: FormData) => {
     const valueWidth = fieldWidth * 0.65;
 
     trustInfoRows.forEach((row, index) => {
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      const labelLines = doc.splitTextToSize(row.label, labelWidth - 3);
+      const dynH = Math.max(cellHeight, labelLines.length * 5 + 3);
       const rowY = yPosition;
 
-      doc.setDrawColor(...colors.borderGray);
-      doc.setLineWidth(0.5);
-      doc.rect(margin, rowY, labelWidth, cellHeight);
-      doc.rect(margin + labelWidth, rowY, valueWidth, cellHeight);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, rowY, labelWidth, dynH, 'FD');
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin + labelWidth, rowY, valueWidth, dynH, 'FD');
 
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
       doc.setTextColor(...colors.darkText);
-      doc.text(row.label, margin + 1, rowY + 5);
+      doc.text(labelLines, margin + 1, rowY + 5);
 
       const field = new doc.AcroFormTextField();
       field.fieldName = `trust_${index}`;
-      field.Rect = [margin + labelWidth + 0.5, rowY + 0.5, valueWidth - 1, cellHeight - 1];
+      field.Rect = [margin + labelWidth + 0.5, rowY + 0.5, valueWidth - 1, dynH - 1];
       field.fontSize = 9;
       field.textColor = colors.darkText;
       field.borderStyle = 'none';
@@ -2336,94 +2511,78 @@ export const generatePDF = (formData: FormData) => {
 
     yPosition += 8;
 
-    const beneficiaries = formData.trustBeneficiariesData || [];
-    if (beneficiaries.length > 0) {
-      // Subheading
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.darkText);
+    doc.text('Trust Beneficiaries:', margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    yPosition += 6;
+
+    const beneficiaryCount = parseInt(formData.trustBeneficiariesCount || '0');
+    const beneCellHeight = 6;
+    const beneLabelWidth = fieldWidth * 0.35;
+    const beneValueWidth = fieldWidth * 0.65;
+
+    for (let i = 0; i < beneficiaryCount; i++) {
+      const beneficiary = formData.trustBeneficiariesData?.[i];
+
+      checkPageBreak(6 + 5 * beneCellHeight + 8);
+
+      // Beneficiary header
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(...colors.darkText);
-      doc.text('Beneficiary Information', margin, yPosition);
+      doc.text(`Beneficiary ${i + 1}:`, margin, yPosition);
       yPosition += 6;
 
-      // Table header
-      const colWidths = [fieldWidth * 0.22, fieldWidth * 0.20, fieldWidth * 0.20, fieldWidth * 0.19, fieldWidth * 0.19];
-      const colHeaders = ['Name', 'Relationship', 'Country', 'Phone', 'Email'];
-      const tableHeaderHeight = 7;
-      const tableRowHeight = 7;
+      const beneFields = [
+        { label: 'Beneficiary Name:', value: beneficiary?.beneficiaryName || '', fieldName: 'name' },
+        { label: 'Relationship to Settlor:', value: beneficiary?.relationshipToSettlor || '', fieldName: 'relationship' },
+        { label: 'Country of Residence:', value: beneficiary?.countryOfResidence || '', fieldName: 'country' },
+        { label: 'Phone Number:', value: beneficiary?.phoneNumber || '', fieldName: 'phone' },
+        { label: 'Email Address:', value: beneficiary?.emailAddress || '', fieldName: 'email' },
+      ];
 
-      checkPageBreak(tableHeaderHeight + beneficiaries.length * tableRowHeight + 8);
-
-      // Draw header row
-      doc.setFillColor(230, 236, 245);
-      let colX = margin;
-      colWidths.forEach((w) => {
-        doc.setDrawColor(...colors.borderGray);
-        doc.setLineWidth(0.5);
-        doc.rect(colX, yPosition, w, tableHeaderHeight, 'FD');
-        colX += w;
-      });
-      colX = margin;
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(...colors.darkText);
-      colHeaders.forEach((h, ci) => {
-        doc.text(h, colX + 1.5, yPosition + 4.8);
-        colX += colWidths[ci];
-      });
-      yPosition += tableHeaderHeight;
-
-      // Draw data rows
-      beneficiaries.forEach((b, i) => {
-        const effectiveName = b?.beneficiaryName || (b?._selectedPerson !== '__other__' ? b?._selectedPerson : '') || '';
-        const rowValues = [
-          effectiveName,
-          b?.relationshipToSettlor || '',
-          b?.countryOfResidence || '',
-          b?.phoneNumber || '',
-          b?.emailAddress || '',
-        ];
-
-        checkPageBreak(tableRowHeight);
-
-        const rowY = yPosition;
-        colX = margin;
-        doc.setFillColor(i % 2 === 0 ? 255 : 248, i % 2 === 0 ? 255 : 250, i % 2 === 0 ? 255 : 252);
-        colWidths.forEach((w) => {
-          doc.setDrawColor(...colors.borderGray);
-          doc.setLineWidth(0.4);
-          doc.rect(colX, rowY, w, tableRowHeight, 'FD');
-          colX += w;
-        });
-
-        colX = margin;
-        doc.setFontSize(8);
+      beneFields.forEach((field) => {
+        doc.setFontSize(9);
         doc.setFont(undefined, 'normal');
-        doc.setTextColor(...colors.darkText);
-        rowValues.forEach((val, ci) => {
-          const maxW = colWidths[ci] - 3;
-          const truncated = doc.splitTextToSize(val, maxW)[0] || '';
-          doc.text(truncated, colX + 1.5, rowY + 4.8);
-          colX += colWidths[ci];
-        });
+        const labelLines = doc.splitTextToSize(field.label, beneLabelWidth - 3);
+        const dynH = Math.max(beneCellHeight, labelLines.length * 5 + 3);
+        const rowY = yPosition;
 
-        yPosition += tableRowHeight;
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin, rowY, beneLabelWidth, dynH, 'FD');
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin + beneLabelWidth, rowY, beneValueWidth, dynH, 'FD');
+
+        doc.setTextColor(...colors.darkText);
+        doc.text(labelLines, margin + 1, rowY + 4);
+
+        const inputField = new doc.AcroFormTextField();
+        inputField.fieldName = `trust_beneficiary_${i + 1}_${field.fieldName}`;
+        inputField.Rect = [margin + beneLabelWidth + 0.5, rowY + 0.5, beneValueWidth - 1, dynH - 1];
+        inputField.fontSize = 8;
+        inputField.textColor = colors.darkText;
+        inputField.borderStyle = 'none';
+        inputField.value = field.value;
+        doc.addField(inputField);
+
+        yPosition += dynH;
       });
 
-      yPosition += 10;
+      yPosition += 8;
     }
 
-    yPosition += 4;
+    yPosition += 8;
 
     if (yPosition + 80 > pageHeight - margin) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.darkText);
-    doc.text('Trust and Professional Contracts:', margin, yPosition);
-    yPosition += 6;
+    addSubsectionHeader('Trust and Professional Contracts:');
     doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
     doc.text('For clients with Trusts, your Estate Trustee must know your \'Quarterback Team\' to manage transitions or wind-ups effectively.', margin, yPosition);
@@ -2440,12 +2599,12 @@ export const generatePDF = (formData: FormData) => {
     const tpcRowLabels = ['Lawyer(s):', 'Accountant/Tax Prep(s):', 'Other:'];
 
     let currentY = yPosition;
-    doc.setLineWidth(0.5);
+    doc.setLineWidth(0.3);
 
     tpcHeaders.forEach((header, colIdx) => {
       const colWidths = [tpcCol1Width, tpcCol2Width, tpcCol3Width, tpcCol4Width];
       const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-      doc.setDrawColor(180, 180, 180);
+      doc.setDrawColor(...colors.tableBorder);
       doc.setFillColor(250, 250, 250);
       doc.rect(xPos, currentY, colWidths[colIdx], tpcHeaderHeight, 'FD');
       doc.setFontSize(8);
@@ -2461,8 +2620,8 @@ export const generatePDF = (formData: FormData) => {
     tpcRowLabels.forEach((label, rowIdx) => {
       const rowY = currentY;
 
-      doc.setDrawColor(...colors.borderGray);
-      doc.setLineWidth(0.5);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
       doc.rect(margin, rowY, tpcCol1Width, tpcRowHeight);
       doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
@@ -2471,8 +2630,8 @@ export const generatePDF = (formData: FormData) => {
 
       [tpcCol2Width, tpcCol3Width, tpcCol4Width].forEach((colWidth, colIdx) => {
         const xPos = margin + [tpcCol1Width, tpcCol1Width + tpcCol2Width, tpcCol1Width + tpcCol2Width + tpcCol3Width][colIdx];
-        doc.setDrawColor(...colors.borderGray);
-        doc.setLineWidth(0.5);
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
         doc.rect(xPos, rowY, colWidth, tpcRowHeight);
 
         const field = new doc.AcroFormTextField();
@@ -2490,93 +2649,68 @@ export const generatePDF = (formData: FormData) => {
     yPosition = currentY + 12;
 
     if (yPosition + 80 > pageHeight - margin) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.darkText);
-    doc.text('Trustee Information:', margin, yPosition);
-    yPosition += 8;
+    addSubsectionHeader('Trustee Information:');
 
-    const trustees = formData.trustTrusteesData || [];
-    if (trustees.length > 0) {
-      const tiColWidths = [fieldWidth * 0.22, fieldWidth * 0.20, fieldWidth * 0.20, fieldWidth * 0.19, fieldWidth * 0.19];
-      const tiColHeaders = ['Name', 'Relationship', 'Country', 'Phone', 'Email'];
-      const tiHeaderH = 7;
-      const tiRowH = 7;
+    const tiRowHeight = 10;
+    const tiHeaderHeight = 12;
+    const tiRowCount = 6;
+    const tiCol1Width = fieldWidth * 0.40;
+    const tiCol2Width = fieldWidth * 0.30;
+    const tiCol3Width = fieldWidth * 0.30;
 
-      checkPageBreak(tiHeaderH + trustees.length * tiRowH + 8);
+    const tiHeaders = ['Trustee Name:', 'Phone Number:', 'Email Address:'];
 
-      // Header row
-      doc.setFillColor(230, 236, 245);
-      let tiColX = margin;
-      tiColWidths.forEach((w) => {
-        doc.setDrawColor(...colors.borderGray);
-        doc.setLineWidth(0.5);
-        doc.rect(tiColX, yPosition, w, tiHeaderH, 'FD');
-        tiColX += w;
-      });
-      tiColX = margin;
+    currentY = yPosition;
+    doc.setLineWidth(0.3);
+
+    tiHeaders.forEach((header, colIdx) => {
+      const colWidths = [tiCol1Width, tiCol2Width, tiCol3Width];
+      const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setFillColor(250, 250, 250);
+      doc.rect(xPos, currentY, colWidths[colIdx], tiHeaderHeight, 'FD');
       doc.setFontSize(8);
       doc.setFont(undefined, 'bold');
-      doc.setTextColor(...colors.darkText);
-      tiColHeaders.forEach((h, ci) => {
-        doc.text(h, tiColX + 1.5, yPosition + 4.8);
-        tiColX += tiColWidths[ci];
-      });
-      yPosition += tiHeaderH;
+      doc.setTextColor(0, 0, 0);
+      const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
+      const textY = currentY + (tiHeaderHeight - lines.length * 2.5) / 2 + 2.5;
+      doc.text(lines, xPos + 1, textY);
+    });
 
-      // Data rows
-      trustees.forEach((t, i) => {
-        const effectiveName = t?.trusteeName || (t?._selectedPerson !== '__other__' ? t?._selectedPerson : '') || '';
-        const rowValues = [
-          effectiveName,
-          t?.relationshipToSettlor || '',
-          t?.countryOfResidence || '',
-          t?.phoneNumber || '',
-          t?.emailAddress || '',
-        ];
+    currentY += tiHeaderHeight;
 
-        checkPageBreak(tiRowH);
-        const rowY = yPosition;
-        tiColX = margin;
-        doc.setFillColor(i % 2 === 0 ? 255 : 248, i % 2 === 0 ? 255 : 250, i % 2 === 0 ? 255 : 252);
-        tiColWidths.forEach((w) => {
-          doc.setDrawColor(...colors.borderGray);
-          doc.setLineWidth(0.4);
-          doc.rect(tiColX, rowY, w, tiRowH, 'FD');
-          tiColX += w;
-        });
-        tiColX = margin;
-        doc.setFontSize(8);
-        doc.setFont(undefined, 'normal');
-        doc.setTextColor(...colors.darkText);
-        rowValues.forEach((val, ci) => {
-          const maxW = tiColWidths[ci] - 3;
-          const truncated = doc.splitTextToSize(val, maxW)[0] || '';
-          doc.text(truncated, tiColX + 1.5, rowY + 4.8);
-          tiColX += tiColWidths[ci];
-        });
-        yPosition += tiRowH;
+    for (let rowIdx = 0; rowIdx < tiRowCount; rowIdx++) {
+      const rowY = currentY;
+      [tiCol1Width, tiCol2Width, tiCol3Width].forEach((colWidth, colIdx) => {
+        const xPos = margin + [0, tiCol1Width, tiCol1Width + tiCol2Width][colIdx];
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.rect(xPos, rowY, colWidth, tiRowHeight);
+
+        const field = new doc.AcroFormTextField();
+        field.fieldName = `trust_trustee_${rowIdx}_${colIdx}`;
+        field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, tiRowHeight - 1];
+        field.fontSize = 8;
+        field.textColor = colors.darkText;
+        field.borderStyle = 'none';
+        doc.addField(field);
       });
 
-      yPosition += 12;
-    } else {
-      yPosition += 4;
+      currentY += tiRowHeight;
     }
 
+    yPosition = currentY + 12;
+
     if (yPosition + 100 > pageHeight - margin) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.darkText);
-    doc.text('Trust Contents:', margin, yPosition);
-    yPosition += 8;
+    addSubsectionHeader('Trust Contents:');
 
     const tcRowHeight = 10;
     const tcHeaderHeight = 12;
@@ -2589,12 +2723,12 @@ export const generatePDF = (formData: FormData) => {
     const tcHeaders = ['Asset Type:', 'Estimated Value:', 'Book Value/Cost Base:', 'Other Information:'];
 
     currentY = yPosition;
-    doc.setLineWidth(0.5);
+    doc.setLineWidth(0.3);
 
     tcHeaders.forEach((header, colIdx) => {
       const colWidths = [tcCol1Width, tcCol2Width, tcCol3Width, tcCol4Width];
       const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-      doc.setDrawColor(180, 180, 180);
+      doc.setDrawColor(...colors.tableBorder);
       doc.setFillColor(250, 250, 250);
       doc.rect(xPos, currentY, colWidths[colIdx], tcHeaderHeight, 'FD');
       doc.setFontSize(8);
@@ -2611,8 +2745,8 @@ export const generatePDF = (formData: FormData) => {
       const rowY = currentY;
       [tcCol1Width, tcCol2Width, tcCol3Width, tcCol4Width].forEach((colWidth, colIdx) => {
         const xPos = margin + [0, tcCol1Width, tcCol1Width + tcCol2Width, tcCol1Width + tcCol2Width + tcCol3Width][colIdx];
-        doc.setDrawColor(...colors.borderGray);
-        doc.setLineWidth(0.5);
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
         doc.rect(xPos, rowY, colWidth, tcRowHeight);
 
         const field = new doc.AcroFormTextField();
@@ -2630,7 +2764,7 @@ export const generatePDF = (formData: FormData) => {
     yPosition = currentY + 8;
   }
 
-  doc.addPage();
+  addPage();
   yPosition = 12;
   addSectionHeader('Sole Proprietorships and Partnerships');
 
@@ -2642,7 +2776,7 @@ export const generatePDF = (formData: FormData) => {
     const pageHeight = doc.internal.pageSize.height;
     const checkPage = (needed: number) => {
       if (yPosition + needed > pageHeight - 15) {
-        doc.addPage();
+        addPage();
         yPosition = 15;
       }
     };
@@ -2655,17 +2789,7 @@ export const generatePDF = (formData: FormData) => {
     doc.text(`${clientName} — ${sp.registeredName || `Sole Proprietorship ${idx + 1}`}`, margin, yPosition);
     yPosition += 8;
 
-    checkPage(15);
-    yPosition += 10;
-    doc.setFillColor(...colors.navyBlue);
-    doc.rect(margin, yPosition - 3, 2, 8, 'F');
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.mediumGray);
-    doc.text('Business Identification and Records', margin + 5, yPosition + 3);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...colors.darkText);
-    yPosition += 10;
+    addSubsectionHeader('Business Identification and Records');
 
     {
       const spIdRows: [string, string][] = [];
@@ -2677,23 +2801,27 @@ export const generatePDF = (formData: FormData) => {
         const rowH = 8;
         checkPage(spIdRows.length * rowH + 2);
         spIdRows.forEach(([label, val], rowIdx) => {
-          doc.setDrawColor(180, 180, 180);
-          doc.rect(margin, yPosition, labelColW, rowH);
-          doc.rect(margin + labelColW, yPosition, valueColW, rowH);
-          doc.setFont(undefined, 'bold');
-          doc.setFontSize(9);
-          doc.text(label, margin + 2, yPosition + 5.5);
           doc.setFont(undefined, 'normal');
-          const valLines = doc.splitTextToSize(val, valueColW - 4);
+          doc.setFontSize(9);
+          const labelLines = doc.splitTextToSize(label, labelColW - 3);
+          const dynH = Math.max(rowH, labelLines.length * 5 + 3);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, labelColW, dynH, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + labelColW, yPosition, valueColW, dynH, 'FD');
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 2, yPosition + 5.5);
           const fldSpIdVal = new doc.AcroFormTextField();
           fldSpIdVal.fieldName = `sp_id_val_${idx}_row_${rowIdx}`;
-          fldSpIdVal.Rect = [margin + labelColW + 0.5, yPosition + 0.5, valueColW - 1, rowH - 1];
+          fldSpIdVal.Rect = [margin + labelColW + 0.5, yPosition + 0.5, valueColW - 1, dynH - 1];
           fldSpIdVal.fontSize = 9;
           fldSpIdVal.textColor = colors.darkText;
           fldSpIdVal.borderStyle = 'none';
-          fldSpIdVal.value = valLines[0] || '';
+          fldSpIdVal.value = val;
           doc.addField(fldSpIdVal);
-          yPosition += rowH;
+          yPosition += dynH;
         });
         yPosition += 4;
       }
@@ -2707,7 +2835,7 @@ export const generatePDF = (formData: FormData) => {
       doc.text(noLicLines, margin, yPosition);
       yPosition += noLicLines.length * 6 + 4;
     } else if (sp.hasLicenses === 'yes' && sp.licenses && sp.licenses.length > 0) {
-      const licLabelColW = 65;
+      const licLabelColW = 70;
       const licValueColW = fieldWidth - licLabelColW;
       const licRowH = 8;
 
@@ -2725,22 +2853,27 @@ export const generatePDF = (formData: FormData) => {
         ];
 
         licRows.forEach(([label, value, fieldName]) => {
-          doc.setDrawColor(180, 180, 180);
-          doc.rect(margin, yPosition, licLabelColW, licRowH);
-          doc.rect(margin + licLabelColW, yPosition, licValueColW, licRowH);
           doc.setFont(undefined, 'normal');
           doc.setFontSize(8);
+          const labelLines = doc.splitTextToSize(label, licLabelColW - 3);
+          const dynH = Math.max(licRowH, labelLines.length * 5 + 3);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, licLabelColW, dynH, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + licLabelColW, yPosition, licValueColW, dynH, 'FD');
           doc.setTextColor(...colors.darkText);
-          doc.text(label, margin + 2, yPosition + 5.5);
+          doc.text(labelLines, margin + 2, yPosition + 5.5);
           const licField = new doc.AcroFormTextField();
           licField.fieldName = fieldName;
-          licField.Rect = [margin + licLabelColW + 0.5, yPosition + 0.5, licValueColW - 1, licRowH - 1];
+          licField.Rect = [margin + licLabelColW + 0.5, yPosition + 0.5, licValueColW - 1, dynH - 1];
           licField.fontSize = 8;
           licField.textColor = colors.darkText;
           licField.borderStyle = 'none';
           licField.value = value;
           doc.addField(licField);
-          yPosition += licRowH;
+          yPosition += dynH;
         });
 
         doc.setFontSize(9);
@@ -2753,18 +2886,7 @@ export const generatePDF = (formData: FormData) => {
       const acctValueColW = fieldWidth - acctLabelColW;
       const acctRowH = 8;
 
-      checkPage(15);
-      yPosition += 10;
-      doc.setFillColor(...colors.navyBlue);
-      doc.rect(margin, yPosition - 3, 2, 8, 'F');
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(...colors.mediumGray);
-      doc.text('Accounting Information', margin + 5, yPosition + 3);
-      doc.setFont(undefined, 'normal');
-      doc.setTextColor(...colors.darkText);
-      yPosition += 10;
-      doc.setFontSize(9);
+      addSubsectionHeader('Accounting Information:');
 
       if (sp.bookkeeper === 'no') {
         const noAcctRows: [string, string, string][] = [
@@ -2773,21 +2895,27 @@ export const generatePDF = (formData: FormData) => {
         ];
         checkPage(noAcctRows.length * acctRowH + 2);
         noAcctRows.forEach(([label, prefill, fieldName]) => {
-          doc.setDrawColor(180, 180, 180);
-          doc.rect(margin, yPosition, acctLabelColW, acctRowH);
-          doc.rect(margin + acctLabelColW, yPosition, acctValueColW, acctRowH);
           doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          const labelLines = doc.splitTextToSize(label, acctLabelColW - 3);
+          const dynH = Math.max(acctRowH, labelLines.length * 5 + 3);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, acctLabelColW, dynH, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + acctLabelColW, yPosition, acctValueColW, dynH, 'FD');
           doc.setTextColor(...colors.darkText);
-          doc.text(label, margin + 2, yPosition + 5.5);
+          doc.text(labelLines, margin + 2, yPosition + 5.5);
           const acctField = new doc.AcroFormTextField();
           acctField.fieldName = fieldName;
-          acctField.Rect = [margin + acctLabelColW + 0.5, yPosition + 0.5, acctValueColW - 1, acctRowH - 1];
+          acctField.Rect = [margin + acctLabelColW + 0.5, yPosition + 0.5, acctValueColW - 1, dynH - 1];
           acctField.fontSize = 8;
           acctField.textColor = colors.darkText;
           acctField.borderStyle = 'none';
           acctField.value = prefill;
           doc.addField(acctField);
-          yPosition += acctRowH;
+          yPosition += dynH;
         });
       } else {
         const yesAcctRows: [string, string, string][] = [
@@ -2800,348 +2928,269 @@ export const generatePDF = (formData: FormData) => {
         ];
         checkPage(yesAcctRows.length * acctRowH + 2);
         yesAcctRows.forEach(([label, prefill, fieldName]) => {
-          doc.setDrawColor(180, 180, 180);
-          doc.rect(margin, yPosition, acctLabelColW, acctRowH);
-          doc.rect(margin + acctLabelColW, yPosition, acctValueColW, acctRowH);
           doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          const labelLines = doc.splitTextToSize(label, acctLabelColW - 3);
+          const dynH = Math.max(acctRowH, labelLines.length * 5 + 3);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, acctLabelColW, dynH, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + acctLabelColW, yPosition, acctValueColW, dynH, 'FD');
           doc.setTextColor(...colors.darkText);
-          doc.text(label, margin + 2, yPosition + 5.5);
+          doc.text(labelLines, margin + 2, yPosition + 5.5);
           const acctField = new doc.AcroFormTextField();
           acctField.fieldName = fieldName;
-          acctField.Rect = [margin + acctLabelColW + 0.5, yPosition + 0.5, acctValueColW - 1, acctRowH - 1];
+          acctField.Rect = [margin + acctLabelColW + 0.5, yPosition + 0.5, acctValueColW - 1, dynH - 1];
           acctField.fontSize = 8;
           acctField.textColor = colors.darkText;
           acctField.borderStyle = 'none';
           acctField.value = prefill;
           doc.addField(acctField);
-          yPosition += acctRowH;
+          yPosition += dynH;
         });
       }
       yPosition += 4;
     }
 
     if (sp.hasDigitalAssets === 'yes') {
-      checkPage(15);
-      yPosition += 10;
-      doc.setFillColor(...colors.navyBlue);
-      doc.rect(margin, yPosition - 3, 2, 8, 'F');
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(...colors.mediumGray);
-      doc.text('Digital Assets', margin + 5, yPosition + 3);
-      doc.setFont(undefined, 'normal');
-      doc.setTextColor(...colors.darkText);
-      yPosition += 10;
+      const daLabelColW = 70;
+      const daValueColW = fieldWidth - daLabelColW;
+      const daRowH = 8;
 
-      // Build digital asset rows for chart
-      const digitalAssetRows: [string, string, string][] = [];
-      if (sp.website !== undefined) digitalAssetRows.push(['Website:', sp.website || '', `sp_da_website_${idx}`]);
-      if (sp.websiteCredentialsLocation !== undefined) digitalAssetRows.push(['Website Credentials Location:', sp.websiteCredentialsLocation || '', `sp_da_website_creds_${idx}`]);
-      if (sp.domainProvider !== undefined) digitalAssetRows.push(['Domain Provider:', sp.domainProvider || '', `sp_da_domain_${idx}`]);
-      if (sp.domainCredentialsLocation !== undefined) digitalAssetRows.push(['Domain Credentials Location:', sp.domainCredentialsLocation || '', `sp_da_domain_creds_${idx}`]);
+      addSubsectionHeader('Digital Assets:');
 
-      if (digitalAssetRows.length > 0) {
-        const daLabelW = 70;
-        const daValueW = fieldWidth - daLabelW;
-        const daRowH = 8;
-        checkPage(digitalAssetRows.length * daRowH + 2);
-        digitalAssetRows.forEach(([label, prefill, fieldName]) => {
-          doc.setDrawColor(180, 180, 180);
-          doc.rect(margin, yPosition, daLabelW, daRowH);
-          doc.rect(margin + daLabelW, yPosition, daValueW, daRowH);
-          doc.setFont(undefined, 'bold');
+      const daMainRows: [string, string, string][] = [];
+      if (sp.website !== undefined) daMainRows.push(['Website:', sp.website || '', `sp_website_${idx}`]);
+      if (sp.websiteCredentialsLocation !== undefined) daMainRows.push(['Website Credentials Location:', sp.websiteCredentialsLocation || '', `sp_website_creds_${idx}`]);
+      if (sp.domainProvider !== undefined) daMainRows.push(['Domain Provider:', sp.domainProvider || '', `sp_domain_${idx}`]);
+      if (sp.domainCredentialsLocation !== undefined) daMainRows.push(['Domain Credentials Location:', sp.domainCredentialsLocation || '', `sp_domain_creds_${idx}`]);
+
+      if (daMainRows.length > 0) {
+        checkPage(daMainRows.length * daRowH + 2);
+        daMainRows.forEach(([label, prefill, fieldName]) => {
+          doc.setFont(undefined, 'normal');
           doc.setFontSize(9);
-          doc.text(label, margin + 2, yPosition + 5.5);
+          const labelLines = doc.splitTextToSize(label, daLabelColW - 3);
+          const dynH = Math.max(daRowH, labelLines.length * 5 + 3);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, daLabelColW, dynH, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + daLabelColW, yPosition, daValueColW, dynH, 'FD');
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 2, yPosition + 5.5);
           const daField = new doc.AcroFormTextField();
           daField.fieldName = fieldName;
-          daField.Rect = [margin + daLabelW + 0.5, yPosition + 0.5, daValueW - 1, daRowH - 1];
+          daField.Rect = [margin + daLabelColW + 0.5, yPosition + 0.5, daValueColW - 1, dynH - 1];
           daField.fontSize = 8;
           daField.textColor = colors.darkText;
           daField.borderStyle = 'none';
           daField.value = prefill;
           doc.addField(daField);
-          yPosition += daRowH;
+          yPosition += dynH;
         });
         yPosition += 4;
       }
 
       if (sp.socialAccounts && sp.socialAccounts.length > 0) {
-        const socialHeaders = ['Account', 'Platform / URL', 'Credentials Location'];
-        const socialColWidths = [fieldWidth * 0.12, fieldWidth * 0.38, fieldWidth * 0.50];
-        const socialColX = [margin, margin + socialColWidths[0], margin + socialColWidths[0] + socialColWidths[1]];
-        const socialRowH = 8;
-
-        checkPage(socialRowH * (sp.socialAccounts.length + 1) + 6);
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(9);
-        doc.setTextColor(...colors.darkText);
-        doc.text('Social Media Accounts', margin, yPosition);
-        yPosition += 5;
-
-        // Header row
-        doc.setDrawColor(180, 180, 180);
-        socialHeaders.forEach((h, ci) => {
-          doc.rect(socialColX[ci], yPosition, socialColWidths[ci], socialRowH);
-          doc.setFont(undefined, 'bold');
-          doc.setFontSize(8);
-          doc.text(h, socialColX[ci] + 2, yPosition + 5.5);
-        });
-        yPosition += socialRowH;
+        addSubsectionHeader('Social Media Accounts:');
 
         sp.socialAccounts.forEach((sa, si) => {
-          checkPage(socialRowH);
-          doc.setDrawColor(180, 180, 180);
-          socialColWidths.forEach((w, ci) => doc.rect(socialColX[ci], yPosition, w, socialRowH));
-          doc.setFont(undefined, 'normal');
-          doc.setFontSize(8);
-          doc.text(`${si + 1}`, socialColX[0] + 2, yPosition + 5.5);
-
-          const fldPlatform = new doc.AcroFormTextField();
-          fldPlatform.fieldName = `sp_social_platform_${idx}_${si}`;
-          fldPlatform.Rect = [socialColX[1] + 0.5, yPosition + 0.5, socialColWidths[1] - 1, socialRowH - 1];
-          fldPlatform.fontSize = 8;
-          fldPlatform.textColor = colors.darkText;
-          fldPlatform.borderStyle = 'none';
-          fldPlatform.value = sa.platform || '';
-          doc.addField(fldPlatform);
-
-          const fldCreds = new doc.AcroFormTextField();
-          fldCreds.fieldName = `sp_social_creds_${idx}_${si}`;
-          fldCreds.Rect = [socialColX[2] + 0.5, yPosition + 0.5, socialColWidths[2] - 1, socialRowH - 1];
-          fldCreds.fontSize = 8;
-          fldCreds.textColor = colors.darkText;
-          fldCreds.borderStyle = 'none';
-          fldCreds.value = sa.credentialsLocation || '';
-          doc.addField(fldCreds);
-
-          yPosition += socialRowH;
+          const saRows: [string, string, string][] = [];
+          if (sa.platform !== undefined) saRows.push([`Account ${si + 1}:`, sa.platform || '', `sp_social_platform_${idx}_${si}`]);
+          if (sa.credentialsLocation !== undefined) saRows.push(['Credentials Location:', sa.credentialsLocation || '', `sp_social_creds_${idx}_${si}`]);
+          if (saRows.length > 0) {
+            checkPage(saRows.length * daRowH + 2);
+            saRows.forEach(([label, prefill, fieldName]) => {
+              doc.setFont(undefined, 'normal');
+              doc.setFontSize(9);
+              const labelLines = doc.splitTextToSize(label, daLabelColW - 3);
+              const dynH = Math.max(daRowH, labelLines.length * 5 + 3);
+              doc.setDrawColor(...colors.tableBorder);
+              doc.setLineWidth(0.3);
+              doc.setFillColor(255, 255, 255);
+              doc.rect(margin, yPosition, daLabelColW, dynH, 'FD');
+              doc.setFillColor(255, 255, 255);
+              doc.rect(margin + daLabelColW, yPosition, daValueColW, dynH, 'FD');
+              doc.setTextColor(...colors.darkText);
+              doc.text(labelLines, margin + 2, yPosition + 5.5);
+              const saField = new doc.AcroFormTextField();
+              saField.fieldName = fieldName;
+              saField.Rect = [margin + daLabelColW + 0.5, yPosition + 0.5, daValueColW - 1, dynH - 1];
+              saField.fontSize = 8;
+              saField.textColor = colors.darkText;
+              saField.borderStyle = 'none';
+              saField.value = prefill;
+              doc.addField(saField);
+              yPosition += dynH;
+            });
+            yPosition += 2;
+          }
         });
-        yPosition += 4;
+        yPosition += 2;
       }
 
       if (sp.onlinePersonas && sp.onlinePersonas.length > 0) {
-        const personaHeaders = ['Persona', 'Name', 'Credentials Location'];
-        const personaColWidths = [fieldWidth * 0.12, fieldWidth * 0.38, fieldWidth * 0.50];
-        const personaColX = [margin, margin + personaColWidths[0], margin + personaColWidths[0] + personaColWidths[1]];
-        const personaRowH = 8;
-
-        checkPage(personaRowH * (sp.onlinePersonas.length + 1) + 6);
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(9);
-        doc.setTextColor(...colors.darkText);
-        doc.text('Online Personas', margin, yPosition);
-        yPosition += 5;
-
-        // Header row
-        doc.setDrawColor(180, 180, 180);
-        personaHeaders.forEach((h, ci) => {
-          doc.rect(personaColX[ci], yPosition, personaColWidths[ci], personaRowH);
-          doc.setFont(undefined, 'bold');
-          doc.setFontSize(8);
-          doc.text(h, personaColX[ci] + 2, yPosition + 5.5);
-        });
-        yPosition += personaRowH;
+        addSubsectionHeader('Online Personas:');
 
         sp.onlinePersonas.forEach((op, oi) => {
-          checkPage(personaRowH);
-          doc.setDrawColor(180, 180, 180);
-          personaColWidths.forEach((w, ci) => doc.rect(personaColX[ci], yPosition, w, personaRowH));
-          doc.setFont(undefined, 'normal');
-          doc.setFontSize(8);
-          doc.text(`${oi + 1}`, personaColX[0] + 2, yPosition + 5.5);
-
-          const fldPersonaName = new doc.AcroFormTextField();
-          fldPersonaName.fieldName = `sp_persona_name_${idx}_${oi}`;
-          fldPersonaName.Rect = [personaColX[1] + 0.5, yPosition + 0.5, personaColWidths[1] - 1, personaRowH - 1];
-          fldPersonaName.fontSize = 8;
-          fldPersonaName.textColor = colors.darkText;
-          fldPersonaName.borderStyle = 'none';
-          fldPersonaName.value = op.name || '';
-          doc.addField(fldPersonaName);
-
-          const fldPersonaCreds = new doc.AcroFormTextField();
-          fldPersonaCreds.fieldName = `sp_persona_creds_${idx}_${oi}`;
-          fldPersonaCreds.Rect = [personaColX[2] + 0.5, yPosition + 0.5, personaColWidths[2] - 1, personaRowH - 1];
-          fldPersonaCreds.fontSize = 8;
-          fldPersonaCreds.textColor = colors.darkText;
-          fldPersonaCreds.borderStyle = 'none';
-          fldPersonaCreds.value = op.credentialsLocation || '';
-          doc.addField(fldPersonaCreds);
-
-          yPosition += personaRowH;
+          const opRows: [string, string, string][] = [];
+          if (op.name !== undefined) opRows.push([`Persona ${oi + 1}:`, op.name || '', `sp_persona_name_${idx}_${oi}`]);
+          if (op.credentialsLocation !== undefined) opRows.push(['Credentials Location:', op.credentialsLocation || '', `sp_persona_creds_${idx}_${oi}`]);
+          if (opRows.length > 0) {
+            checkPage(opRows.length * daRowH + 2);
+            opRows.forEach(([label, prefill, fieldName]) => {
+              doc.setFont(undefined, 'normal');
+              doc.setFontSize(9);
+              const labelLines = doc.splitTextToSize(label, daLabelColW - 3);
+              const dynH = Math.max(daRowH, labelLines.length * 5 + 3);
+              doc.setDrawColor(...colors.tableBorder);
+              doc.setLineWidth(0.3);
+              doc.setFillColor(255, 255, 255);
+              doc.rect(margin, yPosition, daLabelColW, dynH, 'FD');
+              doc.setFillColor(255, 255, 255);
+              doc.rect(margin + daLabelColW, yPosition, daValueColW, dynH, 'FD');
+              doc.setTextColor(...colors.darkText);
+              doc.text(labelLines, margin + 2, yPosition + 5.5);
+              const opField = new doc.AcroFormTextField();
+              opField.fieldName = fieldName;
+              opField.Rect = [margin + daLabelColW + 0.5, yPosition + 0.5, daValueColW - 1, dynH - 1];
+              opField.fontSize = 8;
+              opField.textColor = colors.darkText;
+              opField.borderStyle = 'none';
+              opField.value = prefill;
+              doc.addField(opField);
+              yPosition += dynH;
+            });
+            yPosition += 2;
+          }
         });
-        yPosition += 4;
+        yPosition += 2;
       }
     }
 
-    checkPage(15);
-    yPosition += 10;
-    doc.setFillColor(...colors.navyBlue);
-    doc.rect(margin, yPosition - 3, 2, 8, 'F');
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.mediumGray);
-    doc.text('Asset and Liability Inventory', margin + 5, yPosition + 3);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...colors.darkText);
-    yPosition += 10;
+    addSubsectionHeader('Asset and Liability Inventory');
 
     if (sp.hasMajorAssets === 'no') {
       checkPage(7);
       doc.setFont(undefined, 'normal');
-      doc.setFontSize(9);
       doc.text('No major assets.', margin, yPosition);
       yPosition += 7;
     } else if (sp.hasMajorAssets === 'yes' && sp.assets && sp.assets.length > 0) {
-      const assetHeaders = ['Asset Name', 'Asset Type', 'Location of Records'];
-      const assetColWidths = [fieldWidth * 0.35, fieldWidth * 0.25, fieldWidth * 0.40];
-      const assetColX = [margin, margin + assetColWidths[0], margin + assetColWidths[0] + assetColWidths[1]];
-      const assetRowH = 8;
-
-      checkPage(assetRowH * (sp.assets.length + 1) + 8);
-      doc.setFont(undefined, 'bold');
+      checkPage(8);
       doc.setFontSize(9);
+      doc.setFont(undefined, 'bolditalic');
       doc.setTextColor(...colors.darkText);
-      doc.text('Major Assets', margin, yPosition);
-      yPosition += 5;
-
-      doc.setDrawColor(180, 180, 180);
-      assetHeaders.forEach((h, ci) => {
-        doc.rect(assetColX[ci], yPosition, assetColWidths[ci], assetRowH);
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(8);
-        doc.text(h, assetColX[ci] + 2, yPosition + 5.5);
-      });
-      yPosition += assetRowH;
-
+      const majorAssetsHeading = 'Major Assets:';
+      doc.text(majorAssetsHeading, margin, yPosition);
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPosition + 1, margin + doc.getTextWidth(majorAssetsHeading), yPosition + 1);
+      yPosition += 6;
+      const assetLabelColW = 70;
+      const assetValueColW = fieldWidth - assetLabelColW;
+      const assetRowH = 8;
       sp.assets.forEach((asset, ai) => {
-        checkPage(assetRowH);
-        doc.setDrawColor(180, 180, 180);
-        assetColWidths.forEach((w, ci) => doc.rect(assetColX[ci], yPosition, w, assetRowH));
-
-        const fldAssetName = new doc.AcroFormTextField();
-        fldAssetName.fieldName = `sp_asset_name_${idx}_${ai}`;
-        fldAssetName.Rect = [assetColX[0] + 0.5, yPosition + 0.5, assetColWidths[0] - 1, assetRowH - 1];
-        fldAssetName.fontSize = 8;
-        fldAssetName.textColor = colors.darkText;
-        fldAssetName.borderStyle = 'none';
-        fldAssetName.value = asset.name || '';
-        doc.addField(fldAssetName);
-
-        const fldAssetType = new doc.AcroFormTextField();
-        fldAssetType.fieldName = `sp_asset_type_${idx}_${ai}`;
-        fldAssetType.Rect = [assetColX[1] + 0.5, yPosition + 0.5, assetColWidths[1] - 1, assetRowH - 1];
-        fldAssetType.fontSize = 8;
-        fldAssetType.textColor = colors.darkText;
-        fldAssetType.borderStyle = 'none';
-        fldAssetType.value = asset.type || '';
-        doc.addField(fldAssetType);
-
-        const fldAssetRecords = new doc.AcroFormTextField();
-        fldAssetRecords.fieldName = `sp_asset_records_${idx}_${ai}`;
-        fldAssetRecords.Rect = [assetColX[2] + 0.5, yPosition + 0.5, assetColWidths[2] - 1, assetRowH - 1];
-        fldAssetRecords.fontSize = 8;
-        fldAssetRecords.textColor = colors.darkText;
-        fldAssetRecords.borderStyle = 'none';
-        fldAssetRecords.value = asset.recordsLocation || '';
-        doc.addField(fldAssetRecords);
-
-        yPosition += assetRowH;
+        checkPage(14);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(9);
+        doc.text(`${asset.name || `Asset ${ai + 1}`}:`, margin, yPosition);
+        yPosition += 5;
+        const assetFields: [string, string, string][] = [
+          ['Asset Name:', asset.name || '', `sp_asset_name_${idx}_${ai}`],
+          ['Asset Type:', asset.type || '', `sp_asset_type_${idx}_${ai}`],
+          ['Location of Records:', asset.recordsLocation || '', `sp_asset_loc_${idx}_${ai}`],
+        ];
+        assetFields.forEach(([label, val, fieldName]) => {
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          const labelLines = doc.splitTextToSize(label, assetLabelColW - 3);
+          const dynH = Math.max(assetRowH, labelLines.length * 5 + 3);
+          checkPage(dynH + 2);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, assetLabelColW, dynH, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + assetLabelColW, yPosition, assetValueColW, dynH, 'FD');
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 2, yPosition + 5.5);
+          const fldAssetVal = new doc.AcroFormTextField();
+          fldAssetVal.fieldName = fieldName;
+          fldAssetVal.Rect = [margin + assetLabelColW + 0.5, yPosition + 0.5, assetValueColW - 1, dynH - 1];
+          fldAssetVal.fontSize = 9;
+          fldAssetVal.textColor = colors.darkText;
+          fldAssetVal.borderStyle = 'none';
+          fldAssetVal.value = val;
+          doc.addField(fldAssetVal);
+          yPosition += dynH;
+        });
+        yPosition += 4;
       });
-      yPosition += 4;
     }
 
     if (sp.hasLiabilities === 'no') {
       checkPage(7);
       doc.setFont(undefined, 'normal');
-      doc.setFontSize(9);
       doc.text('No outstanding liabilities or debts.', margin, yPosition);
       yPosition += 7;
     } else if (sp.hasLiabilities === 'yes' && sp.liabilities && sp.liabilities.length > 0) {
-      const liabHeaders = ['Lender Name', 'Liability Type', 'Lender Contact', 'Location of Documentation'];
-      const liabColWidths = [fieldWidth * 0.25, fieldWidth * 0.20, fieldWidth * 0.25, fieldWidth * 0.30];
-      const liabColX = [
-        margin,
-        margin + liabColWidths[0],
-        margin + liabColWidths[0] + liabColWidths[1],
-        margin + liabColWidths[0] + liabColWidths[1] + liabColWidths[2],
-      ];
-      const liabRowH = 8;
-
-      checkPage(liabRowH * (sp.liabilities.length + 1) + 8);
-      doc.setFont(undefined, 'bold');
+      checkPage(8);
       doc.setFontSize(9);
+      doc.setFont(undefined, 'bolditalic');
       doc.setTextColor(...colors.darkText);
-      doc.text('Outstanding Liabilities / Debts', margin, yPosition);
-      yPosition += 5;
-
-      doc.setDrawColor(180, 180, 180);
-      liabHeaders.forEach((h, ci) => {
-        doc.rect(liabColX[ci], yPosition, liabColWidths[ci], liabRowH);
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(8);
-        doc.text(h, liabColX[ci] + 2, yPosition + 5.5);
-      });
-      yPosition += liabRowH;
-
+      const liabHeading = 'Outstanding Liabilities / Debts:';
+      doc.text(liabHeading, margin, yPosition);
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPosition + 1, margin + doc.getTextWidth(liabHeading), yPosition + 1);
+      yPosition += 6;
+      const liabLabelColW = 70;
+      const liabValueColW = fieldWidth - liabLabelColW;
+      const liabRowH = 8;
       sp.liabilities.forEach((liability, li) => {
-        checkPage(liabRowH);
-        doc.setDrawColor(180, 180, 180);
-        liabColWidths.forEach((w, ci) => doc.rect(liabColX[ci], yPosition, w, liabRowH));
-
-        const fldLiabLender = new doc.AcroFormTextField();
-        fldLiabLender.fieldName = `sp_liab_lender_${idx}_${li}`;
-        fldLiabLender.Rect = [liabColX[0] + 0.5, yPosition + 0.5, liabColWidths[0] - 1, liabRowH - 1];
-        fldLiabLender.fontSize = 8;
-        fldLiabLender.textColor = colors.darkText;
-        fldLiabLender.borderStyle = 'none';
-        fldLiabLender.value = liability.lenderName || '';
-        doc.addField(fldLiabLender);
-
-        const fldLiabType = new doc.AcroFormTextField();
-        fldLiabType.fieldName = `sp_liab_type_${idx}_${li}`;
-        fldLiabType.Rect = [liabColX[1] + 0.5, yPosition + 0.5, liabColWidths[1] - 1, liabRowH - 1];
-        fldLiabType.fontSize = 8;
-        fldLiabType.textColor = colors.darkText;
-        fldLiabType.borderStyle = 'none';
-        fldLiabType.value = liability.liabilityType || '';
-        doc.addField(fldLiabType);
-
-        const fldLiabContact = new doc.AcroFormTextField();
-        fldLiabContact.fieldName = `sp_liab_contact_${idx}_${li}`;
-        fldLiabContact.Rect = [liabColX[2] + 0.5, yPosition + 0.5, liabColWidths[2] - 1, liabRowH - 1];
-        fldLiabContact.fontSize = 8;
-        fldLiabContact.textColor = colors.darkText;
-        fldLiabContact.borderStyle = 'none';
-        fldLiabContact.value = liability.lenderContact || '';
-        doc.addField(fldLiabContact);
-
-        const fldLiabDoc = new doc.AcroFormTextField();
-        fldLiabDoc.fieldName = `sp_liab_doc_${idx}_${li}`;
-        fldLiabDoc.Rect = [liabColX[3] + 0.5, yPosition + 0.5, liabColWidths[3] - 1, liabRowH - 1];
-        fldLiabDoc.fontSize = 8;
-        fldLiabDoc.textColor = colors.darkText;
-        fldLiabDoc.borderStyle = 'none';
-        fldLiabDoc.value = liability.documentationLocation || '';
-        doc.addField(fldLiabDoc);
-
-        yPosition += liabRowH;
+        checkPage(18);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(9);
+        const liabLabel = [liability.lenderName, liability.liabilityType].filter(Boolean).join(' - ');
+        doc.text(liabLabel ? `${liabLabel}:` : `Liability ${li + 1}:`, margin, yPosition);
+        yPosition += 5;
+        const liabilityFields: [string, string, string][] = [
+          ['Lender Name:', liability.lenderName || '', `sp_liab_lender_${idx}_${li}`],
+          ['Liability Type:', liability.liabilityType || '', `sp_liab_type_${idx}_${li}`],
+          ['Lender Contact:', liability.lenderContact || '', `sp_liab_contact_${idx}_${li}`],
+          ['Location of Documentation:', liability.documentationLocation || '', `sp_liab_loc_${idx}_${li}`],
+        ];
+        liabilityFields.forEach(([label, val, fieldName]) => {
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          const labelLines = doc.splitTextToSize(label, liabLabelColW - 3);
+          const dynH = Math.max(liabRowH, labelLines.length * 5 + 3);
+          checkPage(dynH + 2);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, liabLabelColW, dynH, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + liabLabelColW, yPosition, liabValueColW, dynH, 'FD');
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 2, yPosition + 5.5);
+          const fldLiabVal = new doc.AcroFormTextField();
+          fldLiabVal.fieldName = fieldName;
+          fldLiabVal.Rect = [margin + liabLabelColW + 0.5, yPosition + 0.5, liabValueColW - 1, dynH - 1];
+          fldLiabVal.fontSize = 9;
+          fldLiabVal.textColor = colors.darkText;
+          fldLiabVal.borderStyle = 'none';
+          fldLiabVal.value = val;
+          doc.addField(fldLiabVal);
+          yPosition += dynH;
+        });
+        yPosition += 4;
       });
-      yPosition += 4;
     }
 
-    checkPage(15);
-    yPosition += 10;
-    doc.setFillColor(...colors.navyBlue);
-    doc.rect(margin, yPosition - 3, 2, 8, 'F');
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.mediumGray);
-    doc.text('Business Continuity and Succession', margin + 5, yPosition + 3);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...colors.darkText);
-    yPosition += 10;
-    doc.setFontSize(9);
+    addSubsectionHeader('Business Continuity and Succession');
 
     const businessName = sp.registeredName || `Business ${idx + 1}`;
 
@@ -3340,15 +3389,14 @@ export const generatePDF = (formData: FormData) => {
     }
 
     if (docRows.length > 0) {
-      checkPage(15);
-      yPosition += 10;
-      doc.setFillColor(...colors.navyBlue);
-      doc.rect(margin, yPosition - 3, 2, 8, 'F');
-      doc.setFontSize(12);
+      checkPage(30);
+      yPosition += 4;
       doc.setFont(undefined, 'bold');
-      doc.setTextColor(...colors.mediumGray);
-      doc.text('Document Summary', margin + 5, yPosition + 3);
-      doc.setFont(undefined, 'normal');
+      doc.setFontSize(10);
+      doc.setFillColor(...colors.navyBlue);
+      doc.rect(margin, yPosition - 4, fieldWidth, 10, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.text(`${businessName} — Document Summary`, margin + 3, yPosition + 2);
       doc.setTextColor(...colors.darkText);
       yPosition += 10;
 
@@ -3420,7 +3468,7 @@ export const generatePDF = (formData: FormData) => {
     const pageHeight = doc.internal.pageSize.height;
     const checkPage = (needed: number) => {
       if (yPosition + needed > pageHeight - 15) {
-        doc.addPage();
+        addPage();
         yPosition = 15;
       }
     };
@@ -3432,18 +3480,7 @@ export const generatePDF = (formData: FormData) => {
     doc.text(`${clientName}'s Partnership ${idx + 1}: ${businessName}`, margin, yPosition);
     yPosition += 8;
 
-    checkPage(15);
-    yPosition += 10;
-    doc.setFillColor(...colors.navyBlue);
-    doc.rect(margin, yPosition - 3, 2, 8, 'F');
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.mediumGray);
-    doc.text('Business Identification and Records', margin + 5, yPosition + 3);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...colors.darkText);
-    yPosition += 10;
-    doc.setFontSize(9);
+    addSubsectionHeader('Business Identification and Records');
 
     {
       const pIdRows: [string, string][] = [];
@@ -3455,469 +3492,153 @@ export const generatePDF = (formData: FormData) => {
         const rowH = 8;
         checkPage(pIdRows.length * rowH + 2);
         pIdRows.forEach(([label, val], rowIdx) => {
-          doc.setDrawColor(180, 180, 180);
-          doc.rect(margin, yPosition, labelColW, rowH);
-          doc.rect(margin + labelColW, yPosition, valueColW, rowH);
-          doc.setFont(undefined, 'bold');
-          doc.setFontSize(9);
-          doc.text(label, margin + 2, yPosition + 5.5);
           doc.setFont(undefined, 'normal');
-          const valLines = doc.splitTextToSize(val, valueColW - 4);
+          doc.setFontSize(9);
+          const labelLines = doc.splitTextToSize(label, labelColW - 3);
+          const dynH = Math.max(rowH, labelLines.length * 5 + 3);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, labelColW, dynH, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + labelColW, yPosition, valueColW, dynH, 'FD');
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 2, yPosition + 5.5);
           const fldPIdVal = new doc.AcroFormTextField();
           fldPIdVal.fieldName = `p_id_val_${idx}_row_${rowIdx}`;
-          fldPIdVal.Rect = [margin + labelColW + 0.5, yPosition + 0.5, valueColW - 1, rowH - 1];
+          fldPIdVal.Rect = [margin + labelColW + 0.5, yPosition + 0.5, valueColW - 1, dynH - 1];
           fldPIdVal.fontSize = 9;
           fldPIdVal.textColor = colors.darkText;
           fldPIdVal.borderStyle = 'none';
-          fldPIdVal.value = valLines[0] || '';
+          fldPIdVal.value = val;
           doc.addField(fldPIdVal);
-          yPosition += rowH;
+          yPosition += dynH;
         });
         yPosition += 4;
       }
     }
 
-    if (p.partnershipType) {
-      checkPage(7);
-      doc.setFont(undefined, 'bold');
-      doc.text('Type of Partnership:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      const typeLabel = p.partnershipType === 'general'
-        ? 'General Partner (with unlimited personal liability)'
-        : 'Limited Partner (with limited liability)';
-      const typeLines = doc.splitTextToSize(typeLabel, pageWidth - margin * 2 - doc.getTextWidth('Type of Partnership:') - 4);
-      if (typeLines.length === 1) {
-        const fldPType = new doc.AcroFormTextField();
-        fldPType.fieldName = `p_type_${idx}`;
-        fldPType.Rect = [margin + doc.getTextWidth('Type of Partnership:') + 2, yPosition - 5.5, pageWidth - (margin + doc.getTextWidth('Type of Partnership:') + 2) - margin, 7];
-        fldPType.fontSize = 9;
-        fldPType.textColor = colors.darkText;
-        fldPType.borderStyle = 'none';
-        fldPType.value = typeLabel || '';
-        doc.addField(fldPType);
-        yPosition += 6;
-      } else {
-        yPosition += 6;
-        const fldPType = new doc.AcroFormTextField();
-        fldPType.fieldName = `p_type_${idx}`;
-        fldPType.Rect = [margin + 4, yPosition - 5.5, pageWidth - (margin + 4) - margin, 7];
-        fldPType.fontSize = 9;
-        fldPType.textColor = colors.darkText;
-        fldPType.borderStyle = 'none';
-        fldPType.value = typeLines[0] || '';
-        doc.addField(fldPType);
-        yPosition += typeLines.length * 5 + 2;
-      }
-    }
+    const pLabelColW = 70;
+    const pValueColW = fieldWidth - pLabelColW;
+    const pRowH = 8;
 
-    checkPage(7);
-    doc.setFont(undefined, 'bold');
-    doc.text('Written Partnership Agreement:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    const fldAgreementYesNo = new doc.AcroFormTextField();
-    fldAgreementYesNo.fieldName = `p_agreement_yesno_${idx}`;
-    fldAgreementYesNo.Rect = [margin + doc.getTextWidth('Written Partnership Agreement:') + 2, yPosition - 5.5, pageWidth - (margin + doc.getTextWidth('Written Partnership Agreement:') + 2) - margin, 7];
-    fldAgreementYesNo.fontSize = 9;
-    fldAgreementYesNo.textColor = colors.darkText;
-    fldAgreementYesNo.borderStyle = 'none';
-    fldAgreementYesNo.value = (p.hasWrittenAgreement === 'yes' ? 'Yes' : p.hasWrittenAgreement === 'no' ? 'No' : 'Not answered') || '';
-    doc.addField(fldAgreementYesNo);
-    yPosition += 6;
+    const renderPRow = (label: string, value: string, fieldName: string) => {
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(9);
+      const labelLines = doc.splitTextToSize(label, pLabelColW - 4);
+      const dynamicRowH = Math.max(pRowH, labelLines.length * 5 + 3);
+      checkPage(dynamicRowH + 2);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, yPosition, pLabelColW, dynamicRowH, 'FD');
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin + pLabelColW, yPosition, pValueColW, dynamicRowH, 'FD');
+      doc.setTextColor(...colors.darkText);
+      doc.text(labelLines, margin + 2, yPosition + 5.5);
+      const f = new doc.AcroFormTextField();
+      f.fieldName = fieldName;
+      f.Rect = [margin + pLabelColW + 0.5, yPosition + 0.5, pValueColW - 1, dynamicRowH - 1];
+      f.fontSize = 8;
+      f.textColor = colors.darkText;
+      f.borderStyle = 'none';
+      f.value = value;
+      doc.addField(f);
+      yPosition += dynamicRowH;
+    };
+
+    const typeLabel = p.partnershipType === 'general'
+      ? 'General Partner (with unlimited personal liability)'
+      : p.partnershipType === 'limited' ? 'Limited Partner (with limited liability)' : '';
+    if (typeLabel) renderPRow('Type of Partnership:', typeLabel, `p_type_${idx}`);
+
+    renderPRow('Written Partnership Agreement:', p.hasWrittenAgreement === 'yes' ? 'Yes' : p.hasWrittenAgreement === 'no' ? 'No' : '', `p_agreement_yesno_${idx}`);
 
     if (p.hasWrittenAgreement === 'yes') {
-      if (p.agreementDocLocation) {
-        checkPage(7);
-        doc.setFont(undefined, 'bold');
-        doc.text('Location of Original Document:', margin + 4, yPosition);
-        doc.setFont(undefined, 'normal');
-        const locLines = doc.splitTextToSize(p.agreementDocLocation, pageWidth - margin * 2 - doc.getTextWidth('Location of Original Document:') - 8);
-        if (locLines.length === 1) {
-          const fldAgreementLoc = new doc.AcroFormTextField();
-          fldAgreementLoc.fieldName = `p_agreement_loc_${idx}`;
-          fldAgreementLoc.Rect = [margin + 4 + doc.getTextWidth('Location of Original Document:') + 2, yPosition - 5.5, pageWidth - (margin + 4 + doc.getTextWidth('Location of Original Document:') + 2) - margin, 7];
-          fldAgreementLoc.fontSize = 9;
-          fldAgreementLoc.textColor = colors.darkText;
-          fldAgreementLoc.borderStyle = 'none';
-          fldAgreementLoc.value = p.agreementDocLocation || '';
-          doc.addField(fldAgreementLoc);
-          yPosition += 6;
-        } else {
-          yPosition += 6;
-          const fldAgreementLoc = new doc.AcroFormTextField();
-          fldAgreementLoc.fieldName = `p_agreement_loc_${idx}`;
-          fldAgreementLoc.Rect = [margin + 8, yPosition - 5.5, pageWidth - (margin + 8) - margin, 7];
-          fldAgreementLoc.fontSize = 9;
-          fldAgreementLoc.textColor = colors.darkText;
-          fldAgreementLoc.borderStyle = 'none';
-          fldAgreementLoc.value = locLines[0] || '';
-          doc.addField(fldAgreementLoc);
-          yPosition += locLines.length * 5 + 2;
-        }
-      }
-
+      if (p.agreementDocLocation) renderPRow('Location of Original Document:', p.agreementDocLocation, `p_agreement_loc_${idx}`);
       if (p.agreementHasDeathProvisions) {
-        checkPage(7);
         const provisionLabels: Record<string, string> = { yes: 'Yes', no: 'No', unsure: "I'm not sure" };
-        doc.setFont(undefined, 'bold');
-        const provQ = 'Contains provisions for death or incapacity of a partner:';
-        const provQLines = doc.splitTextToSize(provQ, pageWidth - margin * 2 - 4);
-        doc.text(provQLines, margin + 4, yPosition);
-        yPosition += provQLines.length * 5 + 1;
-        doc.setFont(undefined, 'normal');
-        const fldProvisions = new doc.AcroFormTextField();
-        fldProvisions.fieldName = `p_agreement_provisions_${idx}`;
-        fldProvisions.Rect = [margin + 8, yPosition - 5.5, pageWidth - (margin + 8) - margin, 7];
-        fldProvisions.fontSize = 9;
-        fldProvisions.textColor = colors.darkText;
-        fldProvisions.borderStyle = 'none';
-        fldProvisions.value = (provisionLabels[p.agreementHasDeathProvisions] || p.agreementHasDeathProvisions) || '';
-        doc.addField(fldProvisions);
-        yPosition += 6;
+        renderPRow('Contains provisions for death or incapacity of a partner:', provisionLabels[p.agreementHasDeathProvisions] || p.agreementHasDeathProvisions, `p_agreement_provisions_${idx}`);
       }
     }
 
-    checkPage(15);
-    yPosition += 10;
-    doc.setFillColor(...colors.navyBlue);
-    doc.rect(margin, yPosition - 3, 2, 8, 'F');
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.mediumGray);
-    doc.text('Continuity and Buy-Sell Provisions', margin + 5, yPosition + 3);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...colors.darkText);
-    yPosition += 10;
-    doc.setFontSize(9);
+    addSubsectionHeader('Continuity and Buy-Sell Provisions');
 
     if (p.continuityContinues) {
-      checkPage(12);
       const continuityLabels: Record<string, string> = {
         continues: 'Continues with remaining partners',
         wound_up: 'Wound up',
         unsure: "I'm not sure",
       };
-      doc.setFont(undefined, 'bold');
-      const contQ = 'Business continuation upon death or incapacity:';
-      const contQLines = doc.splitTextToSize(contQ, pageWidth - margin * 2);
-      doc.text(contQLines, margin, yPosition);
-      yPosition += contQLines.length * 5 + 1;
-      doc.setFont(undefined, 'normal');
-      const fld_p_continuity = new doc.AcroFormTextField();
-      fld_p_continuity.fieldName = `p_continuity_${idx}`;
-      fld_p_continuity.Rect = [margin + 4, yPosition - 4.5, pageWidth - margin - (margin + 4), 6];
-      fld_p_continuity.fontSize = 9;
-      fld_p_continuity.textColor = colors.darkText;
-      fld_p_continuity.borderStyle = 'none';
-      fld_p_continuity.value = continuityLabels[p.continuityContinues] || p.continuityContinues || '';
-      doc.addField(fld_p_continuity);
-      yPosition += 6;
+      renderPRow('Business continuation upon death or incapacity:', continuityLabels[p.continuityContinues] || p.continuityContinues, `p_continuity_${idx}`);
     }
 
     if (p.hasBuySellAgreement) {
-      checkPage(7);
-      doc.setFont(undefined, 'bold');
-      doc.text('Buy-sell agreement obliging remaining partners to purchase interest:', margin, yPosition);
-      yPosition += 5;
-      doc.setFont(undefined, 'normal');
-      const fld_p_buysell_yesno = new doc.AcroFormTextField();
-      fld_p_buysell_yesno.fieldName = `p_buysell_yesno_${idx}`;
-      fld_p_buysell_yesno.Rect = [margin + 4, yPosition - 4.5, pageWidth - margin - (margin + 4), 6];
-      fld_p_buysell_yesno.fontSize = 9;
-      fld_p_buysell_yesno.textColor = colors.darkText;
-      fld_p_buysell_yesno.borderStyle = 'none';
-      fld_p_buysell_yesno.value = p.hasBuySellAgreement === 'yes' ? 'Yes' : 'No';
-      doc.addField(fld_p_buysell_yesno);
-      yPosition += 6;
+      renderPRow('Buy-sell agreement obliging remaining partners to purchase interest:', p.hasBuySellAgreement === 'yes' ? 'Yes' : 'No', `p_buysell_yesno_${idx}`);
     }
 
     if (p.hasBuySellAgreement === 'yes') {
-      if (p.buySellDocLocation) {
-        checkPage(7);
-        doc.setFont(undefined, 'bold');
-        doc.text('Location of buy/sell document:', margin + 4, yPosition);
-        doc.setFont(undefined, 'normal');
-        const bsLines = doc.splitTextToSize(p.buySellDocLocation, pageWidth - margin * 2 - doc.getTextWidth('Location of buy/sell document:') - 8);
-        if (bsLines.length === 1) {
-          const fld_p_buysell_loc_s = new doc.AcroFormTextField();
-          fld_p_buysell_loc_s.fieldName = `p_buysell_loc_${idx}`;
-          fld_p_buysell_loc_s.Rect = [margin + 4 + doc.getTextWidth('Location of buy/sell document:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 4 + doc.getTextWidth('Location of buy/sell document:') + 2), 6];
-          fld_p_buysell_loc_s.fontSize = 9;
-          fld_p_buysell_loc_s.textColor = colors.darkText;
-          fld_p_buysell_loc_s.borderStyle = 'none';
-          fld_p_buysell_loc_s.value = p.buySellDocLocation || '';
-          doc.addField(fld_p_buysell_loc_s);
-          yPosition += 6;
-        } else {
-          yPosition += 6;
-          const fld_p_buysell_loc_m = new doc.AcroFormTextField();
-          fld_p_buysell_loc_m.fieldName = `p_buysell_loc_${idx}`;
-          fld_p_buysell_loc_m.Rect = [margin + 8, yPosition - 4.5, pageWidth - margin - (margin + 8), 6];
-          fld_p_buysell_loc_m.fontSize = 9;
-          fld_p_buysell_loc_m.textColor = colors.darkText;
-          fld_p_buysell_loc_m.borderStyle = 'none';
-          fld_p_buysell_loc_m.value = p.buySellDocLocation || '';
-          doc.addField(fld_p_buysell_loc_m);
-          yPosition += bsLines.length * 5 + 2;
-        }
-      }
-      if (p.buySellFundedByInsurance) {
-        checkPage(7);
-        doc.setFont(undefined, 'bold');
-        doc.text('Buy/sell agreement funded by life insurance:', margin + 4, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fld_p_buysell_insurance_yesno = new doc.AcroFormTextField();
-        fld_p_buysell_insurance_yesno.fieldName = `p_buysell_insurance_yesno_${idx}`;
-        fld_p_buysell_insurance_yesno.Rect = [margin + 4 + doc.getTextWidth('Buy/sell agreement funded by life insurance:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 4 + doc.getTextWidth('Buy/sell agreement funded by life insurance:') + 2), 6];
-        fld_p_buysell_insurance_yesno.fontSize = 9;
-        fld_p_buysell_insurance_yesno.textColor = colors.darkText;
-        fld_p_buysell_insurance_yesno.borderStyle = 'none';
-        fld_p_buysell_insurance_yesno.value = p.buySellFundedByInsurance === 'yes' ? 'Yes' : 'No';
-        doc.addField(fld_p_buysell_insurance_yesno);
-        yPosition += 6;
-      }
+      if (p.buySellDocLocation) renderPRow('Location of buy/sell document:', p.buySellDocLocation, `p_buysell_loc_${idx}`);
+      if (p.buySellFundedByInsurance) renderPRow('Buy/sell agreement funded by life insurance:', p.buySellFundedByInsurance === 'yes' ? 'Yes' : 'No', `p_buysell_insurance_yesno_${idx}`);
       if (p.buySellFundedByInsurance === 'yes' && p.buySellInsuranceDocLocation) {
-        checkPage(7);
-        doc.setFont(undefined, 'bold');
-        doc.text('Location of buy/sell life insurance documentation:', margin + 8, yPosition);
-        yPosition += 5;
-        doc.setFont(undefined, 'normal');
-        const insLines = doc.splitTextToSize(p.buySellInsuranceDocLocation, pageWidth - margin * 2 - 16);
-        const fld_p_buysell_insurance_loc = new doc.AcroFormTextField();
-        fld_p_buysell_insurance_loc.fieldName = `p_buysell_insurance_loc_${idx}`;
-        fld_p_buysell_insurance_loc.Rect = [margin + 12, yPosition - 4.5, pageWidth - margin - (margin + 12), 6];
-        fld_p_buysell_insurance_loc.fontSize = 9;
-        fld_p_buysell_insurance_loc.textColor = colors.darkText;
-        fld_p_buysell_insurance_loc.borderStyle = 'none';
-        fld_p_buysell_insurance_loc.value = p.buySellInsuranceDocLocation || '';
-        doc.addField(fld_p_buysell_insurance_loc);
-        yPosition += insLines.length * 5 + 2;
+        renderPRow('Location of buy/sell life insurance documentation:', p.buySellInsuranceDocLocation, `p_buysell_insurance_loc_${idx}`);
       }
     }
 
     if (p.hasValuationMethod) {
-      checkPage(7);
-      doc.setFont(undefined, 'bold');
-      doc.text('Written valuation method for partnership interest:', margin, yPosition);
-      yPosition += 5;
-      doc.setFont(undefined, 'normal');
-      const fld_p_valuation_yesno = new doc.AcroFormTextField();
-      fld_p_valuation_yesno.fieldName = `p_valuation_yesno_${idx}`;
-      fld_p_valuation_yesno.Rect = [margin + 4, yPosition - 4.5, pageWidth - margin - (margin + 4), 6];
-      fld_p_valuation_yesno.fontSize = 9;
-      fld_p_valuation_yesno.textColor = colors.darkText;
-      fld_p_valuation_yesno.borderStyle = 'none';
-      fld_p_valuation_yesno.value = p.hasValuationMethod === 'yes' ? 'Yes' : 'No';
-      doc.addField(fld_p_valuation_yesno);
-      yPosition += 6;
+      renderPRow('Written valuation method for partnership interest:', p.hasValuationMethod === 'yes' ? 'Yes' : 'No', `p_valuation_yesno_${idx}`);
     }
-
     if (p.hasValuationMethod === 'yes' && p.valuationMethodDocLocation) {
-      checkPage(7);
-      doc.setFont(undefined, 'bold');
-      doc.text('Location of valuation method documentation:', margin + 4, yPosition);
-      yPosition += 5;
-      doc.setFont(undefined, 'normal');
-      const valLines2 = doc.splitTextToSize(p.valuationMethodDocLocation, pageWidth - margin * 2 - 8);
-      const fld_p_valuation_loc = new doc.AcroFormTextField();
-      fld_p_valuation_loc.fieldName = `p_valuation_loc_${idx}`;
-      fld_p_valuation_loc.Rect = [margin + 8, yPosition - 4.5, pageWidth - margin - (margin + 8), 6];
-      fld_p_valuation_loc.fontSize = 9;
-      fld_p_valuation_loc.textColor = colors.darkText;
-      fld_p_valuation_loc.borderStyle = 'none';
-      fld_p_valuation_loc.value = p.valuationMethodDocLocation || '';
-      doc.addField(fld_p_valuation_loc);
-      yPosition += valLines2.length * 5 + 2;
+      renderPRow('Location of valuation method documentation:', p.valuationMethodDocLocation, `p_valuation_loc_${idx}`);
     }
 
-    checkPage(15);
-    yPosition += 10;
-    doc.setFillColor(...colors.navyBlue);
-    doc.rect(margin, yPosition - 3, 2, 8, 'F');
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.mediumGray);
-    doc.text('Liability and Fiduciary Risks', margin + 5, yPosition + 3);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...colors.darkText);
-    yPosition += 10;
-    doc.setFontSize(9);
+    addSubsectionHeader('Liability and Fiduciary Risks');
 
     if (p.hasPersonalGuarantees) {
-      checkPage(7);
-      doc.setFont(undefined, 'bold');
-      doc.text('Personal guarantees for partnership debts or bank loans:', margin, yPosition);
-      yPosition += 5;
-      doc.setFont(undefined, 'normal');
-      doc.text(p.hasPersonalGuarantees === 'yes' ? 'Yes' : 'No', margin + 4, yPosition);
-      yPosition += 6;
+      renderPRow('Personal guarantees for partnership debts or bank loans:', p.hasPersonalGuarantees === 'yes' ? 'Yes' : 'No', `p_personal_guarantees_yesno_${idx}`);
     }
 
     if (p.hasPersonalGuarantees === 'yes' && p.personalGuarantees && p.personalGuarantees.length > 0) {
       p.personalGuarantees.forEach((g, gIdx) => {
-        checkPage(14);
-        doc.setFont(undefined, 'bold');
-        doc.text(`Personal Guarantee ${gIdx + 1}:`, margin + 4, yPosition);
+        checkPage(20);
+        yPosition += 4;
+        doc.setFont(undefined, 'bolditalic');
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.darkText);
+        const pgLabel = `Personal Guarantee ${gIdx + 1}:`;
+        doc.text(pgLabel, margin, yPosition);
+        doc.setLineWidth(0.3);
+        doc.line(margin, yPosition + 1, margin + doc.getTextWidth(pgLabel), yPosition + 1);
         yPosition += 6;
-
-        if (g.natureOfDebt) {
-          doc.setFont(undefined, 'bold');
-          doc.text('Nature of the debt:', margin + 8, yPosition);
-          doc.setFont(undefined, 'normal');
-          const debtLines = doc.splitTextToSize(g.natureOfDebt, pageWidth - margin * 2 - doc.getTextWidth('Nature of the debt:') - 12);
-          if (debtLines.length === 1) {
-            const fld_p_guarantee_debt_s = new doc.AcroFormTextField();
-            fld_p_guarantee_debt_s.fieldName = `p_guarantee_debt_${idx}_${gIdx}`;
-            fld_p_guarantee_debt_s.Rect = [margin + 8 + doc.getTextWidth('Nature of the debt:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 8 + doc.getTextWidth('Nature of the debt:') + 2), 6];
-            fld_p_guarantee_debt_s.fontSize = 9;
-            fld_p_guarantee_debt_s.textColor = colors.darkText;
-            fld_p_guarantee_debt_s.borderStyle = 'none';
-            fld_p_guarantee_debt_s.value = g.natureOfDebt || '';
-            doc.addField(fld_p_guarantee_debt_s);
-            yPosition += 6;
-          } else {
-            yPosition += 6;
-            const fld_p_guarantee_debt_m = new doc.AcroFormTextField();
-            fld_p_guarantee_debt_m.fieldName = `p_guarantee_debt_${idx}_${gIdx}`;
-            fld_p_guarantee_debt_m.Rect = [margin + 12, yPosition - 4.5, pageWidth - margin - (margin + 12), 6];
-            fld_p_guarantee_debt_m.fontSize = 9;
-            fld_p_guarantee_debt_m.textColor = colors.darkText;
-            fld_p_guarantee_debt_m.borderStyle = 'none';
-            fld_p_guarantee_debt_m.value = g.natureOfDebt || '';
-            doc.addField(fld_p_guarantee_debt_m);
-            yPosition += debtLines.length * 5 + 2;
-          }
-        }
-
-        if (g.documentationLocation) {
-          checkPage(7);
-          doc.setFont(undefined, 'bold');
-          doc.text('Documentation location:', margin + 8, yPosition);
-          doc.setFont(undefined, 'normal');
-          const docLines = doc.splitTextToSize(g.documentationLocation, pageWidth - margin * 2 - doc.getTextWidth('Documentation location:') - 12);
-          if (docLines.length === 1) {
-            const fld_p_guarantee_doc_s = new doc.AcroFormTextField();
-            fld_p_guarantee_doc_s.fieldName = `p_guarantee_doc_${idx}_${gIdx}`;
-            fld_p_guarantee_doc_s.Rect = [margin + 8 + doc.getTextWidth('Documentation location:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 8 + doc.getTextWidth('Documentation location:') + 2), 6];
-            fld_p_guarantee_doc_s.fontSize = 9;
-            fld_p_guarantee_doc_s.textColor = colors.darkText;
-            fld_p_guarantee_doc_s.borderStyle = 'none';
-            fld_p_guarantee_doc_s.value = g.documentationLocation || '';
-            doc.addField(fld_p_guarantee_doc_s);
-            yPosition += 6;
-          } else {
-            yPosition += 6;
-            const fld_p_guarantee_doc_m = new doc.AcroFormTextField();
-            fld_p_guarantee_doc_m.fieldName = `p_guarantee_doc_${idx}_${gIdx}`;
-            fld_p_guarantee_doc_m.Rect = [margin + 12, yPosition - 4.5, pageWidth - margin - (margin + 12), 6];
-            fld_p_guarantee_doc_m.fontSize = 9;
-            fld_p_guarantee_doc_m.textColor = colors.darkText;
-            fld_p_guarantee_doc_m.borderStyle = 'none';
-            fld_p_guarantee_doc_m.value = g.documentationLocation || '';
-            doc.addField(fld_p_guarantee_doc_m);
-            yPosition += docLines.length * 5 + 2;
-          }
-        }
+        if (g.natureOfDebt) renderPRow('Nature of the debt:', g.natureOfDebt, `p_guarantee_debt_${idx}_${gIdx}`);
+        if (g.documentationLocation) renderPRow('Documentation location:', g.documentationLocation, `p_guarantee_doc_${idx}_${gIdx}`);
+        yPosition += 2;
       });
     }
 
     if (p.isProfessionalPartnership) {
-      checkPage(7);
-      doc.setFont(undefined, 'bold');
-      doc.text('Professional partnership (law, accounting, etc.):', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      const fld_p_professional_yesno = new doc.AcroFormTextField();
-      fld_p_professional_yesno.fieldName = `p_professional_yesno_${idx}`;
-      fld_p_professional_yesno.Rect = [margin + doc.getTextWidth('Professional partnership (law, accounting, etc.):') + 2, yPosition - 4.5, pageWidth - margin - (margin + doc.getTextWidth('Professional partnership (law, accounting, etc.):') + 2), 6];
-      fld_p_professional_yesno.fontSize = 9;
-      fld_p_professional_yesno.textColor = colors.darkText;
-      fld_p_professional_yesno.borderStyle = 'none';
-      fld_p_professional_yesno.value = p.isProfessionalPartnership === 'yes' ? 'Yes' : 'No';
-      doc.addField(fld_p_professional_yesno);
-      yPosition += 6;
+      renderPRow('Professional partnership (law, accounting, etc.):', p.isProfessionalPartnership === 'yes' ? 'Yes' : 'No', `p_professional_yesno_${idx}`);
     }
 
     if (p.isProfessionalPartnership === 'yes') {
       if (p.hasLiabilityInsurance) {
-        checkPage(7);
-        doc.setFont(undefined, 'bold');
-        doc.text('Liability or errors and omissions insurance:', margin + 4, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fld_p_liability_insurance_yesno = new doc.AcroFormTextField();
-        fld_p_liability_insurance_yesno.fieldName = `p_liability_insurance_yesno_${idx}`;
-        fld_p_liability_insurance_yesno.Rect = [margin + 4 + doc.getTextWidth('Liability or errors and omissions insurance:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 4 + doc.getTextWidth('Liability or errors and omissions insurance:') + 2), 6];
-        fld_p_liability_insurance_yesno.fontSize = 9;
-        fld_p_liability_insurance_yesno.textColor = colors.darkText;
-        fld_p_liability_insurance_yesno.borderStyle = 'none';
-        fld_p_liability_insurance_yesno.value = p.hasLiabilityInsurance === 'yes' ? 'Yes' : 'No';
-        doc.addField(fld_p_liability_insurance_yesno);
-        yPosition += 6;
+        renderPRow('Liability or errors and omissions insurance:', p.hasLiabilityInsurance === 'yes' ? 'Yes' : 'No', `p_liability_insurance_yesno_${idx}`);
       }
-
       if (p.hasLiabilityInsurance === 'yes' && p.liabilityInsurancePolicies && p.liabilityInsurancePolicies.length > 0) {
         p.liabilityInsurancePolicies.forEach((pol, pIdx) => {
-          checkPage(14);
-          doc.setFont(undefined, 'bold');
-          doc.text(`Policy ${pIdx + 1}:`, margin + 8, yPosition);
+          checkPage(20);
+          yPosition += 4;
+          doc.setFont(undefined, 'bolditalic');
+          doc.setFontSize(9);
+          doc.setTextColor(...colors.darkText);
+          const polLabel = `Policy ${pIdx + 1}:`;
+          doc.text(polLabel, margin, yPosition);
+          doc.setLineWidth(0.3);
+          doc.line(margin, yPosition + 1, margin + doc.getTextWidth(polLabel), yPosition + 1);
           yPosition += 6;
-
-          if (pol.description) {
-            doc.setFont(undefined, 'bold');
-            doc.text('Description:', margin + 12, yPosition);
-            doc.setFont(undefined, 'normal');
-            const descLines = doc.splitTextToSize(pol.description, pageWidth - margin * 2 - doc.getTextWidth('Description:') - 16);
-            if (descLines.length === 1) {
-              const fld_p_policy_desc_s = new doc.AcroFormTextField();
-              fld_p_policy_desc_s.fieldName = `p_policy_desc_${idx}_${pIdx}`;
-              fld_p_policy_desc_s.Rect = [margin + 12 + doc.getTextWidth('Description:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 12 + doc.getTextWidth('Description:') + 2), 6];
-              fld_p_policy_desc_s.fontSize = 9;
-              fld_p_policy_desc_s.textColor = colors.darkText;
-              fld_p_policy_desc_s.borderStyle = 'none';
-              fld_p_policy_desc_s.value = pol.description || '';
-              doc.addField(fld_p_policy_desc_s);
-              yPosition += 6;
-            } else {
-              yPosition += 6;
-              const fld_p_policy_desc_m = new doc.AcroFormTextField();
-              fld_p_policy_desc_m.fieldName = `p_policy_desc_${idx}_${pIdx}`;
-              fld_p_policy_desc_m.Rect = [margin + 16, yPosition - 4.5, pageWidth - margin - (margin + 16), 6];
-              fld_p_policy_desc_m.fontSize = 9;
-              fld_p_policy_desc_m.textColor = colors.darkText;
-              fld_p_policy_desc_m.borderStyle = 'none';
-              fld_p_policy_desc_m.value = pol.description || '';
-              doc.addField(fld_p_policy_desc_m);
-              yPosition += descLines.length * 5 + 2;
-            }
-          }
-
-          if (pol.documentationLocation) {
-            checkPage(7);
-            doc.setFont(undefined, 'bold');
-            doc.text('Documentation location:', margin + 12, yPosition);
-            doc.setFont(undefined, 'normal');
-            const polDocLines = doc.splitTextToSize(pol.documentationLocation, pageWidth - margin * 2 - doc.getTextWidth('Documentation location:') - 16);
-            if (polDocLines.length === 1) {
-              const fld_p_policy_doc_s = new doc.AcroFormTextField();
-              fld_p_policy_doc_s.fieldName = `p_policy_doc_${idx}_${pIdx}`;
-              fld_p_policy_doc_s.Rect = [margin + 12 + doc.getTextWidth('Documentation location:') + 2, yPosition - 4.5, pageWidth - margin - (margin + 12 + doc.getTextWidth('Documentation location:') + 2), 6];
-              fld_p_policy_doc_s.fontSize = 9;
-              fld_p_policy_doc_s.textColor = colors.darkText;
-              fld_p_policy_doc_s.borderStyle = 'none';
-              fld_p_policy_doc_s.value = pol.documentationLocation || '';
-              doc.addField(fld_p_policy_doc_s);
-              yPosition += 6;
-            } else {
-              yPosition += 6;
-              const fld_p_policy_doc_m = new doc.AcroFormTextField();
-              fld_p_policy_doc_m.fieldName = `p_policy_doc_${idx}_${pIdx}`;
-              fld_p_policy_doc_m.Rect = [margin + 16, yPosition - 4.5, pageWidth - margin - (margin + 16), 6];
-              fld_p_policy_doc_m.fontSize = 9;
-              fld_p_policy_doc_m.textColor = colors.darkText;
-              fld_p_policy_doc_m.borderStyle = 'none';
-              fld_p_policy_doc_m.value = pol.documentationLocation || '';
-              doc.addField(fld_p_policy_doc_m);
-              yPosition += polDocLines.length * 5 + 2;
-            }
-          }
+          if (pol.description) renderPRow('Description:', pol.description, `p_policy_desc_${idx}_${pIdx}`);
+          if (pol.documentationLocation) renderPRow('Documentation location:', pol.documentationLocation, `p_policy_doc_${idx}_${pIdx}`);
+          yPosition += 2;
         });
       }
     }
@@ -3989,15 +3710,14 @@ export const generatePDF = (formData: FormData) => {
     }
 
     if (pDocRows.length > 0) {
-      checkPage(15);
-      yPosition += 10;
-      doc.setFillColor(...colors.navyBlue);
-      doc.rect(margin, yPosition - 3, 2, 8, 'F');
-      doc.setFontSize(12);
+      checkPage(30);
+      yPosition += 4;
       doc.setFont(undefined, 'bold');
-      doc.setTextColor(...colors.mediumGray);
-      doc.text('Document Summary', margin + 5, yPosition + 3);
-      doc.setFont(undefined, 'normal');
+      doc.setFontSize(10);
+      doc.setFillColor(...colors.navyBlue);
+      doc.rect(margin, yPosition - 4, fieldWidth, 10, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.text(`${businessName} — Document Summary`, margin + 3, yPosition + 2);
       doc.setTextColor(...colors.darkText);
       yPosition += 10;
 
@@ -4165,7 +3885,7 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  doc.addPage();
+  addPage();
   yPosition = 12;
   addSectionHeader('Corporate Information');
 
@@ -4191,12 +3911,7 @@ export const generatePDF = (formData: FormData) => {
         const corporation = formData.corporationsData?.[i];
         const ordinal = getOrdinalLabel(i + 1);
 
-        yPosition += 6;
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...colors.darkText);
-        doc.text(`${ordinal} Corporation:`, margin, yPosition);
-        yPosition += 8;
+        addSubsectionHeader(`${ordinal} Corporation:${corporation?.legalName ? ` ${corporation.legalName}` : ''}`);
 
         const corporationTypeValue = corporation?.corporationType === 'Other' && corporation?.corporationTypeOther
           ? `${corporation.corporationType} - ${corporation.corporationTypeOther}`
@@ -4251,29 +3966,29 @@ export const generatePDF = (formData: FormData) => {
         }, 0);
 
         if (yPosition + tableHeight > pageHeight - margin) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
-          doc.setFontSize(11);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(...colors.darkText);
-          doc.text(`${ordinal} Corporation:`, margin, yPosition);
-          yPosition += 8;
+          addSubsectionHeader(`${ordinal} Corporation:${corporation?.legalName ? ` ${corporation.legalName}` : ''}`);
         }
 
         corpRows.forEach((row, rowIndex) => {
           const isHoldingAssets = row.fieldName === 'holdingCompanyAssets';
-          const rowHeight = isHoldingAssets ? 24 : cellHeight;
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          const labelLines = doc.splitTextToSize(row.label, labelWidth - 3);
+          const baseH = isHoldingAssets ? 24 : cellHeight;
+          const rowHeight = Math.max(baseH, labelLines.length * 5 + 3);
           const rowY = yPosition;
 
-          doc.setDrawColor(...colors.borderGray);
-          doc.setLineWidth(0.5);
-          doc.rect(margin, rowY, labelWidth, rowHeight);
-          doc.rect(margin + labelWidth, rowY, valueWidth, rowHeight);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, rowY, labelWidth, rowHeight, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + labelWidth, rowY, valueWidth, rowHeight, 'FD');
 
-          doc.setFontSize(9);
-          doc.setFont(undefined, 'bold');
           doc.setTextColor(...colors.darkText);
-          doc.text(row.label, margin + 1, rowY + 5);
+          doc.text(labelLines, margin + 1, rowY + 5);
 
           const field = new doc.AcroFormTextField();
           field.fieldName = `corporation_${i + 1}_${row.fieldName}`;
@@ -4296,95 +4011,31 @@ export const generatePDF = (formData: FormData) => {
 
         const bpcTableHeight = 14 + (4 * 10) + 8;
         if (yPosition + bpcTableHeight > pageHeight - margin) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...colors.darkText);
-        doc.text(`${corpName} - Business and Professional Contracts:`, margin, yPosition);
-        yPosition += 6;
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'normal');
-        doc.text('For clients with corporations, your trustee must know your \'Quarterback Team\' to manage transitions or wind-ups effectively.', margin, yPosition);
-        yPosition += 8;
-
-        const bpcRowHeight = 10;
-        const bpcHeaderHeight = 14;
-        const bpcCol1Width = fieldWidth * 0.25;
-        const bpcCol2Width = fieldWidth * 0.25;
-        const bpcCol3Width = fieldWidth * 0.25;
-        const bpcCol4Width = fieldWidth * 0.25;
-
-        const bpcHeaders = ['Professional:', 'Name:', 'Firm/Contact Info:', 'Role in the Estate:'];
-        const bpcRows = ['Lawyer(s):', 'Accountant/Tax Prep(s):', 'Trustee(s):', 'Life/Disability/Critical Illness Provider(s):'];
-
-        let currentY = yPosition;
-        doc.setLineWidth(0.5);
-
-        bpcHeaders.forEach((header, colIdx) => {
-          const colWidths = [bpcCol1Width, bpcCol2Width, bpcCol3Width, bpcCol4Width];
-          const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-          doc.setDrawColor(180, 180, 180);
-          doc.setFillColor(250, 250, 250);
-          doc.rect(xPos, currentY, colWidths[colIdx], bpcHeaderHeight, 'FD');
-          doc.setFontSize(8);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(0, 0, 0);
-          const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
-          const textY = currentY + (bpcHeaderHeight - lines.length * 3) / 2 + 3;
-          doc.text(lines, xPos + 1, textY);
-        });
-
-        currentY += bpcHeaderHeight;
-
-        bpcRows.forEach((rowLabel, rowIdx) => {
-          const rowY = currentY;
-          doc.setDrawColor(...colors.borderGray);
-          doc.setFillColor(240, 240, 250);
-          doc.setLineWidth(0.5);
-          doc.rect(margin, rowY, bpcCol1Width, bpcRowHeight, 'FD');
-
-          doc.setFontSize(7);
-          doc.setFont(undefined, 'normal');
-          doc.setTextColor(...colors.darkText);
-          doc.text(rowLabel, margin + 1, rowY + 6);
-
-          [bpcCol2Width, bpcCol3Width, bpcCol4Width].forEach((colWidth, colIdx) => {
-            const xPos = margin + bpcCol1Width + [0, bpcCol2Width, bpcCol2Width + bpcCol3Width][colIdx];
-            doc.rect(xPos, rowY, colWidth, bpcRowHeight);
-
-            const field = new doc.AcroFormTextField();
-            field.fieldName = `corp_${i + 1}_bpc_${rowIdx}_${colIdx}`;
-            field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, bpcRowHeight - 1];
-            field.fontSize = 7;
-            field.textColor = colors.darkText;
-            field.borderStyle = 'none';
-            field.multiline = true;
-            doc.addField(field);
-          });
-
-          currentY += bpcRowHeight;
-        });
-
-        yPosition = currentY + 12;
-
+        const allPtRows = [
+          'Lawyer(s):',
+          'Accountant/Tax Prep(s):',
+          'Trustee(s):',
+          'Life/Disability/Critical Illness Provider(s):',
+          'Corporate Accountant:',
+          'Commercial Banker:',
+          'Business Valuator:',
+          'Other:',
+          'Other:',
+        ];
         const ptRowHeight = 10;
         const ptHeaderHeight = 14;
-        const ptRows = ['Corporate Accountant:', 'Commercial Banker:', 'Business Valuator:', 'Other:', 'Other:'];
-        const ptTableHeight = ptHeaderHeight + (ptRows.length * ptRowHeight) + 14;
+        const ptTableHeight = ptHeaderHeight + (allPtRows.length * ptRowHeight) + 14;
 
         if (yPosition + ptTableHeight > pageHeight - margin) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...colors.darkText);
-        doc.text(`${corpName} - Professional Team:`, margin, yPosition);
-        yPosition += 6;
+        addSubsectionHeader(`${corpName} - Professional Team:`);
         doc.setFontSize(9);
         doc.setFont(undefined, 'normal');
         doc.text('These are the professionals that are related to your corporate needs:', margin, yPosition);
@@ -4397,13 +4048,13 @@ export const generatePDF = (formData: FormData) => {
 
         const ptHeaders = ['Professional:', 'Name:', 'Firm & Contact Info:', 'Primary Role:'];
 
-        currentY = yPosition;
-        doc.setLineWidth(0.5);
+        let currentY = yPosition;
+        doc.setLineWidth(0.3);
 
         ptHeaders.forEach((header, colIdx) => {
           const colWidths = [ptCol1Width, ptCol2Width, ptCol3Width, ptCol4Width];
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-          doc.setDrawColor(180, 180, 180);
+          doc.setDrawColor(...colors.tableBorder);
           doc.setFillColor(250, 250, 250);
           doc.rect(xPos, currentY, colWidths[colIdx], ptHeaderHeight, 'FD');
           doc.setFontSize(8);
@@ -4416,11 +4067,11 @@ export const generatePDF = (formData: FormData) => {
 
         currentY += ptHeaderHeight;
 
-        ptRows.forEach((rowLabel, rowIdx) => {
+        allPtRows.forEach((rowLabel, rowIdx) => {
           const rowY = currentY;
-          doc.setDrawColor(...colors.borderGray);
-          doc.setFillColor(240, 240, 250);
-          doc.setLineWidth(0.5);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setFillColor(255, 255, 255);
+          doc.setLineWidth(0.3);
           doc.rect(margin, rowY, ptCol1Width, ptRowHeight, 'FD');
 
           doc.setFontSize(7);
@@ -4453,15 +4104,11 @@ export const generatePDF = (formData: FormData) => {
         const fopgTableHeight = fopgHeaderHeight + (fopgRowCount * fopgRowHeight) + 8;
 
         if (yPosition + fopgTableHeight > pageHeight - margin) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...colors.darkText);
-        doc.text(`${corpName} - Financial Obligations and Personal Guarantees:`, margin, yPosition);
-        yPosition += 8;
+        addSubsectionHeader(`${corpName} - Financial Obligations and Personal Guarantees:`);
 
         const fopgCol1Width = fieldWidth * 0.20;
         const fopgCol2Width = fieldWidth * 0.22;
@@ -4472,12 +4119,12 @@ export const generatePDF = (formData: FormData) => {
         const fopgHeaders = ['Creditor/Bank:', 'Loan Type (term, LOC, Mortgage):', 'Account Number:', 'Personal Guarantee? (Y/N)', 'Location of Supporting Documents'];
 
         currentY = yPosition;
-        doc.setLineWidth(0.5);
+        doc.setLineWidth(0.3);
 
         fopgHeaders.forEach((header, colIdx) => {
           const colWidths = [fopgCol1Width, fopgCol2Width, fopgCol3Width, fopgCol4Width, fopgCol5Width];
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-          doc.setDrawColor(180, 180, 180);
+          doc.setDrawColor(...colors.tableBorder);
           doc.setFillColor(250, 250, 250);
           doc.rect(xPos, currentY, colWidths[colIdx], fopgHeaderHeight, 'FD');
           doc.setFontSize(7);
@@ -4494,8 +4141,8 @@ export const generatePDF = (formData: FormData) => {
           const rowY = currentY;
           [fopgCol1Width, fopgCol2Width, fopgCol3Width, fopgCol4Width, fopgCol5Width].forEach((colWidth, colIdx) => {
             const xPos = margin + [0, fopgCol1Width, fopgCol1Width + fopgCol2Width, fopgCol1Width + fopgCol2Width + fopgCol3Width, fopgCol1Width + fopgCol2Width + fopgCol3Width + fopgCol4Width][colIdx];
-            doc.setDrawColor(...colors.borderGray);
-            doc.setLineWidth(0.5);
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
             doc.rect(xPos, rowY, colWidth, fopgRowHeight);
 
             const field = new doc.AcroFormTextField();
@@ -4519,15 +4166,11 @@ export const generatePDF = (formData: FormData) => {
         const bcrmTableHeight = bcrmHeaderHeight + (bcrmRows.length * bcrmRowHeight) + 14;
 
         if (yPosition + bcrmTableHeight > pageHeight - margin) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...colors.darkText);
-        doc.text(`${corpName} - Business Continuity and Risk Management:`, margin, yPosition);
-        yPosition += 6;
+        addSubsectionHeader(`${corpName} - Business Continuity and Risk Management:`);
         doc.setFontSize(9);
         doc.setFont(undefined, 'normal');
         doc.text('Insurance is often the primary source of liquidity for funding buy/sell agreements or paying terminal taxes.', margin, yPosition);
@@ -4543,12 +4186,12 @@ export const generatePDF = (formData: FormData) => {
         const bcrmHeaders = ['Policy Type:', 'Insurance Carrier:', 'Key Contact:', 'Policy Number:', 'Beneficiary/Purpose:', 'Location of Supporting Documents'];
 
         currentY = yPosition;
-        doc.setLineWidth(0.5);
+        doc.setLineWidth(0.3);
 
         bcrmHeaders.forEach((header, colIdx) => {
           const colWidths = [bcrmCol1Width, bcrmCol2Width, bcrmCol3Width, bcrmCol4Width, bcrmCol5Width, bcrmCol6Width];
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-          doc.setDrawColor(180, 180, 180);
+          doc.setDrawColor(...colors.tableBorder);
           doc.setFillColor(250, 250, 250);
           doc.rect(xPos, currentY, colWidths[colIdx], bcrmHeaderHeight, 'FD');
           doc.setFontSize(6.5);
@@ -4563,9 +4206,9 @@ export const generatePDF = (formData: FormData) => {
 
         bcrmRows.forEach((rowLabel, rowIdx) => {
           const rowY = currentY;
-          doc.setDrawColor(...colors.borderGray);
-          doc.setFillColor(240, 240, 250);
-          doc.setLineWidth(0.5);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setFillColor(255, 255, 255);
+          doc.setLineWidth(0.3);
           doc.rect(margin, rowY, bcrmCol1Width, bcrmRowHeight, 'FD');
 
           doc.setFontSize(7);
@@ -4604,15 +4247,11 @@ export const generatePDF = (formData: FormData) => {
         const sbstTableHeight = sbstHeaderHeight + (sbstRows.length * sbstRowHeight) + 14;
 
         if (yPosition + sbstTableHeight > pageHeight - margin) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...colors.darkText);
-        doc.text(`${corpName} - Succession and Buy-Sell Triggers:`, margin, yPosition);
-        yPosition += 6;
+        addSubsectionHeader(`${corpName} - Succession and Buy-Sell Triggers:`);
         doc.setFontSize(9);
         doc.setFont(undefined, 'normal');
         doc.text('Identify the roadmap for who takes control and how they are supposed to pay for it.', margin, yPosition);
@@ -4626,12 +4265,12 @@ export const generatePDF = (formData: FormData) => {
         const sbstHeaders = ['Succession Detail:', 'Response/Instruction:', 'Location of Governing Agreement:', 'Other Information:'];
 
         currentY = yPosition;
-        doc.setLineWidth(0.5);
+        doc.setLineWidth(0.3);
 
         sbstHeaders.forEach((header, colIdx) => {
           const colWidths = [sbstCol1Width, sbstCol2Width, sbstCol3Width, sbstCol4Width];
           const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-          doc.setDrawColor(180, 180, 180);
+          doc.setDrawColor(...colors.tableBorder);
           doc.setFillColor(250, 250, 250);
           doc.rect(xPos, currentY, colWidths[colIdx], sbstHeaderHeight, 'FD');
           doc.setFontSize(8);
@@ -4646,9 +4285,9 @@ export const generatePDF = (formData: FormData) => {
 
         sbstRows.forEach((row, rowIdx) => {
           const rowY = currentY;
-          doc.setDrawColor(180, 180, 180);
-          doc.setFillColor(240, 240, 250);
-          doc.setLineWidth(0.5);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setFillColor(255, 255, 255);
+          doc.setLineWidth(0.3);
           doc.rect(margin, rowY, sbstCol1Width, sbstRowHeight, 'FD');
 
           doc.setFontSize(7);
@@ -4658,7 +4297,7 @@ export const generatePDF = (formData: FormData) => {
 
           [sbstCol2Width, sbstCol3Width, sbstCol4Width].forEach((colWidth, colIdx) => {
             const xPos = margin + sbstCol1Width + [0, sbstCol2Width, sbstCol2Width + sbstCol3Width][colIdx];
-            doc.setDrawColor(180, 180, 180);
+            doc.setDrawColor(...colors.tableBorder);
             doc.rect(xPos, rowY, colWidth, sbstRowHeight);
 
             const field = new doc.AcroFormTextField();
@@ -4682,7 +4321,7 @@ export const generatePDF = (formData: FormData) => {
     }
   }
 
-  doc.addPage();
+  addPage();
   yPosition = 12;
   addSectionHeader('Who is on your Team?');
 
@@ -5062,138 +4701,62 @@ You should explore this as an option with your legal and CFP® professionals bec
     } else if (formData.client1PoaPersonalCareName) {
       doc.text(`${client1Name}'s Primary Power of Attorney for Personal Care:`, margin, yPosition);
       doc.setFont(undefined, 'normal');
-      yPosition += 8;
+      yPosition += 6;
 
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
-      doc.text('Name:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      const fld_c1_poa_pc_name = new doc.AcroFormTextField();
-      fld_c1_poa_pc_name.fieldName = 'c1_poa_pc_name';
-      fld_c1_poa_pc_name.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-      fld_c1_poa_pc_name.fontSize = 9;
-      fld_c1_poa_pc_name.textColor = colors.darkText;
-      fld_c1_poa_pc_name.borderStyle = 'none';
-      fld_c1_poa_pc_name.value = formData.client1PoaPersonalCareName || '';
-      doc.addField(fld_c1_poa_pc_name);
-      yPosition += 5;
-
-      if (formData.client1PoaPersonalCarePhone) {
-        doc.setFont(undefined, 'bold');
-        doc.text('Phone:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fld_c1_poa_pc_phone = new doc.AcroFormTextField();
-        fld_c1_poa_pc_phone.fieldName = 'c1_poa_pc_phone';
-        fld_c1_poa_pc_phone.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c1_poa_pc_phone.fontSize = 9;
-        fld_c1_poa_pc_phone.textColor = colors.darkText;
-        fld_c1_poa_pc_phone.borderStyle = 'none';
-        fld_c1_poa_pc_phone.value = formData.client1PoaPersonalCarePhone || '';
-        doc.addField(fld_c1_poa_pc_phone);
-        yPosition += 5;
-      }
-
-      if (formData.client1PoaPersonalCareEmail) {
-        doc.setFont(undefined, 'bold');
-        doc.text('Email:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fld_c1_poa_pc_email = new doc.AcroFormTextField();
-        fld_c1_poa_pc_email.fieldName = 'c1_poa_pc_email';
-        fld_c1_poa_pc_email.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c1_poa_pc_email.fontSize = 9;
-        fld_c1_poa_pc_email.textColor = colors.darkText;
-        fld_c1_poa_pc_email.borderStyle = 'none';
-        fld_c1_poa_pc_email.value = formData.client1PoaPersonalCareEmail || '';
-        doc.addField(fld_c1_poa_pc_email);
-        yPosition += 5;
-      }
-
-      if (formData.client1PoaPersonalCareRelationship) {
-        doc.setFont(undefined, 'bold');
-        doc.text('Relationship:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fld_c1_poa_pc_relationship = new doc.AcroFormTextField();
-        fld_c1_poa_pc_relationship.fieldName = 'c1_poa_pc_relationship';
-        fld_c1_poa_pc_relationship.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c1_poa_pc_relationship.fontSize = 9;
-        fld_c1_poa_pc_relationship.textColor = colors.darkText;
-        fld_c1_poa_pc_relationship.borderStyle = 'none';
-        fld_c1_poa_pc_relationship.value = formData.client1PoaPersonalCareRelationship || '';
-        doc.addField(fld_c1_poa_pc_relationship);
-        yPosition += 5;
-      }
-
-      if (formData.client1PoaPersonalCareProvince) {
+      {
+        const poaLabelColW = 70;
+        const poaValueColW = fieldWidth - poaLabelColW;
+        const poaRowH = 8;
         const provinceLabels: Record<string, string> = {
-          alberta: 'Alberta',
-          british_columbia: 'British Columbia',
-          manitoba: 'Manitoba',
-          new_brunswick: 'New Brunswick',
-          newfoundland_labrador: 'Newfoundland and Labrador',
-          northwest_territories: 'Northwest Territories',
-          nova_scotia: 'Nova Scotia',
-          nunavut: 'Nunavut',
-          ontario: 'Ontario',
-          prince_edward_island: 'Prince Edward Island',
-          quebec: 'Quebec',
-          saskatchewan: 'Saskatchewan',
-          yukon: 'Yukon'
+          alberta: 'Alberta', british_columbia: 'British Columbia', manitoba: 'Manitoba',
+          new_brunswick: 'New Brunswick', newfoundland_labrador: 'Newfoundland and Labrador',
+          northwest_territories: 'Northwest Territories', nova_scotia: 'Nova Scotia',
+          nunavut: 'Nunavut', ontario: 'Ontario', prince_edward_island: 'Prince Edward Island',
+          quebec: 'Quebec', saskatchewan: 'Saskatchewan', yukon: 'Yukon'
         };
-        const provinceLabel = provinceLabels[formData.client1PoaPersonalCareProvince] || formData.client1PoaPersonalCareProvince;
-
-        doc.setFont(undefined, 'bold');
-        doc.text('Location:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const locationText = formData.client1PoaPersonalCareCity ?
-          `${formData.client1PoaPersonalCareCity}, ${provinceLabel}` :
-          provinceLabel;
-        const fld_c1_poa_pc_location_province = new doc.AcroFormTextField();
-        fld_c1_poa_pc_location_province.fieldName = 'c1_poa_pc_location_province';
-        fld_c1_poa_pc_location_province.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c1_poa_pc_location_province.fontSize = 9;
-        fld_c1_poa_pc_location_province.textColor = colors.darkText;
-        fld_c1_poa_pc_location_province.borderStyle = 'none';
-        fld_c1_poa_pc_location_province.value = locationText || '';
-        doc.addField(fld_c1_poa_pc_location_province);
-        yPosition += 5;
-      } else if (formData.client1PoaPersonalCareCountry) {
-        doc.setFont(undefined, 'bold');
-        doc.text('Location:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const locationText = formData.client1PoaPersonalCareCity ?
-          `${formData.client1PoaPersonalCareCity}, ${formData.client1PoaPersonalCareCountry}` :
-          formData.client1PoaPersonalCareCountry;
-        const fld_c1_poa_pc_location_country = new doc.AcroFormTextField();
-        fld_c1_poa_pc_location_country.fieldName = 'c1_poa_pc_location_country';
-        fld_c1_poa_pc_location_country.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c1_poa_pc_location_country.fontSize = 9;
-        fld_c1_poa_pc_location_country.textColor = colors.darkText;
-        fld_c1_poa_pc_location_country.borderStyle = 'none';
-        fld_c1_poa_pc_location_country.value = locationText || '';
-        doc.addField(fld_c1_poa_pc_location_country);
-        yPosition += 5;
-      }
-
-      if (formData.client1PoaPersonalCareHasDocCopy) {
-        const docCopyLabel =
-          formData.client1PoaPersonalCareHasDocCopy === 'yes_on_file' ? 'Yes, on their files' :
+        let locationVal = '';
+        if (formData.client1PoaPersonalCareProvince) {
+          const pl = provinceLabels[formData.client1PoaPersonalCareProvince] || formData.client1PoaPersonalCareProvince;
+          locationVal = formData.client1PoaPersonalCareCity ? `${formData.client1PoaPersonalCareCity}, ${pl}` : pl;
+        } else if (formData.client1PoaPersonalCareCountry) {
+          locationVal = formData.client1PoaPersonalCareCity ? `${formData.client1PoaPersonalCareCity}, ${formData.client1PoaPersonalCareCountry}` : formData.client1PoaPersonalCareCountry;
+        }
+        const docCopyVal = formData.client1PoaPersonalCareHasDocCopy === 'yes_on_file' ? 'Yes, on their files' :
           formData.client1PoaPersonalCareHasDocCopy === 'no_can_access' ? 'No, but they know how to access the document if/when necessary' :
-          'No, this has not been discussed';
-        doc.setFont(undefined, 'bold');
-        doc.text('Document copy:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fld_c1_poa_pc_doc_copy = new doc.AcroFormTextField();
-        fld_c1_poa_pc_doc_copy.fieldName = 'c1_poa_pc_doc_copy';
-        fld_c1_poa_pc_doc_copy.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c1_poa_pc_doc_copy.fontSize = 9;
-        fld_c1_poa_pc_doc_copy.textColor = colors.darkText;
-        fld_c1_poa_pc_doc_copy.borderStyle = 'none';
-        fld_c1_poa_pc_doc_copy.value = docCopyLabel || '';
-        doc.addField(fld_c1_poa_pc_doc_copy);
-        yPosition += 5;
+          formData.client1PoaPersonalCareHasDocCopy ? 'No, this has not been discussed' : '';
+        const c1PcRows: [string, string, string][] = [
+          ['Name:', formData.client1PoaPersonalCareName || '', 'c1_poa_pc_name'],
+          ['Phone:', formData.client1PoaPersonalCarePhone || '', 'c1_poa_pc_phone'],
+          ['Email:', formData.client1PoaPersonalCareEmail || '', 'c1_poa_pc_email'],
+          ['Relationship:', formData.client1PoaPersonalCareRelationship || '', 'c1_poa_pc_relationship'],
+          ['Location:', locationVal, 'c1_poa_pc_location'],
+          ['Document copy:', docCopyVal, 'c1_poa_pc_doc_copy'],
+        ].filter(([, val]) => val) as [string, string, string][];
+        c1PcRows.forEach(([label, val, fieldName]) => {
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          const labelLines = doc.splitTextToSize(label, poaLabelColW - 3);
+          const dynH = Math.max(poaRowH, labelLines.length * 5 + 3);
+          checkPageBreak(dynH + 2);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, poaLabelColW, dynH, 'FD');
+          doc.rect(margin + poaLabelColW, yPosition, poaValueColW, dynH, 'FD');
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 2, yPosition + 5.5);
+          const fld = new doc.AcroFormTextField();
+          fld.fieldName = fieldName;
+          fld.Rect = [margin + poaLabelColW + 0.5, yPosition + 0.5, poaValueColW - 1, dynH - 1];
+          fld.fontSize = 9;
+          fld.textColor = colors.darkText;
+          fld.borderStyle = 'none';
+          fld.value = val;
+          doc.addField(fld);
+          yPosition += dynH;
+        });
+        yPosition += 4;
       }
-
-      yPosition += 3;
 
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
@@ -5231,10 +4794,12 @@ You should explore this as an option with your legal and CFP® professionals bec
       const poaColWidths = [fieldWidth * 0.22, fieldWidth * 0.18, fieldWidth * 0.22, fieldWidth * 0.23, fieldWidth * 0.15];
       let poaTableY = yPosition;
 
-      doc.setDrawColor(0, 0, 0);
-      doc.setFillColor(200, 200, 200);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
       doc.setFontSize(8);
+      doc.setTextColor(...colors.darkText);
 
       const poaCol1X = margin;
       const poaCol2X = margin + poaColWidths[0];
@@ -5242,11 +4807,11 @@ You should explore this as an option with your legal and CFP® professionals bec
       const poaCol4X = margin + poaColWidths[0] + poaColWidths[1] + poaColWidths[2];
       const poaCol5X = margin + poaColWidths[0] + poaColWidths[1] + poaColWidths[2] + poaColWidths[3];
 
-      doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
-      doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
-      doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
-      doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
-      doc.rect(poaCol5X, poaTableY, poaColWidths[4], poaCellHeight);
+      doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight, 'FD');
+      doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight, 'FD');
+      doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight, 'FD');
+      doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight, 'FD');
+      doc.rect(poaCol5X, poaTableY, poaColWidths[4], poaCellHeight, 'FD');
 
       doc.text('Name:', poaCol1X + 0.5, poaTableY + 4);
       doc.text('Phone Number:', poaCol2X + 0.5, poaTableY + 4);
@@ -5258,14 +4823,17 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       if (formData.spouseIsPoaPersonalCare === 'yes') {
 
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
         doc.setFillColor(255, 255, 255);
         doc.setFont(undefined, 'normal');
 
-        doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
-        doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
-        doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
-        doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
-        doc.rect(poaCol5X, poaTableY, poaColWidths[4], poaCellHeight);
+        doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight, 'FD');
+        doc.setFillColor(...colors.tableHeader);
+        doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight, 'FD');
+        doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight, 'FD');
+        doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight, 'FD');
+        doc.rect(poaCol5X, poaTableY, poaColWidths[4], poaCellHeight, 'FD');
 
         const spouseField1 = new doc.AcroFormTextField();
         spouseField1.fieldName = 'poa_personal_care_spouse_name';
@@ -5318,14 +4886,17 @@ You should explore this as an option with your legal and CFP® professionals bec
       for (let i = 0; i < poaCount; i++) {
         const poaData = formData.client1PoaPersonalCareData?.[i];
 
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
         doc.setFillColor(255, 255, 255);
         doc.setFont(undefined, 'normal');
 
-        doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
-        doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
-        doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
-        doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
-        doc.rect(poaCol5X, poaTableY, poaColWidths[4], poaCellHeight);
+        doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight, 'FD');
+        doc.setFillColor(...colors.tableHeader);
+        doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight, 'FD');
+        doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight, 'FD');
+        doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight, 'FD');
+        doc.rect(poaCol5X, poaTableY, poaColWidths[4], poaCellHeight, 'FD');
 
         const field1 = new doc.AcroFormTextField();
         field1.fieldName = `poa_personal_care_${i}_name`;
@@ -5378,7 +4949,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         if (poaData?.country || poaData?.city) {
           if (poaTableY > 270) {
-            doc.addPage();
+            addPage();
             poaTableY = 12;
           }
 
@@ -5395,7 +4966,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (formData.client1PoaPersonalCareDocLocation) {
       if (yPosition > 260) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -5417,7 +4988,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (formData.client1PoaPersonalCareHasDocCopy) {
       if (yPosition > 260) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -5440,7 +5011,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (formData.client1HasLivingWill === 'yes') {
     if (yPosition > 260) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -5488,138 +5059,62 @@ You should explore this as an option with your legal and CFP® professionals bec
     } else if (formData.client2PoaPersonalCareName) {
       doc.text(`${client2Name}'s Primary Power of Attorney for Personal Care:`, margin, yPosition);
       doc.setFont(undefined, 'normal');
-      yPosition += 8;
+      yPosition += 6;
 
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
-      doc.text('Name:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      const fld_c2_poa_pc_name = new doc.AcroFormTextField();
-      fld_c2_poa_pc_name.fieldName = 'c2_poa_pc_name';
-      fld_c2_poa_pc_name.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-      fld_c2_poa_pc_name.fontSize = 9;
-      fld_c2_poa_pc_name.textColor = colors.darkText;
-      fld_c2_poa_pc_name.borderStyle = 'none';
-      fld_c2_poa_pc_name.value = formData.client2PoaPersonalCareName || '';
-      doc.addField(fld_c2_poa_pc_name);
-      yPosition += 5;
-
-      if (formData.client2PoaPersonalCarePhone) {
-        doc.setFont(undefined, 'bold');
-        doc.text('Phone:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fld_c2_poa_pc_phone = new doc.AcroFormTextField();
-        fld_c2_poa_pc_phone.fieldName = 'c2_poa_pc_phone';
-        fld_c2_poa_pc_phone.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c2_poa_pc_phone.fontSize = 9;
-        fld_c2_poa_pc_phone.textColor = colors.darkText;
-        fld_c2_poa_pc_phone.borderStyle = 'none';
-        fld_c2_poa_pc_phone.value = formData.client2PoaPersonalCarePhone || '';
-        doc.addField(fld_c2_poa_pc_phone);
-        yPosition += 5;
-      }
-
-      if (formData.client2PoaPersonalCareEmail) {
-        doc.setFont(undefined, 'bold');
-        doc.text('Email:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fld_c2_poa_pc_email = new doc.AcroFormTextField();
-        fld_c2_poa_pc_email.fieldName = 'c2_poa_pc_email';
-        fld_c2_poa_pc_email.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c2_poa_pc_email.fontSize = 9;
-        fld_c2_poa_pc_email.textColor = colors.darkText;
-        fld_c2_poa_pc_email.borderStyle = 'none';
-        fld_c2_poa_pc_email.value = formData.client2PoaPersonalCareEmail || '';
-        doc.addField(fld_c2_poa_pc_email);
-        yPosition += 5;
-      }
-
-      if (formData.client2PoaPersonalCareRelationship) {
-        doc.setFont(undefined, 'bold');
-        doc.text('Relationship:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fld_c2_poa_pc_relationship = new doc.AcroFormTextField();
-        fld_c2_poa_pc_relationship.fieldName = 'c2_poa_pc_relationship';
-        fld_c2_poa_pc_relationship.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c2_poa_pc_relationship.fontSize = 9;
-        fld_c2_poa_pc_relationship.textColor = colors.darkText;
-        fld_c2_poa_pc_relationship.borderStyle = 'none';
-        fld_c2_poa_pc_relationship.value = formData.client2PoaPersonalCareRelationship || '';
-        doc.addField(fld_c2_poa_pc_relationship);
-        yPosition += 5;
-      }
-
-      if (formData.client2PoaPersonalCareProvince) {
+      {
+        const poaLabelColW = 70;
+        const poaValueColW = fieldWidth - poaLabelColW;
+        const poaRowH = 8;
         const provinceLabels: Record<string, string> = {
-          alberta: 'Alberta',
-          british_columbia: 'British Columbia',
-          manitoba: 'Manitoba',
-          new_brunswick: 'New Brunswick',
-          newfoundland_labrador: 'Newfoundland and Labrador',
-          northwest_territories: 'Northwest Territories',
-          nova_scotia: 'Nova Scotia',
-          nunavut: 'Nunavut',
-          ontario: 'Ontario',
-          prince_edward_island: 'Prince Edward Island',
-          quebec: 'Quebec',
-          saskatchewan: 'Saskatchewan',
-          yukon: 'Yukon'
+          alberta: 'Alberta', british_columbia: 'British Columbia', manitoba: 'Manitoba',
+          new_brunswick: 'New Brunswick', newfoundland_labrador: 'Newfoundland and Labrador',
+          northwest_territories: 'Northwest Territories', nova_scotia: 'Nova Scotia',
+          nunavut: 'Nunavut', ontario: 'Ontario', prince_edward_island: 'Prince Edward Island',
+          quebec: 'Quebec', saskatchewan: 'Saskatchewan', yukon: 'Yukon'
         };
-        const provinceLabel = provinceLabels[formData.client2PoaPersonalCareProvince] || formData.client2PoaPersonalCareProvince;
-
-        doc.setFont(undefined, 'bold');
-        doc.text('Location:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const locationText = formData.client2PoaPersonalCareCity ?
-          `${formData.client2PoaPersonalCareCity}, ${provinceLabel}` :
-          provinceLabel;
-        const fld_c2_poa_pc_location_province = new doc.AcroFormTextField();
-        fld_c2_poa_pc_location_province.fieldName = 'c2_poa_pc_location_province';
-        fld_c2_poa_pc_location_province.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c2_poa_pc_location_province.fontSize = 9;
-        fld_c2_poa_pc_location_province.textColor = colors.darkText;
-        fld_c2_poa_pc_location_province.borderStyle = 'none';
-        fld_c2_poa_pc_location_province.value = locationText || '';
-        doc.addField(fld_c2_poa_pc_location_province);
-        yPosition += 5;
-      } else if (formData.client2PoaPersonalCareCountry) {
-        doc.setFont(undefined, 'bold');
-        doc.text('Location:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const locationText = formData.client2PoaPersonalCareCity ?
-          `${formData.client2PoaPersonalCareCity}, ${formData.client2PoaPersonalCareCountry}` :
-          formData.client2PoaPersonalCareCountry;
-        const fld_c2_poa_pc_location_country = new doc.AcroFormTextField();
-        fld_c2_poa_pc_location_country.fieldName = 'c2_poa_pc_location_country';
-        fld_c2_poa_pc_location_country.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c2_poa_pc_location_country.fontSize = 9;
-        fld_c2_poa_pc_location_country.textColor = colors.darkText;
-        fld_c2_poa_pc_location_country.borderStyle = 'none';
-        fld_c2_poa_pc_location_country.value = locationText || '';
-        doc.addField(fld_c2_poa_pc_location_country);
-        yPosition += 5;
-      }
-
-      if (formData.client2PoaPersonalCareHasDocCopy) {
-        const docCopyLabel =
-          formData.client2PoaPersonalCareHasDocCopy === 'yes_on_file' ? 'Yes, on their files' :
+        let locationVal = '';
+        if (formData.client2PoaPersonalCareProvince) {
+          const pl = provinceLabels[formData.client2PoaPersonalCareProvince] || formData.client2PoaPersonalCareProvince;
+          locationVal = formData.client2PoaPersonalCareCity ? `${formData.client2PoaPersonalCareCity}, ${pl}` : pl;
+        } else if (formData.client2PoaPersonalCareCountry) {
+          locationVal = formData.client2PoaPersonalCareCity ? `${formData.client2PoaPersonalCareCity}, ${formData.client2PoaPersonalCareCountry}` : formData.client2PoaPersonalCareCountry;
+        }
+        const docCopyVal = formData.client2PoaPersonalCareHasDocCopy === 'yes_on_file' ? 'Yes, on their files' :
           formData.client2PoaPersonalCareHasDocCopy === 'no_can_access' ? 'No, but they know how to access the document if/when necessary' :
-          'No, this has not been discussed';
-        doc.setFont(undefined, 'bold');
-        doc.text('Document copy:', margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        const fld_c2_poa_pc_doc_copy = new doc.AcroFormTextField();
-        fld_c2_poa_pc_doc_copy.fieldName = 'c2_poa_pc_doc_copy';
-        fld_c2_poa_pc_doc_copy.Rect = [margin + 30, yPosition - 4.5, pageWidth - margin - (margin + 30), 6];
-        fld_c2_poa_pc_doc_copy.fontSize = 9;
-        fld_c2_poa_pc_doc_copy.textColor = colors.darkText;
-        fld_c2_poa_pc_doc_copy.borderStyle = 'none';
-        fld_c2_poa_pc_doc_copy.value = docCopyLabel || '';
-        doc.addField(fld_c2_poa_pc_doc_copy);
-        yPosition += 5;
+          formData.client2PoaPersonalCareHasDocCopy ? 'No, this has not been discussed' : '';
+        const c2PcRows: [string, string, string][] = [
+          ['Name:', formData.client2PoaPersonalCareName || '', 'c2_poa_pc_name'],
+          ['Phone:', formData.client2PoaPersonalCarePhone || '', 'c2_poa_pc_phone'],
+          ['Email:', formData.client2PoaPersonalCareEmail || '', 'c2_poa_pc_email'],
+          ['Relationship:', formData.client2PoaPersonalCareRelationship || '', 'c2_poa_pc_relationship'],
+          ['Location:', locationVal, 'c2_poa_pc_location'],
+          ['Document copy:', docCopyVal, 'c2_poa_pc_doc_copy'],
+        ].filter(([, val]) => val) as [string, string, string][];
+        c2PcRows.forEach(([label, val, fieldName]) => {
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
+          const labelLines = doc.splitTextToSize(label, poaLabelColW - 3);
+          const dynH = Math.max(poaRowH, labelLines.length * 5 + 3);
+          checkPageBreak(dynH + 2);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, yPosition, poaLabelColW, dynH, 'FD');
+          doc.rect(margin + poaLabelColW, yPosition, poaValueColW, dynH, 'FD');
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 2, yPosition + 5.5);
+          const fld = new doc.AcroFormTextField();
+          fld.fieldName = fieldName;
+          fld.Rect = [margin + poaLabelColW + 0.5, yPosition + 0.5, poaValueColW - 1, dynH - 1];
+          fld.fontSize = 9;
+          fld.textColor = colors.darkText;
+          fld.borderStyle = 'none';
+          fld.value = val;
+          doc.addField(fld);
+          yPosition += dynH;
+        });
+        yPosition += 4;
       }
-
-      yPosition += 3;
 
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
@@ -5638,7 +5133,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const client2Name = formData.spouseName || 'Client 2';
 
     if (yPosition > 260) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -5665,20 +5160,22 @@ You should explore this as an option with your legal and CFP® professionals bec
     const poaColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
     let poaTableY = yPosition;
 
-    doc.setDrawColor(0, 0, 0);
-    doc.setFillColor(200, 200, 200);
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
     doc.setFont(undefined, 'bold');
     doc.setFontSize(8);
+    doc.setTextColor(...colors.darkText);
 
     const poaCol1X = margin;
     const poaCol2X = margin + poaColWidths[0];
     const poaCol3X = margin + poaColWidths[0] + poaColWidths[1];
     const poaCol4X = margin + poaColWidths[0] + poaColWidths[1] + poaColWidths[2];
 
-    doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
-    doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
-    doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
-    doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
+    doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight, 'FD');
+    doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight, 'FD');
+    doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight, 'FD');
+    doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight, 'FD');
 
     doc.text('Name:', poaCol1X + 0.5, poaTableY + 4);
     doc.text('Phone Number:', poaCol2X + 0.5, poaTableY + 4);
@@ -5690,13 +5187,16 @@ You should explore this as an option with your legal and CFP® professionals bec
     for (let i = 0; i < poaCount; i++) {
       const poaData = formData.client2PoaPersonalCareData?.[i];
 
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
       doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
 
-      doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight);
-      doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight);
-      doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight);
-      doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight);
+      doc.rect(poaCol1X, poaTableY, poaColWidths[0], poaCellHeight, 'FD');
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(poaCol2X, poaTableY, poaColWidths[1], poaCellHeight, 'FD');
+      doc.rect(poaCol3X, poaTableY, poaColWidths[2], poaCellHeight, 'FD');
+      doc.rect(poaCol4X, poaTableY, poaColWidths[3], poaCellHeight, 'FD');
 
       const field1 = new doc.AcroFormTextField();
       field1.fieldName = `poa_personal_care_client2_${i}_name`;
@@ -5738,7 +5238,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       if (poaData?.country || poaData?.city) {
         if (poaTableY > 270) {
-          doc.addPage();
+          addPage();
           poaTableY = 12;
         }
 
@@ -5754,7 +5254,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (formData.client2PoaPersonalCareDocLocation) {
       if (yPosition > 260) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -5776,7 +5276,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (formData.client2PoaPersonalCareHasDocCopy) {
       if (yPosition > 260) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -5798,7 +5298,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (formData.client2HasLivingWill === 'yes') {
       if (yPosition > 260) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -5814,7 +5314,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   // Additional Reading for Powers of Attorney for Personal Care
   if (formData.client1HasWill === 'yes') {
     if (yPosition > 150) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -5838,7 +5338,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     poaReadingText.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -5851,7 +5351,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     doc.setFont(undefined, 'bold');
     doc.setFontSize(9);
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('1. How does a Power of Attorney for Personal Care Come into Force?', margin, yPosition);
@@ -5873,7 +5373,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     section1Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -5885,7 +5385,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 2
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Responsibilities and Duties of the Attorney:', margin, yPosition);
@@ -5909,7 +5409,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     section2Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -5921,7 +5421,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 3
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Revocation and Rescinding of the POA:', margin, yPosition);
@@ -5944,7 +5444,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     section3Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -5956,7 +5456,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 4
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Best Practices for an Effective POA:', margin, yPosition);
@@ -5983,7 +5483,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     section4Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -6034,7 +5534,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       doc.setFont(undefined, 'bold');
       if (yPosition > 270) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text('Geographic / Jurisdictional Concerns', margin, yPosition);
@@ -6061,7 +5561,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       geoConcernText.forEach(line => {
         if (yPosition > 280) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
         doc.text(line, margin, yPosition);
@@ -6077,7 +5577,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const client2Name = formData.spouseName || 'Client 2';
 
     if (yPosition > 230) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -6118,7 +5618,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const client1Name = formData.fullName || 'Client 1';
 
     if (yPosition > 260) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -6134,7 +5634,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const poaPropertyCount = parseInt(formData.client1PoaPropertyCount, 10);
 
     if (yPosition > 210) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -6148,20 +5648,22 @@ You should explore this as an option with your legal and CFP® professionals bec
     const poaPropertyColWidths = [fieldWidth * 0.25, fieldWidth * 0.2, fieldWidth * 0.27, fieldWidth * 0.28];
     let poaPropertyTableY = yPosition;
 
-    doc.setDrawColor(0, 0, 0);
-    doc.setFillColor(200, 200, 200);
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
     doc.setFont(undefined, 'bold');
     doc.setFontSize(8);
+    doc.setTextColor(...colors.darkText);
 
     const poaPropertyCol1X = margin;
     const poaPropertyCol2X = margin + poaPropertyColWidths[0];
     const poaPropertyCol3X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1];
     const poaPropertyCol4X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1] + poaPropertyColWidths[2];
 
-    doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight);
-    doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
-    doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
-    doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+    doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight, 'FD');
+    doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight, 'FD');
+    doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight, 'FD');
+    doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight, 'FD');
 
     doc.text('Name:', poaPropertyCol1X + 0.5, poaPropertyTableY + 4);
     doc.text('Phone Number:', poaPropertyCol2X + 0.5, poaPropertyTableY + 4);
@@ -6172,17 +5674,20 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     for (let i = 0; i < poaPropertyCount; i++) {
       if (poaPropertyTableY > 275) {
-        doc.addPage();
+        addPage();
         poaPropertyTableY = 12;
       }
 
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
       doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
 
-      doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight);
-      doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
-      doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
-      doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight, 'FD');
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight, 'FD');
+      doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight, 'FD');
+      doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight, 'FD');
 
       const poaPropertyData = formData.client1PoaPropertyData?.[i];
 
@@ -6226,7 +5731,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       if (poaPropertyData?.country || poaPropertyData?.city) {
         if (poaPropertyTableY > 270) {
-          doc.addPage();
+          addPage();
           poaPropertyTableY = 12;
         }
 
@@ -6243,7 +5748,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (formData.client1PoaPropertyHasDocCopy) {
     if (yPosition > 260) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -6267,7 +5772,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const client2Name = formData.spouseName || 'Client 2';
 
     if (yPosition > 230) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -6310,7 +5815,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const client2Name = formData.spouseName || 'Client 2';
 
     if (yPosition > 260) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -6326,7 +5831,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const poaPropertyCount = parseInt(formData.client2PoaPropertyCount, 10);
 
     if (yPosition > 210) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -6340,20 +5845,22 @@ You should explore this as an option with your legal and CFP® professionals bec
     const poaPropertyColWidths = [fieldWidth * 0.25, fieldWidth * 0.2, fieldWidth * 0.27, fieldWidth * 0.28];
     let poaPropertyTableY = yPosition;
 
-    doc.setDrawColor(0, 0, 0);
-    doc.setFillColor(200, 200, 200);
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
     doc.setFont(undefined, 'bold');
     doc.setFontSize(8);
+    doc.setTextColor(...colors.darkText);
 
     const poaPropertyCol1X = margin;
     const poaPropertyCol2X = margin + poaPropertyColWidths[0];
     const poaPropertyCol3X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1];
     const poaPropertyCol4X = margin + poaPropertyColWidths[0] + poaPropertyColWidths[1] + poaPropertyColWidths[2];
 
-    doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight);
-    doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
-    doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
-    doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+    doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight, 'FD');
+    doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight, 'FD');
+    doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight, 'FD');
+    doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight, 'FD');
 
     doc.text('Name:', poaPropertyCol1X + 0.5, poaPropertyTableY + 4);
     doc.text('Phone Number:', poaPropertyCol2X + 0.5, poaPropertyTableY + 4);
@@ -6364,19 +5871,22 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     for (let i = 0; i < poaPropertyCount; i++) {
       if (poaPropertyTableY > 275) {
-        doc.addPage();
+        addPage();
         poaPropertyTableY = 12;
       }
 
       const poaData = formData.client2PoaPropertyData?.[i];
 
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
       doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
 
-      doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight);
-      doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight);
-      doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight);
-      doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight);
+      doc.rect(poaPropertyCol1X, poaPropertyTableY, poaPropertyColWidths[0], poaPropertyCellHeight, 'FD');
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(poaPropertyCol2X, poaPropertyTableY, poaPropertyColWidths[1], poaPropertyCellHeight, 'FD');
+      doc.rect(poaPropertyCol3X, poaPropertyTableY, poaPropertyColWidths[2], poaPropertyCellHeight, 'FD');
+      doc.rect(poaPropertyCol4X, poaPropertyTableY, poaPropertyColWidths[3], poaPropertyCellHeight, 'FD');
 
       const field1 = new doc.AcroFormTextField();
       field1.fieldName = `poa_property_client2_${i}_name`;
@@ -6418,7 +5928,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       if (poaData?.country || poaData?.city) {
         if (poaPropertyTableY > 270) {
-          doc.addPage();
+          addPage();
           poaPropertyTableY = 12;
         }
 
@@ -6434,7 +5944,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (formData.client2PoaPropertyDocLocation) {
       if (yPosition > 260) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -6456,7 +5966,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (formData.client2PoaPropertyHasDocCopy) {
       if (yPosition > 260) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -6480,7 +5990,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   // Additional Reading for Powers of Attorney for Property
   if (formData.client1HasWill === 'yes') {
     if (yPosition > 150) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -6505,7 +6015,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     poaPropertyReadingText.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -6518,7 +6028,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     doc.setFont(undefined, 'bold');
     doc.setFontSize(9);
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('How a POA Comes into Force:', margin, yPosition);
@@ -6542,7 +6052,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     poaPropSection1Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -6554,7 +6064,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 2: Responsibilities and Fiduciary Duties
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Responsibilities and Fiduciary Duties:', margin, yPosition);
@@ -6577,7 +6087,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     poaPropSection2Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -6589,7 +6099,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 3: Revocation and Termination
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Revocation and Termination:', margin, yPosition);
@@ -6610,7 +6120,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     poaPropSection3Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -6622,7 +6132,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 4: Best Practices for an Effective POA
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Best Practices for an Effective POA:', margin, yPosition);
@@ -6652,7 +6162,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     poaPropSection4Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -6667,16 +6177,12 @@ You should explore this as an option with your legal and CFP® professionals bec
     const estateTrusteeData = formData.client1EstateTrusteeData || [];
 
     if (yPosition > 210) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
     const client1Name = formData.fullName || 'Client 1';
-    doc.text(`${client1Name}'s Estate Trustees:`, margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+    addSubsectionHeader(`${client1Name}'s Estate Trustees:`);
 
     const etCellHeight = 6;
 
@@ -6685,23 +6191,19 @@ You should explore this as an option with your legal and CFP® professionals bec
       const isCorporate = trustee.type === 'corporate';
 
       if (yPosition > 240) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
       doc.text(`Estate Trustee #${i + 1}${isCorporate ? ' (Corporate Trustee)' : ' (Person)'}`, margin, yPosition);
       yPosition += 6;
 
       if (isCorporate) {
         const etColWidths = [fieldWidth * 0.3, fieldWidth * 0.7];
         let etTableY = yPosition;
-
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(200, 200, 200);
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(8);
 
         const labelCol = margin;
         const valueCol = margin + etColWidths[0];
@@ -6717,17 +6219,21 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         fields.forEach((field, idx) => {
           if (etTableY > 275) {
-            doc.addPage();
+            addPage();
             etTableY = 12;
           }
 
-          doc.setFillColor(240, 240, 240);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
           doc.setFont(undefined, 'normal');
-          doc.rect(labelCol, etTableY, etColWidths[0], etCellHeight);
+          doc.setFontSize(8);
+          doc.setTextColor(...colors.darkText);
+          doc.rect(labelCol, etTableY, etColWidths[0], etCellHeight, 'FD');
           doc.text(field.label, labelCol + 0.5, etTableY + 4);
 
-          doc.setFillColor(255, 255, 255);
-          doc.rect(valueCol, etTableY, etColWidths[1], etCellHeight);
+          doc.setFillColor(...colors.tableHeader);
+          doc.rect(valueCol, etTableY, etColWidths[1], etCellHeight, 'FD');
 
           const fieldObj = new doc.AcroFormTextField();
           fieldObj.fieldName = `estate_trustee_${i}_${field.key}`;
@@ -6751,22 +6257,24 @@ You should explore this as an option with your legal and CFP® professionals bec
         const etColWidths = [fieldWidth * 0.22, fieldWidth * 0.18, fieldWidth * 0.22, fieldWidth * 0.23, fieldWidth * 0.15];
         let etTableY = yPosition;
 
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(200, 200, 200);
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(8);
-
         const etCol1X = margin;
         const etCol2X = margin + etColWidths[0];
         const etCol3X = margin + etColWidths[0] + etColWidths[1];
         const etCol4X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2];
         const etCol5X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2] + etColWidths[3];
 
-        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
-        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
-        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
-        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
-        doc.rect(etCol5X, etTableY, etColWidths[4], etCellHeight);
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...colors.darkText);
+
+        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight, 'FD');
+        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight, 'FD');
+        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight, 'FD');
+        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight, 'FD');
+        doc.rect(etCol5X, etTableY, etColWidths[4], etCellHeight, 'FD');
 
         doc.text('Name:', etCol1X + 0.5, etTableY + 4);
         doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
@@ -6777,18 +6285,21 @@ You should explore this as an option with your legal and CFP® professionals bec
         etTableY += etCellHeight;
 
         if (etTableY > 275) {
-          doc.addPage();
+          addPage();
           etTableY = 12;
         }
 
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
         doc.setFillColor(255, 255, 255);
         doc.setFont(undefined, 'normal');
 
-        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
-        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
-        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
-        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
-        doc.rect(etCol5X, etTableY, etColWidths[4], etCellHeight);
+        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight, 'FD');
+        doc.setFillColor(...colors.tableHeader);
+        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight, 'FD');
+        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight, 'FD');
+        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight, 'FD');
+        doc.rect(etCol5X, etTableY, etColWidths[4], etCellHeight, 'FD');
 
         const field1 = new doc.AcroFormTextField();
         field1.fieldName = `estate_trustee_${i}_name`;
@@ -6841,7 +6352,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         if (trustee.country || trustee.city) {
           if (etTableY > 270) {
-            doc.addPage();
+            addPage();
             etTableY = 12;
           }
 
@@ -6862,7 +6373,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (formData.client1EstateTrusteeKnowsWillLocation === 'yes') {
       if (yPosition > 260) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -6874,7 +6385,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += knowsLocationLines.length * 5 + 5;
     } else if (formData.client1EstateTrusteeKnowsWillLocation === 'no') {
       if (yPosition > 240) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -6897,17 +6408,12 @@ You should explore this as an option with your legal and CFP® professionals bec
     const estateTrusteeData = formData.client2EstateTrusteeData || [];
 
     if (yPosition > 210) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
     const client2Name = formData.spouseName || 'Client 2';
-
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    doc.text(`${client2Name}'s Estate Trustees:`, margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+    addSubsectionHeader(`${client2Name}'s Estate Trustees:`);
 
     const etCellHeight = 6;
 
@@ -6916,23 +6422,19 @@ You should explore this as an option with your legal and CFP® professionals bec
       const isCorporate = trustee.type === 'corporate';
 
       if (yPosition > 240) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
       doc.text(`Estate Trustee #${i + 1}${isCorporate ? ' (Corporate Trustee)' : ' (Person)'}`, margin, yPosition);
       yPosition += 6;
 
       if (isCorporate) {
         const etColWidths = [fieldWidth * 0.3, fieldWidth * 0.7];
         let etTableY = yPosition;
-
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(200, 200, 200);
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(8);
 
         const labelCol = margin;
         const valueCol = margin + etColWidths[0];
@@ -6948,17 +6450,21 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         fields.forEach((field, idx) => {
           if (etTableY > 275) {
-            doc.addPage();
+            addPage();
             etTableY = 12;
           }
 
-          doc.setFillColor(240, 240, 240);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
           doc.setFont(undefined, 'normal');
-          doc.rect(labelCol, etTableY, etColWidths[0], etCellHeight);
+          doc.setFontSize(8);
+          doc.setTextColor(...colors.darkText);
+          doc.rect(labelCol, etTableY, etColWidths[0], etCellHeight, 'FD');
           doc.text(field.label, labelCol + 0.5, etTableY + 4);
 
-          doc.setFillColor(255, 255, 255);
-          doc.rect(valueCol, etTableY, etColWidths[1], etCellHeight);
+          doc.setFillColor(...colors.tableHeader);
+          doc.rect(valueCol, etTableY, etColWidths[1], etCellHeight, 'FD');
 
           const fieldObj = new doc.AcroFormTextField();
           fieldObj.fieldName = `estate_trustee_client2_${i}_${field.key}`;
@@ -6977,22 +6483,24 @@ You should explore this as an option with your legal and CFP® professionals bec
         const etColWidths = [fieldWidth * 0.22, fieldWidth * 0.18, fieldWidth * 0.22, fieldWidth * 0.23, fieldWidth * 0.15];
         let etTableY = yPosition;
 
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(200, 200, 200);
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(8);
-
         const etCol1X = margin;
         const etCol2X = margin + etColWidths[0];
         const etCol3X = margin + etColWidths[0] + etColWidths[1];
         const etCol4X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2];
         const etCol5X = margin + etColWidths[0] + etColWidths[1] + etColWidths[2] + etColWidths[3];
 
-        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
-        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
-        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
-        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
-        doc.rect(etCol5X, etTableY, etColWidths[4], etCellHeight);
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.setFillColor(255, 255, 255);
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...colors.darkText);
+
+        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight, 'FD');
+        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight, 'FD');
+        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight, 'FD');
+        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight, 'FD');
+        doc.rect(etCol5X, etTableY, etColWidths[4], etCellHeight, 'FD');
 
         doc.text('Name:', etCol1X + 0.5, etTableY + 4);
         doc.text('Phone Number:', etCol2X + 0.5, etTableY + 4);
@@ -7003,17 +6511,20 @@ You should explore this as an option with your legal and CFP® professionals bec
         etTableY += etCellHeight;
 
         if (etTableY > 275) {
-          doc.addPage();
+          addPage();
           etTableY = 12;
         }
 
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
         doc.setFillColor(255, 255, 255);
         doc.setFont(undefined, 'normal');
 
-        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight);
-        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight);
-        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight);
-        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight);
+        doc.rect(etCol1X, etTableY, etColWidths[0], etCellHeight, 'FD');
+        doc.setFillColor(...colors.tableHeader);
+        doc.rect(etCol2X, etTableY, etColWidths[1], etCellHeight, 'FD');
+        doc.rect(etCol3X, etTableY, etColWidths[2], etCellHeight, 'FD');
+        doc.rect(etCol4X, etTableY, etColWidths[3], etCellHeight, 'FD');
 
         const field1 = new doc.AcroFormTextField();
         field1.fieldName = `estate_trustee_client2_${i}_name`;
@@ -7055,7 +6566,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         if (trustee?.country || trustee?.city) {
           if (etTableY > 270) {
-            doc.addPage();
+            addPage();
             etTableY = 12;
           }
 
@@ -7074,7 +6585,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (formData.client2EstateTrusteeKnowsWillLocation === 'yes') {
       if (yPosition > 240) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -7086,7 +6597,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += knowsLocationLines.length * 5 + 5;
     } else if (formData.client2EstateTrusteeKnowsWillLocation === 'no') {
       if (yPosition > 240) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -7107,7 +6618,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   // Additional Reading for Estate Trustees
   if (formData.client1HasWill === 'yes') {
     if (yPosition > 150) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -7135,7 +6646,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     estateTrusteeIntroText.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -7147,7 +6658,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 1: Preliminary Duties and Probate
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Preliminary Duties and Probate:', margin, yPosition);
@@ -7171,7 +6682,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     etSection1Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -7183,7 +6694,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 2: Safeguarding and Valuing Assets
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Safeguarding and Valuing Assets:', margin, yPosition);
@@ -7204,7 +6715,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     etSection2Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -7216,7 +6727,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 3: Tax and Legal Obligations
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Tax and Legal Obligations:', margin, yPosition);
@@ -7236,7 +6747,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     etSection3Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -7248,7 +6759,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 4: Distribution and Final Accounting
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Distribution and Final Accounting:', margin, yPosition);
@@ -7268,7 +6779,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     etSection4Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -7280,7 +6791,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Section 5: Compensation
     doc.setFont(undefined, 'bold');
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text('Compensation:', margin, yPosition);
@@ -7297,7 +6808,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     etSection5Text.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -7316,15 +6827,11 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (showFuneralSection) {
     if (yPosition > 210) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    doc.text('Funeral and Cemetery Arrangements:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+    addSubsectionHeader('Funeral and Cemetery Arrangements:');
 
     if (formData.client1HasFuneralArrangements === 'yes' || formData.client1HasDiscussedFuneral === 'yes') {
       doc.setFontSize(9);
@@ -7390,7 +6897,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if ((formData.client2HasFuneralArrangements === 'yes' || formData.client2HasDiscussedFuneral === 'yes') && hasSpouse) {
       if (yPosition > 240) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -7456,7 +6963,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       if (formData.client2HasDiscussedFuneral === 'no') {
         if (yPosition > 230) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
@@ -7485,7 +6992,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (bothUseAccountant && sameAccountant) {
       if (yPosition > 210) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -7500,86 +7007,19 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
       yPosition += 6;
 
-      const accountantRows = [
-        { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
-        { label: 'Name:' },
-        { label: 'Firm:' },
-        { label: 'Phone Number:' },
-        { label: 'Email Address:' },
-        { label: 'City, Province:' },
-        { label: 'What Year did you begin working with this person?' },
-        { label: 'Other Details:' },
-        { label: 'Other Details:' },
-        { label: 'Other Details:' },
-      ];
-
-      const accountantCellHeight = 6;
-      const accountantColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-      let accountantTableY = yPosition;
-
-      accountantRows.forEach((row, rowIndex) => {
-        if (accountantTableY > 275) {
-          doc.addPage();
-          accountantTableY = 12;
-        }
-
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-        doc.setFontSize(8);
-
-        const accountantCol1X = margin;
-        const accountantCol2X = margin + accountantColWidths[0];
-        const accountantCol3X = margin + accountantColWidths[0] + accountantColWidths[1];
-
-        doc.rect(accountantCol1X, accountantTableY, accountantColWidths[0], accountantCellHeight);
-        doc.rect(accountantCol2X, accountantTableY, accountantColWidths[1], accountantCellHeight);
-        doc.rect(accountantCol3X, accountantTableY, accountantColWidths[2], accountantCellHeight);
-
-        if (rowIndex === 0) {
-          doc.text('Name:', accountantCol1X + 0.5, accountantTableY + 4);
-          doc.text('Information:', accountantCol2X + 0.5, accountantTableY + 4);
-          doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
-        } else {
-          doc.setFont(undefined, 'normal');
-
-          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-            const labelField = new doc.AcroFormTextField();
-            labelField.fieldName = `accountant_shared_${rowIndex}_col1`;
-            labelField.Rect = [accountantCol1X + 0.3, accountantTableY + 0.3, accountantColWidths[0] - 0.6, accountantCellHeight - 0.6];
-            labelField.fontSize = 8;
-            labelField.textColor = [0, 0, 0];
-            labelField.borderStyle = 'none';
-            labelField.value = row.label;
-            doc.addField(labelField);
-          } else {
-            doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
-          }
-
-          const accountantField1 = new doc.AcroFormTextField();
-          accountantField1.fieldName = `accountant_shared_${rowIndex}_col2`;
-          accountantField1.Rect = [accountantCol2X + 0.3, accountantTableY + 0.3, accountantColWidths[1] - 0.6, accountantCellHeight - 0.6];
-          accountantField1.fontSize = 7;
-          accountantField1.textColor = [0, 0, 0];
-          accountantField1.borderStyle = 'none';
-          doc.addField(accountantField1);
-
-          const accountantField2 = new doc.AcroFormTextField();
-          accountantField2.fieldName = `accountant_shared_${rowIndex}_col3`;
-          accountantField2.Rect = [accountantCol3X + 0.3, accountantTableY + 0.3, accountantColWidths[2] - 0.6, accountantCellHeight - 0.6];
-          accountantField2.fontSize = 7;
-          accountantField2.textColor = [0, 0, 0];
-          accountantField2.borderStyle = 'none';
-          doc.addField(accountantField2);
-        }
-
-        accountantTableY += accountantCellHeight;
-      });
-
-      yPosition = accountantTableY + 10;
+      renderEstateRow('Name:', '', 'accountant_shared_name');
+      renderEstateRow('Firm:', '', 'accountant_shared_firm');
+      renderEstateRow('Phone Number:', '', 'accountant_shared_phone');
+      renderEstateRow('Email Address:', '', 'accountant_shared_email');
+      renderEstateRow('City, Province:', '', 'accountant_shared_city');
+      renderEstateRow('What Year did you begin working with this person?', '', 'accountant_shared_year');
+      renderEstateRow('Other Details:', '', 'accountant_shared_other1');
+      renderEstateRow('Other Details:', '', 'accountant_shared_other2');
+      renderEstateRow('Other Details:', '', 'accountant_shared_other3');
+      yPosition += 6;
     } else if (bothUseAccountant && !sameAccountant) {
       if (yPosition > 210) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -7594,7 +7034,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       [client1Name, client2Name].forEach((clientName, clientIndex) => {
         if (yPosition > 200) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
@@ -7607,87 +7047,20 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
         yPosition += 6;
 
-        const accountantRows = [
-          { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Name:' },
-          { label: 'Firm:' },
-          { label: 'Phone Number:' },
-          { label: 'Email Address:' },
-          { label: 'City, Province:' },
-          { label: 'What Year did you begin working with this person?' },
-          { label: 'Other Details:' },
-          { label: 'Other Details:' },
-          { label: 'Other Details:' },
-        ];
-
-        const accountantCellHeight = 6;
-        const accountantColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let accountantTableY = yPosition;
-
-        accountantRows.forEach((row, rowIndex) => {
-          if (accountantTableY > 275) {
-            doc.addPage();
-            accountantTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const accountantCol1X = margin;
-          const accountantCol2X = margin + accountantColWidths[0];
-          const accountantCol3X = margin + accountantColWidths[0] + accountantColWidths[1];
-
-          doc.rect(accountantCol1X, accountantTableY, accountantColWidths[0], accountantCellHeight);
-          doc.rect(accountantCol2X, accountantTableY, accountantColWidths[1], accountantCellHeight);
-          doc.rect(accountantCol3X, accountantTableY, accountantColWidths[2], accountantCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Name:', accountantCol1X + 0.5, accountantTableY + 4);
-            doc.text('Information:', accountantCol2X + 0.5, accountantTableY + 4);
-            doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `accountant_client${clientIndex + 1}_${rowIndex}_col1`;
-              labelField.Rect = [accountantCol1X + 0.3, accountantTableY + 0.3, accountantColWidths[0] - 0.6, accountantCellHeight - 0.6];
-              labelField.fontSize = 8;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
-            }
-
-            const accountantField1 = new doc.AcroFormTextField();
-            accountantField1.fieldName = `accountant_client${clientIndex + 1}_${rowIndex}_col2`;
-            accountantField1.Rect = [accountantCol2X + 0.3, accountantTableY + 0.3, accountantColWidths[1] - 0.6, accountantCellHeight - 0.6];
-            accountantField1.fontSize = 7;
-            accountantField1.textColor = [0, 0, 0];
-            accountantField1.borderStyle = 'none';
-            doc.addField(accountantField1);
-
-            const accountantField2 = new doc.AcroFormTextField();
-            accountantField2.fieldName = `accountant_client${clientIndex + 1}_${rowIndex}_col3`;
-            accountantField2.Rect = [accountantCol3X + 0.3, accountantTableY + 0.3, accountantColWidths[2] - 0.6, accountantCellHeight - 0.6];
-            accountantField2.fontSize = 7;
-            accountantField2.textColor = [0, 0, 0];
-            accountantField2.borderStyle = 'none';
-            doc.addField(accountantField2);
-          }
-
-          accountantTableY += accountantCellHeight;
-        });
-
-        yPosition = accountantTableY + 10;
+        renderEstateRow('Name:', '', `accountant_client${clientIndex + 1}_name`);
+        renderEstateRow('Firm:', '', `accountant_client${clientIndex + 1}_firm`);
+        renderEstateRow('Phone Number:', '', `accountant_client${clientIndex + 1}_phone`);
+        renderEstateRow('Email Address:', '', `accountant_client${clientIndex + 1}_email`);
+        renderEstateRow('City, Province:', '', `accountant_client${clientIndex + 1}_city`);
+        renderEstateRow('What Year did you begin working with this person?', '', `accountant_client${clientIndex + 1}_year`);
+        renderEstateRow('Other Details:', '', `accountant_client${clientIndex + 1}_other1`);
+        renderEstateRow('Other Details:', '', `accountant_client${clientIndex + 1}_other2`);
+        renderEstateRow('Other Details:', '', `accountant_client${clientIndex + 1}_other3`);
+        yPosition += 6;
       });
     } else {
       if (yPosition > 210) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -7706,76 +7079,21 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
         yPosition += 6;
 
-        const accountantRows = [
-          { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Name:' },
-          { label: 'Firm:' },
-          { label: 'Phone Number:' },
-          { label: 'Email Address:' },
-          { label: 'City, Province:' },
-          { label: 'What Year did you begin working with this person?' },
-          { label: 'Other Details:' },
-          { label: 'Other Details:' },
-          { label: 'Other Details:' },
-        ];
-
-        const accountantCellHeight = 6;
-        const accountantColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let accountantTableY = yPosition;
-
-        accountantRows.forEach((row, rowIndex) => {
-          if (accountantTableY > 275) {
-            doc.addPage();
-            accountantTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const accountantCol1X = margin;
-          const accountantCol2X = margin + accountantColWidths[0];
-          const accountantCol3X = margin + accountantColWidths[0] + accountantColWidths[1];
-
-          doc.rect(accountantCol1X, accountantTableY, accountantColWidths[0], accountantCellHeight);
-          doc.rect(accountantCol2X, accountantTableY, accountantColWidths[1], accountantCellHeight);
-          doc.rect(accountantCol3X, accountantTableY, accountantColWidths[2], accountantCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Name:', accountantCol1X + 0.5, accountantTableY + 4);
-            doc.text('Information:', accountantCol2X + 0.5, accountantTableY + 4);
-            doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-            doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
-
-            const accountantField1 = new doc.AcroFormTextField();
-            accountantField1.fieldName = `accountant_client1_${rowIndex}_col2`;
-            accountantField1.Rect = [accountantCol2X + 0.3, accountantTableY + 0.3, accountantColWidths[1] - 0.6, accountantCellHeight - 0.6];
-            accountantField1.fontSize = 7;
-            accountantField1.textColor = [0, 0, 0];
-            accountantField1.borderStyle = 'none';
-            doc.addField(accountantField1);
-
-            const accountantField2 = new doc.AcroFormTextField();
-            accountantField2.fieldName = `accountant_client1_${rowIndex}_col3`;
-            accountantField2.Rect = [accountantCol3X + 0.3, accountantTableY + 0.3, accountantColWidths[2] - 0.6, accountantCellHeight - 0.6];
-            accountantField2.fontSize = 7;
-            accountantField2.textColor = [0, 0, 0];
-            accountantField2.borderStyle = 'none';
-            doc.addField(accountantField2);
-          }
-
-          accountantTableY += accountantCellHeight;
-        });
-
-        yPosition = accountantTableY + 10;
+        renderEstateRow('Name:', '', 'accountant_c1only_name');
+        renderEstateRow('Firm:', '', 'accountant_c1only_firm');
+        renderEstateRow('Phone Number:', '', 'accountant_c1only_phone');
+        renderEstateRow('Email Address:', '', 'accountant_c1only_email');
+        renderEstateRow('City, Province:', '', 'accountant_c1only_city');
+        renderEstateRow('What Year did you begin working with this person?', '', 'accountant_c1only_year');
+        renderEstateRow('Other Details:', '', 'accountant_c1only_other1');
+        renderEstateRow('Other Details:', '', 'accountant_c1only_other2');
+        renderEstateRow('Other Details:', '', 'accountant_c1only_other3');
+        yPosition += 6;
       }
 
       if (formData.client2UsesAccountant === 'yes') {
         if (yPosition > 200) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
@@ -7788,77 +7106,22 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.text('Location of tax returns for the last 3-5 years and financial statements.', margin, yPosition);
         yPosition += 6;
 
-        const accountantRows = [
-          { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Name:' },
-          { label: 'Firm:' },
-          { label: 'Phone Number:' },
-          { label: 'Email Address:' },
-          { label: 'City, Province:' },
-          { label: 'What Year did you begin working with this person?' },
-          { label: 'Other Details:' },
-          { label: 'Other Details:' },
-          { label: 'Other Details:' },
-        ];
-
-        const accountantCellHeight = 6;
-        const accountantColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let accountantTableY = yPosition;
-
-        accountantRows.forEach((row, rowIndex) => {
-          if (accountantTableY > 275) {
-            doc.addPage();
-            accountantTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const accountantCol1X = margin;
-          const accountantCol2X = margin + accountantColWidths[0];
-          const accountantCol3X = margin + accountantColWidths[0] + accountantColWidths[1];
-
-          doc.rect(accountantCol1X, accountantTableY, accountantColWidths[0], accountantCellHeight);
-          doc.rect(accountantCol2X, accountantTableY, accountantColWidths[1], accountantCellHeight);
-          doc.rect(accountantCol3X, accountantTableY, accountantColWidths[2], accountantCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Name:', accountantCol1X + 0.5, accountantTableY + 4);
-            doc.text('Information:', accountantCol2X + 0.5, accountantTableY + 4);
-            doc.text('Other Details:', accountantCol3X + 0.5, accountantTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-            doc.text(row.label, accountantCol1X + 0.5, accountantTableY + 4);
-
-            const accountantField1 = new doc.AcroFormTextField();
-            accountantField1.fieldName = `accountant_client2_${rowIndex}_col2`;
-            accountantField1.Rect = [accountantCol2X + 0.3, accountantTableY + 0.3, accountantColWidths[1] - 0.6, accountantCellHeight - 0.6];
-            accountantField1.fontSize = 7;
-            accountantField1.textColor = [0, 0, 0];
-            accountantField1.borderStyle = 'none';
-            doc.addField(accountantField1);
-
-            const accountantField2 = new doc.AcroFormTextField();
-            accountantField2.fieldName = `accountant_client2_${rowIndex}_col3`;
-            accountantField2.Rect = [accountantCol3X + 0.3, accountantTableY + 0.3, accountantColWidths[2] - 0.6, accountantCellHeight - 0.6];
-            accountantField2.fontSize = 7;
-            accountantField2.textColor = [0, 0, 0];
-            accountantField2.borderStyle = 'none';
-            doc.addField(accountantField2);
-          }
-
-          accountantTableY += accountantCellHeight;
-        });
-
-        yPosition = accountantTableY + 10;
+        renderEstateRow('Name:', '', 'accountant_c2only_name');
+        renderEstateRow('Firm:', '', 'accountant_c2only_firm');
+        renderEstateRow('Phone Number:', '', 'accountant_c2only_phone');
+        renderEstateRow('Email Address:', '', 'accountant_c2only_email');
+        renderEstateRow('City, Province:', '', 'accountant_c2only_city');
+        renderEstateRow('What Year did you begin working with this person?', '', 'accountant_c2only_year');
+        renderEstateRow('Other Details:', '', 'accountant_c2only_other1');
+        renderEstateRow('Other Details:', '', 'accountant_c2only_other2');
+        renderEstateRow('Other Details:', '', 'accountant_c2only_other3');
+        yPosition += 6;
       }
     }
 
     if (formData.client1UsesAccountant === 'no' && formData.client1AccountingRecordsLocation) {
       if (yPosition > 260) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -7870,7 +7133,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     if (formData.client2UsesAccountant === 'no' && formData.client2AccountingRecordsLocation) {
       if (yPosition > 260) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -7890,7 +7153,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (bothHaveCameronSmith && client1AdvisorCount > 0) {
     if (yPosition > 190) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -7902,97 +7165,21 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     const advisorData = formData.client1FinancialAdvisorsData?.[0];
 
-    const advisorRows = [
-      { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
-      { label: 'Firm Name:' },
-      { label: 'Key Contact:' },
-      { label: 'Phone Number:' },
-      { label: 'Email Address:' },
-      { label: 'City, Province:' },
-      { label: 'What Year did you begin working with this person?' },
-      { label: 'Where are past statements/tax documents stored?' },
-      { label: 'Other Details:' },
-      { label: 'Other Details:' },
-    ];
-
-    const advisorCellHeight = 6;
-    const advisorColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-    let advisorTableY = yPosition;
-
-    advisorRows.forEach((row, rowIndex) => {
-      if (advisorTableY > 275) {
-        doc.addPage();
-        advisorTableY = 12;
-      }
-
-      doc.setDrawColor(0, 0, 0);
-      doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-      doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-      doc.setFontSize(8);
-
-      const advisorCol1X = margin;
-      const advisorCol2X = margin + advisorColWidths[0];
-      const advisorCol3X = margin + advisorColWidths[0] + advisorColWidths[1];
-
-      doc.rect(advisorCol1X, advisorTableY, advisorColWidths[0], advisorCellHeight);
-      doc.rect(advisorCol2X, advisorTableY, advisorColWidths[1], advisorCellHeight);
-      doc.rect(advisorCol3X, advisorTableY, advisorColWidths[2], advisorCellHeight);
-
-      if (rowIndex === 0) {
-        doc.text('Name:', advisorCol1X + 0.5, advisorTableY + 4);
-        doc.text('Information:', advisorCol2X + 0.5, advisorTableY + 4);
-        doc.text('Other Details:', advisorCol3X + 0.5, advisorTableY + 4);
-      } else {
-        doc.setFont(undefined, 'normal');
-
-        if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-          const labelField = new doc.AcroFormTextField();
-          labelField.fieldName = `advisor_both_cameron_${rowIndex}_col1`;
-          labelField.Rect = [advisorCol1X + 0.3, advisorTableY + 0.3, advisorColWidths[0] - 0.6, advisorCellHeight - 0.6];
-          labelField.fontSize = 8;
-          labelField.textColor = [0, 0, 0];
-          labelField.borderStyle = 'none';
-          labelField.value = row.label;
-          doc.addField(labelField);
-        } else {
-          doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
-        }
-
-        const advisorField1 = new doc.AcroFormTextField();
-        advisorField1.fieldName = `advisor_both_cameron_${rowIndex}_col2`;
-        advisorField1.Rect = [advisorCol2X + 0.3, advisorTableY + 0.3, advisorColWidths[1] - 0.6, advisorCellHeight - 0.6];
-        advisorField1.fontSize = 7;
-        advisorField1.textColor = [0, 0, 0];
-        advisorField1.borderStyle = 'none';
-        if (rowIndex === 1) {
-          advisorField1.value = advisorData?.firm || '';
-        } else if (rowIndex === 2) {
-          advisorField1.value = advisorData?.name || '';
-        } else if (rowIndex === 3) {
-          advisorField1.value = advisorData?.phone || '';
-        } else if (rowIndex === 4) {
-          advisorField1.value = advisorData?.email || '';
-        }
-        doc.addField(advisorField1);
-
-        const advisorField2 = new doc.AcroFormTextField();
-        advisorField2.fieldName = `advisor_both_cameron_${rowIndex}_col3`;
-        advisorField2.Rect = [advisorCol3X + 0.3, advisorTableY + 0.3, advisorColWidths[2] - 0.6, advisorCellHeight - 0.6];
-        advisorField2.fontSize = 7;
-        advisorField2.textColor = [0, 0, 0];
-        advisorField2.borderStyle = 'none';
-        doc.addField(advisorField2);
-      }
-
-      advisorTableY += advisorCellHeight;
-    });
-
-    yPosition = advisorTableY + 10;
+    renderEstateRow('Firm Name:', advisorData?.firm || '', 'advisor_cameron_firm');
+    renderEstateRow('Key Contact:', advisorData?.name || '', 'advisor_cameron_contact');
+    renderEstateRow('Phone Number:', advisorData?.phone || '', 'advisor_cameron_phone');
+    renderEstateRow('Email Address:', advisorData?.email || '', 'advisor_cameron_email');
+    renderEstateRow('City, Province:', '', 'advisor_cameron_city');
+    renderEstateRow('What Year did you begin working with this person?', '', 'advisor_cameron_year');
+    renderEstateRow('Where are past statements/tax documents stored?', '', 'advisor_cameron_docs');
+    renderEstateRow('Other Details:', '', 'advisor_cameron_other1');
+    renderEstateRow('Other Details:', '', 'advisor_cameron_other2');
+    yPosition += 6;
 
     if (client1AdvisorCount > 1) {
       for (let advisorIndex = 1; advisorIndex < client1AdvisorCount; advisorIndex++) {
         if (yPosition > 190) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
@@ -8007,205 +7194,41 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.text('Contact details for the person managing your portfolios and the location of current statements.', margin, yPosition);
         yPosition += 6;
 
-        const advisorRows = [
-          { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Firm Name:' },
-          { label: 'Key Contact:' },
-          { label: 'Phone Number:' },
-          { label: 'Email Address:' },
-          { label: 'City, Province:' },
-          { label: 'What Year did you begin working with this person?' },
-          { label: 'Where are past statements/tax documents stored?' },
-          { label: 'Other Details:' },
-          { label: 'Other Details:' },
-        ];
+        renderEstateRow('Firm Name:', advisorData?.firm || '', `advisor_c1_${advisorIndex + 1}_firm`);
+        renderEstateRow('Key Contact:', advisorData?.name || '', `advisor_c1_${advisorIndex + 1}_contact`);
+        renderEstateRow('Phone Number:', advisorData?.phone || '', `advisor_c1_${advisorIndex + 1}_phone`);
+        renderEstateRow('Email Address:', advisorData?.email || '', `advisor_c1_${advisorIndex + 1}_email`);
+        renderEstateRow('City, Province:', '', `advisor_c1_${advisorIndex + 1}_city`);
+        renderEstateRow('What Year did you begin working with this person?', '', `advisor_c1_${advisorIndex + 1}_year`);
+        renderEstateRow('Where are past statements/tax documents stored?', '', `advisor_c1_${advisorIndex + 1}_docs`);
+        renderEstateRow('Other Details:', '', `advisor_c1_${advisorIndex + 1}_other1`);
+        renderEstateRow('Other Details:', '', `advisor_c1_${advisorIndex + 1}_other2`);
+        yPosition += 4;
 
-        const advisorCellHeight = 6;
-        const advisorColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let advisorTableY = yPosition;
-
-        advisorRows.forEach((row, rowIndex) => {
-          if (advisorTableY > 275) {
-            doc.addPage();
-            advisorTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const advisorCol1X = margin;
-          const advisorCol2X = margin + advisorColWidths[0];
-          const advisorCol3X = margin + advisorColWidths[0] + advisorColWidths[1];
-
-          doc.rect(advisorCol1X, advisorTableY, advisorColWidths[0], advisorCellHeight);
-          doc.rect(advisorCol2X, advisorTableY, advisorColWidths[1], advisorCellHeight);
-          doc.rect(advisorCol3X, advisorTableY, advisorColWidths[2], advisorCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Name:', advisorCol1X + 0.5, advisorTableY + 4);
-            doc.text('Information:', advisorCol2X + 0.5, advisorTableY + 4);
-            doc.text('Other Details:', advisorCol3X + 0.5, advisorTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col1`;
-              labelField.Rect = [advisorCol1X + 0.3, advisorTableY + 0.3, advisorColWidths[0] - 0.6, advisorCellHeight - 0.6];
-              labelField.fontSize = 8;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
-            }
-
-            const advisorField1 = new doc.AcroFormTextField();
-            advisorField1.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col2`;
-            advisorField1.Rect = [advisorCol2X + 0.3, advisorTableY + 0.3, advisorColWidths[1] - 0.6, advisorCellHeight - 0.6];
-            advisorField1.fontSize = 7;
-            advisorField1.textColor = [0, 0, 0];
-            advisorField1.borderStyle = 'none';
-            if (rowIndex === 1) {
-              advisorField1.value = advisorData?.firm || '';
-            } else if (rowIndex === 2) {
-              advisorField1.value = advisorData?.name || '';
-            } else if (rowIndex === 3) {
-              advisorField1.value = advisorData?.phone || '';
-            } else if (rowIndex === 4) {
-              advisorField1.value = advisorData?.email || '';
-            }
-            doc.addField(advisorField1);
-
-            const advisorField2 = new doc.AcroFormTextField();
-            advisorField2.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col3`;
-            advisorField2.Rect = [advisorCol3X + 0.3, advisorTableY + 0.3, advisorColWidths[2] - 0.6, advisorCellHeight - 0.6];
-            advisorField2.fontSize = 7;
-            advisorField2.textColor = [0, 0, 0];
-            advisorField2.borderStyle = 'none';
-            doc.addField(advisorField2);
-          }
-
-          advisorTableY += advisorCellHeight;
-        });
-
-        yPosition = advisorTableY + 10;
-
-        if (yPosition > 150) {
-          doc.addPage();
-          yPosition = 12;
-        }
-
+        checkPageBreak(20);
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
         const institutionLabel = advisorData?.firm ? `${advisorData.firm} Accounts Held` : `Institution ${advisorIndex + 1} Accounts Held`;
         doc.text(institutionLabel, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 
-        const accountRows = [
-          { label: 'Account Type:', col2: 'Institution:', col3: 'Last 4 Digits of the Account Number:', col4: 'Beneficiary on File (if applicable):' },
-          { label: 'RRSP' },
-          { label: 'Spousal RRSP' },
-          { label: 'Locked In RRSP/LIRA' },
-          { label: 'RRIF' },
-          { label: 'Spousal RRIF' },
-          { label: 'Life Income Fund (LIF)' },
-          { label: 'TFSA' },
-          { label: 'Non-Registered Account' },
-          { label: 'RESP' },
-          { label: 'RDSP' },
-          { label: 'FHSA' },
-          { label: 'In Trust For:' },
-          { label: 'Other:' },
-          { label: 'Joint with _____:' },
-        ];
-
-        const accountCellHeight = 6;
-        const accountColWidths = [fieldWidth * 0.20, fieldWidth * 0.27, fieldWidth * 0.27, fieldWidth * 0.26];
-        let accountTableY = yPosition;
-
-        accountRows.forEach((row, rowIndex) => {
-          if (accountTableY > 275) {
-            doc.addPage();
-            accountTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(7);
-
-          const accountCol1X = margin;
-          const accountCol2X = margin + accountColWidths[0];
-          const accountCol3X = margin + accountColWidths[0] + accountColWidths[1];
-          const accountCol4X = margin + accountColWidths[0] + accountColWidths[1] + accountColWidths[2];
-
-          doc.rect(accountCol1X, accountTableY, accountColWidths[0], accountCellHeight);
-          doc.rect(accountCol2X, accountTableY, accountColWidths[1], accountCellHeight);
-          doc.rect(accountCol3X, accountTableY, accountColWidths[2], accountCellHeight);
-          doc.rect(accountCol4X, accountTableY, accountColWidths[3], accountCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Account Type:', accountCol1X + 0.5, accountTableY + 3);
-            doc.text('Institution:', accountCol2X + 0.5, accountTableY + 3);
-            doc.text('Last 4 Digits:', accountCol3X + 0.5, accountTableY + 3);
-            doc.text('Beneficiary:', accountCol4X + 0.5, accountTableY + 3);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other:' || row.label === 'In Trust For:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `account_client1_advisor${advisorIndex + 1}_${rowIndex}_col1`;
-              labelField.Rect = [accountCol1X + 0.3, accountTableY + 0.3, accountColWidths[0] - 0.6, accountCellHeight - 0.6];
-              labelField.fontSize = 7;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, accountCol1X + 0.5, accountTableY + 3.5);
-            }
-
-            const accountField1 = new doc.AcroFormTextField();
-            accountField1.fieldName = `account_client1_advisor${advisorIndex + 1}_${rowIndex}_col2`;
-            accountField1.Rect = [accountCol2X + 0.3, accountTableY + 0.3, accountColWidths[1] - 0.6, accountCellHeight - 0.6];
-            accountField1.fontSize = 7;
-            accountField1.textColor = [0, 0, 0];
-            accountField1.borderStyle = 'none';
-            doc.addField(accountField1);
-
-            const accountField2 = new doc.AcroFormTextField();
-            accountField2.fieldName = `account_client1_advisor${advisorIndex + 1}_${rowIndex}_col3`;
-            accountField2.Rect = [accountCol3X + 0.3, accountTableY + 0.3, accountColWidths[2] - 0.6, accountCellHeight - 0.6];
-            accountField2.fontSize = 7;
-            accountField2.textColor = [0, 0, 0];
-            accountField2.borderStyle = 'none';
-            doc.addField(accountField2);
-
-            const accountField3 = new doc.AcroFormTextField();
-            accountField3.fieldName = `account_client1_advisor${advisorIndex + 1}_${rowIndex}_col4`;
-            accountField3.Rect = [accountCol4X + 0.3, accountTableY + 0.3, accountColWidths[3] - 0.6, accountCellHeight - 0.6];
-            accountField3.fontSize = 7;
-            accountField3.textColor = [0, 0, 0];
-            accountField3.borderStyle = 'none';
-            doc.addField(accountField3);
-          }
-
-          accountTableY += accountCellHeight;
-        });
-
-        yPosition = accountTableY + 10;
+        renderAccountTable(`acct_c1_adv${advisorIndex + 1}`, [
+          { label: 'RRSP' }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
+          { label: 'RRIF' }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
+          { label: 'TFSA' }, { label: 'Non-Registered Account' }, { label: 'RESP' },
+          { label: 'RDSP' }, { label: 'FHSA' },
+          { label: 'In Trust For:', editable: true }, { label: 'Other:', editable: true }, { label: 'Joint with _____:', editable: true },
+        ]);
+        yPosition += 6;
       }
     }
 
     if (client2AdvisorCount > 1) {
       for (let advisorIndex = 1; advisorIndex < client2AdvisorCount; advisorIndex++) {
         if (yPosition > 190) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
@@ -8220,204 +7243,40 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.text('Contact details for the person managing your portfolios and the location of current statements.', margin, yPosition);
         yPosition += 6;
 
-        const advisorRows = [
-          { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Firm Name:' },
-          { label: 'Key Contact:' },
-          { label: 'Phone Number:' },
-          { label: 'Email Address:' },
-          { label: 'City, Province:' },
-          { label: 'What Year did you begin working with this person?' },
-          { label: 'Where are past statements/tax documents stored?' },
-          { label: 'Other Details:' },
-          { label: 'Other Details:' },
-        ];
+        renderEstateRow('Firm Name:', advisorData?.firm || '', `advisor_c2_${advisorIndex + 1}_firm`);
+        renderEstateRow('Key Contact:', advisorData?.name || '', `advisor_c2_${advisorIndex + 1}_contact`);
+        renderEstateRow('Phone Number:', advisorData?.phone || '', `advisor_c2_${advisorIndex + 1}_phone`);
+        renderEstateRow('Email Address:', advisorData?.email || '', `advisor_c2_${advisorIndex + 1}_email`);
+        renderEstateRow('City, Province:', '', `advisor_c2_${advisorIndex + 1}_city`);
+        renderEstateRow('What Year did you begin working with this person?', '', `advisor_c2_${advisorIndex + 1}_year`);
+        renderEstateRow('Where are past statements/tax documents stored?', '', `advisor_c2_${advisorIndex + 1}_docs`);
+        renderEstateRow('Other Details:', '', `advisor_c2_${advisorIndex + 1}_other1`);
+        renderEstateRow('Other Details:', '', `advisor_c2_${advisorIndex + 1}_other2`);
+        yPosition += 4;
 
-        const advisorCellHeight = 6;
-        const advisorColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let advisorTableY = yPosition;
-
-        advisorRows.forEach((row, rowIndex) => {
-          if (advisorTableY > 275) {
-            doc.addPage();
-            advisorTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const advisorCol1X = margin;
-          const advisorCol2X = margin + advisorColWidths[0];
-          const advisorCol3X = margin + advisorColWidths[0] + advisorColWidths[1];
-
-          doc.rect(advisorCol1X, advisorTableY, advisorColWidths[0], advisorCellHeight);
-          doc.rect(advisorCol2X, advisorTableY, advisorColWidths[1], advisorCellHeight);
-          doc.rect(advisorCol3X, advisorTableY, advisorColWidths[2], advisorCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Name:', advisorCol1X + 0.5, advisorTableY + 4);
-            doc.text('Information:', advisorCol2X + 0.5, advisorTableY + 4);
-            doc.text('Other Details:', advisorCol3X + 0.5, advisorTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col1`;
-              labelField.Rect = [advisorCol1X + 0.3, advisorTableY + 0.3, advisorColWidths[0] - 0.6, advisorCellHeight - 0.6];
-              labelField.fontSize = 8;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
-            }
-
-            const advisorField1 = new doc.AcroFormTextField();
-            advisorField1.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col2`;
-            advisorField1.Rect = [advisorCol2X + 0.3, advisorTableY + 0.3, advisorColWidths[1] - 0.6, advisorCellHeight - 0.6];
-            advisorField1.fontSize = 7;
-            advisorField1.textColor = [0, 0, 0];
-            advisorField1.borderStyle = 'none';
-            if (rowIndex === 1) {
-              advisorField1.value = advisorData?.firm || '';
-            } else if (rowIndex === 2) {
-              advisorField1.value = advisorData?.name || '';
-            } else if (rowIndex === 3) {
-              advisorField1.value = advisorData?.phone || '';
-            } else if (rowIndex === 4) {
-              advisorField1.value = advisorData?.email || '';
-            }
-            doc.addField(advisorField1);
-
-            const advisorField2 = new doc.AcroFormTextField();
-            advisorField2.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col3`;
-            advisorField2.Rect = [advisorCol3X + 0.3, advisorTableY + 0.3, advisorColWidths[2] - 0.6, advisorCellHeight - 0.6];
-            advisorField2.fontSize = 7;
-            advisorField2.textColor = [0, 0, 0];
-            advisorField2.borderStyle = 'none';
-            doc.addField(advisorField2);
-          }
-
-          advisorTableY += advisorCellHeight;
-        });
-
-        yPosition = advisorTableY + 10;
-
-        if (yPosition > 150) {
-          doc.addPage();
-          yPosition = 12;
-        }
-
+        checkPageBreak(20);
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
         const institutionLabel = advisorData?.firm ? `${advisorData.firm} Accounts Held` : `Institution ${advisorIndex + 1} Accounts Held`;
         doc.text(institutionLabel, margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 
-        const accountRows = [
-          { label: 'Account Type:', col2: 'Institution:', col3: 'Last 4 Digits of the Account Number:', col4: 'Beneficiary on File (if applicable):' },
-          { label: 'RRSP' },
-          { label: 'Spousal RRSP' },
-          { label: 'Locked In RRSP/LIRA' },
-          { label: 'RRIF' },
-          { label: 'Spousal RRIF' },
-          { label: 'Life Income Fund (LIF)' },
-          { label: 'TFSA' },
-          { label: 'Non-Registered Account' },
-          { label: 'RESP' },
-          { label: 'RDSP' },
-          { label: 'FHSA' },
-          { label: 'In Trust For:' },
-          { label: 'Other:' },
-          { label: 'Joint with _____:' },
-        ];
-
-        const accountCellHeight = 6;
-        const accountColWidths = [fieldWidth * 0.20, fieldWidth * 0.27, fieldWidth * 0.27, fieldWidth * 0.26];
-        let accountTableY = yPosition;
-
-        accountRows.forEach((row, rowIndex) => {
-          if (accountTableY > 275) {
-            doc.addPage();
-            accountTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(7);
-
-          const accountCol1X = margin;
-          const accountCol2X = margin + accountColWidths[0];
-          const accountCol3X = margin + accountColWidths[0] + accountColWidths[1];
-          const accountCol4X = margin + accountColWidths[0] + accountColWidths[1] + accountColWidths[2];
-
-          doc.rect(accountCol1X, accountTableY, accountColWidths[0], accountCellHeight);
-          doc.rect(accountCol2X, accountTableY, accountColWidths[1], accountCellHeight);
-          doc.rect(accountCol3X, accountTableY, accountColWidths[2], accountCellHeight);
-          doc.rect(accountCol4X, accountTableY, accountColWidths[3], accountCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Account Type:', accountCol1X + 0.5, accountTableY + 3);
-            doc.text('Institution:', accountCol2X + 0.5, accountTableY + 3);
-            doc.text('Last 4 Digits:', accountCol3X + 0.5, accountTableY + 3);
-            doc.text('Beneficiary:', accountCol4X + 0.5, accountTableY + 3);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other:' || row.label === 'In Trust For:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `account_client2_advisor${advisorIndex + 1}_${rowIndex}_col1`;
-              labelField.Rect = [accountCol1X + 0.3, accountTableY + 0.3, accountColWidths[0] - 0.6, accountCellHeight - 0.6];
-              labelField.fontSize = 7;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, accountCol1X + 0.5, accountTableY + 3.5);
-            }
-
-            const accountField1 = new doc.AcroFormTextField();
-            accountField1.fieldName = `account_client2_advisor${advisorIndex + 1}_${rowIndex}_col2`;
-            accountField1.Rect = [accountCol2X + 0.3, accountTableY + 0.3, accountColWidths[1] - 0.6, accountCellHeight - 0.6];
-            accountField1.fontSize = 7;
-            accountField1.textColor = [0, 0, 0];
-            accountField1.borderStyle = 'none';
-            doc.addField(accountField1);
-
-            const accountField2 = new doc.AcroFormTextField();
-            accountField2.fieldName = `account_client2_advisor${advisorIndex + 1}_${rowIndex}_col3`;
-            accountField2.Rect = [accountCol3X + 0.3, accountTableY + 0.3, accountColWidths[2] - 0.6, accountCellHeight - 0.6];
-            accountField2.fontSize = 7;
-            accountField2.textColor = [0, 0, 0];
-            accountField2.borderStyle = 'none';
-            doc.addField(accountField2);
-
-            const accountField3 = new doc.AcroFormTextField();
-            accountField3.fieldName = `account_client2_advisor${advisorIndex + 1}_${rowIndex}_col4`;
-            accountField3.Rect = [accountCol4X + 0.3, accountTableY + 0.3, accountColWidths[3] - 0.6, accountCellHeight - 0.6];
-            accountField3.fontSize = 7;
-            accountField3.textColor = [0, 0, 0];
-            accountField3.borderStyle = 'none';
-            doc.addField(accountField3);
-          }
-
-          accountTableY += accountCellHeight;
-        });
-
-        yPosition = accountTableY + 10;
+        renderAccountTable(`acct_c2_adv${advisorIndex + 1}`, [
+          { label: 'RRSP' }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
+          { label: 'RRIF' }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
+          { label: 'TFSA' }, { label: 'Non-Registered Account' }, { label: 'RESP' },
+          { label: 'RDSP' }, { label: 'FHSA' },
+          { label: 'In Trust For:', editable: true }, { label: 'Other:', editable: true }, { label: 'Joint with _____:', editable: true },
+        ]);
+        yPosition += 6;
       }
     }
   } else if (client1AdvisorCount > 0) {
     for (let advisorIndex = 0; advisorIndex < client1AdvisorCount; advisorIndex++) {
       if (yPosition > 190) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
@@ -8432,216 +7291,48 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.text('Contact details for the person managing your portfolios and the location of current statements.', margin, yPosition);
       yPosition += 6;
 
-      const advisorRows = [
-        { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
-        { label: 'Firm Name:' },
-        { label: 'Key Contact:' },
-        { label: 'Phone Number:' },
-        { label: 'Email Address:' },
-        { label: 'City, Province:' },
-        { label: 'What Year did you begin working with this person?' },
-        { label: 'Where are past statements/tax documents stored?' },
-        { label: 'Other Details:' },
-        { label: 'Other Details:' },
-      ];
+      renderEstateRow('Firm Name:', advisorData?.firm || '', `advisor_c1solo_${advisorIndex + 1}_firm`);
+      renderEstateRow('Key Contact:', advisorData?.name || '', `advisor_c1solo_${advisorIndex + 1}_contact`);
+      renderEstateRow('Phone Number:', advisorData?.phone || '', `advisor_c1solo_${advisorIndex + 1}_phone`);
+      renderEstateRow('Email Address:', advisorData?.email || '', `advisor_c1solo_${advisorIndex + 1}_email`);
+      renderEstateRow('City, Province:', '', `advisor_c1solo_${advisorIndex + 1}_city`);
+      renderEstateRow('What Year did you begin working with this person?', '', `advisor_c1solo_${advisorIndex + 1}_year`);
+      renderEstateRow('Where are past statements/tax documents stored?', '', `advisor_c1solo_${advisorIndex + 1}_docs`);
+      renderEstateRow('Other Details:', '', `advisor_c1solo_${advisorIndex + 1}_other1`);
+      renderEstateRow('Other Details:', '', `advisor_c1solo_${advisorIndex + 1}_other2`);
+      yPosition += 4;
 
-      const advisorCellHeight = 6;
-      const advisorColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-      let advisorTableY = yPosition;
-
-      advisorRows.forEach((row, rowIndex) => {
-        if (advisorTableY > 275) {
-          doc.addPage();
-          advisorTableY = 12;
-        }
-
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-        doc.setFontSize(8);
-
-        const advisorCol1X = margin;
-        const advisorCol2X = margin + advisorColWidths[0];
-        const advisorCol3X = margin + advisorColWidths[0] + advisorColWidths[1];
-
-        doc.rect(advisorCol1X, advisorTableY, advisorColWidths[0], advisorCellHeight);
-        doc.rect(advisorCol2X, advisorTableY, advisorColWidths[1], advisorCellHeight);
-        doc.rect(advisorCol3X, advisorTableY, advisorColWidths[2], advisorCellHeight);
-
-        if (rowIndex === 0) {
-          doc.text('Name:', advisorCol1X + 0.5, advisorTableY + 4);
-          doc.text('Information:', advisorCol2X + 0.5, advisorTableY + 4);
-          doc.text('Other Details:', advisorCol3X + 0.5, advisorTableY + 4);
-        } else {
-          doc.setFont(undefined, 'normal');
-
-          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-            const labelField = new doc.AcroFormTextField();
-            labelField.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col1`;
-            labelField.Rect = [advisorCol1X + 0.3, advisorTableY + 0.3, advisorColWidths[0] - 0.6, advisorCellHeight - 0.6];
-            labelField.fontSize = 8;
-            labelField.textColor = [0, 0, 0];
-            labelField.borderStyle = 'none';
-            labelField.value = row.label;
-            doc.addField(labelField);
-          } else {
-            doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
-          }
-
-          const advisorField1 = new doc.AcroFormTextField();
-          advisorField1.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col2`;
-          advisorField1.Rect = [advisorCol2X + 0.3, advisorTableY + 0.3, advisorColWidths[1] - 0.6, advisorCellHeight - 0.6];
-          advisorField1.fontSize = 7;
-          advisorField1.textColor = [0, 0, 0];
-          advisorField1.borderStyle = 'none';
-          if (rowIndex === 1) {
-            advisorField1.value = advisorData?.firm || '';
-          } else if (rowIndex === 2) {
-            advisorField1.value = advisorData?.name || '';
-          } else if (rowIndex === 3) {
-            advisorField1.value = advisorData?.phone || '';
-          } else if (rowIndex === 4) {
-            advisorField1.value = advisorData?.email || '';
-          }
-          doc.addField(advisorField1);
-
-          const advisorField2 = new doc.AcroFormTextField();
-          advisorField2.fieldName = `advisor_client1_${advisorIndex + 1}_${rowIndex}_col3`;
-          advisorField2.Rect = [advisorCol3X + 0.3, advisorTableY + 0.3, advisorColWidths[2] - 0.6, advisorCellHeight - 0.6];
-          advisorField2.fontSize = 7;
-          advisorField2.textColor = [0, 0, 0];
-          advisorField2.borderStyle = 'none';
-          doc.addField(advisorField2);
-        }
-
-        advisorTableY += advisorCellHeight;
-      });
-
-      yPosition = advisorTableY + 10;
-
-      if (yPosition > 150) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
+      checkPageBreak(20);
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      const institutionLabel = advisorData?.firm ? `${advisorData.firm} Accounts Held` : `Institution ${advisorIndex + 1} Accounts Held`;
-      doc.text(institutionLabel, margin, yPosition);
+      doc.setTextColor(...colors.darkText);
+      const institutionLabel_c1 = advisorData?.firm ? `${advisorData.firm} Accounts Held` : `Institution ${advisorIndex + 1} Accounts Held`;
+      doc.text(institutionLabel_c1, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 6;
 
-      const accountRows = [
-        { label: 'Account Type:', col2: 'Institution:', col3: 'Last 4 Digits of the Account Number:', col4: 'Beneficiary on File (if applicable):' },
-        { label: 'RRSP' },
-        { label: 'Spousal RRSP' },
-        { label: 'Locked In RRSP/LIRA' },
-        { label: 'RRIF' },
-        { label: 'Spousal RRIF' },
-        { label: 'Life Income Fund (LIF)' },
-        { label: 'TFSA' },
-        { label: 'Non-Registered Account' },
-        { label: 'RESP' },
-        { label: 'RDSP' },
-        { label: 'FHSA' },
-        { label: 'In Trust For:' },
-        { label: 'Group RRSP:' },
-        { label: 'Deferred Profit-Sharing Plan:' },
-        { label: 'Joint with _____:' },
-        { label: 'Other:' },
-        { label: 'Other:' },
-        { label: 'Other:' },
-      ];
-
-      const accountCellHeight = 6;
-      const accountColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
-      let accountTableY = yPosition;
-
-      accountRows.forEach((row, rowIndex) => {
-        if (accountTableY > 275) {
-          doc.addPage();
-          accountTableY = 12;
-        }
-
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-        doc.setFontSize(7);
-
-        const accountCol1X = margin;
-        const accountCol2X = margin + accountColWidths[0];
-        const accountCol3X = margin + accountColWidths[0] + accountColWidths[1];
-        const accountCol4X = margin + accountColWidths[0] + accountColWidths[1] + accountColWidths[2];
-
-        doc.rect(accountCol1X, accountTableY, accountColWidths[0], accountCellHeight);
-        doc.rect(accountCol2X, accountTableY, accountColWidths[1], accountCellHeight);
-        doc.rect(accountCol3X, accountTableY, accountColWidths[2], accountCellHeight);
-        doc.rect(accountCol4X, accountTableY, accountColWidths[3], accountCellHeight);
-
-        if (rowIndex === 0) {
-          doc.text('Account Type:', accountCol1X + 0.5, accountTableY + 4);
-          doc.text('Institution:', accountCol2X + 0.5, accountTableY + 4);
-          doc.text('Last 4 Digits of the', accountCol3X + 0.5, accountTableY + 2.5);
-          doc.text('Account Number:', accountCol3X + 0.5, accountTableY + 4.5);
-          doc.text('Beneficiary on File (if', accountCol4X + 0.5, accountTableY + 2.5);
-          doc.text('applicable):', accountCol4X + 0.5, accountTableY + 4.5);
-        } else {
-          doc.setFont(undefined, 'normal');
-
-          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-            const labelField = new doc.AcroFormTextField();
-            labelField.fieldName = `accounts_client1_advisor${advisorIndex + 1}_${rowIndex}_col1`;
-            labelField.Rect = [accountCol1X + 0.3, accountTableY + 0.3, accountColWidths[0] - 0.6, accountCellHeight - 0.6];
-            labelField.fontSize = 7;
-            labelField.textColor = [0, 0, 0];
-            labelField.borderStyle = 'none';
-            labelField.value = row.label;
-            doc.addField(labelField);
-          } else {
-            doc.text(row.label, accountCol1X + 0.5, accountTableY + 4);
-          }
-
-          const accountField1 = new doc.AcroFormTextField();
-          accountField1.fieldName = `accounts_client1_advisor${advisorIndex + 1}_${rowIndex}_col2`;
-          accountField1.Rect = [accountCol2X + 0.3, accountTableY + 0.3, accountColWidths[1] - 0.6, accountCellHeight - 0.6];
-          accountField1.fontSize = 7;
-          accountField1.textColor = [0, 0, 0];
-          accountField1.borderStyle = 'none';
-          doc.addField(accountField1);
-
-          const accountField2 = new doc.AcroFormTextField();
-          accountField2.fieldName = `accounts_client1_advisor${advisorIndex + 1}_${rowIndex}_col3`;
-          accountField2.Rect = [accountCol3X + 0.3, accountTableY + 0.3, accountColWidths[2] - 0.6, accountCellHeight - 0.6];
-          accountField2.fontSize = 7;
-          accountField2.textColor = [0, 0, 0];
-          accountField2.borderStyle = 'none';
-          doc.addField(accountField2);
-
-          const accountField3 = new doc.AcroFormTextField();
-          accountField3.fieldName = `accounts_client1_advisor${advisorIndex + 1}_${rowIndex}_col4`;
-          accountField3.Rect = [accountCol4X + 0.3, accountTableY + 0.3, accountColWidths[3] - 0.6, accountCellHeight - 0.6];
-          accountField3.fontSize = 7;
-          accountField3.textColor = [0, 0, 0];
-          accountField3.borderStyle = 'none';
-          doc.addField(accountField3);
-        }
-
-        accountTableY += accountCellHeight;
-      });
-
-      yPosition = accountTableY + 10;
+      renderAccountTable(`acct_c1solo_adv${advisorIndex + 1}`, [
+        { label: 'RRSP' }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
+        { label: 'RRIF' }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
+        { label: 'TFSA' }, { label: 'Non-Registered Account' }, { label: 'RESP' },
+        { label: 'RDSP' }, { label: 'FHSA' }, { label: 'Group RRSP:' }, { label: 'Deferred Profit-Sharing Plan:' },
+        { label: 'In Trust For:', editable: true }, { label: 'Joint with _____:', editable: true },
+        { label: 'Other:', editable: true }, { label: 'Other:', editable: true }, { label: 'Other:', editable: true },
+      ]);
+      yPosition += 6;
     }
   }
 
   if (client2AdvisorCount > 0 && hasSpouse) {
     for (let advisorIndex = 0; advisorIndex < client2AdvisorCount; advisorIndex++) {
       if (yPosition > 190) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
+      doc.setTextColor(...colors.darkText);
       doc.text(`Financial Advisor/Investment Manager - ${client2Name} (${advisorIndex + 1} of ${client2AdvisorCount}):`, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 4;
@@ -8649,206 +7340,37 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.text('Contact details for the person managing your portfolios and the location of current statements.', margin, yPosition);
       yPosition += 6;
 
-      const advisorRows = [
-        { label: 'Name:', col2: 'Information:', col3: 'Other Details:' },
-        { label: 'Firm Name:' },
-        { label: 'Key Contact:' },
-        { label: 'Phone Number:' },
-        { label: 'Email Address:' },
-        { label: 'City, Province:' },
-        { label: 'What Year did you begin working with this person?' },
-        { label: 'Where are past statements/tax documents stored?' },
-        { label: 'Other Details:' },
-        { label: 'Other Details:' },
-      ];
-
-      const advisorCellHeight = 6;
-      const advisorColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-      let advisorTableY = yPosition;
-
       const advisorData = formData.client2FinancialAdvisorsData?.[advisorIndex];
 
-      advisorRows.forEach((row, rowIndex) => {
-        if (advisorTableY > 275) {
-          doc.addPage();
-          advisorTableY = 12;
-        }
+      renderEstateRow('Firm Name:', advisorData?.firm || '', `advisor_c2solo_${advisorIndex + 1}_firm`);
+      renderEstateRow('Key Contact:', advisorData?.name || '', `advisor_c2solo_${advisorIndex + 1}_contact`);
+      renderEstateRow('Phone Number:', advisorData?.phone || '', `advisor_c2solo_${advisorIndex + 1}_phone`);
+      renderEstateRow('Email Address:', advisorData?.email || '', `advisor_c2solo_${advisorIndex + 1}_email`);
+      renderEstateRow('City, Province:', '', `advisor_c2solo_${advisorIndex + 1}_city`);
+      renderEstateRow('What Year did you begin working with this person?', '', `advisor_c2solo_${advisorIndex + 1}_year`);
+      renderEstateRow('Where are past statements/tax documents stored?', '', `advisor_c2solo_${advisorIndex + 1}_docs`);
+      renderEstateRow('Other Details:', '', `advisor_c2solo_${advisorIndex + 1}_other1`);
+      renderEstateRow('Other Details:', '', `advisor_c2solo_${advisorIndex + 1}_other2`);
+      yPosition += 4;
 
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-        doc.setFontSize(8);
-
-        const advisorCol1X = margin;
-        const advisorCol2X = margin + advisorColWidths[0];
-        const advisorCol3X = margin + advisorColWidths[0] + advisorColWidths[1];
-
-        doc.rect(advisorCol1X, advisorTableY, advisorColWidths[0], advisorCellHeight);
-        doc.rect(advisorCol2X, advisorTableY, advisorColWidths[1], advisorCellHeight);
-        doc.rect(advisorCol3X, advisorTableY, advisorColWidths[2], advisorCellHeight);
-
-        if (rowIndex === 0) {
-          doc.text('Name:', advisorCol1X + 0.5, advisorTableY + 4);
-          doc.text('Information:', advisorCol2X + 0.5, advisorTableY + 4);
-          doc.text('Other Details:', advisorCol3X + 0.5, advisorTableY + 4);
-        } else {
-          doc.setFont(undefined, 'normal');
-
-          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-            const labelField = new doc.AcroFormTextField();
-            labelField.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col1`;
-            labelField.Rect = [advisorCol1X + 0.3, advisorTableY + 0.3, advisorColWidths[0] - 0.6, advisorCellHeight - 0.6];
-            labelField.fontSize = 8;
-            labelField.textColor = [0, 0, 0];
-            labelField.borderStyle = 'none';
-            labelField.value = row.label;
-            doc.addField(labelField);
-          } else {
-            doc.text(row.label, advisorCol1X + 0.5, advisorTableY + 4);
-          }
-
-          const advisorField1 = new doc.AcroFormTextField();
-          advisorField1.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col2`;
-          advisorField1.Rect = [advisorCol2X + 0.3, advisorTableY + 0.3, advisorColWidths[1] - 0.6, advisorCellHeight - 0.6];
-          advisorField1.fontSize = 7;
-          advisorField1.textColor = [0, 0, 0];
-          advisorField1.borderStyle = 'none';
-          if (rowIndex === 1) {
-            advisorField1.value = advisorData?.firm || '';
-          } else if (rowIndex === 2) {
-            advisorField1.value = advisorData?.name || '';
-          } else if (rowIndex === 3) {
-            advisorField1.value = advisorData?.phone || '';
-          } else if (rowIndex === 4) {
-            advisorField1.value = advisorData?.email || '';
-          }
-          doc.addField(advisorField1);
-
-          const advisorField2 = new doc.AcroFormTextField();
-          advisorField2.fieldName = `advisor_client2_${advisorIndex + 1}_${rowIndex}_col3`;
-          advisorField2.Rect = [advisorCol3X + 0.3, advisorTableY + 0.3, advisorColWidths[2] - 0.6, advisorCellHeight - 0.6];
-          advisorField2.fontSize = 7;
-          advisorField2.textColor = [0, 0, 0];
-          advisorField2.borderStyle = 'none';
-          doc.addField(advisorField2);
-        }
-
-        advisorTableY += advisorCellHeight;
-      });
-
-      yPosition = advisorTableY + 10;
-
-      if (yPosition > 150) {
-        doc.addPage();
-        yPosition = 12;
-      }
-
+      checkPageBreak(20);
       doc.setFontSize(10);
       doc.setFont(undefined, 'bold');
-      const institutionLabel = advisorData?.firm ? `${advisorData.firm} Accounts Held` : `Institution ${advisorIndex + 1} Accounts Held`;
-      doc.text(institutionLabel, margin, yPosition);
+      doc.setTextColor(...colors.darkText);
+      const institutionLabel_c2 = advisorData?.firm ? `${advisorData.firm} Accounts Held` : `Institution ${advisorIndex + 1} Accounts Held`;
+      doc.text(institutionLabel_c2, margin, yPosition);
       doc.setFont(undefined, 'normal');
       yPosition += 6;
 
-      const accountRows = [
-        { label: 'Account Type:', col2: 'Institution:', col3: 'Last 4 Digits of the Account Number:', col4: 'Beneficiary on File (if applicable):' },
-        { label: 'RRSP' },
-        { label: 'Spousal RRSP' },
-        { label: 'Locked In RRSP/LIRA' },
-        { label: 'RRIF' },
-        { label: 'Spousal RRIF' },
-        { label: 'Life Income Fund (LIF)' },
-        { label: 'TFSA' },
-        { label: 'Non-Registered Account' },
-        { label: 'RESP' },
-        { label: 'RDSP' },
-        { label: 'FHSA' },
-        { label: 'In Trust For:' },
-        { label: 'Group RRSP:' },
-        { label: 'Deferred Profit-Sharing Plan:' },
-        { label: 'Joint with _____:' },
-        { label: 'Other:' },
-        { label: 'Other:' },
-        { label: 'Other:' },
-      ];
-
-      const accountCellHeight = 6;
-      const accountColWidths = [fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25, fieldWidth * 0.25];
-      let accountTableY = yPosition;
-
-      accountRows.forEach((row, rowIndex) => {
-        if (accountTableY > 275) {
-          doc.addPage();
-          accountTableY = 12;
-        }
-
-        doc.setDrawColor(0, 0, 0);
-        doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-        doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-        doc.setFontSize(7);
-
-        const accountCol1X = margin;
-        const accountCol2X = margin + accountColWidths[0];
-        const accountCol3X = margin + accountColWidths[0] + accountColWidths[1];
-        const accountCol4X = margin + accountColWidths[0] + accountColWidths[1] + accountColWidths[2];
-
-        doc.rect(accountCol1X, accountTableY, accountColWidths[0], accountCellHeight);
-        doc.rect(accountCol2X, accountTableY, accountColWidths[1], accountCellHeight);
-        doc.rect(accountCol3X, accountTableY, accountColWidths[2], accountCellHeight);
-        doc.rect(accountCol4X, accountTableY, accountColWidths[3], accountCellHeight);
-
-        if (rowIndex === 0) {
-          doc.text('Account Type:', accountCol1X + 0.5, accountTableY + 4);
-          doc.text('Institution:', accountCol2X + 0.5, accountTableY + 4);
-          doc.text('Last 4 Digits of the', accountCol3X + 0.5, accountTableY + 2.5);
-          doc.text('Account Number:', accountCol3X + 0.5, accountTableY + 4.5);
-          doc.text('Beneficiary on File (if', accountCol4X + 0.5, accountTableY + 2.5);
-          doc.text('applicable):', accountCol4X + 0.5, accountTableY + 4.5);
-        } else {
-          doc.setFont(undefined, 'normal');
-
-          if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-            const labelField = new doc.AcroFormTextField();
-            labelField.fieldName = `accounts_client2_advisor${advisorIndex + 1}_${rowIndex}_col1`;
-            labelField.Rect = [accountCol1X + 0.3, accountTableY + 0.3, accountColWidths[0] - 0.6, accountCellHeight - 0.6];
-            labelField.fontSize = 7;
-            labelField.textColor = [0, 0, 0];
-            labelField.borderStyle = 'none';
-            labelField.value = row.label;
-            doc.addField(labelField);
-          } else {
-            doc.text(row.label, accountCol1X + 0.5, accountTableY + 4);
-          }
-
-          const accountField1 = new doc.AcroFormTextField();
-          accountField1.fieldName = `accounts_client2_advisor${advisorIndex + 1}_${rowIndex}_col2`;
-          accountField1.Rect = [accountCol2X + 0.3, accountTableY + 0.3, accountColWidths[1] - 0.6, accountCellHeight - 0.6];
-          accountField1.fontSize = 7;
-          accountField1.textColor = [0, 0, 0];
-          accountField1.borderStyle = 'none';
-          doc.addField(accountField1);
-
-          const accountField2 = new doc.AcroFormTextField();
-          accountField2.fieldName = `accounts_client2_advisor${advisorIndex + 1}_${rowIndex}_col3`;
-          accountField2.Rect = [accountCol3X + 0.3, accountTableY + 0.3, accountColWidths[2] - 0.6, accountCellHeight - 0.6];
-          accountField2.fontSize = 7;
-          accountField2.textColor = [0, 0, 0];
-          accountField2.borderStyle = 'none';
-          doc.addField(accountField2);
-
-          const accountField3 = new doc.AcroFormTextField();
-          accountField3.fieldName = `accounts_client2_advisor${advisorIndex + 1}_${rowIndex}_col4`;
-          accountField3.Rect = [accountCol4X + 0.3, accountTableY + 0.3, accountColWidths[3] - 0.6, accountCellHeight - 0.6];
-          accountField3.fontSize = 7;
-          accountField3.textColor = [0, 0, 0];
-          accountField3.borderStyle = 'none';
-          doc.addField(accountField3);
-        }
-
-        accountTableY += accountCellHeight;
-      });
-
-      yPosition = accountTableY + 10;
+      renderAccountTable(`acct_c2solo_adv${advisorIndex + 1}`, [
+        { label: 'RRSP' }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
+        { label: 'RRIF' }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
+        { label: 'TFSA' }, { label: 'Non-Registered Account' }, { label: 'RESP' },
+        { label: 'RDSP' }, { label: 'FHSA' }, { label: 'Group RRSP:' }, { label: 'Deferred Profit-Sharing Plan:' },
+        { label: 'In Trust For:', editable: true }, { label: 'Joint with _____:', editable: true },
+        { label: 'Other:', editable: true }, { label: 'Other:', editable: true }, { label: 'Other:', editable: true },
+      ]);
+      yPosition += 6;
     }
   }
 
@@ -8858,7 +7380,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (needsFuneralReading) {
     if (yPosition > 200) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -8882,7 +7404,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     funeralText.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -8898,7 +7420,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (needsSecondaryWillReading) {
     if (yPosition > 120) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -8973,7 +7495,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     secondaryWillText.forEach(line => {
       if (yPosition > 280) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin, yPosition);
@@ -8997,7 +7519,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   }
 
   if (totalBankCount > 0) {
-    doc.addPage();
+    addPage();
     yPosition = 12;
     addSectionHeader('Your Financial Footprint');
 
@@ -9012,644 +7534,90 @@ You should explore this as an option with your legal and CFP® professionals bec
       const jointInstitutions = formData.jointInstitutionsData || [];
       for (let i = 0; i < jointCount; i++) {
         if (yPosition > 180) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
         const institutionName = jointInstitutions[i]?.name || `Institution ${i + 1}`;
-        doc.text(`${institutionName} - Joint Banking Account`, margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 6;
-
-        const bankRows = [
-          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Institution Name:' },
-          { label: 'Branch/Location:' },
-          { label: 'Account Type:' },
-          { label: 'Last 4 Digits of Account Number:' },
-          { label: 'Primary Contact Person:' },
-          { label: 'Online Banking Access:' },
-          { label: 'Other Details:' },
-        ];
-
-        const bankCellHeight = 6;
-        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let bankTableY = yPosition;
-
-        bankRows.forEach((row, rowIndex) => {
-          if (bankTableY > 275) {
-            doc.addPage();
-            bankTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const bankCol1X = margin;
-          const bankCol2X = margin + bankColWidths[0];
-          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
-
-          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
-          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
-          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
-            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
-            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `bank_joint_${i + 1}_${rowIndex}_col1`;
-              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
-              labelField.fontSize = 7;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
-            }
-
-            const bankField1 = new doc.AcroFormTextField();
-            bankField1.fieldName = `bank_joint_${i + 1}_${rowIndex}_col2`;
-            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
-            bankField1.fontSize = 7;
-            bankField1.textColor = [0, 0, 0];
-            bankField1.borderStyle = 'none';
-            doc.addField(bankField1);
-
-            const bankField2 = new doc.AcroFormTextField();
-            bankField2.fieldName = `bank_joint_${i + 1}_${rowIndex}_col3`;
-            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
-            bankField2.fontSize = 7;
-            bankField2.textColor = [0, 0, 0];
-            bankField2.borderStyle = 'none';
-            doc.addField(bankField2);
-          }
-
-          bankTableY += bankCellHeight;
-        });
-
-        yPosition = bankTableY + 10;
+        addSubsectionHeader(`${institutionName} - Joint Banking Account`);
+        renderBankTable(`bank_joint_${i + 1}`, jointInstitutions[i]);
       }
     } else if (bankingStructure === 'individual') {
       const client1Count = parseInt(formData.client1BankCount || '0');
       const client1Institutions = formData.client1InstitutionsData || [];
       for (let i = 0; i < client1Count; i++) {
         if (yPosition > 180) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
         const institutionName = client1Institutions[i]?.name || `Institution ${i + 1}`;
-        doc.text(`${client1Name} - ${institutionName}`, margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 6;
-
-        const bankRows = [
-          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Institution Name:' },
-          { label: 'Branch/Location:' },
-          { label: 'Account Type:' },
-          { label: 'Last 4 Digits of Account Number:' },
-          { label: 'Primary Contact Person:' },
-          { label: 'Online Banking Access:' },
-          { label: 'Other Details:' },
-        ];
-
-        const bankCellHeight = 6;
-        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let bankTableY = yPosition;
-
-        bankRows.forEach((row, rowIndex) => {
-          if (bankTableY > 275) {
-            doc.addPage();
-            bankTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const bankCol1X = margin;
-          const bankCol2X = margin + bankColWidths[0];
-          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
-
-          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
-          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
-          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
-            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
-            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `bank_client1_${i + 1}_${rowIndex}_col1`;
-              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
-              labelField.fontSize = 7;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
-            }
-
-            const bankField1 = new doc.AcroFormTextField();
-            bankField1.fieldName = `bank_client1_${i + 1}_${rowIndex}_col2`;
-            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
-            bankField1.fontSize = 7;
-            bankField1.textColor = [0, 0, 0];
-            bankField1.borderStyle = 'none';
-            doc.addField(bankField1);
-
-            const bankField2 = new doc.AcroFormTextField();
-            bankField2.fieldName = `bank_client1_${i + 1}_${rowIndex}_col3`;
-            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
-            bankField2.fontSize = 7;
-            bankField2.textColor = [0, 0, 0];
-            bankField2.borderStyle = 'none';
-            doc.addField(bankField2);
-          }
-
-          bankTableY += bankCellHeight;
-        });
-
-        yPosition = bankTableY + 10;
+        addSubsectionHeader(`${client1Name} - ${institutionName}`);
+        renderBankTable(`bank_client1_${i + 1}`, client1Institutions[i]);
       }
 
       const client2Count = parseInt(formData.client2BankCount || '0');
       const client2Institutions = formData.client2InstitutionsData || [];
       for (let i = 0; i < client2Count; i++) {
         if (yPosition > 180) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
-
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
         const institutionName = client2Institutions[i]?.name || `Institution ${i + 1}`;
-        doc.text(`${client2Name} - ${institutionName}`, margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 6;
-
-        const bankRows = [
-          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Institution Name:' },
-          { label: 'Branch/Location:' },
-          { label: 'Account Type:' },
-          { label: 'Last 4 Digits of Account Number:' },
-          { label: 'Primary Contact Person:' },
-          { label: 'Online Banking Access:' },
-          { label: 'Other Details:' },
-        ];
-
-        const bankCellHeight = 6;
-        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let bankTableY = yPosition;
-
-        bankRows.forEach((row, rowIndex) => {
-          if (bankTableY > 275) {
-            doc.addPage();
-            bankTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const bankCol1X = margin;
-          const bankCol2X = margin + bankColWidths[0];
-          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
-
-          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
-          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
-          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
-            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
-            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `bank_client2_${i + 1}_${rowIndex}_col1`;
-              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
-              labelField.fontSize = 7;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
-            }
-
-            const bankField1 = new doc.AcroFormTextField();
-            bankField1.fieldName = `bank_client2_${i + 1}_${rowIndex}_col2`;
-            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
-            bankField1.fontSize = 7;
-            bankField1.textColor = [0, 0, 0];
-            bankField1.borderStyle = 'none';
-            doc.addField(bankField1);
-
-            const bankField2 = new doc.AcroFormTextField();
-            bankField2.fieldName = `bank_client2_${i + 1}_${rowIndex}_col3`;
-            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
-            bankField2.fontSize = 7;
-            bankField2.textColor = [0, 0, 0];
-            bankField2.borderStyle = 'none';
-            doc.addField(bankField2);
-          }
-
-          bankTableY += bankCellHeight;
-        });
-
-        yPosition = bankTableY + 10;
+        addSubsectionHeader(`${client2Name} - ${institutionName}`);
+        renderBankTable(`bank_client2_${i + 1}`, client2Institutions[i]);
       }
     } else if (bankingStructure === 'mixed') {
       const jointCount = parseInt(formData.mixedJointBankCount || '0');
       const mixedJointInstitutions = formData.mixedJointInstitutionsData || [];
       for (let i = 0; i < jointCount; i++) {
         if (yPosition > 180) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
         const institutionName = mixedJointInstitutions[i]?.name || `Institution ${i + 1}`;
-        doc.text(`${institutionName} - Joint Banking Account`, margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 6;
-
-        const bankRows = [
-          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Institution Name:' },
-          { label: 'Branch/Location:' },
-          { label: 'Account Type:' },
-          { label: 'Last 4 Digits of Account Number:' },
-          { label: 'Primary Contact Person:' },
-          { label: 'Online Banking Access:' },
-          { label: 'Other Details:' },
-        ];
-
-        const bankCellHeight = 6;
-        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let bankTableY = yPosition;
-
-        bankRows.forEach((row, rowIndex) => {
-          if (bankTableY > 275) {
-            doc.addPage();
-            bankTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const bankCol1X = margin;
-          const bankCol2X = margin + bankColWidths[0];
-          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
-
-          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
-          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
-          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
-            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
-            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `bank_mixed_joint_${i + 1}_${rowIndex}_col1`;
-              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
-              labelField.fontSize = 7;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
-            }
-
-            const bankField1 = new doc.AcroFormTextField();
-            bankField1.fieldName = `bank_mixed_joint_${i + 1}_${rowIndex}_col2`;
-            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
-            bankField1.fontSize = 7;
-            bankField1.textColor = [0, 0, 0];
-            bankField1.borderStyle = 'none';
-            doc.addField(bankField1);
-
-            const bankField2 = new doc.AcroFormTextField();
-            bankField2.fieldName = `bank_mixed_joint_${i + 1}_${rowIndex}_col3`;
-            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
-            bankField2.fontSize = 7;
-            bankField2.textColor = [0, 0, 0];
-            bankField2.borderStyle = 'none';
-            doc.addField(bankField2);
-          }
-
-          bankTableY += bankCellHeight;
-        });
-
-        yPosition = bankTableY + 10;
+        addSubsectionHeader(`${institutionName} - Joint Banking Account`);
+        renderBankTable(`bank_mixed_joint_${i + 1}`, mixedJointInstitutions[i]);
       }
 
       const client1Count = parseInt(formData.mixedClient1BankCount || '0');
       const mixedClient1Institutions = formData.mixedClient1InstitutionsData || [];
       for (let i = 0; i < client1Count; i++) {
         if (yPosition > 180) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
         const institutionName = mixedClient1Institutions[i]?.name || `Institution ${i + 1}`;
-        doc.text(`${client1Name} - ${institutionName}`, margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 6;
-
-        const bankRows = [
-          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Institution Name:' },
-          { label: 'Branch/Location:' },
-          { label: 'Account Type:' },
-          { label: 'Last 4 Digits of Account Number:' },
-          { label: 'Primary Contact Person:' },
-          { label: 'Online Banking Access:' },
-          { label: 'Other Details:' },
-        ];
-
-        const bankCellHeight = 6;
-        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let bankTableY = yPosition;
-
-        bankRows.forEach((row, rowIndex) => {
-          if (bankTableY > 275) {
-            doc.addPage();
-            bankTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const bankCol1X = margin;
-          const bankCol2X = margin + bankColWidths[0];
-          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
-
-          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
-          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
-          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
-            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
-            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `bank_mixed_client1_${i + 1}_${rowIndex}_col1`;
-              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
-              labelField.fontSize = 7;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
-            }
-
-            const bankField1 = new doc.AcroFormTextField();
-            bankField1.fieldName = `bank_mixed_client1_${i + 1}_${rowIndex}_col2`;
-            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
-            bankField1.fontSize = 7;
-            bankField1.textColor = [0, 0, 0];
-            bankField1.borderStyle = 'none';
-            doc.addField(bankField1);
-
-            const bankField2 = new doc.AcroFormTextField();
-            bankField2.fieldName = `bank_mixed_client1_${i + 1}_${rowIndex}_col3`;
-            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
-            bankField2.fontSize = 7;
-            bankField2.textColor = [0, 0, 0];
-            bankField2.borderStyle = 'none';
-            doc.addField(bankField2);
-          }
-
-          bankTableY += bankCellHeight;
-        });
-
-        yPosition = bankTableY + 10;
+        addSubsectionHeader(`${client1Name} - ${institutionName}`);
+        renderBankTable(`bank_mixed_client1_${i + 1}`, mixedClient1Institutions[i]);
       }
 
       const client2Count = parseInt(formData.mixedClient2BankCount || '0');
       const mixedClient2Institutions = formData.mixedClient2InstitutionsData || [];
       for (let i = 0; i < client2Count; i++) {
         if (yPosition > 180) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
         const institutionName = mixedClient2Institutions[i]?.name || `Institution ${i + 1}`;
-        doc.text(`${client2Name} - ${institutionName}`, margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 6;
-
-        const bankRows = [
-          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Institution Name:' },
-          { label: 'Branch/Location:' },
-          { label: 'Account Type:' },
-          { label: 'Last 4 Digits of Account Number:' },
-          { label: 'Primary Contact Person:' },
-          { label: 'Online Banking Access:' },
-          { label: 'Other Details:' },
-        ];
-
-        const bankCellHeight = 6;
-        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let bankTableY = yPosition;
-
-        bankRows.forEach((row, rowIndex) => {
-          if (bankTableY > 275) {
-            doc.addPage();
-            bankTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const bankCol1X = margin;
-          const bankCol2X = margin + bankColWidths[0];
-          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
-
-          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
-          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
-          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
-            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
-            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `bank_mixed_client2_${i + 1}_${rowIndex}_col1`;
-              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
-              labelField.fontSize = 7;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
-            }
-
-            const bankField1 = new doc.AcroFormTextField();
-            bankField1.fieldName = `bank_mixed_client2_${i + 1}_${rowIndex}_col3`;
-            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
-            bankField1.fontSize = 7;
-            bankField1.textColor = [0, 0, 0];
-            bankField1.borderStyle = 'none';
-            doc.addField(bankField1);
-
-            const bankField2 = new doc.AcroFormTextField();
-            bankField2.fieldName = `bank_mixed_client2_${i + 1}_${rowIndex}_col3`;
-            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
-            bankField2.fontSize = 7;
-            bankField2.textColor = [0, 0, 0];
-            bankField2.borderStyle = 'none';
-            doc.addField(bankField2);
-          }
-
-          bankTableY += bankCellHeight;
-        });
-
-        yPosition = bankTableY + 10;
+        addSubsectionHeader(`${client2Name} - ${institutionName}`);
+        renderBankTable(`bank_mixed_client2_${i + 1}`, mixedClient2Institutions[i]);
       }
     } else if (!hasSpouse) {
       const bankCount = parseInt(formData.client1BankCount || '0');
       const client1Institutions = formData.client1InstitutionsData || [];
       for (let i = 0; i < bankCount; i++) {
         if (yPosition > 180) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
         const institutionName = client1Institutions[i]?.name || `Institution ${i + 1}`;
-        doc.text(`${institutionName} - Banking Account`, margin, yPosition);
-        doc.setFont(undefined, 'normal');
-        yPosition += 6;
-
-        const bankRows = [
-          { label: 'Detail:', col2: 'Information:', col3: 'Other Details:' },
-          { label: 'Institution Name:' },
-          { label: 'Branch/Location:' },
-          { label: 'Account Type:' },
-          { label: 'Last 4 Digits of Account Number:' },
-          { label: 'Primary Contact Person:' },
-          { label: 'Online Banking Access:' },
-          { label: 'Other Details:' },
-        ];
-
-        const bankCellHeight = 6;
-        const bankColWidths = [fieldWidth * 0.38, fieldWidth * 0.31, fieldWidth * 0.31];
-        let bankTableY = yPosition;
-
-        bankRows.forEach((row, rowIndex) => {
-          if (bankTableY > 275) {
-            doc.addPage();
-            bankTableY = 12;
-          }
-
-          doc.setDrawColor(0, 0, 0);
-          doc.setFillColor(rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255, rowIndex === 0 ? 200 : 255);
-          doc.setFont(undefined, rowIndex === 0 ? 'bold' : 'normal');
-          doc.setFontSize(8);
-
-          const bankCol1X = margin;
-          const bankCol2X = margin + bankColWidths[0];
-          const bankCol3X = margin + bankColWidths[0] + bankColWidths[1];
-
-          doc.rect(bankCol1X, bankTableY, bankColWidths[0], bankCellHeight);
-          doc.rect(bankCol2X, bankTableY, bankColWidths[1], bankCellHeight);
-          doc.rect(bankCol3X, bankTableY, bankColWidths[2], bankCellHeight);
-
-          if (rowIndex === 0) {
-            doc.text('Detail:', bankCol1X + 0.5, bankTableY + 4);
-            doc.text('Information:', bankCol2X + 0.5, bankTableY + 4);
-            doc.text('Other Details:', bankCol3X + 0.5, bankTableY + 4);
-          } else {
-            doc.setFont(undefined, 'normal');
-
-            if (row.label === 'Other Details:' || row.label === 'Other:' || row.label === 'Joint with _____:') {
-              const labelField = new doc.AcroFormTextField();
-              labelField.fieldName = `bank_single_${i + 1}_${rowIndex}_col1`;
-              labelField.Rect = [bankCol1X + 0.3, bankTableY + 0.3, bankColWidths[0] - 0.6, bankCellHeight - 0.6];
-              labelField.fontSize = 7;
-              labelField.textColor = [0, 0, 0];
-              labelField.borderStyle = 'none';
-              labelField.value = row.label;
-              doc.addField(labelField);
-            } else {
-              doc.text(row.label, bankCol1X + 0.5, bankTableY + 4);
-            }
-
-            const bankField1 = new doc.AcroFormTextField();
-            bankField1.fieldName = `bank_single_${i + 1}_${rowIndex}_col2`;
-            bankField1.Rect = [bankCol2X + 0.3, bankTableY + 0.3, bankColWidths[1] - 0.6, bankCellHeight - 0.6];
-            bankField1.fontSize = 7;
-            bankField1.textColor = [0, 0, 0];
-            bankField1.borderStyle = 'none';
-            doc.addField(bankField1);
-
-            const bankField2 = new doc.AcroFormTextField();
-            bankField2.fieldName = `bank_single_${i + 1}_${rowIndex}_col3`;
-            bankField2.Rect = [bankCol3X + 0.3, bankTableY + 0.3, bankColWidths[2] - 0.6, bankCellHeight - 0.6];
-            bankField2.fontSize = 7;
-            bankField2.textColor = [0, 0, 0];
-            bankField2.borderStyle = 'none';
-            doc.addField(bankField2);
-          }
-
-          bankTableY += bankCellHeight;
-        });
-
-        yPosition = bankTableY + 10;
+        addSubsectionHeader(`${institutionName} - Banking Account`);
+        renderBankTable(`bank_single_${i + 1}`, client1Institutions[i]);
       }
     }
 
@@ -9675,38 +7643,45 @@ You should explore this as an option with your legal and CFP® professionals bec
     const col4Width = fieldWidth * 0.25;
     let vehicleTableY = yPosition;
 
-    doc.setDrawColor(0, 0, 0);
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
     doc.setFillColor(255, 255, 255);
     doc.setFont(undefined, 'bold');
     doc.setFontSize(8);
+    doc.setTextColor(...colors.darkText);
 
-    doc.rect(margin, vehicleTableY, col1Width, vehicleCellHeight);
+    doc.rect(margin, vehicleTableY, col1Width, vehicleCellHeight, 'FD');
     doc.text('Item Description:', margin + 0.5, vehicleTableY + 4.5);
 
-    doc.rect(margin + col1Width, vehicleTableY, col2Width, vehicleCellHeight);
+    doc.rect(margin + col1Width, vehicleTableY, col2Width, vehicleCellHeight, 'FD');
     doc.text('Physical Location:', margin + col1Width + 0.5, vehicleTableY + 4.5);
 
-    doc.rect(margin + col1Width + col2Width, vehicleTableY, col3Width, vehicleCellHeight);
+    doc.rect(margin + col1Width + col2Width, vehicleTableY, col3Width, vehicleCellHeight, 'FD');
     doc.text('Ownership\n(Sole/Joint):', margin + col1Width + col2Width + 0.5, vehicleTableY + 3);
 
-    doc.rect(margin + col1Width + col2Width + col3Width, vehicleTableY, col4Width, vehicleCellHeight);
+    doc.rect(margin + col1Width + col2Width + col3Width, vehicleTableY, col4Width, vehicleCellHeight, 'FD');
     doc.text('Insurance Provider:', margin + col1Width + col2Width + col3Width + 0.5, vehicleTableY + 4.5);
 
     vehicleTableY += vehicleCellHeight;
 
     vehicleItems.forEach((item, index) => {
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
       doc.setFontSize(7);
+      doc.setTextColor(...colors.darkText);
 
-      doc.rect(margin, vehicleTableY, col1Width, vehicleCellHeight);
+      doc.rect(margin, vehicleTableY, col1Width, vehicleCellHeight, 'FD');
       const lines = item.split('\n');
       lines.forEach((line, lineIndex) => {
         doc.text(line, margin + 0.5, vehicleTableY + 3.5 + (lineIndex * 3));
       });
 
-      doc.rect(margin + col1Width, vehicleTableY, col2Width, vehicleCellHeight);
-      doc.rect(margin + col1Width + col2Width, vehicleTableY, col3Width, vehicleCellHeight);
-      doc.rect(margin + col1Width + col2Width + col3Width, vehicleTableY, col4Width, vehicleCellHeight);
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(margin + col1Width, vehicleTableY, col2Width, vehicleCellHeight, 'FD');
+      doc.rect(margin + col1Width + col2Width, vehicleTableY, col3Width, vehicleCellHeight, 'FD');
+      doc.rect(margin + col1Width + col2Width + col3Width, vehicleTableY, col4Width, vehicleCellHeight, 'FD');
 
       const field1 = new doc.AcroFormTextField();
       field1.fieldName = `vehicle_location_${index}`;
@@ -9757,40 +7732,44 @@ You should explore this as an option with your legal and CFP® professionals bec
     const hCol4Width = fieldWidth * 0.25;
     let heirloomTableY = yPosition;
 
-    doc.setDrawColor(0, 0, 0);
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
     doc.setFillColor(255, 255, 255);
     doc.setFont(undefined, 'bold');
     doc.setFontSize(8);
+    doc.setTextColor(...colors.darkText);
 
-    doc.rect(margin, heirloomTableY, hCol1Width, heirloomCellHeight);
+    doc.rect(margin, heirloomTableY, hCol1Width, heirloomCellHeight, 'FD');
     doc.text('Item (Art, Jewelry,\nCollectibles)', margin + 0.5, heirloomTableY + 3.5);
 
-    doc.rect(margin + hCol1Width, heirloomTableY, hCol2Width, heirloomCellHeight);
+    doc.rect(margin + hCol1Width, heirloomTableY, hCol2Width, heirloomCellHeight, 'FD');
     doc.text('Location (e.g., Safe,\nDisplay)', margin + hCol1Width + 0.5, heirloomTableY + 3.5);
 
-    doc.rect(margin + hCol1Width + hCol2Width, heirloomTableY, hCol3Width, heirloomCellHeight);
+    doc.rect(margin + hCol1Width + hCol2Width, heirloomTableY, hCol3Width, heirloomCellHeight, 'FD');
     doc.text('Estimated\nValue/Appraisal:', margin + hCol1Width + hCol2Width + 0.5, heirloomTableY + 3.5);
 
-    doc.rect(margin + hCol1Width + hCol2Width + hCol3Width, heirloomTableY, hCol4Width, heirloomCellHeight);
+    doc.rect(margin + hCol1Width + hCol2Width + hCol3Width, heirloomTableY, hCol4Width, heirloomCellHeight, 'FD');
     doc.text('Intended Beneficiary:', margin + hCol1Width + hCol2Width + hCol3Width + 0.5, heirloomTableY + 4.5);
 
     heirloomTableY += heirloomCellHeight;
 
     for (let i = 0; i < 12; i++) {
       if (heirloomTableY + heirloomCellHeight > pageHeight - 20) {
-        addPageFooter();
-        doc.addPage();
-        pageNumber++;
+        addPage();
         heirloomTableY = 25;
-        addPageHeader();
       }
 
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
 
-      doc.rect(margin, heirloomTableY, hCol1Width, heirloomCellHeight);
-      doc.rect(margin + hCol1Width, heirloomTableY, hCol2Width, heirloomCellHeight);
-      doc.rect(margin + hCol1Width + hCol2Width, heirloomTableY, hCol3Width, heirloomCellHeight);
-      doc.rect(margin + hCol1Width + hCol2Width + hCol3Width, heirloomTableY, hCol4Width, heirloomCellHeight);
+      doc.rect(margin, heirloomTableY, hCol1Width, heirloomCellHeight, 'FD');
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(margin + hCol1Width, heirloomTableY, hCol2Width, heirloomCellHeight, 'FD');
+      doc.rect(margin + hCol1Width + hCol2Width, heirloomTableY, hCol3Width, heirloomCellHeight, 'FD');
+      doc.rect(margin + hCol1Width + hCol2Width + hCol3Width, heirloomTableY, hCol4Width, heirloomCellHeight, 'FD');
 
       const hField1 = new doc.AcroFormTextField();
       hField1.fieldName = `heirloom_item_${i}`;
@@ -9857,35 +7836,42 @@ You should explore this as an option with your legal and CFP® professionals bec
     const sCol4Width = fieldWidth * 0.25;
     let storageTableY = yPosition;
 
-    doc.setDrawColor(0, 0, 0);
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
     doc.setFillColor(255, 255, 255);
     doc.setFont(undefined, 'bold');
     doc.setFontSize(8);
+    doc.setTextColor(...colors.darkText);
 
-    doc.rect(margin, storageTableY, sCol1Width, storageCellHeight);
+    doc.rect(margin, storageTableY, sCol1Width, storageCellHeight, 'FD');
     doc.text('Storage Type:', margin + 0.5, storageTableY + 4.5);
 
-    doc.rect(margin + sCol1Width, storageTableY, sCol2Width, storageCellHeight);
+    doc.rect(margin + sCol1Width, storageTableY, sCol2Width, storageCellHeight, 'FD');
     doc.text('Physical Location:', margin + sCol1Width + 0.5, storageTableY + 4.5);
 
-    doc.rect(margin + sCol1Width + sCol2Width, storageTableY, sCol3Width, storageCellHeight);
+    doc.rect(margin + sCol1Width + sCol2Width, storageTableY, sCol3Width, storageCellHeight, 'FD');
     doc.text('Key/Combination\nLocation:', margin + sCol1Width + sCol2Width + 0.5, storageTableY + 3.5);
 
-    doc.rect(margin + sCol1Width + sCol2Width + sCol3Width, storageTableY, sCol4Width, storageCellHeight);
+    doc.rect(margin + sCol1Width + sCol2Width + sCol3Width, storageTableY, sCol4Width, storageCellHeight, 'FD');
     doc.text('Box/Locker Number:', margin + sCol1Width + sCol2Width + sCol3Width + 0.5, storageTableY + 4.5);
 
     storageTableY += storageCellHeight;
 
     storageItems.forEach((item, index) => {
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
       doc.setFontSize(7);
+      doc.setTextColor(...colors.darkText);
 
-      doc.rect(margin, storageTableY, sCol1Width, storageCellHeight);
+      doc.rect(margin, storageTableY, sCol1Width, storageCellHeight, 'FD');
       doc.text(item, margin + 0.5, storageTableY + 4.5);
 
-      doc.rect(margin + sCol1Width, storageTableY, sCol2Width, storageCellHeight);
-      doc.rect(margin + sCol1Width + sCol2Width, storageTableY, sCol3Width, storageCellHeight);
-      doc.rect(margin + sCol1Width + sCol2Width + sCol3Width, storageTableY, sCol4Width, storageCellHeight);
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(margin + sCol1Width, storageTableY, sCol2Width, storageCellHeight, 'FD');
+      doc.rect(margin + sCol1Width + sCol2Width, storageTableY, sCol3Width, storageCellHeight, 'FD');
+      doc.rect(margin + sCol1Width + sCol2Width + sCol3Width, storageTableY, sCol4Width, storageCellHeight, 'FD');
 
       const sField1 = new doc.AcroFormTextField();
       sField1.fieldName = `storage_location_${index}`;
@@ -9948,15 +7934,11 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.setTextColor(...colors.darkText);
 
       if (yPosition > 180) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text('Property Overview', margin, yPosition);
-      yPosition += 5;
-      doc.setFont(undefined, 'normal');
+      addSubsectionHeader('Property Overview');
 
       const tableStartY = yPosition;
       const rowHeight = 8;
@@ -9996,45 +7978,44 @@ You should explore this as an option with your legal and CFP® professionals bec
       let currentY = tableStartY;
       overviewRows.forEach(([label, value], rowIdx) => {
         if (currentY > 260) {
-          doc.addPage();
+          addPage();
           currentY = 12;
         }
 
-        doc.setDrawColor(...colors.tableBorder);
-        doc.setFillColor(...colors.tableHeader);
-        doc.rect(margin, currentY, col1Width, rowHeight, 'FD');
-        doc.setTextColor(...colors.darkText);
         doc.setFontSize(8);
-        doc.setFont(undefined, 'bold');
-        doc.text(label, margin + 2, currentY + 5);
+        doc.setFont(undefined, 'normal');
+        const labelLines = doc.splitTextToSize(label, col1Width - 3);
+        const dynH = Math.max(rowHeight, labelLines.length * 5 + 3);
+
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin, currentY, col1Width, dynH, 'FD');
+        doc.setTextColor(...colors.darkText);
+        doc.text(labelLines, margin + 2, currentY + 5);
 
         doc.setFillColor(255, 255, 255);
-        doc.rect(margin + col1Width, currentY, col2Width, rowHeight, 'FD');
-        doc.setFont(undefined, 'normal');
+        doc.rect(margin + col1Width, currentY, col2Width, dynH, 'FD');
         const fldPropOverview = new doc.AcroFormTextField();
         fldPropOverview.fieldName = `prop${propNum}_overview_${rowIdx}`;
-        fldPropOverview.Rect = [margin + col1Width + 0.5, currentY + 0.5, col2Width - 1, rowHeight - 1];
+        fldPropOverview.Rect = [margin + col1Width + 0.5, currentY + 0.5, col2Width - 1, dynH - 1];
         fldPropOverview.fontSize = 8;
         fldPropOverview.textColor = colors.darkText;
         fldPropOverview.borderStyle = 'none';
         fldPropOverview.value = value || '';
         doc.addField(fldPropOverview);
 
-        currentY += rowHeight;
+        currentY += dynH;
       });
 
       yPosition = currentY + 8;
 
       if (yPosition > 180) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text('Address', margin, yPosition);
-      yPosition += 5;
-      doc.setFont(undefined, 'normal');
+      addSubsectionHeader('Address');
 
       const addressLines = [];
       if (address) addressLines.push(address);
@@ -10048,7 +8029,7 @@ You should explore this as an option with your legal and CFP® professionals bec
         const addressStartY = yPosition;
         addressLines.forEach((line, addrIdx) => {
           if (yPosition > 260) {
-            doc.addPage();
+            addPage();
             yPosition = 12;
           }
           doc.setDrawColor(...colors.tableBorder);
@@ -10070,15 +8051,11 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 8;
 
       if (yPosition > 180) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text('Records & Tax Information', margin, yPosition);
-      yPosition += 5;
-      doc.setFont(undefined, 'normal');
+      addSubsectionHeader('Records & Tax Information');
 
       doc.setFontSize(8);
       doc.setTextColor(...colors.mediumGray);
@@ -10100,14 +8077,20 @@ You should explore this as an option with your legal and CFP® professionals bec
       const recordCol2 = 25;
       const recordCol3 = pageWidth - margin * 2 - recordCol1 - recordCol2;
 
-      doc.setFillColor(...colors.tableHeader);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
       doc.rect(margin, yPosition, recordCol1, rowHeight, 'FD');
       doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(...colors.darkText);
       doc.text('Record Type', margin + 2, yPosition + 5);
 
+      doc.setFillColor(255, 255, 255);
       doc.rect(margin + recordCol1, yPosition, recordCol2, rowHeight, 'FD');
       doc.text('Available', margin + recordCol1 + 2, yPosition + 5);
 
+      doc.setFillColor(255, 255, 255);
       doc.rect(margin + recordCol1 + recordCol2, yPosition, recordCol3, rowHeight, 'FD');
       doc.text('Storage Location', margin + recordCol1 + recordCol2 + 2, yPosition + 5);
       doc.setFont(undefined, 'normal');
@@ -10116,20 +8099,27 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       recordTypes.forEach(({ key, label }) => {
         if (yPosition > 260) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
         const hasRecord = formData[`property${propNum}${key}`] === 'yes';
         const location = formData[`property${propNum}${key}Location`] || '';
 
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
         doc.setFillColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...colors.darkText);
         doc.rect(margin, yPosition, recordCol1, rowHeight, 'FD');
         doc.text(label, margin + 2, yPosition + 5);
 
+        doc.setFillColor(255, 255, 255);
         doc.rect(margin + recordCol1, yPosition, recordCol2, rowHeight, 'FD');
         doc.text(hasRecord ? 'Yes' : 'No', margin + recordCol1 + 2, yPosition + 5);
 
+        doc.setFillColor(...colors.tableHeader);
         doc.rect(margin + recordCol1 + recordCol2, yPosition, recordCol3, rowHeight, 'FD');
         {
           const fldRecLoc = new doc.AcroFormTextField();
@@ -10149,38 +8139,37 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       if (isRental === 'yes') {
         if (yPosition > 180) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
-        doc.text('Rental Information', margin, yPosition);
-        yPosition += 5;
-        doc.setFont(undefined, 'normal');
+        addSubsectionHeader('Rental Information');
 
         const rentalStartY = yPosition;
-        doc.setFillColor(...colors.tableHeader);
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.setFillColor(255, 255, 255);
         doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
         doc.setFontSize(8);
-        doc.setFont(undefined, 'bold');
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...colors.darkText);
         doc.text('Rental Property', margin + 2, yPosition + 5);
 
         doc.setFillColor(255, 255, 255);
         doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
-        doc.setFont(undefined, 'normal');
         doc.text('Yes', margin + col1Width + 2, yPosition + 5);
         yPosition += rowHeight;
 
         if (leaseStorage) {
-          doc.setFillColor(...colors.tableHeader);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
           doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
-          doc.setFont(undefined, 'bold');
+          doc.setFont(undefined, 'normal');
           doc.text('Lease Storage Location', margin + 2, yPosition + 5);
 
-          doc.setFillColor(255, 255, 255);
+          doc.setFillColor(...colors.tableHeader);
           doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
-          doc.setFont(undefined, 'normal');
           const fldLease = new doc.AcroFormTextField();
           fldLease.fieldName = `prop${propNum}_lease_storage`;
           fldLease.Rect = [margin + col1Width + 0.5, yPosition + 0.5, col2Width - 1, rowHeight - 1];
@@ -10197,15 +8186,11 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       if (lawyerName || lawyerFirm || lawyerPhone || lawyerEmail) {
         if (yPosition > 180) {
-          doc.addPage();
+          addPage();
           yPosition = 12;
         }
 
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
-        doc.text('Legal Contact', margin, yPosition);
-        yPosition += 5;
-        doc.setFont(undefined, 'normal');
+        addSubsectionHeader('Legal Contact');
 
         const lawyerRows = [];
         if (lawyerName) lawyerRows.push(['Lawyer Name', lawyerName]);
@@ -10215,19 +8200,21 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         lawyerRows.forEach(([label, value], lawyerRowIdx) => {
           if (yPosition > 260) {
-            doc.addPage();
+            addPage();
             yPosition = 12;
           }
 
-          doc.setFillColor(...colors.tableHeader);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
           doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
           doc.setFontSize(8);
-          doc.setFont(undefined, 'bold');
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
           doc.text(label, margin + 2, yPosition + 5);
 
-          doc.setFillColor(255, 255, 255);
+          doc.setFillColor(...colors.tableHeader);
           doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
-          doc.setFont(undefined, 'normal');
           const fldLawyer = new doc.AcroFormTextField();
           fldLawyer.fieldName = `prop${propNum}_lawyer_${lawyerRowIdx}`;
           fldLawyer.Rect = [margin + col1Width + 0.5, yPosition + 0.5, col2Width - 1, rowHeight - 1];
@@ -10244,15 +8231,11 @@ You should explore this as an option with your legal and CFP® professionals bec
       }
 
       if (yPosition > 220) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text('Additional Notes or Missing Information', margin, yPosition);
-      yPosition += 5;
-      doc.setFont(undefined, 'normal');
+      addSubsectionHeader('Additional Notes or Missing Information');
 
       const notesBoxHeight = 30;
       doc.setDrawColor(...colors.tableBorder);
@@ -10271,7 +8254,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += notesBoxHeight + 15;
 
       if (propNum < propertyCount && yPosition > 220) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
     }
@@ -10325,15 +8308,11 @@ You should explore this as an option with your legal and CFP® professionals bec
       }
 
       if (yPosition > 200) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text(group.heading, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
+      addSubsectionHeader(group.heading);
 
       const debtsToProcess = group.debts;
       let debtStartIndex = 0;
@@ -10343,7 +8322,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         if (debtStartIndex > 0) {
           if (yPosition > 150) {
-            doc.addPage();
+            addPage();
             yPosition = 12;
           }
           doc.setFontSize(11);
@@ -10361,29 +8340,34 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         debtRows.forEach((rowLabel, rowIndex) => {
           if (debtTableY > 275) {
-            doc.addPage();
+            addPage();
             debtTableY = 12;
           }
 
-          doc.setDrawColor(0, 0, 0);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
           doc.setFillColor(255, 255, 255);
           doc.setFont(undefined, 'normal');
           doc.setFontSize(8);
+          doc.setTextColor(...colors.darkText);
 
           const labelColX = margin;
-          doc.rect(labelColX, debtTableY, labelColWidth, cellHeight);
+          doc.rect(labelColX, debtTableY, labelColWidth, cellHeight, 'FD');
           doc.text(rowLabel, labelColX + 0.5, debtTableY + 4.5);
 
           for (let i = 0; i < numDebts; i++) {
             const debt = debtsInThisChart[i];
             const valueColX = margin + labelColWidth + (i * valueColWidth);
-            doc.rect(valueColX, debtTableY, valueColWidth, cellHeight);
 
             if (rowIndex === 1 && debt.debtType) {
+              doc.setFillColor(255, 255, 255);
+              doc.rect(valueColX, debtTableY, valueColWidth, cellHeight, 'FD');
               doc.setFontSize(7);
               doc.text(debt.debtType, valueColX + 0.5, debtTableY + 4.5);
               doc.setFontSize(8);
             } else {
+              doc.setFillColor(...colors.tableHeader);
+              doc.rect(valueColX, debtTableY, valueColWidth, cellHeight, 'FD');
               const debtField = new doc.AcroFormTextField();
               const globalDebtIndex = formData.debtsData.indexOf(debt);
               debtField.fieldName = `debt_${globalDebtIndex + 1}_row_${rowIndex}_col`;
@@ -10401,18 +8385,21 @@ You should explore this as an option with your legal and CFP® professionals bec
         debtsInThisChart.forEach((debt, i) => {
           if (debt.hasOtherOnLoan === 'yes') {
             if (debtTableY > 270) {
-              doc.addPage();
+              addPage();
               debtTableY = 12;
             }
 
             const valueColX = margin + labelColWidth + (i * valueColWidth);
 
-            doc.setFillColor(240, 240, 240);
-            doc.rect(margin, debtTableY, labelColWidth, cellHeight);
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
             doc.setFillColor(255, 255, 255);
+            doc.setTextColor(...colors.darkText);
+            doc.rect(margin, debtTableY, labelColWidth, cellHeight, 'FD');
             doc.text('Other on Loan:', margin + 0.5, debtTableY + 4.5);
 
-            doc.rect(valueColX, debtTableY, valueColWidth, cellHeight);
+            doc.setFillColor(...colors.tableHeader);
+            doc.rect(valueColX, debtTableY, valueColWidth, cellHeight, 'FD');
             const otherNameField = new doc.AcroFormTextField();
             const globalDebtIndex = formData.debtsData.indexOf(debt);
             otherNameField.fieldName = `debt_${globalDebtIndex + 1}_other_name`;
@@ -10436,16 +8423,19 @@ You should explore this as an option with your legal and CFP® professionals bec
             const valueColX = margin + labelColWidth + (i * valueColWidth);
 
             if (debtTableY > 270) {
-              doc.addPage();
+              addPage();
               debtTableY = 12;
             }
 
-            doc.setFillColor(240, 240, 240);
-            doc.rect(margin, debtTableY, labelColWidth, cellHeight);
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
             doc.setFillColor(255, 255, 255);
+            doc.setTextColor(...colors.darkText);
+            doc.rect(margin, debtTableY, labelColWidth, cellHeight, 'FD');
             doc.text('Other Phone:', margin + 0.5, debtTableY + 4.5);
 
-            doc.rect(valueColX, debtTableY, valueColWidth, cellHeight);
+            doc.setFillColor(...colors.tableHeader);
+            doc.rect(valueColX, debtTableY, valueColWidth, cellHeight, 'FD');
             const otherPhoneField = new doc.AcroFormTextField();
             const globalDebtIndex = formData.debtsData.indexOf(debt);
             otherPhoneField.fieldName = `debt_${globalDebtIndex + 1}_other_phone`;
@@ -10466,28 +8456,34 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         debtsInThisChart.forEach((debt, i) => {
           if (debtTableY > 270) {
-            doc.addPage();
+            addPage();
             debtTableY = 12;
           }
 
           const valueColX = margin + labelColWidth + (i * valueColWidth);
 
-          doc.setFillColor(240, 240, 240);
-          doc.rect(margin, debtTableY, labelColWidth, cellHeight);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
           doc.setFillColor(255, 255, 255);
+          doc.setTextColor(...colors.darkText);
+          doc.rect(margin, debtTableY, labelColWidth, cellHeight, 'FD');
           doc.text('Secured/Unsecured:', margin + 0.5, debtTableY + 4.5);
 
-          doc.rect(valueColX, debtTableY, valueColWidth, cellHeight);
-
           if (debt.isSecured === 'no') {
+            doc.setFillColor(255, 255, 255);
+            doc.rect(valueColX, debtTableY, valueColWidth, cellHeight, 'FD');
             doc.setFontSize(7);
             doc.text('Unsecured Loan', valueColX + 0.5, debtTableY + 4.5);
             doc.setFontSize(8);
           } else if (debt.isSecured === 'yes') {
+            doc.setFillColor(255, 255, 255);
+            doc.rect(valueColX, debtTableY, valueColWidth, cellHeight, 'FD');
             doc.setFontSize(7);
             doc.text('Secured', valueColX + 0.5, debtTableY + 4.5);
             doc.setFontSize(8);
           } else {
+            doc.setFillColor(...colors.tableHeader);
+            doc.rect(valueColX, debtTableY, valueColWidth, cellHeight, 'FD');
             const securedField = new doc.AcroFormTextField();
             const globalDebtIndex = formData.debtsData.indexOf(debt);
             securedField.fieldName = `debt_${globalDebtIndex + 1}_secured_status`;
@@ -10504,18 +8500,21 @@ You should explore this as an option with your legal and CFP® professionals bec
         debtsInThisChart.forEach((debt, i) => {
           if (debt.isSecured === 'yes') {
             if (debtTableY > 270) {
-              doc.addPage();
+              addPage();
               debtTableY = 12;
             }
 
             const valueColX = margin + labelColWidth + (i * valueColWidth);
 
-            doc.setFillColor(240, 240, 240);
-            doc.rect(margin, debtTableY, labelColWidth, cellHeight);
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
             doc.setFillColor(255, 255, 255);
+            doc.setTextColor(...colors.darkText);
+            doc.rect(margin, debtTableY, labelColWidth, cellHeight, 'FD');
             doc.text('Secured By:', margin + 0.5, debtTableY + 4.5);
 
-            doc.rect(valueColX, debtTableY, valueColWidth, cellHeight);
+            doc.setFillColor(...colors.tableHeader);
+            doc.rect(valueColX, debtTableY, valueColWidth, cellHeight, 'FD');
             const securedByField = new doc.AcroFormTextField();
             const globalDebtIndex = formData.debtsData.indexOf(debt);
             securedByField.fieldName = `debt_${globalDebtIndex + 1}_secured_by`;
@@ -10556,20 +8555,22 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     let ccTableY = yPosition;
 
-    doc.setDrawColor(0, 0, 0);
-    doc.setFillColor(200, 200, 200);
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
     doc.setFont(undefined, 'bold');
     doc.setFontSize(8);
+    doc.setTextColor(...colors.darkText);
 
     const col1X = margin;
     const col2X = margin + colWidths[0];
     const col3X = margin + colWidths[0] + colWidths[1];
     const col4X = margin + colWidths[0] + colWidths[1] + colWidths[2];
 
-    doc.rect(col1X, ccTableY, colWidths[0], cellHeight);
-    doc.rect(col2X, ccTableY, colWidths[1], cellHeight);
-    doc.rect(col3X, ccTableY, colWidths[2], cellHeight);
-    doc.rect(col4X, ccTableY, colWidths[3], cellHeight);
+    doc.rect(col1X, ccTableY, colWidths[0], cellHeight, 'FD');
+    doc.rect(col2X, ccTableY, colWidths[1], cellHeight, 'FD');
+    doc.rect(col3X, ccTableY, colWidths[2], cellHeight, 'FD');
+    doc.rect(col4X, ccTableY, colWidths[3], cellHeight, 'FD');
 
     doc.text('Credit Card Company:', col1X + 0.5, ccTableY + 4);
     doc.text('Last 4 Digits of the Card:', col2X + 0.5, ccTableY + 4);
@@ -10580,19 +8581,21 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     formData.creditCardsData.forEach((card, index) => {
       if (ccTableY > 275) {
-        doc.addPage();
+        addPage();
         ccTableY = 12;
       }
 
-      doc.setDrawColor(0, 0, 0);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
       doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
       doc.setFontSize(8);
 
-      doc.rect(col1X, ccTableY, colWidths[0], cellHeight);
-      doc.rect(col2X, ccTableY, colWidths[1], cellHeight);
-      doc.rect(col3X, ccTableY, colWidths[2], cellHeight);
-      doc.rect(col4X, ccTableY, colWidths[3], cellHeight);
+      doc.rect(col1X, ccTableY, colWidths[0], cellHeight, 'FD');
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(col2X, ccTableY, colWidths[1], cellHeight, 'FD');
+      doc.rect(col3X, ccTableY, colWidths[2], cellHeight, 'FD');
+      doc.rect(col4X, ccTableY, colWidths[3], cellHeight, 'FD');
 
       const ccField1 = new doc.AcroFormTextField();
       ccField1.fieldName = `credit_card_${index + 1}_company`;
@@ -10645,17 +8648,13 @@ You should explore this as an option with your legal and CFP® professionals bec
   } else if (formData.client1HasCreditCards === 'no') {
     yPosition += 12;
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
     const client1Name = formData.fullName || 'Client 1';
 
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('Credit Cards', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+    addSectionHeader('Credit Cards');
 
     doc.setFontSize(10);
     doc.text(`${client1Name} indicated that they have no credit cards.`, margin, yPosition);
@@ -10666,17 +8665,13 @@ You should explore this as an option with your legal and CFP® professionals bec
     if (formData.client2HasCreditCards === 'yes' && formData.client2CreditCardsData && formData.client2CreditCardsData.length > 0) {
       yPosition += 12;
       if (yPosition > 240) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
       const client2Name = formData.spouseName || 'Client 2';
 
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${client2Name}'s Credit Cards`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 10;
+      addSectionHeader(`${client2Name}'s Credit Cards`);
 
       const cellHeight = 6;
       const colWidths = [
@@ -10688,20 +8683,22 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       let ccTableY = yPosition;
 
-      doc.setDrawColor(0, 0, 0);
-      doc.setFillColor(200, 200, 200);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
       doc.setFontSize(8);
+      doc.setTextColor(...colors.darkText);
 
       const col1X = margin;
       const col2X = margin + colWidths[0];
       const col3X = margin + colWidths[0] + colWidths[1];
       const col4X = margin + colWidths[0] + colWidths[1] + colWidths[2];
 
-      doc.rect(col1X, ccTableY, colWidths[0], cellHeight);
-      doc.rect(col2X, ccTableY, colWidths[1], cellHeight);
-      doc.rect(col3X, ccTableY, colWidths[2], cellHeight);
-      doc.rect(col4X, ccTableY, colWidths[3], cellHeight);
+      doc.rect(col1X, ccTableY, colWidths[0], cellHeight, 'FD');
+      doc.rect(col2X, ccTableY, colWidths[1], cellHeight, 'FD');
+      doc.rect(col3X, ccTableY, colWidths[2], cellHeight, 'FD');
+      doc.rect(col4X, ccTableY, colWidths[3], cellHeight, 'FD');
 
       doc.text('Credit Card Company:', col1X + 0.5, ccTableY + 4);
       doc.text('Last 4 Digits of the Card:', col2X + 0.5, ccTableY + 4);
@@ -10712,19 +8709,21 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       formData.client2CreditCardsData.forEach((card, index) => {
         if (ccTableY > 275) {
-          doc.addPage();
+          addPage();
           ccTableY = 12;
         }
 
-        doc.setDrawColor(0, 0, 0);
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
         doc.setFillColor(255, 255, 255);
         doc.setFont(undefined, 'normal');
         doc.setFontSize(8);
 
-        doc.rect(col1X, ccTableY, colWidths[0], cellHeight);
-        doc.rect(col2X, ccTableY, colWidths[1], cellHeight);
-        doc.rect(col3X, ccTableY, colWidths[2], cellHeight);
-        doc.rect(col4X, ccTableY, colWidths[3], cellHeight);
+        doc.rect(col1X, ccTableY, colWidths[0], cellHeight, 'FD');
+        doc.setFillColor(...colors.tableHeader);
+        doc.rect(col2X, ccTableY, colWidths[1], cellHeight, 'FD');
+        doc.rect(col3X, ccTableY, colWidths[2], cellHeight, 'FD');
+        doc.rect(col4X, ccTableY, colWidths[3], cellHeight, 'FD');
 
         const ccField1 = new doc.AcroFormTextField();
         ccField1.fieldName = `client2_credit_card_${index + 1}_company`;
@@ -10777,17 +8776,13 @@ You should explore this as an option with your legal and CFP® professionals bec
     } else if (formData.client2HasCreditCards === 'no') {
       yPosition += 12;
       if (yPosition > 270) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
       const client2Name = formData.spouseName || 'Client 2';
 
-      doc.setFontSize(12);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${client2Name}'s Credit Cards`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 8;
+      addSectionHeader(`${client2Name}'s Credit Cards`);
 
       doc.setFontSize(10);
       doc.text(`${client2Name} indicated that they have no credit cards.`, margin, yPosition);
@@ -10803,7 +8798,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     if (policyCount <= 0) return;
 
     if (yPosition > 200) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -10836,33 +8831,39 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     insuranceRows.forEach((rowLabel, rowIndex) => {
       if (insuranceTableY > 275) {
-        doc.addPage();
+        addPage();
         insuranceTableY = 12;
       }
 
-      doc.setDrawColor(0, 0, 0);
-      doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
       doc.setFontSize(8);
+      const labelLines = doc.splitTextToSize(rowLabel, labelColWidth - 2);
+      const dynH = Math.max(cellHeight, labelLines.length * 5 + 3);
+
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.setTextColor(...colors.darkText);
 
       const labelColX = margin;
-      doc.rect(labelColX, insuranceTableY, labelColWidth, cellHeight);
-      doc.text(rowLabel, labelColX + 0.5, insuranceTableY + 4.5);
+      doc.rect(labelColX, insuranceTableY, labelColWidth, dynH, 'FD');
+      doc.text(labelLines, labelColX + 0.5, insuranceTableY + 4.5);
 
       for (let i = 0; i < policyCount; i++) {
         const valueColX = margin + labelColWidth + (i * valueColWidth);
-        doc.rect(valueColX, insuranceTableY, valueColWidth, cellHeight);
+        doc.setFillColor(...colors.tableHeader);
+        doc.rect(valueColX, insuranceTableY, valueColWidth, dynH, 'FD');
 
         const insuranceField = new doc.AcroFormTextField();
         insuranceField.fieldName = `${policyType.replace(/\s+/g, '_').toLowerCase()}_${clientName.replace(/\s+/g, '_').toLowerCase()}_${i + 1}_row_${rowIndex}`;
-        insuranceField.Rect = [valueColX + 0.3, insuranceTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+        insuranceField.Rect = [valueColX + 0.3, insuranceTableY + 0.3, valueColWidth - 0.6, dynH - 0.6];
         insuranceField.fontSize = 7;
         insuranceField.textColor = [0, 0, 0];
         insuranceField.borderStyle = 'none';
         doc.addField(insuranceField);
       }
 
-      insuranceTableY += cellHeight;
+      insuranceTableY += dynH;
     });
 
     yPosition = insuranceTableY + 15;
@@ -10870,7 +8871,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   const generateWorkBenefitsChart = (clientName: string, hasWorkBenefits: string, isFirst: boolean = false) => {
     if (yPosition > 240) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -10907,31 +8908,37 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     workBenefitsRows.forEach((rowLabel, rowIndex) => {
       if (workBenefitsTableY > 275) {
-        doc.addPage();
+        addPage();
         workBenefitsTableY = 12;
       }
 
-      doc.setDrawColor(0, 0, 0);
-      doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
       doc.setFontSize(8);
+      const labelLines = doc.splitTextToSize(rowLabel, labelColWidth - 2);
+      const dynH = Math.max(cellHeight, labelLines.length * 5 + 3);
+
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.setTextColor(...colors.darkText);
 
       const labelColX = margin;
-      doc.rect(labelColX, workBenefitsTableY, labelColWidth, cellHeight);
-      doc.text(rowLabel, labelColX + 0.5, workBenefitsTableY + 4.5);
+      doc.rect(labelColX, workBenefitsTableY, labelColWidth, dynH, 'FD');
+      doc.text(labelLines, labelColX + 0.5, workBenefitsTableY + 4.5);
 
       const valueColX = margin + labelColWidth;
-      doc.rect(valueColX, workBenefitsTableY, valueColWidth, cellHeight);
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(valueColX, workBenefitsTableY, valueColWidth, dynH, 'FD');
 
       const workBenefitsField = new doc.AcroFormTextField();
       workBenefitsField.fieldName = `work_benefits_${clientName.replace(/\s+/g, '_').toLowerCase()}_row_${rowIndex}`;
-      workBenefitsField.Rect = [valueColX + 0.3, workBenefitsTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+      workBenefitsField.Rect = [valueColX + 0.3, workBenefitsTableY + 0.3, valueColWidth - 0.6, dynH - 0.6];
       workBenefitsField.fontSize = 7;
       workBenefitsField.textColor = [0, 0, 0];
       workBenefitsField.borderStyle = 'none';
       doc.addField(workBenefitsField);
 
-      workBenefitsTableY += cellHeight;
+      workBenefitsTableY += dynH;
     });
 
     yPosition = workBenefitsTableY + 15;
@@ -10964,7 +8971,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (hasAnyLifeInsurance) {
     if (yPosition > 240) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -11000,7 +9007,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (hasAnyDisabilityInsurance) {
     if (yPosition > 240) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -11036,7 +9043,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (hasAnyCriticalIllness) {
     if (yPosition > 240) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -11068,7 +9075,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   const generatePropertyInsuranceChart = (propertyLabel: string, documentLocation?: string) => {
     if (yPosition > 230) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -11094,37 +9101,42 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     propertyRows.forEach((rowLabel, rowIndex) => {
       if (propertyTableY > 275) {
-        doc.addPage();
+        addPage();
         propertyTableY = 12;
       }
 
-      doc.setDrawColor(0, 0, 0);
-      doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
       doc.setFontSize(8);
+      const labelLines = doc.splitTextToSize(rowLabel, labelColWidth - 2);
+      const dynH = Math.max(cellHeight, labelLines.length * 5 + 3);
+
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.setTextColor(...colors.darkText);
 
       const labelColX = margin;
-      doc.rect(labelColX, propertyTableY, labelColWidth, cellHeight);
-      doc.text(rowLabel, labelColX + 0.5, propertyTableY + 4.5);
+      doc.rect(labelColX, propertyTableY, labelColWidth, dynH, 'FD');
+      doc.text(labelLines, labelColX + 0.5, propertyTableY + 4.5);
 
       const valueColX = margin + labelColWidth;
-      doc.rect(valueColX, propertyTableY, valueColWidth, cellHeight);
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(valueColX, propertyTableY, valueColWidth, dynH, 'FD');
 
       const propertyField = new doc.AcroFormTextField();
       propertyField.fieldName = `property_${propertyLabel.replace(/\s+/g, '_').toLowerCase()}_row_${rowIndex}`;
-      propertyField.Rect = [valueColX + 0.3, propertyTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+      propertyField.Rect = [valueColX + 0.3, propertyTableY + 0.3, valueColWidth - 0.6, dynH - 0.6];
       propertyField.fontSize = 7;
       propertyField.textColor = [0, 0, 0];
       propertyField.borderStyle = 'none';
 
-      // Pre-populate Document Location field if provided
       if (rowLabel === 'Document Location:' && documentLocation) {
         propertyField.value = documentLocation;
       }
 
       doc.addField(propertyField);
 
-      propertyTableY += cellHeight;
+      propertyTableY += dynH;
     });
 
     yPosition = propertyTableY + 15;
@@ -11132,7 +9144,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (formData.hasHomeInsurance) {
     if (yPosition > 240) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -11167,7 +9179,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   const generateVehicleInsuranceChart = (vehicleLabel: string, clientName: string, vehicleDescription?: string, docLocation?: string) => {
     if (yPosition > 230) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -11200,32 +9212,38 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     vehicleRows.forEach((rowLabel, rowIndex) => {
       if (vehicleTableY > 275) {
-        doc.addPage();
+        addPage();
         vehicleTableY = 12;
       }
 
-      doc.setDrawColor(0, 0, 0);
-      doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'normal');
       doc.setFontSize(8);
+      const labelLines = doc.splitTextToSize(rowLabel, labelColWidth - 2);
+      const dynH = Math.max(cellHeight, labelLines.length * 5 + 3);
+
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.setTextColor(...colors.darkText);
 
       const labelColX = margin;
-      doc.rect(labelColX, vehicleTableY, labelColWidth, cellHeight);
-      doc.text(rowLabel, labelColX + 0.5, vehicleTableY + 4.5);
+      doc.rect(labelColX, vehicleTableY, labelColWidth, dynH, 'FD');
+      doc.text(labelLines, labelColX + 0.5, vehicleTableY + 4.5);
 
       const valueColX = margin + labelColWidth;
-      doc.rect(valueColX, vehicleTableY, valueColWidth, cellHeight);
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(valueColX, vehicleTableY, valueColWidth, dynH, 'FD');
 
       const vehicleField = new doc.AcroFormTextField();
       vehicleField.fieldName = `vehicle_${vehicleLabel.replace(/\s+/g, '_').toLowerCase()}_${clientName.replace(/\s+/g, '_').toLowerCase()}_row_${rowIndex}`;
-      vehicleField.Rect = [valueColX + 0.3, vehicleTableY + 0.3, valueColWidth - 0.6, cellHeight - 0.6];
+      vehicleField.Rect = [valueColX + 0.3, vehicleTableY + 0.3, valueColWidth - 0.6, dynH - 0.6];
       vehicleField.fontSize = 7;
       vehicleField.textColor = [0, 0, 0];
       vehicleField.borderStyle = 'none';
       vehicleField.value = rowValues[rowIndex];
       doc.addField(vehicleField);
 
-      vehicleTableY += cellHeight;
+      vehicleTableY += dynH;
     });
 
     yPosition = vehicleTableY + 15;
@@ -11233,7 +9251,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (formData.client1HasVehicleInsurance === 'yes' || formData.client2HasVehicleInsurance === 'yes') {
     if (yPosition > 240) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -11292,7 +9310,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   if (formData.client1HasVehicleInsurance === 'no' &&
       (formData.client2HasVehicleInsurance === 'no' || !formData.client2HasVehicleInsurance)) {
     if (yPosition > 240) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -11314,7 +9332,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   // Your Virtual Footprint Section
   if (yPosition > 240) {
-    doc.addPage();
+    addPage();
     yPosition = 12;
   }
 
@@ -11333,7 +9351,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   const splitIntro1 = doc.splitTextToSize(introText1, fieldWidth);
   splitIntro1.forEach((line: string) => {
     if (yPosition > 275) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text(line, margin, yPosition);
@@ -11345,7 +9363,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   const splitIntro2 = doc.splitTextToSize(introText2, fieldWidth);
   splitIntro2.forEach((line: string) => {
     if (yPosition > 275) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text(line, margin, yPosition);
@@ -11357,7 +9375,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   const splitIntro3 = doc.splitTextToSize(introText3, fieldWidth);
   splitIntro3.forEach((line: string) => {
     if (yPosition > 275) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text(line, margin, yPosition);
@@ -11367,7 +9385,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   // Warning - Social Media Scams
   if (yPosition > 240) {
-    doc.addPage();
+    addPage();
     yPosition = 12;
   }
 
@@ -11380,7 +9398,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   const splitWarning = doc.splitTextToSize(warningText, fieldWidth);
   splitWarning.forEach((line: string) => {
     if (yPosition > 275) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text(line, margin, yPosition);
@@ -11401,14 +9419,14 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   scamItems.forEach((item) => {
     if (yPosition > 270) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     const bulletText = `•  ${item}`;
     const splitBullet = doc.splitTextToSize(bulletText, fieldWidth - 3);
     splitBullet.forEach((line: string, idx: number) => {
       if (yPosition > 275) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
       doc.text(line, margin + (idx === 0 ? 0 : 3), yPosition);
@@ -11421,7 +9439,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   const splitClosing = doc.splitTextToSize(closingText, fieldWidth);
   splitClosing.forEach((line: string) => {
     if (yPosition > 275) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text(line, margin, yPosition);
@@ -11431,7 +9449,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   // Key things to Prepare
   if (yPosition > 240) {
-    doc.addPage();
+    addPage();
     yPosition = 12;
   }
 
@@ -11450,7 +9468,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   const splitHardware = doc.splitTextToSize(hardwareText, fieldWidth);
   splitHardware.forEach((line: string) => {
     if (yPosition > 275) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text(line, margin, yPosition);
@@ -11459,7 +9477,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   yPosition += 5;
 
   if (yPosition > 220) {
-    doc.addPage();
+    addPage();
     yPosition = 12;
   }
 
@@ -11478,14 +9496,16 @@ You should explore this as an option with your legal and CFP® professionals bec
   let hardwareTableY = yPosition;
 
   // Headers
-  doc.setDrawColor(0, 0, 0);
+  doc.setDrawColor(...colors.tableBorder);
+  doc.setLineWidth(0.3);
   doc.setFillColor(255, 255, 255);
   doc.setFont(undefined, 'bold');
   doc.setFontSize(7);
+  doc.setTextColor(...colors.darkText);
 
   hardwareHeaders.forEach((header, colIndex) => {
     const colX = margin + (colIndex * hardwareColWidth);
-    doc.rect(colX, hardwareTableY, hardwareColWidth, hardwareCellHeight);
+    doc.rect(colX, hardwareTableY, hardwareColWidth, hardwareCellHeight, 'FD');
     doc.text(header, colX + 0.5, hardwareTableY + 4.5);
   });
   hardwareTableY += hardwareCellHeight;
@@ -11496,12 +9516,15 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   hardwareRows.forEach((rowLabel, rowIndex) => {
     if (hardwareTableY > 270) {
-      doc.addPage();
+      addPage();
       hardwareTableY = 12;
     }
 
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
     // First column (label)
-    doc.rect(margin, hardwareTableY, hardwareColWidth, hardwareCellHeight);
+    doc.rect(margin, hardwareTableY, hardwareColWidth, hardwareCellHeight, 'FD');
 
     // For "Other:" row, make it fillable
     if (rowLabel === 'Other:') {
@@ -11520,7 +9543,8 @@ You should explore this as an option with your legal and CFP® professionals bec
     // Other columns (fillable fields)
     for (let colIndex = 1; colIndex < 4; colIndex++) {
       const colX = margin + (colIndex * hardwareColWidth);
-      doc.rect(colX, hardwareTableY, hardwareColWidth, hardwareCellHeight);
+      doc.setFillColor(...colors.tableHeader);
+      doc.rect(colX, hardwareTableY, hardwareColWidth, hardwareCellHeight, 'FD');
 
       const field = new doc.AcroFormTextField();
       field.fieldName = `hardware_row_${rowIndex}_col_${colIndex}`;
@@ -11538,7 +9562,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   // Email and Social Media Presence Section
   if (yPosition > 240) {
-    doc.addPage();
+    addPage();
     yPosition = 12;
   }
 
@@ -11552,7 +9576,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   const splitSocial = doc.splitTextToSize(socialText, fieldWidth);
   splitSocial.forEach((line: string) => {
     if (yPosition > 275) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text(line, margin, yPosition);
@@ -11561,7 +9585,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   yPosition += 5;
 
   if (yPosition > 200) {
-    doc.addPage();
+    addPage();
     yPosition = 12;
   }
 
@@ -11602,7 +9626,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   socialRows.forEach((rowLabel, rowIndex) => {
     if (socialTableY > 270) {
-      doc.addPage();
+      addPage();
       socialTableY = 12;
     }
 
@@ -11644,7 +9668,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   // Financial and Critical Digital Files Section
   if (yPosition > 240) {
-    doc.addPage();
+    addPage();
     yPosition = 12;
   }
 
@@ -11658,7 +9682,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   const splitFinancial = doc.splitTextToSize(financialText, fieldWidth);
   splitFinancial.forEach((line: string) => {
     if (yPosition > 275) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
     doc.text(line, margin, yPosition);
@@ -11747,7 +9771,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (hasClient1Pensions || hasClient2Pensions) {
     if (yPosition > 200) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -11770,19 +9794,21 @@ You should explore this as an option with your legal and CFP® professionals bec
       const pensionCol3Width = fieldWidth * 0.40;
       let pensionTableY = yPosition;
 
-      doc.setDrawColor(0, 0, 0);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
       doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
       doc.setFontSize(8);
+      doc.setTextColor(...colors.darkText);
 
       // Header row
-      doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight);
+      doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight, 'FD');
       doc.text('Employer Name:', margin + 0.5, pensionTableY + 4.5);
 
-      doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight);
+      doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight, 'FD');
       doc.text('Employment Status:', margin + pensionCol1Width + 0.5, pensionTableY + 4.5);
 
-      doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight);
+      doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight, 'FD');
       doc.text('Location of Pension Information:', margin + pensionCol1Width + pensionCol2Width + 0.5, pensionTableY + 4.5);
 
       pensionTableY += pensionCellHeight;
@@ -11793,8 +9819,11 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         const pension = client1PensionsData[i];
 
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.setFillColor(255, 255, 255);
         // Employer Name column
-        doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight);
+        doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight, 'FD');
         const employerField = new doc.AcroFormTextField();
         employerField.fieldName = `client1_pension_employer_${i}`;
         employerField.Rect = [margin + 0.3, pensionTableY + 0.3, pensionCol1Width - 0.6, pensionCellHeight - 0.6];
@@ -11805,7 +9834,8 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.addField(employerField);
 
         // Employment Status column
-        doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight);
+        doc.setFillColor(...colors.tableHeader);
+        doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight, 'FD');
         const statusField = new doc.AcroFormTextField();
         statusField.fieldName = `client1_pension_status_${i}`;
         statusField.Rect = [margin + pensionCol1Width + 0.3, pensionTableY + 0.3, pensionCol2Width - 0.6, pensionCellHeight - 0.6];
@@ -11816,7 +9846,7 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.addField(statusField);
 
         // Document Location column
-        doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight);
+        doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight, 'FD');
         const locationField = new doc.AcroFormTextField();
         locationField.fieldName = `client1_pension_location_${i}`;
         locationField.Rect = [margin + pensionCol1Width + pensionCol2Width + 0.3, pensionTableY + 0.3, pensionCol3Width - 0.6, pensionCellHeight - 0.6];
@@ -11848,19 +9878,21 @@ You should explore this as an option with your legal and CFP® professionals bec
       const pensionCol3Width = fieldWidth * 0.40;
       let pensionTableY = yPosition;
 
-      doc.setDrawColor(0, 0, 0);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
       doc.setFillColor(255, 255, 255);
       doc.setFont(undefined, 'bold');
       doc.setFontSize(8);
+      doc.setTextColor(...colors.darkText);
 
       // Header row
-      doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight);
+      doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight, 'FD');
       doc.text('Employer Name:', margin + 0.5, pensionTableY + 4.5);
 
-      doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight);
+      doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight, 'FD');
       doc.text('Employment Status:', margin + pensionCol1Width + 0.5, pensionTableY + 4.5);
 
-      doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight);
+      doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight, 'FD');
       doc.text('Location of Pension Information:', margin + pensionCol1Width + pensionCol2Width + 0.5, pensionTableY + 4.5);
 
       pensionTableY += pensionCellHeight;
@@ -11871,8 +9903,11 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         const pension = client2PensionsData[i];
 
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.setFillColor(255, 255, 255);
         // Employer Name column
-        doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight);
+        doc.rect(margin, pensionTableY, pensionCol1Width, pensionCellHeight, 'FD');
         const employerField = new doc.AcroFormTextField();
         employerField.fieldName = `client2_pension_employer_${i}`;
         employerField.Rect = [margin + 0.3, pensionTableY + 0.3, pensionCol1Width - 0.6, pensionCellHeight - 0.6];
@@ -11883,7 +9918,8 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.addField(employerField);
 
         // Employment Status column
-        doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight);
+        doc.setFillColor(...colors.tableHeader);
+        doc.rect(margin + pensionCol1Width, pensionTableY, pensionCol2Width, pensionCellHeight, 'FD');
         const statusField = new doc.AcroFormTextField();
         statusField.fieldName = `client2_pension_status_${i}`;
         statusField.Rect = [margin + pensionCol1Width + 0.3, pensionTableY + 0.3, pensionCol2Width - 0.6, pensionCellHeight - 0.6];
@@ -11894,7 +9930,7 @@ You should explore this as an option with your legal and CFP® professionals bec
         doc.addField(statusField);
 
         // Document Location column
-        doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight);
+        doc.rect(margin + pensionCol1Width + pensionCol2Width, pensionTableY, pensionCol3Width, pensionCellHeight, 'FD');
         const locationField = new doc.AcroFormTextField();
         locationField.fieldName = `client2_pension_location_${i}`;
         locationField.Rect = [margin + pensionCol1Width + pensionCol2Width + 0.3, pensionTableY + 0.3, pensionCol3Width - 0.6, pensionCellHeight - 0.6];
@@ -11917,7 +9953,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (hasClient1ESOP || hasClient2ESOP) {
     if (yPosition > 200) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -12016,7 +10052,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   }
 
   // Add Supporting Document Summary section
-  doc.addPage();
+  addPage();
   yPosition = 12;
   addSectionHeader('Supporting Document Summary');
 
@@ -12269,9 +10305,11 @@ You should explore this as an option with your legal and CFP® professionals bec
     const docTableValueWidth = fieldWidth * 0.333;
 
     // Header row
-    doc.setDrawColor(...colors.borderGray);
-    doc.setFillColor(200, 200, 200);
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
     doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight, 'FD');
+    doc.setFillColor(255, 255, 255);
     doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight, 'FD');
 
     doc.setFontSize(9);
@@ -12286,13 +10324,16 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     client1Documents.forEach((docItem: any) => {
       if (yPosition > 270) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
-      doc.setDrawColor(...colors.borderGray);
-      doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight);
-      doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight, 'FD');
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight, 'FD');
 
       if (docItem.needsNameField) {
         // Create fillable text with "with _______" format
@@ -12331,7 +10372,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   // Create Client 2 Document Summary Table
   if (client2Documents.length > 0) {
     if (yPosition > 200) {
-      doc.addPage();
+      addPage();
       yPosition = 12;
     }
 
@@ -12346,9 +10387,11 @@ You should explore this as an option with your legal and CFP® professionals bec
     const docTableValueWidth = fieldWidth * 0.333;
 
     // Header row
-    doc.setDrawColor(...colors.borderGray);
-    doc.setFillColor(200, 200, 200);
+    doc.setDrawColor(...colors.tableBorder);
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255);
     doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight, 'FD');
+    doc.setFillColor(255, 255, 255);
     doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight, 'FD');
 
     doc.setFontSize(9);
@@ -12363,13 +10406,16 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     client2Documents.forEach((docItem: any) => {
       if (yPosition > 270) {
-        doc.addPage();
+        addPage();
         yPosition = 12;
       }
 
-      doc.setDrawColor(...colors.borderGray);
-      doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight);
-      doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight);
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, yPosition, docTableLabelWidth, docTableCellHeight, 'FD');
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin + docTableLabelWidth, yPosition, docTableValueWidth, docTableCellHeight, 'FD');
 
       if (docItem.needsNameField) {
         // Create fillable text with "with _______" format
@@ -12406,9 +10452,8 @@ You should explore this as an option with your legal and CFP® professionals bec
   }
 
   // Add new page for additional information
-  doc.addPage();
+  addPage();
   yPosition = 30;
-  addPageHeader();
 
   // Add question text
   doc.setFontSize(11);
@@ -12436,9 +10481,6 @@ You should explore this as an option with your legal and CFP® professionals bec
   additionalInfoField.fontSize = 10;
   additionalInfoField.textColor = colors.darkText;
   doc.addField(additionalInfoField);
-
-  // Add footer to final page
-  addPageFooter();
 
   const fileName = `estate-planning-${formData.fullName?.replace(/\s+/g, '-').toLowerCase() || 'form'}.pdf`;
   doc.save(fileName);

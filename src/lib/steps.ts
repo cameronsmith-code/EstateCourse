@@ -225,8 +225,11 @@ export const STEPS: Step[] = [
       {
         key: 'hasMarriageContract',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Does ${name} have a marriage contract (prenuptial agreement)?`;
+          const c1Full = answers.get(1)?.fullName as string || 'Client 1';
+          const c2Full = answers.get(1)?.spouseName as string || 'Client 2';
+          const c1 = c1Full.split(' ')[0];
+          const c2 = c2Full.split(' ')[0];
+          return `Does ${c1} and ${c2} have a marriage contract (prenuptial agreement)?`;
         },
         type: 'radio',
         options: [

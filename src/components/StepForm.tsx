@@ -7246,7 +7246,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 12 && (() => {
+          {step.id === 13 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';

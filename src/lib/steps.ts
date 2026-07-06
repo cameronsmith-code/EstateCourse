@@ -2545,6 +2545,81 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'property1OtherOwnerPhone',
+        label: 'Other owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property1Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property1OtherOwnerPercent',
+        label: 'Other owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property1Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property1HasAdditionalOwners',
+        label: 'Are there any additional owners?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property1Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property1AdditionalOwnerName',
+        label: 'Additional owner\'s full name:',
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property1Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && ownersArray.includes('other') && formData.property1HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property1AdditionalOwnerPhone',
+        label: 'Additional owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property1Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && ownersArray.includes('other') && formData.property1HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property1AdditionalOwnerPercent',
+        label: 'Additional owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property1Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 1 && ownersArray.includes('other') && formData.property1HasAdditionalOwners === 'yes';
+        },
+      },
+      {
         key: 'property1OwnershipStructure',
         label: 'Describe the ownership structure:',
         type: 'radio',
@@ -2818,6 +2893,81 @@ export const STEPS: Step[] = [
           const owners = formData.property2Owners;
           const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
           return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property2OtherOwnerPhone',
+        label: 'Other owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property2Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property2OtherOwnerPercent',
+        label: 'Other owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property2Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property2HasAdditionalOwners',
+        label: 'Are there any additional owners?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property2Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property2AdditionalOwnerName',
+        label: 'Additional owner\'s full name:',
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property2Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && ownersArray.includes('other') && formData.property2HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property2AdditionalOwnerPhone',
+        label: 'Additional owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property2Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && ownersArray.includes('other') && formData.property2HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property2AdditionalOwnerPercent',
+        label: 'Additional owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property2Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 2 && ownersArray.includes('other') && formData.property2HasAdditionalOwners === 'yes';
         },
       },
       {
@@ -3096,6 +3246,81 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'property3OtherOwnerPhone',
+        label: 'Other owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property3Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property3OtherOwnerPercent',
+        label: 'Other owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property3Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property3HasAdditionalOwners',
+        label: 'Are there any additional owners?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property3Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property3AdditionalOwnerName',
+        label: 'Additional owner\'s full name:',
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property3Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && ownersArray.includes('other') && formData.property3HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property3AdditionalOwnerPhone',
+        label: 'Additional owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property3Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && ownersArray.includes('other') && formData.property3HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property3AdditionalOwnerPercent',
+        label: 'Additional owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property3Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 3 && ownersArray.includes('other') && formData.property3HasAdditionalOwners === 'yes';
+        },
+      },
+      {
         key: 'property3OwnershipStructure',
         label: 'Describe the ownership structure:',
         type: 'radio',
@@ -3368,6 +3593,81 @@ export const STEPS: Step[] = [
           const owners = formData.property4Owners;
           const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
           return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property4OtherOwnerPhone',
+        label: 'Other owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property4Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property4OtherOwnerPercent',
+        label: 'Other owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property4Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property4HasAdditionalOwners',
+        label: 'Are there any additional owners?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property4Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property4AdditionalOwnerName',
+        label: 'Additional owner\'s full name:',
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property4Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && ownersArray.includes('other') && formData.property4HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property4AdditionalOwnerPhone',
+        label: 'Additional owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property4Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && ownersArray.includes('other') && formData.property4HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property4AdditionalOwnerPercent',
+        label: 'Additional owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property4Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 4 && ownersArray.includes('other') && formData.property4HasAdditionalOwners === 'yes';
         },
       },
       {
@@ -3646,6 +3946,81 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'property5OtherOwnerPhone',
+        label: 'Other owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property5Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property5OtherOwnerPercent',
+        label: 'Other owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property5Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property5HasAdditionalOwners',
+        label: 'Are there any additional owners?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property5Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property5AdditionalOwnerName',
+        label: 'Additional owner\'s full name:',
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property5Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && ownersArray.includes('other') && formData.property5HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property5AdditionalOwnerPhone',
+        label: 'Additional owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property5Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && ownersArray.includes('other') && formData.property5HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property5AdditionalOwnerPercent',
+        label: 'Additional owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property5Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 5 && ownersArray.includes('other') && formData.property5HasAdditionalOwners === 'yes';
+        },
+      },
+      {
         key: 'property5OwnershipStructure',
         label: 'Describe the ownership structure:',
         type: 'radio',
@@ -3918,6 +4293,81 @@ export const STEPS: Step[] = [
           const owners = formData.property6Owners;
           const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
           return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property6OtherOwnerPhone',
+        label: 'Other owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property6Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property6OtherOwnerPercent',
+        label: 'Other owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property6Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property6HasAdditionalOwners',
+        label: 'Are there any additional owners?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property6Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property6AdditionalOwnerName',
+        label: 'Additional owner\'s full name:',
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property6Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && ownersArray.includes('other') && formData.property6HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property6AdditionalOwnerPhone',
+        label: 'Additional owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property6Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && ownersArray.includes('other') && formData.property6HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property6AdditionalOwnerPercent',
+        label: 'Additional owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property6Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 6 && ownersArray.includes('other') && formData.property6HasAdditionalOwners === 'yes';
         },
       },
       {
@@ -4196,6 +4646,81 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'property7OtherOwnerPhone',
+        label: 'Other owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property7Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property7OtherOwnerPercent',
+        label: 'Other owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property7Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property7HasAdditionalOwners',
+        label: 'Are there any additional owners?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property7Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property7AdditionalOwnerName',
+        label: 'Additional owner\'s full name:',
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property7Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && ownersArray.includes('other') && formData.property7HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property7AdditionalOwnerPhone',
+        label: 'Additional owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property7Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && ownersArray.includes('other') && formData.property7HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property7AdditionalOwnerPercent',
+        label: 'Additional owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property7Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 7 && ownersArray.includes('other') && formData.property7HasAdditionalOwners === 'yes';
+        },
+      },
+      {
         key: 'property7OwnershipStructure',
         label: 'Describe the ownership structure:',
         type: 'radio',
@@ -4471,6 +4996,81 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'property8OtherOwnerPhone',
+        label: 'Other owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property8Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property8OtherOwnerPercent',
+        label: 'Other owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property8Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property8HasAdditionalOwners',
+        label: 'Are there any additional owners?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property8Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property8AdditionalOwnerName',
+        label: 'Additional owner\'s full name:',
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property8Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && ownersArray.includes('other') && formData.property8HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property8AdditionalOwnerPhone',
+        label: 'Additional owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property8Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && ownersArray.includes('other') && formData.property8HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property8AdditionalOwnerPercent',
+        label: 'Additional owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property8Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 8 && ownersArray.includes('other') && formData.property8HasAdditionalOwners === 'yes';
+        },
+      },
+      {
         key: 'property8OwnershipStructure',
         label: 'Describe the ownership structure:',
         type: 'radio',
@@ -4743,6 +5343,81 @@ export const STEPS: Step[] = [
           const owners = formData.property9Owners;
           const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
           return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property9OtherOwnerPhone',
+        label: 'Other owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property9Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property9OtherOwnerPercent',
+        label: 'Other owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property9Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property9HasAdditionalOwners',
+        label: 'Are there any additional owners?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property9Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && ownersArray.includes('other');
+        },
+      },
+      {
+        key: 'property9AdditionalOwnerName',
+        label: 'Additional owner\'s full name:',
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property9Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && ownersArray.includes('other') && formData.property9HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property9AdditionalOwnerPhone',
+        label: 'Additional owner\'s phone number:',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property9Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && ownersArray.includes('other') && formData.property9HasAdditionalOwners === 'yes';
+        },
+      },
+      {
+        key: 'property9AdditionalOwnerPercent',
+        label: 'Additional owner\'s ownership percentage:',
+        type: 'text',
+        placeholder: 'e.g., 33%',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const owners = formData.property9Owners;
+          const ownersArray = Array.isArray(owners) ? owners : (typeof owners === 'string' ? owners.split(',') : []);
+          return formData.hasRealEstate === 'yes' && parseInt(formData.propertyCount || '0') >= 9 && ownersArray.includes('other') && formData.property9HasAdditionalOwners === 'yes';
         },
       },
       {

@@ -7625,36 +7625,258 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 9 && (
-            <>
-              {step.questions.map((question) => {
-                if (question.condition) {
-                  const allFormData = Object.fromEntries(
-                    Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
-                      Object.entries(stepAnswers)
-                    )
-                  );
-                  if (!question.condition(allFormData)) {
-                    return null;
-                  }
+          {step.id === 9 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
+            const maritalStatus = basicAnswers['maritalStatus'] as string;
+            const hasSpouseStep9 = maritalStatus === 'married' || maritalStatus === 'common_law';
+            const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
+
+            // Keys suppressed because we render them in the custom ownership block
+            const suppressedOwnershipKeys = new Set([
+              ...Array.from({ length: 9 }, (_, i) => [
+                `property${i + 1}Owners`,
+                `property${i + 1}OtherOwner`,
+                `property${i + 1}OtherOwnerPhone`,
+                `property${i + 1}OtherOwnerPercent`,
+                `property${i + 1}HasAdditionalOwners`,
+                `property${i + 1}AdditionalOwnerName`,
+                `property${i + 1}AdditionalOwnerPhone`,
+                `property${i + 1}AdditionalOwnerPercent`,
+              ]).flat(),
+            ]);
+
+            type OtherOwner = { name: string; phone: string; email: string; hasMore: 'yes' | 'no' | '' };
+
+            const renderPropertyOwnershipBlock = (n: number) => {
+              const ownersKey = `property${n}Owners`;
+              const otherOwnersKey = `property${n}OtherOwnersData`;
+              const percentsKey = `property${n}OwnerPercents`;
+
+              const rawOwners = answers[ownersKey];
+              const selectedOwners: string[] = Array.isArray(rawOwners)
+                ? rawOwners
+                : typeof rawOwners === 'string' && rawOwners
+                  ? rawOwners.split(',')
+                  : [];
+
+              const otherOwners: OtherOwner[] = (() => {
+                try { return JSON.parse(answers[otherOwnersKey] as string || '[]'); } catch { return []; }
+              })();
+
+              const percents: Record<string, string> = (() => {
+                try { return JSON.parse(answers[percentsKey] as string || '{}'); } catch { return {}; }
+              })();
+
+              const toggleOwner = (val: string) => {
+                const updated = selectedOwners.includes(val)
+                  ? selectedOwners.filter(o => o !== val)
+                  : [...selectedOwners, val];
+                onAnswerChange(ownersKey, updated);
+                if (!updated.includes('other')) {
+                  onAnswerChange(otherOwnersKey, '[]');
+                  const updatedPercents = { ...percents };
+                  Object.keys(updatedPercents).filter(k => k.startsWith('other_')).forEach(k => delete updatedPercents[k]);
+                  onAnswerChange(percentsKey, JSON.stringify(updatedPercents));
                 }
+              };
 
-                const displayLabel = typeof question.label === 'function'
-                  ? question.label(allAnswers || new Map())
-                  : question.label;
+              const updateOtherOwner = (idx: number, field: keyof OtherOwner, val: string) => {
+                const updated = [...otherOwners];
+                if (!updated[idx]) updated[idx] = { name: '', phone: '', email: '', hasMore: '' };
+                updated[idx] = { ...updated[idx], [field]: val };
+                if (field === 'hasMore' && val === 'yes' && !updated[idx + 1]) {
+                  updated.push({ name: '', phone: '', email: '', hasMore: '' });
+                }
+                if (field === 'hasMore' && val === 'no') {
+                  // remove any entries after this one
+                  updated.splice(idx + 1);
+                }
+                onAnswerChange(otherOwnersKey, JSON.stringify(updated));
+              };
 
-                return (
-                  <FormField
-                    key={question.key}
-                    question={{ ...question, label: displayLabel }}
-                    value={answers[question.key]}
-                    onChange={(value) => onAnswerChange(question.key, value)}
-                    answers={allAnswers}
-                  />
-                );
-              })}
-            </>
-          )}
+              const updatePercent = (ownerKey: string, val: string) => {
+                onAnswerChange(percentsKey, JSON.stringify({ ...percents, [ownerKey]: val }));
+              };
+
+              const ownerCheckboxOptions = [
+                { value: 'client1', label: client1Name },
+                ...(hasSpouseStep9 ? [{ value: 'client2', label: client2Name }] : []),
+                { value: 'other', label: 'Other' },
+              ];
+
+              // Build all owner entries for % section
+              const allOwnerEntries: { key: string; label: string }[] = [];
+              if (selectedOwners.includes('client1')) allOwnerEntries.push({ key: 'client1', label: client1Name });
+              if (selectedOwners.includes('client2')) allOwnerEntries.push({ key: 'client2', label: client2Name });
+              otherOwners.forEach((o, idx) => {
+                if (o.name) allOwnerEntries.push({ key: `other_${idx}`, label: o.name });
+                else allOwnerEntries.push({ key: `other_${idx}`, label: `Other Owner ${idx + 1}` });
+              });
+
+              const totalPercent = allOwnerEntries.reduce((sum, e) => sum + (parseFloat(percents[e.key] || '0') || 0), 0);
+              const percentValid = Math.abs(totalPercent - 100) < 0.01;
+
+              // Determine if other owner chain is complete (last entry has hasMore === 'no' or no entries)
+              const otherChainComplete = !selectedOwners.includes('other') ||
+                (otherOwners.length > 0 && otherOwners[otherOwners.length - 1]?.hasMore === 'no');
+
+              return (
+                <div className="space-y-4">
+                  {/* Owner checkboxes */}
+                  <div>
+                    <label className="block text-base font-semibold text-white mb-3">
+                      Who owns the property?
+                    </label>
+                    <div className="space-y-2">
+                      {ownerCheckboxOptions.map(opt => (
+                        <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedOwners.includes(opt.value)}
+                            onChange={() => toggleOwner(opt.value)}
+                            className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                          />
+                          <span className="text-gray-200">{opt.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Other owner entries */}
+                  {selectedOwners.includes('other') && (
+                    <div className="space-y-4">
+                      {(otherOwners.length === 0 ? [{ name: '', phone: '', email: '', hasMore: '' as const }] : otherOwners).map((owner, idx) => (
+                        <div key={idx} className="pl-4 border-l-2 border-blue-500 space-y-3">
+                          <p className="text-sm font-semibold text-blue-300">Other Owner {idx + 1}</p>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">Name:</label>
+                            <input
+                              type="text"
+                              value={owner.name}
+                              onChange={(e) => updateOtherOwner(idx, 'name', e.target.value)}
+                              placeholder="Full name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">Phone Number:</label>
+                            <input
+                              type="text"
+                              value={owner.phone}
+                              onChange={(e) => updateOtherOwner(idx, 'phone', e.target.value)}
+                              placeholder="Phone number"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">Email Address:</label>
+                            <input
+                              type="email"
+                              value={owner.email}
+                              onChange={(e) => updateOtherOwner(idx, 'email', e.target.value)}
+                              placeholder="Email address"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          {(owner.hasMore === '' || owner.hasMore === 'yes') && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">Are there any additional owners?</label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input type="radio" name={`prop${n}-owner${idx}-more`} value="yes" checked={owner.hasMore === 'yes'} onChange={() => updateOtherOwner(idx, 'hasMore', 'yes')} className="mr-2" />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input type="radio" name={`prop${n}-owner${idx}-more`} value="no" checked={owner.hasMore === 'no'} onChange={() => updateOtherOwner(idx, 'hasMore', 'no')} className="mr-2" />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Ownership % section — shown once owners are determined */}
+                  {allOwnerEntries.length > 0 && otherChainComplete && (
+                    <div className="mt-4 space-y-3">
+                      <div className="pb-1 border-b border-gray-500">
+                        <label className="block text-base font-semibold text-white">Ownership %</label>
+                        <p className="text-xs text-gray-400 mt-1">All percentages must add up to 100%</p>
+                      </div>
+                      {allOwnerEntries.map(entry => (
+                        <div key={entry.key} className="flex items-center gap-3">
+                          <span className="text-gray-300 flex-1 text-sm">{entry.label}</span>
+                          <div className="flex items-center gap-1 w-28">
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={percents[entry.key] || ''}
+                              onChange={(e) => updatePercent(entry.key, e.target.value)}
+                              placeholder="0"
+                              className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+                            />
+                            <span className="text-gray-400">%</span>
+                          </div>
+                        </div>
+                      ))}
+                      <div className={`flex justify-between items-center pt-2 border-t border-gray-600 text-sm font-medium ${percentValid ? 'text-green-400' : totalPercent > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                        <span>Total</span>
+                        <span>{totalPercent.toFixed(totalPercent % 1 === 0 ? 0 : 1)}%{totalPercent > 0 && !percentValid ? ' (must equal 100%)' : ''}{percentValid ? ' ✓' : ''}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            };
+
+            return (
+              <>
+                {step.questions.map((question) => {
+                  if (question.condition) {
+                    const allFormData = Object.fromEntries(
+                      Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                        Object.entries(stepAnswers)
+                      )
+                    );
+                    if (!question.condition(allFormData)) {
+                      return null;
+                    }
+                  }
+
+                  if (suppressedOwnershipKeys.has(question.key)) return null;
+
+                  // For OwnersLabel questions, render our custom ownership block
+                  const ownerLabelMatch = question.key.match(/^property(\d+)OwnersLabel$/);
+                  if (ownerLabelMatch) {
+                    const n = parseInt(ownerLabelMatch[1]);
+                    return (
+                      <div key={question.key}>
+                        {renderPropertyOwnershipBlock(n)}
+                      </div>
+                    );
+                  }
+
+                  const displayLabel = typeof question.label === 'function'
+                    ? question.label(allAnswers || new Map())
+                    : question.label;
+
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={{ ...question, label: displayLabel }}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                      answers={allAnswers}
+                    />
+                  );
+                })}
+              </>
+            );
+          })()}
 
           {step.id === 10 && (
             <>

@@ -36,62 +36,86 @@ export const STEPS: Step[] = [
     questions: [
       {
         key: 'fullName',
-        label: 'What is your full name?',
+        label: 'Client 1 — Full Name',
         type: 'text',
-        placeholder: 'Enter your full name',
+        placeholder: 'Enter full name',
         required: true,
       },
       {
         key: 'dateOfBirth',
-        label: 'Date of Birth',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}'s Date of Birth`;
+        },
         type: 'date',
         required: true,
       },
       {
         key: 'address',
-        label: 'Address',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}'s Address`;
+        },
         type: 'text',
-        placeholder: 'Enter your street address',
+        placeholder: 'Enter street address',
         required: true,
       },
       {
         key: 'city',
-        label: 'City',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}'s City`;
+        },
         type: 'text',
-        placeholder: 'Enter your city',
+        placeholder: 'Enter city',
         required: true,
       },
       {
         key: 'province',
-        label: 'Province',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}'s Province`;
+        },
         type: 'text',
-        placeholder: 'Enter your province',
+        placeholder: 'Enter province',
         required: true,
       },
       {
         key: 'postalCode',
-        label: 'Postal Code',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}'s Postal Code`;
+        },
         type: 'text',
-        placeholder: 'Enter your postal code',
+        placeholder: 'Enter postal code',
         required: true,
       },
       {
         key: 'email',
-        label: 'Email Address',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}'s Email Address`;
+        },
         type: 'email',
-        placeholder: 'Enter your email address',
+        placeholder: 'Enter email address',
         required: true,
       },
       {
         key: 'phone',
-        label: 'Phone Number',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}'s Phone Number`;
+        },
         type: 'text',
-        placeholder: 'Enter your phone number',
+        placeholder: 'Enter phone number',
         required: true,
       },
       {
         key: 'maritalStatus',
-        label: 'Marital Status',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}'s Marital Status`;
+        },
         type: 'select',
         options: [
           { value: 'single', label: 'Single' },
@@ -105,14 +129,20 @@ export const STEPS: Step[] = [
       },
       {
         key: 'spouseName',
-        label: 'Spouse or common law partner\'s name',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}'s Spouse or Common-Law Partner's Name`;
+        },
         type: 'text',
         placeholder: 'Enter spouse/partner\'s name',
         required: false,
       },
       {
         key: 'hasMarriageContract',
-        label: 'Do you have a marriage contract (prenuptial agreement)?',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Does ${name} have a marriage contract (prenuptial agreement)?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -130,8 +160,8 @@ export const STEPS: Step[] = [
       {
         key: 'client1HasPreviousRelationship',
         label: (answers) => {
-          const client1Name = answers.get(1)?.fullName || 'Client 1';
-          return `${client1Name}, have you previously been married or in a common law relationship?`;
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Has ${name} previously been married or in a common-law relationship?`;
         },
         type: 'radio',
         options: [
@@ -142,14 +172,21 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1NumberOfPreviousRelationships',
-        label: 'How many previous marriages or common law relationships have you had?',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `How many previous marriages or common-law relationships has ${name} had?`;
+        },
         type: 'number',
         placeholder: '0',
         required: false,
       },
       {
         key: 'spouseSameAddress',
-        label: 'Do they live at the same address?',
+        label: (answers) => {
+          const c1 = answers.get(1)?.fullName as string || 'Client 1';
+          const c2 = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Do ${c1} and ${c2} live at the same address?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -159,55 +196,79 @@ export const STEPS: Step[] = [
       },
       {
         key: 'spouseDateOfBirth',
-        label: 'Spouse Date of Birth',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}'s Date of Birth`;
+        },
         type: 'date',
         required: false,
       },
       {
         key: 'spouseAddress',
-        label: 'Spouse Address',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}'s Address`;
+        },
         type: 'text',
-        placeholder: 'Enter spouse street address',
+        placeholder: 'Enter street address',
         required: false,
       },
       {
         key: 'spouseCity',
-        label: 'Spouse City',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}'s City`;
+        },
         type: 'text',
-        placeholder: 'Enter spouse city',
+        placeholder: 'Enter city',
         required: false,
       },
       {
         key: 'spouseProvince',
-        label: 'Spouse Province',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}'s Province`;
+        },
         type: 'text',
-        placeholder: 'Enter spouse province',
+        placeholder: 'Enter province',
         required: false,
       },
       {
         key: 'spousePostalCode',
-        label: 'Spouse Postal Code',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}'s Postal Code`;
+        },
         type: 'text',
-        placeholder: 'Enter spouse postal code',
+        placeholder: 'Enter postal code',
         required: false,
       },
       {
         key: 'spouseEmail',
-        label: 'Spouse Email Address',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}'s Email Address`;
+        },
         type: 'email',
-        placeholder: 'Enter spouse email address',
+        placeholder: 'Enter email address',
         required: false,
       },
       {
         key: 'spousePhone',
-        label: 'Spouse Phone Number',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}'s Phone Number`;
+        },
         type: 'text',
-        placeholder: 'Enter spouse phone number',
+        placeholder: 'Enter phone number',
         required: false,
       },
       {
         key: 'client2HasPreviousRelationship',
-        label: 'Has your spouse previously been married or in a common law relationship?',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Has ${name} previously been married or in a common-law relationship?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -217,14 +278,21 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2NumberOfPreviousRelationships',
-        label: 'How many previous marriages or common law relationships has your spouse had?',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `How many previous marriages or common-law relationships has ${name} had?`;
+        },
         type: 'number',
         placeholder: '0',
         required: false,
       },
       {
         key: 'hasChildren',
-        label: 'Do you have children?',
+        label: (answers) => {
+          const c1 = answers.get(1)?.fullName as string || 'Client 1';
+          const c2 = answers.get(1)?.spouseName as string;
+          return c2 ? `Do ${c1} and ${c2} have children?` : `Does ${c1} have children?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -234,7 +302,11 @@ export const STEPS: Step[] = [
       },
       {
         key: 'numberOfChildren',
-        label: 'How many children do you have?',
+        label: (answers) => {
+          const c1 = answers.get(1)?.fullName as string || 'Client 1';
+          const c2 = answers.get(1)?.spouseName as string;
+          return c2 ? `How many children do ${c1} and ${c2} have?` : `How many children does ${c1} have?`;
+        },
         type: 'number',
         placeholder: 'Enter number of children',
         required: false,

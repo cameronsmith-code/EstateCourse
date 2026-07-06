@@ -8412,7 +8412,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 10 && (
+          {step.id === 11 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -8489,7 +8489,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 11 && (
+          {step.id === 12 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};

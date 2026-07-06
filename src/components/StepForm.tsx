@@ -5595,7 +5595,7 @@ export default function StepForm({
                             <div className="space-y-3">
                               <p className="text-sm font-medium text-gray-300">Grandchildren's Names:</p>
                               {Array.from({ length: Math.min(parseInt(childrenData[index]?.numberOfGrandchildren || '0'), 20) }).map((_, gcIndex) => (
-                                <div key={gcIndex}>
+                                <div key={gcIndex} className="space-y-2">
                                   <label className="block text-xs text-gray-400 mb-1">
                                     Grandchild {gcIndex + 1}:
                                   </label>
@@ -5604,6 +5604,18 @@ export default function StepForm({
                                     value={childrenData[index]?.[`grandchild${gcIndex + 1}Name`] || ''}
                                     onChange={(e) => handleChildChange(index, `grandchild${gcIndex + 1}Name`, e.target.value)}
                                     placeholder={`Enter grandchild ${gcIndex + 1}'s name`}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                  <label className="block text-xs text-gray-400 mb-1">
+                                    {childrenData[index]?.[`grandchild${gcIndex + 1}Name`]
+                                      ? `${childrenData[index][`grandchild${gcIndex + 1}Name`]}'s other parent's name:`
+                                      : `Grandchild ${gcIndex + 1}'s other parent's name:`}
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={childrenData[index]?.[`grandchild${gcIndex + 1}OtherParent`] || ''}
+                                    onChange={(e) => handleChildChange(index, `grandchild${gcIndex + 1}OtherParent`, e.target.value)}
+                                    placeholder="Enter other parent's name"
                                     className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                   />
                                 </div>

@@ -1300,13 +1300,28 @@ export default function StepForm({
                   customLabel = 'Aside from your former spouse or common law partner\'s passing, have you previously been married or in a common law relationship with another person?';
                 }
 
+                const isMarriedOrCommonLaw = answers['maritalStatus'] === 'married' || answers['maritalStatus'] === 'common_law';
+                const showSubsectionDivider = question.key === 'hasMarriageContract' && isMarriedOrCommonLaw;
+
                 return (
-                  <FormField
-                    key={question.key}
-                    question={{...question, label: customLabel}}
-                    value={answers[question.key]}
-                    onChange={(value) => onAnswerChange(question.key, value)}
-                  />
+                  <React.Fragment key={question.key}>
+                    {showSubsectionDivider && (
+                      <div className="pt-4 pb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-px bg-gray-600" />
+                          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                            Relationship History
+                          </span>
+                          <div className="flex-1 h-px bg-gray-600" />
+                        </div>
+                      </div>
+                    )}
+                    <FormField
+                      question={{...question, label: customLabel}}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  </React.Fragment>
                 );
               })}
             </>

@@ -138,49 +138,6 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
-        key: 'hasMarriageContract',
-        label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Does ${name} have a marriage contract (prenuptial agreement)?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'marriageContractLocation',
-        label: 'Where is the marriage contract located?',
-        type: 'text',
-        placeholder: 'Enter location of marriage contract',
-        required: false,
-      },
-      {
-        key: 'client1HasPreviousRelationship',
-        label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Has ${name} previously been married or in a common-law relationship?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'client1NumberOfPreviousRelationships',
-        label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          return `How many previous marriages or common-law relationships has ${name} had?`;
-        },
-        type: 'number',
-        placeholder: '0',
-        required: false,
-      },
-      {
         key: 'spouseSameAddress',
         label: (answers) => {
           const c1Full = answers.get(1)?.fullName as string || 'Client 1';
@@ -263,6 +220,49 @@ export const STEPS: Step[] = [
         },
         type: 'text',
         placeholder: 'Enter phone number',
+        required: false,
+      },
+      {
+        key: 'hasMarriageContract',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Does ${name} have a marriage contract (prenuptial agreement)?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'marriageContractLocation',
+        label: 'Where is the marriage contract located?',
+        type: 'text',
+        placeholder: 'Enter location of marriage contract',
+        required: false,
+      },
+      {
+        key: 'client1HasPreviousRelationship',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Has ${name} previously been married or in a common-law relationship?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1NumberOfPreviousRelationships',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `How many previous marriages or common-law relationships has ${name} had?`;
+        },
+        type: 'number',
+        placeholder: '0',
         required: false,
       },
       {

@@ -296,7 +296,9 @@ export const STEPS: Step[] = [
         label: (answers) => {
           const c1 = answers.get(1)?.fullName as string || 'Client 1';
           const c2 = answers.get(1)?.spouseName as string;
-          return c2 ? `Do ${c1} and ${c2} have children?` : `Does ${c1} have children?`;
+          return c2
+            ? `Do ${c1} and ${c2} have any children (from their or any other relationship)?`
+            : `Does ${c1} have any children (from their or any other relationship)?`;
         },
         type: 'radio',
         options: [

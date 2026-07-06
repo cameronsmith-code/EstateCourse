@@ -1301,16 +1301,28 @@ export default function StepForm({
                 }
 
                 const isMarriedOrCommonLaw = answers['maritalStatus'] === 'married' || answers['maritalStatus'] === 'common_law';
-                const showSubsectionDivider = question.key === 'hasMarriageContract' && isMarriedOrCommonLaw;
+                const showRelationshipDivider = question.key === 'hasMarriageContract' && isMarriedOrCommonLaw;
+                const showChildrenDivider = question.key === 'hasChildren';
 
                 return (
                   <React.Fragment key={question.key}>
-                    {showSubsectionDivider && (
+                    {showRelationshipDivider && (
                       <div className="pt-4 pb-2">
                         <div className="flex items-center gap-3">
                           <div className="flex-1 h-px bg-gray-600" />
                           <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
                             Relationship History
+                          </span>
+                          <div className="flex-1 h-px bg-gray-600" />
+                        </div>
+                      </div>
+                    )}
+                    {showChildrenDivider && (
+                      <div className="pt-4 pb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-px bg-gray-600" />
+                          <span className="text-sm font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                            Children Information
                           </span>
                           <div className="flex-1 h-px bg-gray-600" />
                         </div>

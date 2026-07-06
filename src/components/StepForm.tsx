@@ -5856,7 +5856,7 @@ export default function StepForm({
                       </div>
                     </div>
 
-{childrenData[index]?.independent !== 'yes' && (
+{childrenData[index]?.independent === 'no' && (
                       <>
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                           <h4 className="text-base font-semibold text-blue-400">Medical &amp; Care</h4>

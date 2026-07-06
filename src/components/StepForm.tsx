@@ -8477,13 +8477,34 @@ export default function StepForm({
                   customLabel = `${client2Name}, do you have any Critical Illness policies?`;
                 }
 
+                const docLocationField = (key: string, answerKey: string) => {
+                  if (answers[answerKey] !== 'yes') return null;
+                  return (
+                    <div key={`${key}-docLocation`} className="mt-1">
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Location of the supporting documents:
+                      </label>
+                      <input
+                        type="text"
+                        value={(answers[`${answerKey}DocLocation`] as string) || ''}
+                        onChange={(e) => onAnswerChange(`${answerKey}DocLocation`, e.target.value)}
+                        placeholder="e.g., Home office filing cabinet, Google Drive, etc."
+                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  );
+                };
+
                 return (
-                  <FormField
-                    key={question.key}
-                    question={{ ...question, label: customLabel }}
-                    value={answers[question.key]}
-                    onChange={(value) => onAnswerChange(question.key, value)}
-                  />
+                  <React.Fragment key={question.key}>
+                    <FormField
+                      question={{ ...question, label: customLabel }}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                    {question.key === 'client1HasWorkBenefits' && docLocationField(question.key, 'client1HasWorkBenefits')}
+                    {question.key === 'client2HasWorkBenefits' && docLocationField(question.key, 'client2HasWorkBenefits')}
+                  </React.Fragment>
                 );
               })}
             </>

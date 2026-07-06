@@ -183,9 +183,11 @@ export const STEPS: Step[] = [
       {
         key: 'spouseSameAddress',
         label: (answers) => {
-          const c1 = answers.get(1)?.fullName as string || 'Client 1';
-          const c2 = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Do ${c1} and ${c2} live at the same address?`;
+          const c1Full = answers.get(1)?.fullName as string || 'Client 1';
+          const c2Full = answers.get(1)?.spouseName as string || 'Client 2';
+          const c1 = c1Full.split(' ')[0];
+          const c2 = c2Full.split(' ')[0];
+          return `Does ${c1} and ${c2} live at the same address?`;
         },
         type: 'radio',
         options: [

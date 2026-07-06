@@ -4741,9 +4741,18 @@ export default function StepForm({
                           <div className="space-y-8 mt-6">
                             {Array.from({ length: propertyCount }).map((_, index) => (
                               <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                                <h3 className="text-lg font-semibold text-white mb-4">Additional Property {index + 1}</h3>
-                                <div className="space-y-4">
+                                <h3 className="text-lg font-semibold text-white mb-4">
+                                  {propertiesData[index]?.propertyName
+                                    ? propertiesData[index].propertyName
+                                    : `Additional Property ${index + 1}`}
+                                </h3>
+                                <div className="space-y-6">
                                   <div>
+                                    <div className="pb-1 border-b border-gray-500 mb-3">
+                                      <h4 className="text-sm font-semibold text-blue-400 uppercase tracking-wide">Property Details</h4>
+                                    </div>
+                                    <div className="space-y-4">
+                                    <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       What is the name of this property?
                                     </label>
@@ -4814,67 +4823,181 @@ export default function StepForm({
                                       </div>
                                     </>
                                   )}
+                                  </div>{/* end Property Details space-y-4 */}
+                                  </div>{/* end Property Details subsection */}
+
                                   <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Who is the named owner of this property?
-                                    </label>
-                                    <select
-                                      value={propertiesData[index]?.propertyOwner || ''}
-                                      onChange={(e) => handlePropertyChange(index, 'propertyOwner', e.target.value)}
-                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                      <option value="">Select owner</option>
-                                      {ownerOptions.map(option => (
-                                        <option key={option.value} value={option.value}>{option.label}</option>
-                                      ))}
-                                    </select>
-                                  </div>
+                                    <div className="pb-1 border-b border-gray-500 mb-3">
+                                      <h4 className="text-sm font-semibold text-blue-400 uppercase tracking-wide">Ownership</h4>
+                                    </div>
+                                    <div className="space-y-4">
+                                  {(() => {
+                                    const selectedOwners: string[] = JSON.parse(propertiesData[index]?.propertyOwners || '[]');
+                                    const toggleOwner = (val: string) => {
+                                      const updated = selectedOwners.includes(val)
+                                        ? selectedOwners.filter(o => o !== val)
+                                        : [...selectedOwners, val];
+                                      handlePropertyChange(index, 'propertyOwners', JSON.stringify(updated));
+                                      if (!updated.includes('other')) {
+                                        handlePropertyChange(index, 'otherOwnerName', '');
+                                        handlePropertyChange(index, 'otherOwnerPhone', '');
+                                        handlePropertyChange(index, 'otherOwnerPercent', '');
+                                        handlePropertyChange(index, 'hasAdditionalOtherOwners', '');
+                                        handlePropertyChange(index, 'additionalOtherOwners', '[]');
+                                      }
+                                    };
+
+                                    type ExtraOwner = { name: string; phone: string; percent: string };
+                                    const additionalOtherOwners: ExtraOwner[] = JSON.parse(propertiesData[index]?.additionalOtherOwners || '[]');
+                                    const updateAdditionalOwner = (oIdx: number, field: keyof ExtraOwner, val: string) => {
+                                      const updated = [...additionalOtherOwners];
+                                      if (!updated[oIdx]) updated[oIdx] = { name: '', phone: '', percent: '' };
+                                      updated[oIdx][field] = val;
+                                      handlePropertyChange(index, 'additionalOtherOwners', JSON.stringify(updated));
+                                    };
+
+                                    const ownerCheckboxOptions = [
+                                      { value: 'client1', label: client1Name },
+                                      ...(hasSpouse ? [{ value: 'client2', label: client2Name }] : []),
+                                      { value: 'other', label: 'Other' },
+                                    ];
+
+                                    return (
+                                      <div className="space-y-4">
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            Who owns the property? <span className="text-gray-500 font-normal">(Select all that apply)</span>
+                                          </label>
+                                          <div className="space-y-2">
+                                            {ownerCheckboxOptions.map(opt => (
+                                              <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                  type="checkbox"
+                                                  checked={selectedOwners.includes(opt.value)}
+                                                  onChange={() => toggleOwner(opt.value)}
+                                                  className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                                                />
+                                                <span className="text-gray-300">{opt.label}</span>
+                                              </label>
+                                            ))}
+                                          </div>
+                                        </div>
+
+                                        {selectedOwners.includes('other') && (
+                                          <div className="pl-4 border-l-2 border-blue-500 space-y-3">
+                                            <p className="text-sm font-medium text-gray-300">Other owner's details:</p>
+                                            <input
+                                              type="text"
+                                              value={propertiesData[index]?.otherOwnerName || ''}
+                                              onChange={(e) => handlePropertyChange(index, 'otherOwnerName', e.target.value)}
+                                              placeholder="Full name"
+                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                            <input
+                                              type="text"
+                                              value={propertiesData[index]?.otherOwnerPhone || ''}
+                                              onChange={(e) => handlePropertyChange(index, 'otherOwnerPhone', e.target.value)}
+                                              placeholder="Phone number"
+                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                            <input
+                                              type="text"
+                                              value={propertiesData[index]?.otherOwnerPercent || ''}
+                                              onChange={(e) => handlePropertyChange(index, 'otherOwnerPercent', e.target.value)}
+                                              placeholder="Ownership percentage (e.g., 33%)"
+                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+
+                                            <div>
+                                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                Are there any additional owners?
+                                              </label>
+                                              <div className="flex gap-4">
+                                                <label className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`has-additional-other-owners-${index}`}
+                                                    value="yes"
+                                                    checked={propertiesData[index]?.hasAdditionalOtherOwners === 'yes'}
+                                                    onChange={(e) => {
+                                                      handlePropertyChange(index, 'hasAdditionalOtherOwners', e.target.value);
+                                                      if (additionalOtherOwners.length === 0) {
+                                                        handlePropertyChange(index, 'additionalOtherOwners', JSON.stringify([{ name: '', phone: '', percent: '' }]));
+                                                      }
+                                                    }}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">Yes</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`has-additional-other-owners-${index}`}
+                                                    value="no"
+                                                    checked={propertiesData[index]?.hasAdditionalOtherOwners === 'no'}
+                                                    onChange={(e) => {
+                                                      handlePropertyChange(index, 'hasAdditionalOtherOwners', e.target.value);
+                                                      handlePropertyChange(index, 'additionalOtherOwners', '[]');
+                                                    }}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">No</span>
+                                                </label>
+                                              </div>
+                                            </div>
+
+                                            {propertiesData[index]?.hasAdditionalOtherOwners === 'yes' && (
+                                              <div className="space-y-4">
+                                                {additionalOtherOwners.map((owner, oIdx) => (
+                                                  <div key={oIdx} className="pl-4 border-l-2 border-gray-500 space-y-3">
+                                                    <p className="text-sm font-medium text-gray-400">Additional owner {oIdx + 1}:</p>
+                                                    <input
+                                                      type="text"
+                                                      value={owner.name || ''}
+                                                      onChange={(e) => updateAdditionalOwner(oIdx, 'name', e.target.value)}
+                                                      placeholder="Full name"
+                                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                    <input
+                                                      type="text"
+                                                      value={owner.phone || ''}
+                                                      onChange={(e) => updateAdditionalOwner(oIdx, 'phone', e.target.value)}
+                                                      placeholder="Phone number"
+                                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                    <input
+                                                      type="text"
+                                                      value={owner.percent || ''}
+                                                      onChange={(e) => updateAdditionalOwner(oIdx, 'percent', e.target.value)}
+                                                      placeholder="Ownership percentage (e.g., 33%)"
+                                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                    {oIdx === additionalOtherOwners.length - 1 && (
+                                                      <button
+                                                        type="button"
+                                                        onClick={() => handlePropertyChange(index, 'additionalOtherOwners', JSON.stringify([...additionalOtherOwners, { name: '', phone: '', percent: '' }]))}
+                                                        className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                                                      >
+                                                        + Add another owner
+                                                      </button>
+                                                    )}
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
+                                  </div>{/* end Ownership space-y-4 */}
+                                  </div>{/* end Ownership subsection */}
+
                                   <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Is there anyone else who has ownership of the property?
-                                    </label>
-                                    <div className="flex gap-4">
-                                      <label className="flex items-center">
-                                        <input
-                                          type="radio"
-                                          name={`additional-owners-${index}`}
-                                          value="yes"
-                                          checked={propertiesData[index]?.hasAdditionalOwners === 'yes'}
-                                          onChange={(e) => handlePropertyChange(index, 'hasAdditionalOwners', e.target.value)}
-                                          className="mr-2"
-                                        />
-                                        <span className="text-gray-300">Yes</span>
-                                      </label>
-                                      <label className="flex items-center">
-                                        <input
-                                          type="radio"
-                                          name={`additional-owners-${index}`}
-                                          value="no"
-                                          checked={propertiesData[index]?.hasAdditionalOwners === 'no'}
-                                          onChange={(e) => handlePropertyChange(index, 'hasAdditionalOwners', e.target.value)}
-                                          className="mr-2"
-                                        />
-                                        <span className="text-gray-300">No</span>
-                                      </label>
+                                    <div className="pb-1 border-b border-gray-500 mb-3">
+                                      <h4 className="text-sm font-semibold text-blue-400 uppercase tracking-wide">Succession</h4>
                                     </div>
-                                  </div>
-                                  {propertiesData[index]?.hasAdditionalOwners === 'yes' && (
-                                    <div>
-                                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        How many TOTAL parties own the property?
-                                      </label>
-                                      <select
-                                        value={propertiesData[index]?.additionalOwnersCount || ''}
-                                        onChange={(e) => handlePropertyChange(index, 'additionalOwnersCount', e.target.value)}
-                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      >
-                                        <option value="">Select number</option>
-                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                                          <option key={num} value={num}>{num}</option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                  )}
+                                    <div className="space-y-4">
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Do you have a Property Succession Plan/Agreement in place for the property?
@@ -4918,6 +5041,8 @@ export default function StepForm({
                                       />
                                     </div>
                                   )}
+                                  </div>{/* end Succession space-y-4 */}
+                                  </div>{/* end Succession subsection */}
                                 </div>
                               </div>
                             ))}

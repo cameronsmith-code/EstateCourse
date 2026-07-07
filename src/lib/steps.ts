@@ -1461,6 +1461,422 @@ export const STEPS: Step[] = [
         },
       },
       {
+        key: 'client1HasPoaProperty',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${client1Name}, have you named a Power of Attorney for Property?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1PoaPropertySameAsPersonalCare',
+        label: 'Is it the same person as your Power of Attorney for Personal Care?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasPoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1PoaPropertyName',
+        label: "Power of Attorney for Property's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyPhone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyRelationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyIsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyCountry',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no') &&
+            formData.client1PoaPropertyIsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1PoaPropertyProvince',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no') &&
+            formData.client1PoaPropertyIsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1PoaPropertyCity',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyHasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Power of Attorney for Property document?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternatePoaProperty',
+        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Name',
+        label: "Alternate Power of Attorney for Property's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Relationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1AlternatePoaProperty1IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1AlternatePoaProperty1IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternatePoaProperty2',
+        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Name',
+        label: "Alternate Power of Attorney for Property's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Relationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes' &&
+            formData.client1AlternatePoaProperty2IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes' &&
+            formData.client1AlternatePoaProperty2IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternatePoaProperty3',
+        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
         key: 'client2HasPoaPersonalCare',
         label: (answers) => {
           const client2Name = answers.get(1)?.spouseName as string || 'Client 2';

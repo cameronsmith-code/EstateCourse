@@ -2506,13 +2506,76 @@ export default function StepForm({
               );
             };
 
+            const client1PoaPropertyKeys = new Set([
+              'client1HasPoaProperty','client1PoaPropertySameAsPersonalCare',
+              'client1PoaPropertyName','client1PoaPropertyPhone','client1PoaPropertyEmail',
+              'client1PoaPropertyRelationship','client1PoaPropertyIsCanadaResident',
+              'client1PoaPropertyCountry','client1PoaPropertyProvince','client1PoaPropertyCity',
+              'client1PoaPropertyHasDocCopy','client1HasAlternatePoaProperty',
+              'client1AlternatePoaProperty1Name','client1AlternatePoaProperty1Phone',
+              'client1AlternatePoaProperty1Email','client1AlternatePoaProperty1Relationship',
+              'client1AlternatePoaProperty1IsCanadaResident','client1AlternatePoaProperty1Country',
+              'client1AlternatePoaProperty1Province','client1AlternatePoaProperty1City',
+              'client1HasAlternatePoaProperty2',
+              'client1AlternatePoaProperty2Name','client1AlternatePoaProperty2Phone',
+              'client1AlternatePoaProperty2Email','client1AlternatePoaProperty2Relationship',
+              'client1AlternatePoaProperty2IsCanadaResident','client1AlternatePoaProperty2Country',
+              'client1AlternatePoaProperty2Province','client1AlternatePoaProperty2City',
+              'client1HasAlternatePoaProperty3',
+            ]);
+
+            const prefillPropertyFromPersonalCare = answers['client1HasPoaProperty'] === 'yes' &&
+              answers['client1HasPoaPersonalCare'] === 'yes' &&
+              answers['client1PoaPropertySameAsPersonalCare'] === 'yes';
+
+            const renderPoaPropertyQuestion = (question: typeof step.questions[0]) => {
+              if (question.condition && !question.condition(answers)) return null;
+              const prefillKeys = new Set([
+                'client1PoaPropertyName','client1PoaPropertyPhone','client1PoaPropertyEmail',
+                'client1PoaPropertyRelationship','client1PoaPropertyIsCanadaResident',
+                'client1PoaPropertyCountry','client1PoaPropertyProvince','client1PoaPropertyCity',
+              ]);
+              if (prefillPropertyFromPersonalCare && prefillKeys.has(question.key)) {
+                const pcKeyMap: Record<string, string> = {
+                  client1PoaPropertyName: 'client1PoaPersonalCareName',
+                  client1PoaPropertyPhone: 'client1PoaPersonalCarePhone',
+                  client1PoaPropertyEmail: 'client1PoaPersonalCareEmail',
+                  client1PoaPropertyRelationship: 'client1PoaPersonalCareRelationship',
+                  client1PoaPropertyIsCanadaResident: 'client1PoaPersonalCareIsCanadaResident',
+                  client1PoaPropertyCountry: 'client1PoaPersonalCareCountry',
+                  client1PoaPropertyProvince: 'client1PoaPersonalCareProvince',
+                  client1PoaPropertyCity: 'client1PoaPersonalCareCity',
+                };
+                const pcKey = pcKeyMap[question.key];
+                const prefillValue = answers[pcKey] as string || '';
+                let label = typeof question.label === 'function'
+                  ? question.label(allAnswers || new Map())
+                  : question.label;
+                return (
+                  <div key={question.key} className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-300">{label}</label>
+                    <input
+                      type="text"
+                      value={prefillValue}
+                      disabled
+                      className="w-full px-4 py-2 bg-gray-600/50 border border-gray-500 text-gray-300 rounded-lg cursor-not-allowed italic"
+                    />
+                    <p className="text-xs text-blue-400">Pre-filled from Power of Attorney for Personal Care</p>
+                  </div>
+                );
+              }
+              return renderQuestion(question);
+            };
+
             const client1WillQuestions = step.questions.filter(q => client1WillKeys.has(q.key));
             const client2WillQuestions = step.questions.filter(q => client2WillKeys.has(q.key));
             const client1PoaPersonalCareQuestions = step.questions.filter(q => client1PoaPersonalCareKeys.has(q.key));
             const client2PoaPersonalCareQuestions = step.questions.filter(q => client2PoaPersonalCareKeys.has(q.key));
+            const client1PoaPropertyQuestions = step.questions.filter(q => client1PoaPropertyKeys.has(q.key));
             const otherQuestions = step.questions.filter(q =>
               !client1WillKeys.has(q.key) && !client2WillKeys.has(q.key) &&
-              !client1PoaPersonalCareKeys.has(q.key) && !client2PoaPersonalCareKeys.has(q.key)
+              !client1PoaPersonalCareKeys.has(q.key) && !client2PoaPersonalCareKeys.has(q.key) &&
+              !client1PoaPropertyKeys.has(q.key)
             );
 
             return (
@@ -2536,6 +2599,10 @@ export default function StepForm({
                     {client2PoaPersonalCareQuestions.map(q => renderQuestion(q))}
                   </Subsection>
                 )}
+
+                <Subsection title={`${client1Name} — Power of Attorney for Property`}>
+                  {client1PoaPropertyQuestions.map(q => renderPoaPropertyQuestion(q))}
+                </Subsection>
 
                 {otherQuestions.map((question) => {
 

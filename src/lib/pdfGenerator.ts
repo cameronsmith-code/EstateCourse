@@ -5574,6 +5574,8 @@ You should explore this as an option with your legal and CFP® professionals bec
     const client1Name = formData.fullName || 'Client 1';
     const client2Name = formData.spouseName || 'Client 2';
 
+    addSubsectionHeader(`${client1Name} — Power of Attorney for Property`);
+
     if (yPosition > 230) {
       addPage();
       yPosition = 12;

@@ -4438,6 +4438,7 @@ export const generatePDF = (formData: FormData) => {
     const sameLawyer = formData.willsSameLawyer === 'yes';
 
     if (formData.client1HasWill === 'yes') {
+      addSubsectionHeader(`${client1Name} — Will`);
       checkPageBreak(25);
 
       if (formData.client1WillYear) {
@@ -4561,6 +4562,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     }
 
     if (formData.client2HasWill === 'yes' && hasSpouse) {
+      addSubsectionHeader(`${client2Name} — Will`);
       checkPageBreak(25);
 
       if (formData.client2WillYear) {

@@ -4,6 +4,7 @@ import FormField from './FormField';
 import VideoPlayer from './VideoPlayer';
 import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprietorshipDetails';
 import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
+import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2 } from 'lucide-react';
 
 type StepFormProps = {
@@ -2412,9 +2413,80 @@ export default function StepForm({
             const client1Name = basicAnswers['fullName'] as string || 'you';
             const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
 
+            const client1WillKeys = new Set([
+              'client1HasWill','client1WillYear','client1WillPreparedInCanada','client1WillCountry',
+              'client1WillProvince','client1WillStorageLocation','client1HasDigitalWillCopy',
+              'client1DigitalWillLocation','client1HasSecondaryWill',
+              'client1SecondaryWillSameTimeAndJurisdiction','client1SecondaryWillJurisdiction',
+              'client1SecondaryWillDate','client1HasWillMeaningfulChanges',
+              'client1WillMeaningfulChangesDetails','client1HasHensonTrust',
+            ]);
+            const client2WillKeys = new Set([
+              'client2HasWill','client2WillYear','client2WillPreparedInCanada','client2WillCountry',
+              'client2WillProvince','client2WillStorageLocation','client2HasDigitalWillCopy',
+              'client2DigitalWillLocation','client2HasSecondaryWill',
+              'client2SecondaryWillSameTimeAndJurisdiction','client2SecondaryWillJurisdiction',
+              'client2SecondaryWillDate','client2HasWillMeaningfulChanges',
+              'client2WillMeaningfulChangesDetails',
+            ]);
+
+            const renderQuestion = (question: typeof step.questions[0]) => {
+              if (question.condition && !question.condition(answers)) return null;
+
+              let customLabel = typeof question.label === 'function'
+                ? question.label(allAnswers || new Map())
+                : question.label;
+
+              if (question.key === 'client1UsesAccountant') customLabel = `Do you (${client1Name}) use a professional accountant?`;
+              if (question.key === 'client2UsesAccountant') customLabel = `Does ${client2Name} use a professional accountant?`;
+              if (question.key === 'client1AccountingRecordsLocation') customLabel = `${client1Name}, where are your accounting records kept?`;
+              if (question.key === 'client2AccountingRecordsLocation') customLabel = `${client2Name}, where are your accounting records kept?`;
+              if (question.key === 'accountantSamePerson') customLabel = `${client1Name} and ${client2Name}, do you use the same accountant?`;
+              if (question.key === 'client1IsCameronSmithAdvisor') customLabel = `${client1Name}, is Cameron Smith, CFP® your financial advisor?`;
+              if (question.key === 'client1FinancialAdvisors') customLabel = `${client1Name}, how many Financial Advisors do you work with?`;
+              if (question.key === 'client2IsCameronSmithAdvisor') customLabel = `${client2Name}, is Cameron Smith, CFP® your financial advisor?`;
+              if (question.key === 'client2FinancialAdvisors') customLabel = `${client2Name}, how many Financial Advisors do you work with?`;
+              if (question.key === 'client1HasFuneralArrangements') customLabel = `${client1Name}, have you made arrangements for Funeral or Cemetery services?`;
+              if (question.key === 'client1FuneralArrangementsLocation') customLabel = `Where is this document located?`;
+              if (question.key === 'client1HasDiscussedFuneral') customLabel = `${client1Name}, have you communicated to your loved ones what type of funeral you would like to have?`;
+              if (question.key === 'client1FuneralWrittenDown') customLabel = `Is this written down anywhere?`;
+              if (question.key === 'client1FuneralDocLocation') customLabel = `Where is this document stored?`;
+              if (question.key === 'client2HasFuneralArrangements') customLabel = `${client2Name}, have you made arrangements for Funeral or Cemetery services?`;
+              if (question.key === 'client2FuneralArrangementsLocation') customLabel = `Where is this document located?`;
+              if (question.key === 'client2HasDiscussedFuneral') customLabel = `${client2Name}, have you communicated to your loved ones what type of funeral you would like to have?`;
+              if (question.key === 'client2FuneralWrittenDown') customLabel = `Is this written down anywhere?`;
+              if (question.key === 'client2FuneralDocLocation') customLabel = `Where is this document stored?`;
+
+              return (
+                <FormField
+                  key={question.key}
+                  question={{ ...question, label: customLabel }}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                />
+              );
+            };
+
+            const client1WillQuestions = step.questions.filter(q => client1WillKeys.has(q.key));
+            const client2WillQuestions = step.questions.filter(q => client2WillKeys.has(q.key));
+            const otherQuestions = step.questions.filter(q => !client1WillKeys.has(q.key) && !client2WillKeys.has(q.key));
+
             return (
               <>
-                {step.questions.map((question) => {
+                <Subsection title={`${client1Name} — Will`}>
+                  {client1WillQuestions.map(q => renderQuestion(q))}
+                </Subsection>
+
+                {hasSpouse && (
+                  <Subsection title={`${client2Name} — Will`}>
+                    {client2WillQuestions.map(q => {
+                      if (q.key.startsWith('client2') && q.key.includes('Will') && !hasSpouse) return null;
+                      return renderQuestion(q);
+                    })}
+                  </Subsection>
+                )}
+
+                {otherQuestions.map((question) => {
 
                 if (question.key.startsWith('client2') && question.key.includes('Will') && !hasSpouse) {
                   return null;

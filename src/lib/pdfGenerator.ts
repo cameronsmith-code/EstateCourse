@@ -5771,6 +5771,8 @@ You should explore this as an option with your legal and CFP® professionals bec
   if (formData.client2HasPoaProperty === 'yes') {
     const client2Name = formData.spouseName || 'Client 2';
 
+    addSubsectionHeader(`${client2Name} — Power of Attorney for Property`);
+
     if (yPosition > 230) {
       addPage();
       yPosition = 12;

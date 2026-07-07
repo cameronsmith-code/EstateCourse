@@ -2629,16 +2629,25 @@ export default function StepForm({
               return renderQuestion(question);
             };
 
+            const funeralPlanningKeys = new Set([
+              'client1HasFuneralArrangements','client1FuneralArrangementsLocation',
+              'client1HasDiscussedFuneral','client1FuneralWrittenDown','client1FuneralDocLocation',
+              'client2HasFuneralArrangements','client2FuneralArrangementsLocation',
+              'client2HasDiscussedFuneral','client2FuneralWrittenDown','client2FuneralDocLocation',
+            ]);
+
             const client1WillQuestions = step.questions.filter(q => client1WillKeys.has(q.key));
             const client2WillQuestions = step.questions.filter(q => client2WillKeys.has(q.key));
             const client1PoaPersonalCareQuestions = step.questions.filter(q => client1PoaPersonalCareKeys.has(q.key));
             const client2PoaPersonalCareQuestions = step.questions.filter(q => client2PoaPersonalCareKeys.has(q.key));
             const client1PoaPropertyQuestions = step.questions.filter(q => client1PoaPropertyKeys.has(q.key));
             const client2PoaPropertyQuestions = step.questions.filter(q => client2PoaPropertyKeys.has(q.key));
+            const funeralPlanningQuestions = step.questions.filter(q => funeralPlanningKeys.has(q.key));
             const otherQuestions = step.questions.filter(q =>
               !client1WillKeys.has(q.key) && !client2WillKeys.has(q.key) &&
               !client1PoaPersonalCareKeys.has(q.key) && !client2PoaPersonalCareKeys.has(q.key) &&
-              !client1PoaPropertyKeys.has(q.key) && !client2PoaPropertyKeys.has(q.key)
+              !client1PoaPropertyKeys.has(q.key) && !client2PoaPropertyKeys.has(q.key) &&
+              !funeralPlanningKeys.has(q.key)
             );
 
             return (
@@ -2672,6 +2681,10 @@ export default function StepForm({
                     {client2PoaPropertyQuestions.map(q => renderPoaPropertyQuestion2(q))}
                   </Subsection>
                 )}
+
+                <Subsection title="Funeral Planning">
+                  {funeralPlanningQuestions.map(q => renderQuestion(q))}
+                </Subsection>
 
                 {otherQuestions.map((question) => {
 

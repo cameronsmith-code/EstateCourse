@@ -2273,6 +2273,13 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => formData.client2FuneralWrittenDown === 'yes',
       },
+    ],
+  },
+  {
+    id: 8,
+    title: 'Your Professionals',
+    description: 'Information about the professionals you work with',
+    questions: [
       {
         key: 'client1UsesAccountant',
         label: 'Do you use a professional accountant?',
@@ -2354,7 +2361,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 8,
+    id: 9,
     title: 'Your Financial Footprint',
     description: 'Banking and financial account information',
     questions: [
@@ -2450,7 +2457,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 9,
+    id: 10,
     title: 'Real Estate',
     description: 'Information about real estate you own',
     questions: [
@@ -5626,7 +5633,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 10,
+    id: 11,
     title: 'Outstanding Debts',
     description: 'Information about any outstanding debts (not including credit cards)',
     questions: [
@@ -5643,7 +5650,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 11,
+    id: 12,
     title: 'Life Insurance',
     description: 'Information about life insurance, disability insurance, and critical illness policies',
     questions: [
@@ -5772,7 +5779,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 12,
+    id: 13,
     title: 'Property and Casualty Insurance',
     description: 'Information about home and property insurance',
     questions: [
@@ -6088,7 +6095,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 13,
+    id: 14,
     title: 'Pensions and Retirement Benefits',
     description: 'Information about pension plans',
     questions: [

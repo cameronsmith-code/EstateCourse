@@ -899,7 +899,7 @@ export default function StepForm({
           }
         }
       }
-    } else if (step.id === 12) {
+    } else if (step.id === 14) {
       if (answers['client1HasPension'] === 'yes') {
         if (!client1PensionsData || client1PensionsData.length === 0) {
           setValidationError('Please add at least one pension for Client 1 or select "No".');
@@ -4169,144 +4169,166 @@ export default function StepForm({
                 );
               })}
 
-              {step.id === 7 && client1FinancialAdvisorsCount > 0 && (
-                <div className="space-y-6 mt-6">
-                  <h3 className="text-xl font-semibold text-white">
-                    {allAnswers?.get(1)?.fullName || 'Client 1'}'s financial advisor's details:
-                  </h3>
-                  {Array.from({ length: client1FinancialAdvisorsCount }).map((_, index) => (
-                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                      <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
-
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Name *
-                          </label>
-                          <input
-                            type="text"
-                            value={client1FinancialAdvisorsData[index]?.name || ''}
-                            onChange={(e) => handleFinancialAdvisorChange(index, 'name', e.target.value)}
-                            placeholder="Enter name"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Firm/Company *
-                          </label>
-                          <input
-                            type="text"
-                            value={client1FinancialAdvisorsData[index]?.firm || ''}
-                            onChange={(e) => handleFinancialAdvisorChange(index, 'firm', e.target.value)}
-                            placeholder="Enter firm/company name"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Phone Number *
-                          </label>
-                          <input
-                            type="text"
-                            value={client1FinancialAdvisorsData[index]?.phone || ''}
-                            onChange={(e) => handleFinancialAdvisorChange(index, 'phone', e.target.value)}
-                            placeholder="Enter phone number"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Email Address *
-                          </label>
-                          <input
-                            type="email"
-                            value={client1FinancialAdvisorsData[index]?.email || ''}
-                            onChange={(e) => handleFinancialAdvisorChange(index, 'email', e.target.value)}
-                            placeholder="Enter email address"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {step.id === 7 && client2FinancialAdvisorsCount > 0 && (
-                <div className="space-y-6 mt-6">
-                  <h3 className="text-xl font-semibold text-white">
-                    {allAnswers?.get(1)?.spouseName || 'Client 2'}'s financial advisor's details:
-                  </h3>
-                  {Array.from({ length: client2FinancialAdvisorsCount }).map((_, index) => (
-                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                      <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
-
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Name *
-                          </label>
-                          <input
-                            type="text"
-                            value={client2FinancialAdvisorsData[index]?.name || ''}
-                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'name', e.target.value)}
-                            placeholder="Enter name"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Firm/Company *
-                          </label>
-                          <input
-                            type="text"
-                            value={client2FinancialAdvisorsData[index]?.firm || ''}
-                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'firm', e.target.value)}
-                            placeholder="Enter firm/company name"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Phone Number *
-                          </label>
-                          <input
-                            type="text"
-                            value={client2FinancialAdvisorsData[index]?.phone || ''}
-                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'phone', e.target.value)}
-                            placeholder="Enter phone number"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Email Address *
-                          </label>
-                          <input
-                            type="email"
-                            value={client2FinancialAdvisorsData[index]?.email || ''}
-                            onChange={(e) => handleClient2FinancialAdvisorChange(index, 'email', e.target.value)}
-                            placeholder="Enter email address"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </>
             );
           })()}
 
           {step.id === 8 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
+            const client1Name = basicAnswers['fullName'] as string || 'you';
+            const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
+
+            return (
+              <>
+                {step.questions.map((question) => {
+                  if (question.key === 'client2UsesAccountant' && !hasSpouse) return null;
+                  if (question.key === 'client2AccountingRecordsLocation' && !hasSpouse) return null;
+                  if (question.key === 'accountantSamePerson' && !hasSpouse) return null;
+                  if (question.key === 'client2IsCameronSmithAdvisor' && !hasSpouse) return null;
+                  if (question.key === 'client2FinancialAdvisors' && !hasSpouse) return null;
+
+                  let customLabel = question.label;
+                  if (question.key === 'client1UsesAccountant') {
+                    customLabel = `${client1Name}, do you use a professional accountant?`;
+                  }
+                  if (question.key === 'client1IsCameronSmithAdvisor') {
+                    customLabel = `${client1Name}, is Cameron Smith, CFP® your financial advisor?`;
+                  }
+                  if (question.key === 'client1FinancialAdvisors') {
+                    customLabel = `${client1Name}, how many Financial Advisors do you work with?`;
+                  }
+                  if (question.key === 'client2IsCameronSmithAdvisor') {
+                    customLabel = `${client2Name}, is Cameron Smith, CFP® your financial advisor?`;
+                  }
+                  if (question.key === 'client2FinancialAdvisors') {
+                    customLabel = `${client2Name}, how many Financial Advisors do you work with?`;
+                  }
+
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={{ ...question, label: customLabel }}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  );
+                })}
+
+                {client1FinancialAdvisorsCount > 0 && (
+                  <div className="space-y-6 mt-6">
+                    <h3 className="text-xl font-semibold text-white">
+                      {allAnswers?.get(1)?.fullName || 'Client 1'}'s financial advisor's details:
+                    </h3>
+                    {Array.from({ length: client1FinancialAdvisorsCount }).map((_, index) => (
+                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Name *</label>
+                            <input
+                              type="text"
+                              value={client1FinancialAdvisorsData[index]?.name || ''}
+                              onChange={(e) => handleClient1FinancialAdvisorChange(index, 'name', e.target.value)}
+                              placeholder="Enter name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Firm/Company *</label>
+                            <input
+                              type="text"
+                              value={client1FinancialAdvisorsData[index]?.firm || ''}
+                              onChange={(e) => handleClient1FinancialAdvisorChange(index, 'firm', e.target.value)}
+                              placeholder="Enter firm/company name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
+                            <input
+                              type="text"
+                              value={client1FinancialAdvisorsData[index]?.phone || ''}
+                              onChange={(e) => handleClient1FinancialAdvisorChange(index, 'phone', e.target.value)}
+                              placeholder="Enter phone number"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
+                            <input
+                              type="email"
+                              value={client1FinancialAdvisorsData[index]?.email || ''}
+                              onChange={(e) => handleClient1FinancialAdvisorChange(index, 'email', e.target.value)}
+                              placeholder="Enter email address"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {client2FinancialAdvisorsCount > 0 && (
+                  <div className="space-y-6 mt-6">
+                    <h3 className="text-xl font-semibold text-white">
+                      {allAnswers?.get(1)?.spouseName || 'Client 2'}'s financial advisor's details:
+                    </h3>
+                    {Array.from({ length: client2FinancialAdvisorsCount }).map((_, index) => (
+                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+                        <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Name *</label>
+                            <input
+                              type="text"
+                              value={client2FinancialAdvisorsData[index]?.name || ''}
+                              onChange={(e) => handleClient2FinancialAdvisorChange(index, 'name', e.target.value)}
+                              placeholder="Enter name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Firm/Company *</label>
+                            <input
+                              type="text"
+                              value={client2FinancialAdvisorsData[index]?.firm || ''}
+                              onChange={(e) => handleClient2FinancialAdvisorChange(index, 'firm', e.target.value)}
+                              placeholder="Enter firm/company name"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
+                            <input
+                              type="text"
+                              value={client2FinancialAdvisorsData[index]?.phone || ''}
+                              onChange={(e) => handleClient2FinancialAdvisorChange(index, 'phone', e.target.value)}
+                              placeholder="Enter phone number"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
+                            <input
+                              type="email"
+                              value={client2FinancialAdvisorsData[index]?.email || ''}
+                              onChange={(e) => handleClient2FinancialAdvisorChange(index, 'email', e.target.value)}
+                              placeholder="Enter email address"
+                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
+
+          {step.id === 9 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
@@ -7246,7 +7268,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 13 && (() => {
+          {step.id === 14 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
@@ -7476,7 +7498,7 @@ export default function StepForm({
           })()}
 
 
-          {step.id === 9 && (() => {
+          {step.id === 10 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
             const maritalStatus = basicAnswers['maritalStatus'] as string;
@@ -7753,7 +7775,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 10 && (
+          {step.id === 11 && (
             <>
               {step.questions.map((question) => (
                 <FormField
@@ -8263,7 +8285,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 11 && (
+          {step.id === 12 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -8361,7 +8383,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 12 && (
+          {step.id === 13 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};

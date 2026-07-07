@@ -281,6 +281,19 @@ interface FormData {
     city?: string;
   }>;
   client1HasEstateTrustee?: string;
+  client1SpouseIsEstateTrustee?: string;
+  client1EstateTrusteeName?: string;
+  client1EstateTrusteePhone?: string;
+  client1EstateTrusteeEmail?: string;
+  client1EstateTrusteeRelationship?: string;
+  client1EstateTrusteeIsCanadaResident?: string;
+  client1EstateTrusteeCountry?: string;
+  client1EstateTrusteeProvince?: string;
+  client1EstateTrusteeCity?: string;
+  client1EstateTrusteeHasDocCopy?: string;
+  client1HasAlternateEstateTrustee?: string;
+  client1HasAlternateEstateTrustee2?: string;
+  client1HasAlternateEstateTrustee3?: string;
   client1EstateTrusteeCount?: string;
   client1EstateTrusteeData?: Array<{
     type?: string;
@@ -344,6 +357,19 @@ interface FormData {
     city?: string;
   }>;
   client2HasEstateTrustee?: string;
+  client2SpouseIsEstateTrustee?: string;
+  client2EstateTrusteeName?: string;
+  client2EstateTrusteePhone?: string;
+  client2EstateTrusteeEmail?: string;
+  client2EstateTrusteeRelationship?: string;
+  client2EstateTrusteeIsCanadaResident?: string;
+  client2EstateTrusteeCountry?: string;
+  client2EstateTrusteeProvince?: string;
+  client2EstateTrusteeCity?: string;
+  client2EstateTrusteeHasDocCopy?: string;
+  client2HasAlternateEstateTrustee?: string;
+  client2HasAlternateEstateTrustee2?: string;
+  client2HasAlternateEstateTrustee3?: string;
   client2EstateTrusteeCount?: string;
   client2EstateTrusteeData?: Array<{
     type?: string;
@@ -626,6 +652,110 @@ export const generatePDF = (formData: FormData) => {
     formData.client2PoaPersonalCareData = allPOAs;
     formData.client2PoaPersonalCareCount = allPOAs.length.toString();
     formData.client2HasContingentPoaPersonalCare = alternates.length > 0 ? 'yes' : 'no';
+  }
+
+  // Transform Estate Trustee data from flat questionnaire fields into array format
+  const mapHasDocCopy = (val: string | undefined): string => {
+    if (val === 'yes_on_file') return 'yes_copy';
+    if (val === 'no_can_access') return 'yes_instructions';
+    if (val === 'no_not_discussed') return 'no';
+    return '';
+  };
+
+  if (formData.client1HasEstateTrustee === 'yes') {
+    const trustees: Array<Record<string, string | undefined>> = [];
+    if (formData.client1SpouseIsEstateTrustee === 'yes') {
+      trustees.push({
+        name: formData.spouseName,
+        phone: formData.spousePhone,
+        email: formData.spouseEmail,
+        relationship: 'Spouse/Common Law Partner',
+        country: 'Canada',
+        province: formData.spouseProvince,
+        city: formData.spouseCity,
+        providedCopy: undefined,
+      });
+    } else if (formData.client1EstateTrusteeName) {
+      trustees.push({
+        name: formData.client1EstateTrusteeName,
+        phone: formData.client1EstateTrusteePhone,
+        email: formData.client1EstateTrusteeEmail,
+        relationship: formData.client1EstateTrusteeRelationship,
+        country: formData.client1EstateTrusteeIsCanadaResident === 'yes' ? 'Canada' : formData.client1EstateTrusteeCountry,
+        province: formData.client1EstateTrusteeProvince,
+        city: formData.client1EstateTrusteeCity,
+        providedCopy: mapHasDocCopy(formData.client1EstateTrusteeHasDocCopy),
+      });
+    }
+    for (let i = 1; i <= 3; i++) {
+      const nameKey = `client1AlternateEstateTrustee${i}Name` as keyof typeof formData;
+      if (formData[nameKey]) {
+        trustees.push({
+          name: formData[`client1AlternateEstateTrustee${i}Name` as keyof typeof formData] as string,
+          phone: formData[`client1AlternateEstateTrustee${i}Phone` as keyof typeof formData] as string,
+          email: formData[`client1AlternateEstateTrustee${i}Email` as keyof typeof formData] as string,
+          relationship: formData[`client1AlternateEstateTrustee${i}Relationship` as keyof typeof formData] as string,
+          country: (formData[`client1AlternateEstateTrustee${i}IsCanadaResident` as keyof typeof formData] as string) === 'yes'
+            ? 'Canada'
+            : formData[`client1AlternateEstateTrustee${i}Country` as keyof typeof formData] as string,
+          province: formData[`client1AlternateEstateTrustee${i}Province` as keyof typeof formData] as string,
+          city: formData[`client1AlternateEstateTrustee${i}City` as keyof typeof formData] as string,
+          providedCopy: mapHasDocCopy(formData[`client1AlternateEstateTrustee${i}HasDocCopy` as keyof typeof formData] as string),
+        });
+      }
+    }
+    if (trustees.length > 0) {
+      formData.client1EstateTrusteeData = trustees;
+      formData.client1EstateTrusteeCount = trustees.length.toString();
+    }
+  }
+
+  if (formData.client2HasEstateTrustee === 'yes') {
+    const trustees: Array<Record<string, string | undefined>> = [];
+    if (formData.client2SpouseIsEstateTrustee === 'yes') {
+      trustees.push({
+        name: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
+        relationship: 'Spouse/Common Law Partner',
+        country: 'Canada',
+        province: formData.province,
+        city: formData.city,
+        providedCopy: undefined,
+      });
+    } else if (formData.client2EstateTrusteeName) {
+      trustees.push({
+        name: formData.client2EstateTrusteeName,
+        phone: formData.client2EstateTrusteePhone,
+        email: formData.client2EstateTrusteeEmail,
+        relationship: formData.client2EstateTrusteeRelationship,
+        country: formData.client2EstateTrusteeIsCanadaResident === 'yes' ? 'Canada' : formData.client2EstateTrusteeCountry,
+        province: formData.client2EstateTrusteeProvince,
+        city: formData.client2EstateTrusteeCity,
+        providedCopy: mapHasDocCopy(formData.client2EstateTrusteeHasDocCopy),
+      });
+    }
+    for (let i = 1; i <= 3; i++) {
+      const nameKey = `client2AlternateEstateTrustee${i}Name` as keyof typeof formData;
+      if (formData[nameKey]) {
+        trustees.push({
+          name: formData[`client2AlternateEstateTrustee${i}Name` as keyof typeof formData] as string,
+          phone: formData[`client2AlternateEstateTrustee${i}Phone` as keyof typeof formData] as string,
+          email: formData[`client2AlternateEstateTrustee${i}Email` as keyof typeof formData] as string,
+          relationship: formData[`client2AlternateEstateTrustee${i}Relationship` as keyof typeof formData] as string,
+          country: (formData[`client2AlternateEstateTrustee${i}IsCanadaResident` as keyof typeof formData] as string) === 'yes'
+            ? 'Canada'
+            : formData[`client2AlternateEstateTrustee${i}Country` as keyof typeof formData] as string,
+          province: formData[`client2AlternateEstateTrustee${i}Province` as keyof typeof formData] as string,
+          city: formData[`client2AlternateEstateTrustee${i}City` as keyof typeof formData] as string,
+          providedCopy: mapHasDocCopy(formData[`client2AlternateEstateTrustee${i}HasDocCopy` as keyof typeof formData] as string),
+        });
+      }
+    }
+    if (trustees.length > 0) {
+      formData.client2EstateTrusteeData = trustees;
+      formData.client2EstateTrusteeCount = trustees.length.toString();
+    }
   }
 
   // Add a new page, increment counter, and stamp page number top-right

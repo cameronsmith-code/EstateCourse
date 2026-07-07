@@ -2945,6 +2945,945 @@ export const STEPS: Step[] = [
             formData.client2HasAlternatePoaProperty2 === 'yes';
         },
       },
+      // ── Client 1 Estate Trustee (Executor) ──────────────────────────────────
+      {
+        key: 'client1HasEstateTrustee',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${client1Name}, have you named an Estate Trustee (Executor) in your Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client1SpouseIsEstateTrustee',
+        label: (answers) => {
+          const spouseName = answers.get(1)?.spouseName as string || 'your spouse or common law partner';
+          return `Is ${spouseName} your Estate Trustee (Executor)?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const maritalStatus = basicAnswers.maritalStatus as string;
+          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
+          return formData.client1HasEstateTrustee === 'yes' && !!hasSpouse;
+        },
+      },
+      {
+        key: 'client1EstateTrusteeName',
+        label: "Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteePhone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteeEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteeRelationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteeIsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteeCountry',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no') && formData.client1EstateTrusteeIsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1EstateTrusteeProvince',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no') && formData.client1EstateTrusteeIsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1EstateTrusteeCity',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteeHasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1HasAlternateEstateTrustee',
+        label: 'Have you named an alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Name',
+        label: "Alternate Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Relationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1AlternateEstateTrustee1IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1AlternateEstateTrustee1IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1HasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternateEstateTrustee2',
+        label: 'Have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Name',
+        label: "Alternate Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Relationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes' && formData.client1AlternateEstateTrustee2IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes' && formData.client1AlternateEstateTrustee2IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2HasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternateEstateTrustee3',
+        label: 'Have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      // ── Client 2 Estate Trustee (Executor) ──────────────────────────────────
+      {
+        key: 'client2HasEstateTrustee',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${client2Name}, have you named an Estate Trustee (Executor) in your Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          return !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+        },
+      },
+      {
+        key: 'client2SpouseIsEstateTrustee',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Is ${client1Name} your Estate Trustee (Executor)?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const maritalStatus = basicAnswers.maritalStatus as string;
+          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
+          return formData.client2HasEstateTrustee === 'yes' && !!hasSpouse;
+        },
+      },
+      {
+        key: 'client2EstateTrusteeName',
+        label: "Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteePhone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteeEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteeRelationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteeIsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteeCountry',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no') && formData.client2EstateTrusteeIsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2EstateTrusteeProvince',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no') && formData.client2EstateTrusteeIsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2EstateTrusteeCity',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteeHasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2HasAlternateEstateTrustee',
+        label: 'Have you named an alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Name',
+        label: "Alternate Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Relationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2AlternateEstateTrustee1IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2AlternateEstateTrustee1IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1HasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2HasAlternateEstateTrustee2',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Name',
+        label: "Alternate Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Relationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes' && formData.client2AlternateEstateTrustee2IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes' && formData.client2AlternateEstateTrustee2IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2HasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2HasAlternateEstateTrustee3',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
       {
         key: 'client1HasFuneralArrangements',
         label: 'Have you made arrangements for Funeral or Cemetery services?',

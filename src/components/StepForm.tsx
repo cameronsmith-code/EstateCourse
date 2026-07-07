@@ -2629,6 +2629,41 @@ export default function StepForm({
               return renderQuestion(question);
             };
 
+            const client1EstateTrusteeKeys = new Set([
+              'client1HasEstateTrustee','client1SpouseIsEstateTrustee',
+              'client1EstateTrusteeName','client1EstateTrusteePhone','client1EstateTrusteeEmail',
+              'client1EstateTrusteeRelationship','client1EstateTrusteeIsCanadaResident',
+              'client1EstateTrusteeCountry','client1EstateTrusteeProvince','client1EstateTrusteeCity',
+              'client1EstateTrusteeHasDocCopy','client1HasAlternateEstateTrustee',
+              'client1AlternateEstateTrustee1Name','client1AlternateEstateTrustee1Phone',
+              'client1AlternateEstateTrustee1Email','client1AlternateEstateTrustee1Relationship',
+              'client1AlternateEstateTrustee1IsCanadaResident','client1AlternateEstateTrustee1Country',
+              'client1AlternateEstateTrustee1Province','client1AlternateEstateTrustee1City',
+              'client1AlternateEstateTrustee1HasDocCopy','client1HasAlternateEstateTrustee2',
+              'client1AlternateEstateTrustee2Name','client1AlternateEstateTrustee2Phone',
+              'client1AlternateEstateTrustee2Email','client1AlternateEstateTrustee2Relationship',
+              'client1AlternateEstateTrustee2IsCanadaResident','client1AlternateEstateTrustee2Country',
+              'client1AlternateEstateTrustee2Province','client1AlternateEstateTrustee2City',
+              'client1AlternateEstateTrustee2HasDocCopy','client1HasAlternateEstateTrustee3',
+            ]);
+            const client2EstateTrusteeKeys = new Set([
+              'client2HasEstateTrustee','client2SpouseIsEstateTrustee',
+              'client2EstateTrusteeName','client2EstateTrusteePhone','client2EstateTrusteeEmail',
+              'client2EstateTrusteeRelationship','client2EstateTrusteeIsCanadaResident',
+              'client2EstateTrusteeCountry','client2EstateTrusteeProvince','client2EstateTrusteeCity',
+              'client2EstateTrusteeHasDocCopy','client2HasAlternateEstateTrustee',
+              'client2AlternateEstateTrustee1Name','client2AlternateEstateTrustee1Phone',
+              'client2AlternateEstateTrustee1Email','client2AlternateEstateTrustee1Relationship',
+              'client2AlternateEstateTrustee1IsCanadaResident','client2AlternateEstateTrustee1Country',
+              'client2AlternateEstateTrustee1Province','client2AlternateEstateTrustee1City',
+              'client2AlternateEstateTrustee1HasDocCopy','client2HasAlternateEstateTrustee2',
+              'client2AlternateEstateTrustee2Name','client2AlternateEstateTrustee2Phone',
+              'client2AlternateEstateTrustee2Email','client2AlternateEstateTrustee2Relationship',
+              'client2AlternateEstateTrustee2IsCanadaResident','client2AlternateEstateTrustee2Country',
+              'client2AlternateEstateTrustee2Province','client2AlternateEstateTrustee2City',
+              'client2AlternateEstateTrustee2HasDocCopy','client2HasAlternateEstateTrustee3',
+            ]);
+
             const funeralPlanningKeys = new Set([
               'client1HasFuneralArrangements','client1FuneralArrangementsLocation',
               'client1HasDiscussedFuneral','client1FuneralWrittenDown','client1FuneralDocLocation',
@@ -2643,10 +2678,13 @@ export default function StepForm({
             const client1PoaPropertyQuestions = step.questions.filter(q => client1PoaPropertyKeys.has(q.key));
             const client2PoaPropertyQuestions = step.questions.filter(q => client2PoaPropertyKeys.has(q.key));
             const funeralPlanningQuestions = step.questions.filter(q => funeralPlanningKeys.has(q.key));
+            const client1EstateTrusteeQuestions = step.questions.filter(q => client1EstateTrusteeKeys.has(q.key));
+            const client2EstateTrusteeQuestions = step.questions.filter(q => client2EstateTrusteeKeys.has(q.key));
             const otherQuestions = step.questions.filter(q =>
               !client1WillKeys.has(q.key) && !client2WillKeys.has(q.key) &&
               !client1PoaPersonalCareKeys.has(q.key) && !client2PoaPersonalCareKeys.has(q.key) &&
               !client1PoaPropertyKeys.has(q.key) && !client2PoaPropertyKeys.has(q.key) &&
+              !client1EstateTrusteeKeys.has(q.key) && !client2EstateTrusteeKeys.has(q.key) &&
               !funeralPlanningKeys.has(q.key)
             );
 
@@ -2679,6 +2717,16 @@ export default function StepForm({
                 {hasSpouse && (
                   <Subsection title={`${client2Name} — Power of Attorney for Property`}>
                     {client2PoaPropertyQuestions.map(q => renderPoaPropertyQuestion2(q))}
+                  </Subsection>
+                )}
+
+                <Subsection title={`${client1Name} — Estate Trustee (Executor)`}>
+                  {client1EstateTrusteeQuestions.map(q => renderQuestion(q))}
+                </Subsection>
+
+                {hasSpouse && (
+                  <Subsection title={`${client2Name} — Estate Trustee (Executor)`}>
+                    {client2EstateTrusteeQuestions.map(q => renderQuestion(q))}
                   </Subsection>
                 )}
 

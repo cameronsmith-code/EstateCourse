@@ -1112,11 +1112,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter full name',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -1126,11 +1123,8 @@ export const STEPS: Step[] = [
         type: 'tel',
         placeholder: 'Enter phone number',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -1140,11 +1134,8 @@ export const STEPS: Step[] = [
         type: 'email',
         placeholder: 'Enter email address',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -1157,11 +1148,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter relationship',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -1174,11 +1162,8 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -1188,11 +1173,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter country',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1AlternatePoaPersonalCare1IsCanadaResident === 'no';
         },
@@ -1217,11 +1199,8 @@ export const STEPS: Step[] = [
           { value: 'yukon', label: 'Yukon' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1AlternatePoaPersonalCare1IsCanadaResident === 'yes';
         },
@@ -1232,11 +1211,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter city',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -1253,11 +1229,8 @@ export const STEPS: Step[] = [
           { value: 'no_not_discussed', label: 'No, this has not been discussed' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -1270,11 +1243,8 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -1284,11 +1254,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter full name',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -1299,11 +1266,8 @@ export const STEPS: Step[] = [
         type: 'tel',
         placeholder: 'Enter phone number',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -1314,11 +1278,8 @@ export const STEPS: Step[] = [
         type: 'email',
         placeholder: 'Enter email address',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -1332,11 +1293,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter relationship',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -1350,11 +1308,8 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -1365,11 +1320,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter country',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client1AlternatePoaPersonalCare2IsCanadaResident === 'no';
@@ -1395,11 +1347,8 @@ export const STEPS: Step[] = [
           { value: 'yukon', label: 'Yukon' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client1AlternatePoaPersonalCare2IsCanadaResident === 'yes';
@@ -1411,11 +1360,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter city',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -1433,11 +1379,8 @@ export const STEPS: Step[] = [
           { value: 'no_not_discussed', label: 'No, this has not been discussed' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -1451,11 +1394,8 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client1HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') &&
                  formData.client1HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client1HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -2063,11 +2003,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter full name',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -2077,11 +2014,8 @@ export const STEPS: Step[] = [
         type: 'tel',
         placeholder: 'Enter phone number',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -2091,11 +2025,8 @@ export const STEPS: Step[] = [
         type: 'email',
         placeholder: 'Enter email address',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -2108,11 +2039,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter relationship',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -2125,11 +2053,8 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -2139,11 +2064,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter country',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2AlternatePoaPersonalCare1IsCanadaResident === 'no';
         },
@@ -2168,11 +2090,8 @@ export const STEPS: Step[] = [
           { value: 'yukon', label: 'Yukon' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2AlternatePoaPersonalCare1IsCanadaResident === 'yes';
         },
@@ -2183,11 +2102,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter city',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -2205,11 +2121,8 @@ export const STEPS: Step[] = [
           { value: 'no_not_discussed', label: 'No, this has not been discussed' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -2226,11 +2139,8 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes';
         },
       },
@@ -2240,11 +2150,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter full name',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -2255,11 +2162,8 @@ export const STEPS: Step[] = [
         type: 'tel',
         placeholder: 'Enter phone number',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -2270,11 +2174,8 @@ export const STEPS: Step[] = [
         type: 'email',
         placeholder: 'Enter email address',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -2288,11 +2189,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter relationship',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -2306,11 +2204,8 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -2321,11 +2216,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter country',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2AlternatePoaPersonalCare2IsCanadaResident === 'no';
@@ -2351,11 +2243,8 @@ export const STEPS: Step[] = [
           { value: 'yukon', label: 'Yukon' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2AlternatePoaPersonalCare2IsCanadaResident === 'yes';
@@ -2367,11 +2256,8 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter city',
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -2390,11 +2276,8 @@ export const STEPS: Step[] = [
           { value: 'no_not_discussed', label: 'No, this has not been discussed' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -2412,11 +2295,8 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+        condition: (formData: Record<string, string>) => {
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes';
         },
@@ -2431,7 +2311,6 @@ export const STEPS: Step[] = [
           const basicAnswers = allAnswers?.get(1) || {};
           const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare3 === 'yes';
@@ -2447,7 +2326,6 @@ export const STEPS: Step[] = [
           const basicAnswers = allAnswers?.get(1) || {};
           const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare3 === 'yes';
@@ -2463,7 +2341,6 @@ export const STEPS: Step[] = [
           const basicAnswers = allAnswers?.get(1) || {};
           const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare3 === 'yes';
@@ -2482,7 +2359,6 @@ export const STEPS: Step[] = [
           const basicAnswers = allAnswers?.get(1) || {};
           const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare3 === 'yes';
@@ -2501,7 +2377,6 @@ export const STEPS: Step[] = [
           const basicAnswers = allAnswers?.get(1) || {};
           const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare3 === 'yes';
@@ -2517,7 +2392,6 @@ export const STEPS: Step[] = [
           const basicAnswers = allAnswers?.get(1) || {};
           const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare3 === 'yes' &&
@@ -2548,7 +2422,6 @@ export const STEPS: Step[] = [
           const basicAnswers = allAnswers?.get(1) || {};
           const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare3 === 'yes' &&
@@ -2565,7 +2438,6 @@ export const STEPS: Step[] = [
           const basicAnswers = allAnswers?.get(1) || {};
           const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare3 === 'yes';
@@ -2589,7 +2461,6 @@ export const STEPS: Step[] = [
           const basicAnswers = allAnswers?.get(1) || {};
           const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
           return formData.client2HasPoaPersonalCare === 'yes' &&
-                 (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') &&
                  formData.client2HasAlternatePoaPersonalCare === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
                  formData.client2HasAlternatePoaPersonalCare3 === 'yes';

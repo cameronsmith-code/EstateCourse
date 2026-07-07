@@ -4666,6 +4666,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const client1Name = formData.fullName || 'Client 1';
     const client2Name = formData.spouseName || 'Client 2';
 
+    addSubsectionHeader(`${client1Name} — Power of Attorney for Personal Care`);
     checkPageBreak(40);
 
     doc.setFontSize(10);
@@ -5024,6 +5025,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const client1Name = formData.fullName || 'Client 1';
     const client2Name = formData.spouseName || 'Client 2';
 
+    addSubsectionHeader(`${client2Name} — Power of Attorney for Personal Care`);
     checkPageBreak(40);
 
     doc.setFontSize(10);

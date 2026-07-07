@@ -2429,6 +2429,45 @@ export default function StepForm({
               'client2SecondaryWillDate','client2HasWillMeaningfulChanges',
               'client2WillMeaningfulChangesDetails',
             ]);
+            const client1PoaPersonalCareKeys = new Set([
+              'client1HasPoaPersonalCare','client1SpouseIsPoaPersonalCare',
+              'client1PoaPersonalCareName','client1PoaPersonalCarePhone','client1PoaPersonalCareEmail',
+              'client1PoaPersonalCareRelationship','client1PoaPersonalCareIsCanadaResident',
+              'client1PoaPersonalCareCountry','client1PoaPersonalCareProvince','client1PoaPersonalCareCity',
+              'client1PoaPersonalCareHasDocCopy','client1HasAlternatePoaPersonalCare',
+              'client1AlternatePoaPersonalCare1Name','client1AlternatePoaPersonalCare1Phone',
+              'client1AlternatePoaPersonalCare1Email','client1AlternatePoaPersonalCare1Relationship',
+              'client1AlternatePoaPersonalCare1IsCanadaResident','client1AlternatePoaPersonalCare1Country',
+              'client1AlternatePoaPersonalCare1Province','client1AlternatePoaPersonalCare1City',
+              'client1AlternatePoaPersonalCare1HasDocCopy','client1HasAlternatePoaPersonalCare2',
+              'client1AlternatePoaPersonalCare2Name','client1AlternatePoaPersonalCare2Phone',
+              'client1AlternatePoaPersonalCare2Email','client1AlternatePoaPersonalCare2Relationship',
+              'client1AlternatePoaPersonalCare2IsCanadaResident','client1AlternatePoaPersonalCare2Country',
+              'client1AlternatePoaPersonalCare2Province','client1AlternatePoaPersonalCare2City',
+              'client1AlternatePoaPersonalCare2HasDocCopy','client1HasAlternatePoaPersonalCare3',
+            ]);
+            const client2PoaPersonalCareKeys = new Set([
+              'client2HasPoaPersonalCare','client2SpouseIsPoaPersonalCare',
+              'client2PoaPersonalCareName','client2PoaPersonalCarePhone','client2PoaPersonalCareEmail',
+              'client2PoaPersonalCareRelationship','client2PoaPersonalCareIsCanadaResident',
+              'client2PoaPersonalCareCountry','client2PoaPersonalCareProvince','client2PoaPersonalCareCity',
+              'client2PoaPersonalCareHasDocCopy','client2HasAlternatePoaPersonalCare',
+              'client2AlternatePoaPersonalCare1Name','client2AlternatePoaPersonalCare1Phone',
+              'client2AlternatePoaPersonalCare1Email','client2AlternatePoaPersonalCare1Relationship',
+              'client2AlternatePoaPersonalCare1IsCanadaResident','client2AlternatePoaPersonalCare1Country',
+              'client2AlternatePoaPersonalCare1Province','client2AlternatePoaPersonalCare1City',
+              'client2AlternatePoaPersonalCare1HasDocCopy','client2HasAlternatePoaPersonalCare2',
+              'client2AlternatePoaPersonalCare2Name','client2AlternatePoaPersonalCare2Phone',
+              'client2AlternatePoaPersonalCare2Email','client2AlternatePoaPersonalCare2Relationship',
+              'client2AlternatePoaPersonalCare2IsCanadaResident','client2AlternatePoaPersonalCare2Country',
+              'client2AlternatePoaPersonalCare2Province','client2AlternatePoaPersonalCare2City',
+              'client2AlternatePoaPersonalCare2HasDocCopy','client2HasAlternatePoaPersonalCare3',
+              'client2AlternatePoaPersonalCare3Name','client2AlternatePoaPersonalCare3Phone',
+              'client2AlternatePoaPersonalCare3Email','client2AlternatePoaPersonalCare3Relationship',
+              'client2AlternatePoaPersonalCare3IsCanadaResident','client2AlternatePoaPersonalCare3Country',
+              'client2AlternatePoaPersonalCare3Province','client2AlternatePoaPersonalCare3City',
+              'client2AlternatePoaPersonalCare3HasDocCopy',
+            ]);
 
             const renderQuestion = (question: typeof step.questions[0]) => {
               if (question.condition && !question.condition(answers)) return null;
@@ -2469,7 +2508,12 @@ export default function StepForm({
 
             const client1WillQuestions = step.questions.filter(q => client1WillKeys.has(q.key));
             const client2WillQuestions = step.questions.filter(q => client2WillKeys.has(q.key));
-            const otherQuestions = step.questions.filter(q => !client1WillKeys.has(q.key) && !client2WillKeys.has(q.key));
+            const client1PoaPersonalCareQuestions = step.questions.filter(q => client1PoaPersonalCareKeys.has(q.key));
+            const client2PoaPersonalCareQuestions = step.questions.filter(q => client2PoaPersonalCareKeys.has(q.key));
+            const otherQuestions = step.questions.filter(q =>
+              !client1WillKeys.has(q.key) && !client2WillKeys.has(q.key) &&
+              !client1PoaPersonalCareKeys.has(q.key) && !client2PoaPersonalCareKeys.has(q.key)
+            );
 
             return (
               <>
@@ -2479,10 +2523,17 @@ export default function StepForm({
 
                 {hasSpouse && (
                   <Subsection title={`${client2Name} — Will`}>
-                    {client2WillQuestions.map(q => {
-                      if (q.key.startsWith('client2') && q.key.includes('Will') && !hasSpouse) return null;
-                      return renderQuestion(q);
-                    })}
+                    {client2WillQuestions.map(q => renderQuestion(q))}
+                  </Subsection>
+                )}
+
+                <Subsection title={`${client1Name} — Power of Attorney for Personal Care`}>
+                  {client1PoaPersonalCareQuestions.map(q => renderQuestion(q))}
+                </Subsection>
+
+                {hasSpouse && (
+                  <Subsection title={`${client2Name} — Power of Attorney for Personal Care`}>
+                    {client2PoaPersonalCareQuestions.map(q => renderQuestion(q))}
                   </Subsection>
                 )}
 

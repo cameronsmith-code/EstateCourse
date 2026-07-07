@@ -2470,7 +2470,7 @@ export default function StepForm({
             ]);
 
             const renderQuestion = (question: typeof step.questions[0]) => {
-              if (question.condition && !question.condition(answers)) return null;
+              if (question.condition && !question.condition(answers, allAnswers)) return null;
 
               let customLabel = typeof question.label === 'function'
                 ? question.label(allAnswers || new Map())
@@ -2529,7 +2529,7 @@ export default function StepForm({
               answers['client1PoaPropertySameAsPersonalCare'] === 'yes';
 
             const renderPoaPropertyQuestion = (question: typeof step.questions[0]) => {
-              if (question.condition && !question.condition(answers)) return null;
+              if (question.condition && !question.condition(answers, allAnswers)) return null;
               const prefillKeys = new Set([
                 'client1PoaPropertyName','client1PoaPropertyPhone','client1PoaPropertyEmail',
                 'client1PoaPropertyRelationship','client1PoaPropertyIsCanadaResident',
@@ -2591,7 +2591,7 @@ export default function StepForm({
               answers['client2PoaPropertySameAsPersonalCare'] === 'yes';
 
             const renderPoaPropertyQuestion2 = (question: typeof step.questions[0]) => {
-              if (question.condition && !question.condition(answers)) return null;
+              if (question.condition && !question.condition(answers, allAnswers)) return null;
               const prefillKeys2 = new Set([
                 'client2PoaPropertyName','client2PoaPropertyPhone','client2PoaPropertyEmail',
                 'client2PoaPropertyRelationship','client2PoaPropertyIsCanadaResident',

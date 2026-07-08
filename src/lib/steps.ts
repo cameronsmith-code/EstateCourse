@@ -31,7 +31,7 @@ export type Step = {
 export const STEPS: Step[] = [
   {
     id: 1,
-    title: 'Basic Information',
+    title: 'About You',
     description: 'Let\'s get started with a few quick questions',
     questions: [
       {

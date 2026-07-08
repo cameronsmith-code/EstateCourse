@@ -5666,6 +5666,7 @@ export default function StepForm({
                   (s2['client1PreviousRelationshipsData'] as Array<Record<string,string>> || []).forEach(r => { if (r?.name && !knownNames.includes(r.name)) knownNames.push(r.name); });
                   (s2['client2PreviousRelationshipsData'] as Array<Record<string,string>> || []).forEach(r => { if (r?.name && !knownNames.includes(r.name)) knownNames.push(r.name); });
                   (s3['childrenData'] as Array<Record<string,string>> || []).forEach(c => { if (c?.name && !knownNames.includes(c.name)) knownNames.push(c.name); });
+                  if (!knownNames.includes('Estate')) knownNames.push('Estate');
 
                   const selectedTypes = (answers['client1RegisteredAccountTypes'] as string[]) || [];
                   const accountData = (answers['client1RegisteredAccountData'] as Record<string, Array<Record<string, unknown>>>) || {};
@@ -5742,6 +5743,31 @@ export default function StepForm({
                     const totalPct = allBens.reduce((sum, n) => sum + (parseFloat(benPcts[n] || '0') || 0), 0);
                     const pctValid = Math.abs(totalPct - 100) < 0.01;
 
+                    const isSingle = hasMultipleBen === 'no';
+                    const singleIsCustom = isSingle && customBens.length > 0;
+                    const singleSelected = isSingle ? (singleIsCustom ? '__custom__' : (selectedKnown[0] || '')) : '';
+
+                    const selectSingleBen = (name: string, isCustom: boolean) => {
+                      const cur = [...getInsts(typeKey)];
+                      cur[instIdx] = {
+                        ...cur[instIdx],
+                        selectedKnownBeneficiaries: isCustom ? [] : [name],
+                        customBeneficiaries: isCustom ? [''] : [],
+                        beneficiaryPercentages: isCustom ? {} : { [name]: '100' },
+                      };
+                      setInsts(typeKey, cur);
+                    };
+
+                    const updateSingleCustomBen = (value: string) => {
+                      const cur = [...getInsts(typeKey)];
+                      cur[instIdx] = {
+                        ...cur[instIdx],
+                        customBeneficiaries: [value],
+                        beneficiaryPercentages: value.trim() ? { [value]: '100' } : {},
+                      };
+                      setInsts(typeKey, cur);
+                    };
+
                     return (
                       <div className="mt-3 space-y-4 pl-4 border-l-2 border-gray-500">
                         <div>
@@ -5758,7 +5784,6 @@ export default function StepForm({
                           </div>
                         </div>
 
-
                         {hasPrimaryBen === 'yes' && (
                           <>
                             <div>
@@ -5767,7 +5792,11 @@ export default function StepForm({
                                 {(['yes', 'no'] as const).map(opt => (
                                   <label key={opt} className="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name={`mben-${typeKey}-${instIdx}`} value={opt} checked={hasMultipleBen === opt}
-                                      onChange={() => updateInstField(typeKey, instIdx, 'hasMultipleBeneficiaries', opt)}
+                                      onChange={() => {
+                                        const cur = [...getInsts(typeKey)];
+                                        cur[instIdx] = { ...cur[instIdx], hasMultipleBeneficiaries: opt, selectedKnownBeneficiaries: [], customBeneficiaries: [], beneficiaryPercentages: {} };
+                                        setInsts(typeKey, cur);
+                                      }}
                                       className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
                                     <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
                                   </label>
@@ -5775,11 +5804,37 @@ export default function StepForm({
                               </div>
                             </div>
 
-                            {hasMultipleBen && (
+                            {isSingle && (
                               <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-300">
-                                  Select primary beneficiar{hasMultipleBen === 'yes' ? 'ies' : 'y'}:
+                                <label className="block text-sm font-medium text-gray-300">Select primary beneficiary:</label>
+                                {knownNames.map(name => (
+                                  <label key={name} className="flex items-center gap-3 cursor-pointer">
+                                    <input type="radio" name={`sben-${typeKey}-${instIdx}`} value={name}
+                                      checked={singleSelected === name}
+                                      onChange={() => selectSingleBen(name, false)}
+                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                    <span className="text-white text-sm">{name}</span>
+                                  </label>
+                                ))}
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                  <input type="radio" name={`sben-${typeKey}-${instIdx}`} value="__custom__"
+                                    checked={singleSelected === '__custom__'}
+                                    onChange={() => selectSingleBen('', true)}
+                                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                  <span className="text-white text-sm">Other</span>
                                 </label>
+                                {singleIsCustom && (
+                                  <input type="text" value={customBens[0] || ''}
+                                    onChange={e => updateSingleCustomBen(e.target.value)}
+                                    placeholder="Enter beneficiary name"
+                                    className="ml-7 w-full max-w-xs px-3 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                )}
+                              </div>
+                            )}
+
+                            {!isSingle && hasMultipleBen === 'yes' && (
+                              <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-300">Select primary beneficiaries:</label>
                                 {knownNames.map(name => (
                                   <label key={name} className="flex items-center gap-3 cursor-pointer">
                                     <input type="checkbox" checked={selectedKnown.includes(name)}
@@ -5825,7 +5880,17 @@ export default function StepForm({
                               </div>
                             )}
 
-                            {allBens.length > 0 && (
+                            {allBens.length > 0 && isSingle && (
+                              <div className="pl-4 border-l-2 border-blue-500/40">
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Beneficial Ownership:</label>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-white text-sm w-40 shrink-0 truncate">{allBens[0]}</span>
+                                  <span className="text-green-400 text-sm font-medium">100%</span>
+                                </div>
+                              </div>
+                            )}
+
+                            {allBens.length > 0 && !isSingle && (
                               <div className="space-y-3 pl-4 border-l-2 border-blue-500/40">
                                 <label className="block text-sm font-medium text-gray-300">Beneficial Ownership %: (must total 100%)</label>
                                 {allBens.map(name => (

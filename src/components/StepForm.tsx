@@ -5018,7 +5018,11 @@ export default function StepForm({
 
             return (
               <>
-                <h2 className="text-lg font-semibold text-white mb-4">Personal Banking Information:</h2>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-px flex-1 bg-gradient-to-r from-blue-500/50 to-transparent" />
+                  <h3 className="text-sm font-semibold tracking-widest text-blue-400 uppercase whitespace-nowrap">Personal Banking Information</h3>
+                  <div className="h-px flex-1 bg-gradient-to-l from-blue-500/50 to-transparent" />
+                </div>
                 {step.questions.map((question) => {
                   if (question.key === 'bankingStructure' && !hasSpouse) {
                     return null;
@@ -5542,7 +5546,11 @@ export default function StepForm({
                     />
                   );
                 })}
-                <h2 className="text-lg font-semibold text-white mt-8 mb-4">Investment Account Information: ({client1Name})</h2>
+                <div className="flex items-center gap-3 mt-8 mb-5">
+                  <div className="h-px flex-1 bg-gradient-to-r from-blue-500/50 to-transparent" />
+                  <h3 className="text-sm font-semibold tracking-widest text-blue-400 uppercase whitespace-nowrap">Investment Account Information: ({client1Name})</h3>
+                  <div className="h-px flex-1 bg-gradient-to-l from-blue-500/50 to-transparent" />
+                </div>
               </>
             );
           })()}

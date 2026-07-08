@@ -657,3462 +657,6 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 14,
-    title: 'Who is on your Team?',
-    description: 'This section lists the core professionals who already know your history.',
-    questions: [
-      {
-        key: 'client1HasWill',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName || 'Client 1';
-          return `${client1Name}, do you have a Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'client1WillYear',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, in what year was your most recent Will prepared?`;
-        },
-        type: 'select',
-        placeholder: 'Select year',
-        options: generateYearOptions,
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
-        key: 'client1WillPreparedInCanada',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, was your Will prepared in Canada?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
-        key: 'client1WillCountry',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `In what country was ${client1FirstName}'s Will prepared in?`;
-        },
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1WillPreparedInCanada === 'no',
-      },
-      {
-        key: 'client1WillProvince',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `In what Province/Territory was ${client1FirstName}'s Will prepared in?`;
-        },
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1WillPreparedInCanada === 'yes',
-      },
-      {
-        key: 'client1WillStorageLocation',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, where is your most recent Will stored ('wet ink'/original copy)?`;
-        },
-        type: 'text',
-        placeholder: 'Enter storage location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
-        key: 'client1HasDigitalWillCopy',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, do you have a digital copy safely stored?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
-        key: 'client1DigitalWillLocation',
-        label: 'Where is the digital copy stored?',
-        type: 'text',
-        placeholder: 'Enter digital storage location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasDigitalWillCopy === 'yes',
-      },
-      {
-        key: 'client1HasSecondaryWill',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, do you have a Secondary Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
-        key: 'client1SecondaryWillSameTimeAndJurisdiction',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, was the Secondary Will prepared at the same time and same jurisdiction as the Primary Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes',
-      },
-      {
-        key: 'client1SecondaryWillJurisdiction',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, in what jurisdiction was your Secondary Will prepared in?`;
-        },
-        type: 'text',
-        placeholder: 'Enter jurisdiction',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillSameTimeAndJurisdiction === 'no',
-      },
-      {
-        key: 'client1SecondaryWillDate',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, what date was your Secondary Will prepared on?`;
-        },
-        type: 'date',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillSameTimeAndJurisdiction === 'no',
-      },
-      {
-        key: 'client1HasWillMeaningfulChanges',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, since creating your Will, have there been any meaningful changes in your life, family, or financial situation that could affect your wishes? Such as:\n• Marriage, separation, or divorce\n• Birth or adoption of children/grandchildren\n• Death or incapacity of a beneficiary, executor, or guardian\n• Significant changes in assets (real estate, business interests, investments)\n• Changes in residency or tax jurisdiction`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
-      },
-      {
-        key: 'client1WillMeaningfulChangesDetails',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, please describe the meaningful changes:`;
-        },
-        type: 'textarea',
-        placeholder: 'Describe the meaningful changes',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasWillMeaningfulChanges === 'yes',
-      },
-      {
-        key: 'client1HasHensonTrust',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          const childrenData = answers.get(3)?.childrenData as any[];
-          const disabledChild = childrenData?.find((child: any) => child?.disabled === 'yes');
-          const disabledChildName = disabledChild?.name || 'your disabled child';
-          return `${client1Name}, with respect to ${disabledChildName}, have you included an 'Absolute Discretionary Trust' ("Henson Trust" in Ontario) in your Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          const childrenData = formData.childrenData as any;
-          const hasDisabledChild = childrenData && Array.isArray(childrenData) && childrenData.some((child: any) => child?.disabled === 'yes');
-          return formData.client1HasWill === 'yes' && hasDisabledChild;
-        },
-      },
-      {
-        key: 'client2HasWill',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName || 'Client 2';
-          return `${client2Name}, do you have a Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2WillYear',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, in what year was your most recent Will prepared?`;
-        },
-        type: 'select',
-        placeholder: 'Select year',
-        options: generateYearOptions,
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
-      },
-      {
-        key: 'client2WillPreparedInCanada',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, was your Will prepared in Canada?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
-      },
-      {
-        key: 'client2WillCountry',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `In what country was ${client2FirstName}'s Will prepared in?`;
-        },
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2WillPreparedInCanada === 'no',
-      },
-      {
-        key: 'client2WillProvince',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `In what Province/Territory was ${client2FirstName}'s Will prepared in?`;
-        },
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2WillPreparedInCanada === 'yes',
-      },
-      {
-        key: 'client2WillStorageLocation',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, where is your most recent Will stored ('wet ink'/original copy)?`;
-        },
-        type: 'text',
-        placeholder: 'Enter storage location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
-      },
-      {
-        key: 'client2HasDigitalWillCopy',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, do you have a digital copy safely stored?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
-      },
-      {
-        key: 'client2DigitalWillLocation',
-        label: 'Where is the digital copy stored?',
-        type: 'text',
-        placeholder: 'Enter digital storage location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasDigitalWillCopy === 'yes',
-      },
-      {
-        key: 'client2HasSecondaryWill',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, do you have a Secondary Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
-      },
-      {
-        key: 'client2SecondaryWillSameTimeAndJurisdiction',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, was the Secondary Will prepared at the same time and same jurisdiction as the Primary Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasSecondaryWill === 'yes',
-      },
-      {
-        key: 'client2SecondaryWillJurisdiction',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, in what jurisdiction was your Secondary Will prepared in?`;
-        },
-        type: 'text',
-        placeholder: 'Enter jurisdiction',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillSameTimeAndJurisdiction === 'no',
-      },
-      {
-        key: 'client2SecondaryWillDate',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, what date was your Secondary Will prepared on?`;
-        },
-        type: 'date',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillSameTimeAndJurisdiction === 'no',
-      },
-      {
-        key: 'client2HasWillMeaningfulChanges',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, since creating your Will, have there been any meaningful changes in your life, family, or financial situation that could affect your wishes? Such as:\n• Marriage, separation, or divorce\n• Birth or adoption of children/grandchildren\n• Death or incapacity of a beneficiary, executor, or guardian\n• Significant changes in assets (real estate, business interests, investments)\n• Changes in residency or tax jurisdiction`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
-      },
-      {
-        key: 'client2WillMeaningfulChangesDetails',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, please describe the meaningful changes:`;
-        },
-        type: 'textarea',
-        placeholder: 'Describe the meaningful changes',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasWillMeaningfulChanges === 'yes',
-      },
-      {
-        key: 'client1HasPoaPersonalCare',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `${client1Name}, have you named a Power of Attorney for Personal Care?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'client1SpouseIsPoaPersonalCare',
-        label: (answers) => {
-          const spouseName = answers.get(1)?.spouseName as string || 'your spouse or common law partner';
-          return `Is ${spouseName} your Power of Attorney for Personal Care?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const maritalStatus = basicAnswers.maritalStatus as string;
-          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
-          return formData.client1HasPoaPersonalCare === 'yes' && hasSpouse;
-        },
-      },
-      {
-        key: 'client1PoaPersonalCareName',
-        label: "Power of Attorney for Personal Care's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPersonalCarePhone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPersonalCareEmail',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPersonalCareRelationship',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Relationship to ${client1Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPersonalCareIsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPersonalCareCountry',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') && formData.client1PoaPersonalCareIsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client1PoaPersonalCareProvince',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') && formData.client1PoaPersonalCareIsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client1PoaPersonalCareCity',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPersonalCareHasDocCopy',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1HasAlternatePoaPersonalCare',
-        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare1Name',
-        label: "Alternate Power of Attorney for Personal Care's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare1Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare1Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare1Relationship',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Relationship to ${client1Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare1IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare1Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1AlternatePoaPersonalCare1IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare1Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1AlternatePoaPersonalCare1IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare1City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare1HasDocCopy',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client1HasAlternatePoaPersonalCare2',
-        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare2Name',
-        label: "Alternate Power of Attorney for Personal Care's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare2Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare2Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare2Relationship',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Relationship to ${client1Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare2IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare2Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client1AlternatePoaPersonalCare2IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare2Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client1AlternatePoaPersonalCare2IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare2City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaPersonalCare2HasDocCopy',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client1HasAlternatePoaPersonalCare3',
-        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client1HasPoaProperty',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `${client1Name}, have you named a Power of Attorney for Property?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'client1PoaPropertySameAsPersonalCare',
-        label: 'Is it the same person as your Power of Attorney for Personal Care?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' && formData.client1HasPoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client1PoaPropertyName',
-        label: "Power of Attorney for Property's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPropertyPhone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPropertyEmail',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPropertyRelationship',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Relationship to ${client1Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPropertyIsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPropertyCountry',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no') &&
-            formData.client1PoaPropertyIsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client1PoaPropertyProvince',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no') &&
-            formData.client1PoaPropertyIsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client1PoaPropertyCity',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client1PoaPropertyHasDocCopy',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, does this person have a copy of your most recent Power of Attorney for Property document?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client1HasAlternatePoaProperty',
-        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty1Name',
-        label: "Alternate Power of Attorney for Property's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty1Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty1Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty1Relationship',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Relationship to ${client1Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty1IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty1Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1AlternatePoaProperty1IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty1Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1AlternatePoaProperty1IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty1City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client1HasAlternatePoaProperty2',
-        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty2Name',
-        label: "Alternate Power of Attorney for Property's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty2Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty2Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty2Relationship',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Relationship to ${client1Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty2IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty2Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty2 === 'yes' &&
-            formData.client1AlternatePoaProperty2IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty2Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty2 === 'yes' &&
-            formData.client1AlternatePoaProperty2IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternatePoaProperty2City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client1HasAlternatePoaProperty3',
-        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasPoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty === 'yes' &&
-            formData.client1HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client2HasPoaPersonalCare',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `${client2Name}, have you named a Power of Attorney for Personal Care?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2SpouseIsPoaPersonalCare',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Is ${client1Name} your Power of Attorney for Personal Care?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const maritalStatus = basicAnswers.maritalStatus as string;
-          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
-          return formData.client2HasPoaPersonalCare === 'yes' && hasSpouse;
-        },
-      },
-      {
-        key: 'client2PoaPersonalCareName',
-        label: "Power of Attorney for Personal Care's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPersonalCarePhone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPersonalCareEmail',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPersonalCareRelationship',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Relationship to ${client2Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPersonalCareIsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPersonalCareCountry',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') && formData.client2PoaPersonalCareIsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client2PoaPersonalCareProvince',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') && formData.client2PoaPersonalCareIsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client2PoaPersonalCareCity',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPersonalCareHasDocCopy',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2HasAlternatePoaPersonalCare',
-        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare1Name',
-        label: "Alternate Power of Attorney for Personal Care's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare1Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare1Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare1Relationship',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Relationship to ${client2Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare1IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare1Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2AlternatePoaPersonalCare1IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare1Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2AlternatePoaPersonalCare1IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare1City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare1HasDocCopy',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client2HasAlternatePoaPersonalCare2',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, have you named an additional alternate attorney, should this person be unable or unwilling to act?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare2Name',
-        label: "Alternate Power of Attorney for Personal Care's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare2Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare2Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare2Relationship',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Relationship to ${client2Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare2IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare2Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2AlternatePoaPersonalCare2IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare2Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2AlternatePoaPersonalCare2IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare2City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare2HasDocCopy',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client2HasAlternatePoaPersonalCare3',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, have you named an additional alternate attorney, should this person be unable or unwilling to act?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare3Name',
-        label: "Alternate Power of Attorney for Personal Care's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare3Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare3Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare3Relationship',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Relationship to ${client2Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare3IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare3Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare3 === 'yes' &&
-                 formData.client2AlternatePoaPersonalCare3IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare3Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare3 === 'yes' &&
-                 formData.client2AlternatePoaPersonalCare3IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare3City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaPersonalCare3HasDocCopy',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasPoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
-                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
-        },
-      },
-      {
-        key: 'client2HasPoaProperty',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `${client2Name}, have you named a Power of Attorney for Property?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          return !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-        },
-      },
-      {
-        key: 'client2PoaPropertySameAsPersonalCare',
-        label: 'Is it the same person as your Power of Attorney for Personal Care?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasPoaPersonalCare === 'yes';
-        },
-      },
-      {
-        key: 'client2PoaPropertyName',
-        label: "Power of Attorney for Property's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPropertyPhone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPropertyEmail',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPropertyRelationship',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Relationship to ${client2Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPropertyIsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPropertyCountry',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no') &&
-            formData.client2PoaPropertyIsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client2PoaPropertyProvince',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no') &&
-            formData.client2PoaPropertyIsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client2PoaPropertyCity',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
-        },
-      },
-      {
-        key: 'client2PoaPropertyHasDocCopy',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, does this person have a copy of your most recent Power of Attorney for Property document?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client2HasAlternatePoaProperty',
-        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty1Name',
-        label: "Alternate Power of Attorney for Property's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty1Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty1Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty1Relationship',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Relationship to ${client2Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty1IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty1Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2AlternatePoaProperty1IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty1Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2AlternatePoaProperty1IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty1City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client2HasAlternatePoaProperty2',
-        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty2Name',
-        label: "Alternate Power of Attorney for Property's Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty2Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty2Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty2Relationship',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Relationship to ${client2Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty2IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty2Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty2 === 'yes' &&
-            formData.client2AlternatePoaProperty2IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty2Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty2 === 'yes' &&
-            formData.client2AlternatePoaProperty2IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternatePoaProperty2City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      {
-        key: 'client2HasAlternatePoaProperty3',
-        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty === 'yes' &&
-            formData.client2HasAlternatePoaProperty2 === 'yes';
-        },
-      },
-      // ── Client 1 Estate Trustee (Executor) ──────────────────────────────────
-      {
-        key: 'client1HasEstateTrustee',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `${client1Name}, have you named an Estate Trustee (Executor) in your Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client1SpouseIsEstateTrustee',
-        label: (answers) => {
-          const spouseName = answers.get(1)?.spouseName as string || 'your spouse or common law partner';
-          return `Is ${spouseName} your Estate Trustee (Executor)?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const maritalStatus = basicAnswers.maritalStatus as string;
-          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
-          return formData.client1HasEstateTrustee === 'yes' && !!hasSpouse;
-        },
-      },
-      {
-        key: 'client1EstateTrusteeName',
-        label: "Estate Trustee (Executor)'s Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client1EstateTrusteePhone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client1EstateTrusteeEmail',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client1EstateTrusteeRelationship',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Relationship to ${client1Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client1EstateTrusteeIsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client1EstateTrusteeCountry',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no') && formData.client1EstateTrusteeIsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client1EstateTrusteeProvince',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no') && formData.client1EstateTrusteeIsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client1EstateTrusteeCity',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client1EstateTrusteeHasDocCopy',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, does this person have a copy of your most recent Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client1HasAlternateEstateTrustee',
-        label: 'Have you named an alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee1Name',
-        label: "Alternate Estate Trustee (Executor)'s Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee1Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee1Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee1Relationship',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Relationship to ${client1Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee1IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee1Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1AlternateEstateTrustee1IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee1Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1AlternateEstateTrustee1IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee1City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee1HasDocCopy',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, does this person have a copy of your most recent Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client1HasAlternateEstateTrustee2',
-        label: 'Have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee2Name',
-        label: "Alternate Estate Trustee (Executor)'s Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee2Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee2Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee2Relationship',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Relationship to ${client1Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee2IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee2Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes' && formData.client1AlternateEstateTrustee2IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee2Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes' && formData.client1AlternateEstateTrustee2IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee2City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client1AlternateEstateTrustee2HasDocCopy',
-        label: (answers) => {
-          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
-          return `${client1FirstName}, does this person have a copy of your most recent Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client1HasAlternateEstateTrustee3',
-        label: 'Have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      // ── Client 2 Estate Trustee (Executor) ──────────────────────────────────
-      {
-        key: 'client2HasEstateTrustee',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `${client2Name}, have you named an Estate Trustee (Executor) in your Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          return !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-        },
-      },
-      {
-        key: 'client2SpouseIsEstateTrustee',
-        label: (answers) => {
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Is ${client1Name} your Estate Trustee (Executor)?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const maritalStatus = basicAnswers.maritalStatus as string;
-          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
-          return formData.client2HasEstateTrustee === 'yes' && !!hasSpouse;
-        },
-      },
-      {
-        key: 'client2EstateTrusteeName',
-        label: "Estate Trustee (Executor)'s Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client2EstateTrusteePhone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client2EstateTrusteeEmail',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client2EstateTrusteeRelationship',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Relationship to ${client2Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client2EstateTrusteeIsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client2EstateTrusteeCountry',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no') && formData.client2EstateTrusteeIsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client2EstateTrusteeProvince',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no') && formData.client2EstateTrusteeIsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client2EstateTrusteeCity',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client2EstateTrusteeHasDocCopy',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, does this person have a copy of your most recent Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
-          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
-        },
-      },
-      {
-        key: 'client2HasAlternateEstateTrustee',
-        label: 'Have you named an alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee1Name',
-        label: "Alternate Estate Trustee (Executor)'s Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee1Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee1Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee1Relationship',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Relationship to ${client2Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee1IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee1Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2AlternateEstateTrustee1IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee1Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2AlternateEstateTrustee1IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee1City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee1HasDocCopy',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, does this person have a copy of your most recent Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client2HasAlternateEstateTrustee2',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee2Name',
-        label: "Alternate Estate Trustee (Executor)'s Name:",
-        type: 'text',
-        placeholder: 'Enter full name',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee2Phone',
-        label: 'Phone Number:',
-        type: 'tel',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee2Email',
-        label: 'Email Address:',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee2Relationship',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Relationship to ${client2Name}:`;
-        },
-        type: 'text',
-        placeholder: 'Enter relationship',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee2IsCanadaResident',
-        label: 'Is this person a resident of Canada?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee2Country',
-        label: 'Which country is this person a resident of?',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes' && formData.client2AlternateEstateTrustee2IsCanadaResident === 'no';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee2Province',
-        label: 'Which Province or Territory is this person a resident of?',
-        type: 'select',
-        options: [
-          { value: 'alberta', label: 'Alberta' },
-          { value: 'british_columbia', label: 'British Columbia' },
-          { value: 'manitoba', label: 'Manitoba' },
-          { value: 'new_brunswick', label: 'New Brunswick' },
-          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
-          { value: 'northwest_territories', label: 'Northwest Territories' },
-          { value: 'nova_scotia', label: 'Nova Scotia' },
-          { value: 'nunavut', label: 'Nunavut' },
-          { value: 'ontario', label: 'Ontario' },
-          { value: 'prince_edward_island', label: 'Prince Edward Island' },
-          { value: 'quebec', label: 'Quebec' },
-          { value: 'saskatchewan', label: 'Saskatchewan' },
-          { value: 'yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes' && formData.client2AlternateEstateTrustee2IsCanadaResident === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee2City',
-        label: 'City of Residence:',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client2AlternateEstateTrustee2HasDocCopy',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, does this person have a copy of your most recent Will?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, on their files' },
-          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client2HasAlternateEstateTrustee3',
-        label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client2FirstName = client2Name.split(' ')[0];
-          return `${client2FirstName}, have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
-          const basicAnswers = allAnswers?.get(1) || {};
-          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
-          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
-        },
-      },
-      {
-        key: 'client1HasFuneralArrangements',
-        label: 'Have you made arrangements for Funeral or Cemetery services?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'client1FuneralArrangementsLocation',
-        label: 'Where is this document located?',
-        type: 'text',
-        placeholder: 'Enter location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasFuneralArrangements === 'yes',
-      },
-      {
-        key: 'client1HasDiscussedFuneral',
-        label: 'Have you discussed the type of funeral you would like?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client1FuneralWrittenDown',
-        label: 'Is this written down?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasDiscussedFuneral === 'yes',
-      },
-      {
-        key: 'client1FuneralDocLocation',
-        label: 'Where is this document located?',
-        type: 'text',
-        placeholder: 'Enter location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1FuneralWrittenDown === 'yes',
-      },
-      {
-        key: 'client2HasFuneralArrangements',
-        label: 'Has your spouse made arrangements for Funeral or Cemetery services?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2FuneralArrangementsLocation',
-        label: 'Where is this document located?',
-        type: 'text',
-        placeholder: 'Enter location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasFuneralArrangements === 'yes',
-      },
-      {
-        key: 'client2HasDiscussedFuneral',
-        label: 'Has your spouse discussed the type of funeral they would like?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-      },
-      {
-        key: 'client2FuneralWrittenDown',
-        label: 'Is this written down?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasDiscussedFuneral === 'yes',
-      },
-      {
-        key: 'client2FuneralDocLocation',
-        label: 'Where is this document located?',
-        type: 'text',
-        placeholder: 'Enter location',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2FuneralWrittenDown === 'yes',
-      },
-    ],
-  },
-  {
     id: 7,
     title: 'Your Professionals',
     description: 'Information about the professionals you work with',
@@ -7955,6 +4499,3462 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+      },
+    ],
+  },
+  {
+    id: 14,
+    title: 'Who is on your Team?',
+    description: 'This section lists the core professionals who already know your history.',
+    questions: [
+      {
+        key: 'client1HasWill',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          return `${client1Name}, do you have a Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1WillYear',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, in what year was your most recent Will prepared?`;
+        },
+        type: 'select',
+        placeholder: 'Select year',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1WillPreparedInCanada',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, was your Will prepared in Canada?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1WillCountry',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `In what country was ${client1FirstName}'s Will prepared in?`;
+        },
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1WillPreparedInCanada === 'no',
+      },
+      {
+        key: 'client1WillProvince',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `In what Province/Territory was ${client1FirstName}'s Will prepared in?`;
+        },
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1WillPreparedInCanada === 'yes',
+      },
+      {
+        key: 'client1WillStorageLocation',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, where is your most recent Will stored ('wet ink'/original copy)?`;
+        },
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1HasDigitalWillCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, do you have a digital copy safely stored?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1DigitalWillLocation',
+        label: 'Where is the digital copy stored?',
+        type: 'text',
+        placeholder: 'Enter digital storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasDigitalWillCopy === 'yes',
+      },
+      {
+        key: 'client1HasSecondaryWill',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, do you have a Secondary Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1SecondaryWillSameTimeAndJurisdiction',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, was the Secondary Will prepared at the same time and same jurisdiction as the Primary Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes',
+      },
+      {
+        key: 'client1SecondaryWillJurisdiction',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, in what jurisdiction was your Secondary Will prepared in?`;
+        },
+        type: 'text',
+        placeholder: 'Enter jurisdiction',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillSameTimeAndJurisdiction === 'no',
+      },
+      {
+        key: 'client1SecondaryWillDate',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, what date was your Secondary Will prepared on?`;
+        },
+        type: 'date',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillSameTimeAndJurisdiction === 'no',
+      },
+      {
+        key: 'client1HasWillMeaningfulChanges',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, since creating your Will, have there been any meaningful changes in your life, family, or financial situation that could affect your wishes? Such as:\n• Marriage, separation, or divorce\n• Birth or adoption of children/grandchildren\n• Death or incapacity of a beneficiary, executor, or guardian\n• Significant changes in assets (real estate, business interests, investments)\n• Changes in residency or tax jurisdiction`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes',
+      },
+      {
+        key: 'client1WillMeaningfulChangesDetails',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, please describe the meaningful changes:`;
+        },
+        type: 'textarea',
+        placeholder: 'Describe the meaningful changes',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasWill === 'yes' && formData.client1HasWillMeaningfulChanges === 'yes',
+      },
+      {
+        key: 'client1HasHensonTrust',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          const childrenData = answers.get(3)?.childrenData as any[];
+          const disabledChild = childrenData?.find((child: any) => child?.disabled === 'yes');
+          const disabledChildName = disabledChild?.name || 'your disabled child';
+          return `${client1Name}, with respect to ${disabledChildName}, have you included an 'Absolute Discretionary Trust' ("Henson Trust" in Ontario) in your Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const childrenData = formData.childrenData as any;
+          const hasDisabledChild = childrenData && Array.isArray(childrenData) && childrenData.some((child: any) => child?.disabled === 'yes');
+          return formData.client1HasWill === 'yes' && hasDisabledChild;
+        },
+      },
+      {
+        key: 'client2HasWill',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          return `${client2Name}, do you have a Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2WillYear',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, in what year was your most recent Will prepared?`;
+        },
+        type: 'select',
+        placeholder: 'Select year',
+        options: generateYearOptions,
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2WillPreparedInCanada',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, was your Will prepared in Canada?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2WillCountry',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `In what country was ${client2FirstName}'s Will prepared in?`;
+        },
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2WillPreparedInCanada === 'no',
+      },
+      {
+        key: 'client2WillProvince',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `In what Province/Territory was ${client2FirstName}'s Will prepared in?`;
+        },
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2WillPreparedInCanada === 'yes',
+      },
+      {
+        key: 'client2WillStorageLocation',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, where is your most recent Will stored ('wet ink'/original copy)?`;
+        },
+        type: 'text',
+        placeholder: 'Enter storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2HasDigitalWillCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, do you have a digital copy safely stored?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2DigitalWillLocation',
+        label: 'Where is the digital copy stored?',
+        type: 'text',
+        placeholder: 'Enter digital storage location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasDigitalWillCopy === 'yes',
+      },
+      {
+        key: 'client2HasSecondaryWill',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, do you have a Secondary Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2SecondaryWillSameTimeAndJurisdiction',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, was the Secondary Will prepared at the same time and same jurisdiction as the Primary Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasSecondaryWill === 'yes',
+      },
+      {
+        key: 'client2SecondaryWillJurisdiction',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, in what jurisdiction was your Secondary Will prepared in?`;
+        },
+        type: 'text',
+        placeholder: 'Enter jurisdiction',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillSameTimeAndJurisdiction === 'no',
+      },
+      {
+        key: 'client2SecondaryWillDate',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, what date was your Secondary Will prepared on?`;
+        },
+        type: 'date',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillSameTimeAndJurisdiction === 'no',
+      },
+      {
+        key: 'client2HasWillMeaningfulChanges',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, since creating your Will, have there been any meaningful changes in your life, family, or financial situation that could affect your wishes? Such as:\n• Marriage, separation, or divorce\n• Birth or adoption of children/grandchildren\n• Death or incapacity of a beneficiary, executor, or guardian\n• Significant changes in assets (real estate, business interests, investments)\n• Changes in residency or tax jurisdiction`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes',
+      },
+      {
+        key: 'client2WillMeaningfulChangesDetails',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, please describe the meaningful changes:`;
+        },
+        type: 'textarea',
+        placeholder: 'Describe the meaningful changes',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasWill === 'yes' && formData.client2HasWillMeaningfulChanges === 'yes',
+      },
+      {
+        key: 'client1HasPoaPersonalCare',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${client1Name}, have you named a Power of Attorney for Personal Care?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1SpouseIsPoaPersonalCare',
+        label: (answers) => {
+          const spouseName = answers.get(1)?.spouseName as string || 'your spouse or common law partner';
+          return `Is ${spouseName} your Power of Attorney for Personal Care?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const maritalStatus = basicAnswers.maritalStatus as string;
+          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
+          return formData.client1HasPoaPersonalCare === 'yes' && hasSpouse;
+        },
+      },
+      {
+        key: 'client1PoaPersonalCareName',
+        label: "Power of Attorney for Personal Care's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPersonalCarePhone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPersonalCareEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPersonalCareRelationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPersonalCareIsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPersonalCareCountry',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') && formData.client1PoaPersonalCareIsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1PoaPersonalCareProvince',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no') && formData.client1PoaPersonalCareIsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1PoaPersonalCareCity',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPersonalCareHasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client1SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1HasAlternatePoaPersonalCare',
+        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare1Name',
+        label: "Alternate Power of Attorney for Personal Care's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare1Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare1Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare1Relationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare1IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare1Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1AlternatePoaPersonalCare1IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare1Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1AlternatePoaPersonalCare1IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare1City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare1HasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternatePoaPersonalCare2',
+        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare2Name',
+        label: "Alternate Power of Attorney for Personal Care's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare2Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare2Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare2Relationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare2IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare2Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client1AlternatePoaPersonalCare2IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare2Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client1AlternatePoaPersonalCare2IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare2City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaPersonalCare2HasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternatePoaPersonalCare3',
+        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client1HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client1HasPoaProperty',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${client1Name}, have you named a Power of Attorney for Property?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1PoaPropertySameAsPersonalCare',
+        label: 'Is it the same person as your Power of Attorney for Personal Care?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasPoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client1PoaPropertyName',
+        label: "Power of Attorney for Property's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyPhone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyRelationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyIsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyCountry',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no') &&
+            formData.client1PoaPropertyIsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1PoaPropertyProvince',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no') &&
+            formData.client1PoaPropertyIsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1PoaPropertyCity',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            (formData.client1HasPoaPersonalCare !== 'yes' || formData.client1PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client1PoaPropertyHasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Power of Attorney for Property document?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternatePoaProperty',
+        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Name',
+        label: "Alternate Power of Attorney for Property's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Relationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1AlternatePoaProperty1IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1AlternatePoaProperty1IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty1City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternatePoaProperty2',
+        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' && formData.client1HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Name',
+        label: "Alternate Power of Attorney for Property's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Relationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes' &&
+            formData.client1AlternatePoaProperty2IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes' &&
+            formData.client1AlternatePoaProperty2IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternatePoaProperty2City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternatePoaProperty3',
+        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasPoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty === 'yes' &&
+            formData.client1HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client2HasPoaPersonalCare',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${client2Name}, have you named a Power of Attorney for Personal Care?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2SpouseIsPoaPersonalCare',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Is ${client1Name} your Power of Attorney for Personal Care?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const maritalStatus = basicAnswers.maritalStatus as string;
+          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
+          return formData.client2HasPoaPersonalCare === 'yes' && hasSpouse;
+        },
+      },
+      {
+        key: 'client2PoaPersonalCareName',
+        label: "Power of Attorney for Personal Care's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPersonalCarePhone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPersonalCareEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPersonalCareRelationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPersonalCareIsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPersonalCareCountry',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') && formData.client2PoaPersonalCareIsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2PoaPersonalCareProvince',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no') && formData.client2PoaPersonalCareIsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2PoaPersonalCareCity',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPersonalCareHasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' && (!hasSpouse || formData.client2SpouseIsPoaPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2HasAlternatePoaPersonalCare',
+        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare1Name',
+        label: "Alternate Power of Attorney for Personal Care's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare1Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare1Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare1Relationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare1IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare1Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2AlternatePoaPersonalCare1IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare1Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2AlternatePoaPersonalCare1IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare1City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare1HasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2HasAlternatePoaPersonalCare2',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, have you named an additional alternate attorney, should this person be unable or unwilling to act?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare2Name',
+        label: "Alternate Power of Attorney for Personal Care's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare2Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare2Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare2Relationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare2IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare2Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2AlternatePoaPersonalCare2IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare2Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2AlternatePoaPersonalCare2IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare2City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare2HasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client2HasAlternatePoaPersonalCare3',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, have you named an additional alternate attorney, should this person be unable or unwilling to act?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare3Name',
+        label: "Alternate Power of Attorney for Personal Care's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare3Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare3Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare3Relationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare3IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare3Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare3 === 'yes' &&
+                 formData.client2AlternatePoaPersonalCare3IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare3Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare3 === 'yes' &&
+                 formData.client2AlternatePoaPersonalCare3IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare3City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaPersonalCare3HasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Power of Attorney for Personal Care document?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasPoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare2 === 'yes' &&
+                 formData.client2HasAlternatePoaPersonalCare3 === 'yes';
+        },
+      },
+      {
+        key: 'client2HasPoaProperty',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${client2Name}, have you named a Power of Attorney for Property?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          return !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+        },
+      },
+      {
+        key: 'client2PoaPropertySameAsPersonalCare',
+        label: 'Is it the same person as your Power of Attorney for Personal Care?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasPoaPersonalCare === 'yes';
+        },
+      },
+      {
+        key: 'client2PoaPropertyName',
+        label: "Power of Attorney for Property's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPropertyPhone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPropertyEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPropertyRelationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPropertyIsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPropertyCountry',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no') &&
+            formData.client2PoaPropertyIsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2PoaPropertyProvince',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no') &&
+            formData.client2PoaPropertyIsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2PoaPropertyCity',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            (formData.client2HasPoaPersonalCare !== 'yes' || formData.client2PoaPropertySameAsPersonalCare === 'no');
+        },
+      },
+      {
+        key: 'client2PoaPropertyHasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Power of Attorney for Property document?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client2HasAlternatePoaProperty',
+        label: 'Have you named an alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty1Name',
+        label: "Alternate Power of Attorney for Property's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty1Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty1Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty1Relationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty1IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty1Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2AlternatePoaProperty1IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty1Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2AlternatePoaProperty1IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty1City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client2HasAlternatePoaProperty2',
+        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' && formData.client2HasAlternatePoaProperty === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty2Name',
+        label: "Alternate Power of Attorney for Property's Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty2Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty2Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty2Relationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty2IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty2Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty2 === 'yes' &&
+            formData.client2AlternatePoaProperty2IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty2Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty2 === 'yes' &&
+            formData.client2AlternatePoaProperty2IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternatePoaProperty2City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      {
+        key: 'client2HasAlternatePoaProperty3',
+        label: 'Have you named an additional alternate attorney, should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasPoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty === 'yes' &&
+            formData.client2HasAlternatePoaProperty2 === 'yes';
+        },
+      },
+      // ── Client 1 Estate Trustee (Executor) ──────────────────────────────────
+      {
+        key: 'client1HasEstateTrustee',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${client1Name}, have you named an Estate Trustee (Executor) in your Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client1SpouseIsEstateTrustee',
+        label: (answers) => {
+          const spouseName = answers.get(1)?.spouseName as string || 'your spouse or common law partner';
+          return `Is ${spouseName} your Estate Trustee (Executor)?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const maritalStatus = basicAnswers.maritalStatus as string;
+          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
+          return formData.client1HasEstateTrustee === 'yes' && !!hasSpouse;
+        },
+      },
+      {
+        key: 'client1EstateTrusteeName',
+        label: "Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteePhone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteeEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteeRelationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteeIsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteeCountry',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no') && formData.client1EstateTrusteeIsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1EstateTrusteeProvince',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no') && formData.client1EstateTrusteeIsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1EstateTrusteeCity',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1EstateTrusteeHasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client1HasEstateTrustee === 'yes' && (!hasSpouse || formData.client1SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client1HasAlternateEstateTrustee',
+        label: 'Have you named an alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Name',
+        label: "Alternate Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Relationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1AlternateEstateTrustee1IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1AlternateEstateTrustee1IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee1HasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternateEstateTrustee2',
+        label: 'Have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Name',
+        label: "Alternate Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Relationship',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Relationship to ${client1Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes' && formData.client1AlternateEstateTrustee2IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes' && formData.client1AlternateEstateTrustee2IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1AlternateEstateTrustee2HasDocCopy',
+        label: (answers) => {
+          const client1FirstName = (answers.get(1)?.fullName as string || 'Client 1').split(' ')[0];
+          return `${client1FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1HasAlternateEstateTrustee3',
+        label: 'Have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          return formData.client1HasEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee === 'yes' && formData.client1HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      // ── Client 2 Estate Trustee (Executor) ──────────────────────────────────
+      {
+        key: 'client2HasEstateTrustee',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${client2Name}, have you named an Estate Trustee (Executor) in your Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          return !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+        },
+      },
+      {
+        key: 'client2SpouseIsEstateTrustee',
+        label: (answers) => {
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `Is ${client1Name} your Estate Trustee (Executor)?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const maritalStatus = basicAnswers.maritalStatus as string;
+          const hasSpouse = (maritalStatus === 'married' || maritalStatus === 'common_law') && basicAnswers.spouseName;
+          return formData.client2HasEstateTrustee === 'yes' && !!hasSpouse;
+        },
+      },
+      {
+        key: 'client2EstateTrusteeName',
+        label: "Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteePhone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteeEmail',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteeRelationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteeIsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteeCountry',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no') && formData.client2EstateTrusteeIsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2EstateTrusteeProvince',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no') && formData.client2EstateTrusteeIsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2EstateTrusteeCity',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2EstateTrusteeHasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = basicAnswers.spouseName && basicAnswers.spouseName !== '';
+          return formData.client2HasEstateTrustee === 'yes' && (!hasSpouse || formData.client2SpouseIsEstateTrustee === 'no');
+        },
+      },
+      {
+        key: 'client2HasAlternateEstateTrustee',
+        label: 'Have you named an alternate Estate Trustee (Executor), should this person be unable or unwilling to act?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Name',
+        label: "Alternate Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Relationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2AlternateEstateTrustee1IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2AlternateEstateTrustee1IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee1HasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2HasAlternateEstateTrustee2',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Name',
+        label: "Alternate Estate Trustee (Executor)'s Name:",
+        type: 'text',
+        placeholder: 'Enter full name',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Phone',
+        label: 'Phone Number:',
+        type: 'tel',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Email',
+        label: 'Email Address:',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Relationship',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Relationship to ${client2Name}:`;
+        },
+        type: 'text',
+        placeholder: 'Enter relationship',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2IsCanadaResident',
+        label: 'Is this person a resident of Canada?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Country',
+        label: 'Which country is this person a resident of?',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes' && formData.client2AlternateEstateTrustee2IsCanadaResident === 'no';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2Province',
+        label: 'Which Province or Territory is this person a resident of?',
+        type: 'select',
+        options: [
+          { value: 'alberta', label: 'Alberta' },
+          { value: 'british_columbia', label: 'British Columbia' },
+          { value: 'manitoba', label: 'Manitoba' },
+          { value: 'new_brunswick', label: 'New Brunswick' },
+          { value: 'newfoundland_labrador', label: 'Newfoundland and Labrador' },
+          { value: 'northwest_territories', label: 'Northwest Territories' },
+          { value: 'nova_scotia', label: 'Nova Scotia' },
+          { value: 'nunavut', label: 'Nunavut' },
+          { value: 'ontario', label: 'Ontario' },
+          { value: 'prince_edward_island', label: 'Prince Edward Island' },
+          { value: 'quebec', label: 'Quebec' },
+          { value: 'saskatchewan', label: 'Saskatchewan' },
+          { value: 'yukon', label: 'Yukon' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes' && formData.client2AlternateEstateTrustee2IsCanadaResident === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2City',
+        label: 'City of Residence:',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2AlternateEstateTrustee2HasDocCopy',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, does this person have a copy of your most recent Will?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes_on_file', label: 'Yes, on their files' },
+          { value: 'no_can_access', label: 'No, but they know how to access the document if/when necessary' },
+          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client2HasAlternateEstateTrustee3',
+        label: (answers) => {
+          const client2Name = answers.get(1)?.spouseName as string || 'Client 2';
+          const client2FirstName = client2Name.split(' ')[0];
+          return `${client2FirstName}, have you named an additional alternate Estate Trustee (Executor), should this person be unable or unwilling to act?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>, allAnswers?: Map<number, Record<string, unknown>>) => {
+          const basicAnswers = allAnswers?.get(1) || {};
+          const hasSpouse = !!(basicAnswers.spouseName && basicAnswers.spouseName !== '');
+          return hasSpouse && formData.client2HasEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee === 'yes' && formData.client2HasAlternateEstateTrustee2 === 'yes';
+        },
+      },
+      {
+        key: 'client1HasFuneralArrangements',
+        label: 'Have you made arrangements for Funeral or Cemetery services?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'client1FuneralArrangementsLocation',
+        label: 'Where is this document located?',
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasFuneralArrangements === 'yes',
+      },
+      {
+        key: 'client1HasDiscussedFuneral',
+        label: 'Have you discussed the type of funeral you would like?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client1FuneralWrittenDown',
+        label: 'Is this written down?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasDiscussedFuneral === 'yes',
+      },
+      {
+        key: 'client1FuneralDocLocation',
+        label: 'Where is this document located?',
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1FuneralWrittenDown === 'yes',
+      },
+      {
+        key: 'client2HasFuneralArrangements',
+        label: 'Has your spouse made arrangements for Funeral or Cemetery services?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2FuneralArrangementsLocation',
+        label: 'Where is this document located?',
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasFuneralArrangements === 'yes',
+      },
+      {
+        key: 'client2HasDiscussedFuneral',
+        label: 'Has your spouse discussed the type of funeral they would like?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'client2FuneralWrittenDown',
+        label: 'Is this written down?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasDiscussedFuneral === 'yes',
+      },
+      {
+        key: 'client2FuneralDocLocation',
+        label: 'Where is this document located?',
+        type: 'text',
+        placeholder: 'Enter location',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2FuneralWrittenDown === 'yes',
       },
     ],
   },

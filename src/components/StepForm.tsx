@@ -5018,6 +5018,7 @@ export default function StepForm({
 
             return (
               <>
+                <h2 className="text-lg font-semibold text-white mb-4">Personal Banking Information:</h2>
                 {step.questions.map((question) => {
                   if (question.key === 'bankingStructure' && !hasSpouse) {
                     return null;
@@ -5541,6 +5542,7 @@ export default function StepForm({
                     />
                   );
                 })}
+                <h2 className="text-lg font-semibold text-white mt-8 mb-4">Investment Account Information: ({client1Name})</h2>
               </>
             );
           })()}

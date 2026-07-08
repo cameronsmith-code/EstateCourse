@@ -5758,11 +5758,6 @@ export default function StepForm({
                           </div>
                         </div>
 
-                        {hasPrimaryBen === 'not_sure' && (
-                          <div className="flex items-center gap-2 px-3 py-2 bg-red-900/30 border border-red-500/50 rounded-lg">
-                            <span className="text-red-400 text-sm font-medium">Red Flag: Beneficiary designation should be reviewed.</span>
-                          </div>
-                        )}
 
                         {hasPrimaryBen === 'yes' && (
                           <>
@@ -5907,8 +5902,9 @@ export default function StepForm({
                                             <input type="radio" name={`advisor-sel-${key}-${instIdx}`} value={opt}
                                               checked={advisorSel === opt}
                                               onChange={() => {
-                                                updateInstField(key, instIdx, 'advisorSelection', opt);
-                                                updateInstField(key, instIdx, 'institution', opt === 'yes' ? `${displayFirm} (${displayName})` : '');
+                                                const cur = [...getInsts(key)];
+                                                cur[instIdx] = { ...cur[instIdx], advisorSelection: opt, institution: opt === 'yes' ? `${displayFirm} (${displayName})` : '' };
+                                                setInsts(key, cur);
                                               }}
                                               className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
                                             <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
@@ -5937,8 +5933,9 @@ export default function StepForm({
                                           <input type="radio" name={`advisor-sel-${key}-${instIdx}`} value={val}
                                             checked={advisorSel === val}
                                             onChange={() => {
-                                              updateInstField(key, instIdx, 'advisorSelection', val);
-                                              updateInstField(key, instIdx, 'institution', `${displayFirm} (${displayName})`);
+                                              const cur = [...getInsts(key)];
+                                              cur[instIdx] = { ...cur[instIdx], advisorSelection: val, institution: `${displayFirm} (${displayName})` };
+                                              setInsts(key, cur);
                                             }}
                                             className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
                                           <span className="text-white text-sm">{displayFirm} — {displayName}</span>
@@ -5948,7 +5945,7 @@ export default function StepForm({
                                     <label className="flex items-center gap-3 cursor-pointer">
                                       <input type="radio" name={`advisor-sel-${key}-${instIdx}`} value="other"
                                         checked={advisorSel === 'other'}
-                                        onChange={() => { updateInstField(key, instIdx, 'advisorSelection', 'other'); updateInstField(key, instIdx, 'institution', ''); }}
+                                        onChange={() => { const cur = [...getInsts(key)]; cur[instIdx] = { ...cur[instIdx], advisorSelection: 'other', institution: '' }; setInsts(key, cur); }}
                                         className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
                                       <span className="text-white text-sm">Other</span>
                                     </label>

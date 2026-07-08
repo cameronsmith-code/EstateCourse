@@ -4886,6 +4886,15 @@ export default function StepForm({
                 onAnswerChange(key, updated);
               };
 
+              const handleOwnershipPercentageChange = (institutionIndex: number, ownerKey: string, value: string) => {
+                const updated = [...institutionsData];
+                if (!updated[institutionIndex]) updated[institutionIndex] = {};
+                const percentages = ({ ...(updated[institutionIndex].ownershipPercentages as Record<string, string> || {}) });
+                percentages[ownerKey] = value;
+                updated[institutionIndex].ownershipPercentages = percentages;
+                onAnswerChange(key, updated);
+              };
+
               return (
                 <div className="space-y-6 mt-6">
                   <h3 className="text-md font-semibold text-white">{label}</h3>
@@ -4898,6 +4907,17 @@ export default function StepForm({
                     const hasCustomOtherOwner = !!(institution.hasCustomOtherOwner);
                     const customOtherOwnerName = (institution.customOtherOwnerName as string) || '';
                     const customOtherOwnerRelationship = (institution.customOtherOwnerRelationship as string) || '';
+                    const accountOwnershipType = (institution.accountOwnershipType as string) || '';
+                    const ownershipPercentages = (institution.ownershipPercentages as Record<string, string>) || {};
+
+                    const allOwnerLabels: { key: string; label: string }[] = [];
+                    if (accountOwners.includes('client1')) allOwnerLabels.push({ key: 'client1', label: client1Name });
+                    if (hasSpouse && accountOwners.includes('client2')) allOwnerLabels.push({ key: 'client2', label: client2Name });
+                    otherKnownOwners.forEach(name => allOwnerLabels.push({ key: name, label: name }));
+                    if (hasCustomOtherOwner && customOtherOwnerName) allOwnerLabels.push({ key: '__custom__', label: customOtherOwnerName });
+
+                    const totalPct = allOwnerLabels.reduce((sum, o) => sum + (parseFloat(ownershipPercentages[o.key] || '0') || 0), 0);
+                    const pctValid = Math.abs(totalPct - 100) < 0.01;
 
                     return (
                       <div key={index} className="p-4 bg-gray-700 rounded-lg space-y-4">
@@ -5020,6 +5040,64 @@ export default function StepForm({
                                     placeholder="e.g., Sibling, Parent, Friend"
                                     className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                   />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {hasOtherOwner && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-3">
+                              Is the account:
+                            </label>
+                            <div className="space-y-2">
+                              {[
+                                { value: 'joint_survivorship', label: 'Joint with Right-of-Survivorship' },
+                                { value: 'joint_tenancy', label: 'Joint Tenancy-in-Common' },
+                                { value: 'not_sure', label: "I'm not sure" },
+                              ].map(opt => (
+                                <label key={opt.value} className="flex items-center space-x-3 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`ownershipType-${key}-${index}`}
+                                    value={opt.value}
+                                    checked={accountOwnershipType === opt.value}
+                                    onChange={() => handleInstitutionFieldChange(index, 'accountOwnershipType', opt.value)}
+                                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                  />
+                                  <span className="text-white">{opt.label}</span>
+                                </label>
+                              ))}
+                            </div>
+
+                            {accountOwnershipType === 'joint_tenancy' && allOwnerLabels.length > 0 && (
+                              <div className="mt-4 pl-4 border-l-2 border-blue-500/40 space-y-3">
+                                <label className="block text-sm font-medium text-gray-300">
+                                  Enter ownership percentage for each owner (must total 100%):
+                                </label>
+                                {allOwnerLabels.map(owner => (
+                                  <div key={owner.key} className="flex items-center gap-3">
+                                    <span className="text-white text-sm w-40 shrink-0">{owner.label}</span>
+                                    <div className="relative flex-1 max-w-[140px]">
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                        value={ownershipPercentages[owner.key] || ''}
+                                        onChange={(e) => handleOwnershipPercentageChange(index, owner.key, e.target.value)}
+                                        placeholder="0"
+                                        className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                                    </div>
+                                  </div>
+                                ))}
+                                <div className={`flex items-center gap-2 text-sm font-medium ${pctValid ? 'text-green-400' : totalPct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                  <span>Total: {totalPct.toFixed(totalPct % 1 === 0 ? 0 : 2)}%</span>
+                                  {totalPct > 0 && !pctValid && <span>— must equal 100%</span>}
+                                  {pctValid && <span>✓</span>}
                                 </div>
                               </div>
                             )}

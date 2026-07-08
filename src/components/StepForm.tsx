@@ -6025,27 +6025,52 @@ export default function StepForm({
                               };
 
                               return (
-                                <div key={instIdx} className="p-4 bg-gray-600 rounded-lg space-y-3">
-                                  <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Institution / Advisor {instIdx + 1}</p>
-                                  {renderAdvisorQuestion()}
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">Account Balance:</label>
-                                    <div className="relative max-w-xs">
-                                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                                      <input type="text" value={(inst.accountBalance as string) || ''}
-                                        onChange={e => updateInstField(key, instIdx, 'accountBalance', e.target.value)}
-                                        placeholder="0.00"
-                                        className="w-full pl-7 pr-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                <React.Fragment key={instIdx}>
+                                  <div className="p-4 bg-gray-600 rounded-lg space-y-3">
+                                    <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Institution / Advisor {instIdx + 1}</p>
+                                    {renderAdvisorQuestion()}
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-1">Account Balance:</label>
+                                      <div className="relative max-w-xs">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                                        <input type="text" value={(inst.accountBalance as string) || ''}
+                                          onChange={e => updateInstField(key, instIdx, 'accountBalance', e.target.value)}
+                                          placeholder="0.00"
+                                          className="w-full pl-7 pr-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                      </div>
                                     </div>
+                                    {renderBeneficiarySection(key, instIdx, inst)}
                                   </div>
-                                  {renderBeneficiarySection(key, instIdx, inst)}
-                                </div>
+                                  {instIdx === insts.length - 1 && (
+                                    <div className="pt-1">
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Do you have additional {label} accounts at another Institution?
+                                      </label>
+                                      <div className="flex gap-4">
+                                        {(['yes', 'no'] as const).map(opt => (
+                                          <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name={`addl-${key}-${instIdx}`} value={opt}
+                                              checked={(inst.hasAdditional as string) === opt}
+                                              onChange={() => {
+                                                const cur = [...getInsts(key)];
+                                                cur[instIdx] = { ...cur[instIdx], hasAdditional: opt };
+                                                if (opt === 'yes') {
+                                                  if (instIdx + 1 >= cur.length) cur.push({ institution: '' });
+                                                } else {
+                                                  cur.splice(instIdx + 1);
+                                                }
+                                                setInsts(key, cur);
+                                              }}
+                                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                            <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                                          </label>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </React.Fragment>
                               );
                             })}
-                            <button type="button" onClick={() => { const insts2 = [...getInsts(key), { institution: '' }]; setInsts(key, insts2); }}
-                              className="flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                              <span>+</span><span>Add Institution / Advisor</span>
-                            </button>
                           </div>
                         );
                       })}

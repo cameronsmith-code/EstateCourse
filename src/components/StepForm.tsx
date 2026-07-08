@@ -5642,7 +5642,7 @@ export default function StepForm({
                 })}
                 <div className="flex items-center gap-3 mt-8 mb-5">
                   <div className="h-px flex-1 bg-gradient-to-r from-blue-500/50 to-transparent" />
-                  <h3 className="text-sm font-semibold tracking-widest text-blue-400 uppercase whitespace-nowrap">Investment Account Information: ({client1Name})</h3>
+                  <h3 className="text-sm font-semibold tracking-widest text-blue-400 uppercase whitespace-nowrap">Investment Account Information: {client1Name}</h3>
                   <div className="h-px flex-1 bg-gradient-to-l from-blue-500/50 to-transparent" />
                 </div>
               </>

@@ -5658,6 +5658,9 @@ export default function StepForm({
 
                   const s2 = allAnswers?.get(2) || {};
                   const s3 = allAnswers?.get(3) || {};
+                  const s7 = allAnswers?.get(7) || {};
+                  const advisorsData = (s7['client1FinancialAdvisorsData'] as Array<Record<string,string>>) || [];
+                  const advisors = advisorsData.filter(a => a?.name || a?.firm);
                   const knownNames: string[] = [client1Name];
                   if (hasSpouse) knownNames.push(client2Name);
                   (s2['client1PreviousRelationshipsData'] as Array<Record<string,string>> || []).forEach(r => { if (r?.name && !knownNames.includes(r.name)) knownNames.push(r.name); });
@@ -5875,16 +5878,98 @@ export default function StepForm({
                         return (
                           <div key={key} className="p-4 bg-gray-700 rounded-lg space-y-4">
                             <h5 className="text-sm font-semibold text-white">{label}</h5>
-                            {insts.map((inst, instIdx) => (
-                              <div key={instIdx} className="p-4 bg-gray-600 rounded-lg space-y-3">
-                                <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Institution / Advisor {instIdx + 1}</p>
-                                <input type="text" value={(inst.institution as string) || ''}
-                                  onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
-                                  placeholder="e.g., TD Waterhouse, Edward Jones, RBC Direct Investing"
-                                  className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                                {renderBeneficiarySection(key, instIdx, inst)}
-                              </div>
-                            ))}
+                            {insts.map((inst, instIdx) => {
+                              const advisorSel = (inst.advisorSelection as string) || '';
+                              const instLabel = (inst.institution as string) || '';
+
+                              const renderAdvisorQuestion = () => {
+                                if (advisors.length === 0) {
+                                  return (
+                                    <input type="text" value={instLabel}
+                                      onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
+                                      placeholder="e.g., TD Waterhouse, Edward Jones, RBC Direct Investing"
+                                      className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                  );
+                                }
+
+                                if (advisors.length === 1) {
+                                  const a = advisors[0];
+                                  const displayFirm = a.firm || a.name;
+                                  const displayName = a.name || a.firm;
+                                  return (
+                                    <div className="space-y-3">
+                                      <label className="block text-sm font-medium text-gray-300">
+                                        Is this held at {displayFirm} with {displayName}?
+                                      </label>
+                                      <div className="flex gap-4">
+                                        {(['yes', 'no'] as const).map(opt => (
+                                          <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name={`advisor-sel-${key}-${instIdx}`} value={opt}
+                                              checked={advisorSel === opt}
+                                              onChange={() => {
+                                                updateInstField(key, instIdx, 'advisorSelection', opt);
+                                                updateInstField(key, instIdx, 'institution', opt === 'yes' ? `${displayFirm} (${displayName})` : '');
+                                              }}
+                                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                            <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                                          </label>
+                                        ))}
+                                      </div>
+                                      {advisorSel === 'no' && (
+                                        <input type="text" value={instLabel}
+                                          onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
+                                          placeholder="Enter institution / advisor name"
+                                          className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                      )}
+                                    </div>
+                                  );
+                                }
+
+                                return (
+                                  <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-300">Institution / Advisor:</label>
+                                    {advisors.map((a, aIdx) => {
+                                      const displayFirm = a.firm || a.name;
+                                      const displayName = a.name || a.firm;
+                                      const val = `advisor_${aIdx}`;
+                                      return (
+                                        <label key={aIdx} className="flex items-center gap-3 cursor-pointer">
+                                          <input type="radio" name={`advisor-sel-${key}-${instIdx}`} value={val}
+                                            checked={advisorSel === val}
+                                            onChange={() => {
+                                              updateInstField(key, instIdx, 'advisorSelection', val);
+                                              updateInstField(key, instIdx, 'institution', `${displayFirm} (${displayName})`);
+                                            }}
+                                            className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                          <span className="text-white text-sm">{displayFirm} — {displayName}</span>
+                                        </label>
+                                      );
+                                    })}
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                      <input type="radio" name={`advisor-sel-${key}-${instIdx}`} value="other"
+                                        checked={advisorSel === 'other'}
+                                        onChange={() => { updateInstField(key, instIdx, 'advisorSelection', 'other'); updateInstField(key, instIdx, 'institution', ''); }}
+                                        className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                      <span className="text-white text-sm">Other</span>
+                                    </label>
+                                    {advisorSel === 'other' && (
+                                      <input type="text" value={instLabel}
+                                        onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
+                                        placeholder="Enter institution / advisor name"
+                                        className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                    )}
+                                  </div>
+                                );
+                              };
+
+                              return (
+                                <div key={instIdx} className="p-4 bg-gray-600 rounded-lg space-y-3">
+                                  <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Institution / Advisor {instIdx + 1}</p>
+                                  {renderAdvisorQuestion()}
+                                  {renderBeneficiarySection(key, instIdx, inst)}
+                                </div>
+                              );
+                            })}
                             <button type="button" onClick={() => { const insts2 = [...getInsts(key), { institution: '' }]; setInsts(key, insts2); }}
                               className="flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors">
                               <span>+</span><span>Add Institution / Advisor</span>

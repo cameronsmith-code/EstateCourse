@@ -199,6 +199,24 @@ interface FormData {
     phoneNumber?: string;
     emailAddress?: string;
   }>;
+  hasAdditionalFamilyTrust?: string;
+  trust2LegalName?: string;
+  trust2DeedLocation?: string;
+  trust2YearEstablished?: string;
+  trust2BeneficiariesCount?: string;
+  trust2BeneficiariesData?: Array<{ beneficiaryName?: string; relationshipToSettlor?: string; countryOfResidence?: string; phoneNumber?: string; emailAddress?: string; }>;
+  hasAdditionalFamilyTrust2?: string;
+  trust3LegalName?: string;
+  trust3DeedLocation?: string;
+  trust3YearEstablished?: string;
+  trust3BeneficiariesCount?: string;
+  trust3BeneficiariesData?: Array<{ beneficiaryName?: string; relationshipToSettlor?: string; countryOfResidence?: string; phoneNumber?: string; emailAddress?: string; }>;
+  hasAdditionalFamilyTrust3?: string;
+  trust4LegalName?: string;
+  trust4DeedLocation?: string;
+  trust4YearEstablished?: string;
+  trust4BeneficiariesCount?: string;
+  trust4BeneficiariesData?: Array<{ beneficiaryName?: string; relationshipToSettlor?: string; countryOfResidence?: string; phoneNumber?: string; emailAddress?: string; }>;
   hasSoleProprietorship?: string;
   soleProprietorshipCount?: string;
   client1SolePropsData?: SolePropData[];
@@ -2886,6 +2904,126 @@ export const generatePDF = (formData: FormData) => {
     }
 
     yPosition = currentY + 8;
+
+    // ── Helper to render an additional trust block ────────────────────────────
+    const renderAdditionalTrust = (
+      trustNum: number,
+      legalName: string | undefined,
+      deedLocation: string | undefined,
+      yearEstablished: string | undefined,
+      beneficiariesCount: string | undefined,
+      beneficiariesData: Array<{ beneficiaryName?: string; relationshipToSettlor?: string; countryOfResidence?: string; phoneNumber?: string; emailAddress?: string; }> | undefined,
+    ) => {
+      checkPageBreak(30);
+      addSubsectionHeader(`Family Trust ${trustNum}:`);
+
+      const atRows = [
+        { label: `Trust ${trustNum} - Legal Name:`, value: legalName || '' },
+        { label: 'Trust Deed Location:', value: deedLocation || '' },
+        { label: 'Year Established:', value: yearEstablished || '' },
+        { label: 'Number of Beneficiaries:', value: beneficiariesCount || '' },
+      ];
+
+      const atLabelW = fieldWidth * 0.35;
+      const atValueW = fieldWidth * 0.65;
+      const atCellH = 8;
+
+      atRows.forEach((row, idx) => {
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        const labelLines = doc.splitTextToSize(row.label, atLabelW - 3);
+        const dynH = Math.max(atCellH, labelLines.length * 5 + 3);
+        checkPageBreak(dynH + 2);
+        const rowY = yPosition;
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin, rowY, atLabelW, dynH, 'FD');
+        doc.rect(margin + atLabelW, rowY, atValueW, dynH, 'FD');
+        doc.setTextColor(...colors.darkText);
+        doc.text(labelLines, margin + 1, rowY + 5);
+        const fld = new doc.AcroFormTextField();
+        fld.fieldName = `trust${trustNum}_info_${idx}`;
+        fld.Rect = [margin + atLabelW + 0.5, rowY + 0.5, atValueW - 1, dynH - 1];
+        fld.fontSize = 9;
+        fld.textColor = colors.darkText;
+        fld.borderStyle = 'none';
+        fld.value = row.value;
+        doc.addField(fld);
+        yPosition += dynH;
+      });
+
+      yPosition += 8;
+
+      const bCount = parseInt(beneficiariesCount || '0');
+      if (bCount > 0) {
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...colors.darkText);
+        doc.text('Trust Beneficiaries:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+
+        const bLabelW = fieldWidth * 0.35;
+        const bValueW = fieldWidth * 0.65;
+        const bCellH = 6;
+
+        for (let i = 0; i < bCount; i++) {
+          const bene = beneficiariesData?.[i];
+          checkPageBreak(6 + 5 * bCellH + 8);
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.text(`Beneficiary ${i + 1}:`, margin, yPosition);
+          yPosition += 6;
+
+          const beneFields = [
+            { label: 'Beneficiary Name:', value: bene?.beneficiaryName || '', fn: 'name' },
+            { label: 'Relationship to Settlor:', value: bene?.relationshipToSettlor || '', fn: 'relationship' },
+            { label: 'Country of Residence:', value: bene?.countryOfResidence || '', fn: 'country' },
+            { label: 'Phone Number:', value: bene?.phoneNumber || '', fn: 'phone' },
+            { label: 'Email Address:', value: bene?.emailAddress || '', fn: 'email' },
+          ];
+
+          beneFields.forEach((bf) => {
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            const labelLines = doc.splitTextToSize(bf.label, bLabelW - 3);
+            const dynH = Math.max(bCellH, labelLines.length * 5 + 3);
+            const rowY = yPosition;
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(margin, rowY, bLabelW, dynH, 'FD');
+            doc.rect(margin + bLabelW, rowY, bValueW, dynH, 'FD');
+            doc.setTextColor(...colors.darkText);
+            doc.text(labelLines, margin + 1, rowY + 4);
+            const inputFld = new doc.AcroFormTextField();
+            inputFld.fieldName = `trust${trustNum}_bene_${i + 1}_${bf.fn}`;
+            inputFld.Rect = [margin + bLabelW + 0.5, rowY + 0.5, bValueW - 1, dynH - 1];
+            inputFld.fontSize = 8;
+            inputFld.textColor = colors.darkText;
+            inputFld.borderStyle = 'none';
+            inputFld.value = bf.value;
+            doc.addField(inputFld);
+            yPosition += dynH;
+          });
+          yPosition += 8;
+        }
+      }
+
+      yPosition += 4;
+    };
+
+    if (formData.hasAdditionalFamilyTrust === 'yes') {
+      renderAdditionalTrust(2, formData.trust2LegalName, formData.trust2DeedLocation, formData.trust2YearEstablished, formData.trust2BeneficiariesCount, formData.trust2BeneficiariesData);
+    }
+    if (formData.hasAdditionalFamilyTrust2 === 'yes') {
+      renderAdditionalTrust(3, formData.trust3LegalName, formData.trust3DeedLocation, formData.trust3YearEstablished, formData.trust3BeneficiariesCount, formData.trust3BeneficiariesData);
+    }
+    if (formData.hasAdditionalFamilyTrust3 === 'yes') {
+      renderAdditionalTrust(4, formData.trust4LegalName, formData.trust4DeedLocation, formData.trust4YearEstablished, formData.trust4BeneficiariesCount, formData.trust4BeneficiariesData);
+    }
   }
 
   addPage();

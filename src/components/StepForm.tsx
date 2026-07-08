@@ -20,6 +20,51 @@ type StepFormProps = {
   currentStepNumber: number;
 };
 
+function TrustBeneficiariesSection({
+  label,
+  count,
+  data,
+  onChange,
+}: {
+  label: string;
+  count: number;
+  data: Array<Record<string, string>>;
+  onChange: (index: number, field: string, value: string) => void;
+}) {
+  return (
+    <div className="space-y-6 mt-6">
+      <h3 className="text-xl font-semibold text-white">{label}</h3>
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
+          <h4 className="text-lg font-semibold text-white mb-4">Beneficiary {index + 1}</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Beneficiary Name *</label>
+              <input type="text" value={data[index]?.beneficiaryName || ''} onChange={(e) => onChange(index, 'beneficiaryName', e.target.value)} placeholder="Enter beneficiary name" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Relationship to Settlor *</label>
+              <input type="text" value={data[index]?.relationshipToSettlor || ''} onChange={(e) => onChange(index, 'relationshipToSettlor', e.target.value)} placeholder="e.g., Daughter, Son, Spouse, etc." className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Country of Residence</label>
+              <input type="text" value={data[index]?.countryOfResidence || ''} onChange={(e) => onChange(index, 'countryOfResidence', e.target.value)} placeholder="Enter country of residence" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+              <input type="tel" value={data[index]?.phoneNumber || ''} onChange={(e) => onChange(index, 'phoneNumber', e.target.value)} placeholder="Enter phone number" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+              <input type="email" value={data[index]?.emailAddress || ''} onChange={(e) => onChange(index, 'emailAddress', e.target.value)} placeholder="Enter email address" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function StepForm({
   step,
   answers,
@@ -477,7 +522,8 @@ export default function StepForm({
     if (answers['hasFamilyTrust'] !== 'yes') {
       const keysToClear = [
         'trustLegalName', 'trustDeedLocation', 'trustYearEstablished',
-        'trustBeneficiariesCount', 'trustBeneficiariesData'
+        'trustBeneficiariesCount', 'trustBeneficiariesData',
+        'hasAdditionalFamilyTrust',
       ];
       keysToClear.forEach(key => {
         if (answers[key] !== undefined) {
@@ -486,6 +532,50 @@ export default function StepForm({
       });
     }
   }, [answers['hasFamilyTrust']]);
+
+  useEffect(() => {
+    if (answers['hasAdditionalFamilyTrust'] !== 'yes') {
+      const keysToClear = [
+        'trust2LegalName', 'trust2DeedLocation', 'trust2YearEstablished',
+        'trust2BeneficiariesCount', 'trust2BeneficiariesData',
+        'hasAdditionalFamilyTrust2',
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['hasAdditionalFamilyTrust']]);
+
+  useEffect(() => {
+    if (answers['hasAdditionalFamilyTrust2'] !== 'yes') {
+      const keysToClear = [
+        'trust3LegalName', 'trust3DeedLocation', 'trust3YearEstablished',
+        'trust3BeneficiariesCount', 'trust3BeneficiariesData',
+        'hasAdditionalFamilyTrust3',
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['hasAdditionalFamilyTrust2']]);
+
+  useEffect(() => {
+    if (answers['hasAdditionalFamilyTrust3'] !== 'yes') {
+      const keysToClear = [
+        'trust4LegalName', 'trust4DeedLocation', 'trust4YearEstablished',
+        'trust4BeneficiariesCount', 'trust4BeneficiariesData',
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['hasAdditionalFamilyTrust3']]);
 
   useEffect(() => {
     if (answers['ownsCorporation'] !== 'yes') {
@@ -1215,11 +1305,39 @@ export default function StepForm({
 
   const handleBeneficiaryChange = (index: number, field: string, value: string) => {
     const updated = [...trustBeneficiariesData];
-    if (!updated[index]) {
-      updated[index] = {};
-    }
+    if (!updated[index]) updated[index] = {};
     updated[index][field] = value;
     onAnswerChange('trustBeneficiariesData', updated);
+  };
+
+  const trust2BeneficiariesCount = parseInt(answers['trust2BeneficiariesCount'] as string) || 0;
+  const trust2BeneficiariesData = (answers['trust2BeneficiariesData'] as Array<Record<string, string>>) || Array(Math.max(0, trust2BeneficiariesCount)).fill(null).map(() => ({}));
+
+  const handleTrust2BeneficiaryChange = (index: number, field: string, value: string) => {
+    const updated = [...trust2BeneficiariesData];
+    if (!updated[index]) updated[index] = {};
+    updated[index][field] = value;
+    onAnswerChange('trust2BeneficiariesData', updated);
+  };
+
+  const trust3BeneficiariesCount = parseInt(answers['trust3BeneficiariesCount'] as string) || 0;
+  const trust3BeneficiariesData = (answers['trust3BeneficiariesData'] as Array<Record<string, string>>) || Array(Math.max(0, trust3BeneficiariesCount)).fill(null).map(() => ({}));
+
+  const handleTrust3BeneficiaryChange = (index: number, field: string, value: string) => {
+    const updated = [...trust3BeneficiariesData];
+    if (!updated[index]) updated[index] = {};
+    updated[index][field] = value;
+    onAnswerChange('trust3BeneficiariesData', updated);
+  };
+
+  const trust4BeneficiariesCount = parseInt(answers['trust4BeneficiariesCount'] as string) || 0;
+  const trust4BeneficiariesData = (answers['trust4BeneficiariesData'] as Array<Record<string, string>>) || Array(Math.max(0, trust4BeneficiariesCount)).fill(null).map(() => ({}));
+
+  const handleTrust4BeneficiaryChange = (index: number, field: string, value: string) => {
+    const updated = [...trust4BeneficiariesData];
+    if (!updated[index]) updated[index] = {};
+    updated[index][field] = value;
+    onAnswerChange('trust4BeneficiariesData', updated);
   };
 
   const numberOfCorporations = parseInt(answers['numberOfCorporations'] as string) || 0;
@@ -1342,106 +1460,126 @@ export default function StepForm({
 
           {step.id === 4 && (
             <>
-              {step.questions.map((question) => {
-                if (question.key === 'trustLegalName' && answers['hasFamilyTrust'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'trustDeedLocation' && answers['hasFamilyTrust'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'trustYearEstablished' && answers['hasFamilyTrust'] !== 'yes') {
-                  return null;
-                }
-                if (question.key === 'trustBeneficiariesCount' && answers['hasFamilyTrust'] !== 'yes') {
-                  return null;
-                }
-
-                return (
-                  <FormField
-                    key={question.key}
-                    question={question}
-                    value={answers[question.key]}
-                    onChange={(value) => onAnswerChange(question.key, value)}
-                  />
-                );
-              })}
+              {/* ── Trust 1 ── */}
+              {step.questions
+                .filter(q => ['hasFamilyTrust','trustLegalName','trustDeedLocation','trustYearEstablished','trustBeneficiariesCount'].includes(q.key))
+                .map((question) => {
+                  if (question.key !== 'hasFamilyTrust' && answers['hasFamilyTrust'] !== 'yes') return null;
+                  return (
+                    <FormField
+                      key={question.key}
+                      question={question}
+                      value={answers[question.key]}
+                      onChange={(value) => onAnswerChange(question.key, value)}
+                    />
+                  );
+                })}
 
               {answers['hasFamilyTrust'] === 'yes' && trustBeneficiariesCount > 0 && (
-                <div className="space-y-6 mt-6">
-                  <h3 className="text-xl font-semibold text-white">Trust Beneficiaries</h3>
-                  {Array.from({ length: trustBeneficiariesCount }).map((_, index) => (
-                    <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                      <h4 className="text-lg font-semibold text-white mb-4">Beneficiary {index + 1}</h4>
+                <TrustBeneficiariesSection
+                  label="Trust Beneficiaries"
+                  count={trustBeneficiariesCount}
+                  data={trustBeneficiariesData}
+                  onChange={handleBeneficiaryChange}
+                />
+              )}
 
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Beneficiary Name *
-                          </label>
-                          <input
-                            type="text"
-                            value={trustBeneficiariesData[index]?.beneficiaryName || ''}
-                            onChange={(e) => handleBeneficiaryChange(index, 'beneficiaryName', e.target.value)}
-                            placeholder="Enter beneficiary name"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
+              {/* ── Additional Trust prompt ── */}
+              {answers['hasFamilyTrust'] === 'yes' && (() => {
+                const q = step.questions.find(q => q.key === 'hasAdditionalFamilyTrust');
+                if (!q) return null;
+                return <FormField key={q.key} question={q} value={answers[q.key]} onChange={(v) => onAnswerChange(q.key, v)} />;
+              })()}
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Relationship to Settlor *
-                          </label>
-                          <input
-                            type="text"
-                            value={trustBeneficiariesData[index]?.relationshipToSettlor || ''}
-                            onChange={(e) => handleBeneficiaryChange(index, 'relationshipToSettlor', e.target.value)}
-                            placeholder="e.g., Daughter, Son, Spouse, etc."
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
+              {/* ── Trust 2 ── */}
+              {answers['hasAdditionalFamilyTrust'] === 'yes' && (
+                <>
+                  <div className="mt-6 pt-4 border-t border-gray-600">
+                    <h3 className="text-lg font-semibold text-white mb-4">Family Trust 2</h3>
+                  </div>
+                  {step.questions
+                    .filter(q => ['trust2LegalName','trust2DeedLocation','trust2YearEstablished','trust2BeneficiariesCount'].includes(q.key))
+                    .map((question) => (
+                      <FormField
+                        key={question.key}
+                        question={question}
+                        value={answers[question.key]}
+                        onChange={(value) => onAnswerChange(question.key, value)}
+                      />
+                    ))}
+                  {trust2BeneficiariesCount > 0 && (
+                    <TrustBeneficiariesSection
+                      label="Trust 2 Beneficiaries"
+                      count={trust2BeneficiariesCount}
+                      data={trust2BeneficiariesData}
+                      onChange={handleTrust2BeneficiaryChange}
+                    />
+                  )}
+                  {(() => {
+                    const q = step.questions.find(q => q.key === 'hasAdditionalFamilyTrust2');
+                    if (!q) return null;
+                    return <FormField key={q.key} question={q} value={answers[q.key]} onChange={(v) => onAnswerChange(q.key, v)} />;
+                  })()}
+                </>
+              )}
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Country of Residence
-                          </label>
-                          <input
-                            type="text"
-                            value={trustBeneficiariesData[index]?.countryOfResidence || ''}
-                            onChange={(e) => handleBeneficiaryChange(index, 'countryOfResidence', e.target.value)}
-                            placeholder="Enter country of residence"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
+              {/* ── Trust 3 ── */}
+              {answers['hasAdditionalFamilyTrust2'] === 'yes' && (
+                <>
+                  <div className="mt-6 pt-4 border-t border-gray-600">
+                    <h3 className="text-lg font-semibold text-white mb-4">Family Trust 3</h3>
+                  </div>
+                  {step.questions
+                    .filter(q => ['trust3LegalName','trust3DeedLocation','trust3YearEstablished','trust3BeneficiariesCount'].includes(q.key))
+                    .map((question) => (
+                      <FormField
+                        key={question.key}
+                        question={question}
+                        value={answers[question.key]}
+                        onChange={(value) => onAnswerChange(question.key, value)}
+                      />
+                    ))}
+                  {trust3BeneficiariesCount > 0 && (
+                    <TrustBeneficiariesSection
+                      label="Trust 3 Beneficiaries"
+                      count={trust3BeneficiariesCount}
+                      data={trust3BeneficiariesData}
+                      onChange={handleTrust3BeneficiaryChange}
+                    />
+                  )}
+                  {(() => {
+                    const q = step.questions.find(q => q.key === 'hasAdditionalFamilyTrust3');
+                    if (!q) return null;
+                    return <FormField key={q.key} question={q} value={answers[q.key]} onChange={(v) => onAnswerChange(q.key, v)} />;
+                  })()}
+                </>
+              )}
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Phone Number
-                          </label>
-                          <input
-                            type="tel"
-                            value={trustBeneficiariesData[index]?.phoneNumber || ''}
-                            onChange={(e) => handleBeneficiaryChange(index, 'phoneNumber', e.target.value)}
-                            placeholder="Enter phone number"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Email Address
-                          </label>
-                          <input
-                            type="email"
-                            value={trustBeneficiariesData[index]?.emailAddress || ''}
-                            onChange={(e) => handleBeneficiaryChange(index, 'emailAddress', e.target.value)}
-                            placeholder="Enter email address"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              {/* ── Trust 4 ── */}
+              {answers['hasAdditionalFamilyTrust3'] === 'yes' && (
+                <>
+                  <div className="mt-6 pt-4 border-t border-gray-600">
+                    <h3 className="text-lg font-semibold text-white mb-4">Family Trust 4</h3>
+                  </div>
+                  {step.questions
+                    .filter(q => ['trust4LegalName','trust4DeedLocation','trust4YearEstablished','trust4BeneficiariesCount'].includes(q.key))
+                    .map((question) => (
+                      <FormField
+                        key={question.key}
+                        question={question}
+                        value={answers[question.key]}
+                        onChange={(value) => onAnswerChange(question.key, value)}
+                      />
+                    ))}
+                  {trust4BeneficiariesCount > 0 && (
+                    <TrustBeneficiariesSection
+                      label="Trust 4 Beneficiaries"
+                      count={trust4BeneficiariesCount}
+                      data={trust4BeneficiariesData}
+                      onChange={handleTrust4BeneficiaryChange}
+                    />
+                  )}
+                </>
               )}
             </>
           )}

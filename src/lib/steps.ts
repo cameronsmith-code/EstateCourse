@@ -657,7 +657,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 7,
+    id: 14,
     title: 'Who is on your Team?',
     description: 'This section lists the core professionals who already know your history.',
     questions: [
@@ -4113,7 +4113,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 8,
+    id: 7,
     title: 'Your Professionals',
     description: 'Information about the professionals you work with',
     questions: [
@@ -4198,7 +4198,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 9,
+    id: 8,
     title: 'Your Financial Footprint',
     description: 'Banking and financial account information',
     questions: [
@@ -4294,7 +4294,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 10,
+    id: 9,
     title: 'Real Estate',
     description: 'Information about real estate you own',
     questions: [
@@ -7470,7 +7470,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 11,
+    id: 10,
     title: 'Outstanding Debts',
     description: 'Information about any outstanding debts (not including credit cards)',
     questions: [
@@ -7487,7 +7487,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 12,
+    id: 11,
     title: 'Life Insurance',
     description: 'Information about life insurance, disability insurance, and critical illness policies',
     questions: [
@@ -7616,7 +7616,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 13,
+    id: 12,
     title: 'Property and Casualty Insurance',
     description: 'Information about home and property insurance',
     questions: [
@@ -7932,7 +7932,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 14,
+    id: 13,
     title: 'Pensions and Retirement Benefits',
     description: 'Information about pension plans',
     questions: [

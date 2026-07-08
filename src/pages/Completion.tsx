@@ -20,6 +20,9 @@ export default function Completion() {
     const step9 = answers.get(9) || {};
     const step10 = answers.get(10) || {};
     const step11 = answers.get(11) || {};
+    const step12 = answers.get(12) || {};
+    const step13 = answers.get(13) || {};
+    const step14 = answers.get(14) || {};
 
     const data = {
       ...step1,
@@ -34,9 +37,12 @@ export default function Completion() {
       ...step8,
       ...step9,
       ...step10,
-      client1PensionsData: step11.client1PensionsData,
-      client2PensionsData: step11.client2PensionsData,
       ...step11,
+      ...step12,
+      client1PensionsData: step13.client1PensionsData,
+      client2PensionsData: step13.client2PensionsData,
+      ...step13,
+      ...step14,
     };
 
     setFormData(data);

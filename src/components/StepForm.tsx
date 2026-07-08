@@ -990,7 +990,7 @@ export default function StepForm({
           }
         }
       }
-    } else if (step.id === 14) {
+    } else if (step.id === 13) {
       if (answers['client1HasPension'] === 'yes') {
         if (!client1PensionsData || client1PensionsData.length === 0) {
           setValidationError('Please add at least one pension for Client 1 or select "No".');
@@ -2545,7 +2545,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 7 && (() => {
+          {step.id === 14 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'you';
@@ -4631,7 +4631,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 8 && (() => {
+          {step.id === 7 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'you';
@@ -4786,7 +4786,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 9 && (() => {
+          {step.id === 8 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
@@ -7726,7 +7726,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 14 && (() => {
+          {step.id === 13 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
@@ -7956,7 +7956,7 @@ export default function StepForm({
           })()}
 
 
-          {step.id === 10 && (() => {
+          {step.id === 9 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
             const maritalStatus = basicAnswers['maritalStatus'] as string;
@@ -8233,7 +8233,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 11 && (
+          {step.id === 10 && (
             <>
               {step.questions.map((question) => (
                 <FormField
@@ -8743,7 +8743,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 12 && (
+          {step.id === 11 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};
@@ -8841,7 +8841,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 13 && (
+          {step.id === 12 && (
             <>
               {step.questions.map((question) => {
                 const basicAnswers = allAnswers?.get(1) || {};

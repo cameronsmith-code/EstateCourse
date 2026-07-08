@@ -5963,6 +5963,16 @@ export default function StepForm({
                                 <div key={instIdx} className="p-4 bg-gray-600 rounded-lg space-y-3">
                                   <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Institution / Advisor {instIdx + 1}</p>
                                   {renderAdvisorQuestion()}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Account Balance:</label>
+                                    <div className="relative max-w-xs">
+                                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                                      <input type="text" value={(inst.accountBalance as string) || ''}
+                                        onChange={e => updateInstField(key, instIdx, 'accountBalance', e.target.value)}
+                                        placeholder="0.00"
+                                        className="w-full pl-7 pr-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                    </div>
+                                  </div>
                                   {renderBeneficiarySection(key, instIdx, inst)}
                                 </div>
                               );

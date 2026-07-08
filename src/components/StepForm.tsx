@@ -5645,6 +5645,256 @@ export default function StepForm({
                   <h3 className="text-sm font-semibold tracking-widest text-blue-400 uppercase whitespace-nowrap">Investment Account Information: {client1Name}</h3>
                   <div className="h-px flex-1 bg-gradient-to-l from-blue-500/50 to-transparent" />
                 </div>
+
+                {(() => {
+                  const REGISTERED_ACCOUNT_TYPES = [
+                    { key: 'rrsp', label: 'Registered Retirement Savings Plan (RRSP)' },
+                    { key: 'rrif', label: 'Registered Retirement Income Fund (RRIF)' },
+                    { key: 'tfsa', label: 'Tax-Free Savings Account (TFSA)' },
+                    { key: 'fhsa', label: 'Tax-Free First Home Savings Account (FHSA)' },
+                    { key: 'resp', label: 'Registered Education Savings Plan (RESP)' },
+                    { key: 'rdsp', label: 'Registered Disability Savings Plan (RDSP)' },
+                  ];
+
+                  const s2 = allAnswers?.get(2) || {};
+                  const s3 = allAnswers?.get(3) || {};
+                  const knownNames: string[] = [client1Name];
+                  if (hasSpouse) knownNames.push(client2Name);
+                  (s2['client1PreviousRelationshipsData'] as Array<Record<string,string>> || []).forEach(r => { if (r?.name && !knownNames.includes(r.name)) knownNames.push(r.name); });
+                  (s2['client2PreviousRelationshipsData'] as Array<Record<string,string>> || []).forEach(r => { if (r?.name && !knownNames.includes(r.name)) knownNames.push(r.name); });
+                  (s3['childrenData'] as Array<Record<string,string>> || []).forEach(c => { if (c?.name && !knownNames.includes(c.name)) knownNames.push(c.name); });
+
+                  const selectedTypes = (answers['client1RegisteredAccountTypes'] as string[]) || [];
+                  const accountData = (answers['client1RegisteredAccountData'] as Record<string, Array<Record<string, unknown>>>) || {};
+
+                  const toggleAccountType = (typeKey: string) => {
+                    const updated = selectedTypes.includes(typeKey)
+                      ? selectedTypes.filter(t => t !== typeKey)
+                      : [...selectedTypes, typeKey];
+                    if (selectedTypes.includes(typeKey)) {
+                      const d = { ...accountData };
+                      delete d[typeKey];
+                      onAnswerChange('client1RegisteredAccountData', d);
+                    }
+                    onAnswerChange('client1RegisteredAccountTypes', updated);
+                  };
+
+                  const getInsts = (typeKey: string): Array<Record<string, unknown>> => accountData[typeKey] || [];
+
+                  const setInsts = (typeKey: string, insts: Array<Record<string, unknown>>) => {
+                    onAnswerChange('client1RegisteredAccountData', { ...accountData, [typeKey]: insts });
+                  };
+
+                  const updateInstField = (typeKey: string, idx: number, field: string, value: unknown) => {
+                    const insts = [...getInsts(typeKey)];
+                    insts[idx] = { ...insts[idx], [field]: value };
+                    setInsts(typeKey, insts);
+                  };
+
+                  const toggleKnownBen = (typeKey: string, idx: number, name: string) => {
+                    const insts = [...getInsts(typeKey)];
+                    const cur = (insts[idx]?.selectedKnownBeneficiaries as string[]) || [];
+                    insts[idx] = { ...insts[idx], selectedKnownBeneficiaries: cur.includes(name) ? cur.filter(n => n !== name) : [...cur, name] };
+                    setInsts(typeKey, insts);
+                  };
+
+                  const addCustomBen = (typeKey: string, idx: number) => {
+                    const insts = [...getInsts(typeKey)];
+                    const cur = (insts[idx]?.customBeneficiaries as string[]) || [];
+                    insts[idx] = { ...insts[idx], customBeneficiaries: [...cur, ''] };
+                    setInsts(typeKey, insts);
+                  };
+
+                  const updateCustomBen = (typeKey: string, idx: number, bIdx: number, value: string) => {
+                    const insts = [...getInsts(typeKey)];
+                    const cur = [...((insts[idx]?.customBeneficiaries as string[]) || [])];
+                    cur[bIdx] = value;
+                    insts[idx] = { ...insts[idx], customBeneficiaries: cur };
+                    setInsts(typeKey, insts);
+                  };
+
+                  const removeLastCustomBen = (typeKey: string, idx: number) => {
+                    const insts = [...getInsts(typeKey)];
+                    const cur = [...((insts[idx]?.customBeneficiaries as string[]) || [])];
+                    if (cur.length > 0) cur.pop();
+                    insts[idx] = { ...insts[idx], customBeneficiaries: cur };
+                    setInsts(typeKey, insts);
+                  };
+
+                  const updateBenPct = (typeKey: string, idx: number, name: string, value: string) => {
+                    const insts = [...getInsts(typeKey)];
+                    const pcts = { ...((insts[idx]?.beneficiaryPercentages as Record<string,string>) || {}) };
+                    pcts[name] = value;
+                    insts[idx] = { ...insts[idx], beneficiaryPercentages: pcts };
+                    setInsts(typeKey, insts);
+                  };
+
+                  const renderBeneficiarySection = (typeKey: string, instIdx: number, inst: Record<string, unknown>) => {
+                    const hasPrimaryBen = (inst.hasPrimaryBeneficiary as string) || '';
+                    const hasMultipleBen = (inst.hasMultipleBeneficiaries as string) || '';
+                    const selectedKnown = (inst.selectedKnownBeneficiaries as string[]) || [];
+                    const customBens = (inst.customBeneficiaries as string[]) || [];
+                    const benPcts = (inst.beneficiaryPercentages as Record<string,string>) || {};
+                    const allBens = [...selectedKnown, ...customBens.filter(b => b.trim())];
+                    const totalPct = allBens.reduce((sum, n) => sum + (parseFloat(benPcts[n] || '0') || 0), 0);
+                    const pctValid = Math.abs(totalPct - 100) < 0.01;
+
+                    return (
+                      <div className="mt-3 space-y-4 pl-4 border-l-2 border-gray-500">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Have you named a primary beneficiary(ies)?</label>
+                          <div className="flex flex-wrap gap-4">
+                            {(['yes', 'no', 'not_sure'] as const).map(opt => (
+                              <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name={`pben-${typeKey}-${instIdx}`} value={opt} checked={hasPrimaryBen === opt}
+                                  onChange={() => updateInstField(typeKey, instIdx, 'hasPrimaryBeneficiary', opt)}
+                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : "I'm not sure"}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+
+                        {hasPrimaryBen === 'not_sure' && (
+                          <div className="flex items-center gap-2 px-3 py-2 bg-red-900/30 border border-red-500/50 rounded-lg">
+                            <span className="text-red-400 text-sm font-medium">Red Flag: Beneficiary designation should be reviewed.</span>
+                          </div>
+                        )}
+
+                        {hasPrimaryBen === 'yes' && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">Are there multiple primary beneficiaries?</label>
+                              <div className="flex gap-4">
+                                {(['yes', 'no'] as const).map(opt => (
+                                  <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name={`mben-${typeKey}-${instIdx}`} value={opt} checked={hasMultipleBen === opt}
+                                      onChange={() => updateInstField(typeKey, instIdx, 'hasMultipleBeneficiaries', opt)}
+                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                    <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+
+                            {hasMultipleBen && (
+                              <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-300">
+                                  Select primary beneficiar{hasMultipleBen === 'yes' ? 'ies' : 'y'}:
+                                </label>
+                                {knownNames.map(name => (
+                                  <label key={name} className="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" checked={selectedKnown.includes(name)}
+                                      onChange={() => toggleKnownBen(typeKey, instIdx, name)}
+                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                    <span className="text-white text-sm">{name}</span>
+                                  </label>
+                                ))}
+
+                                {customBens.map((name, bIdx) => (
+                                  <div key={bIdx} className="space-y-2 pl-2">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-4 h-4 bg-blue-500 rounded flex items-center justify-center shrink-0">
+                                        <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                                          <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                      </div>
+                                      <input type="text" value={name} onChange={e => updateCustomBen(typeKey, instIdx, bIdx, e.target.value)}
+                                        placeholder="Enter beneficiary name"
+                                        className="flex-1 px-3 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                    </div>
+                                    {bIdx === customBens.length - 1 && (
+                                      <div className="pl-7 space-y-2">
+                                        <p className="text-sm text-gray-300">Are there other primary beneficiaries?</p>
+                                        <div className="flex gap-3">
+                                          <button type="button" onClick={() => addCustomBen(typeKey, instIdx)}
+                                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">Yes</button>
+                                          <button type="button" onClick={() => removeLastCustomBen(typeKey, instIdx)}
+                                            className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors">No</button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+
+                                {customBens.length === 0 && (
+                                  <label className="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" checked={false} onChange={() => addCustomBen(typeKey, instIdx)}
+                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                    <span className="text-white text-sm">Other</span>
+                                  </label>
+                                )}
+                              </div>
+                            )}
+
+                            {allBens.length > 0 && (
+                              <div className="space-y-3 pl-4 border-l-2 border-blue-500/40">
+                                <label className="block text-sm font-medium text-gray-300">Beneficial Ownership %: (must total 100%)</label>
+                                {allBens.map(name => (
+                                  <div key={name} className="flex items-center gap-3">
+                                    <span className="text-white text-sm w-40 shrink-0 truncate">{name}</span>
+                                    <div className="relative flex-1 max-w-[140px]">
+                                      <input type="number" min="0" max="100" step="0.01"
+                                        value={benPcts[name] || ''}
+                                        onChange={e => updateBenPct(typeKey, instIdx, name, e.target.value)}
+                                        placeholder="0"
+                                        className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                                    </div>
+                                  </div>
+                                ))}
+                                <p className={`text-sm font-medium ${pctValid ? 'text-green-400' : totalPct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                  Total: {totalPct.toFixed(totalPct % 1 === 0 ? 0 : 2)}%{totalPct > 0 && !pctValid ? ' — must equal 100%' : ''}{pctValid ? ' ✓' : ''}
+                                </p>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  };
+
+                  return (
+                    <div className="mt-6 space-y-6">
+                      <div className="pb-2 border-b border-gray-600">
+                        <h4 className="text-sm font-semibold text-gray-200 uppercase tracking-wide">Registered Accounts</h4>
+                      </div>
+
+                      <div className="space-y-2">
+                        {REGISTERED_ACCOUNT_TYPES.map(({ key, label }) => (
+                          <label key={key} className="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" checked={selectedTypes.includes(key)} onChange={() => toggleAccountType(key)}
+                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                            <span className="text-white text-sm">{label}</span>
+                          </label>
+                        ))}
+                      </div>
+
+                      {REGISTERED_ACCOUNT_TYPES.filter(({ key }) => selectedTypes.includes(key)).map(({ key, label }) => {
+                        const insts = getInsts(key);
+                        return (
+                          <div key={key} className="p-4 bg-gray-700 rounded-lg space-y-4">
+                            <h5 className="text-sm font-semibold text-white">{label}</h5>
+                            {insts.map((inst, instIdx) => (
+                              <div key={instIdx} className="p-4 bg-gray-600 rounded-lg space-y-3">
+                                <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Institution / Advisor {instIdx + 1}</p>
+                                <input type="text" value={(inst.institution as string) || ''}
+                                  onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
+                                  placeholder="e.g., TD Waterhouse, Edward Jones, RBC Direct Investing"
+                                  className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                {renderBeneficiarySection(key, instIdx, inst)}
+                              </div>
+                            ))}
+                            <button type="button" onClick={() => { const insts2 = [...getInsts(key), { institution: '' }]; setInsts(key, insts2); }}
+                              className="flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                              <span>+</span><span>Add Institution / Advisor</span>
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </>
             );
           })()}

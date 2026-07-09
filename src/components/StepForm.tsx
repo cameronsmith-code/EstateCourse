@@ -6342,7 +6342,7 @@ export default function StepForm({
                               <>
                                 {saFollowUp}
                                 {saOrBen === 'successor_annuitant' && saContingentSection}
-                                {(saOrBen === 'beneficiary' || saOrBen === 'not_sure') && beneficiaryDetails}
+                                {saOrBen === 'beneficiary' && beneficiaryDetails}
                               </>
                             ) : hasPrimaryBen === 'yes' ? beneficiaryDetails : null}
                           </>

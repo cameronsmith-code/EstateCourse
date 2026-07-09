@@ -553,6 +553,8 @@ interface FormData {
   client1PensionsData?: Array<Record<string, string>>;
   client2HasPension?: string;
   client2PensionsData?: Array<Record<string, string>>;
+  client1RegisteredAccountData?: Record<string, Array<Record<string, unknown>>>;
+  client2RegisteredAccountData?: Record<string, Array<Record<string, unknown>>>;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -1100,7 +1102,7 @@ export const generatePDF = (formData: FormData) => {
     yPosition += dynH;
   };
 
-  const renderAccountTable = (prefix: string, rows: { label: string; editable?: boolean }[]) => {
+  const renderAccountTable = (prefix: string, rows: { label: string; editable?: boolean; col4?: string }[]) => {
     const headerLabels = ['Account Type', 'Institution', 'Last 4 Digits', 'Beneficiary'];
     checkPageBreak(10);
     const hRowY = yPosition;
@@ -1120,7 +1122,7 @@ export const generatePDF = (formData: FormData) => {
     doc.text(headerLabels[3], margin + acctLabelWidth + acctCol2Width + acctCol3Width + 2, hRowY + 5.5);
     yPosition += acctRowH;
     rows.forEach((row, i) => {
-      renderAccountRow(row.label, `${prefix}_row${i}`, !!row.editable);
+      renderAccountRow(row.label, `${prefix}_row${i}`, !!row.editable, '', '', row.col4 || '');
     });
     yPosition += 4;
   };
@@ -7414,6 +7416,14 @@ You should explore this as an option with your legal and CFP® professionals bec
     }
   }
 
+  const c1RegData = (formData.client1RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;
+  const c2RegData = (formData.client2RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;
+  const benReviewNote = 'Beneficiary Review is Recommended';
+  const c1RrspNote = (c1RegData.rrsp || []).some(i => i.successorAnnuitantOrBeneficiary === 'not_sure') ? benReviewNote : '';
+  const c1RrifNote = (c1RegData.rrif || []).some(i => i.successorAnnuitantOrBeneficiary === 'not_sure') ? benReviewNote : '';
+  const c2RrspNote = (c2RegData.rrsp || []).some(i => i.successorAnnuitantOrBeneficiary === 'not_sure') ? benReviewNote : '';
+  const c2RrifNote = (c2RegData.rrif || []).some(i => i.successorAnnuitantOrBeneficiary === 'not_sure') ? benReviewNote : '';
+
   const client1AdvisorCount = parseInt(formData.client1FinancialAdvisors || '0');
   const client2AdvisorCount = parseInt(formData.client2FinancialAdvisors || '0');
 
@@ -7485,8 +7495,8 @@ You should explore this as an option with your legal and CFP® professionals bec
         yPosition += 6;
 
         renderAccountTable(`acct_c1_adv${advisorIndex + 1}`, [
-          { label: 'RRSP' }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
-          { label: 'RRIF' }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
+          { label: 'RRSP', col4: c1RrspNote }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
+          { label: 'RRIF', col4: c1RrifNote }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
           { label: 'TFSA' }, { label: 'Non-Registered Account' }, { label: 'RESP' },
           { label: 'RDSP' }, { label: 'FHSA' },
           { label: 'In Trust For:', editable: true }, { label: 'Other:', editable: true }, { label: 'Joint with _____:', editable: true },
@@ -7534,8 +7544,8 @@ You should explore this as an option with your legal and CFP® professionals bec
         yPosition += 6;
 
         renderAccountTable(`acct_c2_adv${advisorIndex + 1}`, [
-          { label: 'RRSP' }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
-          { label: 'RRIF' }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
+          { label: 'RRSP', col4: c2RrspNote }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
+          { label: 'RRIF', col4: c2RrifNote }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
           { label: 'TFSA' }, { label: 'Non-Registered Account' }, { label: 'RESP' },
           { label: 'RDSP' }, { label: 'FHSA' },
           { label: 'In Trust For:', editable: true }, { label: 'Other:', editable: true }, { label: 'Joint with _____:', editable: true },
@@ -7582,8 +7592,8 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 6;
 
       renderAccountTable(`acct_c1solo_adv${advisorIndex + 1}`, [
-        { label: 'RRSP' }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
-        { label: 'RRIF' }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
+        { label: 'RRSP', col4: c1RrspNote }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
+        { label: 'RRIF', col4: c1RrifNote }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
         { label: 'TFSA' }, { label: 'Non-Registered Account' }, { label: 'RESP' },
         { label: 'RDSP' }, { label: 'FHSA' }, { label: 'Group RRSP:' }, { label: 'Deferred Profit-Sharing Plan:' },
         { label: 'In Trust For:', editable: true }, { label: 'Joint with _____:', editable: true },
@@ -7633,8 +7643,8 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 6;
 
       renderAccountTable(`acct_c2solo_adv${advisorIndex + 1}`, [
-        { label: 'RRSP' }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
-        { label: 'RRIF' }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
+        { label: 'RRSP', col4: c2RrspNote }, { label: 'Spousal RRSP' }, { label: 'Locked In RRSP/LIRA' },
+        { label: 'RRIF', col4: c2RrifNote }, { label: 'Spousal RRIF' }, { label: 'Life Income Fund (LIF)' },
         { label: 'TFSA' }, { label: 'Non-Registered Account' }, { label: 'RESP' },
         { label: 'RDSP' }, { label: 'FHSA' }, { label: 'Group RRSP:' }, { label: 'Deferred Profit-Sharing Plan:' },
         { label: 'In Trust For:', editable: true }, { label: 'Joint with _____:', editable: true },

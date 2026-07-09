@@ -5915,7 +5915,7 @@ export default function StepForm({
                             <div>
                               <label className="block text-sm font-medium text-gray-300 mb-2">Is {client2Name} named as your Successor Holder?</label>
                               <div className="flex gap-4">
-                                {(['yes', 'no'] as const).map(opt => (
+                                {(['yes', 'no', 'not_sure'] as const).map(opt => (
                                   <label key={opt} className="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name={`sh-${typeKey}-${instIdx}`} value={opt} checked={hasSuccessorHolder === opt}
                                       onChange={() => {
@@ -5924,7 +5924,7 @@ export default function StepForm({
                                         setInsts(typeKey, cur);
                                       }}
                                       className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                                    <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                                    <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : "I'm not sure"}</span>
                                   </label>
                                 ))}
                               </div>
@@ -5935,7 +5935,7 @@ export default function StepForm({
                                 <div>
                                   <label className="block text-sm font-medium text-gray-300 mb-2">Have you named any beneficiaries, should your successor holder predecease?</label>
                                   <div className="flex gap-4">
-                                    {(['yes', 'no'] as const).map(opt => (
+                                    {(['yes', 'no', 'not_sure'] as const).map(opt => (
                                       <label key={opt} className="flex items-center gap-2 cursor-pointer">
                                         <input type="radio" name={`bip-${typeKey}-${instIdx}`} value={opt} checked={hasBenIfPredecease === opt}
                                           onChange={() => {
@@ -5944,7 +5944,7 @@ export default function StepForm({
                                             setInsts(typeKey, cur);
                                           }}
                                           className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                                        <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                                        <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : "I'm not sure"}</span>
                                       </label>
                                     ))}
                                   </div>

@@ -7545,7 +7545,7 @@ export default function StepForm({
                     {childrenData[index]?.disabled === 'yes' && (
                       <>
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
-                          <h4 className="text-base font-semibold text-blue-400">Disability Information</h4>
+                          <h4 className="text-base font-semibold text-blue-400">Future Support &amp; Independence</h4>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">

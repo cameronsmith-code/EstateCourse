@@ -1700,7 +1700,7 @@ export const generatePDF = (formData: FormData) => {
         ];
         const disPreviewH = disRows_preview.reduce((acc, r) => acc + (r.large ? 28 : 8), 0);
         checkPageBreak(20 + disPreviewH + 4);
-        const disabilitySubheading = `${nickname} Disability Information`;
+        const disabilitySubheading = `${nickname} Future Support & Independence`;
         addSubsectionHeader(disabilitySubheading);
         yPosition += 2;
 

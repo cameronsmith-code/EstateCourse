@@ -6408,9 +6408,58 @@ export default function StepForm({
                             {beneficiaryDetails}
                             {isResp && (() => {
                               const hasSuccSub = (inst.hasSuccessorSubscriber as string) || '';
-                              const succSubName = (inst.successorSubscriberName as string) || '';
                               const additionalSubscriber = (inst.additionalSubscriber as string) || '';
                               const andCoSubscriber = additionalSubscriber ? ` (and ${additionalSubscriber} if applicable)` : '';
+
+                              // Compute adult-eligible names based on province age of majority
+                              const province = ((basicAnswers['province'] as string) || '').toLowerCase();
+                              const higherMajorityProvinces = ['bc', 'british columbia', 'nova scotia', 'new brunswick', 'newfoundland', 'nl', 'ns', 'nb'];
+                              const ageOfMajority = higherMajorityProvinces.some(p => province.includes(p)) ? 19 : 18;
+                              const today = new Date();
+                              const adultKnownOptions: string[] = [];
+                              if (hasSpouse && client2Name) adultKnownOptions.push(client2Name);
+                              ((s2['client1PreviousRelationshipsData'] as Array<Record<string,string>>) || []).forEach(r => {
+                                if (r?.name && !adultKnownOptions.includes(r.name)) adultKnownOptions.push(r.name);
+                              });
+                              allChildren.forEach(c => {
+                                if (!c?.name || !c?.dateOfBirth) return;
+                                const ageMs = today.getTime() - new Date(c.dateOfBirth).getTime();
+                                if (ageMs / (365.25 * 24 * 60 * 60 * 1000) >= ageOfMajority && !adultKnownOptions.includes(c.name)) adultKnownOptions.push(c.name);
+                              });
+
+                              const succSubSelected = (inst.succSubSelected as string[]) || [];
+                              const other1Active = (inst.succSubOther1Active as string) === 'yes';
+                              const other2Active = (inst.succSubOther2Active as string) === 'yes';
+                              const other1 = (inst.succSubOther1 as Record<string,string>) || {};
+                              const other2 = (inst.succSubOther2 as Record<string,string>) || {};
+                              const otherRelationship = (inst.succSubOtherRelationship as string) || '';
+
+                              const toggleKnownSuccSub = (name: string) => {
+                                const cur = [...getInsts(typeKey)];
+                                const prev = (cur[instIdx].succSubSelected as string[]) || [];
+                                cur[instIdx] = { ...cur[instIdx], succSubSelected: prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name] };
+                                setInsts(typeKey, cur);
+                              };
+
+                              const updateOther = (slot: 1 | 2, field: string, value: string) => {
+                                const key = slot === 1 ? 'succSubOther1' : 'succSubOther2';
+                                const cur = [...getInsts(typeKey)];
+                                const prev = (cur[instIdx][key] as Record<string,string>) || {};
+                                cur[instIdx] = { ...cur[instIdx], [key]: { ...prev, [field]: value } };
+                                setInsts(typeKey, cur);
+                              };
+
+                              const contactFields = [
+                                { key: 'name', label: 'Name', placeholder: 'Full name', type: 'text' },
+                                { key: 'city', label: 'City', placeholder: 'City', type: 'text' },
+                                { key: 'province', label: 'Province', placeholder: 'Province', type: 'text' },
+                                { key: 'country', label: 'Country', placeholder: 'Country', type: 'text' },
+                                { key: 'phone', label: 'Phone', placeholder: 'Phone number', type: 'tel' },
+                                { key: 'email', label: 'Email', placeholder: 'Email address', type: 'email' },
+                              ];
+
+                              const inputClass = 'w-full px-2 py-1.5 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+
                               return (
                                 <div className="pt-3 border-t border-gray-600 space-y-3">
                                   <div>
@@ -6424,7 +6473,7 @@ export default function StepForm({
                                             checked={hasSuccSub === opt}
                                             onChange={() => {
                                               const cur = [...getInsts(typeKey)];
-                                              cur[instIdx] = { ...cur[instIdx], hasSuccessorSubscriber: opt, successorSubscriberName: '' };
+                                              cur[instIdx] = { ...cur[instIdx], hasSuccessorSubscriber: opt, succSubSelected: [], succSubOther1Active: '', succSubOther2Active: '', succSubOther1: {}, succSubOther2: {}, succSubOtherRelationship: '' };
                                               setInsts(typeKey, cur);
                                             }}
                                             className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
@@ -6433,15 +6482,82 @@ export default function StepForm({
                                       ))}
                                     </div>
                                   </div>
+
                                   {hasSuccSub === 'yes' && (
-                                    <div>
-                                      <label className="block text-sm font-medium text-gray-300 mb-1">Successor Subscriber name:</label>
-                                      <input type="text" value={succSubName}
-                                        onChange={e => updateInstField(typeKey, instIdx, 'successorSubscriberName', e.target.value)}
-                                        placeholder="Enter name"
-                                        className="w-full max-w-xs px-3 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                    <div className="space-y-2">
+                                      <label className="block text-sm font-medium text-gray-300">Select Successor Subscriber(s):</label>
+
+                                      {adultKnownOptions.map(name => (
+                                        <label key={name} className="flex items-center gap-3 cursor-pointer">
+                                          <input type="checkbox" checked={succSubSelected.includes(name)} onChange={() => toggleKnownSuccSub(name)}
+                                            className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                          <span className="text-white text-sm">{name}</span>
+                                        </label>
+                                      ))}
+
+                                      {/* Other — person 1 */}
+                                      <label className="flex items-center gap-3 cursor-pointer">
+                                        <input type="checkbox" checked={other1Active}
+                                          onChange={() => {
+                                            const cur = [...getInsts(typeKey)];
+                                            const nowActive = !other1Active;
+                                            cur[instIdx] = { ...cur[instIdx], succSubOther1Active: nowActive ? 'yes' : '', succSubOther1: {}, succSubOther2Active: '', succSubOther2: {}, succSubOtherRelationship: '' };
+                                            setInsts(typeKey, cur);
+                                          }}
+                                          className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                        <span className="text-white text-sm">Other</span>
+                                      </label>
+
+                                      {other1Active && (
+                                        <div className="pl-7 space-y-3">
+                                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Person 1</p>
+                                          <div className="grid grid-cols-2 gap-2">
+                                            {contactFields.map(f => (
+                                              <div key={f.key}>
+                                                <label className="block text-xs text-gray-400 mb-1">{f.label}:</label>
+                                                <input type={f.type} value={other1[f.key] || ''} onChange={e => updateOther(1, f.key, e.target.value)} placeholder={f.placeholder} className={inputClass} />
+                                              </div>
+                                            ))}
+                                          </div>
+
+                                          {/* Other — person 2 */}
+                                          <label className="flex items-center gap-3 cursor-pointer">
+                                            <input type="checkbox" checked={other2Active}
+                                              onChange={() => {
+                                                const cur = [...getInsts(typeKey)];
+                                                const nowActive = !other2Active;
+                                                cur[instIdx] = { ...cur[instIdx], succSubOther2Active: nowActive ? 'yes' : '', succSubOther2: {}, succSubOtherRelationship: '' };
+                                                setInsts(typeKey, cur);
+                                              }}
+                                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                            <span className="text-white text-sm">Add a second person</span>
+                                          </label>
+
+                                          {other2Active && (
+                                            <div className="pl-7 space-y-3">
+                                              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Person 2</p>
+                                              <div className="grid grid-cols-2 gap-2">
+                                                {contactFields.map(f => (
+                                                  <div key={f.key}>
+                                                    <label className="block text-xs text-gray-400 mb-1">{f.label}:</label>
+                                                    <input type={f.type} value={other2[f.key] || ''} onChange={e => updateOther(2, f.key, e.target.value)} placeholder={f.placeholder} className={inputClass} />
+                                                  </div>
+                                                ))}
+                                              </div>
+                                              <div>
+                                                <label className="block text-xs text-gray-400 mb-1">What is the relationship between Person 1 and Person 2?</label>
+                                                <input type="text" value={otherRelationship}
+                                                  onChange={e => updateInstField(typeKey, instIdx, 'succSubOtherRelationship', e.target.value)}
+                                                  placeholder="e.g. siblings, spouses, friends"
+                                                  className={inputClass} />
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
                                   )}
+
                                   {(hasSuccSub === 'no' || hasSuccSub === 'not_sure') && (
                                     <div className="flex items-start gap-2 p-3 bg-amber-900/30 border border-amber-600/40 rounded-lg">
                                       <svg className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>

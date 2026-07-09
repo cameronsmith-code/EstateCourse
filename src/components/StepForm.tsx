@@ -1253,9 +1253,10 @@ export default function StepForm({
   };
 
   const client1FinancialAdvisorsCount = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
-  const client1FinancialAdvisorsData = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(Math.max(0, client1FinancialAdvisorsCount || 0)).fill(null).map(() => ({}));
+  const client1FinancialAdvisorsDataRaw = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
+  const client1FinancialAdvisorsData: Array<Record<string, string>> = Array.from({ length: client1FinancialAdvisorsCount }, (_, i) => client1FinancialAdvisorsDataRaw[i] || {});
 
-  const handleFinancialAdvisorChange = (index: number, field: string, value: string) => {
+  const handleClient1FinancialAdvisorChange = (index: number, field: string, value: string) => {
     const updated = [...client1FinancialAdvisorsData];
     if (!updated[index]) {
       updated[index] = {};
@@ -1289,7 +1290,8 @@ export default function StepForm({
   };
 
   const client2FinancialAdvisorsCount = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
-  const client2FinancialAdvisorsData = (answers['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || Array(Math.max(0, client2FinancialAdvisorsCount || 0)).fill(null).map(() => ({}));
+  const client2FinancialAdvisorsDataRaw = (answers['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
+  const client2FinancialAdvisorsData: Array<Record<string, string>> = Array.from({ length: client2FinancialAdvisorsCount }, (_, i) => client2FinancialAdvisorsDataRaw[i] || {});
 
   const handleClient2FinancialAdvisorChange = (index: number, field: string, value: string) => {
     const updated = [...client2FinancialAdvisorsData];

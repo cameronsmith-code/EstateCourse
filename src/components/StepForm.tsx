@@ -5754,6 +5754,44 @@ export default function StepForm({
                     setInsts(typeKey, insts);
                   };
 
+                  const toggleKnownContingentBen = (typeKey: string, idx: number, name: string) => {
+                    const insts = [...getInsts(typeKey)];
+                    const cur = (insts[idx]?.selectedKnownContingentBeneficiaries as string[]) || [];
+                    insts[idx] = { ...insts[idx], selectedKnownContingentBeneficiaries: cur.includes(name) ? cur.filter(n => n !== name) : [...cur, name] };
+                    setInsts(typeKey, insts);
+                  };
+
+                  const addCustomContingentBen = (typeKey: string, idx: number) => {
+                    const insts = [...getInsts(typeKey)];
+                    const cur = (insts[idx]?.customContingentBeneficiaries as string[]) || [];
+                    insts[idx] = { ...insts[idx], customContingentBeneficiaries: [...cur, ''] };
+                    setInsts(typeKey, insts);
+                  };
+
+                  const updateCustomContingentBen = (typeKey: string, idx: number, bIdx: number, value: string) => {
+                    const insts = [...getInsts(typeKey)];
+                    const cur = [...((insts[idx]?.customContingentBeneficiaries as string[]) || [])];
+                    cur[bIdx] = value;
+                    insts[idx] = { ...insts[idx], customContingentBeneficiaries: cur };
+                    setInsts(typeKey, insts);
+                  };
+
+                  const removeLastCustomContingentBen = (typeKey: string, idx: number) => {
+                    const insts = [...getInsts(typeKey)];
+                    const cur = [...((insts[idx]?.customContingentBeneficiaries as string[]) || [])];
+                    if (cur.length > 0) cur.pop();
+                    insts[idx] = { ...insts[idx], customContingentBeneficiaries: cur };
+                    setInsts(typeKey, insts);
+                  };
+
+                  const updateContingentBenPct = (typeKey: string, idx: number, name: string, value: string) => {
+                    const insts = [...getInsts(typeKey)];
+                    const pcts = { ...((insts[idx]?.contingentBeneficiaryPercentages as Record<string,string>) || {}) };
+                    pcts[name] = value;
+                    insts[idx] = { ...insts[idx], contingentBeneficiaryPercentages: pcts };
+                    setInsts(typeKey, insts);
+                  };
+
                   const renderBeneficiarySection = (typeKey: string, instIdx: number, inst: Record<string, unknown>) => {
                     const hasPrimaryBen = (inst.hasPrimaryBeneficiary as string) || '';
                     const hasMultipleBen = (inst.hasMultipleBeneficiaries as string) || '';
@@ -5765,10 +5803,21 @@ export default function StepForm({
                     const pctValid = Math.abs(totalPct - 100) < 0.01;
                     const hasSuccessorHolder = (inst.hasSuccessorHolder as string) || '';
                     const hasBenIfPredecease = (inst.hasBenIfPredecease as string) || '';
+                    const hasContingentBen = (inst.hasContingentBeneficiary as string) || '';
+                    const hasMultipleContingentBen = (inst.hasMultipleContingentBeneficiaries as string) || '';
+                    const selectedKnownContingent = (inst.selectedKnownContingentBeneficiaries as string[]) || [];
+                    const customContingentBens = (inst.customContingentBeneficiaries as string[]) || [];
+                    const contingentBenPcts = (inst.contingentBeneficiaryPercentages as Record<string,string>) || {};
+                    const allContingentBens = [...selectedKnownContingent, ...customContingentBens.filter(b => b.trim())];
+                    const totalContingentPct = allContingentBens.reduce((sum, n) => sum + (parseFloat(contingentBenPcts[n] || '0') || 0), 0);
+                    const contingentPctValid = Math.abs(totalContingentPct - 100) < 0.01;
 
                     const isSingle = hasMultipleBen === 'no';
                     const singleIsCustom = isSingle && customBens.length > 0;
                     const singleSelected = isSingle ? (singleIsCustom ? '__custom__' : (selectedKnown[0] || '')) : '';
+                    const isContingentSingle = hasMultipleContingentBen === 'no';
+                    const contingentSingleIsCustom = isContingentSingle && customContingentBens.length > 0;
+                    const contingentSingleSelected = isContingentSingle ? (contingentSingleIsCustom ? '__custom__' : (selectedKnownContingent[0] || '')) : '';
 
                     const selectSingleBen = (name: string, isCustom: boolean) => {
                       const cur = [...getInsts(typeKey)];
@@ -5787,6 +5836,27 @@ export default function StepForm({
                         ...cur[instIdx],
                         customBeneficiaries: [value],
                         beneficiaryPercentages: value.trim() ? { [value]: '100' } : {},
+                      };
+                      setInsts(typeKey, cur);
+                    };
+
+                    const selectSingleContingentBen = (name: string, isCustom: boolean) => {
+                      const cur = [...getInsts(typeKey)];
+                      cur[instIdx] = {
+                        ...cur[instIdx],
+                        selectedKnownContingentBeneficiaries: isCustom ? [] : [name],
+                        customContingentBeneficiaries: isCustom ? [''] : [],
+                        contingentBeneficiaryPercentages: isCustom ? {} : { [name]: '100' },
+                      };
+                      setInsts(typeKey, cur);
+                    };
+
+                    const updateSingleCustomContingentBen = (value: string) => {
+                      const cur = [...getInsts(typeKey)];
+                      cur[instIdx] = {
+                        ...cur[instIdx],
+                        customContingentBeneficiaries: [value],
+                        contingentBeneficiaryPercentages: value.trim() ? { [value]: '100' } : {},
                       };
                       setInsts(typeKey, cur);
                     };
@@ -5903,6 +5973,139 @@ export default function StepForm({
                             <p className={`text-sm font-medium ${pctValid ? 'text-green-400' : totalPct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
                               Total: {totalPct.toFixed(totalPct % 1 === 0 ? 0 : 2)}%{totalPct > 0 && !pctValid ? ' — must equal 100%' : ''}{pctValid ? ' ✓' : ''}
                             </p>
+                          </div>
+                        )}
+
+                        {allBens.length > 0 && (
+                          <div className="pt-3 border-t border-gray-600 space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Have you named any contingent beneficiaries, should {allBens.length === 1 ? allBens[0] : 'your primary beneficiary(ies)'} predecease?
+                              </label>
+                              <div className="flex flex-wrap gap-4">
+                                {(['yes', 'no', 'not_sure'] as const).map(opt => (
+                                  <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name={`cben-${typeKey}-${instIdx}`} value={opt} checked={hasContingentBen === opt}
+                                      onChange={() => {
+                                        const cur = [...getInsts(typeKey)];
+                                        cur[instIdx] = { ...cur[instIdx], hasContingentBeneficiary: opt, hasMultipleContingentBeneficiaries: '', selectedKnownContingentBeneficiaries: [], customContingentBeneficiaries: [], contingentBeneficiaryPercentages: {} };
+                                        setInsts(typeKey, cur);
+                                      }}
+                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                    <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : "I'm not sure"}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+
+                            {hasContingentBen === 'yes' && (
+                              <>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Are there multiple contingent beneficiaries?</label>
+                                  <div className="flex gap-4">
+                                    {(['yes', 'no'] as const).map(opt => (
+                                      <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name={`mcben-${typeKey}-${instIdx}`} value={opt} checked={hasMultipleContingentBen === opt}
+                                          onChange={() => {
+                                            const cur = [...getInsts(typeKey)];
+                                            cur[instIdx] = { ...cur[instIdx], hasMultipleContingentBeneficiaries: opt, selectedKnownContingentBeneficiaries: [], customContingentBeneficiaries: [], contingentBeneficiaryPercentages: {} };
+                                            setInsts(typeKey, cur);
+                                          }}
+                                          className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                        <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {isContingentSingle && (
+                                  <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-300">Select contingent beneficiary:</label>
+                                    {knownNames.map(name => (
+                                      <label key={name} className="flex items-center gap-3 cursor-pointer">
+                                        <input type="radio" name={`scben-${typeKey}-${instIdx}`} value={name} checked={contingentSingleSelected === name} onChange={() => selectSingleContingentBen(name, false)} className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                        <span className="text-white text-sm">{name}</span>
+                                      </label>
+                                    ))}
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                      <input type="radio" name={`scben-${typeKey}-${instIdx}`} value="__custom__" checked={contingentSingleSelected === '__custom__'} onChange={() => selectSingleContingentBen('', true)} className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                      <span className="text-white text-sm">Other</span>
+                                    </label>
+                                    {contingentSingleIsCustom && (
+                                      <input type="text" value={customContingentBens[0] || ''} onChange={e => updateSingleCustomContingentBen(e.target.value)} placeholder="Enter beneficiary name"
+                                        className="ml-7 w-full max-w-xs px-3 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                    )}
+                                  </div>
+                                )}
+
+                                {!isContingentSingle && hasMultipleContingentBen === 'yes' && (
+                                  <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-300">Select contingent beneficiaries:</label>
+                                    {knownNames.map(name => (
+                                      <label key={name} className="flex items-center gap-3 cursor-pointer">
+                                        <input type="checkbox" checked={selectedKnownContingent.includes(name)} onChange={() => toggleKnownContingentBen(typeKey, instIdx, name)} className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                        <span className="text-white text-sm">{name}</span>
+                                      </label>
+                                    ))}
+                                    {customContingentBens.map((name, bIdx) => (
+                                      <div key={bIdx} className="space-y-2 pl-2">
+                                        <div className="flex items-center gap-3">
+                                          <div className="w-4 h-4 bg-blue-500 rounded flex items-center justify-center shrink-0">
+                                            <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                          </div>
+                                          <input type="text" value={name} onChange={e => updateCustomContingentBen(typeKey, instIdx, bIdx, e.target.value)} placeholder="Enter beneficiary name"
+                                            className="flex-1 px-3 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        {bIdx === customContingentBens.length - 1 && (
+                                          <div className="pl-7 space-y-2">
+                                            <p className="text-sm text-gray-300">Are there other contingent beneficiaries?</p>
+                                            <div className="flex gap-3">
+                                              <button type="button" onClick={() => addCustomContingentBen(typeKey, instIdx)} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">Yes</button>
+                                              <button type="button" onClick={() => removeLastCustomContingentBen(typeKey, instIdx)} className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors">No</button>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                    {customContingentBens.length === 0 && (
+                                      <label className="flex items-center gap-3 cursor-pointer">
+                                        <input type="checkbox" checked={false} onChange={() => addCustomContingentBen(typeKey, instIdx)} className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                        <span className="text-white text-sm">Other</span>
+                                      </label>
+                                    )}
+                                  </div>
+                                )}
+
+                                {allContingentBens.length > 0 && isContingentSingle && (
+                                  <div className="pl-4 border-l-2 border-blue-500/40">
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">Beneficial Ownership:</label>
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-white text-sm w-40 shrink-0 truncate">{allContingentBens[0]}</span>
+                                      <span className="text-green-400 text-sm font-medium">100%</span>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {allContingentBens.length > 0 && !isContingentSingle && (
+                                  <div className="space-y-3 pl-4 border-l-2 border-blue-500/40">
+                                    <label className="block text-sm font-medium text-gray-300">Beneficial Ownership %: (must total 100%)</label>
+                                    {allContingentBens.map(name => (
+                                      <div key={name} className="flex items-center gap-3">
+                                        <span className="text-white text-sm w-40 shrink-0 truncate">{name}</span>
+                                        <div className="relative flex-1 max-w-[140px]">
+                                          <input type="number" min="0" max="100" step="0.01" value={contingentBenPcts[name] || ''} onChange={e => updateContingentBenPct(typeKey, instIdx, name, e.target.value)} placeholder="0"
+                                            className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                    <p className={`text-sm font-medium ${contingentPctValid ? 'text-green-400' : totalContingentPct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                      Total: {totalContingentPct.toFixed(totalContingentPct % 1 === 0 ? 0 : 2)}%{totalContingentPct > 0 && !contingentPctValid ? ' — must equal 100%' : ''}{contingentPctValid ? ' ✓' : ''}
+                                    </p>
+                                  </div>
+                                )}
+                              </>
+                            )}
                           </div>
                         )}
                       </>

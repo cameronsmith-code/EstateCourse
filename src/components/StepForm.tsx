@@ -6483,80 +6483,109 @@ export default function StepForm({
                                     </div>
                                   </div>
 
-                                  {hasSuccSub === 'yes' && (
-                                    <div className="space-y-2">
-                                      <label className="block text-sm font-medium text-gray-300">Select Successor Subscriber(s):</label>
+                                  {hasSuccSub === 'yes' && (() => {
+                                    // Compute total selected count and display names for relationship question
+                                    const other1DisplayName = other1Active ? (other1.name?.trim() || 'Other (1)') : null;
+                                    const other2DisplayName = other2Active ? (other2.name?.trim() || 'Other (2)') : null;
+                                    const allSelectedNames: string[] = [
+                                      ...succSubSelected,
+                                      ...(other1DisplayName ? [other1DisplayName] : []),
+                                      ...(other2DisplayName ? [other2DisplayName] : []),
+                                    ];
+                                    const totalSelected = allSelectedNames.length;
+                                    const atMax = totalSelected >= 2;
+                                    const canAddOther = !other1Active && !atMax;
 
-                                      {adultKnownOptions.map(name => (
-                                        <label key={name} className="flex items-center gap-3 cursor-pointer">
-                                          <input type="checkbox" checked={succSubSelected.includes(name)} onChange={() => toggleKnownSuccSub(name)}
-                                            className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
-                                          <span className="text-white text-sm">{name}</span>
+                                    return (
+                                      <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-gray-300">
+                                          Select Successor Subscriber(s): <span className="text-gray-400 font-normal">(maximum 2)</span>
                                         </label>
-                                      ))}
 
-                                      {/* Other — person 1 */}
-                                      <label className="flex items-center gap-3 cursor-pointer">
-                                        <input type="checkbox" checked={other1Active}
-                                          onChange={() => {
-                                            const cur = [...getInsts(typeKey)];
-                                            const nowActive = !other1Active;
-                                            cur[instIdx] = { ...cur[instIdx], succSubOther1Active: nowActive ? 'yes' : '', succSubOther1: {}, succSubOther2Active: '', succSubOther2: {}, succSubOtherRelationship: '' };
-                                            setInsts(typeKey, cur);
-                                          }}
-                                          className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
-                                        <span className="text-white text-sm">Other</span>
-                                      </label>
+                                        {adultKnownOptions.map(name => {
+                                          const isChecked = succSubSelected.includes(name);
+                                          const isDisabled = atMax && !isChecked;
+                                          return (
+                                            <label key={name} className={`flex items-center gap-3 ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                              <input type="checkbox" checked={isChecked} disabled={isDisabled}
+                                                onChange={() => !isDisabled && toggleKnownSuccSub(name)}
+                                                className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                              <span className="text-white text-sm">{name}</span>
+                                            </label>
+                                          );
+                                        })}
 
-                                      {other1Active && (
-                                        <div className="pl-7 space-y-3">
-                                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Person 1</p>
-                                          <div className="grid grid-cols-2 gap-2">
-                                            {contactFields.map(f => (
-                                              <div key={f.key}>
-                                                <label className="block text-xs text-gray-400 mb-1">{f.label}:</label>
-                                                <input type={f.type} value={other1[f.key] || ''} onChange={e => updateOther(1, f.key, e.target.value)} placeholder={f.placeholder} className={inputClass} />
-                                              </div>
-                                            ))}
-                                          </div>
-
-                                          {/* Other — person 2 */}
-                                          <label className="flex items-center gap-3 cursor-pointer">
-                                            <input type="checkbox" checked={other2Active}
+                                        {/* Other — checkbox only shown when not already at max or already active */}
+                                        {(canAddOther || other1Active) && (
+                                          <label className={`flex items-center gap-3 ${!other1Active && atMax ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                            <input type="checkbox" checked={other1Active} disabled={!other1Active && atMax}
                                               onChange={() => {
                                                 const cur = [...getInsts(typeKey)];
-                                                const nowActive = !other2Active;
-                                                cur[instIdx] = { ...cur[instIdx], succSubOther2Active: nowActive ? 'yes' : '', succSubOther2: {}, succSubOtherRelationship: '' };
+                                                const nowActive = !other1Active;
+                                                cur[instIdx] = { ...cur[instIdx], succSubOther1Active: nowActive ? 'yes' : '', succSubOther1: {}, succSubOther2Active: '', succSubOther2: {}, succSubOtherRelationship: '' };
                                                 setInsts(typeKey, cur);
                                               }}
                                               className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
-                                            <span className="text-white text-sm">Add a second person</span>
+                                            <span className="text-white text-sm">Other</span>
                                           </label>
+                                        )}
 
-                                          {other2Active && (
-                                            <div className="pl-7 space-y-3">
-                                              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Person 2</p>
-                                              <div className="grid grid-cols-2 gap-2">
-                                                {contactFields.map(f => (
-                                                  <div key={f.key}>
-                                                    <label className="block text-xs text-gray-400 mb-1">{f.label}:</label>
-                                                    <input type={f.type} value={other2[f.key] || ''} onChange={e => updateOther(2, f.key, e.target.value)} placeholder={f.placeholder} className={inputClass} />
-                                                  </div>
-                                                ))}
-                                              </div>
-                                              <div>
-                                                <label className="block text-xs text-gray-400 mb-1">What is the relationship between Person 1 and Person 2?</label>
-                                                <input type="text" value={otherRelationship}
-                                                  onChange={e => updateInstField(typeKey, instIdx, 'succSubOtherRelationship', e.target.value)}
-                                                  placeholder="e.g. siblings, spouses, friends"
-                                                  className={inputClass} />
-                                              </div>
+                                        {other1Active && (
+                                          <div className="pl-7 space-y-3">
+                                            <div className="grid grid-cols-2 gap-2">
+                                              {contactFields.map(f => (
+                                                <div key={f.key}>
+                                                  <label className="block text-xs text-gray-400 mb-1">{f.label}:</label>
+                                                  <input type={f.type} value={other1[f.key] || ''} onChange={e => updateOther(1, f.key, e.target.value)} placeholder={f.placeholder} className={inputClass} />
+                                                </div>
+                                              ))}
                                             </div>
-                                          )}
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
+
+                                            {/* Second other — only available if fewer than 2 total are selected */}
+                                            {(other2Active || !atMax || other2Active) && (
+                                              <label className={`flex items-center gap-3 ${!other2Active && atMax ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                                <input type="checkbox" checked={other2Active} disabled={!other2Active && atMax}
+                                                  onChange={() => {
+                                                    const cur = [...getInsts(typeKey)];
+                                                    const nowActive = !other2Active;
+                                                    cur[instIdx] = { ...cur[instIdx], succSubOther2Active: nowActive ? 'yes' : '', succSubOther2: {}, succSubOtherRelationship: '' };
+                                                    setInsts(typeKey, cur);
+                                                  }}
+                                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                                <span className="text-white text-sm">Add a second person</span>
+                                              </label>
+                                            )}
+
+                                            {other2Active && (
+                                              <div className="pl-7 space-y-3">
+                                                <div className="grid grid-cols-2 gap-2">
+                                                  {contactFields.map(f => (
+                                                    <div key={f.key}>
+                                                      <label className="block text-xs text-gray-400 mb-1">{f.label}:</label>
+                                                      <input type={f.type} value={other2[f.key] || ''} onChange={e => updateOther(2, f.key, e.target.value)} placeholder={f.placeholder} className={inputClass} />
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+
+                                        {/* Relationship question — shown whenever exactly 2 people are selected */}
+                                        {totalSelected === 2 && (
+                                          <div className="pt-2">
+                                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                                              What is the relationship between {allSelectedNames[0]} and {allSelectedNames[1]}?
+                                            </label>
+                                            <input type="text" value={otherRelationship}
+                                              onChange={e => updateInstField(typeKey, instIdx, 'succSubOtherRelationship', e.target.value)}
+                                              placeholder="e.g. siblings, spouses, friends"
+                                              className={inputClass} />
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
 
                                   {(hasSuccSub === 'no' || hasSuccSub === 'not_sure') && (
                                     <div className="flex items-start gap-2 p-3 bg-amber-900/30 border border-amber-600/40 rounded-lg">

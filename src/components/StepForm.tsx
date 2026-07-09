@@ -7539,13 +7539,26 @@ export default function StepForm({
                           />
                           <span className="text-gray-300">No</span>
                         </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`disabled-${index}`}
+                            value="not_sure"
+                            checked={childrenData[index]?.disabled === 'not_sure'}
+                            onChange={(e) => handleChildChange(index, 'disabled', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">We're not sure yet</span>
+                        </label>
                       </div>
                     </div>
 
-                    {childrenData[index]?.disabled === 'yes' && (
+                    {(childrenData[index]?.disabled === 'yes' || childrenData[index]?.disabled === 'not_sure') && (
                       <>
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
-                          <h4 className="text-base font-semibold text-blue-400">Future Support &amp; Independence</h4>
+                          <h4 className="text-base font-semibold text-blue-400">
+                            {childrenData[index]?.disabled === 'not_sure' ? 'Potential Future Support & Independence' : 'Future Support & Independence'}
+                          </h4>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">

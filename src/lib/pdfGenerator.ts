@@ -1693,14 +1693,14 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition += 6;
 
-      if (child.disabled === 'yes') {
+      if (child.disabled === 'yes' || child.disabled === 'not_sure') {
         const disRows_preview: { large?: boolean }[] = [
           {}, {}, {}, {}, {}, {},
           { large: true }, { large: true }, { large: true },
         ];
         const disPreviewH = disRows_preview.reduce((acc, r) => acc + (r.large ? 28 : 8), 0);
         checkPageBreak(20 + disPreviewH + 4);
-        const disabilitySubheading = `${nickname} Future Support & Independence`;
+        const disabilitySubheading = child.disabled === 'not_sure' ? `${nickname} Potential Future Support & Independence` : `${nickname} Future Support & Independence`;
         addSubsectionHeader(disabilitySubheading);
         yPosition += 2;
 

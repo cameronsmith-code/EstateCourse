@@ -1084,6 +1084,8 @@ export default function StepForm({
     updated[index][field] = value;
 
     if (field === 'disabled' && value === 'no') {
+      updated[index].supportNeedTypes = undefined;
+      updated[index].supportNeedOther = undefined;
       updated[index].disabilityTaxCredit = undefined;
       updated[index].disabilityNature = undefined;
       updated[index].disabilityFormalDiagnosis = undefined;
@@ -7560,6 +7562,66 @@ export default function StepForm({
                             {childrenData[index]?.disabled === 'not_sure' ? 'Potential Future Support & Independence' : 'Future Support & Independence'}
                           </h4>
                         </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-3">
+                            What best describes the support need? (Select all that apply)
+                          </label>
+                          <div className="flex flex-col gap-2">
+                            {[
+                              { value: 'cognitive_developmental', label: 'Cognitive or developmental disability' },
+                              { value: 'physical', label: 'Physical disability' },
+                              { value: 'medical_condition', label: 'Medical condition' },
+                              { value: 'mental_health', label: 'Mental health condition' },
+                              { value: 'learning', label: 'Learning disability' },
+                              { value: 'complex_care', label: 'Complex care needs' },
+                              { value: 'prefer_no_label', label: 'Prefer not to label it - but planning support is needed' },
+                            ].map(({ value, label }) => {
+                              const current = (childrenData[index]?.supportNeedTypes || '').split(',').filter(Boolean);
+                              const checked = current.includes(value);
+                              return (
+                                <label key={value} className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => {
+                                      const next = checked ? current.filter(v => v !== value) : [...current, value];
+                                      handleChildChange(index, 'supportNeedTypes', next.join(','));
+                                    }}
+                                    className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                                  />
+                                  <span className="text-gray-300 text-sm">{label}</span>
+                                </label>
+                              );
+                            })}
+                            <div className="mt-1">
+                              <label className="flex items-start gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={(childrenData[index]?.supportNeedTypes || '').split(',').includes('other')}
+                                  onChange={() => {
+                                    const current = (childrenData[index]?.supportNeedTypes || '').split(',').filter(Boolean);
+                                    const checked = current.includes('other');
+                                    const next = checked ? current.filter(v => v !== 'other') : [...current, 'other'];
+                                    handleChildChange(index, 'supportNeedTypes', next.join(','));
+                                    if (checked) handleChildChange(index, 'supportNeedOther', '');
+                                  }}
+                                  className="w-4 h-4 mt-0.5 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                                />
+                                <span className="text-gray-300 text-sm">Other</span>
+                              </label>
+                              {(childrenData[index]?.supportNeedTypes || '').split(',').includes('other') && (
+                                <input
+                                  type="text"
+                                  value={childrenData[index]?.supportNeedOther || ''}
+                                  onChange={(e) => handleChildChange(index, 'supportNeedOther', e.target.value)}
+                                  placeholder="Please describe the situation"
+                                  className="mt-2 ml-6 w-full max-w-md px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Do they qualify for the disability tax credit?

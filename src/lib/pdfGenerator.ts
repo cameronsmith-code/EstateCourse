@@ -1716,7 +1716,20 @@ export const generatePDF = (formData: FormData) => {
           return '';
         })();
 
+        const supportNeedLabels: Record<string, string> = {
+          cognitive_developmental: 'Cognitive or developmental disability',
+          physical: 'Physical disability',
+          medical_condition: 'Medical condition',
+          mental_health: 'Mental health condition',
+          learning: 'Learning disability',
+          complex_care: 'Complex care needs',
+          prefer_no_label: 'Prefer not to label it - but planning support is needed',
+          other: child.supportNeedOther ? `Other: ${child.supportNeedOther}` : 'Other',
+        };
+        const supportNeedValue = (child.supportNeedTypes || '').split(',').filter(Boolean).map(v => supportNeedLabels[v] || v).join('; ');
+
         const disRows: { label: string; value: string; large?: boolean }[] = [
+          { label: 'Support need type(s):', value: supportNeedValue },
           { label: 'Nature of disability:', value: child.disabilityNature || '' },
           { label: 'Formal diagnosis? (yes/no)', value: child.disabilityFormalDiagnosis || '' },
           { label: 'Describe the nature and severity of the disability:', value: child.disabilitySeverity || '', large: true },

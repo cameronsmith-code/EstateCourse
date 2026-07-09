@@ -6320,33 +6320,23 @@ export default function StepForm({
                                     ))}
                                   </div>
                                 </div>
-                                {hasBenIfPredecease === 'yes' && (
-                                  <>
-                                    {primaryBenQuestion}
-                                    {hasPrimaryBen === 'yes' && beneficiaryDetails}
-                                  </>
-                                )}
+                                {hasBenIfPredecease === 'yes' && beneficiaryDetails}
                               </>
                             )}
-                            {hasSuccessorHolder === 'no' && (
-                              <>
-                                {primaryBenQuestion}
-                                {hasPrimaryBen === 'yes' && beneficiaryDetails}
-                              </>
-                            )}
+                            {hasSuccessorHolder === 'no' && beneficiaryDetails}
                           </>
-                        ) : (
+                        ) : (typeKey === 'rrif' || typeKey === 'rrsp') && hasSpouse ? (
                           <>
                             {primaryBenQuestion}
-                            {hasPrimaryBen === 'yes' && (typeKey === 'rrif' || typeKey === 'rrsp') && hasSpouse ? (
+                            {hasPrimaryBen === 'yes' && (
                               <>
                                 {saFollowUp}
                                 {saOrBen === 'successor_annuitant' && saContingentSection}
                                 {saOrBen === 'beneficiary' && beneficiaryDetails}
                               </>
-                            ) : hasPrimaryBen === 'yes' ? beneficiaryDetails : null}
+                            )}
                           </>
-                        )}
+                        ) : beneficiaryDetails}
                       </div>
                     );
                   };

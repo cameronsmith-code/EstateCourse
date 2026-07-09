@@ -6211,7 +6211,7 @@ export default function StepForm({
                           </div>
                         )}
 
-                        {allBens.length > 0 && (
+                        {allBens.length > 0 && !isResp && (
                           <div className="pt-3 border-t border-gray-600 space-y-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -6403,7 +6403,56 @@ export default function StepForm({
                               </>
                             )}
                           </>
-                        ) : beneficiaryDetails}
+                        ) : (
+                          <>
+                            {beneficiaryDetails}
+                            {isResp && (() => {
+                              const hasSuccSub = (inst.hasSuccessorSubscriber as string) || '';
+                              const succSubName = (inst.successorSubscriberName as string) || '';
+                              const additionalSubscriber = (inst.additionalSubscriber as string) || '';
+                              const andCoSubscriber = additionalSubscriber ? ` (and ${additionalSubscriber} if applicable)` : '';
+                              return (
+                                <div className="pt-3 border-t border-gray-600 space-y-3">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                      Have you named a Successor Subscriber (the person(s) who would oversee the account should you{andCoSubscriber} pass away)?
+                                    </label>
+                                    <div className="flex flex-wrap gap-4">
+                                      {(['yes', 'no', 'not_sure'] as const).map(opt => (
+                                        <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                          <input type="radio" name={`succsub-${typeKey}-${instIdx}`} value={opt}
+                                            checked={hasSuccSub === opt}
+                                            onChange={() => {
+                                              const cur = [...getInsts(typeKey)];
+                                              cur[instIdx] = { ...cur[instIdx], hasSuccessorSubscriber: opt, successorSubscriberName: '' };
+                                              setInsts(typeKey, cur);
+                                            }}
+                                            className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                          <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : "I'm not sure"}</span>
+                                        </label>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  {hasSuccSub === 'yes' && (
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-1">Successor Subscriber name:</label>
+                                      <input type="text" value={succSubName}
+                                        onChange={e => updateInstField(typeKey, instIdx, 'successorSubscriberName', e.target.value)}
+                                        placeholder="Enter name"
+                                        className="w-full max-w-xs px-3 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                    </div>
+                                  )}
+                                  {(hasSuccSub === 'no' || hasSuccSub === 'not_sure') && (
+                                    <div className="flex items-start gap-2 p-3 bg-amber-900/30 border border-amber-600/40 rounded-lg">
+                                      <svg className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                      <p className="text-amber-300 text-xs">Naming a Successor Subscriber is recommended. This will be flagged as an action item in your estate planning summary.</p>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </>
+                        )}
                       </div>
                     );
                   };

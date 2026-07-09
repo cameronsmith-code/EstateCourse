@@ -7423,6 +7423,28 @@ You should explore this as an option with your legal and CFP® professionals bec
   const c1RrifNote = (c1RegData.rrif || []).some(i => i.successorAnnuitantOrBeneficiary === 'not_sure') ? benReviewNote : '';
   const c2RrspNote = (c2RegData.rrsp || []).some(i => i.successorAnnuitantOrBeneficiary === 'not_sure') ? benReviewNote : '';
   const c2RrifNote = (c2RegData.rrif || []).some(i => i.successorAnnuitantOrBeneficiary === 'not_sure') ? benReviewNote : '';
+  const c1RespMissingSuccessorSubscriber = (c1RegData.resp || []).some(i => i.hasSuccessorSubscriber === 'no' || i.hasSuccessorSubscriber === 'not_sure');
+  const c2RespMissingSuccessorSubscriber = (c2RegData.resp || []).some(i => i.hasSuccessorSubscriber === 'no' || i.hasSuccessorSubscriber === 'not_sure');
+
+  const renderRespSuccessorSubscriberTodo = (clientLabel: string) => {
+    checkPageBreak(18);
+    doc.setFillColor(255, 255, 200);
+    const todoText = `TO DO (${clientLabel} - RESP): A Successor Subscriber has not been named. This is strongly recommended — if you pass away without one, the RESP may need to go through your estate, causing delays and potential loss of grants. Please name a Successor Subscriber in your Will or directly through your financial institution.`;
+    const todoLines = doc.splitTextToSize(todoText, pageWidth - margin * 2 - 12);
+    const todoBoxH = todoLines.length * 5 + 8;
+    doc.rect(margin, yPosition, pageWidth - margin * 2, todoBoxH, 'F');
+    doc.setDrawColor(180, 140, 0);
+    doc.rect(margin, yPosition, pageWidth - margin * 2, todoBoxH, 'S');
+    doc.setTextColor(80, 60, 0);
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    doc.text(todoLines, margin + 4, yPosition + 5);
+    doc.setTextColor(...colors.darkText);
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(200, 200, 200);
+    doc.setFont(undefined, 'normal');
+    yPosition += todoBoxH + 4;
+  };
 
   const client1AdvisorCount = parseInt(formData.client1FinancialAdvisors || '0');
   const client2AdvisorCount = parseInt(formData.client2FinancialAdvisors || '0');
@@ -7551,6 +7573,7 @@ You should explore this as an option with your legal and CFP® professionals bec
           { label: 'In Trust For:', editable: true }, { label: 'Other:', editable: true }, { label: 'Joint with _____:', editable: true },
         ]);
         yPosition += 6;
+        if (advisorIndex === 0 && c2RespMissingSuccessorSubscriber) renderRespSuccessorSubscriberTodo(client2Name);
       }
     }
   } else if (client1AdvisorCount > 0) {
@@ -7600,6 +7623,7 @@ You should explore this as an option with your legal and CFP® professionals bec
         { label: 'Other:', editable: true }, { label: 'Other:', editable: true }, { label: 'Other:', editable: true },
       ]);
       yPosition += 6;
+      if (advisorIndex === 0 && c1RespMissingSuccessorSubscriber) renderRespSuccessorSubscriberTodo(client1Name);
     }
   }
 
@@ -7651,6 +7675,7 @@ You should explore this as an option with your legal and CFP® professionals bec
         { label: 'Other:', editable: true }, { label: 'Other:', editable: true }, { label: 'Other:', editable: true },
       ]);
       yPosition += 6;
+      if (advisorIndex === 0 && c2RespMissingSuccessorSubscriber) renderRespSuccessorSubscriberTodo(client2Name);
     }
   }
 
@@ -10612,6 +10637,50 @@ You should explore this as an option with your legal and CFP® professionals bec
     });
 
     yPosition += 10;
+  }
+
+  // Will Review / Recommendations Checklist
+  const willReviewItems: string[] = [];
+  if (c1RespMissingSuccessorSubscriber) willReviewItems.push(`Name a Successor Subscriber for ${client1Name}'s RESP — without one, the account may fall into the estate upon death, causing delays and potential forfeiture of government grants.`);
+  if (c2RespMissingSuccessorSubscriber && hasSpouse) willReviewItems.push(`Name a Successor Subscriber for ${client2Name}'s RESP — without one, the account may fall into the estate upon death, causing delays and potential forfeiture of government grants.`);
+
+  if (willReviewItems.length > 0) {
+    addPage();
+    yPosition = 20;
+
+    doc.setFontSize(13);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...colors.navyBlue);
+    doc.text('Will Review / Planning Recommendations', margin, yPosition);
+    yPosition += 8;
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...colors.darkText);
+    doc.text('The following action items were identified during your estate planning questionnaire and should be addressed with your advisor:', margin, yPosition, { maxWidth: fieldWidth });
+    yPosition += 10;
+
+    willReviewItems.forEach((item, idx) => {
+      checkPageBreak(20);
+      doc.setFillColor(255, 248, 220);
+      const bulletLines = doc.splitTextToSize(`\u2022  ${item}`, fieldWidth - 10);
+      const bulletBoxH = bulletLines.length * 5 + 8;
+      doc.rect(margin, yPosition, fieldWidth, bulletBoxH, 'F');
+      doc.setDrawColor(180, 140, 0);
+      doc.rect(margin, yPosition, fieldWidth, bulletBoxH, 'S');
+      doc.setTextColor(60, 40, 0);
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text(bulletLines, margin + 5, yPosition + 5);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(200, 200, 200);
+      yPosition += bulletBoxH + 4;
+      void idx;
+    });
+
+    yPosition += 6;
   }
 
   // Add new page for additional information

@@ -5663,7 +5663,7 @@ export default function StepForm({
                   const s7 = allAnswers?.get(7) || {};
                   const advisorsData = (s7['client1FinancialAdvisorsData'] as Array<Record<string,string>>) || [];
                   const advisors = advisorsData.filter(a => a?.name || a?.firm);
-                  const knownNames: string[] = [client1Name];
+                  const knownNames: string[] = [];
                   if (hasSpouse) knownNames.push(client2Name);
                   (s2['client1PreviousRelationshipsData'] as Array<Record<string,string>> || []).forEach(r => { if (r?.name && !knownNames.includes(r.name)) knownNames.push(r.name); });
                   (s2['client2PreviousRelationshipsData'] as Array<Record<string,string>> || []).forEach(r => { if (r?.name && !knownNames.includes(r.name)) knownNames.push(r.name); });

@@ -5763,6 +5763,8 @@ export default function StepForm({
                     const allBens = [...selectedKnown, ...customBens.filter(b => b.trim())];
                     const totalPct = allBens.reduce((sum, n) => sum + (parseFloat(benPcts[n] || '0') || 0), 0);
                     const pctValid = Math.abs(totalPct - 100) < 0.01;
+                    const hasSuccessorHolder = (inst.hasSuccessorHolder as string) || '';
+                    const hasBenIfPredecease = (inst.hasBenIfPredecease as string) || '';
 
                     const isSingle = hasMultipleBen === 'no';
                     const singleIsCustom = isSingle && customBens.length > 0;
@@ -5789,33 +5791,136 @@ export default function StepForm({
                       setInsts(typeKey, cur);
                     };
 
-                    return (
-                      <div className="mt-3 space-y-4 pl-4 border-l-2 border-gray-500">
+                    const primaryBenQuestion = (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Have you named a primary beneficiary(ies)?</label>
+                        <div className="flex flex-wrap gap-4">
+                          {(['yes', 'no', 'not_sure'] as const).map(opt => (
+                            <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" name={`pben-${typeKey}-${instIdx}`} value={opt} checked={hasPrimaryBen === opt}
+                                onChange={() => updateInstField(typeKey, instIdx, 'hasPrimaryBeneficiary', opt)}
+                                className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                              <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : "I'm not sure"}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    );
+
+                    const beneficiaryDetails = (
+                      <>
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">Have you named a primary beneficiary(ies)?</label>
-                          <div className="flex flex-wrap gap-4">
-                            {(['yes', 'no', 'not_sure'] as const).map(opt => (
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Are there multiple primary beneficiaries?</label>
+                          <div className="flex gap-4">
+                            {(['yes', 'no'] as const).map(opt => (
                               <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name={`pben-${typeKey}-${instIdx}`} value={opt} checked={hasPrimaryBen === opt}
-                                  onChange={() => updateInstField(typeKey, instIdx, 'hasPrimaryBeneficiary', opt)}
+                                <input type="radio" name={`mben-${typeKey}-${instIdx}`} value={opt} checked={hasMultipleBen === opt}
+                                  onChange={() => { const cur = [...getInsts(typeKey)]; cur[instIdx] = { ...cur[instIdx], hasMultipleBeneficiaries: opt, selectedKnownBeneficiaries: [], customBeneficiaries: [], beneficiaryPercentages: {} }; setInsts(typeKey, cur); }}
                                   className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                                <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : "I'm not sure"}</span>
+                                <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
                               </label>
                             ))}
                           </div>
                         </div>
+                        {isSingle && (
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-300">Select primary beneficiary:</label>
+                            {knownNames.map(name => (
+                              <label key={name} className="flex items-center gap-3 cursor-pointer">
+                                <input type="radio" name={`sben-${typeKey}-${instIdx}`} value={name} checked={singleSelected === name} onChange={() => selectSingleBen(name, false)} className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                <span className="text-white text-sm">{name}</span>
+                              </label>
+                            ))}
+                            <label className="flex items-center gap-3 cursor-pointer">
+                              <input type="radio" name={`sben-${typeKey}-${instIdx}`} value="__custom__" checked={singleSelected === '__custom__'} onChange={() => selectSingleBen('', true)} className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                              <span className="text-white text-sm">Other</span>
+                            </label>
+                            {singleIsCustom && (
+                              <input type="text" value={customBens[0] || ''} onChange={e => updateSingleCustomBen(e.target.value)} placeholder="Enter beneficiary name"
+                                className="ml-7 w-full max-w-xs px-3 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                            )}
+                          </div>
+                        )}
+                        {!isSingle && hasMultipleBen === 'yes' && (
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-300">Select primary beneficiaries:</label>
+                            {knownNames.map(name => (
+                              <label key={name} className="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" checked={selectedKnown.includes(name)} onChange={() => toggleKnownBen(typeKey, instIdx, name)} className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                <span className="text-white text-sm">{name}</span>
+                              </label>
+                            ))}
+                            {customBens.map((name, bIdx) => (
+                              <div key={bIdx} className="space-y-2 pl-2">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-4 h-4 bg-blue-500 rounded flex items-center justify-center shrink-0">
+                                    <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                  </div>
+                                  <input type="text" value={name} onChange={e => updateCustomBen(typeKey, instIdx, bIdx, e.target.value)} placeholder="Enter beneficiary name"
+                                    className="flex-1 px-3 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                </div>
+                                {bIdx === customBens.length - 1 && (
+                                  <div className="pl-7 space-y-2">
+                                    <p className="text-sm text-gray-300">Are there other primary beneficiaries?</p>
+                                    <div className="flex gap-3">
+                                      <button type="button" onClick={() => addCustomBen(typeKey, instIdx)} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">Yes</button>
+                                      <button type="button" onClick={() => removeLastCustomBen(typeKey, instIdx)} className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors">No</button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                            {customBens.length === 0 && (
+                              <label className="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" checked={false} onChange={() => addCustomBen(typeKey, instIdx)} className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
+                                <span className="text-white text-sm">Other</span>
+                              </label>
+                            )}
+                          </div>
+                        )}
+                        {allBens.length > 0 && isSingle && (
+                          <div className="pl-4 border-l-2 border-blue-500/40">
+                            <label className="block text-sm font-medium text-gray-300 mb-1">Beneficial Ownership:</label>
+                            <div className="flex items-center gap-3">
+                              <span className="text-white text-sm w-40 shrink-0 truncate">{allBens[0]}</span>
+                              <span className="text-green-400 text-sm font-medium">100%</span>
+                            </div>
+                          </div>
+                        )}
+                        {allBens.length > 0 && !isSingle && (
+                          <div className="space-y-3 pl-4 border-l-2 border-blue-500/40">
+                            <label className="block text-sm font-medium text-gray-300">Beneficial Ownership %: (must total 100%)</label>
+                            {allBens.map(name => (
+                              <div key={name} className="flex items-center gap-3">
+                                <span className="text-white text-sm w-40 shrink-0 truncate">{name}</span>
+                                <div className="relative flex-1 max-w-[140px]">
+                                  <input type="number" min="0" max="100" step="0.01" value={benPcts[name] || ''} onChange={e => updateBenPct(typeKey, instIdx, name, e.target.value)} placeholder="0"
+                                    className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                                </div>
+                              </div>
+                            ))}
+                            <p className={`text-sm font-medium ${pctValid ? 'text-green-400' : totalPct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                              Total: {totalPct.toFixed(totalPct % 1 === 0 ? 0 : 2)}%{totalPct > 0 && !pctValid ? ' — must equal 100%' : ''}{pctValid ? ' ✓' : ''}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    );
 
-                        {hasPrimaryBen === 'yes' && (
+                    return (
+                      <div className="mt-3 space-y-4 pl-4 border-l-2 border-gray-500">
+                        {typeKey === 'tfsa' && hasSpouse ? (
                           <>
                             <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">Are there multiple primary beneficiaries?</label>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">Is {client2Name} named as your Successor Holder?</label>
                               <div className="flex gap-4">
                                 {(['yes', 'no'] as const).map(opt => (
                                   <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name={`mben-${typeKey}-${instIdx}`} value={opt} checked={hasMultipleBen === opt}
+                                    <input type="radio" name={`sh-${typeKey}-${instIdx}`} value={opt} checked={hasSuccessorHolder === opt}
                                       onChange={() => {
                                         const cur = [...getInsts(typeKey)];
-                                        cur[instIdx] = { ...cur[instIdx], hasMultipleBeneficiaries: opt, selectedKnownBeneficiaries: [], customBeneficiaries: [], beneficiaryPercentages: {} };
+                                        cur[instIdx] = { ...cur[instIdx], hasSuccessorHolder: opt, successorHolder: opt === 'yes' ? client2Name : '', hasBenIfPredecease: '', hasPrimaryBeneficiary: '', hasMultipleBeneficiaries: '', selectedKnownBeneficiaries: [], customBeneficiaries: [], beneficiaryPercentages: {} };
                                         setInsts(typeKey, cur);
                                       }}
                                       className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
@@ -5824,114 +5929,45 @@ export default function StepForm({
                                 ))}
                               </div>
                             </div>
-
-                            {isSingle && (
-                              <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-300">Select primary beneficiary:</label>
-                                {knownNames.map(name => (
-                                  <label key={name} className="flex items-center gap-3 cursor-pointer">
-                                    <input type="radio" name={`sben-${typeKey}-${instIdx}`} value={name}
-                                      checked={singleSelected === name}
-                                      onChange={() => selectSingleBen(name, false)}
-                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                                    <span className="text-white text-sm">{name}</span>
-                                  </label>
-                                ))}
-                                <label className="flex items-center gap-3 cursor-pointer">
-                                  <input type="radio" name={`sben-${typeKey}-${instIdx}`} value="__custom__"
-                                    checked={singleSelected === '__custom__'}
-                                    onChange={() => selectSingleBen('', true)}
-                                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                                  <span className="text-white text-sm">Other</span>
-                                </label>
-                                {singleIsCustom && (
-                                  <input type="text" value={customBens[0] || ''}
-                                    onChange={e => updateSingleCustomBen(e.target.value)}
-                                    placeholder="Enter beneficiary name"
-                                    className="ml-7 w-full max-w-xs px-3 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
-                                )}
-                              </div>
-                            )}
-
-                            {!isSingle && hasMultipleBen === 'yes' && (
-                              <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-300">Select primary beneficiaries:</label>
-                                {knownNames.map(name => (
-                                  <label key={name} className="flex items-center gap-3 cursor-pointer">
-                                    <input type="checkbox" checked={selectedKnown.includes(name)}
-                                      onChange={() => toggleKnownBen(typeKey, instIdx, name)}
-                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
-                                    <span className="text-white text-sm">{name}</span>
-                                  </label>
-                                ))}
-
-                                {customBens.map((name, bIdx) => (
-                                  <div key={bIdx} className="space-y-2 pl-2">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-4 h-4 bg-blue-500 rounded flex items-center justify-center shrink-0">
-                                        <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
-                                          <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                      </div>
-                                      <input type="text" value={name} onChange={e => updateCustomBen(typeKey, instIdx, bIdx, e.target.value)}
-                                        placeholder="Enter beneficiary name"
-                                        className="flex-1 px-3 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
-                                    </div>
-                                    {bIdx === customBens.length - 1 && (
-                                      <div className="pl-7 space-y-2">
-                                        <p className="text-sm text-gray-300">Are there other primary beneficiaries?</p>
-                                        <div className="flex gap-3">
-                                          <button type="button" onClick={() => addCustomBen(typeKey, instIdx)}
-                                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">Yes</button>
-                                          <button type="button" onClick={() => removeLastCustomBen(typeKey, instIdx)}
-                                            className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors">No</button>
-                                        </div>
-                                      </div>
-                                    )}
+                            {hasSuccessorHolder === 'yes' && (
+                              <>
+                                <div className="text-sm text-gray-300">Successor Holder: <span className="text-white font-medium">{client2Name}</span></div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Have you named any beneficiaries, should your successor holder predecease?</label>
+                                  <div className="flex gap-4">
+                                    {(['yes', 'no'] as const).map(opt => (
+                                      <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name={`bip-${typeKey}-${instIdx}`} value={opt} checked={hasBenIfPredecease === opt}
+                                          onChange={() => {
+                                            const cur = [...getInsts(typeKey)];
+                                            cur[instIdx] = { ...cur[instIdx], hasBenIfPredecease: opt, hasPrimaryBeneficiary: '', hasMultipleBeneficiaries: '', selectedKnownBeneficiaries: [], customBeneficiaries: [], beneficiaryPercentages: {} };
+                                            setInsts(typeKey, cur);
+                                          }}
+                                          className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                        <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                                      </label>
+                                    ))}
                                   </div>
-                                ))}
-
-                                {customBens.length === 0 && (
-                                  <label className="flex items-center gap-3 cursor-pointer">
-                                    <input type="checkbox" checked={false} onChange={() => addCustomBen(typeKey, instIdx)}
-                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
-                                    <span className="text-white text-sm">Other</span>
-                                  </label>
-                                )}
-                              </div>
-                            )}
-
-                            {allBens.length > 0 && isSingle && (
-                              <div className="pl-4 border-l-2 border-blue-500/40">
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Beneficial Ownership:</label>
-                                <div className="flex items-center gap-3">
-                                  <span className="text-white text-sm w-40 shrink-0 truncate">{allBens[0]}</span>
-                                  <span className="text-green-400 text-sm font-medium">100%</span>
                                 </div>
-                              </div>
+                                {hasBenIfPredecease === 'yes' && (
+                                  <>
+                                    {primaryBenQuestion}
+                                    {hasPrimaryBen === 'yes' && beneficiaryDetails}
+                                  </>
+                                )}
+                              </>
                             )}
-
-                            {allBens.length > 0 && !isSingle && (
-                              <div className="space-y-3 pl-4 border-l-2 border-blue-500/40">
-                                <label className="block text-sm font-medium text-gray-300">Beneficial Ownership %: (must total 100%)</label>
-                                {allBens.map(name => (
-                                  <div key={name} className="flex items-center gap-3">
-                                    <span className="text-white text-sm w-40 shrink-0 truncate">{name}</span>
-                                    <div className="relative flex-1 max-w-[140px]">
-                                      <input type="number" min="0" max="100" step="0.01"
-                                        value={benPcts[name] || ''}
-                                        onChange={e => updateBenPct(typeKey, instIdx, name, e.target.value)}
-                                        placeholder="0"
-                                        className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
-                                    </div>
-                                  </div>
-                                ))}
-                                <p className={`text-sm font-medium ${pctValid ? 'text-green-400' : totalPct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                                  Total: {totalPct.toFixed(totalPct % 1 === 0 ? 0 : 2)}%{totalPct > 0 && !pctValid ? ' — must equal 100%' : ''}{pctValid ? ' ✓' : ''}
-                                </p>
-                              </div>
+                            {hasSuccessorHolder === 'no' && (
+                              <>
+                                {primaryBenQuestion}
+                                {hasPrimaryBen === 'yes' && beneficiaryDetails}
+                              </>
                             )}
+                          </>
+                        ) : (
+                          <>
+                            {primaryBenQuestion}
+                            {hasPrimaryBen === 'yes' && beneficiaryDetails}
                           </>
                         )}
                       </div>

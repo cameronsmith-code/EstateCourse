@@ -7514,7 +7514,7 @@ export default function StepForm({
 
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Are they disabled?
+                        Does {childrenData[index]?.nickname || childrenData[index]?.name || 'this child'} have a disability, medical condition, or support need that may affect their long-term care or independence?
                       </label>
                       <div className="flex gap-4">
                         <label className="flex items-center">

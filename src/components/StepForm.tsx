@@ -5685,6 +5685,25 @@ export default function StepForm({
                     onAnswerChange('client1RegisteredAccountTypes', updated);
                   };
 
+                  const accountDecisions = (answers['client1RegisteredAccountDecisions'] as Record<string, 'yes'|'no'>) || {};
+
+                  const setAccountDecision = (typeKey: string, decision: 'yes'|'no') => {
+                    onAnswerChange('client1RegisteredAccountDecisions', { ...accountDecisions, [typeKey]: decision });
+                    if (decision === 'yes') {
+                      if (!selectedTypes.includes(typeKey)) {
+                        onAnswerChange('client1RegisteredAccountTypes', [...selectedTypes, typeKey]);
+                      }
+                      if (!accountData[typeKey] || accountData[typeKey].length === 0) {
+                        onAnswerChange('client1RegisteredAccountData', { ...accountData, [typeKey]: [{ institution: '' }] });
+                      }
+                    } else {
+                      const d = { ...accountData };
+                      delete d[typeKey];
+                      onAnswerChange('client1RegisteredAccountData', d);
+                      onAnswerChange('client1RegisteredAccountTypes', selectedTypes.filter(t => t !== typeKey));
+                    }
+                  };
+
                   const getInsts = (typeKey: string): Array<Record<string, unknown>> => accountData[typeKey] || [];
 
                   const setInsts = (typeKey: string, insts: Array<Record<string, unknown>>) => {
@@ -5925,20 +5944,27 @@ export default function StepForm({
                         <h4 className="text-sm font-semibold text-gray-200 uppercase tracking-wide">Registered Accounts</h4>
                       </div>
 
-                      <div className="space-y-2">
-                        {REGISTERED_ACCOUNT_TYPES.map(({ key, label }) => (
-                          <label key={key} className="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" checked={selectedTypes.includes(key)} onChange={() => toggleAccountType(key)}
-                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
-                            <span className="text-white text-sm">{label}</span>
-                          </label>
-                        ))}
-                      </div>
-
-                      {REGISTERED_ACCOUNT_TYPES.filter(({ key }) => selectedTypes.includes(key)).map(({ key, label }) => {
+                      {REGISTERED_ACCOUNT_TYPES.map(({ key, label }) => {
+                        const decision = accountDecisions[key] || (selectedTypes.includes(key) ? 'yes' : undefined);
                         const insts = getInsts(key);
                         return (
-                          <div key={key} className="p-4 bg-gray-700 rounded-lg space-y-4">
+                          <div key={key} className="space-y-3 pb-4 border-b border-gray-700 last:border-0 last:pb-0">
+                            <div>
+                              <p className="text-sm font-medium text-gray-200 mb-2">Do you have a {label}?</p>
+                              <div className="flex gap-4">
+                                {(['yes', 'no'] as const).map(opt => (
+                                  <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name={`has-account-${key}`} value={opt}
+                                      checked={decision === opt}
+                                      onChange={() => setAccountDecision(key, opt)}
+                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                    <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                            {decision === 'yes' && (
+                            <div className="p-4 bg-gray-700 rounded-lg space-y-4">
                             <h5 className="text-sm font-semibold text-white">{label}</h5>
                             {insts.map((inst, instIdx) => {
                               const advisorSel = (inst.advisorSelection as string) || '';
@@ -6064,6 +6090,8 @@ export default function StepForm({
                               className="flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors">
                               <span>+</span><span>Add Institution / Advisor</span>
                             </button>
+                            </div>
+                            )}
                           </div>
                         );
                       })}

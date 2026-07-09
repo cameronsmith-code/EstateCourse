@@ -5861,9 +5861,13 @@ export default function StepForm({
                       setInsts(typeKey, cur);
                     };
 
+                    const primaryBenLabel = (typeKey === 'rrif' || typeKey === 'rrsp') && hasSpouse
+                      ? `Is ${client2Name} named as a Successor Annuitant or Beneficiary?`
+                      : 'Have you named a primary beneficiary(ies)?';
+
                     const primaryBenQuestion = (
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Have you named a primary beneficiary(ies)?</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">{primaryBenLabel}</label>
                         <div className="flex flex-wrap gap-4">
                           {(['yes', 'no', 'not_sure'] as const).map(opt => (
                             <label key={opt} className="flex items-center gap-2 cursor-pointer">

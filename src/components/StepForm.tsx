@@ -6281,7 +6281,7 @@ export default function StepForm({
 
                     return (
                       <div className="mt-3 space-y-4 pl-4 border-l-2 border-gray-500">
-                        {typeKey === 'tfsa' && hasSpouse ? (
+                        {(typeKey === 'tfsa' || typeKey === 'fhsa') && hasSpouse ? (
                           <>
                             <div>
                               <label className="block text-sm font-medium text-gray-300 mb-2">Is {client2Name} named as your Successor Holder?</label>

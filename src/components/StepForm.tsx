@@ -6026,7 +6026,23 @@ export default function StepForm({
 
                               return (
                                 <div key={instIdx} className="p-4 bg-gray-600 rounded-lg space-y-3">
-                                  <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Institution / Advisor {instIdx + 1}</p>
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Institution / Advisor {instIdx + 1}</p>
+                                    {instIdx > 0 && (
+                                      <button type="button"
+                                        onClick={() => {
+                                          const cur = [...getInsts(key)];
+                                          cur.splice(instIdx);
+                                          setInsts(key, cur);
+                                        }}
+                                        className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition-colors">
+                                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                        </svg>
+                                        Remove
+                                      </button>
+                                    )}
+                                  </div>
                                   {renderAdvisorQuestion()}
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-1">Account Balance:</label>

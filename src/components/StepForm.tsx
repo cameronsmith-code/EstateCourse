@@ -7624,42 +7624,28 @@ export default function StepForm({
 
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Do they qualify for the disability tax credit?
+                            Do they qualify for the Disability Tax Credit (DTC)?
                           </label>
-                        <div className="flex gap-4">
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name={`disabilityTaxCredit-${index}`}
-                              value="yes"
-                              checked={childrenData[index]?.disabilityTaxCredit === 'yes'}
-                              onChange={(e) => handleChildChange(index, 'disabilityTaxCredit', e.target.value)}
-                              className="mr-2"
-                            />
-                            <span className="text-gray-300">Yes</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name={`disabilityTaxCredit-${index}`}
-                              value="no"
-                              checked={childrenData[index]?.disabilityTaxCredit === 'no'}
-                              onChange={(e) => handleChildChange(index, 'disabilityTaxCredit', e.target.value)}
-                              className="mr-2"
-                            />
-                            <span className="text-gray-300">No</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name={`disabilityTaxCredit-${index}`}
-                              value="not-looked"
-                              checked={childrenData[index]?.disabilityTaxCredit === 'not-looked'}
-                              onChange={(e) => handleChildChange(index, 'disabilityTaxCredit', e.target.value)}
-                              className="mr-2"
-                            />
-                            <span className="text-gray-300">I/we haven't looked into this</span>
-                          </label>
+                        <div className="flex flex-col gap-2">
+                          {[
+                            { value: 'yes', label: 'Yes' },
+                            { value: 'no', label: 'No' },
+                            { value: 'in-progress', label: 'Application is in progress' },
+                            { value: 'denied', label: 'Previously denied' },
+                            { value: 'not-looked', label: "I/we haven't looked into this" },
+                          ].map(({ value, label }) => (
+                            <label key={value} className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`disabilityTaxCredit-${index}`}
+                                value={value}
+                                checked={childrenData[index]?.disabilityTaxCredit === value}
+                                onChange={(e) => handleChildChange(index, 'disabilityTaxCredit', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-gray-300">{label}</span>
+                            </label>
+                          ))}
                         </div>
                       </div>
 

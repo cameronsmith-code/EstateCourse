@@ -1712,6 +1712,8 @@ export const generatePDF = (formData: FormData) => {
         const dtcValue = (() => {
           if (child.disabilityTaxCredit === 'yes') return 'Yes';
           if (child.disabilityTaxCredit === 'no') return 'No';
+          if (child.disabilityTaxCredit === 'in-progress') return 'Application is in progress';
+          if (child.disabilityTaxCredit === 'denied') return 'Previously denied';
           if (child.disabilityTaxCredit === 'not-looked') return "I/we haven't looked into this";
           return '';
         })();

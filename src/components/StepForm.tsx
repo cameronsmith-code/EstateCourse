@@ -6485,6 +6485,66 @@ export default function StepForm({
                                         className="w-full pl-7 pr-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                                     </div>
                                   </div>
+                                  {key === 'resp' && (() => {
+                                    const isSoleSubscriber = (inst.isSoleSubscriber as string) || '';
+                                    const additionalSubscriber = (inst.additionalSubscriber as string) || '';
+                                    const prevRels = (s2['client1PreviousRelationshipsData'] as Array<Record<string,string>>) || [];
+                                    const children = (s3['childrenData'] as Array<Record<string,string>>) || [];
+                                    const prevNamesWithChildren = new Set(
+                                      children
+                                        .filter(c => c?.parentsOption === 'client1-other' && c?.otherParentName)
+                                        .map(c => c.otherParentName)
+                                    );
+                                    const subscriberOptions: { value: string; label: string }[] = [];
+                                    if (hasSpouse) subscriberOptions.push({ value: client2Name, label: `${client2Name} (current spouse / common-law partner)` });
+                                    prevRels.forEach(r => {
+                                      if (r?.name && prevNamesWithChildren.has(r.name)) {
+                                        subscriberOptions.push({ value: r.name, label: `${r.name} (previous spouse / common-law partner)` });
+                                      }
+                                    });
+                                    return (
+                                      <div className="space-y-3">
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-2">Are you the sole subscriber, or is there another subscriber?</label>
+                                          <div className="flex flex-wrap gap-4">
+                                            {[{ value: 'sole', label: 'I am the sole subscriber' }, { value: 'joint', label: 'There is another subscriber' }].map(opt => (
+                                              <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                                                <input type="radio" name={`sub-${key}-${instIdx}`} value={opt.value}
+                                                  checked={isSoleSubscriber === opt.value}
+                                                  onChange={() => {
+                                                    const cur = [...getInsts(key)];
+                                                    cur[instIdx] = { ...cur[instIdx], isSoleSubscriber: opt.value, additionalSubscriber: '' };
+                                                    setInsts(key, cur);
+                                                  }}
+                                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                                <span className="text-white text-sm">{opt.label}</span>
+                                              </label>
+                                            ))}
+                                          </div>
+                                        </div>
+                                        {isSoleSubscriber === 'joint' && (
+                                          <div className="pl-4 border-l-2 border-gray-500">
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">Who is the additional subscriber?</label>
+                                            {subscriberOptions.length > 0 ? (
+                                              <div className="space-y-2">
+                                                {subscriberOptions.map(opt => (
+                                                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                                                    <input type="radio" name={`addsub-${key}-${instIdx}`} value={opt.value}
+                                                      checked={additionalSubscriber === opt.value}
+                                                      onChange={() => updateInstField(key, instIdx, 'additionalSubscriber', opt.value)}
+                                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                                    <span className="text-white text-sm">{opt.label}</span>
+                                                  </label>
+                                                ))}
+                                              </div>
+                                            ) : (
+                                              <p className="text-sm text-gray-400">No eligible co-subscribers found. An additional subscriber must be your current or a previous spouse or common-law partner with whom you have children.</p>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
                                   {renderBeneficiarySection(key, instIdx, inst)}
                                 </div>
                               );

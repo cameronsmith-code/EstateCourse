@@ -1837,7 +1837,7 @@ export const generatePDF = (formData: FormData) => {
             try { return (child.preferredCaregivers as unknown as string[]) || []; } catch { return []; }
           })();
 
-          const caregiverContacts: Array<{ type: string; name: string; relationship: string; city: string; province: string; phone: string; email: string; discussed: string }> = (() => {
+          const caregiverContacts: Array<{ type: string; name: string; relationship: string; city: string; province: string; phone: string; email: string; discussed: string; notes?: string }> = (() => {
             try { return JSON.parse((child.caregiverContactsData as string) || '[]'); } catch { return []; }
           })();
 
@@ -1896,8 +1896,9 @@ export const generatePDF = (formData: FormData) => {
               { label: 'Phone Number:', value: contact.phone || '' },
               { label: 'Email Address:', value: contact.email || '' },
               { label: 'Have you spoken with this person about this role?', value: contact.discussed || '' },
+              { label: 'What would you want them to understand about this responsibility?', value: contact.notes || '', large: true },
             ];
-            rows.forEach((row, ri) => renderCgRow(row.label, row.value, `${ci}_${ri}`));
+            rows.forEach((row, ri) => renderCgRow(row.label, row.value, `${ci}_${ri}`, row.large));
           });
 
           if (selectedCaregivers.includes('Not sure yet')) {

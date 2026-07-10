@@ -28,6 +28,7 @@ export interface CaregiverContactEntry {
   phone: string;
   email: string;
   discussed: string;
+  notes: string;
 }
 
 function parseCaregiverContacts(raw: unknown): CaregiverContactEntry[] {
@@ -8140,7 +8141,7 @@ export default function StepForm({
                                     updated[idx] = { ...updated[idx], [field]: value };
                                     handleChildChange(index, 'caregiverContactsData', JSON.stringify(updated));
                                   } else {
-                                    const newEntry: CaregiverContactEntry = { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '', [field]: value };
+                                    const newEntry: CaregiverContactEntry = { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '', notes: '', ...({ [field]: value }) };
                                     handleChildChange(index, 'caregiverContactsData', JSON.stringify([...current, newEntry]));
                                   }
                                 };
@@ -8148,7 +8149,7 @@ export default function StepForm({
                                 const selectPerson = (type: string, personId: string) => {
                                   const current = parseCaregiverContacts(childrenData[index]?.caregiverContactsData);
                                   const idx = current.findIndex((c) => c.type === type);
-                                  const existing: CaregiverContactEntry = idx >= 0 ? current[idx] : { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '' };
+                                  const existing: CaregiverContactEntry = idx >= 0 ? current[idx] : { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '', notes: '' };
                                   const person = knownPeople.find((p) => p.id === personId);
                                   const updated = [...current];
                                   const entry: CaregiverContactEntry = person
@@ -8161,7 +8162,7 @@ export default function StepForm({
 
                                 const getContact = (type: string): CaregiverContactEntry => {
                                   const contacts = parseCaregiverContacts(childrenData[index]?.caregiverContactsData);
-                                  return contacts.find((c) => c.type === type) || { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '' };
+                                  return contacts.find((c) => c.type === type) || { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '', notes: '' };
                                 };
 
                                 const inputCls = 'w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent';
@@ -8241,6 +8242,19 @@ export default function StepForm({
                                               ))}
                                             </div>
                                             <p className="text-xs text-gray-400 italic">These conversations don't need to be final. Even an initial discussion can help everyone better understand your wishes.</p>
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                                              What would you want {contact.name || 'them'} to understand about this responsibility?
+                                            </label>
+                                            <label className="block text-xs font-medium text-gray-400 mb-1">Your notes</label>
+                                            <textarea
+                                              value={contact.notes || ''}
+                                              onChange={(e) => updateContact(caregiverType, 'notes', e.target.value)}
+                                              placeholder={`For example:\n• Daily routines that are important\n• Medical or behavioural needs\n• Communication style\n• What helps during stressful situations\n• Personal values or traditions to continue\n• Relationships you hope they maintain\n• Anything else you would want them to know`}
+                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              rows={8}
+                                            />
                                           </div>
                                         </div>
                                       );

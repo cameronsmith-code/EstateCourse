@@ -7893,6 +7893,65 @@ export default function StepForm({
                             ))}
                           </div>
                         </div>
+                        {(() => {
+                          const ind = childrenData[index]?.expectedIndependence;
+                          const showSupportQuestions = ind === 'Will likely need ongoing support with money decisions' || ind === 'Will likely need ongoing support with health or personal care decisions' || ind === 'Will likely need significant lifelong support';
+                          if (!showSupportQuestions) return null;
+                          return (
+                            <>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-3">
+                                  Do you expect they may need help with financial decisions as an adult?
+                                </label>
+                                <div className="space-y-2 mb-2">
+                                  {['Yes', 'No', 'Unsure'].map((opt) => (
+                                    <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                                      <input
+                                        type="radio"
+                                        name={`financialDecisionHelp_${index}`}
+                                        value={opt}
+                                        checked={childrenData[index]?.financialDecisionHelp === opt}
+                                        onChange={() => handleChildChange(index, 'financialDecisionHelp', opt)}
+                                        className="text-blue-500"
+                                      />
+                                      {opt}
+                                    </label>
+                                  ))}
+                                </div>
+                                <p className="text-xs text-gray-400 italic mb-3">Managing bank accounts, government benefits, RDSP, rent, bills, investments, signing documents.</p>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Other information:</label>
+                                <textarea
+                                  value={childrenData[index]?.financialDecisionHelpOther || ''}
+                                  onChange={(e) => handleChildChange(index, 'financialDecisionHelpOther', e.target.value)}
+                                  placeholder=""
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  rows={3}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-3">
+                                  Do you expect they may need help with personal or healthcare decisions as an adult?
+                                </label>
+                                <div className="space-y-2 mb-2">
+                                  {['Yes', 'No', 'Unsure'].map((opt) => (
+                                    <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                                      <input
+                                        type="radio"
+                                        name={`healthcareDecisionHelp_${index}`}
+                                        value={opt}
+                                        checked={childrenData[index]?.healthcareDecisionHelp === opt}
+                                        onChange={() => handleChildChange(index, 'healthcareDecisionHelp', opt)}
+                                        className="text-blue-500"
+                                      />
+                                      {opt}
+                                    </label>
+                                  ))}
+                                </div>
+                                <p className="text-xs text-gray-400 italic">Medical consent, housing, daily care, safety, services, appointments.</p>
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
                     )}
                     </>

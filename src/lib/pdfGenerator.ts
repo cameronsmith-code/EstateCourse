@@ -1783,6 +1783,11 @@ export const generatePDF = (formData: FormData) => {
           ...coordContactRows,
           { label: 'Care or assistance received regularly:', value: child.regularCareAssistance || '', large: true },
           { label: 'Expected level of independence:', value: child.expectedIndependence || '' },
+          ...((['Will likely need ongoing support with money decisions', 'Will likely need ongoing support with health or personal care decisions', 'Will likely need significant lifelong support'].includes(child.expectedIndependence || '')) ? [
+            { label: 'May need help with financial decisions as an adult?', value: child.financialDecisionHelp || '' },
+            { label: 'Financial decisions - other information:', value: child.financialDecisionHelpOther || '', large: true },
+            { label: 'May need help with personal or healthcare decisions as an adult?', value: child.healthcareDecisionHelp || '' },
+          ] : []),
         ];
 
         disRows.forEach((row, ri) => {

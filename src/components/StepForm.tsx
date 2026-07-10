@@ -7708,111 +7708,102 @@ export default function StepForm({
                                 parent2Label = client2Name;
                               }
 
-                              // Helper to render contact sub-fields for a coordinator type
-                              const renderContactFields = (prefix: string, roleLabel: string, isFamily: boolean) => {
-                                const getField = (f: string) => childrenData[index]?.[`${prefix}_${f}`] || '';
-                                const setField = (f: string, v: string) => handleChildChange(index, `${prefix}_${f}`, v);
-                                const anotherKey = `${prefix}_another`;
-                                const anotherCount = parseInt(childrenData[index]?.[`${prefix}_anotherCount`] || '0', 10);
-
-                                const renderEntry = (entryPrefix: string, entryLabel: string) => (
-                                  <div key={entryPrefix} className="mt-3 p-3 bg-gray-700 rounded space-y-2">
-                                    <p className="text-xs font-medium text-blue-300 mb-1">{entryLabel}</p>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Name</label>
-                                        <input
-                                          type="text"
-                                          value={childrenData[index]?.[`${entryPrefix}_name`] || ''}
-                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_name`, e.target.value)}
-                                          placeholder="Full name"
-                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className="block text-xs text-gray-400 mb-1">{isFamily ? `Relationship to ${childNickname}` : roleLabel}</label>
-                                        <input
-                                          type="text"
-                                          value={childrenData[index]?.[`${entryPrefix}_role`] || ''}
-                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_role`, e.target.value)}
-                                          placeholder={isFamily ? 'e.g. Aunt' : 'e.g. Teacher'}
-                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        />
-                                      </div>
+                              // Render a single contact entry block
+                              const renderEntry = (entryPrefix: string, roleFieldLabel: string, isFamily: boolean) => (
+                                <div key={entryPrefix} className="mt-3 p-3 bg-gray-700 rounded space-y-2">
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                      <label className="block text-xs text-gray-400 mb-1">Name</label>
+                                      <input
+                                        type="text"
+                                        value={childrenData[index]?.[`${entryPrefix}_name`] || ''}
+                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_name`, e.target.value)}
+                                        placeholder="Full name"
+                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <div>
-                                        <label className="block text-xs text-gray-400 mb-1">City</label>
-                                        <input
-                                          type="text"
-                                          value={childrenData[index]?.[`${entryPrefix}_city`] || ''}
-                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_city`, e.target.value)}
-                                          placeholder="City"
-                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Province</label>
-                                        <input
-                                          type="text"
-                                          value={childrenData[index]?.[`${entryPrefix}_province`] || ''}
-                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_province`, e.target.value)}
-                                          placeholder="Province"
-                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        />
-                                      </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Phone</label>
-                                        <input
-                                          type="tel"
-                                          value={childrenData[index]?.[`${entryPrefix}_phone`] || ''}
-                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_phone`, e.target.value)}
-                                          placeholder="Phone number"
-                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className="block text-xs text-gray-400 mb-1">Email</label>
-                                        <input
-                                          type="email"
-                                          value={childrenData[index]?.[`${entryPrefix}_email`] || ''}
-                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_email`, e.target.value)}
-                                          placeholder="Email address"
-                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        />
-                                      </div>
+                                    <div>
+                                      <label className="block text-xs text-gray-400 mb-1">{isFamily ? `Relationship to ${childNickname}` : roleFieldLabel}</label>
+                                      <input
+                                        type="text"
+                                        value={childrenData[index]?.[`${entryPrefix}_role`] || ''}
+                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_role`, e.target.value)}
+                                        placeholder={isFamily ? 'e.g. Aunt' : 'e.g. Teacher'}
+                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
                                     </div>
                                   </div>
-                                );
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                      <label className="block text-xs text-gray-400 mb-1">City</label>
+                                      <input
+                                        type="text"
+                                        value={childrenData[index]?.[`${entryPrefix}_city`] || ''}
+                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_city`, e.target.value)}
+                                        placeholder="City"
+                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs text-gray-400 mb-1">Province</label>
+                                      <input
+                                        type="text"
+                                        value={childrenData[index]?.[`${entryPrefix}_province`] || ''}
+                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_province`, e.target.value)}
+                                        placeholder="Province"
+                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                      <label className="block text-xs text-gray-400 mb-1">Phone</label>
+                                      <input
+                                        type="tel"
+                                        value={childrenData[index]?.[`${entryPrefix}_phone`] || ''}
+                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_phone`, e.target.value)}
+                                        placeholder="Phone number"
+                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs text-gray-400 mb-1">Email</label>
+                                      <input
+                                        type="email"
+                                        value={childrenData[index]?.[`${entryPrefix}_email`] || ''}
+                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_email`, e.target.value)}
+                                        placeholder="Email address"
+                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              );
 
-                                const anotherEntries: React.ReactNode[] = [];
-                                for (let i = 0; i < anotherCount; i++) {
-                                  anotherEntries.push(renderEntry(`${prefix}_extra_${i}`, `Additional ${isFamily ? 'family member' : 'contact'} ${i + 2}`));
-                                }
+                              // Renders chained contact entries: first always shown, extras gated by Yes/No
+                              const renderContactFields = (prefix: string, roleLabel: string, isFamily: boolean) => {
+                                const anotherQuestion = isFamily
+                                  ? `Is there another family member who helps coordinate ${childNickname}'s care today?`
+                                  : 'Is there another contact to add?';
 
-                                return (
-                                  <>
-                                    {renderEntry(prefix, isFamily ? 'Family member' : 'Contact')}
-                                    {anotherEntries}
-                                    <div className="mt-2 ml-1">
-                                      <label className="block text-xs text-gray-400 mb-1">
-                                        {isFamily
-                                          ? `Is there another family member who helps coordinate ${childNickname}'s care today?`
-                                          : `Is there another ${isFamily ? 'family member' : 'contact'} to add?`}
-                                      </label>
+                                const nodes: React.ReactNode[] = [];
+                                nodes.push(renderEntry(prefix, roleLabel, isFamily));
+
+                                let i = 0;
+                                while (i < 20) {
+                                  const hasAnotherKey = `${prefix}_hasAnother_${i}`;
+                                  const hasAnother = childrenData[index]?.[hasAnotherKey];
+                                  nodes.push(
+                                    <div key={`ask_${i}`} className="mt-2 ml-1">
+                                      <label className="block text-xs text-gray-400 mb-1">{anotherQuestion}</label>
                                       <div className="flex gap-4">
                                         <label className="flex items-center text-sm text-gray-300">
                                           <input
                                             type="radio"
-                                            name={`${prefix}_another`}
+                                            name={`${prefix}_hasAnother_${i}`}
                                             value="yes"
-                                            checked={childrenData[index]?.[anotherKey] === 'yes'}
-                                            onChange={() => {
-                                              handleChildChange(index, anotherKey, 'yes');
-                                              handleChildChange(index, `${prefix}_anotherCount`, String(anotherCount + (childrenData[index]?.[anotherKey] === 'yes' ? 0 : 1)));
-                                            }}
+                                            checked={hasAnother === 'yes'}
+                                            onChange={() => handleChildChange(index, hasAnotherKey, 'yes')}
                                             className="mr-1"
                                           />
                                           Yes
@@ -7820,21 +7811,25 @@ export default function StepForm({
                                         <label className="flex items-center text-sm text-gray-300">
                                           <input
                                             type="radio"
-                                            name={`${prefix}_another`}
+                                            name={`${prefix}_hasAnother_${i}`}
                                             value="no"
-                                            checked={childrenData[index]?.[anotherKey] === 'no'}
-                                            onChange={() => handleChildChange(index, anotherKey, 'no')}
+                                            checked={hasAnother === 'no'}
+                                            onChange={() => handleChildChange(index, hasAnotherKey, 'no')}
                                             className="mr-1"
                                           />
                                           No
                                         </label>
                                       </div>
                                     </div>
-                                  </>
-                                );
+                                  );
+                                  if (hasAnother !== 'yes') break;
+                                  nodes.push(renderEntry(`${prefix}_extra_${i}`, roleLabel, isFamily));
+                                  i++;
+                                }
+                                return <>{nodes}</>;
                               };
 
-                              const checkboxItem = (value: string, label: string) => (
+                              const checkboxItem = (value: string, label: string, withContacts?: { prefix: string; roleLabel: string; isFamily: boolean }) => (
                                 <div key={value}>
                                   <label className="flex items-center">
                                     <input
@@ -7851,10 +7846,7 @@ export default function StepForm({
                                     />
                                     <span className="text-gray-300">{label}</span>
                                   </label>
-                                  {selected.includes(value) && value === 'other-family' && renderContactFields(`coord_${index}_otherfam`, 'Relationship', true)}
-                                  {selected.includes(value) && value === 'school-team' && renderContactFields(`coord_${index}_school`, 'Role and responsibility', false)}
-                                  {selected.includes(value) && value === 'doctor-therapist-support-worker' && renderContactFields(`coord_${index}_doctor`, 'Role and responsibility', false)}
-                                  {selected.includes(value) && value === 'other' && renderContactFields(`coord_${index}_other`, 'Role and responsibility', false)}
+                                  {selected.includes(value) && withContacts && renderContactFields(withContacts.prefix, withContacts.roleLabel, withContacts.isFamily)}
                                 </div>
                               );
 
@@ -7863,10 +7855,9 @@ export default function StepForm({
                                   {checkboxItem('parent-guardian-1', parent1Label)}
                                   {checkboxItem('parent-guardian-2', parent2Label)}
                                   {checkboxItem('sibling', 'Sibling')}
-                                  {checkboxItem('other-family', 'Other family')}
-                                  {checkboxItem('school-team', 'School team')}
-                                  {checkboxItem('doctor-therapist-support-worker', 'Doctor / therapist / support worker')}
-                                  {checkboxItem('other', 'Other')}
+                                  {checkboxItem('other-family', 'Other family', { prefix: `coord_${index}_otherfam`, roleLabel: 'Relationship', isFamily: true })}
+                                  {checkboxItem('school-team', 'School team', { prefix: `coord_${index}_school`, roleLabel: 'Role and responsibility', isFamily: false })}
+                                  {checkboxItem('doctor-therapist-support-worker', 'Doctor / therapist / support worker', { prefix: `coord_${index}_doctor`, roleLabel: 'Role and responsibility', isFamily: false })}
                                 </>
                               );
                             })()}

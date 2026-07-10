@@ -1749,8 +1749,10 @@ export const generatePDF = (formData: FormData) => {
             }
           };
           addEntry(prefix);
-          const extraCount = parseInt(child[`${prefix}_anotherCount`] || '0', 10);
-          for (let i = 0; i < extraCount; i++) addEntry(`${prefix}_extra_${i}`);
+          for (let i = 0; i < 20; i++) {
+            if (child[`${prefix}_hasAnother_${i}`] !== 'yes') break;
+            addEntry(`${prefix}_extra_${i}`);
+          }
           return rows;
         };
 
@@ -1759,7 +1761,6 @@ export const generatePDF = (formData: FormData) => {
         if (selectedCoords.includes('other-family')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_otherfam`, 'Relationship'));
         if (selectedCoords.includes('school-team')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_school`, 'Role and responsibility'));
         if (selectedCoords.includes('doctor-therapist-support-worker')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_doctor`, 'Role and responsibility'));
-        if (selectedCoords.includes('other')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_other`, 'Role and responsibility'));
 
         const careCoordinatorLabels: Record<string, string> = {
           'parent-guardian-1': 'Parent / guardian 1',

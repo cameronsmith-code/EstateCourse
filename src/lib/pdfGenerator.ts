@@ -1732,15 +1732,7 @@ export const generatePDF = (formData: FormData) => {
 
         const disRows: { label: string; value: string; large?: boolean }[] = [
           { label: 'Support need type(s):', value: supportNeedValue },
-          { label: 'Nature of disability:', value: child.disabilityNature || '' },
-          { label: 'Formal diagnosis? (yes/no)', value: child.disabilityFormalDiagnosis || '' },
-          { label: 'Describe the nature and severity of the disability:', value: child.disabilitySeverity || '', large: true },
           { label: 'Do they qualify for the Disability Tax Credit (DTC)?', value: dtcValue },
-          { label: 'Who is the primary coordinator of care today?', value: child.disabilityCoordinator || '' },
-          { label: 'Is there a long-term plan already in place?', value: child.disabilityLongTermPlan || '' },
-          { label: 'Any funding tied to residency or caregiver status?', value: child.disabilityFunding || '' },
-          { label: 'Describe any care and assistance provided:', value: child.disabilityCare || '', large: true },
-          { label: 'Other information that would help support a potential guardian:', value: child.disabilityOther || '', large: true },
         ];
 
         disRows.forEach((row, ri) => {

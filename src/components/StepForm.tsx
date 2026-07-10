@@ -93,6 +93,22 @@ function collectKnownPeople(allAnswers?: Map<number, Record<string, unknown>>): 
         'Spouse / Partner'
       );
     }
+
+    // Children's other parents
+    const childrenArr = stepAnswers['childrenData'] as Array<Record<string, string>> | undefined;
+    childrenArr?.forEach((child, ci) => {
+      if (child?.otherParentName) {
+        tryAdd({ name: child.otherParentName }, `other_parent_${ci}`, 'Other Parent');
+      }
+    });
+
+    // Previous relationship partners (may be a co-parent)
+    (['client1PreviousRelationshipsData', 'client2PreviousRelationshipsData'] as const).forEach((key) => {
+      const arr = stepAnswers[key] as Array<Record<string, string>> | undefined;
+      arr?.forEach((p, i) => {
+        if (p?.name) tryAdd({ name: p.name, city: p.city, province: p.province, phone: p.phone, email: p.email }, `${key}_${i}`, 'Previous Partner');
+      });
+    });
   });
 
   return people;
@@ -8159,6 +8175,7 @@ export default function StepForm({
                                     )}
                                     {selectedCaregivers.filter((t) => t !== 'Not sure yet').map((caregiverType) => {
                                       const contact = getContact(caregiverType);
+                                      const childLabel = childrenData[index]?.nickname || childrenData[index]?.name || 'this child';
                                       return (
                                         <div key={caregiverType} className="border border-gray-600 rounded-lg p-5 bg-gray-700 space-y-4">
                                           <h5 className="text-sm font-semibold text-white">{caregiverType}</h5>
@@ -8180,12 +8197,12 @@ export default function StepForm({
                                           )}
                                           <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Full Name</label>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
                                               <input type="text" value={contact.name} onChange={(e) => updateContact(caregiverType, 'name', e.target.value)} placeholder="Full name" className={inputCls} />
                                             </div>
                                             <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Relationship</label>
-                                              <input type="text" value={contact.relationship} onChange={(e) => updateContact(caregiverType, 'relationship', e.target.value)} placeholder="e.g. Brother, Grandmother" className={inputCls} />
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Relationship to {childLabel}</label>
+                                              <input type="text" value={contact.relationship} onChange={(e) => updateContact(caregiverType, 'relationship', e.target.value)} placeholder="e.g. Aunt" className={inputCls} />
                                             </div>
                                             <div>
                                               <label className="block text-xs font-medium text-gray-400 mb-1">City</label>
@@ -8196,11 +8213,11 @@ export default function StepForm({
                                               <input type="text" value={contact.province} onChange={(e) => updateContact(caregiverType, 'province', e.target.value)} placeholder="Province" className={inputCls} />
                                             </div>
                                             <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Phone Number</label>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Phone</label>
                                               <input type="tel" value={contact.phone} onChange={(e) => updateContact(caregiverType, 'phone', e.target.value)} placeholder="Phone number" className={inputCls} />
                                             </div>
                                             <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Email</label>
                                               <input type="email" value={contact.email} onChange={(e) => updateContact(caregiverType, 'email', e.target.value)} placeholder="Email address" className={inputCls} />
                                             </div>
                                           </div>

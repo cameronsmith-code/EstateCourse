@@ -7687,35 +7687,189 @@ export default function StepForm({
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Who helps coordinate their care today?
                           </label>
-                          <div className="flex flex-col gap-2">
-                            {[
-                              { value: 'parent-guardian-1', label: 'Parent / guardian 1' },
-                              { value: 'parent-guardian-2', label: 'Parent / guardian 2' },
-                              { value: 'sibling', label: 'Sibling' },
-                              { value: 'other-family', label: 'Other family' },
-                              { value: 'school-team', label: 'School team' },
-                              { value: 'doctor-therapist-support-worker', label: 'Doctor / therapist / support worker' },
-                              { value: 'other', label: 'Other' },
-                            ].map(({ value, label }) => {
+                          <div className="flex flex-col gap-3">
+                            {(() => {
                               const selected = (childrenData[index]?.careCoordinators || '').split(',').filter(Boolean);
-                              return (
-                                <label key={value} className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={selected.includes(value)}
-                                    onChange={(e) => {
-                                      const current = (childrenData[index]?.careCoordinators || '').split(',').filter(Boolean);
-                                      const updated = e.target.checked
-                                        ? [...current, value]
-                                        : current.filter((v) => v !== value);
-                                      handleChildChange(index, 'careCoordinators', updated.join(','));
-                                    }}
-                                    className="mr-2"
-                                  />
-                                  <span className="text-gray-300">{label}</span>
-                                </label>
+                              const childNickname = childrenData[index]?.nickname || childrenData[index]?.name || 'this child';
+
+                              // Derive parent labels from parentsOption
+                              const parentsOption = childrenData[index]?.parentsOption || '';
+                              const otherParentName = childrenData[index]?.otherParentName || 'Other parent';
+                              let parent1Label = 'Parent / guardian 1';
+                              let parent2Label = 'Parent / guardian 2';
+                              if (parentsOption === 'both') {
+                                parent1Label = client1Name;
+                                parent2Label = client2Name;
+                              } else if (parentsOption === 'client1-other') {
+                                parent1Label = client1Name;
+                                parent2Label = otherParentName;
+                              } else if (parentsOption === 'client2-other') {
+                                parent1Label = otherParentName;
+                                parent2Label = client2Name;
+                              }
+
+                              // Helper to render contact sub-fields for a coordinator type
+                              const renderContactFields = (prefix: string, roleLabel: string, isFamily: boolean) => {
+                                const getField = (f: string) => childrenData[index]?.[`${prefix}_${f}`] || '';
+                                const setField = (f: string, v: string) => handleChildChange(index, `${prefix}_${f}`, v);
+                                const anotherKey = `${prefix}_another`;
+                                const anotherCount = parseInt(childrenData[index]?.[`${prefix}_anotherCount`] || '0', 10);
+
+                                const renderEntry = (entryPrefix: string, entryLabel: string) => (
+                                  <div key={entryPrefix} className="mt-3 p-3 bg-gray-700 rounded space-y-2">
+                                    <p className="text-xs font-medium text-blue-300 mb-1">{entryLabel}</p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="block text-xs text-gray-400 mb-1">Name</label>
+                                        <input
+                                          type="text"
+                                          value={childrenData[index]?.[`${entryPrefix}_name`] || ''}
+                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_name`, e.target.value)}
+                                          placeholder="Full name"
+                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs text-gray-400 mb-1">{isFamily ? `Relationship to ${childNickname}` : roleLabel}</label>
+                                        <input
+                                          type="text"
+                                          value={childrenData[index]?.[`${entryPrefix}_role`] || ''}
+                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_role`, e.target.value)}
+                                          placeholder={isFamily ? 'e.g. Aunt' : 'e.g. Teacher'}
+                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="block text-xs text-gray-400 mb-1">City</label>
+                                        <input
+                                          type="text"
+                                          value={childrenData[index]?.[`${entryPrefix}_city`] || ''}
+                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_city`, e.target.value)}
+                                          placeholder="City"
+                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs text-gray-400 mb-1">Province</label>
+                                        <input
+                                          type="text"
+                                          value={childrenData[index]?.[`${entryPrefix}_province`] || ''}
+                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_province`, e.target.value)}
+                                          placeholder="Province"
+                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="block text-xs text-gray-400 mb-1">Phone</label>
+                                        <input
+                                          type="tel"
+                                          value={childrenData[index]?.[`${entryPrefix}_phone`] || ''}
+                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_phone`, e.target.value)}
+                                          placeholder="Phone number"
+                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs text-gray-400 mb-1">Email</label>
+                                        <input
+                                          type="email"
+                                          value={childrenData[index]?.[`${entryPrefix}_email`] || ''}
+                                          onChange={(e) => handleChildChange(index, `${entryPrefix}_email`, e.target.value)}
+                                          placeholder="Email address"
+                                          className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+
+                                const anotherEntries: React.ReactNode[] = [];
+                                for (let i = 0; i < anotherCount; i++) {
+                                  anotherEntries.push(renderEntry(`${prefix}_extra_${i}`, `Additional ${isFamily ? 'family member' : 'contact'} ${i + 2}`));
+                                }
+
+                                return (
+                                  <>
+                                    {renderEntry(prefix, isFamily ? 'Family member' : 'Contact')}
+                                    {anotherEntries}
+                                    <div className="mt-2 ml-1">
+                                      <label className="block text-xs text-gray-400 mb-1">
+                                        {isFamily
+                                          ? `Is there another family member who helps coordinate ${childNickname}'s care today?`
+                                          : `Is there another ${isFamily ? 'family member' : 'contact'} to add?`}
+                                      </label>
+                                      <div className="flex gap-4">
+                                        <label className="flex items-center text-sm text-gray-300">
+                                          <input
+                                            type="radio"
+                                            name={`${prefix}_another`}
+                                            value="yes"
+                                            checked={childrenData[index]?.[anotherKey] === 'yes'}
+                                            onChange={() => {
+                                              handleChildChange(index, anotherKey, 'yes');
+                                              handleChildChange(index, `${prefix}_anotherCount`, String(anotherCount + (childrenData[index]?.[anotherKey] === 'yes' ? 0 : 1)));
+                                            }}
+                                            className="mr-1"
+                                          />
+                                          Yes
+                                        </label>
+                                        <label className="flex items-center text-sm text-gray-300">
+                                          <input
+                                            type="radio"
+                                            name={`${prefix}_another`}
+                                            value="no"
+                                            checked={childrenData[index]?.[anotherKey] === 'no'}
+                                            onChange={() => handleChildChange(index, anotherKey, 'no')}
+                                            className="mr-1"
+                                          />
+                                          No
+                                        </label>
+                                      </div>
+                                    </div>
+                                  </>
+                                );
+                              };
+
+                              const checkboxItem = (value: string, label: string) => (
+                                <div key={value}>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={selected.includes(value)}
+                                      onChange={(e) => {
+                                        const current = (childrenData[index]?.careCoordinators || '').split(',').filter(Boolean);
+                                        const updated = e.target.checked
+                                          ? [...current, value]
+                                          : current.filter((v) => v !== value);
+                                        handleChildChange(index, 'careCoordinators', updated.join(','));
+                                      }}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">{label}</span>
+                                  </label>
+                                  {selected.includes(value) && value === 'other-family' && renderContactFields(`coord_${index}_otherfam`, 'Relationship', true)}
+                                  {selected.includes(value) && value === 'school-team' && renderContactFields(`coord_${index}_school`, 'Role and responsibility', false)}
+                                  {selected.includes(value) && value === 'doctor-therapist-support-worker' && renderContactFields(`coord_${index}_doctor`, 'Role and responsibility', false)}
+                                  {selected.includes(value) && value === 'other' && renderContactFields(`coord_${index}_other`, 'Role and responsibility', false)}
+                                </div>
                               );
-                            })}
+
+                              return (
+                                <>
+                                  {checkboxItem('parent-guardian-1', parent1Label)}
+                                  {checkboxItem('parent-guardian-2', parent2Label)}
+                                  {checkboxItem('sibling', 'Sibling')}
+                                  {checkboxItem('other-family', 'Other family')}
+                                  {checkboxItem('school-team', 'School team')}
+                                  {checkboxItem('doctor-therapist-support-worker', 'Doctor / therapist / support worker')}
+                                  {checkboxItem('other', 'Other')}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                         <div>

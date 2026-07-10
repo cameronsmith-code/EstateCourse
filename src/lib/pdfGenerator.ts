@@ -1730,6 +1730,37 @@ export const generatePDF = (formData: FormData) => {
         };
         const supportNeedValue = (child.supportNeedTypes || '').split(',').filter(Boolean).map(v => supportNeedLabels[v] || v).join('; ');
 
+        // Build care coordinator contact detail rows
+        const buildCoordContactRows = (prefix: string, roleLabel: string): { label: string; value: string }[] => {
+          const rows: { label: string; value: string }[] = [];
+          const addEntry = (ep: string) => {
+            const name = child[`${ep}_name`] || '';
+            const role = child[`${ep}_role`] || '';
+            const city = child[`${ep}_city`] || '';
+            const province = child[`${ep}_province`] || '';
+            const phone = child[`${ep}_phone`] || '';
+            const email = child[`${ep}_email`] || '';
+            if (name || role || city || province || phone || email) {
+              rows.push({ label: 'Name:', value: name });
+              rows.push({ label: roleLabel + ':', value: role });
+              rows.push({ label: 'City / Province:', value: [city, province].filter(Boolean).join(', ') });
+              rows.push({ label: 'Phone:', value: phone });
+              rows.push({ label: 'Email:', value: email });
+            }
+          };
+          addEntry(prefix);
+          const extraCount = parseInt(child[`${prefix}_anotherCount`] || '0', 10);
+          for (let i = 0; i < extraCount; i++) addEntry(`${prefix}_extra_${i}`);
+          return rows;
+        };
+
+        const selectedCoords = (child.careCoordinators || '').split(',').filter(Boolean);
+        const coordContactRows: { label: string; value: string }[] = [];
+        if (selectedCoords.includes('other-family')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_otherfam`, 'Relationship'));
+        if (selectedCoords.includes('school-team')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_school`, 'Role and responsibility'));
+        if (selectedCoords.includes('doctor-therapist-support-worker')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_doctor`, 'Role and responsibility'));
+        if (selectedCoords.includes('other')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_other`, 'Role and responsibility'));
+
         const careCoordinatorLabels: Record<string, string> = {
           'parent-guardian-1': 'Parent / guardian 1',
           'parent-guardian-2': 'Parent / guardian 2',
@@ -1739,7 +1770,7 @@ export const generatePDF = (formData: FormData) => {
           'doctor-therapist-support-worker': 'Doctor / therapist / support worker',
           'other': 'Other',
         };
-        const careCoordinatorValue = (child.careCoordinators || '').split(',').filter(Boolean).map(v => careCoordinatorLabels[v] || v).join('; ');
+        const careCoordinatorValue = selectedCoords.map(v => careCoordinatorLabels[v] || v).join('; ');
 
         const disRows: { label: string; value: string; large?: boolean }[] = [
           { label: 'Support need type(s):', value: supportNeedValue },
@@ -1747,6 +1778,7 @@ export const generatePDF = (formData: FormData) => {
           { label: 'Where is the document stored?', value: child.dtcDocLocation || '' },
           { label: 'Current support needs:', value: child.currentSupportNeeds || '', large: true },
           { label: 'Who helps coordinate their care today?', value: careCoordinatorValue },
+          ...coordContactRows,
           { label: 'Care or assistance received regularly:', value: child.regularCareAssistance || '', large: true },
         ];
 

@@ -1833,49 +1833,94 @@ export const generatePDF = (formData: FormData) => {
           addSubsectionHeader(`${nickname} Preferred Future Caregiver:`);
           yPosition += 2;
 
-          const caregiverLabelWidth = fieldWidth * 0.40;
-          const caregiverValueWidth = fieldWidth * 0.60;
-          const caregiverRowH = 8;
-          const caregiverLargeRowH = 48;
+          const selectedCaregivers: string[] = (() => {
+            try { return (child.preferredCaregivers as unknown as string[]) || []; } catch { return []; }
+          })();
 
-          const caregiverList = (child.preferredCaregivers as unknown as string[] | undefined || []);
-          const caregiverRows: { label: string; value: string; large?: boolean }[] = [
-            { label: 'Who would you hope steps in first?', value: caregiverList.join(', ') },
-            { label: 'Have you spoken with this person (or people) about this role?', value: child.caregiverDiscussed || '' },
-            { label: 'What would you want them to understand about this responsibility?', value: child.caregiverNotes || '', large: true },
-          ];
+          const caregiverContacts: Array<{ type: string; name: string; relationship: string; city: string; province: string; phone: string; email: string; discussed: string }> = (() => {
+            try { return JSON.parse((child.caregiverContactsData as string) || '[]'); } catch { return []; }
+          })();
 
-          caregiverRows.forEach((row, ri) => {
-            doc.setFontSize(8.5);
-            doc.setFont(undefined, 'normal');
-            const labelLines = doc.splitTextToSize(row.label, caregiverLabelWidth - 2);
-            const baseH = row.large ? caregiverLargeRowH : caregiverRowH;
-            const rowH = Math.max(baseH, labelLines.length * 5 + 3);
+          const cgLabelW = fieldWidth * 0.40;
+          const cgValueW = fieldWidth * 0.60;
+          const cgRowH = 8;
+
+          const renderCgRow = (label: string, value: string, fieldSuffix: string, large = false) => {
+            const rowH = large ? Math.max(28, cgRowH) : cgRowH;
             checkPageBreak(rowH + 4);
             const rowY = yPosition;
-
+            doc.setFontSize(8.5);
+            doc.setFont(undefined, 'normal');
+            const labelLines = doc.splitTextToSize(label, cgLabelW - 2);
+            const dynH = Math.max(rowH, labelLines.length * 5 + 3);
             doc.setDrawColor(...colors.tableBorder);
             doc.setLineWidth(0.3);
             doc.setFillColor(255, 255, 255);
-            doc.rect(margin, rowY, caregiverLabelWidth, rowH, 'FD');
-            doc.setFillColor(255, 255, 255);
-            doc.rect(margin + caregiverLabelWidth, rowY, caregiverValueWidth, rowH, 'FD');
-
+            doc.rect(margin, rowY, cgLabelW, dynH, 'FD');
+            doc.rect(margin + cgLabelW, rowY, cgValueW, dynH, 'FD');
             doc.setTextColor(...colors.darkText);
             doc.text(labelLines, margin + 1, rowY + 5);
+            const f = new doc.AcroFormTextField();
+            f.fieldName = `child_${index}_cg_${fieldSuffix}`;
+            f.Rect = [margin + cgLabelW + 0.5, rowY + 0.5, cgValueW - 1, dynH - 1];
+            f.fontSize = 8.5;
+            f.textColor = colors.darkText;
+            f.borderStyle = 'none';
+            f.value = value;
+            if (large) f.multiline = true;
+            doc.addField(f);
+            yPosition += dynH;
+          };
 
-            const cgField = new doc.AcroFormTextField();
-            cgField.fieldName = `child_${index}_caregiver_${ri}`;
-            cgField.Rect = [margin + caregiverLabelWidth + 0.5, rowY + 0.5, caregiverValueWidth - 1, rowH - 1];
-            cgField.fontSize = 8.5;
-            cgField.textColor = colors.darkText;
-            cgField.borderStyle = 'none';
-            cgField.value = row.value || '';
-            if (row.large) cgField.multiline = true;
-            doc.addField(cgField);
+          const typeLabel = selectedCaregivers.filter((t) => t !== 'Not sure yet').join(', ');
+          if (typeLabel) renderCgRow('Who would you hope steps in first?', typeLabel, 'types');
 
-            yPosition += rowH;
+          const nonSureCaregivers = selectedCaregivers.filter((t) => t !== 'Not sure yet');
+          nonSureCaregivers.forEach((caregiverType, ci) => {
+            const contact = caregiverContacts.find((c) => c.type === caregiverType);
+            if (!contact) return;
+            checkPageBreak(20);
+            yPosition += 4;
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(...colors.darkText);
+            doc.text(caregiverType, margin, yPosition);
+            doc.setFont(undefined, 'normal');
+            yPosition += 5;
+
+            const rows: { label: string; value: string }[] = [
+              { label: 'Full Name:', value: contact.name || '' },
+              { label: 'Relationship:', value: contact.relationship || '' },
+              { label: 'City:', value: contact.city || '' },
+              { label: 'Province:', value: contact.province || '' },
+              { label: 'Phone Number:', value: contact.phone || '' },
+              { label: 'Email Address:', value: contact.email || '' },
+              { label: 'Have you spoken with this person about this role?', value: contact.discussed || '' },
+            ];
+            rows.forEach((row, ri) => renderCgRow(row.label, row.value, `${ci}_${ri}`));
           });
+
+          if (selectedCaregivers.includes('Not sure yet')) {
+            checkPageBreak(30);
+            const todoText = 'TO DO: Begin a conversation about future caregivers. You indicated that you are not yet sure who could step into a caregiving role if needed. Consider beginning conversations with trusted family members or friends about who may be willing and able to help in the future.';
+            const todoLines = doc.splitTextToSize(todoText, fieldWidth - 8);
+            const todoBoxH = todoLines.length * 5 + 8;
+            doc.setFillColor(255, 255, 200);
+            doc.rect(margin, yPosition, fieldWidth, todoBoxH, 'F');
+            doc.setDrawColor(180, 140, 0);
+            doc.setLineWidth(0.5);
+            doc.rect(margin, yPosition, fieldWidth, todoBoxH, 'S');
+            doc.setTextColor(80, 60, 0);
+            doc.setFontSize(8.5);
+            doc.setFont(undefined, 'bold');
+            doc.text(todoLines, margin + 4, yPosition + 5);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
+            yPosition += todoBoxH + 6;
+          }
 
           yPosition += 6;
         }

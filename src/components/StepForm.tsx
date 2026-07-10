@@ -7,6 +7,97 @@ import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
 import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info } from 'lucide-react';
 
+interface KnownPerson {
+  id: string;
+  displayName: string;
+  name: string;
+  relationship: string;
+  city: string;
+  province: string;
+  phone: string;
+  email: string;
+}
+
+export interface CaregiverContactEntry {
+  type: string;
+  selectedPersonId: string;
+  name: string;
+  relationship: string;
+  city: string;
+  province: string;
+  phone: string;
+  email: string;
+  discussed: string;
+}
+
+function parseCaregiverContacts(raw: unknown): CaregiverContactEntry[] {
+  try {
+    const parsed = JSON.parse((raw as string) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function collectKnownPeople(allAnswers?: Map<number, Record<string, unknown>>): KnownPerson[] {
+  const people: KnownPerson[] = [];
+  const seenIds = new Set<string>();
+  if (!allAnswers) return people;
+
+  const tryAdd = (
+    p: { name?: string; relationship?: string; city?: string; province?: string; phone?: string; email?: string } | undefined,
+    id: string,
+    role: string
+  ) => {
+    if (!p?.name || seenIds.has(id)) return;
+    seenIds.add(id);
+    people.push({
+      id,
+      displayName: `${p.name}${p.relationship ? ` — ${p.relationship}` : ''} (${role})`,
+      name: p.name,
+      relationship: p.relationship || '',
+      city: p.city || '',
+      province: p.province || '',
+      phone: p.phone || '',
+      email: p.email || '',
+    });
+  };
+
+  allAnswers.forEach((stepAnswers) => {
+    (
+      [
+        ['client1EstateTrusteeData', 'Estate Trustee'],
+        ['client2EstateTrusteeData', 'Estate Trustee'],
+        ['client1PoaPersonalCareData', 'POA Personal Care'],
+        ['client2PoaPersonalCareData', 'POA Personal Care'],
+        ['client1PoaPropertyData', 'POA Property'],
+        ['client2PoaPropertyData', 'POA Property'],
+      ] as [string, string][]
+    ).forEach(([key, role]) => {
+      const arr = stepAnswers[key] as Array<Record<string, string>> | undefined;
+      arr?.forEach((p, i) => tryAdd(p, `${key}_${i}`, role));
+    });
+
+    const spouseName = stepAnswers['spouseName'] as string | undefined;
+    if (spouseName) {
+      tryAdd(
+        {
+          name: spouseName,
+          relationship: 'Spouse / Partner',
+          city: (stepAnswers['spouseCity'] as string) || '',
+          province: (stepAnswers['spouseProvince'] as string) || '',
+          phone: (stepAnswers['spousePhone'] as string) || '',
+          email: (stepAnswers['spouseEmail'] as string) || '',
+        },
+        'spouse',
+        'Spouse / Partner'
+      );
+    }
+  });
+
+  return people;
+}
+
 type StepFormProps = {
   step: Step;
   answers: Record<string, unknown>;
@@ -1113,6 +1204,7 @@ export default function StepForm({
         updated[index].preferredCaregivers = undefined;
         updated[index].caregiverDiscussed = undefined;
         updated[index].caregiverNotes = undefined;
+        updated[index].caregiverContactsData = undefined;
       }
     }
 
@@ -7996,11 +8088,19 @@ export default function StepForm({
                                     <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
                                       <input
                                         type="checkbox"
-                                        checked={(childrenData[index]?.preferredCaregivers as string[] | undefined || []).includes(opt)}
+                                        checked={(childrenData[index]?.preferredCaregivers as unknown as string[] || []).includes(opt)}
                                         onChange={(e) => {
-                                          const current: string[] = (childrenData[index]?.preferredCaregivers as string[] | undefined) || [];
-                                          const updated = e.target.checked ? [...current, opt] : current.filter((v) => v !== opt);
-                                          handleChildChange(index, 'preferredCaregivers', updated);
+                                          const current: string[] = (childrenData[index]?.preferredCaregivers as unknown as string[]) || [];
+                                          const updatedList = e.target.checked ? [...current, opt] : current.filter((v) => v !== opt);
+                                          const updatedChild = { ...(childrenData[index] || {}) } as Record<string, unknown>;
+                                          updatedChild.preferredCaregivers = updatedList;
+                                          if (!e.target.checked) {
+                                            const contacts = parseCaregiverContacts(updatedChild.caregiverContactsData);
+                                            updatedChild.caregiverContactsData = JSON.stringify(contacts.filter((c) => c.type !== opt));
+                                          }
+                                          const updatedAll = [...childrenData];
+                                          updatedAll[index] = updatedChild as Record<string, string>;
+                                          onAnswerChange('childrenData', updatedAll);
                                         }}
                                         className="text-blue-500 rounded"
                                       />
@@ -8011,41 +8111,126 @@ export default function StepForm({
                                 <p className="text-xs text-gray-400 italic">This doesn't create any legal appointment. It simply helps identify who you currently believe would be the best person to provide care and support.</p>
                               </div>
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-3">
-                                  Have you spoken with this person (or people) about this role?
-                                </label>
-                                <div className="space-y-2 mb-2">
-                                  {['Yes', 'Partly', 'No'].map((opt) => (
-                                    <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                                      <input
-                                        type="radio"
-                                        name={`caregiverDiscussed_${index}`}
-                                        value={opt}
-                                        checked={childrenData[index]?.caregiverDiscussed === opt}
-                                        onChange={() => handleChildChange(index, 'caregiverDiscussed', opt)}
-                                        className="text-blue-500"
-                                      />
-                                      {opt}
-                                    </label>
-                                  ))}
-                                </div>
-                                <p className="text-xs text-gray-400 italic">Conversations don't need to be final. Even an early discussion can help everyone better understand your wishes.</p>
-                              </div>
+                              {(() => {
+                                const selectedCaregivers = (childrenData[index]?.preferredCaregivers as unknown as string[]) || [];
+                                const notSureSelected = selectedCaregivers.includes('Not sure yet');
+                                const knownPeople = collectKnownPeople(allAnswers);
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  What would you want them to understand about this responsibility?
-                                </label>
-                                <label className="block text-xs font-medium text-gray-400 mb-1">Your notes</label>
-                                <textarea
-                                  value={childrenData[index]?.caregiverNotes || ''}
-                                  onChange={(e) => handleChildChange(index, 'caregiverNotes', e.target.value)}
-                                  placeholder={`For example:\n• Daily routines that are important\n• Medical or behavioural needs\n• Communication style\n• What helps during stressful situations\n• Personal values or traditions to continue\n• Relationships you hope they maintain\n• Anything else you would want them to know`}
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  rows={8}
-                                />
-                              </div>
+                                const updateContact = (type: string, field: keyof CaregiverContactEntry, value: string) => {
+                                  const current = parseCaregiverContacts(childrenData[index]?.caregiverContactsData);
+                                  const idx = current.findIndex((c) => c.type === type);
+                                  if (idx >= 0) {
+                                    const updated = [...current];
+                                    updated[idx] = { ...updated[idx], [field]: value };
+                                    handleChildChange(index, 'caregiverContactsData', JSON.stringify(updated));
+                                  } else {
+                                    const newEntry: CaregiverContactEntry = { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '', [field]: value };
+                                    handleChildChange(index, 'caregiverContactsData', JSON.stringify([...current, newEntry]));
+                                  }
+                                };
+
+                                const selectPerson = (type: string, personId: string) => {
+                                  const current = parseCaregiverContacts(childrenData[index]?.caregiverContactsData);
+                                  const idx = current.findIndex((c) => c.type === type);
+                                  const existing: CaregiverContactEntry = idx >= 0 ? current[idx] : { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '' };
+                                  const person = knownPeople.find((p) => p.id === personId);
+                                  const updated = [...current];
+                                  const entry: CaregiverContactEntry = person
+                                    ? { ...existing, selectedPersonId: personId, name: person.name, relationship: person.relationship, city: person.city, province: person.province, phone: person.phone, email: person.email }
+                                    : { ...existing, selectedPersonId: personId };
+                                  if (idx >= 0) updated[idx] = entry;
+                                  else updated.push(entry);
+                                  handleChildChange(index, 'caregiverContactsData', JSON.stringify(updated));
+                                };
+
+                                const getContact = (type: string): CaregiverContactEntry => {
+                                  const contacts = parseCaregiverContacts(childrenData[index]?.caregiverContactsData);
+                                  return contacts.find((c) => c.type === type) || { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '' };
+                                };
+
+                                const inputCls = 'w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+
+                                return (
+                                  <>
+                                    {notSureSelected && (
+                                      <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+                                        <p className="text-sm text-blue-200">It is completely normal not to know who the right person is yet. Many families take time to think this through and discuss it together.</p>
+                                      </div>
+                                    )}
+                                    {selectedCaregivers.filter((t) => t !== 'Not sure yet').map((caregiverType) => {
+                                      const contact = getContact(caregiverType);
+                                      return (
+                                        <div key={caregiverType} className="border border-gray-600 rounded-lg p-5 bg-gray-700 space-y-4">
+                                          <h5 className="text-sm font-semibold text-white">{caregiverType}</h5>
+                                          {knownPeople.length > 0 && (
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Select an existing person or add someone new</label>
+                                              <select
+                                                value={contact.selectedPersonId}
+                                                onChange={(e) => selectPerson(caregiverType, e.target.value)}
+                                                className={inputCls}
+                                              >
+                                                <option value="">Select an existing person...</option>
+                                                {knownPeople.map((p) => (
+                                                  <option key={p.id} value={p.id}>{p.displayName}</option>
+                                                ))}
+                                                <option value="__new__">Add someone new</option>
+                                              </select>
+                                            </div>
+                                          )}
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Full Name</label>
+                                              <input type="text" value={contact.name} onChange={(e) => updateContact(caregiverType, 'name', e.target.value)} placeholder="Full name" className={inputCls} />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Relationship</label>
+                                              <input type="text" value={contact.relationship} onChange={(e) => updateContact(caregiverType, 'relationship', e.target.value)} placeholder="e.g. Brother, Grandmother" className={inputCls} />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">City</label>
+                                              <input type="text" value={contact.city} onChange={(e) => updateContact(caregiverType, 'city', e.target.value)} placeholder="City" className={inputCls} />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Province</label>
+                                              <input type="text" value={contact.province} onChange={(e) => updateContact(caregiverType, 'province', e.target.value)} placeholder="Province" className={inputCls} />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Phone Number</label>
+                                              <input type="tel" value={contact.phone} onChange={(e) => updateContact(caregiverType, 'phone', e.target.value)} placeholder="Phone number" className={inputCls} />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
+                                              <input type="email" value={contact.email} onChange={(e) => updateContact(caregiverType, 'email', e.target.value)} placeholder="Email address" className={inputCls} />
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                              Have you spoken with {contact.name || 'this person'} about this role?
+                                            </label>
+                                            <div className="space-y-2 mb-1">
+                                              {['Yes', 'Partly', 'No'].map((opt) => (
+                                                <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                                                  <input
+                                                    type="radio"
+                                                    name={`caregiverDiscussed_${index}_${caregiverType}`}
+                                                    value={opt}
+                                                    checked={contact.discussed === opt}
+                                                    onChange={() => updateContact(caregiverType, 'discussed', opt)}
+                                                    className="text-blue-500"
+                                                  />
+                                                  {opt}
+                                                </label>
+                                              ))}
+                                            </div>
+                                            <p className="text-xs text-gray-400 italic">These conversations don't need to be final. Even an initial discussion can help everyone better understand your wishes.</p>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </>
+                                );
+                              })()}
                             </>
                           );
                         })()}

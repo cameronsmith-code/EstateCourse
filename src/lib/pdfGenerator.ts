@@ -1695,7 +1695,7 @@ export const generatePDF = (formData: FormData) => {
 
       if (child.disabled === 'yes' || child.disabled === 'not_sure') {
         const disRows_preview: { large?: boolean }[] = [
-          {}, {}, {}, {}, {}, {},
+          {}, {}, {}, {},
           { large: true }, { large: true }, { large: true },
         ];
         const disPreviewH = disRows_preview.reduce((acc, r) => acc + (r.large ? 28 : 8), 0);
@@ -1730,9 +1730,24 @@ export const generatePDF = (formData: FormData) => {
         };
         const supportNeedValue = (child.supportNeedTypes || '').split(',').filter(Boolean).map(v => supportNeedLabels[v] || v).join('; ');
 
+        const careCoordinatorLabels: Record<string, string> = {
+          'parent-guardian-1': 'Parent / guardian 1',
+          'parent-guardian-2': 'Parent / guardian 2',
+          'sibling': 'Sibling',
+          'other-family': 'Other family',
+          'school-team': 'School team',
+          'doctor-therapist-support-worker': 'Doctor / therapist / support worker',
+          'other': 'Other',
+        };
+        const careCoordinatorValue = (child.careCoordinators || '').split(',').filter(Boolean).map(v => careCoordinatorLabels[v] || v).join('; ');
+
         const disRows: { label: string; value: string; large?: boolean }[] = [
           { label: 'Support need type(s):', value: supportNeedValue },
           { label: 'Do they qualify for the Disability Tax Credit (DTC)?', value: dtcValue },
+          { label: 'Where is the document stored?', value: child.dtcDocLocation || '' },
+          { label: 'Current support needs:', value: child.currentSupportNeeds || '', large: true },
+          { label: 'Who helps coordinate their care today?', value: careCoordinatorValue },
+          { label: 'Care or assistance received regularly:', value: child.regularCareAssistance || '', large: true },
         ];
 
         disRows.forEach((row, ri) => {

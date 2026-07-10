@@ -7664,17 +7664,64 @@ export default function StepForm({
                         </div>
                       )}
 
-                      {(childrenData[index]?.disabilityTaxCredit === 'yes' || childrenData[index]?.disabilityTaxCredit === 'no' || childrenData[index]?.disabilityTaxCredit === 'not-looked') && (
-                        <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
+                      {childrenData[index]?.disabilityTaxCredit && (
+                        <div className="space-y-4 mt-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-300 mb-1">
                             In plain language, tell us about their current support needs.
                           </label>
-                          <p className="text-xs text-gray-400 mb-2">For example, school supports, supervision, medical care, communication, mobility, behaviour, daily routines, or anything a future caregiver should understand.</p>
+                          <p className="text-xs text-gray-400 mb-2">For example: school supports, supervision, medical care, communication, mobility, behaviour, daily routines, or anything a future caregiver should understand.</p>
                           <textarea
                             value={childrenData[index]?.currentSupportNeeds || ''}
                             onChange={(e) => handleChildChange(index, 'currentSupportNeeds', e.target.value)}
                             placeholder="Describe their current support needs in plain language"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={6}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Who helps coordinate their care today?
+                          </label>
+                          <div className="flex flex-col gap-2">
+                            {[
+                              { value: 'parent-guardian-1', label: 'Parent / guardian 1' },
+                              { value: 'parent-guardian-2', label: 'Parent / guardian 2' },
+                              { value: 'sibling', label: 'Sibling' },
+                              { value: 'other-family', label: 'Other family' },
+                              { value: 'school-team', label: 'School team' },
+                              { value: 'doctor-therapist-support-worker', label: 'Doctor / therapist / support worker' },
+                              { value: 'other', label: 'Other' },
+                            ].map(({ value, label }) => {
+                              const selected = (childrenData[index]?.careCoordinators || '').split(',').filter(Boolean);
+                              return (
+                                <label key={value} className="flex items-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={selected.includes(value)}
+                                    onChange={(e) => {
+                                      const current = (childrenData[index]?.careCoordinators || '').split(',').filter(Boolean);
+                                      const updated = e.target.checked
+                                        ? [...current, value]
+                                        : current.filter((v) => v !== value);
+                                      handleChildChange(index, 'careCoordinators', updated.join(','));
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">{label}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            What care or assistance do they receive regularly?
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.regularCareAssistance || ''}
+                            onChange={(e) => handleChildChange(index, 'regularCareAssistance', e.target.value)}
+                            placeholder="Describe the care and assistance they receive regularly"
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             rows={4}
                           />

@@ -1782,6 +1782,7 @@ export const generatePDF = (formData: FormData) => {
           { label: 'Who helps coordinate their care today?', value: careCoordinatorValue },
           ...coordContactRows,
           { label: 'Care or assistance received regularly:', value: child.regularCareAssistance || '', large: true },
+          { label: 'Expected level of independence:', value: child.expectedIndependence || '' },
         ];
 
         disRows.forEach((row, ri) => {

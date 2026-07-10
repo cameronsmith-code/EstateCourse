@@ -7866,6 +7866,33 @@ export default function StepForm({
                             rows={4}
                           />
                         </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-3">
+                            As {childrenData[index]?.nickname || childrenData[index]?.name || 'this child'} gets older, what level of independence do you expect?
+                          </label>
+                          <div className="space-y-2">
+                            {[
+                              'Likely independent as an adult',
+                              'Mostly independent, with some support',
+                              'Will likely need ongoing support with money decisions',
+                              'Will likely need ongoing support with health or personal care decisions',
+                              'Will likely need significant lifelong support',
+                              'Too early to know',
+                            ].map((option) => (
+                              <label key={option} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`independence_${index}`}
+                                  value={option}
+                                  checked={childrenData[index]?.expectedIndependence === option}
+                                  onChange={() => handleChildChange(index, 'expectedIndependence', option)}
+                                  className="text-blue-500"
+                                />
+                                {option}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     )}
                     </>

@@ -1926,6 +1926,48 @@ export const generatePDF = (formData: FormData) => {
           yPosition += 6;
         }
 
+        if (child.caregiverGuidanceNotes) {
+          addSubsectionHeader(`${nickname} — Guidance for Future Caregivers:`);
+          yPosition += 2;
+
+          const guidanceLabelW = fieldWidth * 0.40;
+          const guidanceValueW = fieldWidth * 0.60;
+
+          const guidanceQuestion = `What would you want ${nickname}'s potential future caregiver to understand about this responsibility?`;
+          const guidanceNotes = child.caregiverGuidanceNotes as string;
+
+          const qLabelLines = doc.splitTextToSize(guidanceQuestion, guidanceLabelW - 2);
+          const notesLines = doc.splitTextToSize(guidanceNotes, guidanceValueW - 4);
+          const notesH = Math.max(60, notesLines.length * 5 + 6);
+          const qRowH = Math.max(notesH, qLabelLines.length * 5 + 3);
+
+          checkPageBreak(qRowH + 8);
+          const rowY = yPosition;
+
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, rowY, guidanceLabelW, qRowH, 'FD');
+          doc.rect(margin + guidanceLabelW, rowY, guidanceValueW, qRowH, 'FD');
+
+          doc.setTextColor(...colors.darkText);
+          doc.text(qLabelLines, margin + 1, rowY + 5);
+
+          const gField = new doc.AcroFormTextField();
+          gField.fieldName = `child_${index}_caregiver_guidance`;
+          gField.Rect = [margin + guidanceLabelW + 0.5, rowY + 0.5, guidanceValueW - 1, qRowH - 1];
+          gField.fontSize = 8.5;
+          gField.textColor = colors.darkText;
+          gField.borderStyle = 'none';
+          gField.multiline = true;
+          gField.value = guidanceNotes;
+          doc.addField(gField);
+
+          yPosition += qRowH + 6;
+        }
+
         if (child.disabilityTaxCredit === 'not-looked') {
           checkPageBreak(120);
           yPosition += 4;

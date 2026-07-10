@@ -1222,6 +1222,7 @@ export default function StepForm({
         updated[index].caregiverDiscussed = undefined;
         updated[index].caregiverNotes = undefined;
         updated[index].caregiverContactsData = undefined;
+        updated[index].caregiverGuidanceNotes = undefined;
       }
     }
 
@@ -8260,6 +8261,73 @@ export default function StepForm({
                                       );
                                     })}
                                   </>
+                                );
+                              })()}
+
+                              {/* Guidance for future caregivers — shared question */}
+                              {(() => {
+                                const childName = childrenData[index]?.nickname || childrenData[index]?.name || 'your child';
+                                return (
+                                  <div className="space-y-4">
+                                    <div className="mt-2 pb-2 border-b border-gray-500 mb-2">
+                                      <h4 className="text-base font-semibold text-blue-400">Guidance for Future Caregivers</h4>
+                                    </div>
+
+                                    <p className="text-sm font-medium text-gray-300">
+                                      What would you want {childName}'s potential future caregiver to understand about this responsibility?
+                                    </p>
+
+                                    <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+                                      <p className="text-sm text-blue-200 leading-relaxed">
+                                        This is your opportunity to share the things only you know. Imagine {childName}'s future caregiver is reading this after stepping into an unfamiliar role. What would help them feel confident, prepared, and connected to {childName}? There are no right or wrong answers. Write as much or as little as you'd like.
+                                      </p>
+                                    </div>
+
+                                    <div className="bg-gray-800 border border-gray-600 rounded-lg p-4">
+                                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Ideas to consider</p>
+                                      <ul className="space-y-2">
+                                        {[
+                                          `What makes ${childName} feel safe, loved, and understood.`,
+                                          `Their daily routines and habits that provide comfort.`,
+                                          `Medical needs, medications, therapies, allergies, or appointments that are especially important.`,
+                                          `How they communicate, especially if they struggle to express themselves.`,
+                                          `Things that may cause anxiety, frustration, or sensory overload.`,
+                                          `What helps calm them when they are upset.`,
+                                          `Their personality, strengths, interests, hobbies, favourite activities, and sense of humour.`,
+                                          `Important friendships, family relationships, teachers, coaches, or support workers you'd hope remain part of their life.`,
+                                          `Religious, cultural, or family traditions that are meaningful.`,
+                                          `Long-term hopes and dreams you have for them.`,
+                                          `Any advice or encouragement you would want to give the person stepping into this role.`,
+                                        ].map((idea, i) => (
+                                          <li key={i} className="flex items-start gap-2 text-xs text-gray-400">
+                                            <span className="mt-0.5 text-gray-500 shrink-0">•</span>
+                                            <span>{idea}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-400 mb-1">Your notes</label>
+                                      <textarea
+                                        value={childrenData[index]?.caregiverGuidanceNotes || ''}
+                                        onChange={(e) => {
+                                          e.target.style.height = 'auto';
+                                          e.target.style.height = `${e.target.scrollHeight}px`;
+                                          handleChildChange(index, 'caregiverGuidanceNotes', e.target.value);
+                                        }}
+                                        onInput={(e) => {
+                                          const t = e.currentTarget;
+                                          t.style.height = 'auto';
+                                          t.style.height = `${t.scrollHeight}px`;
+                                        }}
+                                        placeholder={`For example... "I hope they always know how much ${childName} loves spending time outdoors. Keeping a predictable routine helps them feel secure, and music is often the quickest way to calm them after a difficult day. Above all, I hope they are treated with patience, kindness, and encouragement to become as independent as possible."`}
+                                        className="w-full px-4 py-3 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
+                                        rows={6}
+                                        style={{ minHeight: '160px' }}
+                                      />
+                                    </div>
+                                  </div>
                                 );
                               })()}
                             </>

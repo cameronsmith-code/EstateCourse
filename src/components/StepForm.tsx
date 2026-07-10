@@ -7649,8 +7649,36 @@ export default function StepForm({
                         </div>
                       </div>
 
+                      {(childrenData[index]?.disabilityTaxCredit === 'yes' || childrenData[index]?.disabilityTaxCredit === 'in-progress') && (
+                        <div className="mt-3">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Where is the document stored?
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.dtcDocLocation || ''}
+                            onChange={(e) => handleChildChange(index, 'dtcDocLocation', e.target.value)}
+                            placeholder="Enter document location"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
+
                       {(childrenData[index]?.disabilityTaxCredit === 'yes' || childrenData[index]?.disabilityTaxCredit === 'no' || childrenData[index]?.disabilityTaxCredit === 'not-looked') && (
                         <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            In plain language, tell us about their current support needs.
+                          </label>
+                          <p className="text-xs text-gray-400 mb-2">For example, school supports, supervision, medical care, communication, mobility, behaviour, daily routines, or anything a future caregiver should understand.</p>
+                          <textarea
+                            value={childrenData[index]?.currentSupportNeeds || ''}
+                            onChange={(e) => handleChildChange(index, 'currentSupportNeeds', e.target.value)}
+                            placeholder="Describe their current support needs in plain language"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={4}
+                          />
+                        </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Nature of disability

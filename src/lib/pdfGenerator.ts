@@ -1758,6 +1758,7 @@ export const generatePDF = (formData: FormData) => {
 
         const selectedCoords = (child.careCoordinators || '').split(',').filter(Boolean);
         const coordContactRows: { label: string; value: string }[] = [];
+        if (selectedCoords.includes('sibling')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_sibling`, 'Relationship'));
         if (selectedCoords.includes('other-family')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_otherfam`, 'Relationship'));
         if (selectedCoords.includes('school-team')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_school`, 'Role and responsibility'));
         if (selectedCoords.includes('doctor-therapist-support-worker')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_doctor`, 'Role and responsibility'));

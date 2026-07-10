@@ -7845,7 +7845,7 @@ export default function StepForm({
                                 <>
                                   {checkboxItem('parent-guardian-1', parent1Label)}
                                   {checkboxItem('parent-guardian-2', parent2Label)}
-                                  {checkboxItem('sibling', 'Sibling')}
+                                  {checkboxItem('sibling', 'Sibling', { prefix: `coord_${index}_sibling`, roleLabel: 'Relationship', isFamily: true })}
                                   {checkboxItem('other-family', 'Other family', { prefix: `coord_${index}_otherfam`, roleLabel: 'Relationship', isFamily: true })}
                                   {checkboxItem('school-team', 'School team', { prefix: `coord_${index}_school`, roleLabel: 'Role and responsibility', isFamily: false })}
                                   {checkboxItem('doctor-therapist-support-worker', 'Doctor / therapist / support worker', { prefix: `coord_${index}_doctor`, roleLabel: 'Role and responsibility', isFamily: false })}

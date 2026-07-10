@@ -1824,6 +1824,62 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition += 6;
 
+        const triggerIndependenceValues = [
+          'Will likely need ongoing support with money decisions',
+          'Will likely need ongoing support with health or personal care decisions',
+          'Will likely need significant lifelong support',
+        ];
+        if (triggerIndependenceValues.includes(child.expectedIndependence || '')) {
+          addSubsectionHeader(`${nickname} Preferred Future Caregiver:`);
+          yPosition += 2;
+
+          const caregiverLabelWidth = fieldWidth * 0.40;
+          const caregiverValueWidth = fieldWidth * 0.60;
+          const caregiverRowH = 8;
+          const caregiverLargeRowH = 48;
+
+          const caregiverList = (child.preferredCaregivers as unknown as string[] | undefined || []);
+          const caregiverRows: { label: string; value: string; large?: boolean }[] = [
+            { label: 'Who would you hope steps in first?', value: caregiverList.join(', ') },
+            { label: 'Have you spoken with this person (or people) about this role?', value: child.caregiverDiscussed || '' },
+            { label: 'What would you want them to understand about this responsibility?', value: child.caregiverNotes || '', large: true },
+          ];
+
+          caregiverRows.forEach((row, ri) => {
+            doc.setFontSize(8.5);
+            doc.setFont(undefined, 'normal');
+            const labelLines = doc.splitTextToSize(row.label, caregiverLabelWidth - 2);
+            const baseH = row.large ? caregiverLargeRowH : caregiverRowH;
+            const rowH = Math.max(baseH, labelLines.length * 5 + 3);
+            checkPageBreak(rowH + 4);
+            const rowY = yPosition;
+
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(margin, rowY, caregiverLabelWidth, rowH, 'FD');
+            doc.setFillColor(255, 255, 255);
+            doc.rect(margin + caregiverLabelWidth, rowY, caregiverValueWidth, rowH, 'FD');
+
+            doc.setTextColor(...colors.darkText);
+            doc.text(labelLines, margin + 1, rowY + 5);
+
+            const cgField = new doc.AcroFormTextField();
+            cgField.fieldName = `child_${index}_caregiver_${ri}`;
+            cgField.Rect = [margin + caregiverLabelWidth + 0.5, rowY + 0.5, caregiverValueWidth - 1, rowH - 1];
+            cgField.fontSize = 8.5;
+            cgField.textColor = colors.darkText;
+            cgField.borderStyle = 'none';
+            cgField.value = row.value || '';
+            if (row.large) cgField.multiline = true;
+            doc.addField(cgField);
+
+            yPosition += rowH;
+          });
+
+          yPosition += 6;
+        }
+
         if (child.disabilityTaxCredit === 'not-looked') {
           checkPageBreak(120);
           yPosition += 4;

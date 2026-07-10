@@ -1110,6 +1110,9 @@ export default function StepForm({
         updated[index].financialDecisionHelpOther = undefined;
         updated[index].healthcareDecisionHelp = undefined;
         updated[index].healthcareDecisionHelpOther = undefined;
+        updated[index].preferredCaregivers = undefined;
+        updated[index].caregiverDiscussed = undefined;
+        updated[index].caregiverNotes = undefined;
       }
     }
 
@@ -7969,6 +7972,78 @@ export default function StepForm({
                                   placeholder="Add any details that may be helpful."
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                   rows={3}
+                                />
+                              </div>
+
+                              <div className="mt-2 pb-2 border-b border-gray-500 mb-2">
+                                <h4 className="text-base font-semibold text-blue-400">Preferred Future Caregiver</h4>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-3">
+                                  If you were no longer able to provide care, who would you hope steps in first?
+                                </label>
+                                <div className="space-y-2 mb-2">
+                                  {[
+                                    'Other parent',
+                                    'Adult sibling',
+                                    'Grandparent',
+                                    'Aunt / uncle',
+                                    'Close family friend',
+                                    'Professional support',
+                                    'Not sure yet',
+                                  ].map((opt) => (
+                                    <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={(childrenData[index]?.preferredCaregivers as string[] | undefined || []).includes(opt)}
+                                        onChange={(e) => {
+                                          const current: string[] = (childrenData[index]?.preferredCaregivers as string[] | undefined) || [];
+                                          const updated = e.target.checked ? [...current, opt] : current.filter((v) => v !== opt);
+                                          handleChildChange(index, 'preferredCaregivers', updated);
+                                        }}
+                                        className="text-blue-500 rounded"
+                                      />
+                                      {opt}
+                                    </label>
+                                  ))}
+                                </div>
+                                <p className="text-xs text-gray-400 italic">This doesn't create any legal appointment. It simply helps identify who you currently believe would be the best person to provide care and support.</p>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-3">
+                                  Have you spoken with this person (or people) about this role?
+                                </label>
+                                <div className="space-y-2 mb-2">
+                                  {['Yes', 'Partly', 'No'].map((opt) => (
+                                    <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                                      <input
+                                        type="radio"
+                                        name={`caregiverDiscussed_${index}`}
+                                        value={opt}
+                                        checked={childrenData[index]?.caregiverDiscussed === opt}
+                                        onChange={() => handleChildChange(index, 'caregiverDiscussed', opt)}
+                                        className="text-blue-500"
+                                      />
+                                      {opt}
+                                    </label>
+                                  ))}
+                                </div>
+                                <p className="text-xs text-gray-400 italic">Conversations don't need to be final. Even an early discussion can help everyone better understand your wishes.</p>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  What would you want them to understand about this responsibility?
+                                </label>
+                                <label className="block text-xs font-medium text-gray-400 mb-1">Your notes</label>
+                                <textarea
+                                  value={childrenData[index]?.caregiverNotes || ''}
+                                  onChange={(e) => handleChildChange(index, 'caregiverNotes', e.target.value)}
+                                  placeholder={`For example:\n• Daily routines that are important\n• Medical or behavioural needs\n• Communication style\n• What helps during stressful situations\n• Personal values or traditions to continue\n• Relationships you hope they maintain\n• Anything else you would want them to know`}
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  rows={8}
                                 />
                               </div>
                             </>

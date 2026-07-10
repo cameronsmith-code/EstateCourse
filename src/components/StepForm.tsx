@@ -1096,6 +1096,10 @@ export default function StepForm({
       updated[index].disabilitySeverity = undefined;
       updated[index].disabilityCare = undefined;
       updated[index].disabilityOther = undefined;
+      updated[index].dtcDocLocation = undefined;
+      updated[index].currentSupportNeeds = undefined;
+      updated[index].careCoordinators = undefined;
+      updated[index].regularCareAssistance = undefined;
     }
 
     if (field === 'medications' && value === 'no') {

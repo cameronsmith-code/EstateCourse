@@ -1078,10 +1078,7 @@ export default function StepForm({
 
   const handleChildChange = (index: number, field: string, value: string) => {
     const updated = [...childrenData];
-    if (!updated[index]) {
-      updated[index] = {};
-    }
-    updated[index][field] = value;
+    updated[index] = { ...(updated[index] || {}), [field]: value };
 
     if (field === 'disabled' && value === 'no') {
       updated[index].supportNeedTypes = undefined;
@@ -1154,19 +1151,13 @@ export default function StepForm({
 
   const handleClient1PrevRelChange = (index: number, field: string, value: string) => {
     const updated = [...client1PreviousRelationshipsData];
-    if (!updated[index]) {
-      updated[index] = {};
-    }
-    updated[index][field] = value;
+    updated[index] = { ...(updated[index] || {}), [field]: value };
     onAnswerChange('client1PreviousRelationshipsData', updated);
   };
 
   const handleClient2PrevRelChange = (index: number, field: string, value: string) => {
     const updated = [...client2PreviousRelationshipsData];
-    if (!updated[index]) {
-      updated[index] = {};
-    }
-    updated[index][field] = value;
+    updated[index] = { ...(updated[index] || {}), [field]: value };
     onAnswerChange('client2PreviousRelationshipsData', updated);
   };
 

@@ -1787,6 +1787,7 @@ export const generatePDF = (formData: FormData) => {
             { label: 'May need help with financial decisions as an adult?', value: child.financialDecisionHelp || '' },
             { label: 'Financial decisions - other information:', value: child.financialDecisionHelpOther || '', large: true },
             { label: 'May need help with personal or healthcare decisions as an adult?', value: child.healthcareDecisionHelp || '' },
+            { label: 'Healthcare decisions - other information:', value: child.healthcareDecisionHelpOther || '', large: true },
           ] : []),
         ];
 

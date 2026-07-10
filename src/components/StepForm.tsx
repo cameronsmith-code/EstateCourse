@@ -1099,6 +1099,20 @@ export default function StepForm({
       updated[index].regularCareAssistance = undefined;
     }
 
+    if (field === 'expectedIndependence') {
+      const triggerValues = [
+        'Will likely need ongoing support with money decisions',
+        'Will likely need ongoing support with health or personal care decisions',
+        'Will likely need significant lifelong support',
+      ];
+      if (!triggerValues.includes(value as string)) {
+        updated[index].financialDecisionHelp = undefined;
+        updated[index].financialDecisionHelpOther = undefined;
+        updated[index].healthcareDecisionHelp = undefined;
+        updated[index].healthcareDecisionHelpOther = undefined;
+      }
+    }
+
     if (field === 'medications' && value === 'no') {
       updated[index].medicationList = undefined;
     }
@@ -7918,12 +7932,12 @@ export default function StepForm({
                                     </label>
                                   ))}
                                 </div>
-                                <p className="text-xs text-gray-400 italic mb-3">Managing bank accounts, government benefits, RDSP, rent, bills, investments, signing documents.</p>
+                                <p className="text-xs text-gray-400 italic mb-3">Examples: Managing bank accounts, government benefits, RDSP, paying rent or bills, investments, signing legal or financial documents.</p>
                                 <label className="block text-sm font-medium text-gray-300 mb-1">Other information:</label>
                                 <textarea
                                   value={childrenData[index]?.financialDecisionHelpOther || ''}
                                   onChange={(e) => handleChildChange(index, 'financialDecisionHelpOther', e.target.value)}
-                                  placeholder=""
+                                  placeholder="Add any details that may be helpful."
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                   rows={3}
                                 />
@@ -7947,7 +7961,15 @@ export default function StepForm({
                                     </label>
                                   ))}
                                 </div>
-                                <p className="text-xs text-gray-400 italic">Medical consent, housing, daily care, safety, services, appointments.</p>
+                                <p className="text-xs text-gray-400 italic mb-3">Examples: Medical consent, housing decisions, daily care, personal safety, accessing support services, arranging appointments.</p>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Other information:</label>
+                                <textarea
+                                  value={childrenData[index]?.healthcareDecisionHelpOther || ''}
+                                  onChange={(e) => handleChildChange(index, 'healthcareDecisionHelpOther', e.target.value)}
+                                  placeholder="Add any details that may be helpful."
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  rows={3}
+                                />
                               </div>
                             </>
                           );

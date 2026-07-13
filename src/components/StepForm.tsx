@@ -100,7 +100,7 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
-      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional'].forEach(key => {
+      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -121,7 +121,7 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['acctHasAccountant'] !== 'yes') {
-      ['acctAdvisor1Firm', 'acctAdvisor1Name', 'acctAdvisor1Phone', 'acctAdvisor1Email', 'acctAdvisor1Services', 'acctAdvisor1Duration', 'acctAdvisor1IncludeInContactList', 'acctAdvisor1WorksWith', 'acctHasAdditional', 'acctAdditionalData', 'acctAdditionalHasAdditional'].forEach(key => {
+      ['acctAdvisor1Firm', 'acctAdvisor1Name', 'acctAdvisor1Phone', 'acctAdvisor1Email', 'acctAdvisor1Services', 'acctAdvisor1Duration', 'acctAdvisor1DocLocation', 'acctAdvisor1IncludeInContactList', 'acctAdvisor1WorksWith', 'acctHasAdditional', 'acctAdditionalData', 'acctAdditionalHasAdditional'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -5029,6 +5029,10 @@ export default function StepForm({
                           ))}
                         </div>
                       </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Where are your documents stored?</label>
+                      <input type="text" value={getPrimaryField(index, 'docLocation')} onChange={e => setPrimaryField(index, 'docLocation', e.target.value)} placeholder="e.g., home office, safety deposit box, with the advisor" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                     </div>
                   </div>
                 );

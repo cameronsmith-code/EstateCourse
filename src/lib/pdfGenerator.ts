@@ -258,6 +258,7 @@ interface FormData {
   fpAdvisor1WorksWith?: string;
   fpAdvisor1Services?: string[];
   fpAdvisor1Duration?: string;
+  fpAdvisor1DocLocation?: string;
   fpAdvisor1IncludeInContactList?: string;
   fpHasAdditionalAdvisor?: string;
   fpAdditionalAdvisorsData?: Array<{
@@ -269,6 +270,7 @@ interface FormData {
     worksWithClients?: string;
     services?: string;
     duration?: string;
+    docLocation?: string;
     includeInContactList?: string;
   }>;
   fpAdditionalHasAdditional?: string[];
@@ -280,6 +282,7 @@ interface FormData {
   acctAdvisor1WorksWith?: string;
   acctAdvisor1Services?: string[];
   acctAdvisor1Duration?: string;
+  acctAdvisor1DocLocation?: string;
   acctAdvisor1IncludeInContactList?: string;
   acctHasAdditional?: string;
   acctAdditionalData?: Array<{
@@ -290,6 +293,7 @@ interface FormData {
     worksWithClients?: string;
     services?: string;
     duration?: string;
+    docLocation?: string;
     includeInContactList?: string;
   }>;
   acctAdditionalHasAdditional?: string[];
@@ -7832,6 +7836,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       renderEstateRow('Services Provided:', servicesStr, `${fieldPrefix}_services`);
 
       renderEstateRow('How Long Together:', advisor.duration || '', `${fieldPrefix}_duration`);
+      renderEstateRow('Where are your documents stored?:', (advisor as { docLocation?: string }).docLocation || '', `${fieldPrefix}_doclocation`);
       renderEstateRow('Include in Contact List:', advisor.includeInContactList === 'yes' ? 'Yes' : advisor.includeInContactList === 'no' ? 'No' : '', `${fieldPrefix}_include`);
       yPosition += 6;
     };
@@ -7845,6 +7850,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       worksWith: formData.fpAdvisor1WorksWith,
       services: formData.fpAdvisor1Services,
       duration: formData.fpAdvisor1Duration,
+      docLocation: formData.fpAdvisor1DocLocation,
       includeInContactList: formData.fpAdvisor1IncludeInContactList,
     }, 'fp_adv1');
 
@@ -7902,6 +7908,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       renderEstateRow('Services Provided:', servicesStr, `${fieldPrefix}_services`);
 
       renderEstateRow('Years Together:', acct.duration || '', `${fieldPrefix}_duration`);
+      renderEstateRow('Where are your documents stored?:', (acct as { docLocation?: string }).docLocation || '', `${fieldPrefix}_doclocation`);
       renderEstateRow('Include in Contact List:', acct.includeInContactList === 'yes' ? 'Yes' : acct.includeInContactList === 'no' ? 'No' : '', `${fieldPrefix}_include`);
       yPosition += 6;
     };
@@ -7914,6 +7921,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       worksWithClients: formData.acctAdvisor1WorksWith,
       services: formData.acctAdvisor1Services,
       duration: formData.acctAdvisor1Duration,
+      docLocation: formData.acctAdvisor1DocLocation,
       includeInContactList: formData.acctAdvisor1IncludeInContactList,
     }, 'acct_adv1');
 

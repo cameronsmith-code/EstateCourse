@@ -8503,7 +8503,7 @@ export default function StepForm({
                             <div className="mt-4">
                               <label className="block text-sm font-medium text-gray-300 mb-2">Which ones?</label>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {['DTC', 'RDSP', 'ODSP / provincial disability support', 'Passport funding / respite funding', 'School supports', 'Housing supports', 'Private insurance', 'Other'].map((opt) => {
+                                {['DTC', 'RDSP', 'ODSP / provincial disability support', 'School supports', 'Housing supports', 'Private insurance', 'Other'].map((opt) => {
                                   const current = (childrenData[index]?.disabilitySupportsList || '').split(',').filter(Boolean);
                                   const isChecked = current.includes(opt);
                                   return (

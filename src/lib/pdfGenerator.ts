@@ -1862,6 +1862,128 @@ export const generatePDF = (formData: FormData) => {
         });
 
         yPosition += 6;
+
+        if (child.careCoordinators) {
+          checkPageBreak(30);
+          addSubsectionHeader(`${nickname} Care Coordinators`);
+          yPosition += 2;
+
+          const careCoordLabels: Record<string, string> = {
+            parent1: formData.fullName || 'Parent / guardian 1',
+            parent2: formData.spouseName || 'Parent / guardian 2',
+            sibling: 'Sibling',
+            family: 'Other family',
+            school: 'School team',
+            doctor: 'Doctor / therapist / support worker',
+            other: 'Other',
+          };
+
+          const selectedCoords = child.careCoordinators.split(',').filter(Boolean);
+          const coordRows: { label: string; value: string }[] = [
+            { label: 'Who helps coordinate their care today?', value: selectedCoords.map(v => careCoordLabels[v] || v).join('; ') },
+          ];
+
+          if (selectedCoords.includes('sibling')) {
+            coordRows.push({ label: 'Sibling name(s):', value: child.careCoordSiblingNames || '' });
+          }
+
+          coordRows.forEach((row, ri) => {
+            doc.setFontSize(8.5);
+            doc.setFont(undefined, 'normal');
+            const labelLines = doc.splitTextToSize(row.label, disLabelWidth - 2);
+            const rowH = Math.max(disRowH, labelLines.length * 5 + 3);
+            const rowY = yPosition;
+
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(margin, rowY, disLabelWidth, rowH, 'FD');
+            doc.rect(margin + disLabelWidth, rowY, disValueWidth, rowH, 'FD');
+
+            doc.setTextColor(...colors.darkText);
+            doc.text(labelLines, margin + 1, rowY + 5);
+
+            const valField = new doc.AcroFormTextField();
+            valField.fieldName = `child_${index}_coord_${ri}`;
+            valField.Rect = [margin + disLabelWidth + 0.5, rowY + 0.5, disValueWidth - 1, rowH - 1];
+            valField.fontSize = 8.5;
+            valField.textColor = colors.darkText;
+            valField.borderStyle = 'none';
+            valField.value = row.value || '';
+            doc.addField(valField);
+
+            yPosition += rowH;
+          });
+
+          const catTitles: Record<string, string> = {
+            family: 'Other Family Member',
+            school: 'School Team Member',
+            doctor: 'Doctor / Therapist / Support Worker',
+            other: 'Other Contact',
+          };
+          const showRoleCats = ['school', 'doctor', 'other'];
+
+          (['family', 'school', 'doctor', 'other'] as const).forEach(cat => {
+            if (!selectedCoords.includes(cat)) return;
+            const count = parseInt(child[`careCoord_${cat}_count`] || '1');
+            for (let ci = 0; ci < count; ci++) {
+              const prefix = `careCoord_${cat}_${ci}`;
+              const name = child[`${prefix}_name`] || '';
+              const phone = child[`${prefix}_phone`] || '';
+              const email = child[`${prefix}_email`] || '';
+              const city = child[`${prefix}_city`] || '';
+              const province = child[`${prefix}_province`] || '';
+              const role = child[`${prefix}_role`] || '';
+              if (!name && !phone && !email && !city && !province && !role) continue;
+
+              checkPageBreak(40);
+              yPosition += 4;
+              doc.setFontSize(9);
+              doc.setFont(undefined, 'bold');
+              doc.setTextColor(...colors.darkText);
+              doc.text(`${catTitles[cat]} ${ci + 1}`, margin, yPosition);
+              yPosition += 5;
+
+              const contactFields: { label: string; value: string }[] = [
+                { label: 'Name:', value: name },
+                { label: 'Phone:', value: phone },
+                { label: 'Email:', value: email },
+                { label: 'City:', value: city },
+                { label: 'Province:', value: province },
+                ...(showRoleCats.includes(cat) ? [{ label: 'Role in support:', value: role }] : []),
+              ];
+
+              const halfWidth = (fieldWidth - 2) / 2;
+              const cRowH = 9;
+              contactFields.forEach((cf, cfi) => {
+                checkPageBreak(cRowH + 2);
+                doc.setFontSize(8.5);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(...colors.darkText);
+                const labelY = yPosition;
+                doc.setDrawColor(...colors.tableBorder);
+                doc.setLineWidth(0.3);
+                doc.setFillColor(255, 255, 255);
+                doc.rect(margin, labelY, halfWidth, cRowH, 'FD');
+                doc.rect(margin + halfWidth, labelY, halfWidth, cRowH, 'FD');
+                doc.text(cf.label, margin + 1, labelY + 6);
+
+                const cfField = new doc.AcroFormTextField();
+                cfField.fieldName = `child_${index}_${prefix}_${cfi}`;
+                cfField.Rect = [margin + halfWidth + 0.5, labelY + 0.5, halfWidth - 1, cRowH - 1];
+                cfField.fontSize = 8.5;
+                cfField.textColor = colors.darkText;
+                cfField.borderStyle = 'none';
+                cfField.value = cf.value;
+                doc.addField(cfField);
+
+                yPosition += cRowH;
+              });
+            }
+          });
+
+          yPosition += 6;
+        }
       }
 
       const isMinor = (() => {

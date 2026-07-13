@@ -1076,6 +1076,40 @@ export default function StepForm({
   const client2PrevRelCount = client2NumberOfPreviousRelationships ? parseInt(client2NumberOfPreviousRelationships as string) : 0;
   const client2PreviousRelationshipsData = (answers['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || Array(Math.max(0, client2PrevRelCount || 0)).fill(null).map(() => ({}));
 
+  const CARE_COORD_CATEGORIES = ['family', 'school', 'doctor', 'other'] as const;
+
+  const clearCareCoordCategory = (obj: Record<string, string>, cat: string) => {
+    delete obj[`careCoord_${cat}_count`];
+    for (let i = 0; i < 10; i++) {
+      delete obj[`careCoord_${cat}_${i}_name`];
+      delete obj[`careCoord_${cat}_${i}_phone`];
+      delete obj[`careCoord_${cat}_${i}_email`];
+      delete obj[`careCoord_${cat}_${i}_city`];
+      delete obj[`careCoord_${cat}_${i}_province`];
+      delete obj[`careCoord_${cat}_${i}_role`];
+    }
+  };
+
+  const clearCareCoordFromPrefix = (obj: Record<string, string>, prefix: string) => {
+    const cat = prefix.replace('careCoord_', '').replace('_', '');
+    const count = parseInt(obj[`${prefix}_count`] || '1');
+    for (let i = 1; i < count; i++) {
+      delete obj[`${prefix}_${i}_name`];
+      delete obj[`${prefix}_${i}_phone`];
+      delete obj[`${prefix}_${i}_email`];
+      delete obj[`${prefix}_${i}_city`];
+      delete obj[`${prefix}_${i}_province`];
+      delete obj[`${prefix}_${i}_role`];
+    }
+    obj[`${prefix}_count`] = '1';
+  };
+
+  const clearCareCoordFields = (obj: Record<string, string>) => {
+    delete obj.careCoordinators;
+    delete obj.careCoordSiblingNames;
+    CARE_COORD_CATEGORIES.forEach(cat => clearCareCoordCategory(obj, cat));
+  };
+
   const handleChildChange = (index: number, field: string, value: string) => {
     const updated = [...childrenData];
     if (!updated[index]) {
@@ -1091,6 +1125,7 @@ export default function StepForm({
       updated[index].notSureSituation = undefined;
       updated[index].notSureRelianceAreas = undefined;
       updated[index].notSureFuture = undefined;
+      clearCareCoordFields(updated[index]);
     }
 
     if (field === 'disabled' && value === 'yes') {
@@ -1104,10 +1139,26 @@ export default function StepForm({
       updated[index].supportNeedOther = undefined;
       updated[index].disabilityTaxCredit = undefined;
       updated[index].disabilityTaxCreditDocLocation = undefined;
+      clearCareCoordFields(updated[index]);
     }
 
     if (field === 'disabilityTaxCredit' && value !== 'yes' && value !== 'in-progress') {
       updated[index].disabilityTaxCreditDocLocation = undefined;
+    }
+
+    if (field === 'careCoordinators') {
+      const newVals = value.split(',').filter(Boolean);
+      const oldVals = (updated[index].careCoordinators || '').split(',').filter(Boolean);
+      const removed = oldVals.filter(v => !newVals.includes(v));
+      removed.forEach(cat => clearCareCoordCategory(updated[index], cat));
+      if (!newVals.includes('sibling')) {
+        updated[index].careCoordSiblingNames = undefined;
+      }
+    }
+
+    if (field.startsWith('careCoord') && field.endsWith('Additional') && value === 'no') {
+      const prefix = field.replace('Additional', '');
+      clearCareCoordFromPrefix(updated[index], prefix);
     }
 
     if (field === 'medications' && value === 'no') {
@@ -7786,6 +7837,125 @@ export default function StepForm({
                           />
                         </div>
                       )}
+
+                      <div className="mt-6">
+                        <label className="block text-sm font-medium text-gray-300 mb-3">
+                          Who helps coordinate their care today? (Select all that apply)
+                        </label>
+                        <div className="flex flex-col gap-2">
+                          {(() => {
+                            const pg1Name = (allAnswers?.get(1)?.['fullName'] as string) || 'Parent / guardian 1';
+                            const pg2Name = (allAnswers?.get(1)?.['spouseName'] as string) || 'Parent / guardian 2';
+                            const hasSpouse = (allAnswers?.get(1)?.['maritalStatus'] === 'married' || allAnswers?.get(1)?.['maritalStatus'] === 'common_law');
+                            const coordOpts: { value: string; label: string }[] = [
+                              { value: 'parent1', label: pg1Name },
+                              ...(hasSpouse ? [{ value: 'parent2', label: pg2Name }] : []),
+                              { value: 'sibling', label: 'Sibling' },
+                              { value: 'family', label: 'Other family' },
+                              { value: 'school', label: 'School team' },
+                              { value: 'doctor', label: 'Doctor / therapist / support worker' },
+                              { value: 'other', label: 'Other' },
+                            ];
+                            const current = (childrenData[index]?.careCoordinators || '').split(',').filter(Boolean);
+                            return coordOpts.map(({ value, label }) => {
+                              const checked = current.includes(value);
+                              return (
+                                <label key={value} className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => {
+                                      const next = checked ? current.filter(v => v !== value) : [...current, value];
+                                      handleChildChange(index, 'careCoordinators', next.join(','));
+                                    }}
+                                    className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                                  />
+                                  <span className="text-gray-300 text-sm">{label}</span>
+                                </label>
+                              );
+                            });
+                          })()}
+                        </div>
+                      </div>
+
+                      {childrenData[index]?.careCoordinators?.split(',').includes('sibling') && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Sibling name(s)
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.careCoordSiblingNames || ''}
+                            onChange={(e) => handleChildChange(index, 'careCoordSiblingNames', e.target.value)}
+                            placeholder="Enter sibling name(s)"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
+
+                      {(['family', 'school', 'doctor', 'other'] as const).map(cat => {
+                        const catSelected = childrenData[index]?.careCoordinators?.split(',').includes(cat);
+                        if (!catSelected) return null;
+                        const catLabels: Record<string, string> = {
+                          family: 'Other family member',
+                          school: 'School team member',
+                          doctor: 'Doctor / therapist / support worker',
+                          other: 'Other contact',
+                        };
+                        const catLabel = catLabels[cat];
+                        const countField = `careCoord_${cat}_count`;
+                        const additionalField = `careCoord_${cat}_additional`;
+                        const count = parseInt(childrenData[index]?.[countField] || '1');
+                        const showRole = cat !== 'family';
+                        return (
+                          <div key={cat} className="mt-4 p-3 bg-gray-700/50 rounded-lg border border-gray-600">
+                            <p className="text-sm font-medium text-blue-400 mb-3">{catLabel}(s)</p>
+                            {Array.from({ length: count }).map((_, ci) => (
+                              <div key={ci} className={ci > 0 ? 'mt-4 pt-4 border-t border-gray-600' : ''}>
+                                <p className="text-xs text-gray-400 mb-2">{catLabel} {ci + 1}</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                  <input type="text" value={childrenData[index]?.[`careCoord_${cat}_${ci}_name`] || ''} onChange={(e) => handleChildChange(index, `careCoord_${cat}_${ci}_name`, e.target.value)} placeholder="Name" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                                  <input type="tel" value={childrenData[index]?.[`careCoord_${cat}_${ci}_phone`] || ''} onChange={(e) => handleChildChange(index, `careCoord_${cat}_${ci}_phone`, e.target.value)} placeholder="Phone" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                                  <input type="email" value={childrenData[index]?.[`careCoord_${cat}_${ci}_email`] || ''} onChange={(e) => handleChildChange(index, `careCoord_${cat}_${ci}_email`, e.target.value)} placeholder="Email" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                                  <input type="text" value={childrenData[index]?.[`careCoord_${cat}_${ci}_city`] || ''} onChange={(e) => handleChildChange(index, `careCoord_${cat}_${ci}_city`, e.target.value)} placeholder="City" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                                  <select value={childrenData[index]?.[`careCoord_${cat}_${ci}_province`] || ''} onChange={(e) => handleChildChange(index, `careCoord_${cat}_${ci}_province`, e.target.value)} className="px-3 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                                    <option value="">Province</option>
+                                    <option value="AB">Alberta</option>
+                                    <option value="BC">British Columbia</option>
+                                    <option value="MB">Manitoba</option>
+                                    <option value="NB">New Brunswick</option>
+                                    <option value="NL">Newfoundland and Labrador</option>
+                                    <option value="NS">Nova Scotia</option>
+                                    <option value="NT">Northwest Territories</option>
+                                    <option value="NU">Nunavut</option>
+                                    <option value="ON">Ontario</option>
+                                    <option value="PE">Prince Edward Island</option>
+                                    <option value="QC">Quebec</option>
+                                    <option value="SK">Saskatchewan</option>
+                                    <option value="YT">Yukon</option>
+                                  </select>
+                                  {showRole && <input type="text" value={childrenData[index]?.[`careCoord_${cat}_${ci}_role`] || ''} onChange={(e) => handleChildChange(index, `careCoord_${cat}_${ci}_role`, e.target.value)} placeholder="Role in support" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:col-span-2" />}
+                                </div>
+                              </div>
+                            ))}
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                {`Are there additional ${catLabel.toLowerCase()}s to add?`}
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input type="radio" name={`${countField}-additional-${index}`} value="yes" checked={childrenData[index]?.[additionalField] === 'yes'} onChange={() => { handleChildChange(index, countField, String(count + 1)); handleChildChange(index, additionalField, 'yes'); }} className="mr-2" />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input type="radio" name={`${countField}-additional-${index}`} value="no" checked={childrenData[index]?.[additionalField] === 'no'} onChange={() => handleChildChange(index, additionalField, 'no')} className="mr-2" />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
 
                     </>
                     )}

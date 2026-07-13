@@ -10,16 +10,6 @@ interface ChildData {
   childSupportDocLocation?: string;
   disabled?: string;
   disabilityTaxCredit?: string;
-  disabilityNature?: string;
-  disabilityFormalDiagnosis?: string;
-  disabilityCoordinator?: string;
-  disabilityLongTermPlan?: string;
-  disabilityLongTermPlanDoc?: string;
-  disabilityFunding?: string;
-  disabilitySeverity?: string;
-  disabilityCare?: string;
-  disabilityContacts?: string;
-  disabilityOther?: string;
   independent?: string;
   medications?: string;
   medicationList?: string;
@@ -1695,8 +1685,7 @@ export const generatePDF = (formData: FormData) => {
 
       if (child.disabled === 'yes' || child.disabled === 'not_sure') {
         const disRows_preview: { large?: boolean }[] = [
-          {}, {}, {}, {}, {}, {},
-          { large: true }, { large: true }, { large: true },
+          {}, {},
         ];
         const disPreviewH = disRows_preview.reduce((acc, r) => acc + (r.large ? 28 : 8), 0);
         checkPageBreak(20 + disPreviewH + 4);
@@ -1732,15 +1721,7 @@ export const generatePDF = (formData: FormData) => {
 
         const disRows: { label: string; value: string; large?: boolean }[] = [
           { label: 'Support need type(s):', value: supportNeedValue },
-          { label: 'Nature of disability:', value: child.disabilityNature || '' },
-          { label: 'Formal diagnosis? (yes/no)', value: child.disabilityFormalDiagnosis || '' },
-          { label: 'Describe the nature and severity of the disability:', value: child.disabilitySeverity || '', large: true },
           { label: 'Do they qualify for the Disability Tax Credit (DTC)?', value: dtcValue },
-          { label: 'Who is the primary coordinator of care today?', value: child.disabilityCoordinator || '' },
-          { label: 'Is there a long-term plan already in place?', value: child.disabilityLongTermPlan || '' },
-          { label: 'Any funding tied to residency or caregiver status?', value: child.disabilityFunding || '' },
-          { label: 'Describe any care and assistance provided:', value: child.disabilityCare || '', large: true },
-          { label: 'Other information that would help support a potential guardian:', value: child.disabilityOther || '', large: true },
         ];
 
         disRows.forEach((row, ri) => {
@@ -1775,74 +1756,6 @@ export const generatePDF = (formData: FormData) => {
         });
 
         yPosition += 6;
-
-        if (child.disabilityTaxCredit === 'not-looked') {
-          checkPageBreak(120);
-          yPosition += 4;
-
-          doc.setFontSize(10);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(...colors.darkText);
-          doc.text('Additional Reading - Disability Tax Credit', margin, yPosition);
-          doc.setFont(undefined, 'normal');
-          yPosition += 6;
-
-          const dtcParagraphs: { label?: string; body: string }[] = [
-            { body: 'The Disability Tax Credit (DTC) is a non-refundable tax credit in Canada designed to help reduce the income tax liability for individuals with disabilities or their supporting persons.' },
-            { label: 'Tax Credit Amount:', body: ' The DTC amount varies each year and is comprised of a federal and, in most cases provincial component.  It is a non-refundable tax credit, meaning it can reduce the amount of income tax the individual owes, but it will not result in a refund if the individual does not owe any tax.' },
-            { label: 'Transfer to a Supporting Person:', body: ' If the person with the disability does not have taxable income or cannot use the entire credit amount, it can be transferred, or a portion of it can be transferred, to a spouse, common-law partner, or another supporting person (such as a parent or other relative).' },
-            { label: 'Other Benefits:', body: ' Being eligible for the DTC can open the door to other government programs and benefits, such as the RDSP, the Child Disability Benefit, and certain tax credits and deductions for medical expenses.' },
-            { label: 'Application Process:', body: ' To apply, the individual must have a medical doctor or another qualified health professional complete and submit Form 2201 (Disability Tax Certificate) to the CRA.  After reviewing the form, the CRA will notify the individual if their application is approved.' },
-            { label: 'Periodic Review:', body: ' The CRA may approve the DTC for a specific number of years, after which the individual might need to reapply or provide updated medical information.' },
-          ];
-
-          const dtcBoxX = margin;
-          const dtcBoxWidth = fieldWidth;
-          const dtcBoxStartY = yPosition;
-
-          doc.setFontSize(8.5);
-          doc.setTextColor(...colors.darkText);
-
-          let dtcTextY = dtcBoxStartY + 4;
-          const dtcLineH = 5;
-          const dtcPad = 3;
-
-          dtcParagraphs.forEach(({ label, body }) => {
-            const fullText = (label || '') + body;
-            const lines = doc.splitTextToSize(fullText, dtcBoxWidth - dtcPad * 2);
-            checkPageBreak(lines.length * dtcLineH + 4);
-
-            if (label) {
-              const labelWidth = doc.getTextWidth(label);
-              lines.forEach((line: string, li: number) => {
-                if (li === 0) {
-                  doc.setFont(undefined, 'bold');
-                  doc.text(label, dtcBoxX + dtcPad, dtcTextY);
-                  doc.setFont(undefined, 'normal');
-                  const rest = line.slice(label.length);
-                  if (rest) doc.text(rest, dtcBoxX + dtcPad + labelWidth, dtcTextY);
-                } else {
-                  doc.setFont(undefined, 'normal');
-                  doc.text(line, dtcBoxX + dtcPad, dtcTextY);
-                }
-                dtcTextY += dtcLineH;
-              });
-            } else {
-              doc.setFont(undefined, 'normal');
-              lines.forEach((line: string) => {
-                doc.text(line, dtcBoxX + dtcPad, dtcTextY);
-                dtcTextY += dtcLineH;
-              });
-            }
-            dtcTextY += 2;
-          });
-
-          doc.setDrawColor(...colors.tableBorder);
-          doc.setLineWidth(0.3);
-          doc.rect(dtcBoxX, dtcBoxStartY, dtcBoxWidth, dtcTextY - dtcBoxStartY + 2);
-
-          yPosition = dtcTextY + 6;
-        }
       }
 
       const isMinor = (() => {
@@ -1859,7 +1772,7 @@ export const generatePDF = (formData: FormData) => {
       const isDisabled = child.disabled === 'yes';
       const isNotFinanciallyIndependent = child.independent === 'no';
       const showChecklist = (isMinor || isDisabled) && isNotFinanciallyIndependent;
-      const showDisabilityDocs = isDisabled && (child.disabilityTaxCredit === 'yes' || child.disabilityTaxCredit === 'not-looked');
+
 
       if (showChecklist) {
         addSubsectionHeader(`${nickname} Medical and Care:`);
@@ -2433,64 +2346,6 @@ export const generatePDF = (formData: FormData) => {
 
           yPosition += rowH;
         });
-
-        if (showDisabilityDocs) {
-          yPosition += 4;
-          checkPageBreak(50);
-
-          doc.setFontSize(8.5);
-          doc.setFont(undefined, 'bolditalic');
-          doc.setTextColor(...colors.darkText);
-          doc.text('Disability Related Documentation:', margin, yPosition);
-          doc.setFont(undefined, 'normal');
-          yPosition += 5;
-
-          const disDocRows = [
-            'Location of approved Form T2001',
-            'Location of CRA approved Notice of Determination:',
-            'Location of long-term care plan document:',
-          ];
-
-          const disDocPrefill: Record<number, string> = {
-            2: child.disabilityLongTermPlanDoc || '',
-          };
-
-          disDocRows.forEach((docLabel, ri) => {
-            const labelLines = doc.splitTextToSize(docLabel, col1W - 2);
-            const neededH = Math.max(rowH, labelLines.length * 4.5 + 3);
-            checkPageBreak(neededH + 2);
-            const rowY = yPosition;
-
-            doc.setFontSize(8);
-            doc.setDrawColor(...colors.tableBorder);
-            doc.setLineWidth(0.3);
-
-            colWidths.forEach((w, ci) => {
-              doc.rect(colX[ci], rowY, w, neededH);
-            });
-
-            doc.setFont(undefined, 'normal');
-            doc.setTextColor(...colors.darkText);
-            let labelTextY = rowY + 4.5;
-            labelLines.forEach((ll: string) => {
-              doc.text(ll, colX[0] + 1, labelTextY);
-              labelTextY += 4.5;
-            });
-
-            for (let ci = 1; ci < 4; ci++) {
-              const cellField = new doc.AcroFormTextField();
-              cellField.fieldName = `child_${index}_disdoc_${ri}_col${ci}`;
-              cellField.Rect = [colX[ci] + 0.5, rowY + 0.5, colWidths[ci] - 1, neededH - 1];
-              cellField.fontSize = 8;
-              cellField.textColor = colors.darkText;
-              cellField.borderStyle = 'none';
-              cellField.value = ci === 1 ? (disDocPrefill[ri] || '') : '';
-              doc.addField(cellField);
-            }
-
-            yPosition += neededH;
-          });
-        }
 
         yPosition += 6;
 

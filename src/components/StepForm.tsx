@@ -1224,6 +1224,8 @@ export default function StepForm({
     delete obj.disabilitySupportsList;
     delete obj.disabilitySupportsOther;
     delete obj.supportLocationDependent;
+    delete obj.supportLocationDependentDetails;
+    delete obj.futureCaregiverSupport;
   };
 
   const handleRemoveFutureCareTeamOther = (childIndex: number, removeAt: number) => {
@@ -1280,7 +1282,7 @@ export default function StepForm({
         updated[index][k] = v;
       }
     });
-    setChildrenData(updated);
+    onAnswerChange('childrenData', updated);
   };
 
   const handleChildChange = (index: number, field: string, value: string) => {
@@ -8463,8 +8465,9 @@ export default function StepForm({
                                       <label key={opt} className="flex items-center">
                                         <input type="checkbox" checked={isChecked} onChange={() => {
                                           const next = isChecked ? current.filter(v => v !== opt) : [...current, opt];
-                                          handleChildChange(index, 'carePlanWorries', next.join(','));
-                                          if (!isChecked && opt === 'Other') {} else if (isChecked && opt === 'Other') { handleChildChange(index, 'carePlanWorriesOther', ''); }
+                                          const fields: Record<string, string> = { carePlanWorries: next.join(',') };
+                                          if (isChecked && opt === 'Other') fields.carePlanWorriesOther = '';
+                                          handleChildMultiChange(index, fields);
                                         }} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500 mr-2" />
                                         <span className="text-gray-300">{opt}</span>
                                       </label>
@@ -8507,8 +8510,9 @@ export default function StepForm({
                                     <label key={opt} className="flex items-center">
                                       <input type="checkbox" checked={isChecked} onChange={() => {
                                         const next = isChecked ? current.filter(v => v !== opt) : [...current, opt];
-                                        handleChildChange(index, 'disabilitySupportsList', next.join(','));
-                                        if (isChecked && opt === 'Other') handleChildChange(index, 'disabilitySupportsOther', '');
+                                        const fields: Record<string, string> = { disabilitySupportsList: next.join(',') };
+                                        if (isChecked && opt === 'Other') fields.disabilitySupportsOther = '';
+                                        handleChildMultiChange(index, fields);
                                       }} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500 mr-2" />
                                       <span className="text-gray-300">{opt}</span>
                                     </label>
@@ -8526,7 +8530,12 @@ export default function StepForm({
                             <div className="flex flex-col gap-2">
                               {['yes', 'no', 'not-sure'].map((opt) => (
                                 <label key={opt} className="flex items-center">
-                                  <input type="radio" name={`supportLocationDependent-${index}`} value={opt} checked={childrenData[index]?.supportLocationDependent === opt} onChange={(e) => handleChildChange(index, 'supportLocationDependent', e.target.value)} className="mr-2" />
+                                  <input type="radio" name={`supportLocationDependent-${index}`} value={opt} checked={childrenData[index]?.supportLocationDependent === opt} onChange={(e) => {
+                                    const val = e.target.value;
+                                    const fields: Record<string, string> = { supportLocationDependent: val };
+                                    if (val !== 'yes') fields.supportLocationDependentDetails = '';
+                                    handleChildMultiChange(index, fields);
+                                  }} className="mr-2" />
                                   <span className="text-gray-300">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : 'Not sure'}</span>
                                 </label>
                               ))}

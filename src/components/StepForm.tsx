@@ -8105,12 +8105,17 @@ export default function StepForm({
                         </label>
                         <div className="flex flex-col gap-2">
                           {(() => {
-                            const pg1Name = (allAnswers?.get(1)?.['fullName'] as string) || 'Parent / guardian 1';
-                            const pg2Name = (allAnswers?.get(1)?.['spouseName'] as string) || 'Parent / guardian 2';
-                            const hasSpouse = (allAnswers?.get(1)?.['maritalStatus'] === 'married' || allAnswers?.get(1)?.['maritalStatus'] === 'common_law');
+                            const s1 = allAnswers?.get(1) || {};
+                            const pg1Name = (s1['fullName'] as string) || 'Parent / guardian 1';
+                            const pg2Name = (s1['spouseName'] as string) || 'Parent / guardian 2';
+                            const hasSpouse = (s1['maritalStatus'] === 'married' || s1['maritalStatus'] === 'common_law');
+                            const childPo = childrenData[index]?.parentsOption || '';
+                            const otherParentName = childrenData[index]?.otherParentName || '';
                             const coordOpts: { value: string; label: string }[] = [
-                              { value: 'parent1', label: pg1Name },
-                              ...(hasSpouse ? [{ value: 'parent2', label: pg2Name }] : []),
+                              ...(childPo !== 'client2-other' ? [{ value: 'parent1', label: pg1Name }] : []),
+                              ...(childPo === 'client1-other' && otherParentName ? [{ value: 'otherparent', label: otherParentName }] : []),
+                              ...(hasSpouse && childPo !== 'client1-other' ? [{ value: 'parent2', label: pg2Name }] : []),
+                              ...(childPo === 'client2-other' && otherParentName ? [{ value: 'otherparent', label: otherParentName }] : []),
                               { value: 'sibling', label: 'Sibling' },
                               { value: 'family', label: 'Other family' },
                               { value: 'school', label: 'School team' },

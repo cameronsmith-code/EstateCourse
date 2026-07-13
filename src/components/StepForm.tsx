@@ -1195,7 +1195,6 @@ export default function StepForm({
       delete obj[`futureCareTeam_${i}_spoken`];
     }
     delete obj.futureCareTeamOtherCount;
-    delete obj.futureCareTeamOtherAdditional;
     for (let i = 0; i < 20; i++) {
       delete obj[`futureCareTeamOther_${i}_name`];
       delete obj[`futureCareTeamOther_${i}_phone`];
@@ -1234,7 +1233,6 @@ export default function StepForm({
     fields.forEach(f => delete obj[`futureCareTeamOther_${count - 1}_${f}`]);
     const newCount = count - 1;
     obj.futureCareTeamOtherCount = String(newCount);
-    if (newCount <= 0) obj.futureCareTeamOtherAdditional = 'no';
     updated[childIndex] = obj;
     onAnswerChange('childrenData', updated);
   };
@@ -8348,22 +8346,6 @@ export default function StepForm({
                               </div>
                             );
                           })}
-
-                          {otherSelected && (
-                            <div className="mt-4">
-                              <label className="block text-sm font-medium text-gray-300 mb-2">Are there additional other contacts to add?</label>
-                              <div className="flex gap-4">
-                                <label className="flex items-center">
-                                  <input type="radio" name={`futureCareTeamOther-additional-${index}`} value="yes" checked={childrenData[index]?.futureCareTeamOtherAdditional === 'yes'} onChange={() => { handleChildChange(index, 'futureCareTeamOtherCount', String(otherCount + 1)); handleChildChange(index, 'futureCareTeamOtherAdditional', 'yes'); }} className="mr-2" />
-                                  <span className="text-gray-300">Yes</span>
-                                </label>
-                                <label className="flex items-center">
-                                  <input type="radio" name={`futureCareTeamOther-additional-${index}`} value="no" checked={childrenData[index]?.futureCareTeamOtherAdditional === 'no'} onChange={() => { handleChildChange(index, 'futureCareTeamOtherAdditional', 'no'); const cur = parseInt(childrenData[index]?.futureCareTeamOtherCount || '0'); const fields = ['name', 'phone', 'email', 'city', 'province', 'relationship', 'spoken']; for (let i = 1; i < cur; i++) { fields.forEach(f => { const obj = { ...childrenData[index] }; delete obj[`futureCareTeamOther_${i}_${f}`]; }); } if (cur > 1) handleChildChange(index, 'futureCareTeamOtherCount', '1'); }} className="mr-2" />
-                                  <span className="text-gray-300">No</span>
-                                </label>
-                              </div>
-                            </div>
-                          )}
 
                           <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-300 mb-2">Are there additional people you would hope would step in to provide care for {childDisplayName}?</label>

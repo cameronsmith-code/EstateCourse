@@ -20,7 +20,6 @@ interface ChildData {
   futureCareTeamSelection?: string;
   futureCareTeamResponsibility?: string;
   futureCareTeamOtherCount?: string;
-  futureCareTeamOtherAdditional?: string;
   futureCareTeamExtra?: string;
   futureCareTeamExtraCount?: string;
   futureCareTeamExtraAdditional?: string;

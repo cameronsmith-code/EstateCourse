@@ -27,6 +27,7 @@ interface ChildData {
   disabilitySupportsList?: string;
   disabilitySupportsOther?: string;
   supportLocationDependent?: string;
+  futureCaregiverSupport?: string;
   futureCareTeamOtherCount?: string;
   futureCareTeamExtra?: string;
   futureCareTeamExtraCount?: string;
@@ -2093,7 +2094,7 @@ export const generatePDF = (formData: FormData) => {
         const otherCount = parseInt(child.futureCareTeamOtherCount || '0');
         const totalEntries = selected.filter(s => s !== 'other').length + otherCount;
 
-        if (totalEntries === 0 && !child.futureCareTeamResponsibility && !child.carePlanWritten && !child.disabilitySupports && !child.supportLocationDependent) {
+        if (totalEntries === 0 && !child.futureCareTeamResponsibility && !child.carePlanWritten && !child.disabilitySupports && !child.supportLocationDependent && !child.futureCaregiverSupport) {
           // skip
         } else {
           doc.setFontSize(8.5);
@@ -2349,6 +2350,29 @@ export const generatePDF = (formData: FormData) => {
           sldField.value = child.supportLocationDependent === 'yes' ? 'Yes' : child.supportLocationDependent === 'no' ? 'No' : 'Not sure';
           doc.addField(sldField);
           yPosition += 20;
+        }
+
+        // Future caregiver support
+        if (child.futureCaregiverSupport) {
+          checkPageBreak(30);
+          yPosition += 4;
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          const fcsLabel = 'What would help a future caregiver support this person well?';
+          const fcsLabelLines = doc.splitTextToSize(fcsLabel, fieldWidth - 4);
+          doc.text(fcsLabelLines, margin + 2, yPosition + 5);
+          yPosition += fcsLabelLines.length * 5 + 3;
+
+          const fcsField = new doc.AcroFormTextField();
+          fcsField.fieldName = `child_${index}_futureCaregiverSupport`;
+          fcsField.Rect = [margin, yPosition, fieldWidth, 40];
+          fcsField.fontSize = 8.5;
+          fcsField.textColor = colors.darkText;
+          fcsField.borderStyle = 'none';
+          fcsField.value = child.futureCaregiverSupport;
+          doc.addField(fcsField);
+          yPosition += 42;
         }
 
         yPosition += 6;

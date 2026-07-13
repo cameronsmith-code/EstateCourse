@@ -249,6 +249,27 @@ interface FormData {
   spousesPoaProperty?: string;
   spouseIsPoaProperty?: string;
   spousePoaPropertyHasDocAccess?: string;
+  fpHasAdvisor?: string;
+  fpAdvisor1Firm?: string;
+  fpAdvisor1Name?: string;
+  fpAdvisor1Phone?: string;
+  fpAdvisor1Email?: string;
+  fpAdvisor1Website?: string;
+  fpAdvisor1Services?: string[];
+  fpAdvisor1Duration?: string;
+  fpAdvisor1IncludeInContactList?: string;
+  fpHasAdditionalAdvisor?: string;
+  fpAdditionalAdvisorsData?: Array<{
+    firm?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+    services?: string;
+    duration?: string;
+    includeInContactList?: string;
+  }>;
+  fpAdditionalHasAdditional?: string[];
   client1HasPoaPersonalCare?: string;
   client1SpouseIsPoaPersonalCare?: string;
   client1PoaPersonalCareName?: string;
@@ -7738,6 +7759,70 @@ You should explore this as an option with your legal and CFP® professionals bec
     }
   }
 
+  // Financial Planner / Wealth Advisor section
+  if (formData.fpHasAdvisor === 'yes') {
+    if (yPosition > 200) {
+      addPage();
+      yPosition = 12;
+    }
+
+    const serviceLabels: Record<string, string> = {
+      investments: 'Investments',
+      retirement_planning: 'Retirement planning',
+      insurance: 'Insurance',
+      estate_planning: 'Estate planning',
+      tax_planning: 'Tax planning',
+      cash_flow: 'Cash flow',
+      business_planning: 'Business planning',
+      other: 'Other',
+    };
+
+    const renderAdvisorSection = (title: string, advisor: { firm?: string; name?: string; phone?: string; email?: string; website?: string; services?: string[] | string; duration?: string; includeInContactList?: string }, fieldPrefix: string) => {
+      if (yPosition > 200) {
+        addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(title, margin, yPosition);
+      doc.setFont(undefined, 'normal');
+      yPosition += 4;
+      doc.setFontSize(8);
+      doc.text('Contact details and scope of work for this professional.', margin, yPosition);
+      yPosition += 6;
+
+      renderEstateRow('Firm:', advisor.firm || '', `${fieldPrefix}_firm`);
+      renderEstateRow('Advisor Name:', advisor.name || '', `${fieldPrefix}_name`);
+      renderEstateRow('Phone:', advisor.phone || '', `${fieldPrefix}_phone`);
+      renderEstateRow('Email:', advisor.email || '', `${fieldPrefix}_email`);
+      renderEstateRow('Website:', advisor.website || '', `${fieldPrefix}_website`);
+
+      const servicesStr = Array.isArray(advisor.services) ? advisor.services.map(s => serviceLabels[s] || s).join(', ') : (advisor.services ? advisor.services.split(',').map((s: string) => serviceLabels[s.trim()] || s.trim()).join(', ') : '');
+      renderEstateRow('Services Provided:', servicesStr, `${fieldPrefix}_services`);
+
+      renderEstateRow('How Long Together:', advisor.duration || '', `${fieldPrefix}_duration`);
+      renderEstateRow('Include in Contact List:', advisor.includeInContactList === 'yes' ? 'Yes' : advisor.includeInContactList === 'no' ? 'No' : '', `${fieldPrefix}_include`);
+      yPosition += 6;
+    };
+
+    renderAdvisorSection('Financial Planner / Wealth Advisor:', {
+      firm: formData.fpAdvisor1Firm,
+      name: formData.fpAdvisor1Name,
+      phone: formData.fpAdvisor1Phone,
+      email: formData.fpAdvisor1Email,
+      website: formData.fpAdvisor1Website,
+      services: formData.fpAdvisor1Services,
+      duration: formData.fpAdvisor1Duration,
+      includeInContactList: formData.fpAdvisor1IncludeInContactList,
+    }, 'fp_adv1');
+
+    const additionalAdvisors = formData.fpAdditionalAdvisorsData || [];
+    additionalAdvisors.forEach((advisor, i) => {
+      renderAdvisorSection(`Financial Planner / Wealth Advisor — Additional #${i + 1}:`, advisor, `fp_adv${i + 2}`);
+    });
+  }
+
   const c1RegData = (formData.client1RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;
   const c2RegData = (formData.client2RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;
   const benReviewNote = 'Beneficiary Review is Recommended';
@@ -10755,6 +10840,88 @@ You should explore this as an option with your legal and CFP® professionals bec
       void idx;
     });
 
+    yPosition += 6;
+  }
+
+  // Your POA and Executor Contact List and Action Guide
+  addPage();
+  yPosition = 30;
+
+  doc.setFontSize(14);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...colors.darkText);
+  doc.text('Your POA and Executor Contact List and Action Guide', margin, yPosition);
+  yPosition += 10;
+
+  const contactListContacts: Array<{ role: string; name: string; phone: string; email: string; firm?: string }> = [];
+
+  if (formData.fpHasAdvisor === 'yes' && formData.fpAdvisor1IncludeInContactList === 'yes') {
+    contactListContacts.push({
+      role: 'Financial Planner / Wealth Advisor',
+      name: formData.fpAdvisor1Name || '',
+      firm: formData.fpAdvisor1Firm || '',
+      phone: formData.fpAdvisor1Phone || '',
+      email: formData.fpAdvisor1Email || '',
+    });
+  }
+
+  (formData.fpAdditionalAdvisorsData || []).forEach((advisor) => {
+    if (advisor.includeInContactList === 'yes') {
+      contactListContacts.push({
+        role: 'Financial Planner / Wealth Advisor',
+        name: advisor.name || '',
+        firm: advisor.firm || '',
+        phone: advisor.phone || '',
+        email: advisor.email || '',
+      });
+    }
+  });
+
+  if (contactListContacts.length > 0) {
+    contactListContacts.forEach((contact) => {
+      if (yPosition > 250) {
+        addPage();
+        yPosition = 30;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(contact.role, margin, yPosition);
+      yPosition += 6;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+
+      const contactRows: Array<[string, string, string]> = [
+        ['Name:', contact.name, `contactlist_${contactListContacts.indexOf(contact)}_name`],
+        ['Firm:', contact.firm || '', `contactlist_${contactListContacts.indexOf(contact)}_firm`],
+        ['Phone:', contact.phone, `contactlist_${contactListContacts.indexOf(contact)}_phone`],
+        ['Email:', contact.email, `contactlist_${contactListContacts.indexOf(contact)}_email`],
+      ];
+
+      contactRows.forEach(([label, value, fieldName]) => {
+        doc.setFont(undefined, 'bold');
+        doc.text(label, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+
+        const field = new doc.AcroFormTextField();
+        field.fieldName = fieldName;
+        field.Rect = [margin + 30, yPosition - 3, fieldWidth - 30, 10];
+        field.fontSize = 9;
+        field.textColor = colors.darkText;
+        field.value = value;
+        doc.addField(field);
+
+        yPosition += 5;
+      });
+
+      yPosition += 6;
+    });
+  } else {
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'italic');
+    doc.setTextColor(...colors.mutedText);
+    doc.text('No professionals have been added to the contact list yet.', margin, yPosition);
     yPosition += 6;
   }
 

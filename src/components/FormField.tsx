@@ -74,6 +74,38 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
     );
   }
 
+  if (type === 'checkbox-group') {
+    const resolvedOptions = typeof options === 'function' ? options() : options;
+    const selectedValues = (value as string[]) || [];
+    return (
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-300 mb-3">
+          {label}
+          {required && <span className="text-red-400 ml-1">*</span>}
+        </label>
+        <div className="space-y-2">
+          {resolvedOptions?.map((opt) => (
+            <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectedValues.includes(opt.value)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    onChange([...selectedValues, opt.value]);
+                  } else {
+                    onChange(selectedValues.filter(v => v !== opt.value));
+                  }
+                }}
+                className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded"
+              />
+              <span className="ml-3 text-gray-300">{opt.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (type === 'radio') {
     const resolvedOptions = typeof options === 'function' ? options() : options;
     return (

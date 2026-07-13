@@ -99,6 +99,27 @@ export default function StepForm({
   }, [answers['spouseIsPoaProperty']]);
 
   useEffect(() => {
+    if (answers['fpHasAdvisor'] !== 'yes') {
+      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional'].forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['fpHasAdvisor']]);
+
+  useEffect(() => {
+    if (answers['fpHasAdditionalAdvisor'] !== 'yes') {
+      if (answers['fpAdditionalAdvisorsData'] !== undefined) {
+        onAnswerChange('fpAdditionalAdvisorsData', undefined);
+      }
+      if (answers['fpAdditionalHasAdditional'] !== undefined) {
+        onAnswerChange('fpAdditionalHasAdditional', undefined);
+      }
+    }
+  }, [answers['fpHasAdditionalAdvisor']]);
+
+  useEffect(() => {
     if (answers['client2SpouseIsPoaPersonalCare'] === 'no') {
       if (answers['client2SpousePoaPersonalCareHasDocCopy'] !== undefined) {
         onAnswerChange('client2SpousePoaPersonalCareHasDocCopy', undefined);
@@ -4839,18 +4860,168 @@ export default function StepForm({
           })()}
 
           {step.id === 7 && (() => {
+            const fpHasAdvisor = answers['fpHasAdvisor'];
+            const fpHasAdditionalAdvisor = answers['fpHasAdditionalAdvisor'];
+
+            const additionalAdvisors = (answers['fpAdditionalAdvisorsData'] as Array<Record<string, string>>) || [];
+            const additionalHasAdditional = (answers['fpAdditionalHasAdditional'] as string[]) || [];
+
+            const updateAdditionalAdvisor = (index: number, field: string, value: string) => {
+              const updated = [...additionalAdvisors];
+              if (!updated[index]) updated[index] = {};
+              updated[index][field] = value;
+              onAnswerChange('fpAdditionalAdvisorsData', updated);
+            };
+
+            const renderAdvisorFields = (prefix: string, index: number, advisorData?: Record<string, string>) => {
+              const data = advisorData || {};
+              return (
+                <div className="space-y-4 border border-gray-600 rounded-lg p-6 bg-gray-700/50">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Firm</label>
+                      <input type="text" value={data.firm || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Firm', e.target.value) : updateAdditionalAdvisor(index - 1, 'firm', e.target.value)} placeholder="Enter firm name" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Advisor name</label>
+                      <input type="text" value={data.name || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Name', e.target.value) : updateAdditionalAdvisor(index - 1, 'name', e.target.value)} placeholder="Enter advisor name" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+                      <input type="text" value={data.phone || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Phone', e.target.value) : updateAdditionalAdvisor(index - 1, 'phone', e.target.value)} placeholder="Enter phone number" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                      <input type="email" value={data.email || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Email', e.target.value) : updateAdditionalAdvisor(index - 1, 'email', e.target.value)} placeholder="Enter email address" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Website (optional)</label>
+                    <input type="text" value={data.website || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Website', e.target.value) : updateAdditionalAdvisor(index - 1, 'website', e.target.value)} placeholder="Enter website URL" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-3">What do they help you with?</label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {['investments', 'retirement_planning', 'insurance', 'estate_planning', 'tax_planning', 'cash_flow', 'business_planning', 'other'].map(svc => {
+                        const services = (index === 0 ? answers['fpAdvisor1Services'] as string[] : (data.services ? data.services.split(',') : [])) || [];
+                        const toggleService = (checked: boolean) => {
+                          const newServices = checked ? [...services, svc] : services.filter((v: string) => v !== svc);
+                          if (index === 0) {
+                            onAnswerChange('fpAdvisor1Services', newServices);
+                          } else {
+                            updateAdditionalAdvisor(index - 1, 'services', newServices.join(','));
+                          }
+                        };
+                        return (
+                          <label key={svc} className="flex items-center p-2 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer text-sm">
+                            <input type="checkbox" checked={services.includes(svc)} onChange={e => toggleService(e.target.checked)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded mr-2" />
+                            <span className="text-gray-300 capitalize">{svc.replace(/_/g, ' ')}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">How long have you worked together?</label>
+                      <input type="text" value={data.duration || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Duration', e.target.value) : updateAdditionalAdvisor(index - 1, 'duration', e.target.value)} placeholder="e.g., 5 years" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-3">May we include this professional in your executor's contact list and action guide?</label>
+                      <div className="flex gap-4">
+                        {['yes', 'no'].map(opt => (
+                          <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name={`${prefix}_include_${index}`} value={opt}
+                              checked={(index === 0 ? answers['fpAdvisor1IncludeInContactList'] : data.includeInContactList) === opt}
+                              onChange={() => index === 0 ? onAnswerChange('fpAdvisor1IncludeInContactList', opt) : updateAdditionalAdvisor(index - 1, 'includeInContactList', opt)}
+                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                            <span className="text-white text-sm capitalize">{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            };
+
+            const renderAdditionalAdvisorQuestion = (index: number) => {
+              const currentHasAdditional = index < additionalHasAdditional.length ? additionalHasAdditional[index] : '';
+              const updateHasAdditional = (val: string) => {
+                const updated = [...additionalHasAdditional];
+                updated[index] = val;
+                onAnswerChange('fpAdditionalHasAdditional', updated);
+              };
+
+              return (
+                <FormField
+                  key={`fp_add_additional_${index}`}
+                  question={{
+                    key: `fp_additional_additional_${index}`,
+                    label: 'Is there an additional Financial Planner/Wealth Advisor that you work with?',
+                    type: 'radio',
+                    options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }],
+                  }}
+                  value={currentHasAdditional}
+                  onChange={updateHasAdditional}
+                />
+              );
+            };
+
+            const additionalAdvisorIndices: number[] = [];
+            if (fpHasAdditionalAdvisor === 'yes') {
+              additionalAdvisorIndices.push(1);
+              if (additionalHasAdditional[0] === 'yes') {
+                additionalAdvisorIndices.push(2);
+                if (additionalHasAdditional[1] === 'yes') {
+                  additionalAdvisorIndices.push(3);
+                  if (additionalHasAdditional[2] === 'yes') {
+                    additionalAdvisorIndices.push(4);
+                    if (additionalHasAdditional[3] === 'yes') {
+                      additionalAdvisorIndices.push(5);
+                    }
+                  }
+                }
+              }
+            }
+
+            const advisor1Data = {
+              firm: answers['fpAdvisor1Firm'] as string || '',
+              name: answers['fpAdvisor1Name'] as string || '',
+              phone: answers['fpAdvisor1Phone'] as string || '',
+              email: answers['fpAdvisor1Email'] as string || '',
+              website: answers['fpAdvisor1Website'] as string || '',
+              duration: answers['fpAdvisor1Duration'] as string || '',
+              includeInContactList: answers['fpAdvisor1IncludeInContactList'] as string || '',
+            };
+
             return (
               <>
-                {step.questions.map((question) => {
-                  return (
-                    <FormField
-                      key={question.key}
-                      question={question}
-                      value={answers[question.key]}
-                      onChange={(value) => onAnswerChange(question.key, value)}
-                    />
-                  );
-                })}
+                <Subsection title="Financial Planner / Wealth Advisor">
+                  <FormField
+                    question={step.questions[0]}
+                    value={fpHasAdvisor}
+                    onChange={(value) => onAnswerChange('fpHasAdvisor', value)}
+                  />
+
+                  {fpHasAdvisor === 'yes' && (
+                    <div className="space-y-6">
+                      {renderAdvisorFields('fp', 0, advisor1Data)}
+                      <FormField
+                        question={step.questions[9]}
+                        value={fpHasAdditionalAdvisor}
+                        onChange={(value) => onAnswerChange('fpHasAdditionalAdvisor', value)}
+                      />
+                    </div>
+                  )}
+                </Subsection>
+
+                {fpHasAdvisor === 'yes' && additionalAdvisorIndices.map((advisorIdx) => (
+                  <Subsection key={`fp_advisor_${advisorIdx}`} title={`Financial Planner / Wealth Advisor — Additional #${advisorIdx}`}>
+                    {renderAdvisorFields('fp', advisorIdx, additionalAdvisors[advisorIdx - 1] || {})}
+                    {renderAdditionalAdvisorQuestion(advisorIdx - 1)}
+                  </Subsection>
+                ))}
               </>
             );
           })()}

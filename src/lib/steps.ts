@@ -10,7 +10,7 @@ const generateYearOptions = () => {
 export type StepQuestion = {
   key: string;
   label: string | ((answers: Map<number, Record<string, unknown>>) => string);
-  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'email' | 'date' | 'number';
+  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'email' | 'tel' | 'date' | 'number' | 'checkbox-group';
   placeholder?: string;
   options?: Array<{ value: string; label: string }> | (() => Array<{ value: string; label: string }>);
   required?: boolean;
@@ -660,7 +660,96 @@ export const STEPS: Step[] = [
     id: 7,
     title: 'Your Professional Team',
     description: 'The people who help manage your family\'s financial, legal, tax, and healthcare affairs.\nIf something happened to you, these are the professionals your executor, attorney for property, attorney for personal care, or future caregiver may need to contact.',
-    questions: [],
+    questions: [
+      {
+        key: 'fpHasAdvisor',
+        label: 'Do you currently work with a financial planner or investment advisor?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'fpAdvisor1Firm',
+        label: 'Firm',
+        type: 'text',
+        placeholder: 'Enter firm name',
+        required: false,
+      },
+      {
+        key: 'fpAdvisor1Name',
+        label: 'Advisor name',
+        type: 'text',
+        placeholder: 'Enter advisor name',
+        required: false,
+      },
+      {
+        key: 'fpAdvisor1Phone',
+        label: 'Phone',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+      },
+      {
+        key: 'fpAdvisor1Email',
+        label: 'Email',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+      },
+      {
+        key: 'fpAdvisor1Website',
+        label: 'Website (optional)',
+        type: 'text',
+        placeholder: 'Enter website URL',
+        required: false,
+      },
+      {
+        key: 'fpAdvisor1Services',
+        label: 'What do they help you with?',
+        type: 'checkbox-group',
+        options: [
+          { value: 'investments', label: 'Investments' },
+          { value: 'retirement_planning', label: 'Retirement planning' },
+          { value: 'insurance', label: 'Insurance' },
+          { value: 'estate_planning', label: 'Estate planning' },
+          { value: 'tax_planning', label: 'Tax planning' },
+          { value: 'cash_flow', label: 'Cash flow' },
+          { value: 'business_planning', label: 'Business planning' },
+          { value: 'other', label: 'Other' },
+        ],
+        required: false,
+      },
+      {
+        key: 'fpAdvisor1Duration',
+        label: 'How long have you worked together?',
+        type: 'text',
+        placeholder: 'e.g., 5 years',
+        required: false,
+      },
+      {
+        key: 'fpAdvisor1IncludeInContactList',
+        label: 'May we include this professional in your executor\'s contact list and action guide?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+      {
+        key: 'fpHasAdditionalAdvisor',
+        label: 'Is there an additional Financial Planner/Wealth Advisor that you work with?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+      },
+    ],
   },
   {
     id: 8,

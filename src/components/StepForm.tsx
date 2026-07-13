@@ -44,7 +44,8 @@ function TrustBeneficiariesSection({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Relationship to Settlor *</label>
-              <input type="text" value={data[index]?.relationshipToSettlor || ''} onChange={(e) => onChange(index, 'relationshipToSettlor', e.target.value)} placeholder="e.g., Daughter, Son, Spouse, etc." className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Daughter, Son, Spouse, etc.</p>
+              <input type="text" value={data[index]?.relationshipToSettlor || ''} onChange={(e) => onChange(index, 'relationshipToSettlor', e.target.value)} placeholder="" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Country of Residence</label>
@@ -2144,11 +2145,12 @@ export default function StepForm({
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">Relationship to You *</label>
+                          <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Spouse, Child, Sibling, etc.</p>
                           <input
                             type="text"
                             value={client1AlternatePoaPersonalCareData[index]?.relationship || ''}
                             onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'relationship', e.target.value)}
-                            placeholder="e.g., Spouse, Child, Sibling, etc."
+                            placeholder=""
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
@@ -2304,11 +2306,12 @@ export default function StepForm({
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">Relationship to You *</label>
+                          <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Spouse, Child, Sibling, etc.</p>
                           <input
                             type="text"
                             value={client2AlternatePoaPersonalCareData[index]?.relationship || ''}
                             onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'relationship', e.target.value)}
-                            placeholder="e.g., Spouse, Child, Sibling, etc."
+                            placeholder=""
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
@@ -2815,11 +2818,12 @@ export default function StepForm({
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Location of the Articles of Incorporation
                           </label>
+                          <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Home office filing cabinet, Safety deposit box, etc.</p>
                           <input
                             type="text"
                             value={corporationsData[index]?.articlesLocation || ''}
                             onChange={(e) => handleCorporationChange(index, 'articlesLocation', e.target.value)}
-                            placeholder="e.g., Home office filing cabinet, Safety deposit box, etc."
+                            placeholder=""
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
@@ -2827,11 +2831,12 @@ export default function StepForm({
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Location of Corporate Minute Book
                           </label>
+                          <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Home office filing cabinet, Safety deposit box, etc.</p>
                           <input
                             type="text"
                             value={corporationsData[index]?.minuteBookLocation || ''}
                             onChange={(e) => handleCorporationChange(index, 'minuteBookLocation', e.target.value)}
-                            placeholder="e.g., Home office filing cabinet, Safety deposit box, etc."
+                            placeholder=""
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
@@ -2871,11 +2876,12 @@ export default function StepForm({
                             <label className="block text-sm font-medium text-gray-300 mb-2">
                               Location of the shareholder agreement *
                             </label>
+                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Home office filing cabinet, Safety deposit box, etc.</p>
                             <input
                               type="text"
                               value={corporationsData[index]?.shareholderAgreementLocation || ''}
                               onChange={(e) => handleCorporationChange(index, 'shareholderAgreementLocation', e.target.value)}
-                              placeholder="e.g., Home office filing cabinet, Safety deposit box, etc."
+                              placeholder=""
                               className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                           </div>
@@ -3566,11 +3572,12 @@ export default function StepForm({
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Relationship to You *
                                 </label>
+                                <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Spouse, Child, Sibling, etc.</p>
                                 <input
                                   type="text"
                                   value={client1PoaPersonalCareData[index]?.relationship || ''}
                                   onChange={(e) => handlePoaPersonalCareChange(index, 'relationship', e.target.value)}
-                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  placeholder=""
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                               </div>
@@ -3809,11 +3816,12 @@ export default function StepForm({
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Relationship to You *
                                 </label>
+                                <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Spouse, Child, Sibling, etc.</p>
                                 <input
                                   type="text"
                                   value={client1PoaPropertyData[index]?.relationship || ''}
                                   onChange={(e) => handlePoaPropertyChange(index, 'relationship', e.target.value)}
-                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  placeholder=""
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                               </div>
@@ -4094,11 +4102,12 @@ export default function StepForm({
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Relationship to You *
                                     </label>
+                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Spouse, Child, Sibling, etc.</p>
                                     <input
                                       type="text"
                                       value={client1EstateTrusteeData[index]?.relationship || ''}
                                       onChange={(e) => handleEstateTrusteeChange(index, 'relationship', e.target.value)}
-                                      placeholder="e.g., Spouse, Child, Sibling, etc."
+                                      placeholder=""
                                       className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
                                   </div>
@@ -4295,11 +4304,12 @@ export default function StepForm({
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Relationship to {client2Name} *
                                 </label>
+                                <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Spouse, Child, Sibling, etc.</p>
                                 <input
                                   type="text"
                                   value={client2PoaPersonalCareData[index]?.relationship || ''}
                                   onChange={(e) => handleClient2PoaPersonalCareChange(index, 'relationship', e.target.value)}
-                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  placeholder=""
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                               </div>
@@ -4544,11 +4554,12 @@ export default function StepForm({
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Relationship to {client2Name} *
                                 </label>
+                                <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Spouse, Child, Sibling, etc.</p>
                                 <input
                                   type="text"
                                   value={client2PoaPropertyData[index]?.relationship || ''}
                                   onChange={(e) => handleClient2PoaPropertyChange(index, 'relationship', e.target.value)}
-                                  placeholder="e.g., Spouse, Child, Sibling, etc."
+                                  placeholder=""
                                   className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                               </div>
@@ -4829,11 +4840,12 @@ export default function StepForm({
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Relationship to {client2Name} *
                                     </label>
+                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Spouse, Child, Sibling, etc.</p>
                                     <input
                                       type="text"
                                       value={client2EstateTrusteeData[index]?.relationship || ''}
                                       onChange={(e) => handleClient2EstateTrusteeChange(index, 'relationship', e.target.value)}
-                                      placeholder="e.g., Spouse, Child, Sibling, etc."
+                                      placeholder=""
                                       className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
                                   </div>
@@ -5270,11 +5282,12 @@ export default function StepForm({
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Institution Name:
                           </label>
+                          <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., TD Bank, RBC, Scotiabank</p>
                           <input
                             type="text"
                             value={(institution.name as string) || ''}
                             onChange={(e) => handleInstitutionFieldChange(index, 'name', e.target.value)}
-                            placeholder="e.g., TD Bank, RBC, Scotiabank"
+                            placeholder=""
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
@@ -5283,11 +5296,12 @@ export default function StepForm({
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Account Type:
                           </label>
+                          <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Checking, Savings, TFSA</p>
                           <input
                             type="text"
                             value={(institution.accountType as string) || ''}
                             onChange={(e) => handleInstitutionFieldChange(index, 'accountType', e.target.value)}
-                            placeholder="e.g., Checking, Savings, TFSA"
+                            placeholder=""
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </div>
@@ -5376,11 +5390,12 @@ export default function StepForm({
                                   <label className="block text-sm font-medium text-gray-300 mb-1">
                                     Relationship to You:
                                   </label>
+                                  <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Sibling, Parent, Friend</p>
                                   <input
                                     type="text"
                                     value={customOtherOwnerRelationship}
                                     onChange={(e) => handleInstitutionFieldChange(index, 'customOtherOwnerRelationship', e.target.value)}
-                                    placeholder="e.g., Sibling, Parent, Friend"
+                                    placeholder=""
                                     className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                   />
                                 </div>
@@ -5822,11 +5837,12 @@ export default function StepForm({
                                               placeholder="Phone number"
                                               className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                             />
+                                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., 33%</p>
                                             <input
                                               type="text"
                                               value={propertiesData[index]?.otherOwnerPercent || ''}
                                               onChange={(e) => handlePropertyChange(index, 'otherOwnerPercent', e.target.value)}
-                                              placeholder="Ownership percentage (e.g., 33%)"
+                                              placeholder="Ownership percentage"
                                               className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                             />
 
@@ -5887,11 +5903,12 @@ export default function StepForm({
                                                       placeholder="Phone number"
                                                       className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     />
+                                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., 33%</p>
                                                     <input
                                                       type="text"
                                                       value={owner.percent || ''}
                                                       onChange={(e) => updateAdditionalOwner(oIdx, 'percent', e.target.value)}
-                                                      placeholder="Ownership percentage (e.g., 33%)"
+                                                      placeholder="Ownership percentage"
                                                       className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     />
                                                     {oIdx === additionalOtherOwners.length - 1 && (
@@ -6917,9 +6934,10 @@ export default function StepForm({
                                             <label className="block text-sm font-medium text-gray-300 mb-1">
                                               What is the relationship between {allSelectedNames[0]} and {allSelectedNames[1]}?
                                             </label>
+                                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g. siblings, spouses, friends</p>
                                             <input type="text" value={otherRelationship}
                                               onChange={e => updateInstField(typeKey, instIdx, 'succSubOtherRelationship', e.target.value)}
-                                              placeholder="e.g. siblings, spouses, friends"
+                                              placeholder=""
                                               className={inputClass} />
                                           </div>
                                         )}
@@ -6977,10 +6995,13 @@ export default function StepForm({
                               const renderAdvisorQuestion = () => {
                                 if (advisors.length === 0) {
                                   return (
-                                    <input type="text" value={instLabel}
-                                      onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
-                                      placeholder="e.g., TD Waterhouse, Edward Jones, RBC Direct Investing"
-                                      className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                    <div>
+                                      <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., TD Waterhouse, Edward Jones, RBC Direct Investing</p>
+                                      <input type="text" value={instLabel}
+                                        onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
+                                        placeholder=""
+                                        className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                    </div>
                                   );
                                 }
 
@@ -8987,11 +9008,12 @@ export default function StepForm({
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       What is the severity?
                                     </label>
+                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Mild, Moderate, Severe, Life-threatening</p>
                                     <input
                                       type="text"
                                       value={allergy.severity || ''}
                                       onChange={(e) => handleAllergyChange(allergyIndex, 'severity', e.target.value)}
-                                      placeholder="e.g., Mild, Moderate, Severe, Life-threatening"
+                                      placeholder=""
                                       className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                     />
                                   </div>
@@ -9000,11 +9022,12 @@ export default function StepForm({
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       What medications are used to treat this allergy?
                                     </label>
+                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Antihistamines, Corticosteroids</p>
                                     <input
                                       type="text"
                                       value={allergy.medications || ''}
                                       onChange={(e) => handleAllergyChange(allergyIndex, 'medications', e.target.value)}
-                                      placeholder="e.g., Antihistamines, Corticosteroids"
+                                      placeholder=""
                                       className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                     />
                                   </div>
@@ -9013,24 +9036,26 @@ export default function StepForm({
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Do they carry an EpiPen?
                                     </label>
+                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Yes, No, Yes - carried at all times</p>
                                     <input
                                       type="text"
                                       value={allergy.epipen || ''}
                                       onChange={(e) => handleAllergyChange(allergyIndex, 'epipen', e.target.value)}
-                                      placeholder="e.g., Yes, No, Yes - carried at all times"
+                                      placeholder=""
                                       className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                     />
                                   </div>
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Where is this allergy plan required? (e.g., School, activities)
+                                      Where is this allergy plan required?
                                     </label>
+                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., School, activities</p>
                                     <input
                                       type="text"
                                       value={allergy.requiredFor || ''}
                                       onChange={(e) => handleAllergyChange(allergyIndex, 'requiredFor', e.target.value)}
-                                      placeholder="e.g., School, sports, daycare"
+                                      placeholder=""
                                       className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                     />
                                   </div>
@@ -9192,11 +9217,12 @@ export default function StepForm({
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   School Contact Information:
                                 </label>
+                                <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., phone number, address, website</p>
                                 <input
                                   type="text"
                                   value={childrenData[index]?.schoolContact || ''}
                                   onChange={(e) => handleChildChange(index, 'schoolContact', e.target.value)}
-                                  placeholder="e.g., phone number, address, website"
+                                  placeholder=""
                                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                 />
                               </div>
@@ -9295,11 +9321,12 @@ export default function StepForm({
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Location of the IEP document:
                                     </label>
+                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., filing cabinet, school office, digital folder</p>
                                     <input
                                       type="text"
                                       value={childrenData[index]?.iepDocumentLocation || ''}
                                       onChange={(e) => handleChildChange(index, 'iepDocumentLocation', e.target.value)}
-                                      placeholder="e.g., filing cabinet, school office, digital folder"
+                                      placeholder=""
                                       className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                     />
                                   </div>
@@ -9309,10 +9336,11 @@ export default function StepForm({
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   Which school activities are most important for your child's confidence and social life?
                                 </label>
+                                <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., sports teams, drama, art club, recess friendships</p>
                                 <textarea
                                   value={childrenData[index]?.schoolActivitiesImportant || ''}
                                   onChange={(e) => handleChildChange(index, 'schoolActivitiesImportant', e.target.value)}
-                                  placeholder="e.g., sports teams, drama, art club, recess friendships"
+                                  placeholder=""
                                   rows={3}
                                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                                 />
@@ -9321,10 +9349,11 @@ export default function StepForm({
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   What are your homework routines?
                                 </label>
+                                <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., time, location, who helps, any challenges</p>
                                 <textarea
                                   value={childrenData[index]?.homeworkRoutines || ''}
                                   onChange={(e) => handleChildChange(index, 'homeworkRoutines', e.target.value)}
-                                  placeholder="e.g., time, location, who helps, any challenges"
+                                  placeholder=""
                                   rows={3}
                                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                                 />
@@ -9333,10 +9362,11 @@ export default function StepForm({
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
                                   What are your hopes or expectations for your child's education over the next few years?
                                 </label>
+                                <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., post-secondary goals, skill development, personal growth</p>
                                 <textarea
                                   value={childrenData[index]?.educationHopes || ''}
                                   onChange={(e) => handleChildChange(index, 'educationHopes', e.target.value)}
-                                  placeholder="e.g., post-secondary goals, skill development, personal growth"
+                                  placeholder=""
                                   rows={3}
                                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                                 />
@@ -9355,8 +9385,9 @@ export default function StepForm({
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Behavioural considerations (e.g., anxiety, ADHD triggers):
+                                  Behavioural considerations:
                                 </label>
+                                <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., anxiety, ADHD triggers</p>
                                 <textarea
                                   value={childrenData[index]?.behaviouralConsiderations || ''}
                                   onChange={(e) => handleChildChange(index, 'behaviouralConsiderations', e.target.value)}
@@ -9500,11 +9531,12 @@ export default function StepForm({
                                 </div>
                                 <div>
                                   <label className="block text-sm font-medium text-gray-300 mb-2">Relationship:</label>
+                                  <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., best friend, teammate, neighbor, cousin</p>
                                   <input
                                     type="text"
                                     value={friend.relationship}
                                     onChange={(e) => handleFriendChange(friendIndex, 'relationship', e.target.value)}
-                                    placeholder="e.g., best friend, teammate, neighbor, cousin"
+                                    placeholder=""
                                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                   />
                                 </div>
@@ -9560,10 +9592,11 @@ export default function StepForm({
                                 </div>
                                 <div>
                                   <label className="block text-sm font-medium text-gray-300 mb-2">What clubs, activities, camps, etc. do they do together?</label>
+                                  <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., soccer team, art camp, chess club</p>
                                   <textarea
                                     value={friend.activitiesTogether}
                                     onChange={(e) => handleFriendChange(friendIndex, 'activitiesTogether', e.target.value)}
-                                    placeholder="e.g., soccer team, art camp, chess club"
+                                    placeholder=""
                                     rows={3}
                                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                                   />
@@ -9602,12 +9635,13 @@ export default function StepForm({
                           })()}
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Are there any important adults outside the immediate family (e.g., coaches, mentors, extended family) who play a meaningful role in {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s life?
+                              Are there any important adults outside the immediate family who play a meaningful role in {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s life?
                             </label>
+                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., coaches, mentors, extended family</p>
                             <textarea
                               value={childrenData[index]?.importantAdults || ''}
                               onChange={(e) => handleChildChange(index, 'importantAdults', e.target.value)}
-                              placeholder="e.g., names, relationship, how often they connect"
+                              placeholder=""
                               rows={3}
                               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                             />
@@ -9616,10 +9650,11 @@ export default function StepForm({
                             <label className="block text-sm font-medium text-gray-300 mb-2">
                               What daily or weekly routines are most important to {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s sense of stability?
                             </label>
+                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., bedtime rituals, meals, weekend traditions, after-school habits, Friday movie nights, annual camping trip</p>
                             <textarea
                               value={childrenData[index]?.importantRoutines || ''}
                               onChange={(e) => handleChildChange(index, 'importantRoutines', e.target.value)}
-                              placeholder="e.g., bedtime rituals, meals, weekend traditions, after-school habits, Friday movie nights, annual camping trip"
+                              placeholder=""
                               rows={3}
                               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                             />
@@ -9728,11 +9763,12 @@ export default function StepForm({
                                     </div>
                                     <div>
                                       <label className="block text-sm font-medium text-gray-300 mb-2">Type:</label>
+                                      <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., sport / music / art / academic / social</p>
                                       <input
                                         type="text"
                                         value={activity.activityType}
                                         onChange={(e) => handleActivityChange(ai, 'activityType', e.target.value)}
-                                        placeholder="e.g., sport / music / art / academic / social"
+                                        placeholder=""
                                         className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                       />
                                     </div>
@@ -9756,11 +9792,12 @@ export default function StepForm({
                                     </div>
                                     <div>
                                       <label className="block text-sm font-medium text-gray-300 mb-2">Frequency:</label>
+                                      <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., weekly, every Saturday, daily</p>
                                       <input
                                         type="text"
                                         value={activity.frequency}
                                         onChange={(e) => handleActivityChange(ai, 'frequency', e.target.value)}
-                                        placeholder="e.g., weekly, every Saturday, daily"
+                                        placeholder=""
                                         className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                       />
                                     </div>
@@ -9813,15 +9850,16 @@ export default function StepForm({
                                               <div key={ofi} className="bg-gray-700 border border-gray-600 rounded-lg p-4 space-y-3">
                                                 {ofi > 0 && <div className="pb-1 border-b border-gray-600"><span className="text-xs font-semibold text-gray-400">Additional Friend #{ofi + 1}</span></div>}
                                                 {[
-                                                  { field: 'friendName' as keyof ActivityFriendEntry, label: "Friend's Name:", placeholder: "Enter friend's name" },
-                                                  { field: 'relationship' as keyof ActivityFriendEntry, label: 'Relationship:', placeholder: 'e.g., best friend, teammate, neighbor, cousin' },
-                                                  { field: 'cityLocation' as keyof ActivityFriendEntry, label: 'City / Location:', placeholder: 'City or general location' },
-                                                  { field: 'parentGuardianName' as keyof ActivityFriendEntry, label: 'Parent / Guardian Name:', placeholder: 'Enter parent or guardian name' },
-                                                  { field: 'parentPhone' as keyof ActivityFriendEntry, label: 'Parent Phone Number:', placeholder: 'Enter parent phone number' },
-                                                  { field: 'parentEmail' as keyof ActivityFriendEntry, label: 'Parent Email:', placeholder: 'Enter parent email address' },
-                                                ].map(({ field, label, placeholder }) => (
+                                                  { field: 'friendName' as keyof ActivityFriendEntry, label: "Friend's Name:", placeholder: "Enter friend's name", hint: '' },
+                                                  { field: 'relationship' as keyof ActivityFriendEntry, label: 'Relationship:', placeholder: '', hint: 'e.g., best friend, teammate, neighbor, cousin' },
+                                                  { field: 'cityLocation' as keyof ActivityFriendEntry, label: 'City / Location:', placeholder: 'City or general location', hint: '' },
+                                                  { field: 'parentGuardianName' as keyof ActivityFriendEntry, label: 'Parent / Guardian Name:', placeholder: 'Enter parent or guardian name', hint: '' },
+                                                  { field: 'parentPhone' as keyof ActivityFriendEntry, label: 'Parent Phone Number:', placeholder: 'Enter parent phone number', hint: '' },
+                                                  { field: 'parentEmail' as keyof ActivityFriendEntry, label: 'Parent Email:', placeholder: 'Enter parent email address', hint: '' },
+                                                ].map(({ field, label, placeholder, hint }) => (
                                                   <div key={field}>
                                                     <label className="block text-xs font-medium text-gray-400 mb-1">{label}</label>
+                                                    {hint && <p className="text-xs italic text-gray-400 mt-1 mb-2">{hint}</p>}
                                                     <input
                                                       type="text"
                                                       value={otherFriend[field] as string}
@@ -9832,11 +9870,12 @@ export default function StepForm({
                                                   </div>
                                                 ))}
                                                 {[
-                                                  { field: 'whyImportant' as keyof ActivityFriendEntry, label: `Why is this relationship important to ${childName}?`, placeholder: 'Describe why this relationship matters' },
-                                                  { field: 'activitiesTogether' as keyof ActivityFriendEntry, label: 'What clubs, activities, camps, etc. do they do together?', placeholder: 'e.g., soccer team, art camp, chess club' },
-                                                ].map(({ field, label, placeholder }) => (
+                                                  { field: 'whyImportant' as keyof ActivityFriendEntry, label: `Why is this relationship important to ${childName}?`, placeholder: 'Describe why this relationship matters', hint: '' },
+                                                  { field: 'activitiesTogether' as keyof ActivityFriendEntry, label: 'What clubs, activities, camps, etc. do they do together?', placeholder: '', hint: 'e.g., soccer team, art camp, chess club' },
+                                                ].map(({ field, label, placeholder, hint }) => (
                                                   <div key={field}>
                                                     <label className="block text-xs font-medium text-gray-400 mb-1">{label}</label>
+                                                    {hint && <p className="text-xs italic text-gray-400 mt-1 mb-2">{hint}</p>}
                                                     <textarea
                                                       value={otherFriend[field] as string}
                                                       onChange={(e) => handleActivityOtherFriendChange(ai, ofi, field, e.target.value)}
@@ -9899,10 +9938,11 @@ export default function StepForm({
                             <label className="block text-sm font-medium text-gray-300 mb-2">
                               How does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} typically express or manage difficult emotions?
                             </label>
+                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., withdraws, talks it out, physical activity, art, needs space</p>
                             <textarea
                               value={childrenData[index]?.emotionalExpression || ''}
                               onChange={(e) => handleChildChange(index, 'emotionalExpression', e.target.value)}
-                              placeholder="e.g., withdraws, talks it out, physical activity, art, needs space"
+                              placeholder=""
                               rows={3}
                               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                             />
@@ -9911,10 +9951,11 @@ export default function StepForm({
                             <label className="block text-sm font-medium text-gray-300 mb-2">
                               What comforts {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} when they are upset, scared, or overwhelmed?
                             </label>
+                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., specific people, objects, activities, words of reassurance</p>
                             <textarea
                               value={childrenData[index]?.comfortStrategies || ''}
                               onChange={(e) => handleChildChange(index, 'comfortStrategies', e.target.value)}
-                              placeholder="e.g., specific people, objects, activities, words of reassurance"
+                              placeholder=""
                               rows={3}
                               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                             />
@@ -9923,10 +9964,11 @@ export default function StepForm({
                             <label className="block text-sm font-medium text-gray-300 mb-2">
                               Are there any social or emotional challenges a guardian should be aware of?
                             </label>
+                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., social anxiety, difficulty with transitions, peer conflicts, sensitivities</p>
                             <textarea
                               value={childrenData[index]?.socialChallenges || ''}
                               onChange={(e) => handleChildChange(index, 'socialChallenges', e.target.value)}
-                              placeholder="e.g., social anxiety, difficulty with transitions, peer conflicts, sensitivities"
+                              placeholder=""
                               rows={3}
                               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                             />
@@ -10061,11 +10103,12 @@ export default function StepForm({
                               <label className="block text-sm font-medium text-gray-300 mb-2">
                                 Where is the pension document stored? *
                               </label>
+                              <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Safe deposit box, home safe, lawyer's office</p>
                               <input
                                 type="text"
                                 value={pension?.documentLocation || ''}
                                 onChange={(e) => handleClient1PensionChange(index, 'documentLocation', e.target.value)}
-                                placeholder="e.g., Safe deposit box, home safe, lawyer's office"
+                                placeholder=""
                                 className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
@@ -10168,11 +10211,12 @@ export default function StepForm({
                               <label className="block text-sm font-medium text-gray-300 mb-2">
                                 Where is the pension document stored? *
                               </label>
+                              <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Safe deposit box, home safe, lawyer's office</p>
                               <input
                                 type="text"
                                 value={pension?.documentLocation || ''}
                                 onChange={(e) => handleClient2PensionChange(index, 'documentLocation', e.target.value)}
-                                placeholder="e.g., Safe deposit box, home safe, lawyer's office"
+                                placeholder=""
                                 className="w-full px-4 py-2 bg-gray-700 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
@@ -10660,11 +10704,12 @@ export default function StepForm({
                               <label className="block text-sm font-medium text-gray-300 mb-2">
                                 What is the loan secured by?
                               </label>
+                              <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Property, Vehicle, etc.</p>
                               <input
                                 type="text"
                                 value={debt.securedBy || ''}
                                 onChange={(e) => handleDebtChange(index, 'securedBy', e.target.value)}
-                                placeholder="e.g., Property, Vehicle, etc."
+                                placeholder=""
                                 className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
@@ -10781,11 +10826,12 @@ export default function StepForm({
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Credit Card Company
                                     </label>
+                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Visa, MasterCard, Amex</p>
                                     <input
                                       type="text"
                                       value={card.company || ''}
                                       onChange={(e) => handleCreditCardChange(index, 'company', e.target.value)}
-                                      placeholder="e.g., Visa, MasterCard, Amex"
+                                      placeholder=""
                                       className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
                                   </div>
@@ -10925,11 +10971,12 @@ export default function StepForm({
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                       Credit Card Company
                                     </label>
+                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Visa, MasterCard, Amex</p>
                                     <input
                                       type="text"
                                       value={card.company || ''}
                                       onChange={(e) => handleClient2CreditCardChange(index, 'company', e.target.value)}
-                                      placeholder="e.g., Visa, MasterCard, Amex"
+                                      placeholder=""
                                       className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
                                   </div>
@@ -11055,11 +11102,12 @@ export default function StepForm({
                       <label className="block text-sm font-medium text-gray-300 mb-1">
                         Location of the supporting documents:
                       </label>
+                      <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Home office filing cabinet, Google Drive, etc.</p>
                       <input
                         type="text"
                         value={(answers[`${answerKey}DocLocation`] as string) || ''}
                         onChange={(e) => onAnswerChange(`${answerKey}DocLocation`, e.target.value)}
-                        placeholder="e.g., Home office filing cabinet, Google Drive, etc."
+                        placeholder=""
                         className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>

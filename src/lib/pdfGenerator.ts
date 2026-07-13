@@ -17,6 +17,10 @@ interface ChildData {
   futureIndependenceLevel?: string;
   futureFinancialHelp?: string;
   futurePersonalHealthHelp?: string;
+  futureCareTeamSelection?: string;
+  futureCareTeamResponsibility?: string;
+  futureCareTeamOtherCount?: string;
+  futureCareTeamOtherAdditional?: string;
   independent?: string;
   medications?: string;
   medicationList?: string;
@@ -2065,6 +2069,138 @@ export const generatePDF = (formData: FormData) => {
             doc.text(exLines, margin + 2, yPosition + 4);
             yPosition += exLines.length * 4 + 2;
           });
+        }
+
+        yPosition += 6;
+      }
+
+      if (child.futureCareTeamSelection) {
+        checkPageBreak(30);
+        addSubsectionHeader(`${nickname} Future Care Team`);
+        yPosition += 2;
+
+        const selected = child.futureCareTeamSelection.split(',').filter(Boolean);
+        const otherCount = parseInt(child.futureCareTeamOtherCount || '0');
+        const totalEntries = selected.filter(s => s !== 'other').length + otherCount;
+
+        if (totalEntries === 0 && !child.futureCareTeamResponsibility) {
+          // skip
+        } else {
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          const qText = 'If you were no longer able to provide care, who would you hope steps in first?';
+          const qLines = doc.splitTextToSize(qText, fieldWidth - 4);
+          doc.text(qLines, margin + 2, yPosition + 5);
+          yPosition += qLines.length * 5 + 4;
+        }
+
+        const halfWidth = (fieldWidth - 2) / 2;
+        const cRowH = 9;
+
+        const renderContactBlock = (label: string, fieldPrefix: string, entryIndex: number) => {
+          checkPageBreak(50);
+          yPosition += 4;
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...colors.darkText);
+          doc.text(label, margin, yPosition);
+          yPosition += 5;
+
+          const contactFields: { label: string; value: string }[] = [
+            { label: 'Name:', value: child[`${fieldPrefix}_name`] || '' },
+            { label: 'Phone:', value: child[`${fieldPrefix}_phone`] || '' },
+            { label: 'Email:', value: child[`${fieldPrefix}_email`] || '' },
+            { label: 'City:', value: child[`${fieldPrefix}_city`] || '' },
+            { label: 'Province:', value: child[`${fieldPrefix}_province`] || '' },
+            { label: `Relationship to ${nickname}:`, value: child[`${fieldPrefix}_relationship`] || '' },
+          ];
+
+          contactFields.forEach((cf, cfi) => {
+            checkPageBreak(cRowH + 2);
+            doc.setFontSize(8.5);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            const labelY = yPosition;
+            doc.setDrawColor(...colors.tableBorder);
+            doc.setLineWidth(0.3);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(margin, labelY, halfWidth, cRowH, 'FD');
+            doc.rect(margin + halfWidth, labelY, halfWidth, cRowH, 'FD');
+            const lblLines = doc.splitTextToSize(cf.label, halfWidth - 2);
+            doc.text(lblLines, margin + 1, labelY + 5);
+
+            const cfField = new doc.AcroFormTextField();
+            cfField.fieldName = `child_${index}_${fieldPrefix}_${cfi}`;
+            cfField.Rect = [margin + halfWidth + 0.5, labelY + 0.5, halfWidth - 1, cRowH - 1];
+            cfField.fontSize = 8.5;
+            cfField.textColor = colors.darkText;
+            cfField.borderStyle = 'none';
+            cfField.value = cf.value;
+            doc.addField(cfField);
+
+            yPosition += cRowH;
+          });
+
+          checkPageBreak(14);
+          yPosition += 2;
+          const spokenVal = child[`${fieldPrefix}_spoken`];
+          const spokenText = spokenVal === 'yes' ? 'Yes' : spokenVal === 'no' ? 'No' : spokenVal === 'partly' ? 'Partly' : '';
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          const spokenY = yPosition;
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, spokenY, halfWidth, cRowH, 'FD');
+          doc.rect(margin + halfWidth, spokenY, halfWidth, cRowH, 'FD');
+          doc.text('Spoken with this person about the role?', margin + 1, spokenY + 5);
+
+          const spokenField = new doc.AcroFormTextField();
+          spokenField.fieldName = `child_${index}_${fieldPrefix}_spoken_field`;
+          spokenField.Rect = [margin + halfWidth + 0.5, spokenY + 0.5, halfWidth - 1, cRowH - 1];
+          spokenField.fontSize = 8.5;
+          spokenField.textColor = colors.darkText;
+          spokenField.borderStyle = 'none';
+          spokenField.value = spokenText;
+          doc.addField(spokenField);
+
+          yPosition += cRowH;
+        };
+
+        let prefilledIdx = 0;
+        selected.filter(s => s !== 'other').forEach(selId => {
+          const label = selId.replace(/_/g, ' ').replace(/\b\w/g, (m: string) => m.toUpperCase());
+          renderContactBlock(label, `futureCareTeam_${prefilledIdx}`, prefilledIdx);
+          prefilledIdx++;
+        });
+
+        for (let oi = 0; oi < otherCount; oi++) {
+          renderContactBlock(`Other Contact ${oi + 1}`, `futureCareTeamOther_${oi}`, oi);
+        }
+
+        if (child.futureCareTeamResponsibility) {
+          checkPageBreak(30);
+          yPosition += 4;
+          const respLabel = 'What would you want them to understand about this responsibility?';
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          const respLabelLines = doc.splitTextToSize(respLabel, fieldWidth - 4);
+          doc.text(respLabelLines, margin + 2, yPosition + 5);
+          yPosition += respLabelLines.length * 5 + 3;
+
+          const respField = new doc.AcroFormTextField();
+          respField.fieldName = `child_${index}_futureCareTeamResponsibility`;
+          respField.Rect = [margin, yPosition, fieldWidth, 30];
+          respField.fontSize = 8.5;
+          respField.textColor = colors.darkText;
+          respField.borderStyle = 'none';
+          respField.value = child.futureCareTeamResponsibility;
+          doc.addField(respField);
+
+          yPosition += 32;
         }
 
         yPosition += 6;

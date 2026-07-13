@@ -1132,6 +1132,101 @@ export default function StepForm({
     onAnswerChange('childrenData', updated);
   };
 
+  const buildPrefilledContacts = (childIndex: number): { id: string; name: string; phone: string; email: string; city: string; province: string; source: string }[] => {
+    const child = childrenData[childIndex] || {};
+    const contacts: { id: string; name: string; phone: string; email: string; city: string; province: string; source: string }[] = [];
+
+    const step1 = allAnswers?.get(1) || {};
+    const hasSpouse = step1['maritalStatus'] === 'married' || step1['maritalStatus'] === 'common_law';
+
+    if (child.parentsOption === 'both' || child.parentsOption === 'parent1') {
+      contacts.push({ id: 'parent1', name: step1['fullName'] as string || '', phone: step1['phone'] as string || '', email: step1['email'] as string || '', city: step1['city'] as string || '', province: step1['province'] as string || '', source: 'parent1' });
+    }
+    if (hasSpouse && (child.parentsOption === 'both' || child.parentsOption === 'parent2')) {
+      contacts.push({ id: 'parent2', name: step1['spouseName'] as string || '', phone: step1['spousePhone'] as string || '', email: step1['spouseEmail'] as string || '', city: step1['spouseCity'] as string || '', province: step1['spouseProvince'] as string || '', source: 'parent2' });
+    }
+
+    if (child.careCoordinators) {
+      const selected = child.careCoordinators.split(',').filter(Boolean);
+
+      if (selected.includes('sibling') && child.careCoordSiblingNames) {
+        child.careCoordSiblingNames.split(',').map(s => s.trim()).filter(Boolean).forEach((sibName, si) => {
+          contacts.push({ id: `sibling_${si}`, name: sibName, phone: '', email: '', city: '', province: '', source: 'sibling' });
+        });
+      }
+
+      CARE_COORD_CATEGORIES.forEach(cat => {
+        if (!selected.includes(cat)) return;
+        const count = parseInt(child[`careCoord_${cat}_count`] || '1');
+        for (let ci = 0; ci < count; ci++) {
+          const name = child[`careCoord_${cat}_${ci}_name`];
+          if (!name) continue;
+          contacts.push({
+            id: `${cat}_${ci}`,
+            name,
+            phone: child[`careCoord_${cat}_${ci}_phone`] || '',
+            email: child[`careCoord_${cat}_${ci}_email`] || '',
+            city: child[`careCoord_${cat}_${ci}_city`] || '',
+            province: child[`careCoord_${cat}_${ci}_province`] || '',
+            source: cat,
+          });
+        }
+      });
+    }
+
+    return contacts;
+  };
+
+  const getPrefilledContact = (childIndex: number, contactId: string) => {
+    const contacts = buildPrefilledContacts(childIndex);
+    return contacts.find(c => c.id === contactId);
+  };
+
+  const clearFutureCareTeamFields = (obj: Record<string, string>) => {
+    delete obj.futureCareTeamSelection;
+    delete obj.futureCareTeamResponsibility;
+    for (let i = 0; i < 20; i++) {
+      delete obj[`futureCareTeam_${i}_name`];
+      delete obj[`futureCareTeam_${i}_phone`];
+      delete obj[`futureCareTeam_${i}_email`];
+      delete obj[`futureCareTeam_${i}_city`];
+      delete obj[`futureCareTeam_${i}_province`];
+      delete obj[`futureCareTeam_${i}_relationship`];
+      delete obj[`futureCareTeam_${i}_spoken`];
+    }
+    delete obj.futureCareTeamOtherCount;
+    delete obj.futureCareTeamOtherAdditional;
+    for (let i = 0; i < 20; i++) {
+      delete obj[`futureCareTeamOther_${i}_name`];
+      delete obj[`futureCareTeamOther_${i}_phone`];
+      delete obj[`futureCareTeamOther_${i}_email`];
+      delete obj[`futureCareTeamOther_${i}_city`];
+      delete obj[`futureCareTeamOther_${i}_province`];
+      delete obj[`futureCareTeamOther_${i}_relationship`];
+      delete obj[`futureCareTeamOther_${i}_spoken`];
+    }
+  };
+
+  const handleRemoveFutureCareTeamOther = (childIndex: number, removeAt: number) => {
+    const updated = [...childrenData];
+    const obj = { ...updated[childIndex] };
+    const count = parseInt(obj.futureCareTeamOtherCount || '0');
+    const fields = ['name', 'phone', 'email', 'city', 'province', 'relationship', 'spoken'];
+    for (let i = removeAt; i < count - 1; i++) {
+      fields.forEach(f => {
+        const val = obj[`futureCareTeamOther_${i + 1}_${f}`];
+        if (val !== undefined) obj[`futureCareTeamOther_${i}_${f}`] = val;
+        else delete obj[`futureCareTeamOther_${i}_${f}`];
+      });
+    }
+    fields.forEach(f => delete obj[`futureCareTeamOther_${count - 1}_${f}`]);
+    const newCount = count - 1;
+    obj.futureCareTeamOtherCount = String(newCount);
+    if (newCount <= 0) obj.futureCareTeamOtherAdditional = 'no';
+    updated[childIndex] = obj;
+    onAnswerChange('childrenData', updated);
+  };
+
   const handleChildChange = (index: number, field: string, value: string) => {
     const updated = [...childrenData];
     if (!updated[index]) {
@@ -1151,6 +1246,7 @@ export default function StepForm({
       updated[index].futureIndependenceLevel = undefined;
       updated[index].futureFinancialHelp = undefined;
       updated[index].futurePersonalHealthHelp = undefined;
+      clearFutureCareTeamFields(updated[index]);
     }
 
     if (field === 'disabled' && value === 'yes') {
@@ -1165,6 +1261,7 @@ export default function StepForm({
       updated[index].disabilityTaxCredit = undefined;
       updated[index].disabilityTaxCreditDocLocation = undefined;
       clearCareCoordFields(updated[index]);
+      clearFutureCareTeamFields(updated[index]);
     }
 
     if (field === 'disabilityTaxCredit' && value !== 'yes' && value !== 'in-progress') {
@@ -8091,6 +8188,155 @@ export default function StepForm({
                         </div>
                       </>
                     )}
+
+                    <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                      <h4 className="text-base font-semibold text-blue-400">Future Care Team</h4>
+                    </div>
+
+                    {(() => {
+                      const childDisplayName = childrenData[index]?.nickname || childrenData[index]?.name || 'this child';
+                      const prefilled = buildPrefilledContacts(index);
+                      const selected = (childrenData[index]?.futureCareTeamSelection || '').split(',').filter(Boolean);
+                      const otherCount = parseInt(childrenData[index]?.futureCareTeamOtherCount || '0');
+                      const otherSelected = selected.includes('other');
+
+                      const toggleSelect = (id: string) => {
+                        const next = selected.includes(id) ? selected.filter(v => v !== id) : [...selected, id];
+                        handleChildChange(index, 'futureCareTeamSelection', next.join(','));
+                      };
+
+                      const sourceLabels: Record<string, string> = {
+                        parent1: 'Parent / Guardian 1',
+                        parent2: 'Parent / Guardian 2',
+                        sibling: 'Sibling',
+                        family: 'Other Family',
+                        school: 'School Team',
+                        doctor: 'Doctor / Therapist / Support Worker',
+                        other: 'Other',
+                      };
+
+                      const renderContactFields = (fieldPrefix: string, ci: number, defaults?: { name?: string; phone?: string; email?: string; city?: string; province?: string }) => (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <input type="text" value={childrenData[index]?.[`${fieldPrefix}_name`] ?? defaults?.name ?? ''} onChange={(e) => handleChildChange(index, `${fieldPrefix}_name`, e.target.value)} placeholder="Name" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                          <input type="tel" value={childrenData[index]?.[`${fieldPrefix}_phone`] ?? defaults?.phone ?? ''} onChange={(e) => handleChildChange(index, `${fieldPrefix}_phone`, e.target.value)} placeholder="Phone" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                          <input type="email" value={childrenData[index]?.[`${fieldPrefix}_email`] ?? defaults?.email ?? ''} onChange={(e) => handleChildChange(index, `${fieldPrefix}_email`, e.target.value)} placeholder="Email" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                          <input type="text" value={childrenData[index]?.[`${fieldPrefix}_city`] ?? defaults?.city ?? ''} onChange={(e) => handleChildChange(index, `${fieldPrefix}_city`, e.target.value)} placeholder="City" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+                          <select value={childrenData[index]?.[`${fieldPrefix}_province`] ?? defaults?.province ?? ''} onChange={(e) => handleChildChange(index, `${fieldPrefix}_province`, e.target.value)} className="px-3 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                            <option value="">Province</option>
+                            <option value="AB">Alberta</option>
+                            <option value="BC">British Columbia</option>
+                            <option value="MB">Manitoba</option>
+                            <option value="NB">New Brunswick</option>
+                            <option value="NL">Newfoundland and Labrador</option>
+                            <option value="NS">Nova Scotia</option>
+                            <option value="NT">Northwest Territories</option>
+                            <option value="NU">Nunavut</option>
+                            <option value="ON">Ontario</option>
+                            <option value="PE">Prince Edward Island</option>
+                            <option value="QC">Quebec</option>
+                            <option value="SK">Saskatchewan</option>
+                            <option value="YT">Yukon</option>
+                          </select>
+                          <input type="text" value={childrenData[index]?.[`${fieldPrefix}_relationship`] ?? ''} onChange={(e) => handleChildChange(index, `${fieldPrefix}_relationship`, e.target.value)} placeholder={`Relationship to ${childDisplayName}`} className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:col-span-2" />
+                        </div>
+                      );
+
+                      const renderSpokenQuestion = (fieldPrefix: string) => (
+                        <div className="mt-3">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Have you spoken with this person about the role?</label>
+                          <div className="flex gap-4">
+                            {[
+                              { value: 'yes', label: 'Yes' },
+                              { value: 'no', label: 'No' },
+                              { value: 'partly', label: 'Partly' },
+                            ].map(({ value, label }) => (
+                              <label key={value} className="flex items-center cursor-pointer">
+                                <input type="radio" name={`${fieldPrefix}-spoken`} value={value} checked={childrenData[index]?.[`${fieldPrefix}_spoken`] === value} onChange={(e) => handleChildChange(index, `${fieldPrefix}_spoken`, e.target.value)} className="mr-2" />
+                                <span className="text-gray-300 text-sm">{label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      );
+
+                      return (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-3">
+                              If you were no longer able to provide care, who would you hope steps in first? (Select all that apply)
+                            </label>
+                            <div className="flex flex-col gap-2">
+                              {prefilled.map(c => {
+                                const isSelected = selected.includes(c.id);
+                                return (
+                                  <label key={c.id} className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(c.id)} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500" />
+                                    <span className="text-gray-300 text-sm">{c.name || sourceLabels[c.source] || c.id}</span>
+                                    {c.name && <span className="text-xs text-gray-500">({sourceLabels[c.source]})</span>}
+                                  </label>
+                                );
+                              })}
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" checked={otherSelected} onChange={() => { toggleSelect('other'); if (!otherSelected && otherCount === 0) { handleChildChange(index, 'futureCareTeamOtherCount', '1'); } }} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500" />
+                                <span className="text-gray-300 text-sm">Other (new person not previously identified)</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {prefilled.filter(c => selected.includes(c.id)).map((c, pi) => {
+                            const fieldPrefix = `futureCareTeam_${pi}`;
+                            return (
+                              <div key={c.id} className="mt-4 p-3 bg-gray-700/50 rounded-lg border border-gray-600">
+                                <p className="text-sm font-medium text-blue-400 mb-3">{c.name || sourceLabels[c.source]}</p>
+                                {renderContactFields(fieldPrefix, pi, { name: c.name, phone: c.phone, email: c.email, city: c.city, province: c.province })}
+                                {renderSpokenQuestion(fieldPrefix)}
+                              </div>
+                            );
+                          })}
+
+                          {otherSelected && Array.from({ length: otherCount }).map((_, oi) => {
+                            const fieldPrefix = `futureCareTeamOther_${oi}`;
+                            return (
+                              <div key={`other-${oi}`} className="mt-4 p-3 bg-gray-700/50 rounded-lg border border-gray-600">
+                                <div className="flex items-center justify-between mb-3">
+                                  <p className="text-sm font-medium text-blue-400">Other Contact {oi + 1}</p>
+                                  {oi > 0 && (
+                                    <button type="button" onClick={() => handleRemoveFutureCareTeamOther(index, oi)} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
+                                      <X size={14} /> Remove
+                                    </button>
+                                  )}
+                                </div>
+                                {renderContactFields(fieldPrefix, oi)}
+                                {renderSpokenQuestion(fieldPrefix)}
+                              </div>
+                            );
+                          })}
+
+                          {otherSelected && (
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">Are there additional other contacts to add?</label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input type="radio" name={`futureCareTeamOther-additional-${index}`} value="yes" checked={childrenData[index]?.futureCareTeamOtherAdditional === 'yes'} onChange={() => { handleChildChange(index, 'futureCareTeamOtherCount', String(otherCount + 1)); handleChildChange(index, 'futureCareTeamOtherAdditional', 'yes'); }} className="mr-2" />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input type="radio" name={`futureCareTeamOther-additional-${index}`} value="no" checked={childrenData[index]?.futureCareTeamOtherAdditional === 'no'} onChange={() => { handleChildChange(index, 'futureCareTeamOtherAdditional', 'no'); const cur = parseInt(childrenData[index]?.futureCareTeamOtherCount || '0'); const fields = ['name', 'phone', 'email', 'city', 'province', 'relationship', 'spoken']; for (let i = 1; i < cur; i++) { fields.forEach(f => { const obj = { ...childrenData[index] }; delete obj[`futureCareTeamOther_${i}_${f}`]; }); } if (cur > 1) handleChildChange(index, 'futureCareTeamOtherCount', '1'); }} className="mr-2" />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+
+                          {(selected.length > 0 || otherCount > 0) && (
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">What would you want them to understand about this responsibility?</label>
+                              <textarea value={childrenData[index]?.futureCareTeamResponsibility || ''} onChange={(e) => handleChildChange(index, 'futureCareTeamResponsibility', e.target.value)} placeholder="Enter your response" rows={4} className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
 
                     <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                       <h4 className="text-base font-semibold text-blue-400">Financial Independence</h4>

@@ -1216,6 +1216,14 @@ export default function StepForm({
       delete obj[`futureCareTeamExtra_${i}_relationship`];
       delete obj[`futureCareTeamExtra_${i}_spoken`];
     }
+    delete obj.carePlanWritten;
+    delete obj.carePlanStored;
+    delete obj.carePlanWorries;
+    delete obj.carePlanWorriesOther;
+    delete obj.disabilitySupports;
+    delete obj.disabilitySupportsList;
+    delete obj.disabilitySupportsOther;
+    delete obj.supportLocationDependent;
   };
 
   const handleRemoveFutureCareTeamOther = (childIndex: number, removeAt: number) => {
@@ -1258,6 +1266,21 @@ export default function StepForm({
     }
     updated[childIndex] = obj;
     onAnswerChange('childrenData', updated);
+  };
+
+  const handleChildMultiChange = (index: number, fields: Record<string, string>) => {
+    const updated = [...childrenData];
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    Object.entries(fields).forEach(([k, v]) => {
+      if (v === '') {
+        delete (updated[index] as Record<string, unknown>)[k];
+      } else {
+        updated[index][k] = v;
+      }
+    });
+    setChildrenData(updated);
   };
 
   const handleChildChange = (index: number, field: string, value: string) => {
@@ -8401,6 +8424,114 @@ export default function StepForm({
                               <textarea value={childrenData[index]?.futureCareTeamResponsibility || ''} onChange={(e) => handleChildChange(index, 'futureCareTeamResponsibility', e.target.value)} placeholder="Enter your response" rows={4} className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                             </div>
                           )}
+
+                          {/* Future Care Plan */}
+                          <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                            <h4 className="text-base font-semibold text-blue-400">Future Care Plan</h4>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Have you written down a future care plan yet?</label>
+                            <div className="flex flex-col gap-2">
+                              {['yes', 'no', 'talked', 'need-help'].map((opt) => (
+                                <label key={opt} className="flex items-center">
+                                  <input type="radio" name={`carePlanWritten-${index}`} value={opt} checked={childrenData[index]?.carePlanWritten === opt} onChange={(e) => {
+                                    const val = e.target.value;
+                                    const obj: Record<string, string> = { carePlanWritten: val };
+                                    if (val !== 'yes') { obj.carePlanStored = ''; obj.carePlanWorries = ''; obj.carePlanWorriesOther = ''; }
+                                    handleChildMultiChange(index, obj);
+                                  }} className="mr-2" />
+                                  <span className="text-gray-300">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : opt === 'talked' ? "We've talked about it, but nothing is written" : 'We need help starting'}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+
+                          {childrenData[index]?.carePlanWritten === 'yes' && (
+                            <>
+                              <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Where is the plan stored?</label>
+                                <input type="text" value={childrenData[index]?.carePlanStored || ''} onChange={(e) => handleChildChange(index, 'carePlanStored', e.target.value)} placeholder="Enter your response" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                              </div>
+                              <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">What worries you most about the future plan?</label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  {['Who would provide care', 'Where they would live', 'Money / funding', 'Government benefits', 'Sibling responsibilities', 'Medical care', 'School-to-adult transition', 'Other'].map((opt) => {
+                                    const current = (childrenData[index]?.carePlanWorries || '').split(',').filter(Boolean);
+                                    const isChecked = current.includes(opt);
+                                    return (
+                                      <label key={opt} className="flex items-center">
+                                        <input type="checkbox" checked={isChecked} onChange={() => {
+                                          const next = isChecked ? current.filter(v => v !== opt) : [...current, opt];
+                                          handleChildChange(index, 'carePlanWorries', next.join(','));
+                                          if (!isChecked && opt === 'Other') {} else if (isChecked && opt === 'Other') { handleChildChange(index, 'carePlanWorriesOther', ''); }
+                                        }} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500 mr-2" />
+                                        <span className="text-gray-300">{opt}</span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                                {(childrenData[index]?.carePlanWorries || '').split(',').includes('Other') && (
+                                  <input type="text" value={childrenData[index]?.carePlanWorriesOther || ''} onChange={(e) => handleChildChange(index, 'carePlanWorriesOther', e.target.value)} placeholder="Please specify" className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                )}
+                              </div>
+                            </>
+                          )}
+
+                          {/* Disability supports */}
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Are any benefits, funding, housing supports, or services connected to their disability or care needs?</label>
+                            <div className="flex flex-col gap-2">
+                              {['yes', 'no', 'not-sure'].map((opt) => (
+                                <label key={opt} className="flex items-center">
+                                  <input type="radio" name={`disabilitySupports-${index}`} value={opt} checked={childrenData[index]?.disabilitySupports === opt} onChange={(e) => {
+                                    const val = e.target.value;
+                                    const obj: Record<string, string> = { disabilitySupports: val };
+                                    if (val !== 'yes') { obj.disabilitySupportsList = ''; obj.disabilitySupportsOther = ''; }
+                                    handleChildMultiChange(index, obj);
+                                  }} className="mr-2" />
+                                  <span className="text-gray-300">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : 'Not sure'}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+
+                          {childrenData[index]?.disabilitySupports === 'yes' && (
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">Which ones?</label>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {['DTC', 'RDSP', 'ODSP / provincial disability support', 'Passport funding / respite funding', 'School supports', 'Housing supports', 'Private insurance', 'Other'].map((opt) => {
+                                  const current = (childrenData[index]?.disabilitySupportsList || '').split(',').filter(Boolean);
+                                  const isChecked = current.includes(opt);
+                                  return (
+                                    <label key={opt} className="flex items-center">
+                                      <input type="checkbox" checked={isChecked} onChange={() => {
+                                        const next = isChecked ? current.filter(v => v !== opt) : [...current, opt];
+                                        handleChildChange(index, 'disabilitySupportsList', next.join(','));
+                                        if (isChecked && opt === 'Other') handleChildChange(index, 'disabilitySupportsOther', '');
+                                      }} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500 mr-2" />
+                                      <span className="text-gray-300">{opt}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                              {(childrenData[index]?.disabilitySupportsList || '').split(',').includes('Other') && (
+                                <input type="text" value={childrenData[index]?.disabilitySupportsOther || ''} onChange={(e) => handleChildChange(index, 'disabilitySupportsOther', e.target.value)} placeholder="Please specify" className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                              )}
+                            </div>
+                          )}
+
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Does any support depend on where they live or who provides care?</label>
+                            <div className="flex flex-col gap-2">
+                              {['yes', 'no', 'not-sure'].map((opt) => (
+                                <label key={opt} className="flex items-center">
+                                  <input type="radio" name={`supportLocationDependent-${index}`} value={opt} checked={childrenData[index]?.supportLocationDependent === opt} onChange={(e) => handleChildChange(index, 'supportLocationDependent', e.target.value)} className="mr-2" />
+                                  <span className="text-gray-300">{opt === 'yes' ? 'Yes' : opt === 'no' ? 'No' : 'Not sure'}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
                         </>
                       );
                     })()}

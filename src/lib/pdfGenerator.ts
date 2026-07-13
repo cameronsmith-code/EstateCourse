@@ -19,6 +19,14 @@ interface ChildData {
   futurePersonalHealthHelp?: string;
   futureCareTeamSelection?: string;
   futureCareTeamResponsibility?: string;
+  carePlanWritten?: string;
+  carePlanStored?: string;
+  carePlanWorries?: string;
+  carePlanWorriesOther?: string;
+  disabilitySupports?: string;
+  disabilitySupportsList?: string;
+  disabilitySupportsOther?: string;
+  supportLocationDependent?: string;
   futureCareTeamOtherCount?: string;
   futureCareTeamExtra?: string;
   futureCareTeamExtraCount?: string;
@@ -2085,7 +2093,7 @@ export const generatePDF = (formData: FormData) => {
         const otherCount = parseInt(child.futureCareTeamOtherCount || '0');
         const totalEntries = selected.filter(s => s !== 'other').length + otherCount;
 
-        if (totalEntries === 0 && !child.futureCareTeamResponsibility) {
+        if (totalEntries === 0 && !child.futureCareTeamResponsibility && !child.carePlanWritten && !child.disabilitySupports && !child.supportLocationDependent) {
           // skip
         } else {
           doc.setFontSize(8.5);
@@ -2210,6 +2218,137 @@ export const generatePDF = (formData: FormData) => {
           doc.addField(respField);
 
           yPosition += 32;
+        }
+
+        // Future Care Plan
+        if (child.carePlanWritten) {
+          checkPageBreak(20);
+          yPosition += 4;
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          const cpLabel = 'Have you written down a future care plan yet?';
+          const cpLabelLines = doc.splitTextToSize(cpLabel, fieldWidth - 4);
+          doc.text(cpLabelLines, margin + 2, yPosition + 5);
+          yPosition += cpLabelLines.length * 5 + 3;
+
+          const cpField = new doc.AcroFormTextField();
+          cpField.fieldName = `child_${index}_carePlanWritten`;
+          cpField.Rect = [margin, yPosition, fieldWidth, 18];
+          cpField.fontSize = 8.5;
+          cpField.textColor = colors.darkText;
+          cpField.borderStyle = 'none';
+          cpField.value = child.carePlanWritten === 'yes' ? 'Yes' : child.carePlanWritten === 'no' ? 'No' : child.carePlanWritten === 'talked' ? "We've talked about it, but nothing is written" : 'We need help starting';
+          doc.addField(cpField);
+          yPosition += 20;
+
+          if (child.carePlanWritten === 'yes') {
+            if (child.carePlanStored) {
+              checkPageBreak(20);
+              const storeLabel = 'Where is the plan stored?';
+              const storeLabelLines = doc.splitTextToSize(storeLabel, fieldWidth - 4);
+              doc.text(storeLabelLines, margin + 2, yPosition + 5);
+              yPosition += storeLabelLines.length * 5 + 3;
+
+              const storeField = new doc.AcroFormTextField();
+              storeField.fieldName = `child_${index}_carePlanStored`;
+              storeField.Rect = [margin, yPosition, fieldWidth, 18];
+              storeField.fontSize = 8.5;
+              storeField.textColor = colors.darkText;
+              storeField.borderStyle = 'none';
+              storeField.value = child.carePlanStored;
+              doc.addField(storeField);
+              yPosition += 20;
+            }
+
+            if (child.carePlanWorries) {
+              checkPageBreak(20);
+              const worryLabel = 'What worries you most about the future plan?';
+              const worryLabelLines = doc.splitTextToSize(worryLabel, fieldWidth - 4);
+              doc.text(worryLabelLines, margin + 2, yPosition + 5);
+              yPosition += worryLabelLines.length * 5 + 3;
+
+              let worryText = child.carePlanWorries.split(',').filter(Boolean).join(', ');
+              if (child.carePlanWorriesOther) worryText = worryText.replace('Other', `Other: ${child.carePlanWorriesOther}`);
+
+              const worryField = new doc.AcroFormTextField();
+              worryField.fieldName = `child_${index}_carePlanWorries`;
+              worryField.Rect = [margin, yPosition, fieldWidth, 18];
+              worryField.fontSize = 8.5;
+              worryField.textColor = colors.darkText;
+              worryField.borderStyle = 'none';
+              worryField.value = worryText;
+              doc.addField(worryField);
+              yPosition += 20;
+            }
+          }
+        }
+
+        // Disability supports
+        if (child.disabilitySupports) {
+          checkPageBreak(20);
+          yPosition += 4;
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          const dsLabel = 'Are any benefits, funding, housing supports, or services connected to their disability or care needs?';
+          const dsLabelLines = doc.splitTextToSize(dsLabel, fieldWidth - 4);
+          doc.text(dsLabelLines, margin + 2, yPosition + 5);
+          yPosition += dsLabelLines.length * 5 + 3;
+
+          const dsField = new doc.AcroFormTextField();
+          dsField.fieldName = `child_${index}_disabilitySupports`;
+          dsField.Rect = [margin, yPosition, fieldWidth, 18];
+          dsField.fontSize = 8.5;
+          dsField.textColor = colors.darkText;
+          dsField.borderStyle = 'none';
+          dsField.value = child.disabilitySupports === 'yes' ? 'Yes' : child.disabilitySupports === 'no' ? 'No' : 'Not sure';
+          doc.addField(dsField);
+          yPosition += 20;
+
+          if (child.disabilitySupports === 'yes' && child.disabilitySupportsList) {
+            checkPageBreak(20);
+            const dlLabel = 'Which ones?';
+            const dlLabelLines = doc.splitTextToSize(dlLabel, fieldWidth - 4);
+            doc.text(dlLabelLines, margin + 2, yPosition + 5);
+            yPosition += dlLabelLines.length * 5 + 3;
+
+            let dlText = child.disabilitySupportsList.split(',').filter(Boolean).join(', ');
+            if (child.disabilitySupportsOther) dlText = dlText.replace('Other', `Other: ${child.disabilitySupportsOther}`);
+
+            const dlField = new doc.AcroFormTextField();
+            dlField.fieldName = `child_${index}_disabilitySupportsList`;
+            dlField.Rect = [margin, yPosition, fieldWidth, 18];
+            dlField.fontSize = 8.5;
+            dlField.textColor = colors.darkText;
+            dlField.borderStyle = 'none';
+            dlField.value = dlText;
+            doc.addField(dlField);
+            yPosition += 20;
+          }
+        }
+
+        // Support location dependent
+        if (child.supportLocationDependent) {
+          checkPageBreak(20);
+          yPosition += 4;
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          const sldLabel = 'Does any support depend on where they live or who provides care?';
+          const sldLabelLines = doc.splitTextToSize(sldLabel, fieldWidth - 4);
+          doc.text(sldLabelLines, margin + 2, yPosition + 5);
+          yPosition += sldLabelLines.length * 5 + 3;
+
+          const sldField = new doc.AcroFormTextField();
+          sldField.fieldName = `child_${index}_supportLocationDependent`;
+          sldField.Rect = [margin, yPosition, fieldWidth, 18];
+          sldField.fontSize = 8.5;
+          sldField.textColor = colors.darkText;
+          sldField.borderStyle = 'none';
+          sldField.value = child.supportLocationDependent === 'yes' ? 'Yes' : child.supportLocationDependent === 'no' ? 'No' : 'Not sure';
+          doc.addField(sldField);
+          yPosition += 20;
         }
 
         yPosition += 6;

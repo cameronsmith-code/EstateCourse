@@ -141,6 +141,27 @@ export default function StepForm({
   }, [answers['acctHasAdditional']]);
 
   useEffect(() => {
+    if (answers['lawHasLawyer'] !== 'yes') {
+      ['lawAdvisor1Firm', 'lawAdvisor1Name', 'lawAdvisor1Phone', 'lawAdvisor1Email', 'lawAdvisor1Services', 'lawAdvisor1Duration', 'lawAdvisor1DocLocation', 'lawAdvisor1IncludeInContactList', 'lawAdvisor1WorksWith', 'lawHasAdditional', 'lawAdditionalData', 'lawAdditionalHasAdditional'].forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['lawHasLawyer']]);
+
+  useEffect(() => {
+    if (answers['lawHasAdditional'] !== 'yes') {
+      if (answers['lawAdditionalData'] !== undefined) {
+        onAnswerChange('lawAdditionalData', undefined);
+      }
+      if (answers['lawAdditionalHasAdditional'] !== undefined) {
+        onAnswerChange('lawAdditionalHasAdditional', undefined);
+      }
+    }
+  }, [answers['lawHasAdditional']]);
+
+  useEffect(() => {
     if (answers['client2SpouseIsPoaPersonalCare'] === 'no') {
       if (answers['client2SpousePoaPersonalCareHasDocCopy'] !== undefined) {
         onAnswerChange('client2SpousePoaPersonalCareHasDocCopy', undefined);
@@ -5161,6 +5182,30 @@ export default function StepForm({
                   },
                   durationLabel: 'How many years have you worked together?',
                   durationPlaceholder: 'e.g., 3 years',
+                })}
+
+                {renderProfessionalSubsection({
+                  prefix: 'law',
+                  subsectionTitle: 'Lawyer',
+                  hasKey: 'lawHasLawyer',
+                  hasAdditionalKey: 'lawHasAdditional',
+                  additionalDataKey: 'lawAdditionalData',
+                  additionalHasAdditionalKey: 'lawAdditionalHasAdditional',
+                  firstQuestionLabel: 'Do you have a lawyer you work with regularly?',
+                  additionalQuestionLabel: 'Is there an additional Lawyer that you work with?',
+                  nameLabel: 'Lawyer name',
+                  servicesLabel: 'What do they usually help you with?',
+                  services: ['wills_powers_of_attorney', 'real_estate', 'corporate_law', 'family_law', 'litigation', 'other'],
+                  serviceLabels: {
+                    wills_powers_of_attorney: 'Wills & Powers of Attorney',
+                    real_estate: 'Real estate',
+                    corporate_law: 'Corporate law',
+                    family_law: 'Family law',
+                    litigation: 'Litigation',
+                    other: 'Other',
+                  },
+                  durationLabel: 'How many years have you worked together?',
+                  durationPlaceholder: 'e.g., 4 years',
                 })}
               </>
             );

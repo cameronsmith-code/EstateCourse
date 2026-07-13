@@ -297,6 +297,29 @@ interface FormData {
     includeInContactList?: string;
   }>;
   acctAdditionalHasAdditional?: string[];
+  lawHasLawyer?: string;
+  lawAdvisor1Firm?: string;
+  lawAdvisor1Name?: string;
+  lawAdvisor1Phone?: string;
+  lawAdvisor1Email?: string;
+  lawAdvisor1WorksWith?: string;
+  lawAdvisor1Services?: string[];
+  lawAdvisor1Duration?: string;
+  lawAdvisor1DocLocation?: string;
+  lawAdvisor1IncludeInContactList?: string;
+  lawHasAdditional?: string;
+  lawAdditionalData?: Array<{
+    firm?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+    worksWithClients?: string;
+    services?: string;
+    duration?: string;
+    docLocation?: string;
+    includeInContactList?: string;
+  }>;
+  lawAdditionalHasAdditional?: string[];
   client1HasPoaPersonalCare?: string;
   client1SpouseIsPoaPersonalCare?: string;
   client1PoaPersonalCareName?: string;
@@ -7931,6 +7954,76 @@ You should explore this as an option with your legal and CFP® professionals bec
     });
   }
 
+  // Lawyer section
+  if (formData.lawHasLawyer === 'yes') {
+    if (yPosition > 200) {
+      addPage();
+      yPosition = 12;
+    }
+
+    const lawServiceLabels: Record<string, string> = {
+      wills_powers_of_attorney: 'Wills & Powers of Attorney',
+      real_estate: 'Real estate',
+      corporate_law: 'Corporate law',
+      family_law: 'Family law',
+      litigation: 'Litigation',
+      other: 'Other',
+    };
+
+    const renderLawyerSection = (title: string, lawyer: { firm?: string; name?: string; phone?: string; email?: string; worksWithClients?: string; services?: string[] | string; duration?: string; docLocation?: string; includeInContactList?: string }, fieldPrefix: string) => {
+      if (yPosition > 200) {
+        addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(title, margin, yPosition);
+      yPosition += 4;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text('Contact details and scope of work for this professional.', margin, yPosition);
+      yPosition += 6;
+
+      const worksWithStr = lawyer.worksWithClients || '';
+      const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
+      const worksWithLabels = worksWithArr.map((c: string) => c === 'client1' ? client1Name : c === 'client2' ? client2Name : '').filter(Boolean);
+      if (hasSpouse) {
+        renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
+      }
+
+      renderEstateRow('Firm:', lawyer.firm || '', `${fieldPrefix}_firm`);
+      renderEstateRow('Lawyer Name:', lawyer.name || '', `${fieldPrefix}_name`);
+      renderEstateRow('Phone:', lawyer.phone || '', `${fieldPrefix}_phone`);
+      renderEstateRow('Email:', lawyer.email || '', `${fieldPrefix}_email`);
+
+      const servicesStr = Array.isArray(lawyer.services) ? lawyer.services.map(s => lawServiceLabels[s] || s).join(', ') : (lawyer.services ? lawyer.services.split(',').map((s: string) => lawServiceLabels[s.trim()] || s.trim()).join(', ') : '');
+      renderEstateRow('Services Provided:', servicesStr, `${fieldPrefix}_services`);
+
+      renderEstateRow('Years Together:', lawyer.duration || '', `${fieldPrefix}_duration`);
+      renderEstateRow('Where are your documents stored?:', lawyer.docLocation || '', `${fieldPrefix}_doclocation`);
+      renderEstateRow('Include in Contact List:', lawyer.includeInContactList === 'yes' ? 'Yes' : lawyer.includeInContactList === 'no' ? 'No' : '', `${fieldPrefix}_include`);
+      yPosition += 6;
+    };
+
+    renderLawyerSection('Lawyer:', {
+      firm: formData.lawAdvisor1Firm,
+      name: formData.lawAdvisor1Name,
+      phone: formData.lawAdvisor1Phone,
+      email: formData.lawAdvisor1Email,
+      worksWithClients: formData.lawAdvisor1WorksWith,
+      services: formData.lawAdvisor1Services,
+      duration: formData.lawAdvisor1Duration,
+      docLocation: formData.lawAdvisor1DocLocation,
+      includeInContactList: formData.lawAdvisor1IncludeInContactList,
+    }, 'law_adv1');
+
+    const additionalLawyers = formData.lawAdditionalData || [];
+    additionalLawyers.forEach((lawyer, i) => {
+      renderLawyerSection(`Lawyer — Additional #${i + 1}:`, lawyer, `law_adv${i + 2}`);
+    });
+  }
+
   const c1RegData = (formData.client1RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;
   const c2RegData = (formData.client2RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;
   const benReviewNote = 'Beneficiary Review is Recommended';
@@ -11003,6 +11096,28 @@ You should explore this as an option with your legal and CFP® professionals bec
         firm: acct.firm || '',
         phone: acct.phone || '',
         email: acct.email || '',
+      });
+    }
+  });
+
+  if (formData.lawHasLawyer === 'yes' && formData.lawAdvisor1IncludeInContactList === 'yes') {
+    contactListContacts.push({
+      role: 'Lawyer',
+      name: formData.lawAdvisor1Name || '',
+      firm: formData.lawAdvisor1Firm || '',
+      phone: formData.lawAdvisor1Phone || '',
+      email: formData.lawAdvisor1Email || '',
+    });
+  }
+
+  (formData.lawAdditionalData || []).forEach((lawyer) => {
+    if (lawyer.includeInContactList === 'yes') {
+      contactListContacts.push({
+        role: 'Lawyer',
+        name: lawyer.name || '',
+        firm: lawyer.firm || '',
+        phone: lawyer.phone || '',
+        email: lawyer.email || '',
       });
     }
   });

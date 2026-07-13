@@ -162,6 +162,27 @@ export default function StepForm({
   }, [answers['lawHasAdditional']]);
 
   useEffect(() => {
+    if (!answers['insHasAdvisor']) {
+      ['insAdvisor1Firm', 'insAdvisor1Name', 'insAdvisor1Phone', 'insAdvisor1Email', 'insAdvisor1Services', 'insAdvisor1Duration', 'insAdvisor1DocLocation', 'insAdvisor1IncludeInContactList', 'insAdvisor1WorksWith', 'insHasAdditional', 'insAdditionalData', 'insAdditionalHasAdditional'].forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['insHasAdvisor']]);
+
+  useEffect(() => {
+    if (answers['insHasAdditional'] !== 'yes') {
+      if (answers['insAdditionalData'] !== undefined) {
+        onAnswerChange('insAdditionalData', undefined);
+      }
+      if (answers['insAdditionalHasAdditional'] !== undefined) {
+        onAnswerChange('insAdditionalHasAdditional', undefined);
+      }
+    }
+  }, [answers['insHasAdditional']]);
+
+  useEffect(() => {
     if (answers['client2SpouseIsPoaPersonalCare'] === 'no') {
       if (answers['client2SpousePoaPersonalCareHasDocCopy'] !== undefined) {
         onAnswerChange('client2SpousePoaPersonalCareHasDocCopy', undefined);
@@ -4915,11 +4936,13 @@ export default function StepForm({
               additionalDataKey: string;
               additionalHasAdditionalKey: string;
               firstQuestionLabel: string;
+              firstQuestionOptions?: Array<{ value: string; label: string }>;
               additionalQuestionLabel: string;
               nameLabel: string;
               servicesLabel: string;
               services: string[];
               serviceLabels?: Record<string, string>;
+              servicesCheckboxStyle?: boolean;
               durationLabel: string;
               durationPlaceholder: string;
               showWebsite?: boolean;
@@ -4930,6 +4953,8 @@ export default function StepForm({
               const hasAdditional = answers[config.hasAdditionalKey];
               const additionalItems = (answers[config.additionalDataKey] as Array<Record<string, string>>) || [];
               const additionalHasAdditional = (answers[config.additionalHasAdditionalKey] as string[]) || [];
+              const firstOptions = config.firstQuestionOptions || [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }];
+              const showDetails = config.firstQuestionOptions ? !!hasProf && hasProf !== 'no' : hasProf === 'yes';
 
               const updateAdditional = (index: number, field: string, value: string) => {
                 const updated = [...additionalItems];
@@ -5107,13 +5132,13 @@ export default function StepForm({
                         key: config.hasKey,
                         label: config.firstQuestionLabel,
                         type: 'radio',
-                        options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }],
+                        options: firstOptions,
                       }}
                       value={hasProf}
                       onChange={(value) => onAnswerChange(config.hasKey, value)}
                     />
 
-                    {hasProf === 'yes' && (
+                    {showDetails && (
                       <div className="space-y-6">
                         {renderFields(0)}
                         <FormField
@@ -5130,7 +5155,7 @@ export default function StepForm({
                     )}
                   </Subsection>
 
-                  {hasProf === 'yes' && additionalIndices.map((advisorIdx) => (
+                  {showDetails && additionalIndices.map((advisorIdx) => (
                     <Subsection key={`${config.prefix}_advisor_${advisorIdx}`} title={`${config.subsectionTitle} — Additional #${advisorIdx}`}>
                       {renderFields(advisorIdx)}
                       {renderAdditionalQuestion(advisorIdx - 1)}
@@ -5206,6 +5231,43 @@ export default function StepForm({
                   },
                   durationLabel: 'How many years have you worked together?',
                   durationPlaceholder: 'e.g., 4 years',
+                })}
+
+                {renderProfessionalSubsection({
+                  prefix: 'ins',
+                  subsectionTitle: 'Insurance',
+                  hasKey: 'insHasAdvisor',
+                  hasAdditionalKey: 'insHasAdditional',
+                  additionalDataKey: 'insAdditionalData',
+                  additionalHasAdditionalKey: 'insAdditionalHasAdditional',
+                  firstQuestionLabel: 'Who helps you with your insurance planning?',
+                  firstQuestionOptions: [
+                    { value: 'financial_planner', label: 'Financial planner' },
+                    { value: 'insurance_advisor', label: 'Insurance advisor' },
+                    { value: 'other', label: 'Other' },
+                  ],
+                  additionalQuestionLabel: 'Is there another Insurance Advisor that you work with?',
+                  nameLabel: 'Advisor name',
+                  servicesLabel: 'Which of the following insurance policies do you currently have with this advisor?',
+                  services: ['life', 'disability', 'critical_illness', 'long_term_care', 'extended_health_dental', 'home', 'condo', 'tenant', 'auto', 'umbrella_liability', 'motorcycle_boat_atv_rv', 'business', 'professional_liability', 'other'],
+                  serviceLabels: {
+                    life: 'Life Insurance',
+                    disability: 'Disability Insurance',
+                    critical_illness: 'Critical Illness Insurance',
+                    long_term_care: 'Long-Term Care Insurance',
+                    extended_health_dental: 'Extended Health & Dental',
+                    home: 'Home Insurance',
+                    condo: 'Condo Insurance',
+                    tenant: 'Tenant Insurance',
+                    auto: 'Auto Insurance',
+                    umbrella_liability: 'Umbrella Liability Insurance',
+                    motorcycle_boat_atv_rv: 'Motorcycle / Boat / ATV / RV Insurance',
+                    business: 'Business Insurance',
+                    professional_liability: 'Professional Liability Insurance',
+                    other: 'Other',
+                  },
+                  durationLabel: 'How long have you worked together?',
+                  durationPlaceholder: 'e.g., 6 years',
                 })}
               </>
             );

@@ -320,6 +320,29 @@ interface FormData {
     includeInContactList?: string;
   }>;
   lawAdditionalHasAdditional?: string[];
+  insHasAdvisor?: string;
+  insAdvisor1Firm?: string;
+  insAdvisor1Name?: string;
+  insAdvisor1Phone?: string;
+  insAdvisor1Email?: string;
+  insAdvisor1WorksWith?: string;
+  insAdvisor1Services?: string[];
+  insAdvisor1Duration?: string;
+  insAdvisor1DocLocation?: string;
+  insAdvisor1IncludeInContactList?: string;
+  insHasAdditional?: string;
+  insAdditionalData?: Array<{
+    firm?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+    worksWithClients?: string;
+    services?: string;
+    duration?: string;
+    docLocation?: string;
+    includeInContactList?: string;
+  }>;
+  insAdditionalHasAdditional?: string[];
   client1HasPoaPersonalCare?: string;
   client1SpouseIsPoaPersonalCare?: string;
   client1PoaPersonalCareName?: string;
@@ -8024,6 +8047,92 @@ You should explore this as an option with your legal and CFP® professionals bec
     });
   }
 
+  // Insurance section
+  if (formData.insHasAdvisor) {
+    if (yPosition > 200) {
+      addPage();
+      yPosition = 12;
+    }
+
+    const insTypeLabels: Record<string, string> = {
+      financial_planner: 'Financial planner',
+      insurance_advisor: 'Insurance advisor',
+      other: 'Other',
+    };
+
+    const insPolicyLabels: Record<string, string> = {
+      life: 'Life Insurance',
+      disability: 'Disability Insurance',
+      critical_illness: 'Critical Illness Insurance',
+      long_term_care: 'Long-Term Care Insurance',
+      extended_health_dental: 'Extended Health & Dental',
+      home: 'Home Insurance',
+      condo: 'Condo Insurance',
+      tenant: 'Tenant Insurance',
+      auto: 'Auto Insurance',
+      umbrella_liability: 'Umbrella Liability Insurance',
+      motorcycle_boat_atv_rv: 'Motorcycle / Boat / ATV / RV Insurance',
+      business: 'Business Insurance',
+      professional_liability: 'Professional Liability Insurance',
+      other: 'Other',
+    };
+
+    const renderInsuranceSection = (title: string, ins: { firm?: string; name?: string; phone?: string; email?: string; worksWithClients?: string; services?: string[] | string; duration?: string; docLocation?: string; includeInContactList?: string }, fieldPrefix: string) => {
+      if (yPosition > 200) {
+        addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(title, margin, yPosition);
+      yPosition += 4;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text('Contact details and insurance policies for this advisor.', margin, yPosition);
+      yPosition += 6;
+
+      const worksWithStr = ins.worksWithClients || '';
+      const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
+      const worksWithLabels = worksWithArr.map((c: string) => c === 'client1' ? client1Name : c === 'client2' ? client2Name : '').filter(Boolean);
+      if (hasSpouse) {
+        renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
+      }
+
+      renderEstateRow('Firm:', ins.firm || '', `${fieldPrefix}_firm`);
+      renderEstateRow('Advisor Name:', ins.name || '', `${fieldPrefix}_name`);
+      renderEstateRow('Phone:', ins.phone || '', `${fieldPrefix}_phone`);
+      renderEstateRow('Email:', ins.email || '', `${fieldPrefix}_email`);
+
+      const servicesStr = Array.isArray(ins.services) ? ins.services.map(s => insPolicyLabels[s] || s).join(', ') : (ins.services ? ins.services.split(',').map((s: string) => insPolicyLabels[s.trim()] || s.trim()).join(', ') : '');
+      renderEstateRow('Insurance Policies:', servicesStr, `${fieldPrefix}_services`);
+
+      renderEstateRow('How Long Together:', ins.duration || '', `${fieldPrefix}_duration`);
+      renderEstateRow('Where are your documents stored?:', ins.docLocation || '', `${fieldPrefix}_doclocation`);
+      renderEstateRow('Include in Contact List:', ins.includeInContactList === 'yes' ? 'Yes' : ins.includeInContactList === 'no' ? 'No' : '', `${fieldPrefix}_include`);
+      yPosition += 6;
+    };
+
+    renderEstateRow('Insurance Planning By:', insTypeLabels[formData.insHasAdvisor] || formData.insHasAdvisor, 'ins_type');
+
+    renderInsuranceSection('Insurance:', {
+      firm: formData.insAdvisor1Firm,
+      name: formData.insAdvisor1Name,
+      phone: formData.insAdvisor1Phone,
+      email: formData.insAdvisor1Email,
+      worksWithClients: formData.insAdvisor1WorksWith,
+      services: formData.insAdvisor1Services,
+      duration: formData.insAdvisor1Duration,
+      docLocation: formData.insAdvisor1DocLocation,
+      includeInContactList: formData.insAdvisor1IncludeInContactList,
+    }, 'ins_adv1');
+
+    const additionalInsurance = formData.insAdditionalData || [];
+    additionalInsurance.forEach((ins, i) => {
+      renderInsuranceSection(`Insurance — Additional #${i + 1}:`, ins, `ins_adv${i + 2}`);
+    });
+  }
+
   const c1RegData = (formData.client1RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;
   const c2RegData = (formData.client2RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;
   const benReviewNote = 'Beneficiary Review is Recommended';
@@ -11118,6 +11227,28 @@ You should explore this as an option with your legal and CFP® professionals bec
         firm: lawyer.firm || '',
         phone: lawyer.phone || '',
         email: lawyer.email || '',
+      });
+    }
+  });
+
+  if (formData.insHasAdvisor && formData.insAdvisor1IncludeInContactList === 'yes') {
+    contactListContacts.push({
+      role: 'Insurance Advisor',
+      name: formData.insAdvisor1Name || '',
+      firm: formData.insAdvisor1Firm || '',
+      phone: formData.insAdvisor1Phone || '',
+      email: formData.insAdvisor1Email || '',
+    });
+  }
+
+  (formData.insAdditionalData || []).forEach((ins) => {
+    if (ins.includeInContactList === 'yes') {
+      contactListContacts.push({
+        role: 'Insurance Advisor',
+        name: ins.name || '',
+        firm: ins.firm || '',
+        phone: ins.phone || '',
+        email: ins.email || '',
       });
     }
   });

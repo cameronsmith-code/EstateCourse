@@ -46,7 +46,9 @@ interface ChildData {
   additionalEducationInfo?: string;
   additionalEducationDetails?: string;
   schoolName?: string;
-  schoolContact?: string;
+  schoolPhone?: string;
+  schoolAddress?: string;
+  schoolWebsite?: string;
   schoolStrengths?: string;
   schoolExtraSupport?: string;
   schoolFocusHelps?: string;
@@ -2652,7 +2654,9 @@ export const generatePDF = (formData: FormData) => {
           if (child.attendingSchool === 'yes') {
             const eduRows = [
               { label: 'School Name:', large: false, value: child.schoolName || '' },
-              { label: 'School Contact Information:', large: false, value: child.schoolContact || '' },
+              { label: 'School Phone Number:', large: false, value: child.schoolPhone || '' },
+              { label: 'School Address:', large: false, value: child.schoolAddress || '' },
+              { label: 'School Website:', large: false, value: child.schoolWebsite || '' },
               { label: `What subjects does ${nickname} naturally enjoy or succeed in?`, large: true, value: child.schoolStrengths || '' },
               { label: 'Where do they typically need extra support?', large: true, value: child.schoolExtraSupport || '' },
               { label: `What helps ${nickname} stay focused?`, large: true, value: child.schoolFocusHelps || '' },

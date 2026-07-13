@@ -1458,7 +1458,9 @@ export default function StepForm({
 
     if (field === 'attendingSchool' && value === 'no') {
       updated[index].schoolName = undefined;
-      updated[index].schoolContact = undefined;
+      updated[index].schoolPhone = undefined;
+      updated[index].schoolAddress = undefined;
+      updated[index].schoolWebsite = undefined;
       updated[index].schoolStrengths = undefined;
       updated[index].schoolExtraSupport = undefined;
       updated[index].schoolFocusHelps = undefined;
@@ -9215,13 +9217,36 @@ export default function StepForm({
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  School Contact Information:
+                                  School Phone Number:
                                 </label>
-                                <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., phone number, address, website</p>
                                 <input
                                   type="text"
-                                  value={childrenData[index]?.schoolContact || ''}
-                                  onChange={(e) => handleChildChange(index, 'schoolContact', e.target.value)}
+                                  value={childrenData[index]?.schoolPhone || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolPhone', e.target.value)}
+                                  placeholder=""
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  School Address:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={childrenData[index]?.schoolAddress || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolAddress', e.target.value)}
+                                  placeholder=""
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  School Website:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={childrenData[index]?.schoolWebsite || ''}
+                                  onChange={(e) => handleChildChange(index, 'schoolWebsite', e.target.value)}
                                   placeholder=""
                                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                 />

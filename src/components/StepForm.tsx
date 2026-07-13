@@ -1615,7 +1615,11 @@ export default function StepForm({
       <div className="bg-gray-800 rounded-lg shadow-md p-8 mb-6 border border-gray-700">
         <h2 className="text-3xl font-bold text-white mb-2">{step.title}</h2>
         {step.description && (
-          <p className="text-gray-400 mb-6">{step.description}</p>
+          <div className="text-gray-400 mb-6">
+            {step.description.split('\n').map((line, i) => (
+              <p key={i} className={i > 0 ? 'mt-1' : ''}>{line}</p>
+            ))}
+          </div>
         )}
 
         <form onSubmit={handleSubmit}>

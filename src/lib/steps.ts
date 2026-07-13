@@ -659,7 +659,7 @@ export const STEPS: Step[] = [
   {
     id: 7,
     title: 'Your Professional Team',
-    description: 'Information about the professionals you work with',
+    description: 'The people who help manage your family\'s financial, legal, tax, and healthcare affairs.\nIf something happened to you, these are the professionals your executor, attorney for property, attorney for personal care, or future caregiver may need to contact.',
     questions: [],
   },
   {

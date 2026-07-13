@@ -1153,11 +1153,15 @@ export default function StepForm({
     const step14 = allAnswers?.get(14) || {};
     const hasSpouse = step1['maritalStatus'] === 'married' || step1['maritalStatus'] === 'common_law';
 
-    if (child.parentsOption === 'both' || child.parentsOption === 'parent1') {
+    const po = child.parentsOption || '';
+    if (po === 'both' || po === 'parent1' || po === 'client1-other') {
       addContact({ id: 'parent1', name: step1['fullName'] as string || '', phone: step1['phone'] as string || '', email: step1['email'] as string || '', city: step1['city'] as string || '', province: step1['province'] as string || '', source: 'parent1' });
     }
-    if (hasSpouse && (child.parentsOption === 'both' || child.parentsOption === 'parent2')) {
+    if (hasSpouse && (po === 'both' || po === 'parent2' || po === 'client2-other')) {
       addContact({ id: 'parent2', name: step1['spouseName'] as string || '', phone: step1['spousePhone'] as string || '', email: step1['spouseEmail'] as string || '', city: step1['spouseCity'] as string || '', province: step1['spouseProvince'] as string || '', source: 'parent2' });
+    }
+    if ((po === 'client1-other' || po === 'client2-other') && child.otherParentName) {
+      addContact({ id: 'otherparent', name: child.otherParentName, source: 'otherparent' });
     }
 
     if (child.careCoordinators) {
@@ -8347,6 +8351,7 @@ export default function StepForm({
                         school: 'School Team',
                         doctor: 'Doctor / Therapist / Support Worker',
                         other: 'Other',
+                        otherparent: "Child's Other Parent",
                         prevrel1: 'Former Partner (Client 1)',
                         prevrel2: 'Former Partner (Client 2)',
                         et1: 'Estate Trustee (Client 1)',

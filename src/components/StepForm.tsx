@@ -5,7 +5,7 @@ import VideoPlayer from './VideoPlayer';
 import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprietorshipDetails';
 import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
 import Subsection from './Subsection';
-import { ChevronLeft, ChevronRight, Check, Trash2, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Trash2, Info, X } from 'lucide-react';
 
 type StepFormProps = {
   step: Step;
@@ -1108,6 +1108,28 @@ export default function StepForm({
     delete obj.careCoordinators;
     delete obj.careCoordSiblingNames;
     CARE_COORD_CATEGORIES.forEach(cat => clearCareCoordCategory(obj, cat));
+  };
+
+  const handleRemoveCareCoordEntry = (childIndex: number, cat: string, removeAt: number) => {
+    const updated = [...childrenData];
+    const obj = { ...updated[childIndex] };
+    const countField = `careCoord_${cat}_count`;
+    const additionalField = `careCoord_${cat}_additional`;
+    const count = parseInt(obj[countField] || '1');
+    const fields = ['name', 'phone', 'email', 'city', 'province', 'role'];
+    for (let i = removeAt; i < count - 1; i++) {
+      fields.forEach(f => {
+        const val = obj[`careCoord_${cat}_${i + 1}_${f}`];
+        if (val !== undefined) obj[`careCoord_${cat}_${i}_${f}`] = val;
+        else delete obj[`careCoord_${cat}_${i}_${f}`];
+      });
+    }
+    fields.forEach(f => delete obj[`careCoord_${cat}_${count - 1}_${f}`]);
+    const newCount = count - 1;
+    obj[countField] = String(newCount);
+    if (newCount <= 1) obj[additionalField] = 'no';
+    updated[childIndex] = obj;
+    onAnswerChange('childrenData', updated);
   };
 
   const handleChildChange = (index: number, field: string, value: string) => {
@@ -7912,7 +7934,14 @@ export default function StepForm({
                             <p className="text-sm font-medium text-blue-400 mb-3">{catLabel}(s)</p>
                             {Array.from({ length: count }).map((_, ci) => (
                               <div key={ci} className={ci > 0 ? 'mt-4 pt-4 border-t border-gray-600' : ''}>
-                                <p className="text-xs text-gray-400 mb-2">{catLabel} {ci + 1}</p>
+                                <div className="flex items-center justify-between mb-2">
+                                  <p className="text-xs text-gray-400">{catLabel} {ci + 1}</p>
+                                  {ci > 0 && (
+                                    <button type="button" onClick={() => handleRemoveCareCoordEntry(index, cat, ci)} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
+                                      <X size={14} /> Remove
+                                    </button>
+                                  )}
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                   <input type="text" value={childrenData[index]?.[`careCoord_${cat}_${ci}_name`] || ''} onChange={(e) => handleChildChange(index, `careCoord_${cat}_${ci}_name`, e.target.value)} placeholder="Name" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
                                   <input type="tel" value={childrenData[index]?.[`careCoord_${cat}_${ci}_phone`] || ''} onChange={(e) => handleChildChange(index, `careCoord_${cat}_${ci}_phone`, e.target.value)} placeholder="Phone" className="px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />

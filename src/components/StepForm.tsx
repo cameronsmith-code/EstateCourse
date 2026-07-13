@@ -1087,6 +1087,11 @@ export default function StepForm({
       updated[index].supportNeedTypes = undefined;
       updated[index].supportNeedOther = undefined;
       updated[index].disabilityTaxCredit = undefined;
+      updated[index].disabilityTaxCreditDocLocation = undefined;
+    }
+
+    if (field === 'disabilityTaxCredit' && value !== 'yes' && value !== 'in-progress') {
+      updated[index].disabilityTaxCreditDocLocation = undefined;
     }
 
     if (field === 'medications' && value === 'no') {
@@ -7640,6 +7645,35 @@ export default function StepForm({
                         </div>
                       </div>
 
+                      {childrenData[index]?.disabilityTaxCredit === 'yes' && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Location of supporting documentation (T2201 Disability Tax Credit Certificate)
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.disabilityTaxCreditDocLocation || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityTaxCreditDocLocation', e.target.value)}
+                            placeholder="Enter document location"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
+
+                      {childrenData[index]?.disabilityTaxCredit === 'in-progress' && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            If/when the CRA approval is complete, you will be given a T2001 Disability Tax Credit Certificate, where will this document be stored?
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.disabilityTaxCreditDocLocation || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityTaxCreditDocLocation', e.target.value)}
+                            placeholder="Enter planned document location"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      )}
 
                     </>
                     )}

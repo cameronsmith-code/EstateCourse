@@ -10,6 +10,7 @@ interface ChildData {
   childSupportDocLocation?: string;
   disabled?: string;
   disabilityTaxCredit?: string;
+  disabilityTaxCreditDocLocation?: string;
   independent?: string;
   medications?: string;
   medicationList?: string;
@@ -1723,6 +1724,13 @@ export const generatePDF = (formData: FormData) => {
           { label: 'Support need type(s):', value: supportNeedValue },
           { label: 'Do they qualify for the Disability Tax Credit (DTC)?', value: dtcValue },
         ];
+
+        if (child.disabilityTaxCredit === 'yes') {
+          disRows.push({ label: 'Location of supporting documentation (T2201 Disability Tax Credit Certificate):', value: child.disabilityTaxCreditDocLocation || '' });
+        }
+        if (child.disabilityTaxCredit === 'in-progress') {
+          disRows.push({ label: 'If/when the CRA approval is complete, you will be given a T2001 Disability Tax Credit Certificate, where will this document be stored?', value: child.disabilityTaxCreditDocLocation || '' });
+        }
 
         disRows.forEach((row, ri) => {
           doc.setFontSize(8.5);

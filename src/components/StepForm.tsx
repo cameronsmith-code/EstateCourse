@@ -8152,6 +8152,8 @@ export default function StepForm({
                     </>
                     )}
 
+                    {childrenData[index]?.disabled !== 'no' && (
+                    <>
                     <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                       <h4 className="text-base font-semibold text-blue-400">Looking Ahead to Adulthood</h4>
                     </div>
@@ -8556,6 +8558,8 @@ export default function StepForm({
                         placeholder="Enter information here..."
                       />
                     </div>
+                    </>
+                    )}
 
                     <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                       <h4 className="text-base font-semibold text-blue-400">Financial Independence</h4>

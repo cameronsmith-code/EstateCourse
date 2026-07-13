@@ -2004,6 +2004,7 @@ export const generatePDF = (formData: FormData) => {
         }
       }
 
+      if (child.disabled !== 'no') {
       if (child.futureIndependenceLevel) {
         checkPageBreak(30);
         addSubsectionHeader(`${nickname} Looking Ahead to Adulthood`);
@@ -2376,6 +2377,7 @@ export const generatePDF = (formData: FormData) => {
         }
 
         yPosition += 6;
+      }
       }
 
       const isMinor = (() => {

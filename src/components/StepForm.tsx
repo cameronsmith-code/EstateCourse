@@ -7,114 +7,6 @@ import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
 import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info } from 'lucide-react';
 
-interface KnownPerson {
-  id: string;
-  displayName: string;
-  name: string;
-  relationship: string;
-  city: string;
-  province: string;
-  phone: string;
-  email: string;
-}
-
-export interface CaregiverContactEntry {
-  type: string;
-  selectedPersonId: string;
-  name: string;
-  relationship: string;
-  city: string;
-  province: string;
-  phone: string;
-  email: string;
-  discussed: string;
-  notes: string;
-}
-
-function parseCaregiverContacts(raw: unknown): CaregiverContactEntry[] {
-  try {
-    const parsed = JSON.parse((raw as string) || '[]');
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function collectKnownPeople(allAnswers?: Map<number, Record<string, unknown>>): KnownPerson[] {
-  const people: KnownPerson[] = [];
-  const seenIds = new Set<string>();
-  if (!allAnswers) return people;
-
-  const tryAdd = (
-    p: { name?: string; relationship?: string; city?: string; province?: string; phone?: string; email?: string } | undefined,
-    id: string,
-    role: string
-  ) => {
-    if (!p?.name || seenIds.has(id)) return;
-    seenIds.add(id);
-    people.push({
-      id,
-      displayName: `${p.name}${p.relationship ? ` — ${p.relationship}` : ''} (${role})`,
-      name: p.name,
-      relationship: p.relationship || '',
-      city: p.city || '',
-      province: p.province || '',
-      phone: p.phone || '',
-      email: p.email || '',
-    });
-  };
-
-  allAnswers.forEach((stepAnswers) => {
-    (
-      [
-        ['client1EstateTrusteeData', 'Estate Trustee'],
-        ['client2EstateTrusteeData', 'Estate Trustee'],
-        ['client1PoaPersonalCareData', 'POA Personal Care'],
-        ['client2PoaPersonalCareData', 'POA Personal Care'],
-        ['client1PoaPropertyData', 'POA Property'],
-        ['client2PoaPropertyData', 'POA Property'],
-      ] as [string, string][]
-    ).forEach(([key, role]) => {
-      const arr = stepAnswers[key] as Array<Record<string, string>> | undefined;
-      arr?.forEach((p, i) => tryAdd(p, `${key}_${i}`, role));
-    });
-
-    const spouseName = stepAnswers['spouseName'] as string | undefined;
-    if (spouseName) {
-      tryAdd(
-        {
-          name: spouseName,
-          relationship: 'Spouse / Partner',
-          city: (stepAnswers['spouseCity'] as string) || '',
-          province: (stepAnswers['spouseProvince'] as string) || '',
-          phone: (stepAnswers['spousePhone'] as string) || '',
-          email: (stepAnswers['spouseEmail'] as string) || '',
-        },
-        'spouse',
-        'Spouse / Partner'
-      );
-    }
-
-    // Children's other parents
-    const childrenArr = stepAnswers['childrenData'] as Array<Record<string, string>> | undefined;
-    childrenArr?.forEach((child, ci) => {
-      if (child?.otherParentName) {
-        tryAdd({ name: child.otherParentName }, `other_parent_${ci}`, 'Other Parent');
-      }
-    });
-
-    // Previous relationship partners (may be a co-parent)
-    (['client1PreviousRelationshipsData', 'client2PreviousRelationshipsData'] as const).forEach((key) => {
-      const arr = stepAnswers[key] as Array<Record<string, string>> | undefined;
-      arr?.forEach((p, i) => {
-        if (p?.name) tryAdd({ name: p.name, city: p.city, province: p.province, phone: p.phone, email: p.email }, `${key}_${i}`, 'Previous Partner');
-      });
-    });
-  });
-
-  return people;
-}
-
 type StepFormProps = {
   step: Step;
   answers: Record<string, unknown>;
@@ -1186,7 +1078,10 @@ export default function StepForm({
 
   const handleChildChange = (index: number, field: string, value: string) => {
     const updated = [...childrenData];
-    updated[index] = { ...(updated[index] || {}), [field]: value };
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
 
     if (field === 'disabled' && value === 'no') {
       updated[index].supportNeedTypes = undefined;
@@ -1201,29 +1096,6 @@ export default function StepForm({
       updated[index].disabilitySeverity = undefined;
       updated[index].disabilityCare = undefined;
       updated[index].disabilityOther = undefined;
-      updated[index].dtcDocLocation = undefined;
-      updated[index].currentSupportNeeds = undefined;
-      updated[index].careCoordinators = undefined;
-      updated[index].regularCareAssistance = undefined;
-    }
-
-    if (field === 'expectedIndependence') {
-      const triggerValues = [
-        'Will likely need ongoing support with money decisions',
-        'Will likely need ongoing support with health or personal care decisions',
-        'Will likely need significant lifelong support',
-      ];
-      if (!triggerValues.includes(value as string)) {
-        updated[index].financialDecisionHelp = undefined;
-        updated[index].financialDecisionHelpOther = undefined;
-        updated[index].healthcareDecisionHelp = undefined;
-        updated[index].healthcareDecisionHelpOther = undefined;
-        updated[index].preferredCaregivers = undefined;
-        updated[index].caregiverDiscussed = undefined;
-        updated[index].caregiverNotes = undefined;
-        updated[index].caregiverContactsData = undefined;
-        updated[index].caregiverGuidanceNotes = undefined;
-      }
     }
 
     if (field === 'medications' && value === 'no') {
@@ -1278,13 +1150,19 @@ export default function StepForm({
 
   const handleClient1PrevRelChange = (index: number, field: string, value: string) => {
     const updated = [...client1PreviousRelationshipsData];
-    updated[index] = { ...(updated[index] || {}), [field]: value };
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
     onAnswerChange('client1PreviousRelationshipsData', updated);
   };
 
   const handleClient2PrevRelChange = (index: number, field: string, value: string) => {
     const updated = [...client2PreviousRelationshipsData];
-    updated[index] = { ...(updated[index] || {}), [field]: value };
+    if (!updated[index]) {
+      updated[index] = {};
+    }
+    updated[index][field] = value;
     onAnswerChange('client2PreviousRelationshipsData', updated);
   };
 
@@ -7771,568 +7649,133 @@ export default function StepForm({
                         </div>
                       </div>
 
-                      {(childrenData[index]?.disabilityTaxCredit === 'yes' || childrenData[index]?.disabilityTaxCredit === 'in-progress') && (
-                        <div className="mt-3">
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Where is the document stored?
-                          </label>
-                          <input
-                            type="text"
-                            value={childrenData[index]?.dtcDocLocation || ''}
-                            onChange={(e) => handleChildChange(index, 'dtcDocLocation', e.target.value)}
-                            placeholder="Enter document location"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-                      )}
-
-                      {childrenData[index]?.disabilityTaxCredit && (
-                        <div className="space-y-4 mt-4">
+                      {(childrenData[index]?.disabilityTaxCredit === 'yes' || childrenData[index]?.disabilityTaxCredit === 'no' || childrenData[index]?.disabilityTaxCredit === 'not-looked') && (
+                        <div className="space-y-4 mt-4 p-4 bg-gray-600 rounded">
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-1">
-                            In plain language, tell us about their current support needs.
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Nature of disability
                           </label>
-                          <p className="text-xs text-gray-400 mb-2">For example: school supports, supervision, medical care, communication, mobility, behaviour, daily routines, or anything a future caregiver should understand.</p>
                           <textarea
-                            value={childrenData[index]?.currentSupportNeeds || ''}
-                            onChange={(e) => handleChildChange(index, 'currentSupportNeeds', e.target.value)}
-                            placeholder="Describe their current support needs in plain language"
+                            value={childrenData[index]?.disabilityNature || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityNature', e.target.value)}
+                            placeholder="Describe the nature of the disability"
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            rows={6}
+                            rows={3}
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Who helps coordinate their care today?
+                            Formal diagnosis? (yes/no)
                           </label>
-                          <div className="flex flex-col gap-3">
-                            {(() => {
-                              const selected = (childrenData[index]?.careCoordinators || '').split(',').filter(Boolean);
-                              const childNickname = childrenData[index]?.nickname || childrenData[index]?.name || 'this child';
-
-                              // Derive parent labels from parentsOption
-                              const parentsOption = childrenData[index]?.parentsOption || '';
-                              const otherParentName = childrenData[index]?.otherParentName || 'Other parent';
-                              let parent1Label = 'Parent / guardian 1';
-                              let parent2Label = 'Parent / guardian 2';
-                              if (parentsOption === 'both') {
-                                parent1Label = client1Name;
-                                parent2Label = client2Name;
-                              } else if (parentsOption === 'client1-other') {
-                                parent1Label = client1Name;
-                                parent2Label = otherParentName;
-                              } else if (parentsOption === 'client2-other') {
-                                parent1Label = otherParentName;
-                                parent2Label = client2Name;
-                              }
-
-                              // Render a single contact entry block
-                              const renderEntry = (entryPrefix: string, roleFieldLabel: string, isFamily: boolean) => (
-                                <div key={entryPrefix} className="mt-3 p-3 bg-gray-700 rounded space-y-2">
-                                  <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                      <label className="block text-xs text-gray-400 mb-1">Name</label>
-                                      <input
-                                        type="text"
-                                        value={childrenData[index]?.[`${entryPrefix}_name`] || ''}
-                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_name`, e.target.value)}
-                                        placeholder="Full name"
-                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="block text-xs text-gray-400 mb-1">{isFamily ? `Relationship to ${childNickname}` : roleFieldLabel}</label>
-                                      <input
-                                        type="text"
-                                        value={childrenData[index]?.[`${entryPrefix}_role`] || ''}
-                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_role`, e.target.value)}
-                                        placeholder={isFamily ? 'e.g. Aunt' : 'e.g. Teacher'}
-                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                      <label className="block text-xs text-gray-400 mb-1">City</label>
-                                      <input
-                                        type="text"
-                                        value={childrenData[index]?.[`${entryPrefix}_city`] || ''}
-                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_city`, e.target.value)}
-                                        placeholder="City"
-                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="block text-xs text-gray-400 mb-1">Province</label>
-                                      <input
-                                        type="text"
-                                        value={childrenData[index]?.[`${entryPrefix}_province`] || ''}
-                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_province`, e.target.value)}
-                                        placeholder="Province"
-                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                      <label className="block text-xs text-gray-400 mb-1">Phone</label>
-                                      <input
-                                        type="tel"
-                                        value={childrenData[index]?.[`${entryPrefix}_phone`] || ''}
-                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_phone`, e.target.value)}
-                                        placeholder="Phone number"
-                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="block text-xs text-gray-400 mb-1">Email</label>
-                                      <input
-                                        type="email"
-                                        value={childrenData[index]?.[`${entryPrefix}_email`] || ''}
-                                        onChange={(e) => handleChildChange(index, `${entryPrefix}_email`, e.target.value)}
-                                        placeholder="Email address"
-                                        className="w-full px-3 py-1.5 text-sm bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-
-                              // Renders chained contact entries: first always shown, extras gated by Yes/No
-                              const renderContactFields = (prefix: string, roleLabel: string, isFamily: boolean) => {
-                                const anotherQuestion = isFamily
-                                  ? `Is there another family member who helps coordinate ${childNickname}'s care today?`
-                                  : 'Is there another contact to add?';
-
-                                const nodes: React.ReactNode[] = [];
-                                nodes.push(renderEntry(prefix, roleLabel, isFamily));
-
-                                let i = 0;
-                                while (i < 20) {
-                                  const hasAnotherKey = `${prefix}_hasAnother_${i}`;
-                                  const hasAnother = childrenData[index]?.[hasAnotherKey];
-                                  nodes.push(
-                                    <div key={`ask_${i}`} className="mt-2 ml-1">
-                                      <label className="block text-xs text-gray-400 mb-1">{anotherQuestion}</label>
-                                      <div className="flex gap-4">
-                                        <label className="flex items-center text-sm text-gray-300">
-                                          <input
-                                            type="radio"
-                                            name={`${prefix}_hasAnother_${i}`}
-                                            value="yes"
-                                            checked={hasAnother === 'yes'}
-                                            onChange={() => handleChildChange(index, hasAnotherKey, 'yes')}
-                                            className="mr-1"
-                                          />
-                                          Yes
-                                        </label>
-                                        <label className="flex items-center text-sm text-gray-300">
-                                          <input
-                                            type="radio"
-                                            name={`${prefix}_hasAnother_${i}`}
-                                            value="no"
-                                            checked={hasAnother === 'no'}
-                                            onChange={() => handleChildChange(index, hasAnotherKey, 'no')}
-                                            className="mr-1"
-                                          />
-                                          No
-                                        </label>
-                                      </div>
-                                    </div>
-                                  );
-                                  if (hasAnother !== 'yes') break;
-                                  nodes.push(renderEntry(`${prefix}_extra_${i}`, roleLabel, isFamily));
-                                  i++;
-                                }
-                                return <>{nodes}</>;
-                              };
-
-                              const checkboxItem = (value: string, label: string, withContacts?: { prefix: string; roleLabel: string; isFamily: boolean }) => (
-                                <div key={value}>
-                                  <label className="flex items-center">
-                                    <input
-                                      type="checkbox"
-                                      checked={selected.includes(value)}
-                                      onChange={(e) => {
-                                        const current = (childrenData[index]?.careCoordinators || '').split(',').filter(Boolean);
-                                        const updated = e.target.checked
-                                          ? [...current, value]
-                                          : current.filter((v) => v !== value);
-                                        handleChildChange(index, 'careCoordinators', updated.join(','));
-                                      }}
-                                      className="mr-2"
-                                    />
-                                    <span className="text-gray-300">{label}</span>
-                                  </label>
-                                  {selected.includes(value) && withContacts && renderContactFields(withContacts.prefix, withContacts.roleLabel, withContacts.isFamily)}
-                                </div>
-                              );
-
-                              return (
-                                <>
-                                  {checkboxItem('parent-guardian-1', parent1Label)}
-                                  {checkboxItem('parent-guardian-2', parent2Label)}
-                                  {checkboxItem('sibling', 'Sibling', { prefix: `coord_${index}_sibling`, roleLabel: 'Relationship', isFamily: true })}
-                                  {checkboxItem('other-family', 'Other family', { prefix: `coord_${index}_otherfam`, roleLabel: 'Relationship', isFamily: true })}
-                                  {checkboxItem('school-team', 'School team', { prefix: `coord_${index}_school`, roleLabel: 'Role and responsibility', isFamily: false })}
-                                  {checkboxItem('doctor-therapist-support-worker', 'Doctor / therapist / support worker', { prefix: `coord_${index}_doctor`, roleLabel: 'Role and responsibility', isFamily: false })}
-                                </>
-                              );
-                            })()}
+                          <div className="flex gap-4">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`disabilityFormalDiagnosis-${index}`}
+                                value="yes"
+                                checked={childrenData[index]?.disabilityFormalDiagnosis === 'yes'}
+                                onChange={(e) => handleChildChange(index, 'disabilityFormalDiagnosis', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-gray-300">Yes</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`disabilityFormalDiagnosis-${index}`}
+                                value="no"
+                                checked={childrenData[index]?.disabilityFormalDiagnosis === 'no'}
+                                onChange={(e) => handleChildChange(index, 'disabilityFormalDiagnosis', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-gray-300">No</span>
+                            </label>
                           </div>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            What care or assistance do they receive regularly?
+                            Describe the nature and severity of the disability
                           </label>
                           <textarea
-                            value={childrenData[index]?.regularCareAssistance || ''}
-                            onChange={(e) => handleChildChange(index, 'regularCareAssistance', e.target.value)}
-                            placeholder="Describe the care and assistance they receive regularly"
+                            value={childrenData[index]?.disabilitySeverity || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilitySeverity', e.target.value)}
+                            placeholder="Describe the nature and severity of the disability"
                             className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             rows={4}
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-3">
-                            As {childrenData[index]?.nickname || childrenData[index]?.name || 'this child'} gets older, what level of independence do you expect?
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Who is the primary coordinator of care today?
                           </label>
-                          <div className="space-y-2">
-                            {[
-                              'Likely independent as an adult',
-                              'Mostly independent, with some support',
-                              'Will likely need ongoing support with money decisions',
-                              'Will likely need ongoing support with health or personal care decisions',
-                              'Will likely need significant lifelong support',
-                              'Too early to know',
-                            ].map((option) => (
-                              <label key={option} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name={`independence_${index}`}
-                                  value={option}
-                                  checked={childrenData[index]?.expectedIndependence === option}
-                                  onChange={() => handleChildChange(index, 'expectedIndependence', option)}
-                                  className="text-blue-500"
-                                />
-                                {option}
-                              </label>
-                            ))}
-                          </div>
+                          <textarea
+                            value={childrenData[index]?.disabilityCoordinator || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityCoordinator', e.target.value)}
+                            placeholder="Who coordinates care today?"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={2}
+                          />
                         </div>
-                        {(() => {
-                          const ind = childrenData[index]?.expectedIndependence;
-                          const showSupportQuestions = ind === 'Will likely need ongoing support with money decisions' || ind === 'Will likely need ongoing support with health or personal care decisions' || ind === 'Will likely need significant lifelong support';
-                          if (!showSupportQuestions) return null;
-                          return (
-                            <>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-3">
-                                  Do you expect they may need help with financial decisions as an adult?
-                                </label>
-                                <div className="space-y-2 mb-2">
-                                  {['Yes', 'No', 'Unsure'].map((opt) => (
-                                    <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                                      <input
-                                        type="radio"
-                                        name={`financialDecisionHelp_${index}`}
-                                        value={opt}
-                                        checked={childrenData[index]?.financialDecisionHelp === opt}
-                                        onChange={() => handleChildChange(index, 'financialDecisionHelp', opt)}
-                                        className="text-blue-500"
-                                      />
-                                      {opt}
-                                    </label>
-                                  ))}
-                                </div>
-                                <p className="text-xs text-gray-400 italic mb-3">Examples: Managing bank accounts, government benefits, RDSP, paying rent or bills, investments, signing legal or financial documents.</p>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Other information:</label>
-                                <textarea
-                                  value={childrenData[index]?.financialDecisionHelpOther || ''}
-                                  onChange={(e) => handleChildChange(index, 'financialDecisionHelpOther', e.target.value)}
-                                  placeholder="Add any details that may be helpful."
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  rows={3}
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-3">
-                                  Do you expect they may need help with personal or healthcare decisions as an adult?
-                                </label>
-                                <div className="space-y-2 mb-2">
-                                  {['Yes', 'No', 'Unsure'].map((opt) => (
-                                    <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                                      <input
-                                        type="radio"
-                                        name={`healthcareDecisionHelp_${index}`}
-                                        value={opt}
-                                        checked={childrenData[index]?.healthcareDecisionHelp === opt}
-                                        onChange={() => handleChildChange(index, 'healthcareDecisionHelp', opt)}
-                                        className="text-blue-500"
-                                      />
-                                      {opt}
-                                    </label>
-                                  ))}
-                                </div>
-                                <p className="text-xs text-gray-400 italic mb-3">Examples: Medical consent, housing decisions, daily care, personal safety, accessing support services, arranging appointments.</p>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Other information:</label>
-                                <textarea
-                                  value={childrenData[index]?.healthcareDecisionHelpOther || ''}
-                                  onChange={(e) => handleChildChange(index, 'healthcareDecisionHelpOther', e.target.value)}
-                                  placeholder="Add any details that may be helpful."
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  rows={3}
-                                />
-                              </div>
-
-                              <div className="mt-2 pb-2 border-b border-gray-500 mb-2">
-                                <h4 className="text-base font-semibold text-blue-400">Preferred Future Caregiver</h4>
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-3">
-                                  If you were no longer able to provide care, who would you hope steps in first?
-                                </label>
-                                <div className="space-y-2 mb-2">
-                                  {[
-                                    'Other parent',
-                                    'Adult sibling',
-                                    'Grandparent',
-                                    'Aunt / uncle',
-                                    'Close family friend',
-                                    'Professional support',
-                                    'Not sure yet',
-                                  ].map((opt) => (
-                                    <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                                      <input
-                                        type="checkbox"
-                                        checked={(childrenData[index]?.preferredCaregivers as unknown as string[] || []).includes(opt)}
-                                        onChange={(e) => {
-                                          const current: string[] = (childrenData[index]?.preferredCaregivers as unknown as string[]) || [];
-                                          const updatedList = e.target.checked ? [...current, opt] : current.filter((v) => v !== opt);
-                                          const updatedChild = { ...(childrenData[index] || {}) } as Record<string, unknown>;
-                                          updatedChild.preferredCaregivers = updatedList;
-                                          if (!e.target.checked) {
-                                            const contacts = parseCaregiverContacts(updatedChild.caregiverContactsData);
-                                            updatedChild.caregiverContactsData = JSON.stringify(contacts.filter((c) => c.type !== opt));
-                                          }
-                                          const updatedAll = [...childrenData];
-                                          updatedAll[index] = updatedChild as Record<string, string>;
-                                          onAnswerChange('childrenData', updatedAll);
-                                        }}
-                                        className="text-blue-500 rounded"
-                                      />
-                                      {opt}
-                                    </label>
-                                  ))}
-                                </div>
-                                <p className="text-xs text-gray-400 italic">This doesn't create any legal appointment. It simply helps identify who you currently believe would be the best person to provide care and support.</p>
-                              </div>
-
-                              {(() => {
-                                const selectedCaregivers = (childrenData[index]?.preferredCaregivers as unknown as string[]) || [];
-                                const notSureSelected = selectedCaregivers.includes('Not sure yet');
-                                const knownPeople = collectKnownPeople(allAnswers);
-
-                                const updateContact = (type: string, field: keyof CaregiverContactEntry, value: string) => {
-                                  const current = parseCaregiverContacts(childrenData[index]?.caregiverContactsData);
-                                  const idx = current.findIndex((c) => c.type === type);
-                                  if (idx >= 0) {
-                                    const updated = [...current];
-                                    updated[idx] = { ...updated[idx], [field]: value };
-                                    handleChildChange(index, 'caregiverContactsData', JSON.stringify(updated));
-                                  } else {
-                                    const newEntry: CaregiverContactEntry = { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '', notes: '', ...({ [field]: value }) };
-                                    handleChildChange(index, 'caregiverContactsData', JSON.stringify([...current, newEntry]));
-                                  }
-                                };
-
-                                const selectPerson = (type: string, personId: string) => {
-                                  const current = parseCaregiverContacts(childrenData[index]?.caregiverContactsData);
-                                  const idx = current.findIndex((c) => c.type === type);
-                                  const existing: CaregiverContactEntry = idx >= 0 ? current[idx] : { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '', notes: '' };
-                                  const person = knownPeople.find((p) => p.id === personId);
-                                  const updated = [...current];
-                                  const entry: CaregiverContactEntry = person
-                                    ? { ...existing, selectedPersonId: personId, name: person.name, relationship: person.relationship, city: person.city, province: person.province, phone: person.phone, email: person.email }
-                                    : { ...existing, selectedPersonId: personId };
-                                  if (idx >= 0) updated[idx] = entry;
-                                  else updated.push(entry);
-                                  handleChildChange(index, 'caregiverContactsData', JSON.stringify(updated));
-                                };
-
-                                const getContact = (type: string): CaregiverContactEntry => {
-                                  const contacts = parseCaregiverContacts(childrenData[index]?.caregiverContactsData);
-                                  return contacts.find((c) => c.type === type) || { type, selectedPersonId: '', name: '', relationship: '', city: '', province: '', phone: '', email: '', discussed: '', notes: '' };
-                                };
-
-                                const inputCls = 'w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent';
-
-                                return (
-                                  <>
-                                    {notSureSelected && (
-                                      <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
-                                        <p className="text-sm text-blue-200">It is completely normal not to know who the right person is yet. Many families take time to think this through and discuss it together.</p>
-                                      </div>
-                                    )}
-                                    {selectedCaregivers.filter((t) => t !== 'Not sure yet').map((caregiverType) => {
-                                      const contact = getContact(caregiverType);
-                                      const childLabel = childrenData[index]?.nickname || childrenData[index]?.name || 'this child';
-                                      return (
-                                        <div key={caregiverType} className="border border-gray-600 rounded-lg p-5 bg-gray-700 space-y-4">
-                                          <h5 className="text-sm font-semibold text-white">{caregiverType}</h5>
-                                          {knownPeople.length > 0 && (
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Select an existing person or add someone new</label>
-                                              <select
-                                                value={contact.selectedPersonId}
-                                                onChange={(e) => selectPerson(caregiverType, e.target.value)}
-                                                className={inputCls}
-                                              >
-                                                <option value="">Select an existing person...</option>
-                                                {knownPeople.map((p) => (
-                                                  <option key={p.id} value={p.id}>{p.displayName}</option>
-                                                ))}
-                                                <option value="__new__">Add someone new</option>
-                                              </select>
-                                            </div>
-                                          )}
-                                          <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
-                                              <input type="text" value={contact.name} onChange={(e) => updateContact(caregiverType, 'name', e.target.value)} placeholder="Full name" className={inputCls} />
-                                            </div>
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Relationship to {childLabel}</label>
-                                              <input type="text" value={contact.relationship} onChange={(e) => updateContact(caregiverType, 'relationship', e.target.value)} placeholder="e.g. Aunt" className={inputCls} />
-                                            </div>
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">City</label>
-                                              <input type="text" value={contact.city} onChange={(e) => updateContact(caregiverType, 'city', e.target.value)} placeholder="City" className={inputCls} />
-                                            </div>
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Province</label>
-                                              <input type="text" value={contact.province} onChange={(e) => updateContact(caregiverType, 'province', e.target.value)} placeholder="Province" className={inputCls} />
-                                            </div>
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Phone</label>
-                                              <input type="tel" value={contact.phone} onChange={(e) => updateContact(caregiverType, 'phone', e.target.value)} placeholder="Phone number" className={inputCls} />
-                                            </div>
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Email</label>
-                                              <input type="email" value={contact.email} onChange={(e) => updateContact(caregiverType, 'email', e.target.value)} placeholder="Email address" className={inputCls} />
-                                            </div>
-                                          </div>
-                                          <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                              Have you spoken with {contact.name || 'this person'} about this role?
-                                            </label>
-                                            <div className="space-y-2 mb-1">
-                                              {['Yes', 'Partly', 'No'].map((opt) => (
-                                                <label key={opt} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                                                  <input
-                                                    type="radio"
-                                                    name={`caregiverDiscussed_${index}_${caregiverType}`}
-                                                    value={opt}
-                                                    checked={contact.discussed === opt}
-                                                    onChange={() => updateContact(caregiverType, 'discussed', opt)}
-                                                    className="text-blue-500"
-                                                  />
-                                                  {opt}
-                                                </label>
-                                              ))}
-                                            </div>
-                                            <p className="text-xs text-gray-400 italic">These conversations don't need to be final. Even an initial discussion can help everyone better understand your wishes.</p>
-                                          </div>
-                                          <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-1">
-                                              What would you want {contact.name || 'them'} to understand about this responsibility?
-                                            </label>
-                                            <label className="block text-xs font-medium text-gray-400 mb-1">Your notes</label>
-                                            <textarea
-                                              value={contact.notes || ''}
-                                              onChange={(e) => updateContact(caregiverType, 'notes', e.target.value)}
-                                              placeholder={`For example:\n• Daily routines that are important\n• Medical or behavioural needs\n• Communication style\n• What helps during stressful situations\n• Personal values or traditions to continue\n• Relationships you hope they maintain\n• Anything else you would want them to know`}
-                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                              rows={8}
-                                            />
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
-                                  </>
-                                );
-                              })()}
-
-                              {/* Guidance for future caregivers — shared question */}
-                              {(() => {
-                                const childName = childrenData[index]?.nickname || childrenData[index]?.name || 'your child';
-                                return (
-                                  <div className="space-y-4">
-                                    <div className="mt-2 pb-2 border-b border-gray-500 mb-2">
-                                      <h4 className="text-base font-semibold text-blue-400">Guidance for Future Caregivers</h4>
-                                    </div>
-
-                                    <p className="text-sm font-medium text-gray-300">
-                                      What would you want {childName}'s potential future caregiver to understand about this responsibility?
-                                    </p>
-
-                                    <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
-                                      <p className="text-sm text-blue-200 leading-relaxed">
-                                        This is your opportunity to share the things only you know. Imagine {childName}'s future caregiver is reading this after stepping into an unfamiliar role. What would help them feel confident, prepared, and connected to {childName}? There are no right or wrong answers. Write as much or as little as you'd like.
-                                      </p>
-                                    </div>
-
-                                    <div className="bg-gray-800 border border-gray-600 rounded-lg p-4">
-                                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Ideas to consider</p>
-                                      <ul className="space-y-2">
-                                        {[
-                                          `What makes ${childName} feel safe, loved, and understood.`,
-                                          `Their daily routines and habits that provide comfort.`,
-                                          `Medical needs, medications, therapies, allergies, or appointments that are especially important.`,
-                                          `How they communicate, especially if they struggle to express themselves.`,
-                                          `Things that may cause anxiety, frustration, or sensory overload.`,
-                                          `What helps calm them when they are upset.`,
-                                          `Their personality, strengths, interests, hobbies, favourite activities, and sense of humour.`,
-                                          `Important friendships, family relationships, teachers, coaches, or support workers you'd hope remain part of their life.`,
-                                          `Religious, cultural, or family traditions that are meaningful.`,
-                                          `Long-term hopes and dreams you have for them.`,
-                                          `Any advice or encouragement you would want to give the person stepping into this role.`,
-                                        ].map((idea, i) => (
-                                          <li key={i} className="flex items-start gap-2 text-xs text-gray-400">
-                                            <span className="mt-0.5 text-gray-500 shrink-0">•</span>
-                                            <span>{idea}</span>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-
-                                    <div>
-                                      <label className="block text-xs font-medium text-gray-400 mb-1">Your notes</label>
-                                      <textarea
-                                        value={childrenData[index]?.caregiverGuidanceNotes || ''}
-                                        onChange={(e) => {
-                                          e.target.style.height = 'auto';
-                                          e.target.style.height = `${e.target.scrollHeight}px`;
-                                          handleChildChange(index, 'caregiverGuidanceNotes', e.target.value);
-                                        }}
-                                        onInput={(e) => {
-                                          const t = e.currentTarget;
-                                          t.style.height = 'auto';
-                                          t.style.height = `${t.scrollHeight}px`;
-                                        }}
-                                        placeholder={`For example... "I hope they always know how much ${childName} loves spending time outdoors. Keeping a predictable routine helps them feel secure, and music is often the quickest way to calm them after a difficult day. Above all, I hope they are treated with patience, kindness, and encouragement to become as independent as possible."`}
-                                        className="w-full px-4 py-3 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden"
-                                        rows={6}
-                                        style={{ minHeight: '160px' }}
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              })()}
-                            </>
-                          );
-                        })()}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Is there a long-term plan already in place?
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityLongTermPlan || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityLongTermPlan', e.target.value)}
+                            placeholder="Describe any long-term plan already in place"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Location of long-term care plan document
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.disabilityLongTermPlanDoc || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityLongTermPlanDoc', e.target.value)}
+                            placeholder="Enter document location"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Any funding tied to residency or caregiver status?
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityFunding || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityFunding', e.target.value)}
+                            placeholder="Describe any funding tied to residency or caregiver status"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Describe any care and assistance provided
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityCare || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityCare', e.target.value)}
+                            placeholder="Describe the care and assistance provided"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={4}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Other information that would help support a potential guardian
+                          </label>
+                          <textarea
+                            value={childrenData[index]?.disabilityOther || ''}
+                            onChange={(e) => handleChildChange(index, 'disabilityOther', e.target.value)}
+                            placeholder="Any other information that would help support a potential guardian"
+                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={4}
+                          />
+                        </div>
                       </div>
                     )}
                     </>

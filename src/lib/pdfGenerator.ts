@@ -1695,7 +1695,7 @@ export const generatePDF = (formData: FormData) => {
 
       if (child.disabled === 'yes' || child.disabled === 'not_sure') {
         const disRows_preview: { large?: boolean }[] = [
-          {}, {}, {}, {},
+          {}, {}, {}, {}, {}, {},
           { large: true }, { large: true }, { large: true },
         ];
         const disPreviewH = disRows_preview.reduce((acc, r) => acc + (r.large ? 28 : 8), 0);
@@ -1730,65 +1730,17 @@ export const generatePDF = (formData: FormData) => {
         };
         const supportNeedValue = (child.supportNeedTypes || '').split(',').filter(Boolean).map(v => supportNeedLabels[v] || v).join('; ');
 
-        // Build care coordinator contact detail rows
-        const buildCoordContactRows = (prefix: string, roleLabel: string): { label: string; value: string }[] => {
-          const rows: { label: string; value: string }[] = [];
-          const addEntry = (ep: string) => {
-            const name = child[`${ep}_name`] || '';
-            const role = child[`${ep}_role`] || '';
-            const city = child[`${ep}_city`] || '';
-            const province = child[`${ep}_province`] || '';
-            const phone = child[`${ep}_phone`] || '';
-            const email = child[`${ep}_email`] || '';
-            if (name || role || city || province || phone || email) {
-              rows.push({ label: 'Name:', value: name });
-              rows.push({ label: roleLabel + ':', value: role });
-              rows.push({ label: 'City / Province:', value: [city, province].filter(Boolean).join(', ') });
-              rows.push({ label: 'Phone:', value: phone });
-              rows.push({ label: 'Email:', value: email });
-            }
-          };
-          addEntry(prefix);
-          for (let i = 0; i < 20; i++) {
-            if (child[`${prefix}_hasAnother_${i}`] !== 'yes') break;
-            addEntry(`${prefix}_extra_${i}`);
-          }
-          return rows;
-        };
-
-        const selectedCoords = (child.careCoordinators || '').split(',').filter(Boolean);
-        const coordContactRows: { label: string; value: string }[] = [];
-        if (selectedCoords.includes('sibling')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_sibling`, 'Relationship'));
-        if (selectedCoords.includes('other-family')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_otherfam`, 'Relationship'));
-        if (selectedCoords.includes('school-team')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_school`, 'Role and responsibility'));
-        if (selectedCoords.includes('doctor-therapist-support-worker')) coordContactRows.push(...buildCoordContactRows(`coord_${index}_doctor`, 'Role and responsibility'));
-
-        const careCoordinatorLabels: Record<string, string> = {
-          'parent-guardian-1': 'Parent / guardian 1',
-          'parent-guardian-2': 'Parent / guardian 2',
-          'sibling': 'Sibling',
-          'other-family': 'Other family',
-          'school-team': 'School team',
-          'doctor-therapist-support-worker': 'Doctor / therapist / support worker',
-          'other': 'Other',
-        };
-        const careCoordinatorValue = selectedCoords.map(v => careCoordinatorLabels[v] || v).join('; ');
-
         const disRows: { label: string; value: string; large?: boolean }[] = [
           { label: 'Support need type(s):', value: supportNeedValue },
+          { label: 'Nature of disability:', value: child.disabilityNature || '' },
+          { label: 'Formal diagnosis? (yes/no)', value: child.disabilityFormalDiagnosis || '' },
+          { label: 'Describe the nature and severity of the disability:', value: child.disabilitySeverity || '', large: true },
           { label: 'Do they qualify for the Disability Tax Credit (DTC)?', value: dtcValue },
-          { label: 'Where is the document stored?', value: child.dtcDocLocation || '' },
-          { label: 'Current support needs:', value: child.currentSupportNeeds || '', large: true },
-          { label: 'Who helps coordinate their care today?', value: careCoordinatorValue },
-          ...coordContactRows,
-          { label: 'Care or assistance received regularly:', value: child.regularCareAssistance || '', large: true },
-          { label: 'Expected level of independence:', value: child.expectedIndependence || '' },
-          ...((['Will likely need ongoing support with money decisions', 'Will likely need ongoing support with health or personal care decisions', 'Will likely need significant lifelong support'].includes(child.expectedIndependence || '')) ? [
-            { label: 'May need help with financial decisions as an adult?', value: child.financialDecisionHelp || '' },
-            { label: 'Financial decisions - other information:', value: child.financialDecisionHelpOther || '', large: true },
-            { label: 'May need help with personal or healthcare decisions as an adult?', value: child.healthcareDecisionHelp || '' },
-            { label: 'Healthcare decisions - other information:', value: child.healthcareDecisionHelpOther || '', large: true },
-          ] : []),
+          { label: 'Who is the primary coordinator of care today?', value: child.disabilityCoordinator || '' },
+          { label: 'Is there a long-term plan already in place?', value: child.disabilityLongTermPlan || '' },
+          { label: 'Any funding tied to residency or caregiver status?', value: child.disabilityFunding || '' },
+          { label: 'Describe any care and assistance provided:', value: child.disabilityCare || '', large: true },
+          { label: 'Other information that would help support a potential guardian:', value: child.disabilityOther || '', large: true },
         ];
 
         disRows.forEach((row, ri) => {
@@ -1823,150 +1775,6 @@ export const generatePDF = (formData: FormData) => {
         });
 
         yPosition += 6;
-
-        const triggerIndependenceValues = [
-          'Will likely need ongoing support with money decisions',
-          'Will likely need ongoing support with health or personal care decisions',
-          'Will likely need significant lifelong support',
-        ];
-        if (triggerIndependenceValues.includes(child.expectedIndependence || '')) {
-          addSubsectionHeader(`${nickname} Preferred Future Caregiver:`);
-          yPosition += 2;
-
-          const selectedCaregivers: string[] = (() => {
-            try { return (child.preferredCaregivers as unknown as string[]) || []; } catch { return []; }
-          })();
-
-          const caregiverContacts: Array<{ type: string; name: string; relationship: string; city: string; province: string; phone: string; email: string; discussed: string; notes?: string }> = (() => {
-            try { return JSON.parse((child.caregiverContactsData as string) || '[]'); } catch { return []; }
-          })();
-
-          const cgLabelW = fieldWidth * 0.40;
-          const cgValueW = fieldWidth * 0.60;
-          const cgRowH = 8;
-
-          const renderCgRow = (label: string, value: string, fieldSuffix: string, large = false) => {
-            const rowH = large ? Math.max(28, cgRowH) : cgRowH;
-            checkPageBreak(rowH + 4);
-            const rowY = yPosition;
-            doc.setFontSize(8.5);
-            doc.setFont(undefined, 'normal');
-            const labelLines = doc.splitTextToSize(label, cgLabelW - 2);
-            const dynH = Math.max(rowH, labelLines.length * 5 + 3);
-            doc.setDrawColor(...colors.tableBorder);
-            doc.setLineWidth(0.3);
-            doc.setFillColor(255, 255, 255);
-            doc.rect(margin, rowY, cgLabelW, dynH, 'FD');
-            doc.rect(margin + cgLabelW, rowY, cgValueW, dynH, 'FD');
-            doc.setTextColor(...colors.darkText);
-            doc.text(labelLines, margin + 1, rowY + 5);
-            const f = new doc.AcroFormTextField();
-            f.fieldName = `child_${index}_cg_${fieldSuffix}`;
-            f.Rect = [margin + cgLabelW + 0.5, rowY + 0.5, cgValueW - 1, dynH - 1];
-            f.fontSize = 8.5;
-            f.textColor = colors.darkText;
-            f.borderStyle = 'none';
-            f.value = value;
-            if (large) f.multiline = true;
-            doc.addField(f);
-            yPosition += dynH;
-          };
-
-          const typeLabel = selectedCaregivers.filter((t) => t !== 'Not sure yet').join(', ');
-          if (typeLabel) renderCgRow('Who would you hope steps in first?', typeLabel, 'types');
-
-          const nonSureCaregivers = selectedCaregivers.filter((t) => t !== 'Not sure yet');
-          nonSureCaregivers.forEach((caregiverType, ci) => {
-            const contact = caregiverContacts.find((c) => c.type === caregiverType);
-            if (!contact) return;
-            checkPageBreak(20);
-            yPosition += 4;
-            doc.setFontSize(9);
-            doc.setFont(undefined, 'bold');
-            doc.setTextColor(...colors.darkText);
-            doc.text(caregiverType, margin, yPosition);
-            doc.setFont(undefined, 'normal');
-            yPosition += 5;
-
-            const rows: { label: string; value: string }[] = [
-              { label: 'Full Name:', value: contact.name || '' },
-              { label: 'Relationship:', value: contact.relationship || '' },
-              { label: 'City:', value: contact.city || '' },
-              { label: 'Province:', value: contact.province || '' },
-              { label: 'Phone Number:', value: contact.phone || '' },
-              { label: 'Email Address:', value: contact.email || '' },
-              { label: 'Have you spoken with this person about this role?', value: contact.discussed || '' },
-              { label: 'What would you want them to understand about this responsibility?', value: contact.notes || '', large: true },
-            ];
-            rows.forEach((row, ri) => renderCgRow(row.label, row.value, `${ci}_${ri}`, row.large));
-          });
-
-          if (selectedCaregivers.includes('Not sure yet')) {
-            checkPageBreak(30);
-            const todoText = 'TO DO: Begin a conversation about future caregivers. You indicated that you are not yet sure who could step into a caregiving role if needed. Consider beginning conversations with trusted family members or friends about who may be willing and able to help in the future.';
-            const todoLines = doc.splitTextToSize(todoText, fieldWidth - 8);
-            const todoBoxH = todoLines.length * 5 + 8;
-            doc.setFillColor(255, 255, 200);
-            doc.rect(margin, yPosition, fieldWidth, todoBoxH, 'F');
-            doc.setDrawColor(180, 140, 0);
-            doc.setLineWidth(0.5);
-            doc.rect(margin, yPosition, fieldWidth, todoBoxH, 'S');
-            doc.setTextColor(80, 60, 0);
-            doc.setFontSize(8.5);
-            doc.setFont(undefined, 'bold');
-            doc.text(todoLines, margin + 4, yPosition + 5);
-            doc.setFont(undefined, 'normal');
-            doc.setTextColor(...colors.darkText);
-            doc.setFillColor(255, 255, 255);
-            doc.setDrawColor(...colors.tableBorder);
-            doc.setLineWidth(0.3);
-            yPosition += todoBoxH + 6;
-          }
-
-          yPosition += 6;
-        }
-
-        if (child.caregiverGuidanceNotes) {
-          addSubsectionHeader(`${nickname} — Guidance for Future Caregivers:`);
-          yPosition += 2;
-
-          const guidanceLabelW = fieldWidth * 0.40;
-          const guidanceValueW = fieldWidth * 0.60;
-
-          const guidanceQuestion = `What would you want ${nickname}'s potential future caregiver to understand about this responsibility?`;
-          const guidanceNotes = child.caregiverGuidanceNotes as string;
-
-          const qLabelLines = doc.splitTextToSize(guidanceQuestion, guidanceLabelW - 2);
-          const notesLines = doc.splitTextToSize(guidanceNotes, guidanceValueW - 4);
-          const notesH = Math.max(60, notesLines.length * 5 + 6);
-          const qRowH = Math.max(notesH, qLabelLines.length * 5 + 3);
-
-          checkPageBreak(qRowH + 8);
-          const rowY = yPosition;
-
-          doc.setFontSize(8.5);
-          doc.setFont(undefined, 'normal');
-          doc.setDrawColor(...colors.tableBorder);
-          doc.setLineWidth(0.3);
-          doc.setFillColor(255, 255, 255);
-          doc.rect(margin, rowY, guidanceLabelW, qRowH, 'FD');
-          doc.rect(margin + guidanceLabelW, rowY, guidanceValueW, qRowH, 'FD');
-
-          doc.setTextColor(...colors.darkText);
-          doc.text(qLabelLines, margin + 1, rowY + 5);
-
-          const gField = new doc.AcroFormTextField();
-          gField.fieldName = `child_${index}_caregiver_guidance`;
-          gField.Rect = [margin + guidanceLabelW + 0.5, rowY + 0.5, guidanceValueW - 1, qRowH - 1];
-          gField.fontSize = 8.5;
-          gField.textColor = colors.darkText;
-          gField.borderStyle = 'none';
-          gField.multiline = true;
-          gField.value = guidanceNotes;
-          doc.addField(gField);
-
-          yPosition += qRowH + 6;
-        }
 
         if (child.disabilityTaxCredit === 'not-looked') {
           checkPageBreak(120);

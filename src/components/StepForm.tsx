@@ -100,7 +100,7 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
-      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional'].forEach(key => {
+      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -4860,6 +4860,11 @@ export default function StepForm({
           })()}
 
           {step.id === 7 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const hasSpouse = basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law';
+            const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
+            const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
+
             const fpHasAdvisor = answers['fpHasAdvisor'];
             const fpHasAdditionalAdvisor = answers['fpHasAdditionalAdvisor'];
 
@@ -4877,6 +4882,34 @@ export default function StepForm({
               const data = advisorData || {};
               return (
                 <div className="space-y-4 border border-gray-600 rounded-lg p-6 bg-gray-700/50">
+                  {hasSpouse && (() => {
+                    const worksWithStr = index === 0 ? (answers['fpAdvisor1WorksWith'] as string) : (data.worksWithClients || '');
+                    const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
+                    const toggleWorksWith = (client: string, checked: boolean) => {
+                      const newArr = checked ? [...worksWithArr, client] : worksWithArr.filter((c: string) => c !== client);
+                      const newVal = newArr.join(',');
+                      if (index === 0) {
+                        onAnswerChange('fpAdvisor1WorksWith', newVal);
+                      } else {
+                        updateAdditionalAdvisor(index - 1, 'worksWithClients', newVal);
+                      }
+                    };
+                    return (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Works with:</label>
+                        <div className="flex flex-wrap gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={worksWithArr.includes('client1')} onChange={e => toggleWorksWith('client1', e.target.checked)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                            <span className="text-gray-300 text-sm">{client1Name}</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={worksWithArr.includes('client2')} onChange={e => toggleWorksWith('client2', e.target.checked)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                            <span className="text-gray-300 text-sm">{client2Name}</span>
+                          </label>
+                        </div>
+                      </div>
+                    );
+                  })()}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">Firm</label>

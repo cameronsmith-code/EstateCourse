@@ -255,6 +255,7 @@ interface FormData {
   fpAdvisor1Phone?: string;
   fpAdvisor1Email?: string;
   fpAdvisor1Website?: string;
+  fpAdvisor1WorksWith?: string;
   fpAdvisor1Services?: string[];
   fpAdvisor1Duration?: string;
   fpAdvisor1IncludeInContactList?: string;
@@ -265,6 +266,7 @@ interface FormData {
     phone?: string;
     email?: string;
     website?: string;
+    worksWithClients?: string;
     services?: string;
     duration?: string;
     includeInContactList?: string;
@@ -7792,6 +7794,13 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.text('Contact details and scope of work for this professional.', margin, yPosition);
       yPosition += 6;
 
+      const worksWithStr = (advisor as { worksWithClients?: string }).worksWithClients || (advisor as { worksWith?: string }).worksWith || '';
+      const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
+      const worksWithLabels = worksWithArr.map((c: string) => c === 'client1' ? client1Name : c === 'client2' ? client2Name : '').filter(Boolean);
+      if (hasSpouse) {
+        renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
+      }
+
       renderEstateRow('Firm:', advisor.firm || '', `${fieldPrefix}_firm`);
       renderEstateRow('Advisor Name:', advisor.name || '', `${fieldPrefix}_name`);
       renderEstateRow('Phone:', advisor.phone || '', `${fieldPrefix}_phone`);
@@ -7812,6 +7821,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       phone: formData.fpAdvisor1Phone,
       email: formData.fpAdvisor1Email,
       website: formData.fpAdvisor1Website,
+      worksWith: formData.fpAdvisor1WorksWith,
       services: formData.fpAdvisor1Services,
       duration: formData.fpAdvisor1Duration,
       includeInContactList: formData.fpAdvisor1IncludeInContactList,

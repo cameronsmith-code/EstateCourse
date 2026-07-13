@@ -272,6 +272,27 @@ interface FormData {
     includeInContactList?: string;
   }>;
   fpAdditionalHasAdditional?: string[];
+  acctHasAccountant?: string;
+  acctAdvisor1Firm?: string;
+  acctAdvisor1Name?: string;
+  acctAdvisor1Phone?: string;
+  acctAdvisor1Email?: string;
+  acctAdvisor1WorksWith?: string;
+  acctAdvisor1Services?: string[];
+  acctAdvisor1Duration?: string;
+  acctAdvisor1IncludeInContactList?: string;
+  acctHasAdditional?: string;
+  acctAdditionalData?: Array<{
+    firm?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+    worksWithClients?: string;
+    services?: string;
+    duration?: string;
+    includeInContactList?: string;
+  }>;
+  acctAdditionalHasAdditional?: string[];
   client1HasPoaPersonalCare?: string;
   client1SpouseIsPoaPersonalCare?: string;
   client1PoaPersonalCareName?: string;
@@ -7833,6 +7854,75 @@ You should explore this as an option with your legal and CFP® professionals bec
     });
   }
 
+  // Accountant (CPA) section
+  if (formData.acctHasAccountant === 'yes') {
+    if (yPosition > 200) {
+      addPage();
+      yPosition = 12;
+    }
+
+    const acctServiceLabels: Record<string, string> = {
+      personal_tax_returns: 'Personal tax returns',
+      corporate_tax: 'Corporate tax',
+      trust_tax_returns: 'Trust tax returns',
+      bookkeeping: 'Bookkeeping',
+      payroll: 'Payroll',
+      estate_tax: 'Estate tax',
+      other: 'Other',
+    };
+
+    const renderAccountantSection = (title: string, acct: { firm?: string; name?: string; phone?: string; email?: string; worksWithClients?: string; services?: string[] | string; duration?: string; includeInContactList?: string }, fieldPrefix: string) => {
+      if (yPosition > 200) {
+        addPage();
+        yPosition = 12;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(title, margin, yPosition);
+      yPosition += 4;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text('Contact details and scope of work for this professional.', margin, yPosition);
+      yPosition += 6;
+
+      const worksWithStr = acct.worksWithClients || '';
+      const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
+      const worksWithLabels = worksWithArr.map((c: string) => c === 'client1' ? client1Name : c === 'client2' ? client2Name : '').filter(Boolean);
+      if (hasSpouse) {
+        renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
+      }
+
+      renderEstateRow('Firm:', acct.firm || '', `${fieldPrefix}_firm`);
+      renderEstateRow('Accountant Name:', acct.name || '', `${fieldPrefix}_name`);
+      renderEstateRow('Phone:', acct.phone || '', `${fieldPrefix}_phone`);
+      renderEstateRow('Email:', acct.email || '', `${fieldPrefix}_email`);
+
+      const servicesStr = Array.isArray(acct.services) ? acct.services.map(s => acctServiceLabels[s] || s).join(', ') : (acct.services ? acct.services.split(',').map((s: string) => acctServiceLabels[s.trim()] || s.trim()).join(', ') : '');
+      renderEstateRow('Services Provided:', servicesStr, `${fieldPrefix}_services`);
+
+      renderEstateRow('Years Together:', acct.duration || '', `${fieldPrefix}_duration`);
+      renderEstateRow('Include in Contact List:', acct.includeInContactList === 'yes' ? 'Yes' : acct.includeInContactList === 'no' ? 'No' : '', `${fieldPrefix}_include`);
+      yPosition += 6;
+    };
+
+    renderAccountantSection('Accountant (CPA):', {
+      firm: formData.acctAdvisor1Firm,
+      name: formData.acctAdvisor1Name,
+      phone: formData.acctAdvisor1Phone,
+      email: formData.acctAdvisor1Email,
+      worksWithClients: formData.acctAdvisor1WorksWith,
+      services: formData.acctAdvisor1Services,
+      duration: formData.acctAdvisor1Duration,
+      includeInContactList: formData.acctAdvisor1IncludeInContactList,
+    }, 'acct_adv1');
+
+    const additionalAccountants = formData.acctAdditionalData || [];
+    additionalAccountants.forEach((acct, i) => {
+      renderAccountantSection(`Accountant (CPA) — Additional #${i + 1}:`, acct, `acct_adv${i + 2}`);
+    });
+  }
+
   const c1RegData = (formData.client1RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;
   const c2RegData = (formData.client2RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;
   const benReviewNote = 'Beneficiary Review is Recommended';
@@ -10883,6 +10973,28 @@ You should explore this as an option with your legal and CFP® professionals bec
         firm: advisor.firm || '',
         phone: advisor.phone || '',
         email: advisor.email || '',
+      });
+    }
+  });
+
+  if (formData.acctHasAccountant === 'yes' && formData.acctAdvisor1IncludeInContactList === 'yes') {
+    contactListContacts.push({
+      role: 'Accountant (CPA)',
+      name: formData.acctAdvisor1Name || '',
+      firm: formData.acctAdvisor1Firm || '',
+      phone: formData.acctAdvisor1Phone || '',
+      email: formData.acctAdvisor1Email || '',
+    });
+  }
+
+  (formData.acctAdditionalData || []).forEach((acct) => {
+    if (acct.includeInContactList === 'yes') {
+      contactListContacts.push({
+        role: 'Accountant (CPA)',
+        name: acct.name || '',
+        firm: acct.firm || '',
+        phone: acct.phone || '',
+        email: acct.email || '',
       });
     }
   });

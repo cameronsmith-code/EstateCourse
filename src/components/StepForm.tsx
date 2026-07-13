@@ -120,6 +120,27 @@ export default function StepForm({
   }, [answers['fpHasAdditionalAdvisor']]);
 
   useEffect(() => {
+    if (answers['acctHasAccountant'] !== 'yes') {
+      ['acctAdvisor1Firm', 'acctAdvisor1Name', 'acctAdvisor1Phone', 'acctAdvisor1Email', 'acctAdvisor1Services', 'acctAdvisor1Duration', 'acctAdvisor1IncludeInContactList', 'acctAdvisor1WorksWith', 'acctHasAdditional', 'acctAdditionalData', 'acctAdditionalHasAdditional'].forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['acctHasAccountant']]);
+
+  useEffect(() => {
+    if (answers['acctHasAdditional'] !== 'yes') {
+      if (answers['acctAdditionalData'] !== undefined) {
+        onAnswerChange('acctAdditionalData', undefined);
+      }
+      if (answers['acctAdditionalHasAdditional'] !== undefined) {
+        onAnswerChange('acctAdditionalHasAdditional', undefined);
+      }
+    }
+  }, [answers['acctHasAdditional']]);
+
+  useEffect(() => {
     if (answers['client2SpouseIsPoaPersonalCare'] === 'no') {
       if (answers['client2SpousePoaPersonalCareHasDocCopy'] !== undefined) {
         onAnswerChange('client2SpousePoaPersonalCareHasDocCopy', undefined);
@@ -4865,196 +4886,278 @@ export default function StepForm({
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
             const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
 
-            const fpHasAdvisor = answers['fpHasAdvisor'];
-            const fpHasAdditionalAdvisor = answers['fpHasAdditionalAdvisor'];
+            interface ProfessionalConfig {
+              prefix: string;
+              subsectionTitle: string;
+              hasKey: string;
+              hasAdditionalKey: string;
+              additionalDataKey: string;
+              additionalHasAdditionalKey: string;
+              firstQuestionLabel: string;
+              additionalQuestionLabel: string;
+              nameLabel: string;
+              servicesLabel: string;
+              services: string[];
+              serviceLabels?: Record<string, string>;
+              durationLabel: string;
+              durationPlaceholder: string;
+              showWebsite?: boolean;
+            }
 
-            const additionalAdvisors = (answers['fpAdditionalAdvisorsData'] as Array<Record<string, string>>) || [];
-            const additionalHasAdditional = (answers['fpAdditionalHasAdditional'] as string[]) || [];
+            const renderProfessionalSubsection = (config: ProfessionalConfig) => {
+              const hasProf = answers[config.hasKey];
+              const hasAdditional = answers[config.hasAdditionalKey];
+              const additionalItems = (answers[config.additionalDataKey] as Array<Record<string, string>>) || [];
+              const additionalHasAdditional = (answers[config.additionalHasAdditionalKey] as string[]) || [];
 
-            const updateAdditionalAdvisor = (index: number, field: string, value: string) => {
-              const updated = [...additionalAdvisors];
-              if (!updated[index]) updated[index] = {};
-              updated[index][field] = value;
-              onAnswerChange('fpAdditionalAdvisorsData', updated);
-            };
-
-            const renderAdvisorFields = (prefix: string, index: number, advisorData?: Record<string, string>) => {
-              const data = advisorData || {};
-              return (
-                <div className="space-y-4 border border-gray-600 rounded-lg p-6 bg-gray-700/50">
-                  {hasSpouse && (() => {
-                    const worksWithStr = index === 0 ? (answers['fpAdvisor1WorksWith'] as string) : (data.worksWithClients || '');
-                    const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
-                    const toggleWorksWith = (client: string, checked: boolean) => {
-                      const newArr = checked ? [...worksWithArr, client] : worksWithArr.filter((c: string) => c !== client);
-                      const newVal = newArr.join(',');
-                      if (index === 0) {
-                        onAnswerChange('fpAdvisor1WorksWith', newVal);
-                      } else {
-                        updateAdditionalAdvisor(index - 1, 'worksWithClients', newVal);
-                      }
-                    };
-                    return (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Works with:</label>
-                        <div className="flex flex-wrap gap-4">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" checked={worksWithArr.includes('client1')} onChange={e => toggleWorksWith('client1', e.target.checked)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
-                            <span className="text-gray-300 text-sm">{client1Name}</span>
-                          </label>
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" checked={worksWithArr.includes('client2')} onChange={e => toggleWorksWith('client2', e.target.checked)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
-                            <span className="text-gray-300 text-sm">{client2Name}</span>
-                          </label>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Firm</label>
-                      <input type="text" value={data.firm || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Firm', e.target.value) : updateAdditionalAdvisor(index - 1, 'firm', e.target.value)} placeholder="Enter firm name" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Advisor name</label>
-                      <input type="text" value={data.name || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Name', e.target.value) : updateAdditionalAdvisor(index - 1, 'name', e.target.value)} placeholder="Enter advisor name" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Phone</label>
-                      <input type="text" value={data.phone || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Phone', e.target.value) : updateAdditionalAdvisor(index - 1, 'phone', e.target.value)} placeholder="Enter phone number" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                      <input type="email" value={data.email || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Email', e.target.value) : updateAdditionalAdvisor(index - 1, 'email', e.target.value)} placeholder="Enter email address" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Website (optional)</label>
-                    <input type="text" value={data.website || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Website', e.target.value) : updateAdditionalAdvisor(index - 1, 'website', e.target.value)} placeholder="Enter website URL" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3">What do they help you with?</label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {['investments', 'retirement_planning', 'insurance', 'estate_planning', 'tax_planning', 'cash_flow', 'business_planning', 'other'].map(svc => {
-                        const services = (index === 0 ? answers['fpAdvisor1Services'] as string[] : (data.services ? data.services.split(',') : [])) || [];
-                        const toggleService = (checked: boolean) => {
-                          const newServices = checked ? [...services, svc] : services.filter((v: string) => v !== svc);
-                          if (index === 0) {
-                            onAnswerChange('fpAdvisor1Services', newServices);
-                          } else {
-                            updateAdditionalAdvisor(index - 1, 'services', newServices.join(','));
-                          }
-                        };
-                        return (
-                          <label key={svc} className="flex items-center p-2 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer text-sm">
-                            <input type="checkbox" checked={services.includes(svc)} onChange={e => toggleService(e.target.checked)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded mr-2" />
-                            <span className="text-gray-300 capitalize">{svc.replace(/_/g, ' ')}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">How long have you worked together?</label>
-                      <input type="text" value={data.duration || ''} onChange={e => index === 0 ? onAnswerChange('fpAdvisor1Duration', e.target.value) : updateAdditionalAdvisor(index - 1, 'duration', e.target.value)} placeholder="e.g., 5 years" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-3">May we include this professional in your executor's contact list and action guide?</label>
-                      <div className="flex gap-4">
-                        {['yes', 'no'].map(opt => (
-                          <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name={`${prefix}_include_${index}`} value={opt}
-                              checked={(index === 0 ? answers['fpAdvisor1IncludeInContactList'] : data.includeInContactList) === opt}
-                              onChange={() => index === 0 ? onAnswerChange('fpAdvisor1IncludeInContactList', opt) : updateAdditionalAdvisor(index - 1, 'includeInContactList', opt)}
-                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                            <span className="text-white text-sm capitalize">{opt}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            };
-
-            const renderAdditionalAdvisorQuestion = (index: number) => {
-              const currentHasAdditional = index < additionalHasAdditional.length ? additionalHasAdditional[index] : '';
-              const updateHasAdditional = (val: string) => {
-                const updated = [...additionalHasAdditional];
-                updated[index] = val;
-                onAnswerChange('fpAdditionalHasAdditional', updated);
+              const updateAdditional = (index: number, field: string, value: string) => {
+                const updated = [...additionalItems];
+                if (!updated[index]) updated[index] = {};
+                updated[index][field] = value;
+                onAnswerChange(config.additionalDataKey, updated);
               };
 
-              return (
-                <FormField
-                  key={`fp_add_additional_${index}`}
-                  question={{
-                    key: `fp_additional_additional_${index}`,
-                    label: 'Is there an additional Financial Planner/Wealth Advisor that you work with?',
-                    type: 'radio',
-                    options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }],
-                  }}
-                  value={currentHasAdditional}
-                  onChange={updateHasAdditional}
-                />
-              );
-            };
+              const setPrimaryField = (index: number, field: string, value: string) => {
+                if (index === 0) {
+                  onAnswerChange(`${config.prefix}Advisor1${field.charAt(0).toUpperCase() + field.slice(1)}`, value);
+                } else {
+                  updateAdditional(index - 1, field, value);
+                }
+              };
 
-            const additionalAdvisorIndices: number[] = [];
-            if (fpHasAdditionalAdvisor === 'yes') {
-              additionalAdvisorIndices.push(1);
-              if (additionalHasAdditional[0] === 'yes') {
-                additionalAdvisorIndices.push(2);
-                if (additionalHasAdditional[1] === 'yes') {
-                  additionalAdvisorIndices.push(3);
-                  if (additionalHasAdditional[2] === 'yes') {
-                    additionalAdvisorIndices.push(4);
-                    if (additionalHasAdditional[3] === 'yes') {
-                      additionalAdvisorIndices.push(5);
+              const getPrimaryField = (index: number, field: string): string => {
+                if (index === 0) {
+                  return (answers[`${config.prefix}Advisor1${field.charAt(0).toUpperCase() + field.slice(1)}`] as string) || '';
+                }
+                return (additionalItems[index - 1]?.[field]) || '';
+              };
+
+              const renderFields = (index: number) => {
+                const svcKey = `${config.prefix}Advisor1Services`;
+                return (
+                  <div className="space-y-4 border border-gray-600 rounded-lg p-6 bg-gray-700/50">
+                    {hasSpouse && (() => {
+                      const worksWithStr = index === 0 ? (answers[`${config.prefix}Advisor1WorksWith`] as string) : (additionalItems[index - 1]?.worksWithClients || '');
+                      const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
+                      const toggleWorksWith = (client: string, checked: boolean) => {
+                        const newArr = checked ? [...worksWithArr, client] : worksWithArr.filter((c: string) => c !== client);
+                        setPrimaryField(index, 'worksWithClients', newArr.join(','));
+                        if (index === 0) onAnswerChange(`${config.prefix}Advisor1WorksWith`, newArr.join(','));
+                        else updateAdditional(index - 1, 'worksWithClients', newArr.join(','));
+                      };
+                      return (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Works with:</label>
+                          <div className="flex flex-wrap gap-4">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" checked={worksWithArr.includes('client1')} onChange={e => toggleWorksWith('client1', e.target.checked)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                              <span className="text-gray-300 text-sm">{client1Name}</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" checked={worksWithArr.includes('client2')} onChange={e => toggleWorksWith('client2', e.target.checked)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                              <span className="text-gray-300 text-sm">{client2Name}</span>
+                            </label>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Firm</label>
+                        <input type="text" value={getPrimaryField(index, 'firm')} onChange={e => setPrimaryField(index, 'firm', e.target.value)} placeholder="Enter firm name" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">{config.nameLabel}</label>
+                        <input type="text" value={getPrimaryField(index, 'name')} onChange={e => setPrimaryField(index, 'name', e.target.value)} placeholder={`Enter ${config.nameLabel.toLowerCase()}`} className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+                        <input type="text" value={getPrimaryField(index, 'phone')} onChange={e => setPrimaryField(index, 'phone', e.target.value)} placeholder="Enter phone number" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" value={getPrimaryField(index, 'email')} onChange={e => setPrimaryField(index, 'email', e.target.value)} placeholder="Enter email address" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      </div>
+                    </div>
+                    {config.showWebsite && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Website (optional)</label>
+                        <input type="text" value={getPrimaryField(index, 'website')} onChange={e => setPrimaryField(index, 'website', e.target.value)} placeholder="Enter website URL" className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-3">{config.servicesLabel}</label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {config.services.map(svc => {
+                          const currentServices = index === 0
+                            ? (answers[svcKey] as string[]) || []
+                            : (additionalItems[index - 1]?.services ? additionalItems[index - 1].services.split(',') : []);
+                          const toggleService = (checked: boolean) => {
+                            const newServices = checked ? [...currentServices, svc] : currentServices.filter((v: string) => v !== svc);
+                            if (index === 0) {
+                              onAnswerChange(svcKey, newServices);
+                            } else {
+                              updateAdditional(index - 1, 'services', newServices.join(','));
+                            }
+                          };
+                          const label = config.serviceLabels?.[svc] || svc.replace(/_/g, ' ');
+                          return (
+                            <label key={svc} className="flex items-center p-2 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer text-sm">
+                              <input type="checkbox" checked={currentServices.includes(svc)} onChange={e => toggleService(e.target.checked)} className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded mr-2" />
+                              <span className="text-gray-300">{label}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">{config.durationLabel}</label>
+                        <input type="text" value={getPrimaryField(index, 'duration')} onChange={e => setPrimaryField(index, 'duration', e.target.value)} placeholder={config.durationPlaceholder} className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-3">May we include this professional in your executor's contact list and action guide?</label>
+                        <div className="flex gap-4">
+                          {['yes', 'no'].map(opt => (
+                            <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" name={`${config.prefix}_include_${index}`} value={opt}
+                                checked={getPrimaryField(index, 'includeInContactList') === opt}
+                                onChange={() => setPrimaryField(index, 'includeInContactList', opt)}
+                                className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                              <span className="text-white text-sm capitalize">{opt}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              };
+
+              const renderAdditionalQuestion = (index: number) => {
+                const currentHasAdditional = index < additionalHasAdditional.length ? additionalHasAdditional[index] : '';
+                const updateHasAdditional = (val: string) => {
+                  const updated = [...additionalHasAdditional];
+                  updated[index] = val;
+                  onAnswerChange(config.additionalHasAdditionalKey, updated);
+                };
+
+                return (
+                  <FormField
+                    key={`${config.prefix}_add_additional_${index}`}
+                    question={{
+                      key: `${config.prefix}_additional_additional_${index}`,
+                      label: config.additionalQuestionLabel,
+                      type: 'radio',
+                      options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }],
+                    }}
+                    value={currentHasAdditional}
+                    onChange={updateHasAdditional}
+                  />
+                );
+              };
+
+              const additionalIndices: number[] = [];
+              if (hasAdditional === 'yes') {
+                additionalIndices.push(1);
+                if (additionalHasAdditional[0] === 'yes') {
+                  additionalIndices.push(2);
+                  if (additionalHasAdditional[1] === 'yes') {
+                    additionalIndices.push(3);
+                    if (additionalHasAdditional[2] === 'yes') {
+                      additionalIndices.push(4);
+                      if (additionalHasAdditional[3] === 'yes') {
+                        additionalIndices.push(5);
+                      }
                     }
                   }
                 }
               }
-            }
 
-            const advisor1Data = {
-              firm: answers['fpAdvisor1Firm'] as string || '',
-              name: answers['fpAdvisor1Name'] as string || '',
-              phone: answers['fpAdvisor1Phone'] as string || '',
-              email: answers['fpAdvisor1Email'] as string || '',
-              website: answers['fpAdvisor1Website'] as string || '',
-              duration: answers['fpAdvisor1Duration'] as string || '',
-              includeInContactList: answers['fpAdvisor1IncludeInContactList'] as string || '',
+              return (
+                <>
+                  <Subsection title={config.subsectionTitle}>
+                    <FormField
+                      question={{
+                        key: config.hasKey,
+                        label: config.firstQuestionLabel,
+                        type: 'radio',
+                        options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }],
+                      }}
+                      value={hasProf}
+                      onChange={(value) => onAnswerChange(config.hasKey, value)}
+                    />
+
+                    {hasProf === 'yes' && (
+                      <div className="space-y-6">
+                        {renderFields(0)}
+                        <FormField
+                          question={{
+                            key: config.hasAdditionalKey,
+                            label: config.additionalQuestionLabel,
+                            type: 'radio',
+                            options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }],
+                          }}
+                          value={hasAdditional}
+                          onChange={(value) => onAnswerChange(config.hasAdditionalKey, value)}
+                        />
+                      </div>
+                    )}
+                  </Subsection>
+
+                  {hasProf === 'yes' && additionalIndices.map((advisorIdx) => (
+                    <Subsection key={`${config.prefix}_advisor_${advisorIdx}`} title={`${config.subsectionTitle} — Additional #${advisorIdx}`}>
+                      {renderFields(advisorIdx)}
+                      {renderAdditionalQuestion(advisorIdx - 1)}
+                    </Subsection>
+                  ))}
+                </>
+              );
             };
 
             return (
               <>
-                <Subsection title="Financial Planner / Wealth Advisor">
-                  <FormField
-                    question={step.questions[0]}
-                    value={fpHasAdvisor}
-                    onChange={(value) => onAnswerChange('fpHasAdvisor', value)}
-                  />
+                {renderProfessionalSubsection({
+                  prefix: 'fp',
+                  subsectionTitle: 'Financial Planner / Wealth Advisor',
+                  hasKey: 'fpHasAdvisor',
+                  hasAdditionalKey: 'fpHasAdditionalAdvisor',
+                  additionalDataKey: 'fpAdditionalAdvisorsData',
+                  additionalHasAdditionalKey: 'fpAdditionalHasAdditional',
+                  firstQuestionLabel: 'Do you currently work with a financial planner or investment advisor?',
+                  additionalQuestionLabel: 'Is there an additional Financial Planner/Wealth Advisor that you work with?',
+                  nameLabel: 'Advisor name',
+                  servicesLabel: 'What do they help you with?',
+                  services: ['investments', 'retirement_planning', 'insurance', 'estate_planning', 'tax_planning', 'cash_flow', 'business_planning', 'other'],
+                  durationLabel: 'How long have you worked together?',
+                  durationPlaceholder: 'e.g., 5 years',
+                  showWebsite: true,
+                })}
 
-                  {fpHasAdvisor === 'yes' && (
-                    <div className="space-y-6">
-                      {renderAdvisorFields('fp', 0, advisor1Data)}
-                      <FormField
-                        question={step.questions[9]}
-                        value={fpHasAdditionalAdvisor}
-                        onChange={(value) => onAnswerChange('fpHasAdditionalAdvisor', value)}
-                      />
-                    </div>
-                  )}
-                </Subsection>
-
-                {fpHasAdvisor === 'yes' && additionalAdvisorIndices.map((advisorIdx) => (
-                  <Subsection key={`fp_advisor_${advisorIdx}`} title={`Financial Planner / Wealth Advisor — Additional #${advisorIdx}`}>
-                    {renderAdvisorFields('fp', advisorIdx, additionalAdvisors[advisorIdx - 1] || {})}
-                    {renderAdditionalAdvisorQuestion(advisorIdx - 1)}
-                  </Subsection>
-                ))}
+                {renderProfessionalSubsection({
+                  prefix: 'acct',
+                  subsectionTitle: 'Accountant (CPA)',
+                  hasKey: 'acctHasAccountant',
+                  hasAdditionalKey: 'acctHasAdditional',
+                  additionalDataKey: 'acctAdditionalData',
+                  additionalHasAdditionalKey: 'acctAdditionalHasAdditional',
+                  firstQuestionLabel: 'Do you work with an accountant?',
+                  additionalQuestionLabel: 'Is there an additional Accountant/CPA that you work with?',
+                  nameLabel: 'Accountant name',
+                  servicesLabel: 'What do they assist with?',
+                  services: ['personal_tax_returns', 'corporate_tax', 'trust_tax_returns', 'bookkeeping', 'payroll', 'estate_tax', 'other'],
+                  serviceLabels: {
+                    personal_tax_returns: 'Personal tax returns',
+                    corporate_tax: 'Corporate tax',
+                    trust_tax_returns: 'Trust tax returns',
+                    bookkeeping: 'Bookkeeping',
+                    payroll: 'Payroll',
+                    estate_tax: 'Estate tax',
+                    other: 'Other',
+                  },
+                  durationLabel: 'How many years have you worked together?',
+                  durationPlaceholder: 'e.g., 3 years',
+                })}
               </>
             );
           })()}

@@ -182,6 +182,36 @@ export default function StepForm({
     }
   }, [answers['insHasAdditional']]);
 
+  // Health Professionals — Specialist gate cleanup
+  useEffect(() => {
+    if (answers['sp_health_has'] !== 'yes') {
+      Object.keys(answers).forEach(key => {
+        if (key.startsWith('sp_health_') && key !== 'sp_health_has') {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['sp_health_has']]);
+
+  // Health Professionals — "has additional" cascade cleanup for all three types
+  useEffect(() => {
+    ['fp', 'sp', 'ph'].forEach(prefix => {
+      for (let idx = 0; idx < 10; idx++) {
+        const addKey = `${prefix}_health_${idx}_has_additional`;
+        if (answers[addKey] !== 'yes') {
+          // Clear this and all subsequent cards
+          for (let clearIdx = idx + 1; clearIdx <= 10; clearIdx++) {
+            Object.keys(answers).forEach(key => {
+              if (key.startsWith(`${prefix}_health_${clearIdx}_`)) {
+                onAnswerChange(key, undefined);
+              }
+            });
+          }
+        }
+      }
+    });
+  }, [answers['fp_health_0_has_additional'], answers['fp_health_1_has_additional'], answers['fp_health_2_has_additional'], answers['sp_health_0_has_additional'], answers['sp_health_1_has_additional'], answers['sp_health_2_has_additional'], answers['ph_health_0_has_additional'], answers['ph_health_1_has_additional'], answers['ph_health_2_has_additional'], answers['sp_health_has']]);
+
   useEffect(() => {
     if (answers['client2SpouseIsPoaPersonalCare'] === 'no') {
       if (answers['client2SpousePoaPersonalCareHasDocCopy'] !== undefined) {
@@ -5269,6 +5299,153 @@ export default function StepForm({
                   durationLabel: 'How long have you worked together?',
                   durationPlaceholder: 'e.g., 6 years',
                 })}
+
+                {(() => {
+                  const healthTypes: Array<{
+                    prefix: string;
+                    title: string;
+                    fields: Array<{ key: string; label: string; placeholder?: string }>;
+                    hasGate?: boolean;
+                    hasGateLabel?: string;
+                  }> = [
+                    {
+                      prefix: 'fp',
+                      title: 'Family Physician',
+                      fields: [
+                        { key: 'name', label: 'Name', placeholder: 'e.g., Dr. Jane Smith' },
+                        { key: 'clinic', label: 'Clinic', placeholder: 'e.g., Riverside Family Clinic' },
+                        { key: 'phone', label: 'Phone', placeholder: 'e.g., (555) 123-4567' },
+                      ],
+                    },
+                    {
+                      prefix: 'sp',
+                      title: 'Specialist',
+                      hasGate: true,
+                      hasGateLabel: 'Do you have any specialists?',
+                      fields: [
+                        { key: 'name', label: 'Name', placeholder: 'e.g., Dr. John Doe' },
+                        { key: 'specialty', label: 'Specialty', placeholder: 'e.g., Cardiology' },
+                        { key: 'phone', label: 'Phone', placeholder: 'e.g., (555) 987-6543' },
+                      ],
+                    },
+                    {
+                      prefix: 'ph',
+                      title: 'Pharmacist',
+                      fields: [
+                        { key: 'name', label: 'Name', placeholder: 'e.g., Sarah Lee, R.Ph.' },
+                        { key: 'pharmacy', label: 'Pharmacy', placeholder: 'e.g., Shoppers Drug Mart' },
+                        { key: 'phone', label: 'Phone', placeholder: 'e.g., (555) 321-7654' },
+                      ],
+                    },
+                  ];
+
+                  const renderHealthField = (prefix: string, idx: number, fieldKey: string, label: string, placeholder?: string) => {
+                    const baseKey = `${prefix}_health_${idx}_${fieldKey}`;
+                    const value = answers[baseKey] as string || '';
+                    return (
+                      <div key={baseKey}>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">{label}</label>
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={e => onAnswerChange(baseKey, e.target.value)}
+                          placeholder={placeholder}
+                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    );
+                  };
+
+                  const renderHealthAdditionalQuestion = (prefix: string, idx: number) => {
+                    const addKey = `${prefix}_health_${idx}_has_additional`;
+                    const nextIdx = idx + 1;
+                    const addValue = answers[addKey] as string;
+
+                    return (
+                      <FormField
+                        question={{
+                          key: addKey,
+                          label: `Is there an additional ${prefix === 'sp' ? 'Specialist' : prefix === 'ph' ? 'Pharmacist' : 'Family Physician'} that your executor/POA should know about?`,
+                          type: 'radio',
+                          options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }],
+                        }}
+                        value={addValue}
+                        onChange={(value) => onAnswerChange(addKey, value)}
+                      />
+                    );
+                  };
+
+                  const renderHealthCard = (cfg: typeof healthTypes[0], idx: number) => {
+                    const cardTitle = idx === 0 ? cfg.title : `${cfg.title} — Additional #${idx}`;
+                    const showGate = cfg.hasGate && idx === 0;
+                    const gateKey = `${cfg.prefix}_health_has`;
+                    const gateValue = answers[gateKey] as string;
+                    if (showGate && gateValue !== 'yes') {
+                      return (
+                        <Subsection key={`${cfg.prefix}_health_${idx}`} title={cfg.title}>
+                          <FormField
+                            question={{
+                              key: gateKey,
+                              label: cfg.hasGateLabel || `Do you have a ${cfg.title}?`,
+                              type: 'radio',
+                              options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }],
+                            }}
+                            value={gateValue}
+                            onChange={(value) => onAnswerChange(gateKey, value)}
+                          />
+                        </Subsection>
+                      );
+                    }
+                    return (
+                      <Subsection key={`${cfg.prefix}_health_${idx}`} title={cardTitle}>
+                        {showGate && (
+                          <FormField
+                            question={{
+                              key: gateKey,
+                              label: cfg.hasGateLabel || `Do you have a ${cfg.title}?`,
+                              type: 'radio',
+                              options: [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }],
+                            }}
+                            value={gateValue}
+                            onChange={(value) => onAnswerChange(gateKey, value)}
+                          />
+                        )}
+                        <div className="space-y-4">
+                          {cfg.fields.map(f => renderHealthField(cfg.prefix, idx, f.key, f.label, f.placeholder))}
+                          {renderHealthAdditionalQuestion(cfg.prefix, idx)}
+                        </div>
+                      </Subsection>
+                    );
+                  };
+
+                  // Build list of cards to render based on "has additional" answers
+                  const renderHealthSubsections = () => {
+                    const sections: Array<JSX.Element> = [];
+                    healthTypes.forEach(cfg => {
+                      let idx = 0;
+                      sections.push(renderHealthCard(cfg, 0));
+                      while (idx < 10) {
+                        const addKey = `${cfg.prefix}_health_${idx}_has_additional`;
+                        if (answers[addKey] === 'yes') {
+                          idx++;
+                          sections.push(renderHealthCard(cfg, idx));
+                        } else {
+                          break;
+                        }
+                      }
+                    });
+                    return sections;
+                  };
+
+                  return (
+                    <>
+                      <Subsection title="Health Professionals">
+                        <p className="text-sm text-gray-400 mb-4">Tell us about the health professionals involved in your care.</p>
+                      </Subsection>
+                      {renderHealthSubsections()}
+                    </>
+                  );
+                })()}
               </>
             );
           })()}

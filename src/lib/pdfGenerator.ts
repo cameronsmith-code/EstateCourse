@@ -343,6 +343,67 @@ interface FormData {
     includeInContactList?: string;
   }>;
   insAdditionalHasAdditional?: string[];
+  fp_health_0_name?: string;
+  fp_health_0_clinic?: string;
+  fp_health_0_phone?: string;
+  fp_health_0_has_additional?: string;
+  fp_health_1_name?: string;
+  fp_health_1_clinic?: string;
+  fp_health_1_phone?: string;
+  fp_health_1_has_additional?: string;
+  fp_health_2_name?: string;
+  fp_health_2_clinic?: string;
+  fp_health_2_phone?: string;
+  fp_health_2_has_additional?: string;
+  fp_health_3_name?: string;
+  fp_health_3_clinic?: string;
+  fp_health_3_phone?: string;
+  fp_health_3_has_additional?: string;
+  fp_health_4_name?: string;
+  fp_health_4_clinic?: string;
+  fp_health_4_phone?: string;
+  fp_health_4_has_additional?: string;
+  sp_health_has?: string;
+  sp_health_0_name?: string;
+  sp_health_0_specialty?: string;
+  sp_health_0_phone?: string;
+  sp_health_0_has_additional?: string;
+  sp_health_1_name?: string;
+  sp_health_1_specialty?: string;
+  sp_health_1_phone?: string;
+  sp_health_1_has_additional?: string;
+  sp_health_2_name?: string;
+  sp_health_2_specialty?: string;
+  sp_health_2_phone?: string;
+  sp_health_2_has_additional?: string;
+  sp_health_3_name?: string;
+  sp_health_3_specialty?: string;
+  sp_health_3_phone?: string;
+  sp_health_3_has_additional?: string;
+  sp_health_4_name?: string;
+  sp_health_4_specialty?: string;
+  sp_health_4_phone?: string;
+  sp_health_4_has_additional?: string;
+  ph_health_0_name?: string;
+  ph_health_0_pharmacy?: string;
+  ph_health_0_phone?: string;
+  ph_health_0_has_additional?: string;
+  ph_health_1_name?: string;
+  ph_health_1_pharmacy?: string;
+  ph_health_1_phone?: string;
+  ph_health_1_has_additional?: string;
+  ph_health_2_name?: string;
+  ph_health_2_pharmacy?: string;
+  ph_health_2_phone?: string;
+  ph_health_2_has_additional?: string;
+  ph_health_3_name?: string;
+  ph_health_3_pharmacy?: string;
+  ph_health_3_phone?: string;
+  ph_health_3_has_additional?: string;
+  ph_health_4_name?: string;
+  ph_health_4_pharmacy?: string;
+  ph_health_4_phone?: string;
+  ph_health_4_has_additional?: string;
   client1HasPoaPersonalCare?: string;
   client1SpouseIsPoaPersonalCare?: string;
   client1PoaPersonalCareName?: string;
@@ -8131,6 +8192,80 @@ You should explore this as an option with your legal and CFP® professionals bec
     additionalInsurance.forEach((ins, i) => {
       renderInsuranceSection(`Insurance — Additional #${i + 1}:`, ins, `ins_adv${i + 2}`);
     });
+  }
+
+  // Health Professionals section
+  if (yPosition > 200) {
+    addPage();
+    yPosition = 12;
+  }
+  doc.setFontSize(10);
+  doc.setFont(undefined, 'bold');
+  doc.text('Health Professionals', margin, yPosition);
+  yPosition += 4;
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'normal');
+  doc.text('Health professionals involved in your care.', margin, yPosition);
+  yPosition += 6;
+
+  const renderHealthProRow = (label: string, value: string, fieldKey: string) => {
+    renderEstateRow(label, value, fieldKey);
+  };
+
+  // Family Physician cards
+  for (let idx = 0; idx < 5; idx++) {
+    const name = formData[`fp_health_${idx}_name` as keyof typeof formData] as string;
+    if (!name && idx > 0) break;
+    if (!name && idx === 0) continue;
+    if (yPosition > 200) { addPage(); yPosition = 12; }
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text(idx === 0 ? 'Family Physician:' : `Family Physician — Additional #${idx}:`, margin, yPosition);
+    yPosition += 5;
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    renderHealthProRow('Name:', (formData[`fp_health_${idx}_name` as keyof typeof formData] as string) || '', `fp_health_${idx}_name`);
+    renderHealthProRow('Clinic:', (formData[`fp_health_${idx}_clinic` as keyof typeof formData] as string) || '', `fp_health_${idx}_clinic`);
+    renderHealthProRow('Phone:', (formData[`fp_health_${idx}_phone` as keyof typeof formData] as string) || '', `fp_health_${idx}_phone`);
+    yPosition += 4;
+  }
+
+  // Specialist cards
+  if (formData.sp_health_has === 'yes') {
+    for (let idx = 0; idx < 5; idx++) {
+      const name = formData[`sp_health_${idx}_name` as keyof typeof formData] as string;
+      if (!name && idx > 0) break;
+      if (!name && idx === 0) continue;
+      if (yPosition > 200) { addPage(); yPosition = 12; }
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.text(idx === 0 ? 'Specialist:' : `Specialist — Additional #${idx}:`, margin, yPosition);
+      yPosition += 5;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      renderHealthProRow('Name:', (formData[`sp_health_${idx}_name` as keyof typeof formData] as string) || '', `sp_health_${idx}_name`);
+      renderHealthProRow('Specialty:', (formData[`sp_health_${idx}_specialty` as keyof typeof formData] as string) || '', `sp_health_${idx}_specialty`);
+      renderHealthProRow('Phone:', (formData[`sp_health_${idx}_phone` as keyof typeof formData] as string) || '', `sp_health_${idx}_phone`);
+      yPosition += 4;
+    }
+  }
+
+  // Pharmacist cards
+  for (let idx = 0; idx < 5; idx++) {
+    const name = formData[`ph_health_${idx}_name` as keyof typeof formData] as string;
+    if (!name && idx > 0) break;
+    if (!name && idx === 0) continue;
+    if (yPosition > 200) { addPage(); yPosition = 12; }
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text(idx === 0 ? 'Pharmacist:' : `Pharmacist — Additional #${idx}:`, margin, yPosition);
+    yPosition += 5;
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'normal');
+    renderHealthProRow('Name:', (formData[`ph_health_${idx}_name` as keyof typeof formData] as string) || '', `ph_health_${idx}_name`);
+    renderHealthProRow('Pharmacy:', (formData[`ph_health_${idx}_pharmacy` as keyof typeof formData] as string) || '', `ph_health_${idx}_pharmacy`);
+    renderHealthProRow('Phone:', (formData[`ph_health_${idx}_phone` as keyof typeof formData] as string) || '', `ph_health_${idx}_phone`);
+    yPosition += 4;
   }
 
   const c1RegData = (formData.client1RegisteredAccountData || {}) as Record<string, Array<Record<string, unknown>>>;

@@ -1088,6 +1088,22 @@ export default function StepForm({
       updated[index].supportNeedOther = undefined;
       updated[index].disabilityTaxCredit = undefined;
       updated[index].disabilityTaxCreditDocLocation = undefined;
+      updated[index].notSureSituation = undefined;
+      updated[index].notSureRelianceAreas = undefined;
+      updated[index].notSureFuture = undefined;
+    }
+
+    if (field === 'disabled' && value === 'yes') {
+      updated[index].notSureSituation = undefined;
+      updated[index].notSureRelianceAreas = undefined;
+      updated[index].notSureFuture = undefined;
+    }
+
+    if (field === 'disabled' && value === 'not_sure') {
+      updated[index].supportNeedTypes = undefined;
+      updated[index].supportNeedOther = undefined;
+      updated[index].disabilityTaxCredit = undefined;
+      updated[index].disabilityTaxCreditDocLocation = undefined;
     }
 
     if (field === 'disabilityTaxCredit' && value !== 'yes' && value !== 'in-progress') {
@@ -7551,12 +7567,108 @@ export default function StepForm({
                       </div>
                     </div>
 
-                    {(childrenData[index]?.disabled === 'yes' || childrenData[index]?.disabled === 'not_sure') && (
+                    {childrenData[index]?.disabled === 'not_sure' && (
                       <>
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
-                          <h4 className="text-base font-semibold text-blue-400">
-                            {childrenData[index]?.disabled === 'not_sure' ? 'Potential Future Support & Independence' : 'Future Support & Independence'}
-                          </h4>
+                          <h4 className="text-base font-semibold text-blue-400">Potential Future Support &amp; Independence</h4>
+                        </div>
+                        <p className="text-sm text-gray-300 italic mb-4">
+                          That's completely okay. Many parents don't yet know what level of independence their child will have as an adult. The next few questions simply help us identify whether additional planning may be helpful in the future.
+                        </p>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-3">
+                            What best describes your situation today?
+                          </label>
+                          <div className="flex flex-col gap-2">
+                            {[
+                              { value: 'expect_independent', label: "We expect they'll become fully independent." },
+                              { value: 'some_support', label: "We think they'll need some extra support as they get older." },
+                              { value: 'professionals_unsure', label: "Doctors or professionals aren't sure yet." },
+                              { value: 'too_young', label: "They're still too young to know." },
+                              { value: 'not_sure', label: "We're not sure." },
+                            ].map(({ value, label }) => (
+                              <label key={value} className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`notSureSituation-${index}`}
+                                  value={value}
+                                  checked={childrenData[index]?.notSureSituation === value}
+                                  onChange={(e) => handleChildChange(index, 'notSureSituation', e.target.value)}
+                                  className="mr-1"
+                                />
+                                <span className="text-gray-300 text-sm">{label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-3">
+                            Are there any areas where they currently rely on adults more than most children their age? (Select all that apply)
+                          </label>
+                          <div className="flex flex-col gap-2">
+                            {[
+                              { value: 'communication', label: 'Communication' },
+                              { value: 'learning', label: 'Learning' },
+                              { value: 'money', label: 'Money' },
+                              { value: 'safety_awareness', label: 'Safety awareness' },
+                              { value: 'medical_care', label: 'Medical care' },
+                              { value: 'personal_care', label: 'Personal care' },
+                              { value: 'mobility', label: 'Mobility' },
+                              { value: 'behaviour', label: 'Behaviour or emotional regulation' },
+                              { value: 'none', label: 'None of these' },
+                              { value: 'not_sure_reliance', label: "We're not sure" },
+                            ].map(({ value, label }) => {
+                              const current = (childrenData[index]?.notSureRelianceAreas || '').split(',').filter(Boolean);
+                              const checked = current.includes(value);
+                              return (
+                                <label key={value} className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => {
+                                      const next = checked ? current.filter(v => v !== value) : [...current, value];
+                                      handleChildChange(index, 'notSureRelianceAreas', next.join(','));
+                                    }}
+                                    className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                                  />
+                                  <span className="text-gray-300 text-sm">{label}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-3">
+                            Thinking 10 years from now, which statement feels closest to what you expect?
+                          </label>
+                          <div className="flex flex-col gap-2">
+                            {[
+                              { value: 'fully_independent', label: "They'll likely live completely independently." },
+                              { value: 'occasional_support', label: "They'll probably need occasional support." },
+                              { value: 'always_support', label: "They'll probably always have someone helping them make important decisions." },
+                              { value: 'dont_know', label: "We honestly don't know yet." },
+                            ].map(({ value, label }) => (
+                              <label key={value} className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`notSureFuture-${index}`}
+                                  value={value}
+                                  checked={childrenData[index]?.notSureFuture === value}
+                                  onChange={(e) => handleChildChange(index, 'notSureFuture', e.target.value)}
+                                  className="mr-1"
+                                />
+                                <span className="text-gray-300 text-sm">{label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {childrenData[index]?.disabled === 'yes' && (
+                      <>
+                        <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                          <h4 className="text-base font-semibold text-blue-400">Future Support &amp; Independence</h4>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-3">

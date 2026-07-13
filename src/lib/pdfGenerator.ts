@@ -11,6 +11,9 @@ interface ChildData {
   disabled?: string;
   disabilityTaxCredit?: string;
   disabilityTaxCreditDocLocation?: string;
+  notSureSituation?: string;
+  notSureRelianceAreas?: string;
+  notSureFuture?: string;
   independent?: string;
   medications?: string;
   medicationList?: string;
@@ -1684,13 +1687,108 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition += 6;
 
-      if (child.disabled === 'yes' || child.disabled === 'not_sure') {
+      if (child.disabled === 'not_sure') {
+        checkPageBreak(80);
+        addSubsectionHeader(`${nickname} Potential Future Support & Independence`);
+        yPosition += 4;
+
+        doc.setFontSize(8.5);
+        doc.setFont(undefined, 'italic');
+        doc.setTextColor(...colors.darkText);
+        const reassurance = "That's completely okay. Many parents don't yet know what level of independence their child will have as an adult. The next few questions simply help us identify whether additional planning may be helpful in the future.";
+        const reassuranceLines = doc.splitTextToSize(reassurance, fieldWidth - 4);
+        const reassuranceH = reassuranceLines.length * 5 + 4;
+        checkPageBreak(reassuranceH + 4);
+        doc.setFillColor(245, 247, 250);
+        doc.rect(margin, yPosition, fieldWidth, reassuranceH, 'F');
+        doc.setDrawColor(...colors.tableBorder);
+        doc.setLineWidth(0.3);
+        doc.rect(margin, yPosition, fieldWidth, reassuranceH);
+        reassuranceLines.forEach((line: string, li: number) => {
+          doc.text(line, margin + 2, yPosition + 5 + li * 5);
+        });
+        yPosition += reassuranceH + 6;
+
+        const notSureSituationLabels: Record<string, string> = {
+          expect_independent: "We expect they'll become fully independent.",
+          some_support: "We think they'll need some extra support as they get older.",
+          professionals_unsure: "Doctors or professionals aren't sure yet.",
+          too_young: "They're still too young to know.",
+          not_sure: "We're not sure.",
+        };
+        const notSureRelianceLabels: Record<string, string> = {
+          communication: 'Communication',
+          learning: 'Learning',
+          money: 'Money',
+          safety_awareness: 'Safety awareness',
+          medical_care: 'Medical care',
+          personal_care: 'Personal care',
+          mobility: 'Mobility',
+          behaviour: 'Behaviour or emotional regulation',
+          none: 'None of these',
+          not_sure_reliance: "We're not sure",
+        };
+        const notSureFutureLabels: Record<string, string> = {
+          fully_independent: "They'll likely live completely independently.",
+          occasional_support: "They'll probably need occasional support.",
+          always_support: "They'll probably always have someone helping them make important decisions.",
+          dont_know: "We honestly don't know yet.",
+        };
+
+        const notSureRelianceValue = (child.notSureRelianceAreas || '').split(',').filter(Boolean).map(v => notSureRelianceLabels[v] || v).join('; ');
+
+        const notSureRows: { label: string; value: string; large?: boolean }[] = [
+          { label: 'What best describes your situation today?', value: notSureSituationLabels[child.notSureSituation || ''] || '' },
+          { label: 'Are there any areas where they currently rely on adults more than most children their age? (Select all that apply)', value: notSureRelianceValue, large: true },
+          { label: 'Thinking 10 years from now, which statement feels closest to what you expect?', value: notSureFutureLabels[child.notSureFuture || ''] || '' },
+        ];
+
+        const disLabelWidth = fieldWidth * 0.40;
+        const disValueWidth = fieldWidth * 0.60;
+        const disRowH = 8;
+        const disLargeRowH = 28;
+
+        notSureRows.forEach((row, ri) => {
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          const labelLines = doc.splitTextToSize(row.label, disLabelWidth - 2);
+          const baseH = row.large ? disLargeRowH : disRowH;
+          const rowH = Math.max(baseH, labelLines.length * 5 + 3);
+          const rowY = yPosition;
+
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, rowY, disLabelWidth, rowH, 'FD');
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin + disLabelWidth, rowY, disValueWidth, rowH, 'FD');
+
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 1, rowY + 5);
+
+          const valField = new doc.AcroFormTextField();
+          valField.fieldName = `child_${index}_notsure_${ri}`;
+          valField.Rect = [margin + disLabelWidth + 0.5, rowY + 0.5, disValueWidth - 1, rowH - 1];
+          valField.fontSize = 8.5;
+          valField.textColor = colors.darkText;
+          valField.borderStyle = 'none';
+          valField.value = row.value || '';
+          if (row.large) valField.multiline = true;
+          doc.addField(valField);
+
+          yPosition += rowH;
+        });
+
+        yPosition += 6;
+      }
+
+      if (child.disabled === 'yes') {
         const disRows_preview: { large?: boolean }[] = [
           {}, {},
         ];
         const disPreviewH = disRows_preview.reduce((acc, r) => acc + (r.large ? 28 : 8), 0);
         checkPageBreak(20 + disPreviewH + 4);
-        const disabilitySubheading = child.disabled === 'not_sure' ? `${nickname} Potential Future Support & Independence` : `${nickname} Future Support & Independence`;
+        const disabilitySubheading = `${nickname} Future Support & Independence`;
         addSubsectionHeader(disabilitySubheading);
         yPosition += 2;
 

@@ -83,50 +83,6 @@ export default function StepForm({
   const [openInfoTooltip, setOpenInfoTooltip] = useState<string | null>(null);
 
   useEffect(() => {
-    const client1IsCameronSmith = answers['client1IsCameronSmithAdvisor'];
-    const client1AdvisorCount = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
-
-    if (client1IsCameronSmith === 'yes' && client1AdvisorCount > 0) {
-      const currentAdvisorsData = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
-
-      if (!currentAdvisorsData[0] || !currentAdvisorsData[0].name) {
-        const cameronSmithData = {
-          name: 'Cameron Smith',
-          firm: 'Clarify Wealth / Investment Planning Counsel',
-          phone: '(647) 448-5963',
-          email: 'Cameron.Smith@ipcsecurities.com'
-        };
-
-        const updatedData = [...currentAdvisorsData];
-        updatedData[0] = { ...cameronSmithData, ...updatedData[0] };
-        onAnswerChange('client1FinancialAdvisorsData', updatedData);
-      }
-    }
-  }, [answers['client1IsCameronSmithAdvisor'], answers['client1FinancialAdvisors']]);
-
-  useEffect(() => {
-    const client2IsCameronSmith = answers['client2IsCameronSmithAdvisor'];
-    const client2AdvisorCount = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
-
-    if (client2IsCameronSmith === 'yes' && client2AdvisorCount > 0) {
-      const currentAdvisorsData = (answers['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
-
-      if (!currentAdvisorsData[0] || !currentAdvisorsData[0].name) {
-        const cameronSmithData = {
-          name: 'Cameron Smith',
-          firm: 'Clarify Wealth / Investment Planning Counsel',
-          phone: '(647) 448-5963',
-          email: 'Cameron.Smith@ipcsecurities.com'
-        };
-
-        const updatedData = [...currentAdvisorsData];
-        updatedData[0] = { ...cameronSmithData, ...updatedData[0] };
-        onAnswerChange('client2FinancialAdvisorsData', updatedData);
-      }
-    }
-  }, [answers['client2IsCameronSmithAdvisor'], answers['client2FinancialAdvisors']]);
-
-  useEffect(() => {
     if (answers['spouseIsPoaPersonalCare'] === 'no') {
       if (answers['spousePoaPersonalCareHasDocCopy'] !== undefined) {
         onAnswerChange('spousePoaPersonalCareHasDocCopy', undefined);
@@ -703,14 +659,6 @@ export default function StepForm({
   }, [answers['client1PoaPropertyCount']]);
 
   useEffect(() => {
-    const count = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
-    const data = answers['client1FinancialAdvisorsData'] as Array<unknown> | undefined;
-    if (data && data.length > count) {
-      onAnswerChange('client1FinancialAdvisorsData', data.slice(0, count));
-    }
-  }, [answers['client1FinancialAdvisors']]);
-
-  useEffect(() => {
     const count = parseInt(answers['client2PoaPersonalCareCount'] as string) || 0;
     const data = answers['client2PoaPersonalCareData'] as Array<unknown> | undefined;
     if (data && data.length > count) {
@@ -733,14 +681,6 @@ export default function StepForm({
       onAnswerChange('client2PoaPropertyData', data.slice(0, count));
     }
   }, [answers['client2PoaPropertyCount']]);
-
-  useEffect(() => {
-    const count = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
-    const data = answers['client2FinancialAdvisorsData'] as Array<unknown> | undefined;
-    if (data && data.length > count) {
-      onAnswerChange('client2FinancialAdvisorsData', data.slice(0, count));
-    }
-  }, [answers['client2FinancialAdvisors']]);
 
   useEffect(() => {
     const count = parseInt(answers['client1EstateTrusteeCount'] as string) || 0;
@@ -1221,12 +1161,6 @@ export default function StepForm({
     const c2PoaPropAlt = (step14['client2AlternatePoaPropertyData'] as Array<Record<string, string>>) || [];
     c2PoaPropAlt.forEach((r, i) => addContact({ id: `c2poapropalt_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', city: r?.city || '', province: r?.province || '', source: 'poaprop2' }));
 
-    // Financial advisors
-    const c1FaData = (step7['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
-    c1FaData.forEach((r, i) => addContact({ id: `c1fa_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', source: 'fa1' }));
-    const c2FaData = (step7['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
-    c2FaData.forEach((r, i) => addContact({ id: `c2fa_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', source: 'fa2' }));
-
     // Trust beneficiaries
     for (let t = 1; t <= 4; t++) {
       const benData = (step4[`trust${t}BeneficiariesData`] as Array<Record<string, string>>) || [];
@@ -1596,19 +1530,6 @@ export default function StepForm({
     onAnswerChange('client1PoaPropertyData', updated);
   };
 
-  const client1FinancialAdvisorsCount = parseInt(answers['client1FinancialAdvisors'] as string) || 0;
-  const client1FinancialAdvisorsDataRaw = (answers['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
-  const client1FinancialAdvisorsData: Array<Record<string, string>> = Array.from({ length: client1FinancialAdvisorsCount }, (_, i) => client1FinancialAdvisorsDataRaw[i] || {});
-
-  const handleClient1FinancialAdvisorChange = (index: number, field: string, value: string) => {
-    const updated = [...client1FinancialAdvisorsData];
-    if (!updated[index]) {
-      updated[index] = {};
-    }
-    updated[index][field] = value;
-    onAnswerChange('client1FinancialAdvisorsData', updated);
-  };
-
   const client2PoaPersonalCareCount = parseInt(answers['client2PoaPersonalCareCount'] as string) || 0;
   const client2PoaPersonalCareData = (answers['client2PoaPersonalCareData'] as Array<Record<string, string>>) || Array(Math.max(0, client2PoaPersonalCareCount || 0)).fill(null).map(() => ({}));
 
@@ -1631,19 +1552,6 @@ export default function StepForm({
     }
     updated[index][field] = value;
     onAnswerChange('client2PoaPropertyData', updated);
-  };
-
-  const client2FinancialAdvisorsCount = parseInt(answers['client2FinancialAdvisors'] as string) || 0;
-  const client2FinancialAdvisorsDataRaw = (answers['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
-  const client2FinancialAdvisorsData: Array<Record<string, string>> = Array.from({ length: client2FinancialAdvisorsCount }, (_, i) => client2FinancialAdvisorsDataRaw[i] || {});
-
-  const handleClient2FinancialAdvisorChange = (index: number, field: string, value: string) => {
-    const updated = [...client2FinancialAdvisorsData];
-    if (!updated[index]) {
-      updated[index] = {};
-    }
-    updated[index][field] = value;
-    onAnswerChange('client2FinancialAdvisorsData', updated);
   };
 
   const trustBeneficiariesCount = parseInt(answers['trustBeneficiariesCount'] as string) || 0;
@@ -2965,15 +2873,6 @@ export default function StepForm({
                 ? question.label(allAnswers || new Map())
                 : question.label;
 
-              if (question.key === 'client1UsesAccountant') customLabel = `Do you (${client1Name}) use a professional accountant?`;
-              if (question.key === 'client2UsesAccountant') customLabel = `Does ${client2Name} use a professional accountant?`;
-              if (question.key === 'client1AccountingRecordsLocation') customLabel = `${client1Name}, where are your accounting records kept?`;
-              if (question.key === 'client2AccountingRecordsLocation') customLabel = `${client2Name}, where are your accounting records kept?`;
-              if (question.key === 'accountantSamePerson') customLabel = `${client1Name} and ${client2Name}, do you use the same accountant?`;
-              if (question.key === 'client1IsCameronSmithAdvisor') customLabel = `${client1Name}, is Cameron Smith, CFP® your financial advisor?`;
-              if (question.key === 'client1FinancialAdvisors') customLabel = `${client1Name}, how many Financial Advisors do you work with?`;
-              if (question.key === 'client2IsCameronSmithAdvisor') customLabel = `${client2Name}, is Cameron Smith, CFP® your financial advisor?`;
-              if (question.key === 'client2FinancialAdvisors') customLabel = `${client2Name}, how many Financial Advisors do you work with?`;
               if (question.key === 'client1HasFuneralArrangements') customLabel = `${client1Name}, have you made arrangements for Funeral or Cemetery services?`;
               if (question.key === 'client1FuneralArrangementsLocation') customLabel = `Where is this document located?`;
               if (question.key === 'client1HasDiscussedFuneral') customLabel = `${client1Name}, have you communicated to your loved ones what type of funeral you would like to have?`;
@@ -3232,9 +3131,6 @@ export default function StepForm({
                   return null;
                 }
 
-                if (question.key === 'client2UsesAccountant' && !hasSpouse) {
-                  return null;
-                }
                 if (question.key === 'spouseIsPoaPersonalCare') {
                   const basicAnswers = allAnswers?.get(1);
                   const maritalStatus = basicAnswers?.maritalStatus;
@@ -3334,57 +3230,7 @@ export default function StepForm({
                 if (question.key === 'client2FuneralDocLocation' && (!hasSpouse || answers['client2FuneralWrittenDown'] !== 'yes')) {
                   return null;
                 }
-                if (question.key === 'client1AccountingRecordsLocation' && answers['client1UsesAccountant'] !== 'no') {
-                  return null;
-                }
-                if (question.key === 'client2AccountingRecordsLocation' && (answers['client2UsesAccountant'] !== 'no' || !hasSpouse)) {
-                  return null;
-                }
-                if (question.key === 'accountantSamePerson' && !(answers['client1UsesAccountant'] === 'yes' && answers['client2UsesAccountant'] === 'yes')) {
-                  return null;
-                }
-                if (question.key === 'client2FinancialAdvisors' && !hasSpouse) {
-                  return null;
-                }
-                if (question.key === 'client2IsCameronSmithAdvisor' && !hasSpouse) {
-                  return null;
-                }
-
-                let customLabel = typeof question.label === 'function'
-                  ? question.label(allAnswers || new Map())
-                  : question.label;
-
-                if (question.key === 'client1UsesAccountant') {
-                  customLabel = `Do you (${client1Name}) use a professional accountant?`;
-                }
-                if (question.key === 'client2UsesAccountant') {
-                  customLabel = `Does ${client2Name} use a professional accountant?`;
-                }
-                if (question.key === 'client1AccountingRecordsLocation') {
-                  customLabel = `${client1Name}, where are your accounting records kept?`;
-                }
-                if (question.key === 'client2AccountingRecordsLocation') {
-                  customLabel = `${client2Name}, where are your accounting records kept?`;
-                }
-                if (question.key === 'accountantSamePerson') {
-                  customLabel = `${client1Name} and ${client2Name}, do you use the same accountant?`;
-                }
-                if (question.key === 'client1IsCameronSmithAdvisor') {
-                  customLabel = `${client1Name}, is Cameron Smith, CFP® your financial advisor?`;
-                }
-                if (question.key === 'client1FinancialAdvisors') {
-                  customLabel = `${client1Name}, how many Financial Advisors do you work with?`;
-                }
-                if (question.key === 'client2IsCameronSmithAdvisor') {
-                  customLabel = `${client2Name}, is Cameron Smith, CFP® your financial advisor?`;
-                }
-                if (question.key === 'client2FinancialAdvisors') {
-                  customLabel = `${client2Name}, how many Financial Advisors do you work with?`;
-                }
-                if (question.key === 'client1HasFuneralArrangements') {
-                  customLabel = `${client1Name}, have you made arrangements for Funeral or Cemetery services?`;
-                }
-                if (question.key === 'client1FuneralArrangementsLocation') {
+                if (question.key === 'client1FuneralArrangementsLocation' && answers['client1HasFuneralArrangements'] !== 'yes') {
                   customLabel = `Where is this document located?`;
                 }
                 if (question.key === 'client1HasDiscussedFuneral') {
@@ -4989,156 +4835,18 @@ export default function StepForm({
           })()}
 
           {step.id === 7 && (() => {
-            const basicAnswers = allAnswers?.get(1) || {};
-            const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
-            const client1Name = basicAnswers['fullName'] as string || 'you';
-            const client2Name = basicAnswers['spouseName'] as string || 'your spouse';
-
             return (
               <>
                 {step.questions.map((question) => {
-                  if (question.key === 'client2UsesAccountant' && !hasSpouse) return null;
-                  if (question.key === 'client2AccountingRecordsLocation' && !hasSpouse) return null;
-                  if (question.key === 'accountantSamePerson' && !hasSpouse) return null;
-                  if (question.key === 'client2IsCameronSmithAdvisor' && !hasSpouse) return null;
-                  if (question.key === 'client2FinancialAdvisors' && !hasSpouse) return null;
-
-                  let customLabel = question.label;
-                  if (question.key === 'client1UsesAccountant') {
-                    customLabel = `${client1Name}, do you use a professional accountant?`;
-                  }
-                  if (question.key === 'client1IsCameronSmithAdvisor') {
-                    customLabel = `${client1Name}, is Cameron Smith, CFP® your financial advisor?`;
-                  }
-                  if (question.key === 'client1FinancialAdvisors') {
-                    customLabel = `${client1Name}, how many Financial Advisors do you work with?`;
-                  }
-                  if (question.key === 'client2IsCameronSmithAdvisor') {
-                    customLabel = `${client2Name}, is Cameron Smith, CFP® your financial advisor?`;
-                  }
-                  if (question.key === 'client2FinancialAdvisors') {
-                    customLabel = `${client2Name}, how many Financial Advisors do you work with?`;
-                  }
-
                   return (
                     <FormField
                       key={question.key}
-                      question={{ ...question, label: customLabel }}
+                      question={question}
                       value={answers[question.key]}
                       onChange={(value) => onAnswerChange(question.key, value)}
                     />
                   );
                 })}
-
-                {client1FinancialAdvisorsCount > 0 && (
-                  <div className="space-y-6 mt-6">
-                    <h3 className="text-xl font-semibold text-white">
-                      {allAnswers?.get(1)?.fullName || 'Client 1'}'s financial advisor's details:
-                    </h3>
-                    {Array.from({ length: client1FinancialAdvisorsCount }).map((_, index) => (
-                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                        <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Name *</label>
-                            <input
-                              type="text"
-                              value={client1FinancialAdvisorsData[index]?.name || ''}
-                              onChange={(e) => handleClient1FinancialAdvisorChange(index, 'name', e.target.value)}
-                              placeholder="Enter name"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Firm/Company *</label>
-                            <input
-                              type="text"
-                              value={client1FinancialAdvisorsData[index]?.firm || ''}
-                              onChange={(e) => handleClient1FinancialAdvisorChange(index, 'firm', e.target.value)}
-                              placeholder="Enter firm/company name"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
-                            <input
-                              type="text"
-                              value={client1FinancialAdvisorsData[index]?.phone || ''}
-                              onChange={(e) => handleClient1FinancialAdvisorChange(index, 'phone', e.target.value)}
-                              placeholder="Enter phone number"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
-                            <input
-                              type="email"
-                              value={client1FinancialAdvisorsData[index]?.email || ''}
-                              onChange={(e) => handleClient1FinancialAdvisorChange(index, 'email', e.target.value)}
-                              placeholder="Enter email address"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {client2FinancialAdvisorsCount > 0 && (
-                  <div className="space-y-6 mt-6">
-                    <h3 className="text-xl font-semibold text-white">
-                      {allAnswers?.get(1)?.spouseName || 'Client 2'}'s financial advisor's details:
-                    </h3>
-                    {Array.from({ length: client2FinancialAdvisorsCount }).map((_, index) => (
-                      <div key={index} className="border border-gray-600 rounded-lg p-6 bg-gray-700">
-                        <h4 className="text-lg font-semibold text-white mb-4">Financial Advisor #{index + 1}</h4>
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Name *</label>
-                            <input
-                              type="text"
-                              value={client2FinancialAdvisorsData[index]?.name || ''}
-                              onChange={(e) => handleClient2FinancialAdvisorChange(index, 'name', e.target.value)}
-                              placeholder="Enter name"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Firm/Company *</label>
-                            <input
-                              type="text"
-                              value={client2FinancialAdvisorsData[index]?.firm || ''}
-                              onChange={(e) => handleClient2FinancialAdvisorChange(index, 'firm', e.target.value)}
-                              placeholder="Enter firm/company name"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
-                            <input
-                              type="text"
-                              value={client2FinancialAdvisorsData[index]?.phone || ''}
-                              onChange={(e) => handleClient2FinancialAdvisorChange(index, 'phone', e.target.value)}
-                              placeholder="Enter phone number"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
-                            <input
-                              type="email"
-                              value={client2FinancialAdvisorsData[index]?.email || ''}
-                              onChange={(e) => handleClient2FinancialAdvisorChange(index, 'email', e.target.value)}
-                              placeholder="Enter email address"
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </>
             );
           })()}
@@ -6021,8 +5729,6 @@ export default function StepForm({
                   const s2 = allAnswers?.get(2) || {};
                   const s3 = allAnswers?.get(3) || {};
                   const s7 = allAnswers?.get(7) || {};
-                  const advisorsData = (s7['client1FinancialAdvisorsData'] as Array<Record<string,string>>) || [];
-                  const advisors = advisorsData.filter(a => a?.name || a?.firm);
                   const knownNames: string[] = [];
                   if (hasSpouse) knownNames.push(client2Name);
                   (s2['client1PreviousRelationshipsData'] as Array<Record<string,string>> || []).forEach(r => { if (r?.name && !knownNames.includes(r.name)) knownNames.push(r.name); });
@@ -6991,90 +6697,16 @@ export default function StepForm({
                             <div className="p-4 bg-gray-700 rounded-lg space-y-4">
                             <h5 className="text-sm font-semibold text-white">{label}</h5>
                             {insts.map((inst, instIdx) => {
-                              const advisorSel = (inst.advisorSelection as string) || '';
                               const instLabel = (inst.institution as string) || '';
 
                               const renderAdvisorQuestion = () => {
-                                if (advisors.length === 0) {
-                                  return (
-                                    <div>
-                                      <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., TD Waterhouse, Edward Jones, RBC Direct Investing</p>
-                                      <input type="text" value={instLabel}
-                                        onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
-                                        placeholder=""
-                                        className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                                    </div>
-                                  );
-                                }
-
-                                if (advisors.length === 1) {
-                                  const a = advisors[0];
-                                  const displayFirm = a.firm || a.name;
-                                  const displayName = a.name || a.firm;
-                                  return (
-                                    <div className="space-y-3">
-                                      <label className="block text-sm font-medium text-gray-300">
-                                        Is this held at {displayFirm} with {displayName}?
-                                      </label>
-                                      <div className="flex gap-4">
-                                        {(['yes', 'no'] as const).map(opt => (
-                                          <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                                            <input type="radio" name={`advisor-sel-${key}-${instIdx}`} value={opt}
-                                              checked={advisorSel === opt}
-                                              onChange={() => {
-                                                const cur = [...getInsts(key)];
-                                                cur[instIdx] = { ...cur[instIdx], advisorSelection: opt, institution: opt === 'yes' ? `${displayFirm} (${displayName})` : '' };
-                                                setInsts(key, cur);
-                                              }}
-                                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                                            <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
-                                          </label>
-                                        ))}
-                                      </div>
-                                      {advisorSel === 'no' && (
-                                        <input type="text" value={instLabel}
-                                          onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
-                                          placeholder="Enter institution / advisor name"
-                                          className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                                      )}
-                                    </div>
-                                  );
-                                }
-
                                 return (
-                                  <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-300">Institution / Advisor:</label>
-                                    {advisors.map((a, aIdx) => {
-                                      const displayFirm = a.firm || a.name;
-                                      const displayName = a.name || a.firm;
-                                      const val = `advisor_${aIdx}`;
-                                      return (
-                                        <label key={aIdx} className="flex items-center gap-3 cursor-pointer">
-                                          <input type="radio" name={`advisor-sel-${key}-${instIdx}`} value={val}
-                                            checked={advisorSel === val}
-                                            onChange={() => {
-                                              const cur = [...getInsts(key)];
-                                              cur[instIdx] = { ...cur[instIdx], advisorSelection: val, institution: `${displayFirm} (${displayName})` };
-                                              setInsts(key, cur);
-                                            }}
-                                            className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                                          <span className="text-white text-sm">{displayFirm} — {displayName}</span>
-                                        </label>
-                                      );
-                                    })}
-                                    <label className="flex items-center gap-3 cursor-pointer">
-                                      <input type="radio" name={`advisor-sel-${key}-${instIdx}`} value="other"
-                                        checked={advisorSel === 'other'}
-                                        onChange={() => { const cur = [...getInsts(key)]; cur[instIdx] = { ...cur[instIdx], advisorSelection: 'other', institution: '' }; setInsts(key, cur); }}
-                                        className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                                      <span className="text-white text-sm">Other</span>
-                                    </label>
-                                    {advisorSel === 'other' && (
-                                      <input type="text" value={instLabel}
-                                        onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
-                                        placeholder="Enter institution / advisor name"
-                                        className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                                    )}
+                                  <div>
+                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., TD Waterhouse, Edward Jones, RBC Direct Investing</p>
+                                    <input type="text" value={instLabel}
+                                      onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
+                                      placeholder=""
+                                      className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                                   </div>
                                 );
                               };

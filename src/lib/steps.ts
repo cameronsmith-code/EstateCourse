@@ -680,7 +680,10 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2UsesAccountant',
-        label: 'Does your spouse use a professional accountant?',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `Does ${name} use a professional accountant?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },

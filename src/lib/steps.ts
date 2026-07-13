@@ -658,7 +658,7 @@ export const STEPS: Step[] = [
   },
   {
     id: 7,
-    title: 'Your Professionals',
+    title: 'Your Professional Team',
     description: 'Information about the professionals you work with',
     questions: [
       {

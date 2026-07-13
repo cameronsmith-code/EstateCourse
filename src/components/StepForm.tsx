@@ -1135,15 +1135,29 @@ export default function StepForm({
   const buildPrefilledContacts = (childIndex: number): { id: string; name: string; phone: string; email: string; city: string; province: string; source: string }[] => {
     const child = childrenData[childIndex] || {};
     const contacts: { id: string; name: string; phone: string; email: string; city: string; province: string; source: string }[] = [];
+    const seenNames = new Set<string>();
+
+    const addContact = (c: { id: string; name: string; phone?: string; email?: string; city?: string; province?: string; source: string }) => {
+      const trimmed = (c.name || '').trim();
+      if (!trimmed) return;
+      const key = trimmed.toLowerCase();
+      if (seenNames.has(key)) return;
+      seenNames.add(key);
+      contacts.push({ id: c.id, name: trimmed, phone: c.phone || '', email: c.email || '', city: c.city || '', province: c.province || '', source: c.source });
+    };
 
     const step1 = allAnswers?.get(1) || {};
+    const step2 = allAnswers?.get(2) || {};
+    const step4 = allAnswers?.get(4) || {};
+    const step7 = allAnswers?.get(7) || {};
+    const step14 = allAnswers?.get(14) || {};
     const hasSpouse = step1['maritalStatus'] === 'married' || step1['maritalStatus'] === 'common_law';
 
     if (child.parentsOption === 'both' || child.parentsOption === 'parent1') {
-      contacts.push({ id: 'parent1', name: step1['fullName'] as string || '', phone: step1['phone'] as string || '', email: step1['email'] as string || '', city: step1['city'] as string || '', province: step1['province'] as string || '', source: 'parent1' });
+      addContact({ id: 'parent1', name: step1['fullName'] as string || '', phone: step1['phone'] as string || '', email: step1['email'] as string || '', city: step1['city'] as string || '', province: step1['province'] as string || '', source: 'parent1' });
     }
     if (hasSpouse && (child.parentsOption === 'both' || child.parentsOption === 'parent2')) {
-      contacts.push({ id: 'parent2', name: step1['spouseName'] as string || '', phone: step1['spousePhone'] as string || '', email: step1['spouseEmail'] as string || '', city: step1['spouseCity'] as string || '', province: step1['spouseProvince'] as string || '', source: 'parent2' });
+      addContact({ id: 'parent2', name: step1['spouseName'] as string || '', phone: step1['spousePhone'] as string || '', email: step1['spouseEmail'] as string || '', city: step1['spouseCity'] as string || '', province: step1['spouseProvince'] as string || '', source: 'parent2' });
     }
 
     if (child.careCoordinators) {
@@ -1151,7 +1165,7 @@ export default function StepForm({
 
       if (selected.includes('sibling') && child.careCoordSiblingNames) {
         child.careCoordSiblingNames.split(',').map(s => s.trim()).filter(Boolean).forEach((sibName, si) => {
-          contacts.push({ id: `sibling_${si}`, name: sibName, phone: '', email: '', city: '', province: '', source: 'sibling' });
+          addContact({ id: `sibling_${si}`, name: sibName, source: 'sibling' });
         });
       }
 
@@ -1159,11 +1173,9 @@ export default function StepForm({
         if (!selected.includes(cat)) return;
         const count = parseInt(child[`careCoord_${cat}_count`] || '1');
         for (let ci = 0; ci < count; ci++) {
-          const name = child[`careCoord_${cat}_${ci}_name`];
-          if (!name) continue;
-          contacts.push({
+          addContact({
             id: `${cat}_${ci}`,
-            name,
+            name: child[`careCoord_${cat}_${ci}_name`],
             phone: child[`careCoord_${cat}_${ci}_phone`] || '',
             email: child[`careCoord_${cat}_${ci}_email`] || '',
             city: child[`careCoord_${cat}_${ci}_city`] || '',
@@ -1173,6 +1185,66 @@ export default function StepForm({
         }
       });
     }
+
+    // Past relationships (former partners)
+    const c1PrevRels = (step2['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+    c1PrevRels.forEach((r, i) => addContact({ id: `c1prevrel_${i}`, name: r?.name || '', source: 'prevrel1' }));
+    const c2PrevRels = (step2['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+    c2PrevRels.forEach((r, i) => addContact({ id: `c2prevrel_${i}`, name: r?.name || '', source: 'prevrel2' }));
+
+    // Estate trustees / executors
+    addContact({ id: 'c1et', name: step14['client1EstateTrusteeName'] as string || '', phone: step14['client1EstateTrusteePhone'] as string || '', email: step14['client1EstateTrusteeEmail'] as string || '', city: step14['client1EstateTrusteeCity'] as string || '', province: step14['client1EstateTrusteeProvince'] as string || '', source: 'et1' });
+    addContact({ id: 'c2et', name: step14['client2EstateTrusteeName'] as string || '', phone: step14['client2EstateTrusteePhone'] as string || '', email: step14['client2EstateTrusteeEmail'] as string || '', city: step14['client2EstateTrusteeCity'] as string || '', province: step14['client2EstateTrusteeProvince'] as string || '', source: 'et2' });
+    const c1EtData = (step14['client1EstateTrusteeData'] as Array<Record<string, string>>) || [];
+    c1EtData.forEach((r, i) => addContact({ id: `c1etalt_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', city: r?.city || '', province: r?.province || '', source: 'et1' }));
+    const c2EtData = (step14['client2EstateTrusteeData'] as Array<Record<string, string>>) || [];
+    c2EtData.forEach((r, i) => addContact({ id: `c2etalt_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', city: r?.city || '', province: r?.province || '', source: 'et2' }));
+
+    // Power of Attorney — Personal Care
+    addContact({ id: 'c1poapc', name: step14['client1PoaPersonalCareName'] as string || '', phone: step14['client1PoaPersonalCarePhone'] as string || '', email: step14['client1PoaPersonalCareEmail'] as string || '', city: step14['client1PoaPersonalCareCity'] as string || '', province: step14['client1PoaPersonalCareProvince'] as string || '', source: 'poapc1' });
+    addContact({ id: 'c2poapc', name: step14['client2PoaPersonalCareName'] as string || '', phone: step14['client2PoaPersonalCarePhone'] as string || '', email: step14['client2PoaPersonalCareEmail'] as string || '', city: step14['client2PoaPersonalCareCity'] as string || '', province: step14['client2PoaPersonalCareProvince'] as string || '', source: 'poapc2' });
+    const c1PoaPcAlt = (step14['client1AlternatePoaPersonalCareData'] as Array<Record<string, string>>) || [];
+    c1PoaPcAlt.forEach((r, i) => addContact({ id: `c1poapcalt_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', city: r?.city || '', province: r?.province || '', source: 'poapc1' }));
+    const c2PoaPcAlt = (step14['client2AlternatePoaPersonalCareData'] as Array<Record<string, string>>) || [];
+    c2PoaPcAlt.forEach((r, i) => addContact({ id: `c2poapcalt_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', city: r?.city || '', province: r?.province || '', source: 'poapc2' }));
+
+    // Power of Attorney — Property
+    addContact({ id: 'c1poaprop', name: step14['client1PoaPropertyName'] as string || '', phone: step14['client1PoaPropertyPhone'] as string || '', email: step14['client1PoaPropertyEmail'] as string || '', city: step14['client1PoaPropertyCity'] as string || '', province: step14['client1PoaPropertyProvince'] as string || '', source: 'poaprop1' });
+    addContact({ id: 'c2poaprop', name: step14['client2PoaPropertyName'] as string || '', phone: step14['client2PoaPropertyPhone'] as string || '', email: step14['client2PoaPropertyEmail'] as string || '', city: step14['client2PoaPropertyCity'] as string || '', province: step14['client2PoaPropertyProvince'] as string || '', source: 'poaprop2' });
+    const c1PoaPropAlt = (step14['client1AlternatePoaPropertyData'] as Array<Record<string, string>>) || [];
+    c1PoaPropAlt.forEach((r, i) => addContact({ id: `c1poapropalt_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', city: r?.city || '', province: r?.province || '', source: 'poaprop1' }));
+    const c2PoaPropAlt = (step14['client2AlternatePoaPropertyData'] as Array<Record<string, string>>) || [];
+    c2PoaPropAlt.forEach((r, i) => addContact({ id: `c2poapropalt_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', city: r?.city || '', province: r?.province || '', source: 'poaprop2' }));
+
+    // Financial advisors
+    const c1FaData = (step7['client1FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
+    c1FaData.forEach((r, i) => addContact({ id: `c1fa_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', source: 'fa1' }));
+    const c2FaData = (step7['client2FinancialAdvisorsData'] as Array<Record<string, string>>) || [];
+    c2FaData.forEach((r, i) => addContact({ id: `c2fa_${i}`, name: r?.name || '', phone: r?.phone || '', email: r?.email || '', source: 'fa2' }));
+
+    // Trust beneficiaries
+    for (let t = 1; t <= 4; t++) {
+      const benData = (step4[`trust${t}BeneficiariesData`] as Array<Record<string, string>>) || [];
+      benData.forEach((r, i) => addContact({ id: `trust${t}ben_${i}`, name: r?.beneficiaryName || '', phone: r?.phoneNumber || '', email: r?.emailAddress || '', source: 'trustben' }));
+    }
+
+    // Adult children (from childrenData — other children who could be caregivers)
+    (childrenData || []).forEach((sib, si) => {
+      if (si === childIndex) return;
+      const sibName = (sib?.name || '').trim();
+      if (!sibName) return;
+      const dob = sib?.dateOfBirth || '';
+      const today = new Date();
+      let isAdult = true;
+      if (dob) {
+        const birth = new Date(dob);
+        const age = today.getFullYear() - birth.getFullYear();
+        isAdult = age >= 18;
+      }
+      if (isAdult) {
+        addContact({ id: `sibchild_${si}`, name: sibName, source: 'adultchild' });
+      }
+    });
 
     return contacts;
   };
@@ -8275,6 +8347,18 @@ export default function StepForm({
                         school: 'School Team',
                         doctor: 'Doctor / Therapist / Support Worker',
                         other: 'Other',
+                        prevrel1: 'Former Partner (Client 1)',
+                        prevrel2: 'Former Partner (Client 2)',
+                        et1: 'Estate Trustee (Client 1)',
+                        et2: 'Estate Trustee (Client 2)',
+                        poapc1: 'POA — Personal Care (Client 1)',
+                        poapc2: 'POA — Personal Care (Client 2)',
+                        poaprop1: 'POA — Property (Client 1)',
+                        poaprop2: 'POA — Property (Client 2)',
+                        fa1: 'Financial Advisor (Client 1)',
+                        fa2: 'Financial Advisor (Client 2)',
+                        trustben: 'Trust Beneficiary',
+                        adultchild: 'Adult Child',
                       };
 
                       const renderContactFields = (fieldPrefix: string, ci: number, defaults?: { name?: string; phone?: string; email?: string; city?: string; province?: string }) => (

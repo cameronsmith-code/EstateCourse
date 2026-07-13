@@ -1148,6 +1148,9 @@ export default function StepForm({
       updated[index].notSureRelianceAreas = undefined;
       updated[index].notSureFuture = undefined;
       clearCareCoordFields(updated[index]);
+      updated[index].futureIndependenceLevel = undefined;
+      updated[index].futureFinancialHelp = undefined;
+      updated[index].futurePersonalHealthHelp = undefined;
     }
 
     if (field === 'disabled' && value === 'yes') {
@@ -1181,6 +1184,11 @@ export default function StepForm({
     if (field.startsWith('careCoord') && field.endsWith('Additional') && value === 'no') {
       const prefix = field.replace('Additional', '');
       clearCareCoordFromPrefix(updated[index], prefix);
+    }
+
+    if (field === 'futureIndependenceLevel' && (value === 'likely_independent' || value === 'too_early')) {
+      updated[index].futureFinancialHelp = undefined;
+      updated[index].futurePersonalHealthHelp = undefined;
     }
 
     if (field === 'medications' && value === 'no') {
@@ -7987,6 +7995,101 @@ export default function StepForm({
                       })}
 
                     </>
+                    )}
+
+                    <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                      <h4 className="text-base font-semibold text-blue-400">Looking Ahead to Adulthood</h4>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-3">
+                        As they get older, what level of independence do you expect?
+                      </label>
+                      <div className="flex flex-col gap-2">
+                        {[
+                          { value: 'likely_independent', label: 'Likely independent as an adult' },
+                          { value: 'mostly_independent', label: 'Mostly independent, with some support' },
+                          { value: 'support_money', label: 'Will likely need ongoing support with money decisions' },
+                          { value: 'support_health', label: 'Will likely need ongoing support with health or personal care decisions' },
+                          { value: 'significant_lifelong', label: 'Will likely need significant lifelong support' },
+                          { value: 'too_early', label: 'Too early to know' },
+                        ].map(({ value, label }) => (
+                          <label key={value} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`futureIndependence-${index}`}
+                              value={value}
+                              checked={childrenData[index]?.futureIndependenceLevel === value}
+                              onChange={(e) => handleChildChange(index, 'futureIndependenceLevel', e.target.value)}
+                              className="mr-1"
+                            />
+                            <span className="text-gray-300 text-sm">{label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {(() => {
+                      const lvl = childrenData[index]?.futureIndependenceLevel;
+                      return lvl && lvl !== 'likely_independent' && lvl !== 'too_early';
+                    })() && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-3">
+                            Do you expect they may need help with financial decisions as an adult?
+                          </label>
+                          <div className="flex gap-4">
+                            {[
+                              { value: 'yes', label: 'Yes' },
+                              { value: 'no', label: 'No' },
+                              { value: 'unsure', label: 'Unsure' },
+                            ].map(({ value, label }) => (
+                              <label key={value} className="flex items-center cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`futureFinancialHelp-${index}`}
+                                  value={value}
+                                  checked={childrenData[index]?.futureFinancialHelp === value}
+                                  onChange={(e) => handleChildChange(index, 'futureFinancialHelp', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300 text-sm">{label}</span>
+                              </label>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-400 italic mt-2">
+                            Examples: Managing bank accounts, government benefits, RDSP, rent, bills, investments, signing documents.
+                          </p>
+                        </div>
+
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-3">
+                            Do you expect they may need help with personal or healthcare decisions as an adult?
+                          </label>
+                          <div className="flex gap-4">
+                            {[
+                              { value: 'yes', label: 'Yes' },
+                              { value: 'no', label: 'No' },
+                              { value: 'unsure', label: 'Unsure' },
+                            ].map(({ value, label }) => (
+                              <label key={value} className="flex items-center cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`futurePersonalHealthHelp-${index}`}
+                                  value={value}
+                                  checked={childrenData[index]?.futurePersonalHealthHelp === value}
+                                  onChange={(e) => handleChildChange(index, 'futurePersonalHealthHelp', e.target.value)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300 text-sm">{label}</span>
+                              </label>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-400 italic mt-2">
+                            Examples: Medical consent, housing, daily care, safety, services, appointments.
+                          </p>
+                        </div>
+                      </>
                     )}
 
                     <div className="mt-6 pb-2 border-b border-gray-500 mb-2">

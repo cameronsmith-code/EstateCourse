@@ -14,6 +14,9 @@ interface ChildData {
   notSureSituation?: string;
   notSureRelianceAreas?: string;
   notSureFuture?: string;
+  futureIndependenceLevel?: string;
+  futureFinancialHelp?: string;
+  futurePersonalHealthHelp?: string;
   independent?: string;
   medications?: string;
   medicationList?: string;
@@ -1984,6 +1987,87 @@ export const generatePDF = (formData: FormData) => {
 
           yPosition += 6;
         }
+      }
+
+      if (child.futureIndependenceLevel) {
+        checkPageBreak(30);
+        addSubsectionHeader(`${nickname} Looking Ahead to Adulthood`);
+        yPosition += 2;
+
+        const independenceLabels: Record<string, string> = {
+          likely_independent: 'Likely independent as an adult',
+          mostly_independent: 'Mostly independent, with some support',
+          support_money: 'Will likely need ongoing support with money decisions',
+          support_health: 'Will likely need ongoing support with health or personal care decisions',
+          significant_lifelong: 'Will likely need significant lifelong support',
+          too_early: 'Too early to know',
+        };
+
+        const lookingAheadRows: { label: string; value: string; large?: boolean }[] = [
+          { label: 'As they get older, what level of independence do you expect?', value: independenceLabels[child.futureIndependenceLevel] || '' },
+        ];
+
+        const showHelp = child.futureIndependenceLevel !== 'likely_independent' && child.futureIndependenceLevel !== 'too_early';
+        if (showHelp) {
+          lookingAheadRows.push({
+            label: 'Do you expect they may need help with financial decisions as an adult?',
+            value: child.futureFinancialHelp === 'yes' ? 'Yes' : child.futureFinancialHelp === 'no' ? 'No' : child.futureFinancialHelp === 'unsure' ? 'Unsure' : '',
+          });
+          lookingAheadRows.push({
+            label: 'Do you expect they may need help with personal or healthcare decisions as an adult?',
+            value: child.futurePersonalHealthHelp === 'yes' ? 'Yes' : child.futurePersonalHealthHelp === 'no' ? 'No' : child.futurePersonalHealthHelp === 'unsure' ? 'Unsure' : '',
+          });
+        }
+
+        const laLabelWidth = fieldWidth * 0.40;
+        const laValueWidth = fieldWidth * 0.60;
+        const laRowH = 8;
+
+        lookingAheadRows.forEach((row, ri) => {
+          doc.setFontSize(8.5);
+          doc.setFont(undefined, 'normal');
+          const labelLines = doc.splitTextToSize(row.label, laLabelWidth - 2);
+          const rowH = Math.max(laRowH, labelLines.length * 5 + 3);
+          const rowY = yPosition;
+
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, rowY, laLabelWidth, rowH, 'FD');
+          doc.rect(margin + laLabelWidth, rowY, laValueWidth, rowH, 'FD');
+
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 1, rowY + 5);
+
+          const valField = new doc.AcroFormTextField();
+          valField.fieldName = `child_${index}_lookingahead_${ri}`;
+          valField.Rect = [margin + laLabelWidth + 0.5, rowY + 0.5, laValueWidth - 1, rowH - 1];
+          valField.fontSize = 8.5;
+          valField.textColor = colors.darkText;
+          valField.borderStyle = 'none';
+          valField.value = row.value || '';
+          doc.addField(valField);
+
+          yPosition += rowH;
+        });
+
+        if (showHelp) {
+          const examples = [
+            'Examples (financial): Managing bank accounts, government benefits, RDSP, rent, bills, investments, signing documents.',
+            'Examples (personal/health): Medical consent, housing, daily care, safety, services, appointments.',
+          ];
+          doc.setFontSize(7.5);
+          doc.setFont(undefined, 'italic');
+          doc.setTextColor(...colors.mediumGray);
+          examples.forEach(ex => {
+            const exLines = doc.splitTextToSize(ex, fieldWidth - 4);
+            checkPageBreak(exLines.length * 4 + 2);
+            doc.text(exLines, margin + 2, yPosition + 4);
+            yPosition += exLines.length * 4 + 2;
+          });
+        }
+
+        yPosition += 6;
       }
 
       const isMinor = (() => {

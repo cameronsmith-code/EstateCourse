@@ -21,6 +21,9 @@ interface ChildData {
   futureCareTeamResponsibility?: string;
   futureCareTeamOtherCount?: string;
   futureCareTeamOtherAdditional?: string;
+  futureCareTeamExtra?: string;
+  futureCareTeamExtraCount?: string;
+  futureCareTeamExtraAdditional?: string;
   independent?: string;
   medications?: string;
   medicationList?: string;
@@ -2178,6 +2181,13 @@ export const generatePDF = (formData: FormData) => {
 
         for (let oi = 0; oi < otherCount; oi++) {
           renderContactBlock(`Other Contact ${oi + 1}`, `futureCareTeamOther_${oi}`, oi);
+        }
+
+        if (child.futureCareTeamExtra === 'yes') {
+          const extraCount = parseInt(child.futureCareTeamExtraCount || '0');
+          for (let ei = 0; ei < extraCount; ei++) {
+            renderContactBlock(`Additional Person ${ei + 1}`, `futureCareTeamExtra_${ei}`, ei);
+          }
         }
 
         if (child.futureCareTeamResponsibility) {

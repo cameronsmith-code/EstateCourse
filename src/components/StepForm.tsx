@@ -1205,6 +1205,18 @@ export default function StepForm({
       delete obj[`futureCareTeamOther_${i}_relationship`];
       delete obj[`futureCareTeamOther_${i}_spoken`];
     }
+    delete obj.futureCareTeamExtra;
+    delete obj.futureCareTeamExtraCount;
+    delete obj.futureCareTeamExtraAdditional;
+    for (let i = 0; i < 20; i++) {
+      delete obj[`futureCareTeamExtra_${i}_name`];
+      delete obj[`futureCareTeamExtra_${i}_phone`];
+      delete obj[`futureCareTeamExtra_${i}_email`];
+      delete obj[`futureCareTeamExtra_${i}_city`];
+      delete obj[`futureCareTeamExtra_${i}_province`];
+      delete obj[`futureCareTeamExtra_${i}_relationship`];
+      delete obj[`futureCareTeamExtra_${i}_spoken`];
+    }
   };
 
   const handleRemoveFutureCareTeamOther = (childIndex: number, removeAt: number) => {
@@ -1223,6 +1235,29 @@ export default function StepForm({
     const newCount = count - 1;
     obj.futureCareTeamOtherCount = String(newCount);
     if (newCount <= 0) obj.futureCareTeamOtherAdditional = 'no';
+    updated[childIndex] = obj;
+    onAnswerChange('childrenData', updated);
+  };
+
+  const handleRemoveFutureCareTeamExtra = (childIndex: number, removeAt: number) => {
+    const updated = [...childrenData];
+    const obj = { ...updated[childIndex] };
+    const count = parseInt(obj.futureCareTeamExtraCount || '0');
+    const fields = ['name', 'phone', 'email', 'city', 'province', 'relationship', 'spoken'];
+    for (let i = removeAt; i < count - 1; i++) {
+      fields.forEach(f => {
+        const val = obj[`futureCareTeamExtra_${i + 1}_${f}`];
+        if (val !== undefined) obj[`futureCareTeamExtra_${i}_${f}`] = val;
+        else delete obj[`futureCareTeamExtra_${i}_${f}`];
+      });
+    }
+    fields.forEach(f => delete obj[`futureCareTeamExtra_${count - 1}_${f}`]);
+    const newCount = count - 1;
+    obj.futureCareTeamExtraCount = String(newCount);
+    if (newCount <= 0) {
+      obj.futureCareTeamExtra = 'no';
+      obj.futureCareTeamExtraAdditional = undefined;
+    }
     updated[childIndex] = obj;
     onAnswerChange('childrenData', updated);
   };
@@ -8199,6 +8234,8 @@ export default function StepForm({
                       const selected = (childrenData[index]?.futureCareTeamSelection || '').split(',').filter(Boolean);
                       const otherCount = parseInt(childrenData[index]?.futureCareTeamOtherCount || '0');
                       const otherSelected = selected.includes('other');
+                      const extraSelected = childrenData[index]?.futureCareTeamExtra === 'yes';
+                      const extraCount = parseInt(childrenData[index]?.futureCareTeamExtraCount || '0');
 
                       const toggleSelect = (id: string) => {
                         const next = selected.includes(id) ? selected.filter(v => v !== id) : [...selected, id];
@@ -8328,7 +8365,55 @@ export default function StepForm({
                             </div>
                           )}
 
-                          {(selected.length > 0 || otherCount > 0) && (
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Are there additional people you would hope would step in to provide care for {childDisplayName}?</label>
+                            <div className="flex gap-4">
+                              <label className="flex items-center">
+                                <input type="radio" name={`futureCareTeamExtra-${index}`} value="yes" checked={extraSelected} onChange={() => { if (extraCount === 0) handleChildChange(index, 'futureCareTeamExtraCount', '1'); handleChildChange(index, 'futureCareTeamExtra', 'yes'); }} className="mr-2" />
+                                <span className="text-gray-300">Yes</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input type="radio" name={`futureCareTeamExtra-${index}`} value="no" checked={childrenData[index]?.futureCareTeamExtra === 'no'} onChange={() => { const obj = { ...childrenData[index] }; const cur = parseInt(obj.futureCareTeamExtraCount || '0'); const fields = ['name', 'phone', 'email', 'city', 'province', 'relationship', 'spoken']; for (let i = 0; i < cur; i++) { fields.forEach(f => delete obj[`futureCareTeamExtra_${i}_${f}`]); } delete obj.futureCareTeamExtraCount; delete obj.futureCareTeamExtraAdditional; obj.futureCareTeamExtra = 'no'; const updated = [...childrenData]; updated[index] = obj; onAnswerChange('childrenData', updated); }} className="mr-2" />
+                                <span className="text-gray-300">No</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {extraSelected && Array.from({ length: extraCount }).map((_, ei) => {
+                            const fieldPrefix = `futureCareTeamExtra_${ei}`;
+                            return (
+                              <div key={`extra-${ei}`} className="mt-4 p-3 bg-gray-700/50 rounded-lg border border-gray-600">
+                                <div className="flex items-center justify-between mb-3">
+                                  <p className="text-sm font-medium text-blue-400">Additional Person {ei + 1}</p>
+                                  {ei > 0 && (
+                                    <button type="button" onClick={() => handleRemoveFutureCareTeamExtra(index, ei)} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
+                                      <X size={14} /> Remove
+                                    </button>
+                                  )}
+                                </div>
+                                {renderContactFields(fieldPrefix, ei)}
+                                {renderSpokenQuestion(fieldPrefix)}
+                              </div>
+                            );
+                          })}
+
+                          {extraSelected && (
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-2">Are there more additional people to add?</label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input type="radio" name={`futureCareTeamExtra-additional-${index}`} value="yes" checked={childrenData[index]?.futureCareTeamExtraAdditional === 'yes'} onChange={() => { handleChildChange(index, 'futureCareTeamExtraCount', String(extraCount + 1)); handleChildChange(index, 'futureCareTeamExtraAdditional', 'yes'); }} className="mr-2" />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input type="radio" name={`futureCareTeamExtra-additional-${index}`} value="no" checked={childrenData[index]?.futureCareTeamExtraAdditional === 'no'} onChange={() => { handleChildChange(index, 'futureCareTeamExtraAdditional', 'no'); const cur = parseInt(childrenData[index]?.futureCareTeamExtraCount || '0'); if (cur > 1) { const obj = { ...childrenData[index] }; const fields = ['name', 'phone', 'email', 'city', 'province', 'relationship', 'spoken']; for (let i = 1; i < cur; i++) { fields.forEach(f => delete obj[`futureCareTeamExtra_${i}_${f}`]); } obj.futureCareTeamExtraCount = '1'; const updated = [...childrenData]; updated[index] = obj; onAnswerChange('childrenData', updated); } }} className="mr-2" />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+
+                          {(selected.length > 0 || otherCount > 0 || extraCount > 0) && (
                             <div className="mt-4">
                               <label className="block text-sm font-medium text-gray-300 mb-2">What would you want them to understand about this responsibility?</label>
                               <textarea value={childrenData[index]?.futureCareTeamResponsibility || ''} onChange={(e) => handleChildChange(index, 'futureCareTeamResponsibility', e.target.value)} placeholder="Enter your response" rows={4} className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />

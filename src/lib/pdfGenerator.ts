@@ -6,6 +6,7 @@ interface ChildData {
   dateOfBirth?: string;
   parentsOption?: string;
   otherParentName?: string;
+  otherParentDeceased?: string;
   childSupportStatus?: string;
   childSupportDocLocation?: string;
   disabled?: string;
@@ -1613,10 +1614,16 @@ export const generatePDF = (formData: FormData) => {
         parentLabel = `${c1} and ${c2}`;
       } else if (child.parentsOption === 'client1-other') {
         const c1 = formData.fullName || 'Client 1';
-        parentLabel = `${c1} and ${child.otherParentName || 'other'}`;
+        const otherLabel = child.otherParentDeceased === 'yes'
+          ? `${child.otherParentName || 'other'} (deceased)`
+          : child.otherParentName || 'other';
+        parentLabel = `${c1} and ${otherLabel}`;
       } else if (child.parentsOption === 'client2-other') {
         const c2 = formData.spouseName || 'Client 2';
-        parentLabel = `${c2} and ${child.otherParentName || 'other'}`;
+        const otherLabel = child.otherParentDeceased === 'yes'
+          ? `${child.otherParentName || 'other'} (deceased)`
+          : child.otherParentName || 'other';
+        parentLabel = `${c2} and ${otherLabel}`;
       }
 
       const ageOfMajorityText = getAgeOfMajorityText(child);

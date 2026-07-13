@@ -1160,7 +1160,7 @@ export default function StepForm({
     if (hasSpouse && (po === 'both' || po === 'parent2' || po === 'client2-other')) {
       addContact({ id: 'parent2', name: step1['spouseName'] as string || '', phone: step1['spousePhone'] as string || '', email: step1['spouseEmail'] as string || '', city: step1['spouseCity'] as string || '', province: step1['spouseProvince'] as string || '', source: 'parent2' });
     }
-    if ((po === 'client1-other' || po === 'client2-other') && child.otherParentName) {
+    if ((po === 'client1-other' || po === 'client2-other') && child.otherParentName && child.otherParentDeceased !== 'yes') {
       addContact({ id: 'otherparent', name: child.otherParentName, source: 'otherparent' });
     }
 
@@ -1424,6 +1424,20 @@ export default function StepForm({
 
     if (field === 'medications' && value === 'no') {
       updated[index].medicationList = undefined;
+    }
+
+    if (field === 'otherParentDeceased' && value === 'yes') {
+      const opName = (updated[index].otherParentName || '').trim();
+      if (opName) {
+        if (updated[index].careCoordinators) {
+          const ccList = updated[index].careCoordinators.split(',').filter(v => v !== 'otherparent');
+          updated[index].careCoordinators = ccList.length > 0 ? ccList.join(',') : undefined;
+        }
+        if (updated[index].futureCareTeamSelection) {
+          const fctList = updated[index].futureCareTeamSelection.split(',').map(s => s.trim()).filter(s => s !== opName);
+          updated[index].futureCareTeamSelection = fctList.length > 0 ? fctList.join(',') : undefined;
+        }
+      }
     }
 
     if (field === 'allergies' && value === 'no') {
@@ -7523,6 +7537,15 @@ export default function StepForm({
                               placeholder="Enter other parent's name"
                               className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
+                            <label className="flex items-center gap-2 mt-3 cursor-pointer w-fit">
+                              <input
+                                type="checkbox"
+                                checked={childrenData[index]?.otherParentDeceased === 'yes'}
+                                onChange={(e) => handleChildChange(index, 'otherParentDeceased', e.target.checked ? 'yes' : 'no')}
+                                className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-gray-700"
+                              />
+                              <span className="text-sm text-gray-300">This person is deceased</span>
+                            </label>
                           </div>
 
                           <div>
@@ -8111,11 +8134,12 @@ export default function StepForm({
                             const hasSpouse = (s1['maritalStatus'] === 'married' || s1['maritalStatus'] === 'common_law');
                             const childPo = childrenData[index]?.parentsOption || '';
                             const otherParentName = childrenData[index]?.otherParentName || '';
+                            const otherParentDeceased = childrenData[index]?.otherParentDeceased === 'yes';
                             const coordOpts: { value: string; label: string }[] = [
                               ...(childPo !== 'client2-other' ? [{ value: 'parent1', label: pg1Name }] : []),
-                              ...(childPo === 'client1-other' && otherParentName ? [{ value: 'otherparent', label: otherParentName }] : []),
+                              ...(childPo === 'client1-other' && otherParentName && !otherParentDeceased ? [{ value: 'otherparent', label: otherParentName }] : []),
                               ...(hasSpouse && childPo !== 'client1-other' ? [{ value: 'parent2', label: pg2Name }] : []),
-                              ...(childPo === 'client2-other' && otherParentName ? [{ value: 'otherparent', label: otherParentName }] : []),
+                              ...(childPo === 'client2-other' && otherParentName && !otherParentDeceased ? [{ value: 'otherparent', label: otherParentName }] : []),
                               { value: 'sibling', label: 'Sibling' },
                               { value: 'family', label: 'Other family' },
                               { value: 'school', label: 'School team' },

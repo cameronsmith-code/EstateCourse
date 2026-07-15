@@ -11382,9 +11382,9 @@ export default function StepForm({
                 return (
                   <React.Fragment key={question.key}>
                     {subheading && (
-                      <h3 className="text-lg font-semibold text-white mt-4 mb-1 pb-1 border-b border-gray-600">
+                      <h4 className="text-base font-semibold text-blue-400 mt-4 mb-1">
                         {subheading}
-                      </h3>
+                      </h4>
                     )}
                     <FormField
                       question={{ ...question, label: customLabel }}

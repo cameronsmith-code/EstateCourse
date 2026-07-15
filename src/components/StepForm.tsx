@@ -11371,8 +11371,21 @@ export default function StepForm({
                   );
                 };
 
+                const subheading = (() => {
+                  if (question.key === 'client1HasWorkBenefits') return 'Work Benefits';
+                  if (question.key === 'client1HasLifeInsurance') return 'Life Insurance';
+                  if (question.key === 'client1HasDisabilityInsurance') return 'Disability Insurance';
+                  if (question.key === 'client1HasCriticalIllness') return 'Critical Illness Insurance';
+                  return null;
+                })();
+
                 return (
                   <React.Fragment key={question.key}>
+                    {subheading && (
+                      <h3 className="text-lg font-semibold text-white mt-4 mb-1 pb-1 border-b border-gray-600">
+                        {subheading}
+                      </h3>
+                    )}
                     <FormField
                       question={{ ...question, label: customLabel }}
                       value={answers[question.key]}

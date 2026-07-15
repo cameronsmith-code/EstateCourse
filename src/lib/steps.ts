@@ -850,7 +850,7 @@ export const STEPS: Step[] = [
   {
     id: 9,
     title: 'Real Estate',
-    description: 'Information about real estate you own',
+    description: 'Real estate is often one of the largest and most emotionally significant parts of an estate. This section helps us understand what properties you own or rent, who owns them, where important documents are kept, and whether there are any planning opportunities or potential challenges for your executor and family.',
     questions: [
       {
         key: 'livingSituation',

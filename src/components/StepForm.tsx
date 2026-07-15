@@ -191,7 +191,31 @@ export default function StepForm({
         }
       });
     }
+    if (answers['livingSituation'] !== 'rent') {
+      Object.keys(answers).forEach(key => {
+        if (key !== 'livingSituation' && key.startsWith('rent')) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
   }, [answers['livingSituation']]);
+
+  // Real Estate — prefill rental address from About You when rentSameAddress is 'yes'
+  useEffect(() => {
+    if (answers['rentSameAddress'] === 'yes') {
+      const step1 = allAnswers?.get(1) as Record<string, string> | undefined;
+      if (step1) {
+        if (step1.address) onAnswerChange('rentAddress', step1.address);
+        if (step1.city) onAnswerChange('rentCity', step1.city);
+        if (step1.province) onAnswerChange('rentProvince', step1.province);
+        if (step1.postalCode) onAnswerChange('rentPostalCode', step1.postalCode);
+      }
+    } else if (answers['rentSameAddress'] === 'no') {
+      ['rentAddress', 'rentCity', 'rentProvince', 'rentPostalCode'].forEach(key => {
+        onAnswerChange(key, undefined);
+      });
+    }
+  }, [answers['rentSameAddress']]);
 
   // Health Professionals — Specialist gate cleanup
   useEffect(() => {
@@ -10731,6 +10755,17 @@ export default function StepForm({
             const globalQuestions = step.questions.filter(q => !/^property\d+/.test(q.key));
             const propertyCount = parseInt(answers['propertyCount'] as string || '0') || 0;
 
+            // Split global questions into sections
+            const rentQuestionKeys = new Set([
+              'rentLandlordName', 'rentSameAddress', 'rentAddress', 'rentCity',
+              'rentProvince', 'rentPostalCode', 'rentMonthlyAmount',
+              'rentLeaseRenewalDate', 'rentLeaseStorage', 'rentAutoPayments',
+              'rentSecurityDeposit', 'rentParkingStorage', 'rentNotifyName',
+            ]);
+            const livingSituationQuestions = globalQuestions.filter(q => !rentQuestionKeys.has(q.key) && q.key !== 'hasRealEstate' && q.key !== 'propertyCount');
+            const rentQuestions = globalQuestions.filter(q => rentQuestionKeys.has(q.key));
+            const ownershipGateQuestions = globalQuestions.filter(q => q.key === 'hasRealEstate' || q.key === 'propertyCount');
+
             const renderQuestion = (question: typeof step.questions[0]) => {
               if (!isVisible(question)) return null;
               if (suppressedOwnershipKeys.has(question.key)) return null;
@@ -10761,8 +10796,19 @@ export default function StepForm({
                 {/* Where you live now subheading */}
                 <h4 className="text-base font-semibold text-blue-400 mt-4 mb-1">Where you live now</h4>
 
-                {/* Global questions (livingSituation, hasRealEstate, propertyCount) */}
-                {globalQuestions.map(renderQuestion)}
+                {/* Living situation questions */}
+                {livingSituationQuestions.map(renderQuestion)}
+
+                {/* Rent questions */}
+                {rentQuestions.length > 0 && answers['livingSituation'] === 'rent' && (
+                  <>
+                    <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Where you rent now</h4>
+                    {rentQuestions.map(renderQuestion)}
+                  </>
+                )}
+
+                {/* Ownership gate questions */}
+                {ownershipGateQuestions.map(renderQuestion)}
 
                 {/* Per-property cards */}
                 {propertyCount > 0 && Array.from({ length: propertyCount }, (_, i) => {

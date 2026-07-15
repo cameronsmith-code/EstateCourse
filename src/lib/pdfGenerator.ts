@@ -704,6 +704,20 @@ interface FormData {
   client2PensionsData?: Array<Record<string, string>>;
   client1RegisteredAccountData?: Record<string, Array<Record<string, unknown>>>;
   client2RegisteredAccountData?: Record<string, Array<Record<string, unknown>>>;
+  livingSituation?: string;
+  rentLandlordName?: string;
+  rentSameAddress?: string;
+  rentAddress?: string;
+  rentCity?: string;
+  rentProvince?: string;
+  rentPostalCode?: string;
+  rentMonthlyAmount?: string;
+  rentLeaseRenewalDate?: string;
+  rentLeaseStorage?: string;
+  rentAutoPayments?: string;
+  rentSecurityDeposit?: string;
+  rentParkingStorage?: string;
+  rentNotifyName?: string;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -8842,6 +8856,37 @@ You should explore this as an option with your legal and CFP® professionals bec
     doc.setTextColor(...colors.darkText);
     doc.text(livingSituationLabels[formData.livingSituation] || formData.livingSituation, margin, yPosition);
     yPosition += 14;
+  }
+
+  // Rental details
+  if (formData.livingSituation === 'rent') {
+    addSectionHeader('Rental Details');
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.darkText);
+
+    const rentFields: { label: string; value?: string }[] = [
+      { label: 'Landlord / Company', value: formData.rentLandlordName },
+      { label: 'Address', value: [formData.rentAddress, formData.rentCity, formData.rentProvince, formData.rentPostalCode].filter(Boolean).join(', ') },
+      { label: 'Monthly Rent', value: formData.rentMonthlyAmount },
+      { label: 'Lease Renewal Date', value: formData.rentLeaseRenewalDate },
+      { label: 'Lease Agreement Stored At', value: formData.rentLeaseStorage },
+      { label: 'Automatic Rent Payments', value: formData.rentAutoPayments === 'yes' ? 'Yes' : formData.rentAutoPayments === 'no' ? 'No' : undefined },
+      { label: 'Security Deposit', value: formData.rentSecurityDeposit === 'yes' ? 'Yes' : formData.rentSecurityDeposit === 'no' ? 'No' : undefined },
+      { label: 'Parking / Storage Lockers', value: formData.rentParkingStorage === 'yes' ? 'Yes' : formData.rentParkingStorage === 'no' ? 'No' : undefined },
+      { label: 'Emergency Contact', value: formData.rentNotifyName },
+    ];
+
+    rentFields.forEach(({ label, value }) => {
+      if (value) {
+        checkPageBreak(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${label}:`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(String(value), margin + 40, yPosition);
+        yPosition += 14;
+      }
+    });
+    yPosition += 6;
   }
 
   if (formData.hasRealEstate === 'yes') {

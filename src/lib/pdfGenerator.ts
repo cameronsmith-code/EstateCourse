@@ -718,6 +718,19 @@ interface FormData {
   rentSecurityDeposit?: string;
   rentParkingStorage?: string;
   rentNotifyName?: string;
+  retLandlordName?: string;
+  retSameAddress?: string;
+  retAddress?: string;
+  retCity?: string;
+  retProvince?: string;
+  retPostalCode?: string;
+  retMonthlyAmount?: string;
+  retLeaseRenewalDate?: string;
+  retLeaseStorage?: string;
+  retAutoPayments?: string;
+  retSecurityDeposit?: string;
+  retParkingStorage?: string;
+  retNotifyName?: string;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -8877,6 +8890,37 @@ You should explore this as an option with your legal and CFP® professionals bec
     ];
 
     rentFields.forEach(({ label, value }) => {
+      if (value) {
+        checkPageBreak(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${label}:`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(String(value), margin + 40, yPosition);
+        yPosition += 14;
+      }
+    });
+    yPosition += 6;
+  }
+
+  // Retirement residence details
+  if (formData.livingSituation === 'retirement') {
+    addSectionHeader('Retirement Residence Details');
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.darkText);
+
+    const retFields: { label: string; value?: string }[] = [
+      { label: 'Residence Name', value: formData.retLandlordName },
+      { label: 'Address', value: [formData.retAddress, formData.retCity, formData.retProvince, formData.retPostalCode].filter(Boolean).join(', ') },
+      { label: 'Monthly Fee', value: formData.retMonthlyAmount },
+      { label: 'Agreement Renewal Date', value: formData.retLeaseRenewalDate },
+      { label: 'Residence Agreement Stored At', value: formData.retLeaseStorage },
+      { label: 'Automatic Monthly Payments', value: formData.retAutoPayments === 'yes' ? 'Yes' : formData.retAutoPayments === 'no' ? 'No' : undefined },
+      { label: 'Security Deposit', value: formData.retSecurityDeposit === 'yes' ? 'Yes' : formData.retSecurityDeposit === 'no' ? 'No' : undefined },
+      { label: 'Parking / Storage Lockers', value: formData.retParkingStorage === 'yes' ? 'Yes' : formData.retParkingStorage === 'no' ? 'No' : undefined },
+      { label: 'Emergency Contact', value: formData.retNotifyName },
+    ];
+
+    retFields.forEach(({ label, value }) => {
       if (value) {
         checkPageBreak(14);
         doc.setFont(undefined, 'bold');

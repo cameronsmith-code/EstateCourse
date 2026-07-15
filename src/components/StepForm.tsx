@@ -198,6 +198,13 @@ export default function StepForm({
         }
       });
     }
+    if (answers['livingSituation'] !== 'retirement') {
+      Object.keys(answers).forEach(key => {
+        if (key !== 'livingSituation' && key.startsWith('ret') && !key.startsWith('retirement')) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
   }, [answers['livingSituation']]);
 
   // Real Estate — prefill rental address from About You when rentSameAddress is 'yes'
@@ -216,6 +223,23 @@ export default function StepForm({
       });
     }
   }, [answers['rentSameAddress']]);
+
+  // Real Estate — prefill retirement residence address from About You when retSameAddress is 'yes'
+  useEffect(() => {
+    if (answers['retSameAddress'] === 'yes') {
+      const step1 = allAnswers?.get(1) as Record<string, string> | undefined;
+      if (step1) {
+        if (step1.address) onAnswerChange('retAddress', step1.address);
+        if (step1.city) onAnswerChange('retCity', step1.city);
+        if (step1.province) onAnswerChange('retProvince', step1.province);
+        if (step1.postalCode) onAnswerChange('retPostalCode', step1.postalCode);
+      }
+    } else if (answers['retSameAddress'] === 'no') {
+      ['retAddress', 'retCity', 'retProvince', 'retPostalCode'].forEach(key => {
+        onAnswerChange(key, undefined);
+      });
+    }
+  }, [answers['retSameAddress']]);
 
   // Health Professionals — Specialist gate cleanup
   useEffect(() => {
@@ -10762,8 +10786,15 @@ export default function StepForm({
               'rentLeaseRenewalDate', 'rentLeaseStorage', 'rentAutoPayments',
               'rentSecurityDeposit', 'rentParkingStorage', 'rentNotifyName',
             ]);
-            const livingSituationQuestions = globalQuestions.filter(q => !rentQuestionKeys.has(q.key) && q.key !== 'hasRealEstate' && q.key !== 'propertyCount');
+            const retQuestionKeys = new Set([
+              'retLandlordName', 'retSameAddress', 'retAddress', 'retCity',
+              'retProvince', 'retPostalCode', 'retMonthlyAmount',
+              'retLeaseRenewalDate', 'retLeaseStorage', 'retAutoPayments',
+              'retSecurityDeposit', 'retParkingStorage', 'retNotifyName',
+            ]);
+            const livingSituationQuestions = globalQuestions.filter(q => !rentQuestionKeys.has(q.key) && !retQuestionKeys.has(q.key) && q.key !== 'hasRealEstate' && q.key !== 'propertyCount');
             const rentQuestions = globalQuestions.filter(q => rentQuestionKeys.has(q.key));
+            const retQuestions = globalQuestions.filter(q => retQuestionKeys.has(q.key));
             const ownershipGateQuestions = globalQuestions.filter(q => q.key === 'hasRealEstate' || q.key === 'propertyCount');
 
             const renderQuestion = (question: typeof step.questions[0]) => {
@@ -10804,6 +10835,14 @@ export default function StepForm({
                   <>
                     <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Where you rent now</h4>
                     {rentQuestions.map(renderQuestion)}
+                  </>
+                )}
+
+                {/* Retirement residence questions */}
+                {retQuestions.length > 0 && answers['livingSituation'] === 'retirement' && (
+                  <>
+                    <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Your retirement residence</h4>
+                    {retQuestions.map(renderQuestion)}
                   </>
                 )}
 

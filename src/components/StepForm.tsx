@@ -182,6 +182,17 @@ export default function StepForm({
     }
   }, [answers['insHasAdditional']]);
 
+  // Real Estate — living situation gate cleanup
+  useEffect(() => {
+    if (answers['livingSituation'] !== 'own') {
+      Object.keys(answers).forEach(key => {
+        if (key !== 'livingSituation' && (key === 'hasRealEstate' || key === 'propertyCount' || /^property\d+/.test(key))) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['livingSituation']]);
+
   // Health Professionals — Specialist gate cleanup
   useEffect(() => {
     if (answers['sp_health_has'] !== 'yes') {

@@ -8828,6 +8828,22 @@ You should explore this as an option with your legal and CFP® professionals bec
   }
 
 
+  // Living situation
+  if (formData.livingSituation) {
+    const livingSituationLabels: Record<string, string> = {
+      own: 'I own my home',
+      rent: 'I rent my home',
+      family: 'I live with family',
+      retirement: 'I live in a retirement residence',
+      other: 'Other',
+    };
+    addSectionHeader('Current Living Situation');
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.darkText);
+    doc.text(livingSituationLabels[formData.livingSituation] || formData.livingSituation, margin, yPosition);
+    yPosition += 14;
+  }
+
   if (formData.hasRealEstate === 'yes') {
     const propertyCount = parseInt(formData.propertyCount || '0');
 

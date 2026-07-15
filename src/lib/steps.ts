@@ -853,6 +853,19 @@ export const STEPS: Step[] = [
     description: 'Information about real estate you own',
     questions: [
       {
+        key: 'livingSituation',
+        label: 'Which best describes your current living situation?',
+        type: 'radio',
+        options: [
+          { value: 'own', label: 'I own my home' },
+          { value: 'rent', label: 'I rent my home' },
+          { value: 'family', label: 'I live with family' },
+          { value: 'retirement', label: 'I live in a retirement residence' },
+          { value: 'other', label: 'Other' },
+        ],
+        required: true,
+      },
+      {
         key: 'hasRealEstate',
         label: 'Do you own any real estate?',
         type: 'radio',
@@ -861,6 +874,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: true,
+        condition: (formData: Record<string, string>) => formData.livingSituation === 'own',
       },
       {
         key: 'propertyCount',

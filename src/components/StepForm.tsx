@@ -162,7 +162,7 @@ export default function StepForm({
   }, [answers['lawHasAdditional']]);
 
   useEffect(() => {
-    if (!answers['insHasAdvisor']) {
+    if (!answers['insHasAdvisor'] || answers['insHasAdvisor'] === 'na') {
       ['insAdvisor1Firm', 'insAdvisor1Name', 'insAdvisor1Phone', 'insAdvisor1Email', 'insAdvisor1Services', 'insAdvisor1Duration', 'insAdvisor1DocLocation', 'insAdvisor1IncludeInContactList', 'insAdvisor1WorksWith', 'insHasAdditional', 'insAdditionalData', 'insAdditionalHasAdditional'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
@@ -4984,7 +4984,7 @@ export default function StepForm({
               const additionalItems = (answers[config.additionalDataKey] as Array<Record<string, string>>) || [];
               const additionalHasAdditional = (answers[config.additionalHasAdditionalKey] as string[]) || [];
               const firstOptions = config.firstQuestionOptions || [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }];
-              const showDetails = config.firstQuestionOptions ? !!hasProf && hasProf !== 'no' : hasProf === 'yes';
+              const showDetails = config.firstQuestionOptions ? !!hasProf && hasProf !== 'no' && hasProf !== 'na' : hasProf === 'yes';
 
               const updateAdditional = (index: number, field: string, value: string) => {
                 const updated = [...additionalItems];
@@ -5275,6 +5275,7 @@ export default function StepForm({
                     { value: 'financial_planner', label: 'Financial planner' },
                     { value: 'insurance_advisor', label: 'Insurance advisor' },
                     { value: 'other', label: 'Other' },
+                    { value: 'na', label: 'N/A' },
                   ],
                   additionalQuestionLabel: 'Is there another Insurance Advisor that you work with?',
                   nameLabel: 'Advisor name',

@@ -8109,7 +8109,7 @@ You should explore this as an option with your legal and CFP® professionals bec
   }
 
   // Insurance section
-  if (formData.insHasAdvisor) {
+  if (formData.insHasAdvisor && formData.insHasAdvisor !== 'na') {
     if (yPosition > 200) {
       addPage();
       yPosition = 12;
@@ -11366,7 +11366,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     }
   });
 
-  if (formData.insHasAdvisor && formData.insAdvisor1IncludeInContactList === 'yes') {
+  if (formData.insHasAdvisor && formData.insHasAdvisor !== 'na' && formData.insAdvisor1IncludeInContactList === 'yes') {
     contactListContacts.push({
       role: 'Insurance Advisor',
       name: formData.insAdvisor1Name || '',

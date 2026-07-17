@@ -8892,7 +8892,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       { label: 'Automatic Rent Payments Details', value: formData.rentAutoPaymentsDetails },
       { label: 'Security Deposit', value: formData.rentSecurityDeposit === 'yes' ? 'Yes' : formData.rentSecurityDeposit === 'no' ? 'No' : undefined },
       { label: 'Parking / Storage Lockers', value: formData.rentParkingStorage === 'yes' ? 'Yes' : formData.rentParkingStorage === 'no' ? 'No' : undefined },
-      { label: 'Location of the key', value: formData.rentKeyLocation },
+      { label: 'Location of the key to the storage locker', value: formData.rentKeyLocation },
       { label: 'Emergency Contact', value: formData.rentNotifyName },
     ];
 
@@ -8924,7 +8924,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       { label: 'Automatic Monthly Payments', value: formData.retAutoPayments === 'yes' ? 'Yes' : formData.retAutoPayments === 'no' ? 'No' : undefined },
       { label: 'Security Deposit', value: formData.retSecurityDeposit === 'yes' ? 'Yes' : formData.retSecurityDeposit === 'no' ? 'No' : undefined },
       { label: 'Parking / Storage Lockers', value: formData.retParkingStorage === 'yes' ? 'Yes' : formData.retParkingStorage === 'no' ? 'No' : undefined },
-      { label: 'Location of the key', value: formData.retKeyLocation },
+      { label: 'Location of the key to the storage locker', value: formData.retKeyLocation },
       { label: 'Emergency Contact', value: formData.retNotifyName },
     ];
 

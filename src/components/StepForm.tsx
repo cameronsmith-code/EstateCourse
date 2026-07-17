@@ -10784,13 +10784,13 @@ export default function StepForm({
               'rentLandlordName', 'rentSameAddress', 'rentAddress', 'rentCity',
               'rentProvince', 'rentPostalCode', 'rentMonthlyAmount',
               'rentLeaseRenewalDate', 'rentLeaseStorage', 'rentAutoPayments',
-              'rentSecurityDeposit', 'rentParkingStorage', 'rentNotifyName',
+              'rentSecurityDeposit', 'rentParkingStorage', 'rentKeyLocation', 'rentNotifyName',
             ]);
             const retQuestionKeys = new Set([
               'retLandlordName', 'retSameAddress', 'retAddress', 'retCity',
               'retProvince', 'retPostalCode', 'retMonthlyAmount',
               'retLeaseRenewalDate', 'retLeaseStorage', 'retAutoPayments',
-              'retSecurityDeposit', 'retParkingStorage', 'retNotifyName',
+              'retSecurityDeposit', 'retParkingStorage', 'retKeyLocation', 'retNotifyName',
             ]);
             const livingSituationQuestions = globalQuestions.filter(q => !rentQuestionKeys.has(q.key) && !retQuestionKeys.has(q.key) && q.key !== 'hasRealEstate' && q.key !== 'propertyCount');
             const rentQuestions = globalQuestions.filter(q => rentQuestionKeys.has(q.key));

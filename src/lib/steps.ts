@@ -987,7 +987,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'rentKeyLocation',
-        label: 'Location of the key:',
+        label: 'Location of the key to the storage locker:',
         type: 'text',
         placeholder: 'Enter where the key is located',
         required: false,
@@ -1115,7 +1115,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'retKeyLocation',
-        label: 'Location of the key:',
+        label: 'Location of the key to the storage locker:',
         type: 'text',
         placeholder: 'Enter where the key is located',
         required: false,

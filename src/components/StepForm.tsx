@@ -3193,6 +3193,145 @@ export default function StepForm({
                             />
                           </div>
                         )}
+
+                        {corporationsData[index]?.corporationType !== 'Holding Company' && (
+                          <Subsection title="Business Continuity and Key Personnel">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Are there key employees whose absence would significantly impact the business?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`hasKeyEmployees-${index}`}
+                                    value="yes"
+                                    checked={corporationsData[index]?.hasKeyEmployees === 'yes'}
+                                    onChange={(e) => handleCorporationChange(index, 'hasKeyEmployees', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`hasKeyEmployees-${index}`}
+                                    value="no"
+                                    checked={corporationsData[index]?.hasKeyEmployees === 'no'}
+                                    onChange={(e) => handleCorporationChange(index, 'hasKeyEmployees', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+
+                            {corporationsData[index]?.hasKeyEmployees === 'yes' && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Key employee name(s) and role(s)
+                                </label>
+                                <textarea
+                                  value={corporationsData[index]?.keyEmployeesDetails || ''}
+                                  onChange={(e) => handleCorporationChange(index, 'keyEmployeesDetails', e.target.value)}
+                                  placeholder="e.g., Jane Doe — Operations Manager, John Smith — Lead Engineer"
+                                  rows={3}
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                />
+                              </div>
+                            )}
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Is there a succession plan in place for the business?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`hasSuccessionPlan-${index}`}
+                                    value="yes"
+                                    checked={corporationsData[index]?.hasSuccessionPlan === 'yes'}
+                                    onChange={(e) => handleCorporationChange(index, 'hasSuccessionPlan', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`hasSuccessionPlan-${index}`}
+                                    value="no"
+                                    checked={corporationsData[index]?.hasSuccessionPlan === 'no'}
+                                    onChange={(e) => handleCorporationChange(index, 'hasSuccessionPlan', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+
+                            {corporationsData[index]?.hasSuccessionPlan === 'yes' && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Describe the succession plan
+                                </label>
+                                <textarea
+                                  value={corporationsData[index]?.successionPlanDetails || ''}
+                                  onChange={(e) => handleCorporationChange(index, 'successionPlanDetails', e.target.value)}
+                                  placeholder="e.g., Buy-sell agreement with partner, transfer of ownership to family member"
+                                  rows={3}
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                />
+                              </div>
+                            )}
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Is there key person life insurance in place?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`hasKeyPersonInsurance-${index}`}
+                                    value="yes"
+                                    checked={corporationsData[index]?.hasKeyPersonInsurance === 'yes'}
+                                    onChange={(e) => handleCorporationChange(index, 'hasKeyPersonInsurance', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`hasKeyPersonInsurance-${index}`}
+                                    value="no"
+                                    checked={corporationsData[index]?.hasKeyPersonInsurance === 'no'}
+                                    onChange={(e) => handleCorporationChange(index, 'hasKeyPersonInsurance', e.target.value)}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+
+                            {corporationsData[index]?.hasKeyPersonInsurance === 'yes' && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Key person insurance details
+                                </label>
+                                <textarea
+                                  value={corporationsData[index]?.keyPersonInsuranceDetails || ''}
+                                  onChange={(e) => handleCorporationChange(index, 'keyPersonInsuranceDetails', e.target.value)}
+                                  placeholder="e.g., $2M policy on Jane Doe with Manulife, policy documents at office"
+                                  rows={3}
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                />
+                              </div>
+                            )}
+                          </Subsection>
+                        )}
                       </div>
                     </div>
                   ))}

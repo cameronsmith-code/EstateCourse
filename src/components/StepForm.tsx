@@ -1121,9 +1121,13 @@ export default function StepForm({
                 setValidationError(`Please confirm whether there are additional owners for corporation ${i + 1}.`);
                 return;
               }
+            }
+            // Validate ownership percentages for all selected owners
+            const allOwnersList = (corporation?.owners || '').split(',').filter(Boolean);
+            const showPct = allOwnersList.length > 0 && (!corporation?.hasOtherOwner || corporation?.hasOtherOwner !== 'true' || corporation?.otherOwnersDone === 'no');
+            if (showPct) {
               const percentages: Record<string, string> = corporation?.ownershipPercentages ? JSON.parse(corporation.ownershipPercentages) : {};
-              const allOwners = (corporation.owners || '').split(',').filter(Boolean);
-              const total = allOwners.reduce((sum, name) => sum + (parseFloat(percentages[name] || '0') || 0), 0);
+              const total = allOwnersList.reduce((sum, name) => sum + (parseFloat(percentages[name] || '0') || 0), 0);
               if (Math.abs(total - 100) > 0.01) {
                 setValidationError(`Ownership stakes for corporation ${i + 1} must total 100% (currently ${total}%).`);
                 return;
@@ -2929,8 +2933,10 @@ export default function StepForm({
                                     </div>
                                   )}
 
-                                  {hasOtherChecked && corporationsData[index]?.otherOwnersDone === 'no' && (() => {
+                                  {(() => {
                                     const allOwnerNames = selectedOwners.filter(Boolean);
+                                    const showOwnership = allOwnerNames.length > 0 && (!hasOtherChecked || corporationsData[index]?.otherOwnersDone === 'no');
+                                    if (!showOwnership) return null;
                                     const percentages: Record<string, string> = corporationsData[index]?.ownershipPercentages ?
                                       (typeof corporationsData[index].ownershipPercentages === 'string' ?
                                         JSON.parse(corporationsData[index].ownershipPercentages) :

@@ -1126,11 +1126,23 @@ export default function StepForm({
             const allOwnersList = (corporation?.owners || '').split(',').filter(Boolean);
             const showPct = allOwnersList.length > 0 && (!corporation?.hasOtherOwner || corporation?.hasOtherOwner !== 'true' || corporation?.otherOwnersDone === 'no');
             if (showPct) {
-              const percentages: Record<string, string> = corporation?.ownershipPercentages ? JSON.parse(corporation.ownershipPercentages) : {};
+              const percentages: Record<string, string> = corporation?.ownershipPercentages ?
+                (typeof corporation.ownershipPercentages === 'string' ? JSON.parse(corporation.ownershipPercentages) : corporation.ownershipPercentages) : {};
               const total = allOwnersList.reduce((sum, name) => sum + (parseFloat(percentages[name] || '0') || 0), 0);
               if (Math.abs(total - 100) > 0.01) {
-                setValidationError(`Ownership stakes for corporation ${i + 1} must total 100% (currently ${total}%).`);
+                const classLabel = corporation?.shareClass1Name || 'Share Class 1';
+                setValidationError(`${classLabel} ownership for corporation ${i + 1} must total 100% (currently ${total}%).`);
                 return;
+              }
+              if (corporation?.hasSecondShareClass === 'true') {
+                const percentages2: Record<string, string> = corporation?.ownershipPercentages2 ?
+                  (typeof corporation.ownershipPercentages2 === 'string' ? JSON.parse(corporation.ownershipPercentages2) : corporation.ownershipPercentages2) : {};
+                const total2 = allOwnersList.reduce((sum, name) => sum + (parseFloat(percentages2[name] || '0') || 0), 0);
+                if (Math.abs(total2 - 100) > 0.01) {
+                  const classLabel = corporation?.shareClass2Name || 'Share Class 2';
+                  setValidationError(`${classLabel} ownership for corporation ${i + 1} must total 100% (currently ${total2}%).`);
+                  return;
+                }
               }
             }
           }
@@ -2988,15 +3000,72 @@ export default function StepForm({
                                       handleCorporationChange(index, 'ownershipPercentages', JSON.stringify(updated));
                                     };
 
+                                    const corp = corporationsData[index];
+                                    const shareClass1Name = corp?.shareClass1Name || '';
+                                    const hasSecondClass = corp?.hasSecondShareClass === 'true';
+                                    const shareClass2Name = corp?.shareClass2Name || '';
+                                    const percentages2: Record<string, string> = corp?.ownershipPercentages2 ?
+                                      (typeof corp.ownershipPercentages2 === 'string' ? JSON.parse(corp.ownershipPercentages2) : corp.ownershipPercentages2) : {};
+                                    const total2 = allOwnerNames.reduce((sum, name) => sum + (parseFloat(percentages2[name] || '0') || 0), 0);
+                                    const pct2Valid = Math.abs(total2 - 100) < 0.01;
+
+                                    const handlePct2Change = (ownerName: string, value: string) => {
+                                      const updated = { ...percentages2 };
+                                      updated[ownerName] = value;
+                                      handleCorporationChange(index, 'ownershipPercentages2', JSON.stringify(updated));
+                                    };
+
                                     return (
                                       <div className="ml-6 mt-4 p-4 bg-gray-700/50 rounded-lg space-y-3">
-                                        <label className="block text-sm font-medium text-gray-300">
-                                          Ownership Stake:
-                                        </label>
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span className="text-sm font-medium text-gray-300">Ownership Stake:</span>
+                                        </div>
+
+                                        {/* Column headers */}
+                                        <div className="flex items-center gap-3">
+                                          <span className="flex-1" />
+                                          <div className="w-36">
+                                            <input
+                                              type="text"
+                                              value={shareClass1Name}
+                                              onChange={(e) => handleCorporationChange(index, 'shareClass1Name', e.target.value)}
+                                              placeholder="Share Class"
+                                              className="w-full px-3 py-1.5 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                          </div>
+                                          {hasSecondClass && (
+                                            <div className="w-36">
+                                              <input
+                                                type="text"
+                                                value={shareClass2Name}
+                                                onChange={(e) => handleCorporationChange(index, 'shareClass2Name', e.target.value)}
+                                                placeholder="Share Class 2"
+                                                className="w-full px-3 py-1.5 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                          )}
+                                          <label className="flex items-center gap-1.5 text-xs text-gray-400 whitespace-nowrap cursor-pointer select-none">
+                                            <input
+                                              type="checkbox"
+                                              checked={hasSecondClass}
+                                              onChange={(e) => {
+                                                handleCorporationChange(index, 'hasSecondShareClass', e.target.checked ? 'true' : 'false');
+                                                if (!e.target.checked) {
+                                                  handleCorporationChange(index, 'ownershipPercentages2', JSON.stringify({}));
+                                                  handleCorporationChange(index, 'shareClass2Name', '');
+                                                }
+                                              }}
+                                              className="w-3.5 h-3.5 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                                            />
+                                            Add Share Class
+                                          </label>
+                                        </div>
+
+                                        {/* Owner rows */}
                                         {allOwnerNames.map(name => (
                                           <div key={name} className="flex items-center gap-3">
                                             <span className="text-white text-sm flex-1">{name}</span>
-                                            <div className="relative w-32">
+                                            <div className="relative w-36">
                                               <input
                                                 type="number"
                                                 min="0"
@@ -3009,12 +3078,37 @@ export default function StepForm({
                                               />
                                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
                                             </div>
+                                            {hasSecondClass && (
+                                              <div className="relative w-36">
+                                                <input
+                                                  type="number"
+                                                  min="0"
+                                                  max="100"
+                                                  step="0.01"
+                                                  value={percentages2[name] || ''}
+                                                  onChange={(e) => handlePct2Change(name, e.target.value)}
+                                                  placeholder="0"
+                                                  className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                                              </div>
+                                            )}
+                                            {hasSecondClass && <span className="w-[calc(theme(spacing.36)+theme(spacing.3))]" />}
                                           </div>
                                         ))}
-                                        <div className={`flex items-center gap-2 text-sm font-medium ${pctValid ? 'text-green-400' : total > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                                          <span>Total: {total.toFixed(total % 1 === 0 ? 0 : 2)}%</span>
-                                          {total > 0 && !pctValid && <span>— must equal 100%</span>}
-                                          {pctValid && <span>✓</span>}
+
+                                        {/* Totals row */}
+                                        <div className="flex items-center gap-3 pt-1 border-t border-gray-600">
+                                          <span className="flex-1 text-xs text-gray-400">Total</span>
+                                          <div className={`w-36 text-sm font-medium text-center ${pctValid ? 'text-green-400' : total > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                            {total.toFixed(total % 1 === 0 ? 0 : 2)}%{total > 0 && !pctValid && ' — must equal 100%'}{pctValid && ' ✓'}
+                                          </div>
+                                          {hasSecondClass && (
+                                            <div className={`w-36 text-sm font-medium text-center ${pct2Valid ? 'text-green-400' : total2 > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                              {total2.toFixed(total2 % 1 === 0 ? 0 : 2)}%{total2 > 0 && !pct2Valid && ' — must equal 100%'}{pct2Valid && ' ✓'}
+                                            </div>
+                                          )}
+                                          {hasSecondClass && <span className="w-[calc(theme(spacing.36)+theme(spacing.3))]" />}
                                         </div>
                                       </div>
                                     );

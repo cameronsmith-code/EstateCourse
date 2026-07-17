@@ -734,8 +734,10 @@ interface FormData {
   retNotifyName?: string;
   hasRealEstate?: string;
   propertyCount?: string;
+  propertyTypes?: string;
   rentKeyLocation?: string;
   retKeyLocation?: string;
+  [key: `property${number}${string}`]: string | undefined;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -8946,21 +8948,24 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     for (let propNum = 1; propNum <= propertyCount; propNum++) {
       const propertyName = formData[`property${propNum}Name`] || `Property ${propNum}`;
-      const purchaseYear = formData[`property${propNum}PurchaseYear`];
-      const owners = formData[`property${propNum}Owners`] || [];
-      const otherOwner = formData[`property${propNum}OtherOwner`];
-      const ownershipStructure = formData[`property${propNum}OwnershipStructure`];
-      const address = formData[`property${propNum}Address`];
-      const city = formData[`property${propNum}City`];
-      const province = formData[`property${propNum}Province`];
       const country = formData[`property${propNum}Country`];
-      const postalCode = formData[`property${propNum}PostalCode`];
-      const isRental = formData[`property${propNum}IsRental`];
-      const leaseStorage = formData[`property${propNum}LeaseStorage`];
-      const lawyerName = formData[`property${propNum}LawyerName`];
-      const lawyerFirm = formData[`property${propNum}LawyerFirm`];
-      const lawyerPhone = formData[`property${propNum}LawyerPhone`];
-      const lawyerEmail = formData[`property${propNum}LawyerEmail`];
+      const province = formData[`property${propNum}Province`];
+      const municipality = formData[`property${propNum}Municipality`];
+      const use = formData[`property${propNum}Use`];
+      const ownership = formData[`property${propNum}Ownership`];
+      const whichCorp = formData[`property${propNum}WhichCorporation`];
+      const whichTrust = formData[`property${propNum}WhichTrust`];
+      const whichPartnership = formData[`property${propNum}WhichPartnership`];
+      const otherOwnerName = formData[`property${propNum}OtherOwnerName`];
+      const otherOwnerPhone = formData[`property${propNum}OtherOwnerPhone`];
+      const otherOwnerCity = formData[`property${propNum}OtherOwnerCity`];
+      const ownershipHeld = formData[`property${propNum}OwnershipHeld`];
+      const hasBeneficialOwner = formData[`property${propNum}HasBeneficialOwner`];
+      const beneficialOwnerName = formData[`property${propNum}BeneficialOwnerName`];
+      const beneficialOwnerPhone = formData[`property${propNum}BeneficialOwnerPhone`];
+      const beneficialOwnerCity = formData[`property${propNum}BeneficialOwnerCity`];
+      const beneficialOwnerPercent = formData[`property${propNum}BeneficialOwnerPercent`];
+      const ownershipDocLocation = formData[`property${propNum}OwnershipDocLocation`];
 
       addSectionHeader(`Real Estate: ${propertyName}`);
 
@@ -8970,307 +8975,222 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 12;
       doc.setTextColor(...colors.darkText);
 
-      if (yPosition > 180) {
-        addPage();
-        yPosition = 12;
-      }
+      if (yPosition > 180) { addPage(); yPosition = 12; }
 
-      addSubsectionHeader('Property Overview');
+      addSubsectionHeader('Jurisdiction');
+
+      const jurisdictionRows = [
+        { label: 'Country', value: country },
+        { label: 'Province / State', value: province },
+        { label: 'Municipality', value: municipality },
+      ];
 
       const tableStartY = yPosition;
       const rowHeight = 8;
       const col1Width = 70;
       const col2Width = pageWidth - margin * 2 - col1Width;
 
-      const overviewRows = [];
-
-      if (purchaseYear) {
-        overviewRows.push(['Purchase Year', purchaseYear]);
-      }
-
-      if (ownershipStructure) {
-        const structureLabel = ownershipStructure === 'joint' ? 'Joint with Right of Survivorship' : 'Tenants in Common';
-        overviewRows.push(['Ownership Structure', structureLabel]);
-      }
-
-      if (owners && owners.length > 0) {
-        const ownersList = Array.isArray(owners) ? owners : [owners];
-        const ownersDisplay = ownersList.map(o => {
-          if (o === 'client1') return formData.fullName || 'Client 1';
-          if (o === 'client2') return formData.spouseFullName || 'Client 2';
-          if (o.startsWith('trust')) {
-            const trustNum = o.replace('trust', '');
-            return formData[`trust${trustNum}Name`] || `Trust ${trustNum}`;
-          }
-          if (o.startsWith('corp')) {
-            const corpNum = o.replace('corp', '');
-            return formData[`corporation${corpNum}Name`] || `Corporation ${corpNum}`;
-          }
-          if (o === 'other' && otherOwner) return otherOwner;
-          return o;
-        }).join(', ');
-        overviewRows.push(['Owners', ownersDisplay]);
-      }
-
       let currentY = tableStartY;
-      overviewRows.forEach(([label, value], rowIdx) => {
-        if (currentY > 260) {
-          addPage();
-          currentY = 12;
-        }
+      jurisdictionRows.forEach(({ label, value }) => {
+        if (currentY > 260) { addPage(); currentY = 12; }
 
         doc.setFontSize(8);
         doc.setFont(undefined, 'normal');
-        const labelLines = doc.splitTextToSize(label, col1Width - 3);
-        const dynH = Math.max(rowHeight, labelLines.length * 5 + 3);
-
         doc.setDrawColor(...colors.tableBorder);
         doc.setLineWidth(0.3);
         doc.setFillColor(255, 255, 255);
-        doc.rect(margin, currentY, col1Width, dynH, 'FD');
+        doc.rect(margin, currentY, col1Width, rowHeight, 'FD');
         doc.setTextColor(...colors.darkText);
-        doc.text(labelLines, margin + 2, currentY + 5);
+        doc.text(label, margin + 2, currentY + 5);
 
         doc.setFillColor(255, 255, 255);
-        doc.rect(margin + col1Width, currentY, col2Width, dynH, 'FD');
-        const fldPropOverview = new doc.AcroFormTextField();
-        fldPropOverview.fieldName = `prop${propNum}_overview_${rowIdx}`;
-        fldPropOverview.Rect = [margin + col1Width + 0.5, currentY + 0.5, col2Width - 1, dynH - 1];
-        fldPropOverview.fontSize = 8;
-        fldPropOverview.textColor = colors.darkText;
-        fldPropOverview.borderStyle = 'none';
-        fldPropOverview.value = value || '';
-        doc.addField(fldPropOverview);
+        doc.rect(margin + col1Width, currentY, col2Width, rowHeight, 'FD');
+        const fld = new doc.AcroFormTextField();
+        fld.fieldName = `prop${propNum}_juris_${label}`;
+        fld.Rect = [margin + col1Width + 0.5, currentY + 0.5, col2Width - 1, rowHeight - 1];
+        fld.fontSize = 8;
+        fld.textColor = colors.darkText;
+        fld.borderStyle = 'none';
+        fld.value = value || '';
+        doc.addField(fld);
 
-        currentY += dynH;
+        currentY += rowHeight;
       });
 
       yPosition = currentY + 8;
 
-      if (yPosition > 180) {
-        addPage();
-        yPosition = 12;
-      }
+      if (yPosition > 180) { addPage(); yPosition = 12; }
 
-      addSubsectionHeader('Address');
+      addSubsectionHeader('Property Use');
 
-      const addressLines = [];
-      if (address) addressLines.push(address);
-      if (city || province || postalCode) {
-        const cityLine = [city, province, postalCode].filter(Boolean).join(', ');
-        addressLines.push(cityLine);
-      }
-      if (country) addressLines.push(country);
-
-      if (addressLines.length > 0) {
-        const addressStartY = yPosition;
-        addressLines.forEach((line, addrIdx) => {
-          if (yPosition > 260) {
-            addPage();
-            yPosition = 12;
-          }
-          doc.setDrawColor(...colors.tableBorder);
-          doc.setFillColor(255, 255, 255);
-          doc.rect(margin, yPosition, pageWidth - margin * 2, rowHeight, 'FD');
-          doc.setFontSize(8);
-          const fldAddr = new doc.AcroFormTextField();
-          fldAddr.fieldName = `prop${propNum}_address_${addrIdx}`;
-          fldAddr.Rect = [margin + 0.5, yPosition + 0.5, pageWidth - margin * 2 - 1, rowHeight - 1];
-          fldAddr.fontSize = 8;
-          fldAddr.textColor = colors.darkText;
-          fldAddr.borderStyle = 'none';
-          fldAddr.value = line || '';
-          doc.addField(fldAddr);
-          yPosition += rowHeight;
-        });
-      }
-
-      yPosition += 8;
-
-      if (yPosition > 180) {
-        addPage();
-        yPosition = 12;
-      }
-
-      addSubsectionHeader('Records & Tax Information');
+      const useLabelMap: Record<string, string> = {
+        principal_residence: 'Principal residence',
+        cottage: 'Cottage / Seasonal home',
+        vacation: 'Vacation property',
+        rental: 'Rental property',
+        mixed: 'Mixed personal & rental',
+        commercial: 'Commercial',
+        vacant_land: 'Vacant land',
+        farm: 'Farm',
+        other: 'Other',
+      };
 
       doc.setFontSize(8);
-      doc.setTextColor(...colors.mediumGray);
-      doc.text('These records help determine the tax cost of your property and can significantly impact', margin, yPosition);
-      yPosition += 4;
-      doc.text('taxes owing when it is sold or transferred.', margin, yPosition);
-      yPosition += 8;
-      doc.setTextColor(...colors.darkText);
-
-      const recordsStartY = yPosition;
-      const recordTypes = [
-        { key: 'RecordPurchaseDocs', label: 'Original Purchase Documents' },
-        { key: 'RecordLegalFees', label: 'Legal Fees and Land Transfer Tax' },
-        { key: 'RecordImprovements', label: 'Capital Improvements' },
-        { key: 'RecordAppraisals', label: 'Appraisals or Valuations' }
-      ];
-
-      const recordCol1 = 60;
-      const recordCol2 = 25;
-      const recordCol3 = pageWidth - margin * 2 - recordCol1 - recordCol2;
-
+      doc.setFont(undefined, 'normal');
       doc.setDrawColor(...colors.tableBorder);
       doc.setLineWidth(0.3);
       doc.setFillColor(255, 255, 255);
-      doc.rect(margin, yPosition, recordCol1, rowHeight, 'FD');
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(8);
+      doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
       doc.setTextColor(...colors.darkText);
-      doc.text('Record Type', margin + 2, yPosition + 5);
+      doc.text('Primary Use', margin + 2, yPosition + 5);
 
       doc.setFillColor(255, 255, 255);
-      doc.rect(margin + recordCol1, yPosition, recordCol2, rowHeight, 'FD');
-      doc.text('Available', margin + recordCol1 + 2, yPosition + 5);
+      doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
+      const fldUse = new doc.AcroFormTextField();
+      fldUse.fieldName = `prop${propNum}_use`;
+      fldUse.Rect = [margin + col1Width + 0.5, yPosition + 0.5, col2Width - 1, rowHeight - 1];
+      fldUse.fontSize = 8;
+      fldUse.textColor = colors.darkText;
+      fldUse.borderStyle = 'none';
+      fldUse.value = use ? (useLabelMap[use] || use) : '';
+      doc.addField(fldUse);
+      yPosition += rowHeight + 8;
 
-      doc.setFillColor(255, 255, 255);
-      doc.rect(margin + recordCol1 + recordCol2, yPosition, recordCol3, rowHeight, 'FD');
-      doc.text('Storage Location', margin + recordCol1 + recordCol2 + 2, yPosition + 5);
-      doc.setFont(undefined, 'normal');
+      if (yPosition > 180) { addPage(); yPosition = 12; }
 
-      yPosition += rowHeight;
+      addSubsectionHeader('Ownership');
 
-      recordTypes.forEach(({ key, label }) => {
-        if (yPosition > 260) {
-          addPage();
-          yPosition = 12;
-        }
+      const ownershipLabelMap: Record<string, string> = {
+        me: 'Me',
+        spouse: 'My spouse',
+        joint_spouse: 'Jointly with spouse',
+        joint_other: 'Jointly with another person',
+        corporation: 'Corporation',
+        trust: 'Family Trust',
+        partnership: 'Partnership',
+        other: 'Other',
+      };
 
-        const hasRecord = formData[`property${propNum}${key}`] === 'yes';
-        const location = formData[`property${propNum}${key}Location`] || '';
+      const ownershipRows: Array<[string, string | undefined]> = [
+        ['Legal Owner', ownership ? (ownershipLabelMap[ownership] || ownership) : undefined],
+      ];
 
+      if (ownership === 'corporation' && whichCorp) ownershipRows.push(['Which Corporation', whichCorp]);
+      if (ownership === 'trust' && whichTrust) ownershipRows.push(['Which Trust', whichTrust]);
+      if (ownership === 'partnership' && whichPartnership) ownershipRows.push(['Which Partnership', whichPartnership]);
+      if ((ownership === 'other' || ownership === 'joint_other') && otherOwnerName) ownershipRows.push(['Other Owner Name', otherOwnerName]);
+      if ((ownership === 'other' || ownership === 'joint_other') && otherOwnerPhone) ownershipRows.push(['Other Owner Phone', otherOwnerPhone]);
+      if ((ownership === 'other' || ownership === 'joint_other') && otherOwnerCity) ownershipRows.push(['Other Owner City', otherOwnerCity]);
+
+      const ownershipHeldLabelMap: Record<string, string> = {
+        joint_tenancy: 'Joint Tenancy',
+        tenants_in_common: 'Tenants in Common',
+        not_sure: 'Not sure',
+      };
+
+      if ((ownership === 'joint_spouse' || ownership === 'joint_other') && ownershipHeld) {
+        ownershipRows.push(['Ownership Held', ownershipHeldLabelMap[ownershipHeld] || ownershipHeld]);
+      }
+
+      currentY = yPosition;
+      ownershipRows.forEach(([label, value], idx) => {
+        if (currentY > 260) { addPage(); currentY = 12; }
+
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
         doc.setDrawColor(...colors.tableBorder);
         doc.setLineWidth(0.3);
         doc.setFillColor(255, 255, 255);
-        doc.setFontSize(8);
-        doc.setFont(undefined, 'normal');
+        doc.rect(margin, currentY, col1Width, rowHeight, 'FD');
         doc.setTextColor(...colors.darkText);
-        doc.rect(margin, yPosition, recordCol1, rowHeight, 'FD');
-        doc.text(label, margin + 2, yPosition + 5);
+        doc.text(label, margin + 2, currentY + 5);
 
         doc.setFillColor(255, 255, 255);
-        doc.rect(margin + recordCol1, yPosition, recordCol2, rowHeight, 'FD');
-        doc.text(hasRecord ? 'Yes' : 'No', margin + recordCol1 + 2, yPosition + 5);
+        doc.rect(margin + col1Width, currentY, col2Width, rowHeight, 'FD');
+        const fld = new doc.AcroFormTextField();
+        fld.fieldName = `prop${propNum}_ownership_${idx}`;
+        fld.Rect = [margin + col1Width + 0.5, currentY + 0.5, col2Width - 1, rowHeight - 1];
+        fld.fontSize = 8;
+        fld.textColor = colors.darkText;
+        fld.borderStyle = 'none';
+        fld.value = value || '';
+        doc.addField(fld);
 
-        doc.setFillColor(...colors.tableHeader);
-        doc.rect(margin + recordCol1 + recordCol2, yPosition, recordCol3, rowHeight, 'FD');
-        {
-          const fldRecLoc = new doc.AcroFormTextField();
-          fldRecLoc.fieldName = `prop${propNum}_rec_${key}_loc`;
-          fldRecLoc.Rect = [margin + recordCol1 + recordCol2 + 0.5, yPosition + 0.5, recordCol3 - 1, rowHeight - 1];
-          fldRecLoc.fontSize = 8;
-          fldRecLoc.textColor = colors.darkText;
-          fldRecLoc.borderStyle = 'none';
-          fldRecLoc.value = (hasRecord && location) ? location : '';
-          doc.addField(fldRecLoc);
-        }
-
-        yPosition += rowHeight;
+        currentY += rowHeight;
       });
 
-      yPosition += 8;
+      yPosition = currentY + 8;
 
-      if (isRental === 'yes') {
-        if (yPosition > 180) {
-          addPage();
-          yPosition = 12;
-        }
+      if (yPosition > 180) { addPage(); yPosition = 12; }
 
-        addSubsectionHeader('Rental Information');
+      addSubsectionHeader('Beneficial Ownership');
 
-        const rentalStartY = yPosition;
+      const beneficialRows: Array<[string, string | undefined]> = [
+        ['Has Beneficial Owner', hasBeneficialOwner === 'yes' ? 'Yes' : hasBeneficialOwner === 'no' ? 'No' : hasBeneficialOwner === 'not_sure' ? 'Not sure' : undefined],
+      ];
+
+      if (hasBeneficialOwner === 'yes') {
+        if (beneficialOwnerName) beneficialRows.push(['Beneficial Owner Name', beneficialOwnerName]);
+        if (beneficialOwnerPhone) beneficialRows.push(['Beneficial Owner Phone', beneficialOwnerPhone]);
+        if (beneficialOwnerCity) beneficialRows.push(['Beneficial Owner City', beneficialOwnerCity]);
+        if (beneficialOwnerPercent) beneficialRows.push(['Ownership %', beneficialOwnerPercent]);
+      }
+
+      currentY = yPosition;
+      beneficialRows.forEach(([label, value], idx) => {
+        if (currentY > 260) { addPage(); currentY = 12; }
+
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
         doc.setDrawColor(...colors.tableBorder);
         doc.setLineWidth(0.3);
         doc.setFillColor(255, 255, 255);
-        doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
-        doc.setFontSize(8);
-        doc.setFont(undefined, 'normal');
+        doc.rect(margin, currentY, col1Width, rowHeight, 'FD');
         doc.setTextColor(...colors.darkText);
-        doc.text('Rental Property', margin + 2, yPosition + 5);
+        doc.text(label, margin + 2, currentY + 5);
 
         doc.setFillColor(255, 255, 255);
-        doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
-        doc.text('Yes', margin + col1Width + 2, yPosition + 5);
-        yPosition += rowHeight;
+        doc.rect(margin + col1Width, currentY, col2Width, rowHeight, 'FD');
+        const fld = new doc.AcroFormTextField();
+        fld.fieldName = `prop${propNum}_beneficial_${idx}`;
+        fld.Rect = [margin + col1Width + 0.5, currentY + 0.5, col2Width - 1, rowHeight - 1];
+        fld.fontSize = 8;
+        fld.textColor = colors.darkText;
+        fld.borderStyle = 'none';
+        fld.value = value || '';
+        doc.addField(fld);
 
-        if (leaseStorage) {
-          doc.setDrawColor(...colors.tableBorder);
-          doc.setLineWidth(0.3);
-          doc.setFillColor(255, 255, 255);
-          doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
-          doc.setFont(undefined, 'normal');
-          doc.text('Lease Storage Location', margin + 2, yPosition + 5);
+        currentY += rowHeight;
+      });
 
-          doc.setFillColor(...colors.tableHeader);
-          doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
-          const fldLease = new doc.AcroFormTextField();
-          fldLease.fieldName = `prop${propNum}_lease_storage`;
-          fldLease.Rect = [margin + col1Width + 0.5, yPosition + 0.5, col2Width - 1, rowHeight - 1];
-          fldLease.fontSize = 8;
-          fldLease.textColor = colors.darkText;
-          fldLease.borderStyle = 'none';
-          fldLease.value = leaseStorage || '';
-          doc.addField(fldLease);
-          yPosition += rowHeight;
-        }
+      yPosition = currentY + 8;
 
-        yPosition += 8;
-      }
+      if (yPosition > 180) { addPage(); yPosition = 12; }
 
-      if (lawyerName || lawyerFirm || lawyerPhone || lawyerEmail) {
-        if (yPosition > 180) {
-          addPage();
-          yPosition = 12;
-        }
+      addSubsectionHeader('Document Storage');
 
-        addSubsectionHeader('Legal Contact');
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setDrawColor(...colors.tableBorder);
+      doc.setLineWidth(0.3);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
+      doc.setTextColor(...colors.darkText);
+      doc.text('Ownership Document Location', margin + 2, yPosition + 5);
 
-        const lawyerRows = [];
-        if (lawyerName) lawyerRows.push(['Lawyer Name', lawyerName]);
-        if (lawyerFirm) lawyerRows.push(['Firm Name', lawyerFirm]);
-        if (lawyerPhone) lawyerRows.push(['Phone Number', lawyerPhone]);
-        if (lawyerEmail) lawyerRows.push(['Email Address', lawyerEmail]);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
+      const fldDoc = new doc.AcroFormTextField();
+      fldDoc.fieldName = `prop${propNum}_doc_location`;
+      fldDoc.Rect = [margin + col1Width + 0.5, yPosition + 0.5, col2Width - 1, rowHeight - 1];
+      fldDoc.fontSize = 8;
+      fldDoc.textColor = colors.darkText;
+      fldDoc.borderStyle = 'none';
+      fldDoc.value = ownershipDocLocation || '';
+      doc.addField(fldDoc);
+      yPosition += rowHeight + 8;
 
-        lawyerRows.forEach(([label, value], lawyerRowIdx) => {
-          if (yPosition > 260) {
-            addPage();
-            yPosition = 12;
-          }
-
-          doc.setDrawColor(...colors.tableBorder);
-          doc.setLineWidth(0.3);
-          doc.setFillColor(255, 255, 255);
-          doc.rect(margin, yPosition, col1Width, rowHeight, 'FD');
-          doc.setFontSize(8);
-          doc.setFont(undefined, 'normal');
-          doc.setTextColor(...colors.darkText);
-          doc.text(label, margin + 2, yPosition + 5);
-
-          doc.setFillColor(...colors.tableHeader);
-          doc.rect(margin + col1Width, yPosition, col2Width, rowHeight, 'FD');
-          const fldLawyer = new doc.AcroFormTextField();
-          fldLawyer.fieldName = `prop${propNum}_lawyer_${lawyerRowIdx}`;
-          fldLawyer.Rect = [margin + col1Width + 0.5, yPosition + 0.5, col2Width - 1, rowHeight - 1];
-          fldLawyer.fontSize = 8;
-          fldLawyer.textColor = colors.darkText;
-          fldLawyer.borderStyle = 'none';
-          fldLawyer.value = value || '';
-          doc.addField(fldLawyer);
-
-          yPosition += rowHeight;
-        });
-
-        yPosition += 8;
-      }
-
-      if (yPosition > 220) {
-        addPage();
-        yPosition = 12;
-      }
+      if (yPosition > 220) { addPage(); yPosition = 12; }
 
       addSubsectionHeader('Additional Notes or Missing Information');
 

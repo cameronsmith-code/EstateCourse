@@ -734,7 +734,8 @@ interface FormData {
   retNotifyName?: string;
   hasRealEstate?: string;
   propertyCount?: string;
-  propertyKeyLocation?: string;
+  rentKeyLocation?: string;
+  retKeyLocation?: string;
 }
 
 const getOrdinalLabel = (num: number): string => {
@@ -8891,6 +8892,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       { label: 'Automatic Rent Payments Details', value: formData.rentAutoPaymentsDetails },
       { label: 'Security Deposit', value: formData.rentSecurityDeposit === 'yes' ? 'Yes' : formData.rentSecurityDeposit === 'no' ? 'No' : undefined },
       { label: 'Parking / Storage Lockers', value: formData.rentParkingStorage === 'yes' ? 'Yes' : formData.rentParkingStorage === 'no' ? 'No' : undefined },
+      { label: 'Location of the key', value: formData.rentKeyLocation },
       { label: 'Emergency Contact', value: formData.rentNotifyName },
     ];
 
@@ -8922,6 +8924,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       { label: 'Automatic Monthly Payments', value: formData.retAutoPayments === 'yes' ? 'Yes' : formData.retAutoPayments === 'no' ? 'No' : undefined },
       { label: 'Security Deposit', value: formData.retSecurityDeposit === 'yes' ? 'Yes' : formData.retSecurityDeposit === 'no' ? 'No' : undefined },
       { label: 'Parking / Storage Lockers', value: formData.retParkingStorage === 'yes' ? 'Yes' : formData.retParkingStorage === 'no' ? 'No' : undefined },
+      { label: 'Location of the key', value: formData.retKeyLocation },
       { label: 'Emergency Contact', value: formData.retNotifyName },
     ];
 
@@ -8940,17 +8943,6 @@ You should explore this as an option with your legal and CFP® professionals bec
 
   if (formData.hasRealEstate === 'yes') {
     const propertyCount = parseInt(formData.propertyCount || '0');
-
-    if (formData.propertyKeyLocation) {
-      checkPageBreak(14);
-      doc.setFontSize(10);
-      doc.setTextColor(...colors.darkText);
-      doc.setFont(undefined, 'bold');
-      doc.text('Location of the key:', margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      doc.text(String(formData.propertyKeyLocation), margin + 40, yPosition);
-      yPosition += 14;
-    }
 
     for (let propNum = 1; propNum <= propertyCount; propNum++) {
       const propertyName = formData[`property${propNum}Name`] || `Property ${propNum}`;

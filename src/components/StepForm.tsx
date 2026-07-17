@@ -4,6 +4,7 @@ import FormField from './FormField';
 import VideoPlayer from './VideoPlayer';
 import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprietorshipDetails';
 import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
+import PropertyDetails, { PropertyData } from './PropertyDetails';
 import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X } from 'lucide-react';
 
@@ -7861,6 +7862,116 @@ export default function StepForm({
 
                 {/* Real estate ownership question */}
                 {ownershipGateQuestions.filter(q => q.key === 'hasRealEstate').map(renderQuestion)}
+
+                {/* Property types and inline property forms */}
+                {answers['hasRealEstate'] === 'yes' && (() => {
+                  const PROPERTY_TYPES = [
+                    'Principal residence', 'Cottage', 'Vacation property', 'Rental property',
+                    'Commercial property', 'Vacant land', 'Farm', 'Condo', 'Foreign property', 'Other',
+                  ];
+                  const selectedTypes = (answers['propertyTypes'] as string[]) || [];
+                  const propertiesData = (answers['propertiesData'] as Array<Partial<PropertyData>>) || [];
+
+                  const handleTypeToggle = (type: string, checked: boolean) => {
+                    let updated: string[];
+                    if (checked) {
+                      updated = [...selectedTypes, type];
+                    } else {
+                      updated = selectedTypes.filter(t => t !== type);
+                      const newPropsData = propertiesData.filter(p => p.type !== type);
+                      onAnswerChange('propertiesData', newPropsData);
+                    }
+                    onAnswerChange('propertyTypes', updated);
+                  };
+
+                  const handlePropertyChange = (propIndex: number, field: keyof PropertyData, value: unknown) => {
+                    const updated = [...propertiesData];
+                    if (!updated[propIndex]) updated[propIndex] = { type: selectedTypes[propIndex] };
+                    updated[propIndex] = { ...updated[propIndex], [field]: value };
+                    onAnswerChange('propertiesData', updated);
+                  };
+
+                  const handlePropertyMultiChange = (propIndex: number, updates: Partial<PropertyData>) => {
+                    const updated = [...propertiesData];
+                    if (!updated[propIndex]) updated[propIndex] = { type: selectedTypes[propIndex] };
+                    updated[propIndex] = { ...updated[propIndex], ...updates };
+                    onAnswerChange('propertiesData', updated);
+                  };
+
+                  // Gather predefined entities
+                  const corporationsData = (allFormData['corporationsData'] as Array<Record<string, string>>) || [];
+                  const trusts: string[] = [];
+                  for (let i = 1; i <= 4; i++) {
+                    const tn = allFormData[`trust${i > 1 ? i : ''}LegalName`];
+                    if (tn) trusts.push(tn);
+                  }
+                  if (allFormData['trustLegalName']) trusts.push(allFormData['trustLegalName']);
+                  const partnerships: string[] = [];
+                  const c1Partnerships = (allFormData['client1PartnershipsData'] as Array<Record<string, string>>) || [];
+                  c1Partnerships.forEach(p => { if (p.registeredName) partnerships.push(p.registeredName); });
+                  const c2Partnerships = (allFormData['client2PartnershipsData'] as Array<Record<string, string>>) || [];
+                  c2Partnerships.forEach(p => { if (p.registeredName) partnerships.push(p.registeredName); });
+
+                  // Predefined people (already identified)
+                  const predefinedPeople: Array<{ name: string; phone?: string; city?: string }> = [];
+                  if (basicAnswers['fullName']) predefinedPeople.push({ name: basicAnswers['fullName'] as string });
+                  if (hasSpouseStep9 && basicAnswers['spouseName']) predefinedPeople.push({ name: basicAnswers['spouseName'] as string });
+                  const c1SoleProps = (allFormData['client1SolePropsData'] as Array<Record<string, string>>) || [];
+                  c1SoleProps.forEach(sp => { if (sp.registeredName) predefinedPeople.push({ name: sp.registeredName }); });
+
+                  return (
+                    <div className="mt-4 space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-3">
+                          Which types of property do you own?
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {PROPERTY_TYPES.map((type) => (
+                            <label key={type} className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={selectedTypes.includes(type)}
+                                onChange={(e) => handleTypeToggle(type, e.target.checked)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">{type}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {selectedTypes.map((type, typeIndex) => {
+                        const propIndex = propertiesData.findIndex(p => p.type === type);
+                        const actualIndex = propIndex >= 0 ? propIndex : propertiesData.length;
+                        if (propIndex < 0) {
+                          // Initialize property data for this type
+                          setTimeout(() => {
+                            const updated = [...propertiesData];
+                            updated[actualIndex] = { type, name: '', country: '', province: '', state: '', city: '', owners: [], otherOwners: [], ownershipPercentages: {} };
+                            onAnswerChange('propertiesData', updated);
+                          }, 0);
+                        }
+                        return (
+                          <PropertyDetails
+                            key={type}
+                            index={typeIndex}
+                            propertyType={type}
+                            data={propertiesData[actualIndex] || { type }}
+                            client1Name={client1Name}
+                            client2Name={client2Name}
+                            hasSpouse={hasSpouseStep9}
+                            corporations={corporationsData}
+                            trusts={trusts}
+                            partnerships={partnerships}
+                            predefinedPeople={predefinedPeople}
+                            onChange={(field, value) => handlePropertyChange(actualIndex, field, value)}
+                            onMultiChange={(updates) => handlePropertyMultiChange(actualIndex, updates)}
+                          />
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </>
             );
           })()}

@@ -8943,6 +8943,37 @@ You should explore this as an option with your legal and CFP® professionals bec
     yPosition += 6;
   }
 
+  // Will Review — foreign property yellow flags
+  if (formData.hasRealEstate === 'yes') {
+    const propertiesData = (formData['propertiesData'] as Array<Record<string, unknown>>) || [];
+    const foreignProperties = propertiesData.filter((p) => {
+      const country = String(p.country || '').toLowerCase();
+      return country && country !== 'canada';
+    });
+
+    if (foreignProperties.length > 0) {
+      addSectionHeader('Will Review — Foreign Property Flags');
+      doc.setFontSize(10);
+      doc.setTextColor(200, 150, 0); // yellow/amber
+
+      foreignProperties.forEach((p) => {
+        const propName = String(p.name || 'Property');
+        const country = String(p.country || '');
+        const flagText = `⚠ ${propName} is outside of Canada (${country}). Review required to ensure estate plan addresses foreign property jurisdiction and tax implications.`;
+        const flagLines = doc.splitTextToSize(flagText, fieldWidth);
+        flagLines.forEach((line: string) => {
+          checkPageBreak(6);
+          doc.text(line, margin, yPosition);
+          yPosition += 5;
+        });
+        yPosition += 3;
+      });
+
+      doc.setTextColor(...colors.darkText);
+      yPosition += 6;
+    }
+  }
+
   const fileName = `estate-planning-${formData.fullName?.replace(/\s+/g, '-').toLowerCase() || 'form'}.pdf`;
   doc.save(fileName);
 };

@@ -7765,30 +7765,6 @@ export default function StepForm({
 
 
 
-          {([7, 10, 11, 12, 13, 14].includes(step.id)) && (() => {
-            const allFormData = Object.fromEntries(
-              Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
-                Object.entries(stepAnswers)
-              )
-            );
-            return step.questions.map((question) => {
-              if (question.condition && typeof question.condition === 'function') {
-                if (!question.condition(allFormData)) return null;
-              }
-              const displayLabel = typeof question.label === 'function'
-                ? question.label(allAnswers || new Map())
-                : question.label;
-              return (
-                <FormField
-                  key={question.key}
-                  question={{ ...question, label: displayLabel }}
-                  value={answers[question.key]}
-                  onChange={(value) => onAnswerChange(question.key, value)}
-                />
-              );
-            });
-          })()}
-
           {step.id === 9 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';

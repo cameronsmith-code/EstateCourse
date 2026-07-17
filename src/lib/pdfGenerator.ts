@@ -715,6 +715,7 @@ interface FormData {
   rentLeaseRenewalDate?: string;
   rentLeaseStorage?: string;
   rentAutoPayments?: string;
+  rentAutoPaymentsDetails?: string;
   rentSecurityDeposit?: string;
   rentParkingStorage?: string;
   rentNotifyName?: string;
@@ -8886,7 +8887,8 @@ You should explore this as an option with your legal and CFP® professionals bec
       { label: 'Monthly Rent', value: formData.rentMonthlyAmount },
       { label: 'Lease Renewal Date', value: formData.rentLeaseRenewalDate },
       { label: 'Lease Agreement Stored At', value: formData.rentLeaseStorage },
-      { label: 'Automatic Rent Payments', value: formData.rentAutoPayments === 'yes' ? 'Yes' : formData.rentAutoPayments === 'no' ? 'No' : undefined },
+      { label: 'Automatic Rent Payments', value: formData.rentAutoPayments === 'void_cheques' ? 'Void Cheques' : formData.rentAutoPayments === 'other' ? 'Other' : undefined },
+      { label: 'Automatic Rent Payments Details', value: formData.rentAutoPaymentsDetails },
       { label: 'Security Deposit', value: formData.rentSecurityDeposit === 'yes' ? 'Yes' : formData.rentSecurityDeposit === 'no' ? 'No' : undefined },
       { label: 'Parking / Storage Lockers', value: formData.rentParkingStorage === 'yes' ? 'Yes' : formData.rentParkingStorage === 'no' ? 'No' : undefined },
       { label: 'Emergency Contact', value: formData.rentNotifyName },

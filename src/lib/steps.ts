@@ -949,11 +949,19 @@ export const STEPS: Step[] = [
         label: 'Do you have automatic rent payments set up?',
         type: 'radio',
         options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
+          { value: 'void_cheques', label: 'Void Cheques' },
+          { value: 'other', label: 'Other' },
         ],
         required: false,
         condition: (formData: Record<string, string>) => formData.livingSituation === 'rent',
+      },
+      {
+        key: 'rentAutoPaymentsDetails',
+        label: 'Provide details',
+        type: 'text',
+        placeholder: 'Enter details',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.rentAutoPayments === 'other',
       },
       {
         key: 'rentSecurityDeposit',

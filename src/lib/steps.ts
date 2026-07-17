@@ -11,13 +11,13 @@ const generateYearOptions = () => {
 export type StepQuestion = {
   key: string;
   label: string | ((answers: Map<number, Record<string, unknown>>) => string);
-  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'email' | 'tel' | 'date' | 'number' | 'checkbox-group';
+  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'email' | 'tel' | 'date' | 'number' | 'checkbox-group' | 'dynamic';
   placeholder?: string;
-  options?: Array<{ value: string; label: string }> | (() => Array<{ value: string; label: string }>);
+  options?: Array<{ value: string; label: string }> | ((answers: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>);
   required?: boolean;
   videoUrl?: string;
   description?: string;
-  condition?: (formData: Record<string, string>) => boolean;
+  condition?: (formData: Record<string, string>) => boolean | "";
   max?: number;
 };
 

@@ -2949,6 +2949,111 @@ export default function StepForm({
           )}
 
 
+          {step.id === 7 && (() => {
+            const allFormData = Object.fromEntries(
+              Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                Object.entries(stepAnswers)
+              )
+            );
+
+            const isVisible = (question: typeof step.questions[0]) => {
+              if (!question.condition) return true;
+              return question.condition(allFormData);
+            };
+
+            const renderQuestion = (question: typeof step.questions[0]) => {
+              if (!isVisible(question)) return null;
+
+              const displayLabel = typeof question.label === 'function'
+                ? question.label(allAnswers || new Map())
+                : question.label;
+
+              const resolvedOptions = typeof question.options === 'function'
+                ? (question.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+                : question.options;
+
+              return (
+                <FormField
+                  key={question.key}
+                  question={{ ...question, label: displayLabel, options: resolvedOptions }}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                />
+              );
+            };
+
+            const fpKeys = new Set([
+              'fpHasAdvisor', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone',
+              'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services',
+              'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpHasAdditionalAdvisor',
+            ]);
+            const acctKeys = new Set([
+              'acctHasAccountant', 'acctAdvisor1Firm', 'acctAdvisor1Name', 'acctAdvisor1Phone',
+              'acctAdvisor1Email', 'acctAdvisor1WorksWith', 'acctAdvisor1Services',
+              'acctAdvisor1Duration', 'acctAdvisor1DocLocation', 'acctAdvisor1IncludeInContactList',
+              'acctHasAdditional',
+            ]);
+            const lawKeys = new Set([
+              'lawHasLawyer', 'lawAdvisor1Firm', 'lawAdvisor1Name', 'lawAdvisor1Phone',
+              'lawAdvisor1Email', 'lawAdvisor1WorksWith', 'lawAdvisor1Services',
+              'lawAdvisor1Duration', 'lawAdvisor1DocLocation', 'lawAdvisor1IncludeInContactList',
+              'lawHasAdditional',
+            ]);
+            const insKeys = new Set([
+              'insHasAdvisor', 'insAdvisor1Firm', 'insAdvisor1Name', 'insAdvisor1Phone',
+              'insAdvisor1Email', 'insAdvisor1WorksWith', 'insAdvisor1Services',
+              'insAdvisor1Duration', 'insAdvisor1DocLocation', 'insAdvisor1IncludeInContactList',
+              'insHasAdditional',
+            ]);
+            const fpHealthKeys = new Set([
+              'fp_health_0_name', 'fp_health_0_clinic', 'fp_health_0_phone', 'fp_health_0_has_additional',
+              'fp_health_1_name', 'fp_health_1_clinic', 'fp_health_1_phone', 'fp_health_1_has_additional',
+              'fp_health_2_name', 'fp_health_2_clinic', 'fp_health_2_phone',
+            ]);
+            const spHealthKeys = new Set([
+              'sp_health_has', 'sp_health_0_name', 'sp_health_0_specialty', 'sp_health_0_phone',
+              'sp_health_0_has_additional', 'sp_health_1_name', 'sp_health_1_specialty', 'sp_health_1_phone',
+              'sp_health_1_has_additional', 'sp_health_2_name', 'sp_health_2_specialty', 'sp_health_2_phone',
+            ]);
+            const phHealthKeys = new Set([
+              'ph_health_0_name', 'ph_health_0_pharmacy', 'ph_health_0_phone', 'ph_health_0_has_additional',
+              'ph_health_1_name', 'ph_health_1_pharmacy', 'ph_health_1_phone',
+            ]);
+
+            const fpQuestions = step.questions.filter(q => fpKeys.has(q.key));
+            const acctQuestions = step.questions.filter(q => acctKeys.has(q.key));
+            const lawQuestions = step.questions.filter(q => lawKeys.has(q.key));
+            const insQuestions = step.questions.filter(q => insKeys.has(q.key));
+            const fpHealthQuestions = step.questions.filter(q => fpHealthKeys.has(q.key));
+            const spHealthQuestions = step.questions.filter(q => spHealthKeys.has(q.key));
+            const phHealthQuestions = step.questions.filter(q => phHealthKeys.has(q.key));
+
+            return (
+              <>
+                <h4 className="text-base font-semibold text-blue-400 mt-4 mb-1">Financial Planner / Investment Advisor</h4>
+                {fpQuestions.map(renderQuestion)}
+
+                <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Accountant (CPA)</h4>
+                {acctQuestions.map(renderQuestion)}
+
+                <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Lawyer</h4>
+                {lawQuestions.map(renderQuestion)}
+
+                <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Insurance Advisor</h4>
+                {insQuestions.map(renderQuestion)}
+
+                <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Family Physician</h4>
+                {fpHealthQuestions.map(renderQuestion)}
+
+                <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Specialists</h4>
+                {spHealthQuestions.map(renderQuestion)}
+
+                <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Pharmacist</h4>
+                {phHealthQuestions.map(renderQuestion)}
+              </>
+            );
+          })()}
+
           {step.id === 8 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');

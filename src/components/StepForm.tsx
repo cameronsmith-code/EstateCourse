@@ -3924,6 +3924,16 @@ export default function StepForm({
                                 );
                               })()}
                             </div>
+
+                            {/* Professional Advisory Directory */}
+                            <div className="mt-8 pt-6 border-t border-gray-600">
+                              <h3 className="text-base font-semibold text-blue-400 mb-1">
+                                Professional Advisory Directory
+                              </h3>
+                              <p className="text-xs italic text-gray-400 mb-4">
+                                {(corporationsData[index]?.corporationName || "(Company's name)")}’s key contacts and professional resources that a Power of Attorney or Estate Trustee would coordinate with as a support team of specialists to manage tax filings and valuations.
+                              </p>
+                            </div>
                           </Subsection>
                         )}
                       </div>

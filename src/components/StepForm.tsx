@@ -3819,7 +3819,21 @@ export default function StepForm({
                                           const isLast = aIdx === digitalAccounts.length - 1;
                                           return (
                                             <div key={aIdx} className="p-4 bg-gray-700/50 rounded-lg mb-4">
-                                              <h4 className="text-sm font-semibold text-gray-200 mb-3">Digital Asset {aIdx + 1}</h4>
+                                              <div className="flex items-center justify-between mb-3">
+                                                <h4 className="text-sm font-semibold text-gray-200">Digital Asset {aIdx + 1}</h4>
+                                                {digitalAccounts.length > 1 && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                      const updated = digitalAccounts.filter((_, i) => i !== aIdx);
+                                                      handleCorporationChange(index, 'digitalAssetAccounts', updated);
+                                                    }}
+                                                    className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                                                  >
+                                                    Remove
+                                                  </button>
+                                                )}
+                                              </div>
                                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
                                                   <label className="block text-xs font-medium text-gray-400 mb-1">Digital Account Name</label>

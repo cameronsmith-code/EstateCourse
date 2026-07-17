@@ -3346,6 +3346,266 @@ export default function StepForm({
                                 </div>
                               </div>
                             )}
+
+                            {/* Signing Authority */}
+                            <div className="mt-6 pt-4 border-t border-gray-600">
+                              <label className="block text-sm font-semibold text-gray-200 mb-1">
+                                Signing Authority
+                              </label>
+                              <p className="text-xs italic text-gray-400 mb-4">
+                                Provide a list of individuals currently registered with the bank who have signing authority on corporate accounts.
+                              </p>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Is the signing authority the same person identified as the Designated Interim Manager?
+                                </label>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`signingAuthSameAsInterim-${index}`}
+                                      value="yes"
+                                      checked={corporationsData[index]?.signingAuthSameAsInterim === 'yes'}
+                                      onChange={(e) => {
+                                        handleCorporationChange(index, 'signingAuthSameAsInterim', e.target.value);
+                                        handleCorporationChange(index, 'signingAuthority', undefined);
+                                        handleCorporationChange(index, 'signingAuthHasAdditional', undefined);
+                                        handleCorporationChange(index, 'signingAuthAdditional', undefined);
+                                      }}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">Yes</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name={`signingAuthSameAsInterim-${index}`}
+                                      value="no"
+                                      checked={corporationsData[index]?.signingAuthSameAsInterim === 'no'}
+                                      onChange={(e) => handleCorporationChange(index, 'signingAuthSameAsInterim', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {corporationsData[index]?.signingAuthSameAsInterim === 'yes' && (
+                                <p className="text-sm text-gray-300 italic mt-3 p-3 bg-gray-600/50 rounded-lg">
+                                  The Designated Interim Manager identified above serves as the signing authority on corporate accounts.
+                                </p>
+                              )}
+
+                              {corporationsData[index]?.signingAuthSameAsInterim === 'no' && (
+                                <div className="mt-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
+                                      <input
+                                        type="text"
+                                        value={corporationsData[index]?.signingAuthority?.name || ''}
+                                        onChange={(e) => handleCorporationChange(index, 'signingAuthority', { ...(corporationsData[index]?.signingAuthority || {}), name: e.target.value })}
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-400 mb-1">Title</label>
+                                      <input
+                                        type="text"
+                                        value={corporationsData[index]?.signingAuthority?.title || ''}
+                                        onChange={(e) => handleCorporationChange(index, 'signingAuthority', { ...(corporationsData[index]?.signingAuthority || {}), title: e.target.value })}
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                      <label className="block text-xs font-medium text-gray-400 mb-1">Responsibilities</label>
+                                      <textarea
+                                        value={corporationsData[index]?.signingAuthority?.responsibilities || ''}
+                                        onChange={(e) => handleCorporationChange(index, 'signingAuthority', { ...(corporationsData[index]?.signingAuthority || {}), responsibilities: e.target.value })}
+                                        placeholder="e.g., Authorized to sign cheques and approve wire transfers on corporate accounts"
+                                        rows={2}
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-400 mb-1">Phone Number</label>
+                                      <input
+                                        type="tel"
+                                        value={corporationsData[index]?.signingAuthority?.phone || ''}
+                                        onChange={(e) => handleCorporationChange(index, 'signingAuthority', { ...(corporationsData[index]?.signingAuthority || {}), phone: e.target.value })}
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
+                                      <input
+                                        type="email"
+                                        value={corporationsData[index]?.signingAuthority?.email || ''}
+                                        onChange={(e) => handleCorporationChange(index, 'signingAuthority', { ...(corporationsData[index]?.signingAuthority || {}), email: e.target.value })}
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {corporationsData[index]?.signingAuthSameAsInterim && (
+                                <div className="mt-4">
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Are there additional individuals who have signing authority on corporate accounts?
+                                  </label>
+                                  <div className="flex gap-4">
+                                    <label className="flex items-center">
+                                      <input
+                                        type="radio"
+                                        name={`signingAuthHasAdditional-${index}`}
+                                        value="yes"
+                                        checked={corporationsData[index]?.signingAuthHasAdditional === 'yes'}
+                                        onChange={(e) => {
+                                          handleCorporationChange(index, 'signingAuthHasAdditional', e.target.value);
+                                          if (e.target.value === 'yes' && !corporationsData[index]?.signingAuthAdditional?.length) {
+                                            handleCorporationChange(index, 'signingAuthAdditional', [{}]);
+                                          }
+                                        }}
+                                        className="mr-2"
+                                      />
+                                      <span className="text-gray-300">Yes</span>
+                                    </label>
+                                    <label className="flex items-center">
+                                      <input
+                                        type="radio"
+                                        name={`signingAuthHasAdditional-${index}`}
+                                        value="no"
+                                        checked={corporationsData[index]?.signingAuthHasAdditional === 'no'}
+                                        onChange={(e) => {
+                                          handleCorporationChange(index, 'signingAuthHasAdditional', e.target.value);
+                                          handleCorporationChange(index, 'signingAuthAdditional', undefined);
+                                        }}
+                                        className="mr-2"
+                                      />
+                                      <span className="text-gray-300">No</span>
+                                    </label>
+                                  </div>
+                                </div>
+                              )}
+
+                              {corporationsData[index]?.signingAuthHasAdditional === 'yes' && (corporationsData[index]?.signingAuthAdditional || []).map((person, addIdx) => {
+                                const additional = corporationsData[index]?.signingAuthAdditional || [];
+                                const isLast = addIdx === additional.length - 1;
+                                return (
+                                  <div key={addIdx} className="mt-4 p-4 bg-gray-700/50 rounded-lg">
+                                    <h4 className="text-sm font-semibold text-gray-200 mb-3">Additional Signing Authority {addIdx + 1}</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
+                                        <input
+                                          type="text"
+                                          value={person?.name || ''}
+                                          onChange={(e) => {
+                                            const updated = [...additional];
+                                            updated[addIdx] = { ...(updated[addIdx] || {}), name: e.target.value };
+                                            handleCorporationChange(index, 'signingAuthAdditional', updated);
+                                          }}
+                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-400 mb-1">Title</label>
+                                        <input
+                                          type="text"
+                                          value={person?.title || ''}
+                                          onChange={(e) => {
+                                            const updated = [...additional];
+                                            updated[addIdx] = { ...(updated[addIdx] || {}), title: e.target.value };
+                                            handleCorporationChange(index, 'signingAuthAdditional', updated);
+                                          }}
+                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                      <div className="md:col-span-2">
+                                        <label className="block text-xs font-medium text-gray-400 mb-1">Responsibilities</label>
+                                        <textarea
+                                          value={person?.responsibilities || ''}
+                                          onChange={(e) => {
+                                            const updated = [...additional];
+                                            updated[addIdx] = { ...(updated[addIdx] || {}), responsibilities: e.target.value };
+                                            handleCorporationChange(index, 'signingAuthAdditional', updated);
+                                          }}
+                                          placeholder="e.g., Co-signer on corporate cheques above $10,000"
+                                          rows={2}
+                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-400 mb-1">Phone Number</label>
+                                        <input
+                                          type="tel"
+                                          value={person?.phone || ''}
+                                          onChange={(e) => {
+                                            const updated = [...additional];
+                                            updated[addIdx] = { ...(updated[addIdx] || {}), phone: e.target.value };
+                                            handleCorporationChange(index, 'signingAuthAdditional', updated);
+                                          }}
+                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
+                                        <input
+                                          type="email"
+                                          value={person?.email || ''}
+                                          onChange={(e) => {
+                                            const updated = [...additional];
+                                            updated[addIdx] = { ...(updated[addIdx] || {}), email: e.target.value };
+                                            handleCorporationChange(index, 'signingAuthAdditional', updated);
+                                          }}
+                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                    </div>
+
+                                    {isLast && (
+                                      <div className="mt-4">
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Are there additional individuals who have signing authority on corporate accounts?
+                                        </label>
+                                        <div className="flex gap-4">
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`signingAuthMore-${index}-${addIdx}`}
+                                              value="yes"
+                                              checked={corporationsData[index]?.[`signingAuthMore_${addIdx}`] === 'yes'}
+                                              onChange={(e) => {
+                                                handleCorporationChange(index, `signingAuthMore_${addIdx}`, e.target.value);
+                                                const updated = [...additional, {}];
+                                                handleCorporationChange(index, 'signingAuthAdditional', updated);
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Yes</span>
+                                          </label>
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`signingAuthMore-${index}-${addIdx}`}
+                                              value="no"
+                                              checked={corporationsData[index]?.[`signingAuthMore_${addIdx}`] === 'no'}
+                                              onChange={(e) => {
+                                                handleCorporationChange(index, `signingAuthMore_${addIdx}`, e.target.value);
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">No</span>
+                                          </label>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </Subsection>
                         )}
                       </div>

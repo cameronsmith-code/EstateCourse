@@ -3196,6 +3196,9 @@ export default function StepForm({
 
                         {corporationsData[index]?.corporationType !== 'Holding Company' && (
                           <Subsection title="Business Continuity and Key Personnel">
+                            <p className="text-xs italic text-gray-400 mb-4">
+                              A corporation is a separate legal entity that survives the death of a shareholder, but its practical viability depends on a clear continuation strategy.
+                            </p>
                             <div>
                               <label className="block text-sm font-medium text-gray-300 mb-2">
                                 Are there key employees whose absence would significantly impact the business?

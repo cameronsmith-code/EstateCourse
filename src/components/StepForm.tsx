@@ -1112,9 +1112,20 @@ export default function StepForm({
 
             // Validate "Other" owners if the checkbox is checked
             if (corporation?.hasOtherOwner === 'true') {
-              const otherOwnersData = corporation?.otherOwners ? JSON.parse(corporation.otherOwners) : [];
-              if (otherOwnersData.length === 0 || otherOwnersData.some((owner: string) => !owner || owner.trim() === '')) {
-                setValidationError(`Please enter all "Other" owner names for corporation ${i + 1}.`);
+              const otherOwnersData: Array<{ type: string; name: string }> = corporation?.otherOwners ? JSON.parse(corporation.otherOwners) : [];
+              if (otherOwnersData.length === 0 || otherOwnersData.some((owner: { type: string; name: string }) => !owner.type || !owner.name || owner.name.trim() === '')) {
+                setValidationError(`Please complete all "Other" owner details for corporation ${i + 1}.`);
+                return;
+              }
+              if (corporation.otherOwnersDone !== 'no') {
+                setValidationError(`Please confirm whether there are additional owners for corporation ${i + 1}.`);
+                return;
+              }
+              const percentages: Record<string, string> = corporation?.ownershipPercentages ? JSON.parse(corporation.ownershipPercentages) : {};
+              const allOwners = (corporation.owners || '').split(',').filter(Boolean);
+              const total = allOwners.reduce((sum, name) => sum + (parseFloat(percentages[name] || '0') || 0), 0);
+              if (Math.abs(total - 100) > 0.01) {
+                setValidationError(`Ownership stakes for corporation ${i + 1} must total 100% (currently ${total}%).`);
                 return;
               }
             }
@@ -2662,7 +2673,7 @@ export default function StepForm({
                                   corporationsData[index].owners.split(',') :
                                   corporationsData[index].owners) : [];
 
-                              const otherOwners = corporationsData[index]?.otherOwners ?
+                              const otherOwners: Array<{ type: string; name: string }> = corporationsData[index]?.otherOwners ?
                                 (typeof corporationsData[index].otherOwners === 'string' ?
                                   JSON.parse(corporationsData[index].otherOwners) :
                                   corporationsData[index].otherOwners) : [];
@@ -2681,9 +2692,16 @@ export default function StepForm({
                                 handleCorporationChange(index, 'owners', updatedOwners.join(','));
                               };
 
-                              const handleOtherOwnerChange = (otherIndex: number, value: string) => {
+                              const handleOtherOwnerChange = (otherIndex: number, field: 'type' | 'name', value: string) => {
                                 const updated = [...otherOwners];
-                                updated[otherIndex] = value;
+                                if (!updated[otherIndex]) updated[otherIndex] = { type: '', name: '' };
+                                if (field === 'type') {
+                                  updated[otherIndex] = { type: value, name: '' };
+                                  handleCorporationChange(index, 'otherOwnersDone', '');
+                                  handleCorporationChange(index, 'ownershipPercentages', JSON.stringify({}));
+                                } else {
+                                  updated[otherIndex] = { ...updated[otherIndex], [field]: value };
+                                }
                                 handleCorporationChange(index, 'otherOwners', JSON.stringify(updated));
 
                                 // Update the owners list
@@ -2697,19 +2715,22 @@ export default function StepForm({
                                 });
 
                                 const currentSelected = selectedOwners.filter(o => predefinedOwners.includes(o));
-                                const validOtherOwners = updated.filter(o => o && o.trim() !== '');
+                                const validOtherOwners = updated.filter(o => o && o.name && o.name.trim() !== '').map(o => o.name);
                                 const allOwners = [...currentSelected, ...validOtherOwners];
                                 handleCorporationChange(index, 'owners', allOwners.join(','));
                               };
 
                               const handleAddMoreOwner = () => {
-                                const updated = [...otherOwners, ''];
+                                const updated = [...otherOwners, { type: '', name: '' }];
                                 handleCorporationChange(index, 'otherOwners', JSON.stringify(updated));
+                                handleCorporationChange(index, 'otherOwnersDone', '');
                               };
 
                               const handleRemoveOwner = (otherIndex: number) => {
-                                const updated = otherOwners.filter((_: string, i: number) => i !== otherIndex);
+                                const updated = otherOwners.filter((_: { type: string; name: string }, i: number) => i !== otherIndex);
                                 handleCorporationChange(index, 'otherOwners', JSON.stringify(updated));
+                                handleCorporationChange(index, 'otherOwnersDone', '');
+                                handleCorporationChange(index, 'ownershipPercentages', JSON.stringify({}));
 
                                 // Update the owners list
                                 const predefinedOwners = [client1Name];
@@ -2722,7 +2743,7 @@ export default function StepForm({
                                 });
 
                                 const currentSelected = selectedOwners.filter(o => predefinedOwners.includes(o));
-                                const validOtherOwners = updated.filter(o => o && o.trim() !== '');
+                                const validOtherOwners = updated.filter(o => o && o.name && o.name.trim() !== '').map(o => o.name);
                                 const allOwners = [...currentSelected, ...validOtherOwners];
                                 handleCorporationChange(index, 'owners', allOwners.join(','));
                               };
@@ -2730,9 +2751,11 @@ export default function StepForm({
                               const handleOtherCheckboxChange = (checked: boolean) => {
                                 handleCorporationChange(index, 'hasOtherOwner', checked.toString());
                                 if (checked && otherOwners.length === 0) {
-                                  handleCorporationChange(index, 'otherOwners', JSON.stringify(['']));
+                                  handleCorporationChange(index, 'otherOwners', JSON.stringify([{ type: '', name: '' }]));
                                 } else if (!checked) {
                                   handleCorporationChange(index, 'otherOwners', JSON.stringify([]));
+                                  handleCorporationChange(index, 'otherOwnersDone', '');
+                                  handleCorporationChange(index, 'ownershipPercentages', JSON.stringify({}));
 
                                   // Remove other owners from the owners list
                                   const predefinedOwners = [client1Name];
@@ -2814,33 +2837,75 @@ export default function StepForm({
 
                                   {hasOtherChecked && (
                                     <div className="ml-6 mt-4 space-y-4">
-                                      {otherOwners.map((ownerName: string, otherIndex: number) => (
-                                        <div key={otherIndex} className="space-y-2">
+                                      {otherOwners.map((owner: { type: string; name: string }, otherIndex: number) => (
+                                        <div key={otherIndex} className="space-y-3 p-4 bg-gray-700/50 rounded-lg">
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-sm font-medium text-gray-300">Owner {otherIndex + 1}</span>
+                                            {otherOwners.length > 1 && (
+                                              <button
+                                                type="button"
+                                                onClick={() => handleRemoveOwner(otherIndex)}
+                                                className="text-gray-400 hover:text-red-400"
+                                              >
+                                                <Trash2 className="w-4 h-4" />
+                                              </button>
+                                            )}
+                                          </div>
                                           <div>
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                                              Enter owner name:
+                                              Owner type:
                                             </label>
-                                            <input
-                                              type="text"
-                                              value={ownerName}
-                                              onChange={(e) => handleOtherOwnerChange(otherIndex, e.target.value)}
-                                              placeholder="Enter name"
-                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            />
+                                            <div className="flex flex-wrap gap-4">
+                                              {[
+                                                { value: 'individual', label: 'Individual' },
+                                                { value: 'corporation', label: 'Corporation' },
+                                                { value: 'trust', label: 'Trust' },
+                                                { value: 'partnership', label: 'Partnership' },
+                                              ].map(opt => (
+                                                <label key={opt.value} className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`otherOwnerType-${index}-${otherIndex}`}
+                                                    value={opt.value}
+                                                    checked={owner.type === opt.value}
+                                                    onChange={() => handleOtherOwnerChange(otherIndex, 'type', opt.value)}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">{opt.label}</span>
+                                                </label>
+                                              ))}
+                                            </div>
                                           </div>
-
-                                          {otherIndex === otherOwners.length - 1 && ownerName && ownerName.trim() !== '' && (
+                                          {owner.type && (
                                             <div>
                                               <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                Are there any additional shareholders of this corporation?
+                                                {owner.type.charAt(0).toUpperCase() + owner.type.slice(1)} name:
+                                              </label>
+                                              <input
+                                                type="text"
+                                                value={owner.name}
+                                                onChange={(e) => handleOtherOwnerChange(otherIndex, 'name', e.target.value)}
+                                                placeholder="Enter name"
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                          )}
+                                          {owner.type && owner.name && owner.name.trim() !== '' && otherIndex === otherOwners.length - 1 && (
+                                            <div>
+                                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                Are there additional owners?
                                               </label>
                                               <div className="flex gap-4">
                                                 <label className="flex items-center">
                                                   <input
                                                     type="radio"
-                                                    name={`additionalShareholders-${index}-${otherIndex}`}
+                                                    name={`additionalOwners-${index}-${otherIndex}`}
                                                     value="yes"
-                                                    onChange={() => handleAddMoreOwner()}
+                                                    checked={corporationsData[index]?.otherOwnersDone === 'yes'}
+                                                    onChange={() => {
+                                                      handleCorporationChange(index, 'otherOwnersDone', 'yes');
+                                                      handleAddMoreOwner();
+                                                    }}
                                                     className="mr-2"
                                                   />
                                                   <span className="text-gray-300">Yes</span>
@@ -2848,9 +2913,10 @@ export default function StepForm({
                                                 <label className="flex items-center">
                                                   <input
                                                     type="radio"
-                                                    name={`additionalShareholders-${index}-${otherIndex}`}
+                                                    name={`additionalOwners-${index}-${otherIndex}`}
                                                     value="no"
-                                                    onChange={() => {}}
+                                                    checked={corporationsData[index]?.otherOwnersDone === 'no'}
+                                                    onChange={() => handleCorporationChange(index, 'otherOwnersDone', 'no')}
                                                     className="mr-2"
                                                   />
                                                   <span className="text-gray-300">No</span>
@@ -2862,6 +2928,53 @@ export default function StepForm({
                                       ))}
                                     </div>
                                   )}
+
+                                  {hasOtherChecked && corporationsData[index]?.otherOwnersDone === 'no' && (() => {
+                                    const allOwnerNames = selectedOwners.filter(Boolean);
+                                    const percentages: Record<string, string> = corporationsData[index]?.ownershipPercentages ?
+                                      (typeof corporationsData[index].ownershipPercentages === 'string' ?
+                                        JSON.parse(corporationsData[index].ownershipPercentages) :
+                                        corporationsData[index].ownershipPercentages) : {};
+                                    const total = allOwnerNames.reduce((sum, name) => sum + (parseFloat(percentages[name] || '0') || 0), 0);
+                                    const pctValid = Math.abs(total - 100) < 0.01;
+
+                                    const handlePctChange = (ownerName: string, value: string) => {
+                                      const updated = { ...percentages };
+                                      updated[ownerName] = value;
+                                      handleCorporationChange(index, 'ownershipPercentages', JSON.stringify(updated));
+                                    };
+
+                                    return (
+                                      <div className="ml-6 mt-4 p-4 bg-gray-700/50 rounded-lg space-y-3">
+                                        <label className="block text-sm font-medium text-gray-300">
+                                          Ownership Stake:
+                                        </label>
+                                        {allOwnerNames.map(name => (
+                                          <div key={name} className="flex items-center gap-3">
+                                            <span className="text-white text-sm flex-1">{name}</span>
+                                            <div className="relative w-32">
+                                              <input
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                step="0.01"
+                                                value={percentages[name] || ''}
+                                                onChange={(e) => handlePctChange(name, e.target.value)}
+                                                placeholder="0"
+                                                className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                        <div className={`flex items-center gap-2 text-sm font-medium ${pctValid ? 'text-green-400' : total > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                          <span>Total: {total.toFixed(total % 1 === 0 ? 0 : 2)}%</span>
+                                          {total > 0 && !pctValid && <span>— must equal 100%</span>}
+                                          {pctValid && <span>✓</span>}
+                                        </div>
+                                      </div>
+                                    );
+                                  })()}
                                 </>
                               );
                             })()}

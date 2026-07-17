@@ -1126,21 +1126,18 @@ export default function StepForm({
             const allOwnersList = (corporation?.owners || '').split(',').filter(Boolean);
             const showPct = allOwnersList.length > 0 && (!corporation?.hasOtherOwner || corporation?.hasOtherOwner !== 'true' || corporation?.otherOwnersDone === 'no');
             if (showPct) {
-              const percentages: Record<string, string> = corporation?.ownershipPercentages ?
-                (typeof corporation.ownershipPercentages === 'string' ? JSON.parse(corporation.ownershipPercentages) : corporation.ownershipPercentages) : {};
-              const total = allOwnersList.reduce((sum, name) => sum + (parseFloat(percentages[name] || '0') || 0), 0);
-              if (Math.abs(total - 100) > 0.01) {
-                const classLabel = corporation?.shareClass1Name || 'Share Class 1';
-                setValidationError(`${classLabel} ownership for corporation ${i + 1} must total 100% (currently ${total}%).`);
-                return;
-              }
-              if (corporation?.hasSecondShareClass === 'true') {
-                const percentages2: Record<string, string> = corporation?.ownershipPercentages2 ?
-                  (typeof corporation.ownershipPercentages2 === 'string' ? JSON.parse(corporation.ownershipPercentages2) : corporation.ownershipPercentages2) : {};
-                const total2 = allOwnersList.reduce((sum, name) => sum + (parseFloat(percentages2[name] || '0') || 0), 0);
-                if (Math.abs(total2 - 100) > 0.01) {
-                  const classLabel = corporation?.shareClass2Name || 'Share Class 2';
-                  setValidationError(`${classLabel} ownership for corporation ${i + 1} must total 100% (currently ${total2}%).`);
+              const shareClasses: string[] = corporation?.shareClasses
+                ? (typeof corporation.shareClasses === 'string' ? JSON.parse(corporation.shareClasses) : corporation.shareClasses)
+                : [''];
+              const shareClassPercentages: Record<string, string>[] = corporation?.shareClassPercentages
+                ? (typeof corporation.shareClassPercentages === 'string' ? JSON.parse(corporation.shareClassPercentages) : corporation.shareClassPercentages)
+                : [{}];
+              for (let ci = 0; ci < shareClasses.length; ci++) {
+                const pcts = shareClassPercentages[ci] || {};
+                const total = allOwnersList.reduce((sum, name) => sum + (parseFloat(pcts[name] || '0') || 0), 0);
+                if (Math.abs(total - 100) > 0.01) {
+                  const classLabel = shareClasses[ci] || `Share Class ${ci + 1}`;
+                  setValidationError(`${classLabel} ownership for corporation ${i + 1} must total 100% (currently ${total}%).`);
                   return;
                 }
               }
@@ -2987,132 +2984,133 @@ export default function StepForm({
                                     const allOwnerNames = selectedOwners.filter(Boolean);
                                     const showOwnership = allOwnerNames.length > 0 && (!hasOtherChecked || corporationsData[index]?.otherOwnersDone === 'no');
                                     if (!showOwnership) return null;
-                                    const percentages: Record<string, string> = corporationsData[index]?.ownershipPercentages ?
-                                      (typeof corporationsData[index].ownershipPercentages === 'string' ?
-                                        JSON.parse(corporationsData[index].ownershipPercentages) :
-                                        corporationsData[index].ownershipPercentages) : {};
-                                    const total = allOwnerNames.reduce((sum, name) => sum + (parseFloat(percentages[name] || '0') || 0), 0);
-                                    const pctValid = Math.abs(total - 100) < 0.01;
+                                    const corp = corporationsData[index];
 
-                                    const handlePctChange = (ownerName: string, value: string) => {
-                                      const updated = { ...percentages };
-                                      updated[ownerName] = value;
-                                      handleCorporationChange(index, 'ownershipPercentages', JSON.stringify(updated));
+                                    // shareClasses: string[] of class names (1–10)
+                                    const shareClasses: string[] = corp?.shareClasses
+                                      ? (typeof corp.shareClasses === 'string' ? JSON.parse(corp.shareClasses) : corp.shareClasses)
+                                      : [''];
+
+                                    // shareClassPercentages: Record<ownerName, string>[] — one entry per class
+                                    const shareClassPercentages: Record<string, string>[] = corp?.shareClassPercentages
+                                      ? (typeof corp.shareClassPercentages === 'string' ? JSON.parse(corp.shareClassPercentages) : corp.shareClassPercentages)
+                                      : [{}];
+
+                                    // Pad arrays to match shareClasses length
+                                    while (shareClassPercentages.length < shareClasses.length) shareClassPercentages.push({});
+
+                                    const classTotals = shareClasses.map((_, ci) =>
+                                      allOwnerNames.reduce((sum, n) => sum + (parseFloat(shareClassPercentages[ci]?.[n] || '0') || 0), 0)
+                                    );
+
+                                    const handleClassNameChange = (ci: number, value: string) => {
+                                      const updated = [...shareClasses];
+                                      updated[ci] = value;
+                                      handleCorporationChange(index, 'shareClasses', JSON.stringify(updated));
                                     };
 
-                                    const corp = corporationsData[index];
-                                    const shareClass1Name = corp?.shareClass1Name || '';
-                                    const hasSecondClass = corp?.hasSecondShareClass === 'true';
-                                    const shareClass2Name = corp?.shareClass2Name || '';
-                                    const percentages2: Record<string, string> = corp?.ownershipPercentages2 ?
-                                      (typeof corp.ownershipPercentages2 === 'string' ? JSON.parse(corp.ownershipPercentages2) : corp.ownershipPercentages2) : {};
-                                    const total2 = allOwnerNames.reduce((sum, name) => sum + (parseFloat(percentages2[name] || '0') || 0), 0);
-                                    const pct2Valid = Math.abs(total2 - 100) < 0.01;
+                                    const handleClassPctChange = (ci: number, ownerName: string, value: string) => {
+                                      const updatedPcts = shareClassPercentages.map(p => ({ ...p }));
+                                      while (updatedPcts.length <= ci) updatedPcts.push({});
+                                      updatedPcts[ci] = { ...updatedPcts[ci], [ownerName]: value };
+                                      handleCorporationChange(index, 'shareClassPercentages', JSON.stringify(updatedPcts));
+                                    };
 
-                                    const handlePct2Change = (ownerName: string, value: string) => {
-                                      const updated = { ...percentages2 };
-                                      updated[ownerName] = value;
-                                      handleCorporationChange(index, 'ownershipPercentages2', JSON.stringify(updated));
+                                    const addShareClass = () => {
+                                      if (shareClasses.length >= 10) return;
+                                      const updatedNames = [...shareClasses, ''];
+                                      const updatedPcts = [...shareClassPercentages, {}];
+                                      handleCorporationChange(index, 'shareClasses', JSON.stringify(updatedNames));
+                                      handleCorporationChange(index, 'shareClassPercentages', JSON.stringify(updatedPcts));
+                                    };
+
+                                    const removeShareClass = () => {
+                                      if (shareClasses.length <= 1) return;
+                                      const updatedNames = shareClasses.slice(0, -1);
+                                      const updatedPcts = shareClassPercentages.slice(0, -1);
+                                      handleCorporationChange(index, 'shareClasses', JSON.stringify(updatedNames));
+                                      handleCorporationChange(index, 'shareClassPercentages', JSON.stringify(updatedPcts));
                                     };
 
                                     return (
                                       <div className="ml-6 mt-4 p-4 bg-gray-700/50 rounded-lg">
                                         <p className="text-sm font-medium text-gray-300 mb-3">Ownership Stake:</p>
 
-                                        {/* Table — owner name col is flex-1; each share class col is w-36; checkbox label is fixed */}
                                         <div className="flex flex-col gap-2">
 
-                                          {/* Header row */}
+                                          {/* Header row — owner name col flex-1, each class col w-36 */}
                                           <div className="flex items-center gap-3">
                                             <span className="flex-1 min-w-0" />
-                                            <div className="w-36 shrink-0">
-                                              <input
-                                                type="text"
-                                                value={shareClass1Name}
-                                                onChange={(e) => handleCorporationChange(index, 'shareClass1Name', e.target.value)}
-                                                placeholder="Share Class"
-                                                className="w-full px-3 py-1.5 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                              />
-                                            </div>
-                                            {hasSecondClass && (
-                                              <div className="w-36 shrink-0">
+                                            {shareClasses.map((className, ci) => (
+                                              <div key={ci} className="w-36 shrink-0">
                                                 <input
                                                   type="text"
-                                                  value={shareClass2Name}
-                                                  onChange={(e) => handleCorporationChange(index, 'shareClass2Name', e.target.value)}
-                                                  placeholder="Share Class 2"
+                                                  value={className}
+                                                  onChange={(e) => handleClassNameChange(ci, e.target.value)}
+                                                  placeholder={`Share Class ${ci + 1}`}
                                                   className="w-full px-3 py-1.5 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 />
                                               </div>
-                                            )}
-                                            <label className="w-32 shrink-0 flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer select-none">
-                                              <input
-                                                type="checkbox"
-                                                checked={hasSecondClass}
-                                                onChange={(e) => {
-                                                  handleCorporationChange(index, 'hasSecondShareClass', e.target.checked ? 'true' : 'false');
-                                                  if (!e.target.checked) {
-                                                    handleCorporationChange(index, 'ownershipPercentages2', JSON.stringify({}));
-                                                    handleCorporationChange(index, 'shareClass2Name', '');
-                                                  }
-                                                }}
-                                                className="w-3.5 h-3.5 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
-                                              />
-                                              Add Share Class
-                                            </label>
+                                            ))}
                                           </div>
 
                                           {/* Owner rows */}
                                           {allOwnerNames.map(name => (
                                             <div key={name} className="flex items-center gap-3">
                                               <span className="flex-1 min-w-0 text-white text-sm truncate">{name}</span>
-                                              <div className="relative w-36 shrink-0">
-                                                <input
-                                                  type="number"
-                                                  min="0"
-                                                  max="100"
-                                                  step="0.01"
-                                                  value={percentages[name] || ''}
-                                                  onChange={(e) => handlePctChange(name, e.target.value)}
-                                                  placeholder="0"
-                                                  className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                />
-                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
-                                              </div>
-                                              {hasSecondClass && (
-                                                <div className="relative w-36 shrink-0">
+                                              {shareClasses.map((_, ci) => (
+                                                <div key={ci} className="relative w-36 shrink-0">
                                                   <input
                                                     type="number"
                                                     min="0"
                                                     max="100"
                                                     step="0.01"
-                                                    value={percentages2[name] || ''}
-                                                    onChange={(e) => handlePct2Change(name, e.target.value)}
+                                                    value={shareClassPercentages[ci]?.[name] || ''}
+                                                    onChange={(e) => handleClassPctChange(ci, name, e.target.value)}
                                                     placeholder="0"
                                                     className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                   />
                                                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
                                                 </div>
-                                              )}
-                                              {/* Spacer to keep name column from expanding into checkbox column */}
-                                              <span className="w-32 shrink-0" />
+                                              ))}
                                             </div>
                                           ))}
 
                                           {/* Total row */}
                                           <div className="flex items-center gap-3 pt-2 mt-1 border-t border-gray-600">
                                             <span className="flex-1 min-w-0 text-xs text-gray-400">Total</span>
-                                            <div className={`w-36 shrink-0 text-sm font-medium text-center ${pctValid ? 'text-green-400' : total > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                                              {total.toFixed(total % 1 === 0 ? 0 : 2)}%{total > 0 && !pctValid && ' !'}{pctValid && ' ✓'}
-                                            </div>
-                                            {hasSecondClass && (
-                                              <div className={`w-36 shrink-0 text-sm font-medium text-center ${pct2Valid ? 'text-green-400' : total2 > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                                                {total2.toFixed(total2 % 1 === 0 ? 0 : 2)}%{total2 > 0 && !pct2Valid && ' !'}{pct2Valid && ' ✓'}
-                                              </div>
-                                            )}
-                                            <span className="w-32 shrink-0" />
+                                            {classTotals.map((t, ci) => {
+                                              const valid = Math.abs(t - 100) < 0.01;
+                                              return (
+                                                <div key={ci} className={`w-36 shrink-0 text-sm font-medium text-center ${valid ? 'text-green-400' : t > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                                  {t.toFixed(t % 1 === 0 ? 0 : 2)}%{t > 0 && !valid && ' !'}{valid && ' ✓'}
+                                                </div>
+                                              );
+                                            })}
                                           </div>
 
+                                        </div>
+
+                                        {/* Add / Remove buttons below chart */}
+                                        <div className="flex items-center gap-3 mt-4">
+                                          {shareClasses.length < 10 && (
+                                            <button
+                                              type="button"
+                                              onClick={addShareClass}
+                                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-400 border border-blue-500/50 rounded-lg hover:bg-blue-500/10 transition-colors"
+                                            >
+                                              <span className="text-base leading-none">+</span> Add Share Class
+                                            </button>
+                                          )}
+                                          {shareClasses.length > 1 && (
+                                            <button
+                                              type="button"
+                                              onClick={removeShareClass}
+                                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-400 border border-red-500/50 rounded-lg hover:bg-red-500/10 transition-colors"
+                                            >
+                                              <span className="text-base leading-none">−</span> Remove Share Class
+                                            </button>
+                                          )}
                                         </div>
                                       </div>
                                     );

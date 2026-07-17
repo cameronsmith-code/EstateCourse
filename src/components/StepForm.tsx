@@ -3201,61 +3201,75 @@ export default function StepForm({
                             </p>
                             <div>
                               <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Are there key employees whose absence would significantly impact the business?
+                                Designated Interim Manager: Identify who has the immediate "on-the-ground" authority to manage day-to-day operations (payroll, supplier payments) if the owner is incapacitated or deceased.
                               </label>
-                              <div className="flex gap-4">
-                                <label className="flex items-center">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
                                   <input
-                                    type="radio"
-                                    name={`hasKeyEmployees-${index}`}
-                                    value="yes"
-                                    checked={corporationsData[index]?.hasKeyEmployees === 'yes'}
-                                    onChange={(e) => handleCorporationChange(index, 'hasKeyEmployees', e.target.value)}
-                                    className="mr-2"
+                                    type="text"
+                                    value={corporationsData[index]?.interimManager?.name || ''}
+                                    onChange={(e) => handleCorporationChange(index, 'interimManager', { ...(corporationsData[index]?.interimManager || {}), name: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                   />
-                                  <span className="text-gray-300">Yes</span>
-                                </label>
-                                <label className="flex items-center">
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">Title</label>
                                   <input
-                                    type="radio"
-                                    name={`hasKeyEmployees-${index}`}
-                                    value="no"
-                                    checked={corporationsData[index]?.hasKeyEmployees === 'no'}
-                                    onChange={(e) => handleCorporationChange(index, 'hasKeyEmployees', e.target.value)}
-                                    className="mr-2"
+                                    type="text"
+                                    value={corporationsData[index]?.interimManager?.title || ''}
+                                    onChange={(e) => handleCorporationChange(index, 'interimManager', { ...(corporationsData[index]?.interimManager || {}), title: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                   />
-                                  <span className="text-gray-300">No</span>
-                                </label>
+                                </div>
+                                <div className="md:col-span-2">
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">Responsibilities</label>
+                                  <textarea
+                                    value={corporationsData[index]?.interimManager?.responsibilities || ''}
+                                    onChange={(e) => handleCorporationChange(index, 'interimManager', { ...(corporationsData[index]?.interimManager || {}), responsibilities: e.target.value })}
+                                    placeholder="e.g., Oversees daily operations, authorizes payroll and supplier payments"
+                                    rows={2}
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">Phone Number</label>
+                                  <input
+                                    type="tel"
+                                    value={corporationsData[index]?.interimManager?.phone || ''}
+                                    onChange={(e) => handleCorporationChange(index, 'interimManager', { ...(corporationsData[index]?.interimManager || {}), phone: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
+                                  <input
+                                    type="email"
+                                    value={corporationsData[index]?.interimManager?.email || ''}
+                                    onChange={(e) => handleCorporationChange(index, 'interimManager', { ...(corporationsData[index]?.interimManager || {}), email: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  />
+                                </div>
                               </div>
                             </div>
-
-                            {corporationsData[index]?.hasKeyEmployees === 'yes' && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Key employee name(s) and role(s)
-                                </label>
-                                <textarea
-                                  value={corporationsData[index]?.keyEmployeesDetails || ''}
-                                  onChange={(e) => handleCorporationChange(index, 'keyEmployeesDetails', e.target.value)}
-                                  placeholder="e.g., Jane Doe — Operations Manager, John Smith — Lead Engineer"
-                                  rows={3}
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                />
-                              </div>
-                            )}
 
                             <div>
                               <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Is there a succession plan in place for the business?
+                                Are there additional key people?
                               </label>
                               <div className="flex gap-4">
                                 <label className="flex items-center">
                                   <input
                                     type="radio"
-                                    name={`hasSuccessionPlan-${index}`}
+                                    name={`hasAdditionalKeyPeople-${index}`}
                                     value="yes"
-                                    checked={corporationsData[index]?.hasSuccessionPlan === 'yes'}
-                                    onChange={(e) => handleCorporationChange(index, 'hasSuccessionPlan', e.target.value)}
+                                    checked={corporationsData[index]?.hasAdditionalKeyPeople === 'yes'}
+                                    onChange={(e) => {
+                                      handleCorporationChange(index, 'hasAdditionalKeyPeople', e.target.value);
+                                      if (e.target.value === 'no') {
+                                        handleCorporationChange(index, 'additionalKeyPeople', undefined);
+                                      }
+                                    }}
                                     className="mr-2"
                                   />
                                   <span className="text-gray-300">Yes</span>
@@ -3263,10 +3277,13 @@ export default function StepForm({
                                 <label className="flex items-center">
                                   <input
                                     type="radio"
-                                    name={`hasSuccessionPlan-${index}`}
+                                    name={`hasAdditionalKeyPeople-${index}`}
                                     value="no"
-                                    checked={corporationsData[index]?.hasSuccessionPlan === 'no'}
-                                    onChange={(e) => handleCorporationChange(index, 'hasSuccessionPlan', e.target.value)}
+                                    checked={corporationsData[index]?.hasAdditionalKeyPeople === 'no'}
+                                    onChange={(e) => {
+                                      handleCorporationChange(index, 'hasAdditionalKeyPeople', e.target.value);
+                                      handleCorporationChange(index, 'additionalKeyPeople', undefined);
+                                    }}
                                     className="mr-2"
                                   />
                                   <span className="text-gray-300">No</span>
@@ -3274,63 +3291,59 @@ export default function StepForm({
                               </div>
                             </div>
 
-                            {corporationsData[index]?.hasSuccessionPlan === 'yes' && (
+                            {corporationsData[index]?.hasAdditionalKeyPeople === 'yes' && (
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Describe the succession plan
+                                  Additional Key Person
                                 </label>
-                                <textarea
-                                  value={corporationsData[index]?.successionPlanDetails || ''}
-                                  onChange={(e) => handleCorporationChange(index, 'successionPlanDetails', e.target.value)}
-                                  placeholder="e.g., Buy-sell agreement with partner, transfer of ownership to family member"
-                                  rows={3}
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                />
-                              </div>
-                            )}
-
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Is there key person life insurance in place?
-                              </label>
-                              <div className="flex gap-4">
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    name={`hasKeyPersonInsurance-${index}`}
-                                    value="yes"
-                                    checked={corporationsData[index]?.hasKeyPersonInsurance === 'yes'}
-                                    onChange={(e) => handleCorporationChange(index, 'hasKeyPersonInsurance', e.target.value)}
-                                    className="mr-2"
-                                  />
-                                  <span className="text-gray-300">Yes</span>
-                                </label>
-                                <label className="flex items-center">
-                                  <input
-                                    type="radio"
-                                    name={`hasKeyPersonInsurance-${index}`}
-                                    value="no"
-                                    checked={corporationsData[index]?.hasKeyPersonInsurance === 'no'}
-                                    onChange={(e) => handleCorporationChange(index, 'hasKeyPersonInsurance', e.target.value)}
-                                    className="mr-2"
-                                  />
-                                  <span className="text-gray-300">No</span>
-                                </label>
-                              </div>
-                            </div>
-
-                            {corporationsData[index]?.hasKeyPersonInsurance === 'yes' && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  Key person insurance details
-                                </label>
-                                <textarea
-                                  value={corporationsData[index]?.keyPersonInsuranceDetails || ''}
-                                  onChange={(e) => handleCorporationChange(index, 'keyPersonInsuranceDetails', e.target.value)}
-                                  placeholder="e.g., $2M policy on Jane Doe with Manulife, policy documents at office"
-                                  rows={3}
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                  <div>
+                                    <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
+                                    <input
+                                      type="text"
+                                      value={corporationsData[index]?.additionalKeyPeople?.[0]?.name || ''}
+                                      onChange={(e) => handleCorporationChange(index, 'additionalKeyPeople', [{ ...((corporationsData[index]?.additionalKeyPeople || [{}])[0] || {}), name: e.target.value }])}
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-medium text-gray-400 mb-1">Title</label>
+                                    <input
+                                      type="text"
+                                      value={corporationsData[index]?.additionalKeyPeople?.[0]?.title || ''}
+                                      onChange={(e) => handleCorporationChange(index, 'additionalKeyPeople', [{ ...((corporationsData[index]?.additionalKeyPeople || [{}])[0] || {}), title: e.target.value }])}
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                  <div className="md:col-span-2">
+                                    <label className="block text-xs font-medium text-gray-400 mb-1">Responsibilities</label>
+                                    <textarea
+                                      value={corporationsData[index]?.additionalKeyPeople?.[0]?.responsibilities || ''}
+                                      onChange={(e) => handleCorporationChange(index, 'additionalKeyPeople', [{ ...((corporationsData[index]?.additionalKeyPeople || [{}])[0] || {}), responsibilities: e.target.value }])}
+                                      placeholder="e.g., Manages client relationships and oversees staff scheduling"
+                                      rows={2}
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-medium text-gray-400 mb-1">Phone Number</label>
+                                    <input
+                                      type="tel"
+                                      value={corporationsData[index]?.additionalKeyPeople?.[0]?.phone || ''}
+                                      onChange={(e) => handleCorporationChange(index, 'additionalKeyPeople', [{ ...((corporationsData[index]?.additionalKeyPeople || [{}])[0] || {}), phone: e.target.value }])}
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
+                                    <input
+                                      type="email"
+                                      value={corporationsData[index]?.additionalKeyPeople?.[0]?.email || ''}
+                                      onChange={(e) => handleCorporationChange(index, 'additionalKeyPeople', [{ ...((corporationsData[index]?.additionalKeyPeople || [{}])[0] || {}), email: e.target.value }])}
+                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                  </div>
+                                </div>
                               </div>
                             )}
                           </Subsection>

@@ -2672,6 +2672,18 @@ export default function StepForm({
                               const trustName = trustAnswers['trustLegalName'] as string || '';
                               const hasTrust = trustAnswers['hasFamilyTrust'] === 'yes' && trustName;
 
+                              const step2Answers = allAnswers?.get(2) || {};
+                              const step3Answers = allAnswers?.get(3) || {};
+                              const childrenDataAll = step3Answers['childrenData'] as Array<Record<string, string>> | undefined;
+                              const childNames = (childrenDataAll || []).map(c => c?.name).filter((n: string) => n && n.trim() !== '') as string[];
+                              const client1PrevRels = step2Answers['client1PreviousRelationshipsData'] as Array<Record<string, string>> | undefined;
+                              const client2PrevRels = step2Answers['client2PreviousRelationshipsData'] as Array<Record<string, string>> | undefined;
+                              const pastSpouseNames = [
+                                ...(client1PrevRels || []).map(r => r?.name).filter((n: string) => n && n.trim() !== '') as string[],
+                                ...(client2PrevRels || []).map(r => r?.name).filter((n: string) => n && n.trim() !== '') as string[],
+                              ];
+                              const extraOwnerNames = [...childNames, ...pastSpouseNames];
+
                               const selectedOwners = corporationsData[index]?.owners ?
                                 (typeof corporationsData[index].owners === 'string' ?
                                   corporationsData[index].owners.split(',') :
@@ -2712,6 +2724,7 @@ export default function StepForm({
                                 const predefinedOwners = [client1Name];
                                 if (hasSpouse) predefinedOwners.push(client2Name);
                                 if (hasTrust) predefinedOwners.push(trustName);
+                                predefinedOwners.push(...extraOwnerNames);
                                 corporationsData.forEach((corp, corpIndex) => {
                                   if (corpIndex !== index && corp?.legalName) {
                                     predefinedOwners.push(corp.legalName);
@@ -2740,6 +2753,7 @@ export default function StepForm({
                                 const predefinedOwners = [client1Name];
                                 if (hasSpouse) predefinedOwners.push(client2Name);
                                 if (hasTrust) predefinedOwners.push(trustName);
+                                predefinedOwners.push(...extraOwnerNames);
                                 corporationsData.forEach((corp, corpIndex) => {
                                   if (corpIndex !== index && corp?.legalName) {
                                     predefinedOwners.push(corp.legalName);
@@ -2828,6 +2842,30 @@ export default function StepForm({
                                     }
                                     return null;
                                   })}
+
+                                  {childNames.map((childName, ci) => (
+                                    <label key={`child-${ci}`} className="flex items-center">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedOwners.includes(childName)}
+                                        onChange={(e) => handleOwnerChange(childName, e.target.checked)}
+                                        className="mr-2"
+                                      />
+                                      <span className="text-white">{childName}</span>
+                                    </label>
+                                  ))}
+
+                                  {pastSpouseNames.map((spouseName, si) => (
+                                    <label key={`past-spouse-${si}`} className="flex items-center">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedOwners.includes(spouseName)}
+                                        onChange={(e) => handleOwnerChange(spouseName, e.target.checked)}
+                                        className="mr-2"
+                                      />
+                                      <span className="text-white">{spouseName}</span>
+                                    </label>
+                                  ))}
 
                                   <label className="flex items-center">
                                     <input

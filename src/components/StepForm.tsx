@@ -7858,30 +7858,6 @@ export default function StepForm({
 
                 {/* Additional Properties subheading */}
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Additional Properties</h4>
-
-                {/* Ownership gate questions */}
-                {ownershipGateQuestions.map(renderQuestion)}
-
-                {/* Per-property cards */}
-                {propertyCount > 0 && Array.from({ length: propertyCount }, (_, i) => {
-                  const n = i + 1;
-                  const propQuestions = step.questions.filter(q => q.key.startsWith(`property${n}`));
-                  const propertyName = (answers[`property${n}Name`] as string) || `Property ${n}`;
-
-                  return (
-                    <div key={`property-card-${n}`} className="border border-gray-600 rounded-xl p-6 bg-gray-800 space-y-5 mt-2">
-                      <div className="flex items-center gap-3 pb-3 border-b border-gray-600">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-bold shrink-0">
-                          {n}
-                        </div>
-                        <h3 className="text-lg font-semibold text-white">
-                          {propertyName !== `Property ${n}` ? propertyName : `Property ${n}`}
-                        </h3>
-                      </div>
-                      {propQuestions.map(renderQuestion)}
-                    </div>
-                  );
-                })}
               </>
             );
           })()}

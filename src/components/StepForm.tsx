@@ -3016,99 +3016,103 @@ export default function StepForm({
                                     };
 
                                     return (
-                                      <div className="ml-6 mt-4 p-4 bg-gray-700/50 rounded-lg space-y-3">
-                                        <div className="flex items-center gap-2 mb-1">
-                                          <span className="text-sm font-medium text-gray-300">Ownership Stake:</span>
-                                        </div>
+                                      <div className="ml-6 mt-4 p-4 bg-gray-700/50 rounded-lg">
+                                        <p className="text-sm font-medium text-gray-300 mb-3">Ownership Stake:</p>
 
-                                        {/* Column headers */}
-                                        <div className="flex items-center gap-3">
-                                          <span className="flex-1" />
-                                          <div className="w-36">
-                                            <input
-                                              type="text"
-                                              value={shareClass1Name}
-                                              onChange={(e) => handleCorporationChange(index, 'shareClass1Name', e.target.value)}
-                                              placeholder="Share Class"
-                                              className="w-full px-3 py-1.5 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            />
-                                          </div>
-                                          {hasSecondClass && (
-                                            <div className="w-36">
+                                        {/* Table — owner name col is flex-1; each share class col is w-36; checkbox label is fixed */}
+                                        <div className="flex flex-col gap-2">
+
+                                          {/* Header row */}
+                                          <div className="flex items-center gap-3">
+                                            <span className="flex-1 min-w-0" />
+                                            <div className="w-36 shrink-0">
                                               <input
                                                 type="text"
-                                                value={shareClass2Name}
-                                                onChange={(e) => handleCorporationChange(index, 'shareClass2Name', e.target.value)}
-                                                placeholder="Share Class 2"
+                                                value={shareClass1Name}
+                                                onChange={(e) => handleCorporationChange(index, 'shareClass1Name', e.target.value)}
+                                                placeholder="Share Class"
                                                 className="w-full px-3 py-1.5 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                               />
                                             </div>
-                                          )}
-                                          <label className="flex items-center gap-1.5 text-xs text-gray-400 whitespace-nowrap cursor-pointer select-none">
-                                            <input
-                                              type="checkbox"
-                                              checked={hasSecondClass}
-                                              onChange={(e) => {
-                                                handleCorporationChange(index, 'hasSecondShareClass', e.target.checked ? 'true' : 'false');
-                                                if (!e.target.checked) {
-                                                  handleCorporationChange(index, 'ownershipPercentages2', JSON.stringify({}));
-                                                  handleCorporationChange(index, 'shareClass2Name', '');
-                                                }
-                                              }}
-                                              className="w-3.5 h-3.5 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
-                                            />
-                                            Add Share Class
-                                          </label>
-                                        </div>
-
-                                        {/* Owner rows */}
-                                        {allOwnerNames.map(name => (
-                                          <div key={name} className="flex items-center gap-3">
-                                            <span className="text-white text-sm flex-1">{name}</span>
-                                            <div className="relative w-36">
-                                              <input
-                                                type="number"
-                                                min="0"
-                                                max="100"
-                                                step="0.01"
-                                                value={percentages[name] || ''}
-                                                onChange={(e) => handlePctChange(name, e.target.value)}
-                                                placeholder="0"
-                                                className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                              />
-                                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
-                                            </div>
                                             {hasSecondClass && (
-                                              <div className="relative w-36">
+                                              <div className="w-36 shrink-0">
+                                                <input
+                                                  type="text"
+                                                  value={shareClass2Name}
+                                                  onChange={(e) => handleCorporationChange(index, 'shareClass2Name', e.target.value)}
+                                                  placeholder="Share Class 2"
+                                                  className="w-full px-3 py-1.5 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                              </div>
+                                            )}
+                                            <label className="w-32 shrink-0 flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer select-none">
+                                              <input
+                                                type="checkbox"
+                                                checked={hasSecondClass}
+                                                onChange={(e) => {
+                                                  handleCorporationChange(index, 'hasSecondShareClass', e.target.checked ? 'true' : 'false');
+                                                  if (!e.target.checked) {
+                                                    handleCorporationChange(index, 'ownershipPercentages2', JSON.stringify({}));
+                                                    handleCorporationChange(index, 'shareClass2Name', '');
+                                                  }
+                                                }}
+                                                className="w-3.5 h-3.5 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                                              />
+                                              Add Share Class
+                                            </label>
+                                          </div>
+
+                                          {/* Owner rows */}
+                                          {allOwnerNames.map(name => (
+                                            <div key={name} className="flex items-center gap-3">
+                                              <span className="flex-1 min-w-0 text-white text-sm truncate">{name}</span>
+                                              <div className="relative w-36 shrink-0">
                                                 <input
                                                   type="number"
                                                   min="0"
                                                   max="100"
                                                   step="0.01"
-                                                  value={percentages2[name] || ''}
-                                                  onChange={(e) => handlePct2Change(name, e.target.value)}
+                                                  value={percentages[name] || ''}
+                                                  onChange={(e) => handlePctChange(name, e.target.value)}
                                                   placeholder="0"
                                                   className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 />
                                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
                                               </div>
-                                            )}
-                                            {hasSecondClass && <span className="w-[calc(theme(spacing.36)+theme(spacing.3))]" />}
-                                          </div>
-                                        ))}
-
-                                        {/* Totals row */}
-                                        <div className="flex items-center gap-3 pt-1 border-t border-gray-600">
-                                          <span className="flex-1 text-xs text-gray-400">Total</span>
-                                          <div className={`w-36 text-sm font-medium text-center ${pctValid ? 'text-green-400' : total > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                                            {total.toFixed(total % 1 === 0 ? 0 : 2)}%{total > 0 && !pctValid && ' — must equal 100%'}{pctValid && ' ✓'}
-                                          </div>
-                                          {hasSecondClass && (
-                                            <div className={`w-36 text-sm font-medium text-center ${pct2Valid ? 'text-green-400' : total2 > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                                              {total2.toFixed(total2 % 1 === 0 ? 0 : 2)}%{total2 > 0 && !pct2Valid && ' — must equal 100%'}{pct2Valid && ' ✓'}
+                                              {hasSecondClass && (
+                                                <div className="relative w-36 shrink-0">
+                                                  <input
+                                                    type="number"
+                                                    min="0"
+                                                    max="100"
+                                                    step="0.01"
+                                                    value={percentages2[name] || ''}
+                                                    onChange={(e) => handlePct2Change(name, e.target.value)}
+                                                    placeholder="0"
+                                                    className="w-full px-4 py-2 pr-8 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                  />
+                                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                                                </div>
+                                              )}
+                                              {/* Spacer to keep name column from expanding into checkbox column */}
+                                              <span className="w-32 shrink-0" />
                                             </div>
-                                          )}
-                                          {hasSecondClass && <span className="w-[calc(theme(spacing.36)+theme(spacing.3))]" />}
+                                          ))}
+
+                                          {/* Total row */}
+                                          <div className="flex items-center gap-3 pt-2 mt-1 border-t border-gray-600">
+                                            <span className="flex-1 min-w-0 text-xs text-gray-400">Total</span>
+                                            <div className={`w-36 shrink-0 text-sm font-medium text-center ${pctValid ? 'text-green-400' : total > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                              {total.toFixed(total % 1 === 0 ? 0 : 2)}%{total > 0 && !pctValid && ' !'}{pctValid && ' ✓'}
+                                            </div>
+                                            {hasSecondClass && (
+                                              <div className={`w-36 shrink-0 text-sm font-medium text-center ${pct2Valid ? 'text-green-400' : total2 > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                                {total2.toFixed(total2 % 1 === 0 ? 0 : 2)}%{total2 > 0 && !pct2Valid && ' !'}{pct2Valid && ' ✓'}
+                                              </div>
+                                            )}
+                                            <span className="w-32 shrink-0" />
+                                          </div>
+
                                         </div>
                                       </div>
                                     );

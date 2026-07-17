@@ -7858,6 +7858,9 @@ export default function StepForm({
 
                 {/* Additional Properties subheading */}
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Additional Properties</h4>
+
+                {/* Real estate ownership question */}
+                {ownershipGateQuestions.filter(q => q.key === 'hasRealEstate').map(renderQuestion)}
               </>
             );
           })()}

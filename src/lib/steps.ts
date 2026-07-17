@@ -1125,6 +1125,14 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes',
       },
       {
+        key: 'propertyKeyLocation',
+        label: 'Location of the key:',
+        type: 'text',
+        placeholder: 'Enter where the key is located',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasRealEstate === 'yes',
+      },
+      {
         key: 'property1Name',
         label: 'Property Name:',
         type: 'text',

@@ -3357,38 +3357,36 @@ export default function StepForm({
                               </p>
 
                               <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <p className="text-sm font-bold text-gray-200 mb-1">
                                   Is the signing authority the same person identified as the Designated Interim Manager?
-                                </label>
-                                <div className="flex gap-4">
-                                  <label className="flex items-center">
+                                </p>
+                                <p className="text-xs italic text-gray-400 mb-3">
+                                  Check if the signing authority is the same person already identified as the Designated Interim Manager.
+                                </p>
+                                {corporationsData[index]?.interimManager?.name ? (
+                                  <label className="flex items-center space-x-3 cursor-pointer">
                                     <input
-                                      type="radio"
-                                      name={`signingAuthSameAsInterim-${index}`}
-                                      value="yes"
+                                      type="checkbox"
                                       checked={corporationsData[index]?.signingAuthSameAsInterim === 'yes'}
                                       onChange={(e) => {
-                                        handleCorporationChange(index, 'signingAuthSameAsInterim', e.target.value);
-                                        handleCorporationChange(index, 'signingAuthority', undefined);
-                                        handleCorporationChange(index, 'signingAuthHasAdditional', undefined);
-                                        handleCorporationChange(index, 'signingAuthAdditional', undefined);
+                                        const val = e.target.checked ? 'yes' : 'no';
+                                        handleCorporationChange(index, 'signingAuthSameAsInterim', val);
+                                        if (e.target.checked) {
+                                          handleCorporationChange(index, 'signingAuthority', undefined);
+                                          handleCorporationChange(index, 'signingAuthHasAdditional', undefined);
+                                          handleCorporationChange(index, 'signingAuthAdditional', undefined);
+                                        }
                                       }}
-                                      className="mr-2"
+                                      className="rounded"
                                     />
-                                    <span className="text-gray-300">Yes</span>
+                                    <span className="text-sm text-gray-300">
+                                      <span className="font-medium text-gray-200">{corporationsData[index]?.interimManager?.name}</span>
+                                      <span className="text-gray-500"> — Designated Interim Manager</span>
+                                    </span>
                                   </label>
-                                  <label className="flex items-center">
-                                    <input
-                                      type="radio"
-                                      name={`signingAuthSameAsInterim-${index}`}
-                                      value="no"
-                                      checked={corporationsData[index]?.signingAuthSameAsInterim === 'no'}
-                                      onChange={(e) => handleCorporationChange(index, 'signingAuthSameAsInterim', e.target.value)}
-                                      className="mr-2"
-                                    />
-                                    <span className="text-gray-300">No</span>
-                                  </label>
-                                </div>
+                                ) : (
+                                  <p className="text-xs text-gray-500 italic">Enter the Designated Interim Manager above to see them here.</p>
+                                )}
                               </div>
 
                               {corporationsData[index]?.signingAuthSameAsInterim === 'yes' && (

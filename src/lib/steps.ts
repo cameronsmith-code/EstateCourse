@@ -1363,6 +1363,22 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
+        key: 'fp_health_0_patients',
+        label: 'Patients:',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+          if (hasSpouse) {
+            return [
+              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+            ];
+          }
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+        },
+        required: false,
+      },
+      {
         key: 'fp_health_0_has_additional',
         label: 'Do you have an additional Family Physician?',
         type: 'radio',
@@ -1393,6 +1409,23 @@ export const STEPS: Step[] = [
         label: 'Phone',
         type: 'text',
         placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fp_health_0_has_additional === 'yes',
+      },
+      {
+        key: 'fp_health_1_patients',
+        label: 'Patients:',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+          if (hasSpouse) {
+            return [
+              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+            ];
+          }
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+        },
         required: false,
         condition: (formData: Record<string, string>) => formData.fp_health_0_has_additional === 'yes',
       },
@@ -1432,6 +1465,23 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.fp_health_1_has_additional === 'yes',
       },
       {
+        key: 'fp_health_2_patients',
+        label: 'Patients:',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+          if (hasSpouse) {
+            return [
+              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+            ];
+          }
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fp_health_1_has_additional === 'yes',
+      },
+      {
         key: 'sp_health_has',
         label: 'Do you see any specialists?',
         type: 'radio',
@@ -1462,6 +1512,23 @@ export const STEPS: Step[] = [
         label: 'Phone',
         type: 'text',
         placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.sp_health_has === 'yes',
+      },
+      {
+        key: 'sp_health_0_patients',
+        label: 'Patients:',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+          if (hasSpouse) {
+            return [
+              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+            ];
+          }
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+        },
         required: false,
         condition: (formData: Record<string, string>) => formData.sp_health_has === 'yes',
       },
@@ -1501,6 +1568,23 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.sp_health_0_has_additional === 'yes',
       },
       {
+        key: 'sp_health_1_patients',
+        label: 'Patients:',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+          if (hasSpouse) {
+            return [
+              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+            ];
+          }
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.sp_health_0_has_additional === 'yes',
+      },
+      {
         key: 'sp_health_1_has_additional',
         label: 'Do you have another additional Specialist?',
         type: 'radio',
@@ -1536,6 +1620,23 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.sp_health_1_has_additional === 'yes',
       },
       {
+        key: 'sp_health_2_patients',
+        label: 'Patients:',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+          if (hasSpouse) {
+            return [
+              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+            ];
+          }
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.sp_health_1_has_additional === 'yes',
+      },
+      {
         key: 'ph_health_0_name',
         label: 'Pharmacist Name',
         type: 'text',
@@ -1554,6 +1655,22 @@ export const STEPS: Step[] = [
         label: 'Phone',
         type: 'text',
         placeholder: 'Enter phone number',
+        required: false,
+      },
+      {
+        key: 'ph_health_0_of',
+        label: 'Pharmacist of',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+          if (hasSpouse) {
+            return [
+              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+            ];
+          }
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+        },
         required: false,
       },
       {
@@ -1587,6 +1704,23 @@ export const STEPS: Step[] = [
         label: 'Phone',
         type: 'text',
         placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.ph_health_0_has_additional === 'yes',
+      },
+      {
+        key: 'ph_health_1_of',
+        label: 'Pharmacist of',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+          if (hasSpouse) {
+            return [
+              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+            ];
+          }
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+        },
         required: false,
         condition: (formData: Record<string, string>) => formData.ph_health_0_has_additional === 'yes',
       },

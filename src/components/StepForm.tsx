@@ -5535,18 +5535,18 @@ export default function StepForm({
               'insHasAdditional',
             ]);
             const fpHealthKeys = new Set([
-              'fp_health_0_name', 'fp_health_0_clinic', 'fp_health_0_phone', 'fp_health_0_has_additional',
-              'fp_health_1_name', 'fp_health_1_clinic', 'fp_health_1_phone', 'fp_health_1_has_additional',
-              'fp_health_2_name', 'fp_health_2_clinic', 'fp_health_2_phone',
+              'fp_health_0_name', 'fp_health_0_clinic', 'fp_health_0_phone', 'fp_health_0_has_additional', 'fp_health_0_patients',
+              'fp_health_1_name', 'fp_health_1_clinic', 'fp_health_1_phone', 'fp_health_1_has_additional', 'fp_health_1_patients',
+              'fp_health_2_name', 'fp_health_2_clinic', 'fp_health_2_phone', 'fp_health_2_patients',
             ]);
             const spHealthKeys = new Set([
-              'sp_health_has', 'sp_health_0_name', 'sp_health_0_specialty', 'sp_health_0_phone',
-              'sp_health_0_has_additional', 'sp_health_1_name', 'sp_health_1_specialty', 'sp_health_1_phone',
-              'sp_health_1_has_additional', 'sp_health_2_name', 'sp_health_2_specialty', 'sp_health_2_phone',
+              'sp_health_has', 'sp_health_0_name', 'sp_health_0_specialty', 'sp_health_0_phone', 'sp_health_0_patients',
+              'sp_health_0_has_additional', 'sp_health_1_name', 'sp_health_1_specialty', 'sp_health_1_phone', 'sp_health_1_patients',
+              'sp_health_1_has_additional', 'sp_health_2_name', 'sp_health_2_specialty', 'sp_health_2_phone', 'sp_health_2_patients',
             ]);
             const phHealthKeys = new Set([
-              'ph_health_0_name', 'ph_health_0_pharmacy', 'ph_health_0_phone', 'ph_health_0_has_additional',
-              'ph_health_1_name', 'ph_health_1_pharmacy', 'ph_health_1_phone',
+              'ph_health_0_name', 'ph_health_0_pharmacy', 'ph_health_0_phone', 'ph_health_0_has_additional', 'ph_health_0_of',
+              'ph_health_1_name', 'ph_health_1_pharmacy', 'ph_health_1_phone', 'ph_health_1_of',
             ]);
 
             const fpQuestions = step.questions.filter(q => fpKeys.has(q.key));

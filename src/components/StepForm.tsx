@@ -3977,6 +3977,149 @@ export default function StepForm({
                                   </>
                                 );
                               })()}
+
+                              {/* Corporate Banker */}
+                              {(() => {
+                                const corp = corporationsData[index] || {};
+                                const bankers: Record<string, string>[] = corp.corpBankers || [{}];
+
+                                return (
+                                  <>
+                                    <h4 className="text-sm font-semibold text-gray-200 mt-6 mb-1">Corporate Banker</h4>
+                                    <p className="text-xs text-gray-400 italic mb-4">Direct contact for the commercial lending officer or account manager</p>
+
+                                    {bankers.map((banker, bIdx) => {
+                                      const isLast = bIdx === bankers.length - 1;
+
+                                      return (
+                                        <div key={bIdx} className="p-4 bg-gray-700/50 rounded-lg mb-4">
+                                          <div className="flex items-center justify-between mb-3">
+                                            {bankers.length > 1 ? (
+                                              <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Corporate Banker {bIdx + 1}</h5>
+                                            ) : (
+                                              <span />
+                                            )}
+                                            {bankers.length > 1 && (
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  const updated = bankers.filter((_, i) => i !== bIdx);
+                                                  handleCorporationChange(index, 'corpBankers', updated.length > 0 ? updated : [{}]);
+                                                  handleCorporationChange(index, `bankerMore_${bIdx - 1}`, undefined);
+                                                }}
+                                                className="text-xs text-red-400 hover:text-red-300 underline underline-offset-2 transition-colors"
+                                              >
+                                                Remove
+                                              </button>
+                                            )}
+                                          </div>
+                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Bank Name</label>
+                                              <input
+                                                type="text"
+                                                value={banker.bankName || ''}
+                                                onChange={(e) => {
+                                                  const updated = [...bankers];
+                                                  updated[bIdx] = { ...(updated[bIdx] || {}), bankName: e.target.value };
+                                                  handleCorporationChange(index, 'corpBankers', updated);
+                                                }}
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Contact Person</label>
+                                              <input
+                                                type="text"
+                                                value={banker.contactPerson || ''}
+                                                onChange={(e) => {
+                                                  const updated = [...bankers];
+                                                  updated[bIdx] = { ...(updated[bIdx] || {}), contactPerson: e.target.value };
+                                                  handleCorporationChange(index, 'corpBankers', updated);
+                                                }}
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Phone</label>
+                                              <input
+                                                type="tel"
+                                                value={banker.phone || ''}
+                                                onChange={(e) => {
+                                                  const updated = [...bankers];
+                                                  updated[bIdx] = { ...(updated[bIdx] || {}), phone: e.target.value };
+                                                  handleCorporationChange(index, 'corpBankers', updated);
+                                                }}
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Email</label>
+                                              <input
+                                                type="email"
+                                                value={banker.email || ''}
+                                                onChange={(e) => {
+                                                  const updated = [...bankers];
+                                                  updated[bIdx] = { ...(updated[bIdx] || {}), email: e.target.value };
+                                                  handleCorporationChange(index, 'corpBankers', updated);
+                                                }}
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Responsibilities</label>
+                                              <textarea
+                                                value={banker.responsibilities || ''}
+                                                onChange={(e) => {
+                                                  const updated = [...bankers];
+                                                  updated[bIdx] = { ...(updated[bIdx] || {}), responsibilities: e.target.value };
+                                                  handleCorporationChange(index, 'corpBankers', updated);
+                                                }}
+                                                rows={2}
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                              />
+                                            </div>
+                                          </div>
+                                          {isLast && (
+                                            <div className="mt-4">
+                                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                Does {(corporationsData[index]?.legalName || "(Company's name)")} have additional banking relationships?
+                                              </label>
+                                              <div className="flex gap-4">
+                                                <label className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`bankerMore-${index}-${bIdx}`}
+                                                    value="yes"
+                                                    checked={corp[`bankerMore_${bIdx}`] === 'yes'}
+                                                    onChange={() => {
+                                                      handleCorporationChange(index, `bankerMore_${bIdx}`, 'yes');
+                                                      handleCorporationChange(index, 'corpBankers', [...bankers, {}]);
+                                                    }}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">Yes</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`bankerMore-${index}-${bIdx}`}
+                                                    value="no"
+                                                    checked={corp[`bankerMore_${bIdx}`] === 'no'}
+                                                    onChange={() => handleCorporationChange(index, `bankerMore_${bIdx}`, 'no')}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">No</span>
+                                                </label>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </>
+                                );
+                              })()}
                             </div>
                       </div>
                     </div>
@@ -3985,7 +4128,6 @@ export default function StepForm({
               )}
             </>
           )}
-
 
           {step.id === 7 && (() => {
             const allFormData = Object.fromEntries(

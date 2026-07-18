@@ -3831,7 +3831,7 @@ export default function StepForm({
                                             ) : (
                                               <span />
                                             )}
-                                            {accountants.length > 1 && (
+                                            {aIdx > 0 && (
                                               <button
                                                 type="button"
                                                 onClick={() => {

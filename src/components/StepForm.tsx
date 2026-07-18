@@ -4120,6 +4120,332 @@ export default function StepForm({
                                   </>
                                 );
                               })()}
+
+                              {/* Payroll Provider */}
+                              {(() => {
+                                const corp = corporationsData[index] || {};
+                                const payrollProviders: Record<string, string>[] = corp.payrollProviders || [{}];
+
+                                // Build list of internal people from the Corporate Step
+                                const internalPeople: { key: string; name: string; role: string }[] = [];
+                                if (corp.interimManager?.name) {
+                                  internalPeople.push({ key: 'interimManager', name: corp.interimManager.name, role: 'Designated Interim Manager' });
+                                }
+                                (corp.additionalKeyPeople || []).forEach((p: Record<string, string>, i: number) => {
+                                  if (p?.name) internalPeople.push({ key: `addKey_${i}`, name: p.name, role: 'Additional Key Person' });
+                                });
+                                (corp.signingAuthorityOtherPeople || []).forEach((p: Record<string, string>, i: number) => {
+                                  if (p?.name) internalPeople.push({ key: `signOther_${i}`, name: p.name, role: 'Signing Authority' });
+                                });
+
+                                return (
+                                  <>
+                                    <h4 className="text-sm font-semibold text-gray-200 mt-6 mb-1">Payroll Provider</h4>
+                                    <p className="text-xs text-gray-400 italic mb-4">Contact info for the internal or external party responsible for staff and shareholder remittances</p>
+
+                                    {payrollProviders.map((provider, pIdx) => {
+                                      const isLast = pIdx === payrollProviders.length - 1;
+                                      const providerType = provider.type || '';
+
+                                      return (
+                                        <div key={pIdx} className="p-4 bg-gray-700/50 rounded-lg mb-4">
+                                          <div className="flex items-center justify-between mb-3">
+                                            {payrollProviders.length > 1 ? (
+                                              <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Payroll Provider {pIdx + 1}</h5>
+                                            ) : (
+                                              <span />
+                                            )}
+                                            {payrollProviders.length > 1 && (
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  const updated = payrollProviders.filter((_, i) => i !== pIdx);
+                                                  handleCorporationChange(index, 'payrollProviders', updated.length > 0 ? updated : [{}]);
+                                                  handleCorporationChange(index, `payrollMore_${pIdx - 1}`, undefined);
+                                                }}
+                                                className="text-xs text-red-400 hover:text-red-300 underline underline-offset-2 transition-colors"
+                                              >
+                                                Remove
+                                              </button>
+                                            )}
+                                          </div>
+
+                                          {/* Internal or External */}
+                                          <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                              Is this party internal or external?
+                                            </label>
+                                            <div className="flex gap-4">
+                                              <label className="flex items-center">
+                                                <input
+                                                  type="radio"
+                                                  name={`payrollType-${index}-${pIdx}`}
+                                                  value="internal"
+                                                  checked={providerType === 'internal'}
+                                                  onChange={() => {
+                                                    const updated = [...payrollProviders];
+                                                    updated[pIdx] = { type: 'internal' };
+                                                    handleCorporationChange(index, 'payrollProviders', updated);
+                                                  }}
+                                                  className="mr-2"
+                                                />
+                                                <span className="text-gray-300">Internal</span>
+                                              </label>
+                                              <label className="flex items-center">
+                                                <input
+                                                  type="radio"
+                                                  name={`payrollType-${index}-${pIdx}`}
+                                                  value="external"
+                                                  checked={providerType === 'external'}
+                                                  onChange={() => {
+                                                    const updated = [...payrollProviders];
+                                                    updated[pIdx] = { type: 'external' };
+                                                    handleCorporationChange(index, 'payrollProviders', updated);
+                                                  }}
+                                                  className="mr-2"
+                                                />
+                                                <span className="text-gray-300">External</span>
+                                              </label>
+                                            </div>
+                                          </div>
+
+                                          {/* Internal: select from known people or Other */}
+                                          {providerType === 'internal' && (
+                                            <div className="mb-4">
+                                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                Select the internal person responsible for payroll:
+                                              </label>
+                                              {internalPeople.length > 0 ? (
+                                                <div className="space-y-2 mb-3">
+                                                  {internalPeople.map(person => (
+                                                    <label key={person.key} className="flex items-center space-x-3 cursor-pointer">
+                                                      <input
+                                                        type="radio"
+                                                        name={`payrollInternalPerson-${index}-${pIdx}`}
+                                                        value={person.key}
+                                                        checked={provider.selectedPerson === person.key}
+                                                        onChange={() => {
+                                                          const updated = [...payrollProviders];
+                                                          updated[pIdx] = {
+                                                            type: 'internal',
+                                                            selectedPerson: person.key,
+                                                            name: person.name,
+                                                            role: person.role,
+                                                          };
+                                                          handleCorporationChange(index, 'payrollProviders', updated);
+                                                        }}
+                                                        className="mr-2"
+                                                      />
+                                                      <span className="text-sm text-gray-300">
+                                                        <span className="font-medium text-gray-200">{person.name}</span>
+                                                        <span className="text-gray-500"> — {person.role}</span>
+                                                      </span>
+                                                    </label>
+                                                  ))}
+                                                </div>
+                                              ) : (
+                                                <p className="text-xs text-gray-500 italic mb-3">No internal people have been identified in the Corporate Step yet.</p>
+                                              )}
+
+                                              <label className="flex items-center space-x-3 cursor-pointer">
+                                                <input
+                                                  type="radio"
+                                                  name={`payrollInternalPerson-${index}-${pIdx}`}
+                                                  value="__other__"
+                                                  checked={provider.selectedPerson === '__other__'}
+                                                  onChange={() => {
+                                                    const updated = [...payrollProviders];
+                                                    updated[pIdx] = { type: 'internal', selectedPerson: '__other__' };
+                                                    handleCorporationChange(index, 'payrollProviders', updated);
+                                                  }}
+                                                  className="mr-2"
+                                                />
+                                                <span className="text-sm text-gray-300 font-medium">Other</span>
+                                              </label>
+
+                                              {provider.selectedPerson === '__other__' && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                                  <div>
+                                                    <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
+                                                    <input
+                                                      type="text"
+                                                      value={provider.name || ''}
+                                                      onChange={(e) => {
+                                                        const updated = [...payrollProviders];
+                                                        updated[pIdx] = { ...updated[pIdx], name: e.target.value };
+                                                        handleCorporationChange(index, 'payrollProviders', updated);
+                                                      }}
+                                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                  </div>
+                                                  <div>
+                                                    <label className="block text-xs font-medium text-gray-400 mb-1">Title</label>
+                                                    <input
+                                                      type="text"
+                                                      value={provider.title || ''}
+                                                      onChange={(e) => {
+                                                        const updated = [...payrollProviders];
+                                                        updated[pIdx] = { ...updated[pIdx], title: e.target.value };
+                                                        handleCorporationChange(index, 'payrollProviders', updated);
+                                                      }}
+                                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                  </div>
+                                                  <div className="md:col-span-2">
+                                                    <label className="block text-xs font-medium text-gray-400 mb-1">Responsibilities</label>
+                                                    <textarea
+                                                      value={provider.responsibilities || ''}
+                                                      onChange={(e) => {
+                                                        const updated = [...payrollProviders];
+                                                        updated[pIdx] = { ...updated[pIdx], responsibilities: e.target.value };
+                                                        handleCorporationChange(index, 'payrollProviders', updated);
+                                                      }}
+                                                      rows={2}
+                                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                                    />
+                                                  </div>
+                                                  <div>
+                                                    <label className="block text-xs font-medium text-gray-400 mb-1">Phone</label>
+                                                    <input
+                                                      type="tel"
+                                                      value={provider.phone || ''}
+                                                      onChange={(e) => {
+                                                        const updated = [...payrollProviders];
+                                                        updated[pIdx] = { ...updated[pIdx], phone: e.target.value };
+                                                        handleCorporationChange(index, 'payrollProviders', updated);
+                                                      }}
+                                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                  </div>
+                                                  <div>
+                                                    <label className="block text-xs font-medium text-gray-400 mb-1">Email</label>
+                                                    <input
+                                                      type="email"
+                                                      value={provider.email || ''}
+                                                      onChange={(e) => {
+                                                        const updated = [...payrollProviders];
+                                                        updated[pIdx] = { ...updated[pIdx], email: e.target.value };
+                                                        handleCorporationChange(index, 'payrollProviders', updated);
+                                                      }}
+                                                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                  </div>
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
+
+                                          {/* External: name/title/responsibilities/phone/email */}
+                                          {providerType === 'external' && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
+                                                <input
+                                                  type="text"
+                                                  value={provider.name || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...payrollProviders];
+                                                    updated[pIdx] = { ...updated[pIdx], name: e.target.value };
+                                                    handleCorporationChange(index, 'payrollProviders', updated);
+                                                  }}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-400 mb-1">Title</label>
+                                                <input
+                                                  type="text"
+                                                  value={provider.title || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...payrollProviders];
+                                                    updated[pIdx] = { ...updated[pIdx], title: e.target.value };
+                                                    handleCorporationChange(index, 'payrollProviders', updated);
+                                                  }}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                              </div>
+                                              <div className="md:col-span-2">
+                                                <label className="block text-xs font-medium text-gray-400 mb-1">Responsibilities</label>
+                                                <textarea
+                                                  value={provider.responsibilities || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...payrollProviders];
+                                                    updated[pIdx] = { ...updated[pIdx], responsibilities: e.target.value };
+                                                    handleCorporationChange(index, 'payrollProviders', updated);
+                                                  }}
+                                                  rows={2}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-400 mb-1">Phone</label>
+                                                <input
+                                                  type="tel"
+                                                  value={provider.phone || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...payrollProviders];
+                                                    updated[pIdx] = { ...updated[pIdx], phone: e.target.value };
+                                                    handleCorporationChange(index, 'payrollProviders', updated);
+                                                  }}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-400 mb-1">Email</label>
+                                                <input
+                                                  type="email"
+                                                  value={provider.email || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...payrollProviders];
+                                                    updated[pIdx] = { ...updated[pIdx], email: e.target.value };
+                                                    handleCorporationChange(index, 'payrollProviders', updated);
+                                                  }}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {isLast && (
+                                            <div className="mt-4">
+                                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                Are there additional people responsible for payroll?
+                                              </label>
+                                              <div className="flex gap-4">
+                                                <label className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`payrollMore-${index}-${pIdx}`}
+                                                    value="yes"
+                                                    checked={corp[`payrollMore_${pIdx}`] === 'yes'}
+                                                    onChange={() => {
+                                                      handleCorporationChange(index, `payrollMore_${pIdx}`, 'yes');
+                                                      handleCorporationChange(index, 'payrollProviders', [...payrollProviders, {}]);
+                                                    }}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">Yes</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`payrollMore-${index}-${pIdx}`}
+                                                    value="no"
+                                                    checked={corp[`payrollMore_${pIdx}`] === 'no'}
+                                                    onChange={() => handleCorporationChange(index, `payrollMore_${pIdx}`, 'no')}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">No</span>
+                                                </label>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </>
+                                );
+                              })()}
                             </div>
                       </div>
                     </div>

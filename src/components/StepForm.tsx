@@ -4713,6 +4713,74 @@ export default function StepForm({
                                   </>
                                 );
                               })()}
+
+                              {/* Buy/Sell Provisions and Insurance Funding */}
+                              {(() => {
+                                const corp = corporationsData[index] || {};
+                                const companyName = corp.legalName || `Corporation ${index + 1}`;
+                                const triggerEvents: string[] = corp.buysellTriggers || [];
+                                const noAgreement = triggerEvents.includes('__no_agreement__');
+                                const triggerOptions = [
+                                  'Death',
+                                  'Disability/Incapacity',
+                                  'Retirement',
+                                  'Marriage Breakdown (Divorce)',
+                                  'Bankruptcy',
+                                  'Loss of Professional License',
+                                  'Unsure',
+                                ];
+
+                                const toggleTrigger = (value: string) => {
+                                  if (value === '__no_agreement__') {
+                                    const next = noAgreement ? [] : ['__no_agreement__'];
+                                    handleCorporationChange(index, 'buysellTriggers', next);
+                                  } else {
+                                    if (noAgreement) return;
+                                    const next = triggerEvents.includes(value)
+                                      ? triggerEvents.filter(t => t !== value)
+                                      : [...triggerEvents, value];
+                                    handleCorporationChange(index, 'buysellTriggers', next);
+                                  }
+                                };
+
+                                return (
+                                  <>
+                                    <h4 className="text-sm font-semibold text-gray-200 mt-6 mb-1">Buy/Sell Provisions and Insurance Funding</h4>
+                                    <p className="text-xs text-gray-400 italic mb-3">
+                                      A well-drafted USA (Unanimous Shareholder Agreement) typically contains these provisions to prevent "fire sales" or unwanted business partners.
+                                    </p>
+
+                                    <div className="mb-4">
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Triggering Events: Specify which events compel or allow a sale
+                                      </label>
+                                      <div className="space-y-2">
+                                        <label className="flex items-center space-x-3 cursor-pointer">
+                                          <input
+                                            type="checkbox"
+                                            checked={noAgreement}
+                                            onChange={() => toggleTrigger('__no_agreement__')}
+                                            className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                          />
+                                          <span className="text-sm text-gray-300">{companyName} does not have a buy/sell agreement</span>
+                                        </label>
+                                        {triggerOptions.map((opt) => (
+                                          <label key={opt} className={`flex items-center space-x-3 ${noAgreement ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                            <input
+                                              type="checkbox"
+                                              checked={triggerEvents.includes(opt)}
+                                              onChange={() => toggleTrigger(opt)}
+                                              disabled={noAgreement}
+                                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                            />
+                                            <span className="text-sm text-gray-300">{opt}</span>
+                                          </label>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </>
+                                );
+                              })()}
                             </div>
                       </div>
                     </div>

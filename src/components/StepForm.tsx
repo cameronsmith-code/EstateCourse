@@ -101,7 +101,7 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
-      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional', 'fpAdvisor1IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpHasAdditionalAdvisor2', 'fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList'].forEach(key => {
+      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional', 'fpAdvisor1IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpHasAdditionalAdvisor2', 'fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList', 'fpAdvisor3WorksWith'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -111,7 +111,7 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdditionalAdvisor'] !== 'yes') {
-      ['fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpHasAdditionalAdvisor2', 'fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList'].forEach(key => {
+      ['fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpHasAdditionalAdvisor2', 'fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList', 'fpAdvisor3WorksWith'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -121,7 +121,7 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdditionalAdvisor2'] !== 'yes') {
-      ['fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList'].forEach(key => {
+      ['fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList', 'fpAdvisor3WorksWith'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -5514,6 +5514,7 @@ export default function StepForm({
               'fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone',
               'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services',
               'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList',
+              'fpAdvisor1WorksWith', 'fpAdvisor2WorksWith', 'fpAdvisor3WorksWith',
             ]);
             const acctKeys = new Set([
               'acctHasAccountant', 'acctAdvisor1Firm', 'acctAdvisor1Name', 'acctAdvisor1Phone',

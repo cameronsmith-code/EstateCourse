@@ -4033,7 +4033,7 @@ export default function StepForm({
 
                                     {canReuseBanker && reuseBanker === 'yes' ? (
                                       <div className="p-4 bg-gray-700/50 rounded-lg mb-4">
-                                        <p className="text-sm text-gray-300 mb-3">Using {corp1BankerName} from {corporationsData[0]?.legalName || 'Corporation 1'}:</p>
+                                        <p className="text-sm text-gray-300 mb-3">Using {corp1BankerName}, the same Corporate Banker as {corporationsData[0]?.legalName || 'Corporation 1'}.</p>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                           <div><span className="text-xs text-gray-400">Bank Name: </span><span className="text-sm text-gray-200">{corp1Bankers[0]?.bankName || '—'}</span></div>
                                           <div><span className="text-xs text-gray-400">Contact: </span><span className="text-sm text-gray-200">{corp1Bankers[0]?.contactPerson || '—'}</span></div>
@@ -4246,7 +4246,7 @@ export default function StepForm({
 
                                     {canReusePayroll && reusePayroll === 'yes' ? (
                                       <div className="p-4 bg-gray-700/50 rounded-lg mb-4">
-                                        <p className="text-sm text-gray-300 mb-3">Using {corp1PayrollName} from {corporationsData[0]?.legalName || 'Corporation 1'}:</p>
+                                        <p className="text-sm text-gray-300 mb-3">Using {corp1PayrollName}, the same Payroll Provider as {corporationsData[0]?.legalName || 'Corporation 1'}.</p>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                           <div><span className="text-xs text-gray-400">Type: </span><span className="text-sm text-gray-200">{corp1Payroll[0]?.type || '—'}</span></div>
                                           <div><span className="text-xs text-gray-400">Name: </span><span className="text-sm text-gray-200">{corp1Payroll[0]?.name || '—'}</span></div>
@@ -4669,7 +4669,7 @@ export default function StepForm({
 
                                     {canReuseLawyer && reuseLawyer === 'yes' ? (
                                       <div className="p-4 bg-gray-700/50 rounded-lg mb-4">
-                                        <p className="text-sm text-gray-300 mb-3">Using {corp1LawyerName} from {corporationsData[0]?.legalName || 'Corporation 1'}:</p>
+                                        <p className="text-sm text-gray-300 mb-3">Using {corp1LawyerName}, the same Legal Counsel as {corporationsData[0]?.legalName || 'Corporation 1'}.</p>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                           <div><span className="text-xs text-gray-400">Firm: </span><span className="text-sm text-gray-200">{corp1Lawyers[0]?.firmName || '—'}</span></div>
                                           <div><span className="text-xs text-gray-400">Contact: </span><span className="text-sm text-gray-200">{corp1Lawyers[0]?.contactName || '—'}</span></div>

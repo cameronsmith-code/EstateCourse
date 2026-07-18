@@ -4999,6 +4999,276 @@ export default function StepForm({
                                         </>
                                       );
                                     })()}
+
+                                    {(() => {
+                                      const otherFunding = corp.otherFunding === 'yes';
+                                      const setOtherFunding = (v: string) => {
+                                        handleCorporationChange(index, 'otherFunding', v);
+                                        if (v === 'no') {
+                                          handleCorporationChange(index, 'otherFundingDetails', '');
+                                        }
+                                      };
+
+                                      const keyPersonHas = corp.keyPersonHas === 'yes';
+                                      const setKeyPersonHas = (v: string) => {
+                                        handleCorporationChange(index, 'keyPersonHas', v);
+                                        if (v === 'no') {
+                                          handleCorporationChange(index, 'keyPersonPolicies', [{}] as unknown as string);
+                                          handleCorporationChange(index, 'keyPersonHasAdditional', 'no');
+                                        }
+                                      };
+
+                                      const previousInsurers: string[] = [];
+                                      const buysellPolicies = (corp.buysellInsurance as Array<Record<string, unknown>>) || [];
+                                      buysellPolicies.forEach(p => {
+                                        const ins = (p.insurer as string) || '';
+                                        if (ins && !previousInsurers.includes(ins)) previousInsurers.push(ins);
+                                      });
+
+                                      const keyPolicies: Array<Record<string, unknown>> = (corp.keyPersonPolicies as Array<Record<string, unknown>>) || [{}];
+                                      const keyInsuranceTypeOptions = ['Life', 'Disability', 'Critical Illness'];
+
+                                      const handleKeyPolicyChange = (pIdx: number, field: string, value: unknown) => {
+                                        const updated = [...keyPolicies];
+                                        if (!updated[pIdx]) updated[pIdx] = {};
+                                        updated[pIdx][field] = value;
+                                        handleCorporationChange(index, 'keyPersonPolicies', updated as unknown as string);
+                                      };
+                                      const addKeyPolicy = () => {
+                                        handleCorporationChange(index, 'keyPersonPolicies', [...keyPolicies, {}] as unknown as string);
+                                      };
+                                      const removeKeyPolicy = (pIdx: number) => {
+                                        const updated = keyPolicies.filter((_, i) => i !== pIdx);
+                                        handleCorporationChange(index, 'keyPersonPolicies', updated as unknown as string);
+                                      };
+
+                                      const keyHasAdditional = corp.keyPersonHasAdditional === 'yes';
+                                      const setKeyHasAdditional = (v: string) => {
+                                        handleCorporationChange(index, 'keyPersonHasAdditional', v);
+                                        if (v === 'yes' && keyPolicies.length === 1) {
+                                          addKeyPolicy();
+                                        }
+                                        if (v === 'no') {
+                                          handleCorporationChange(index, 'keyPersonPolicies', [keyPolicies[0] || {}] as unknown as string);
+                                        }
+                                      };
+
+                                      return (
+                                        <>
+                                          <div className="mb-4 mt-6">
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                              Other Funding: If not insurance, is there a Sinking Fund, Promissory Note arrangement, or bank financing plan?
+                                            </label>
+                                            <div className="flex gap-4">
+                                              <label className="flex items-center space-x-2 cursor-pointer">
+                                                <input
+                                                  type="radio"
+                                                  checked={otherFunding}
+                                                  onChange={() => setOtherFunding('yes')}
+                                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                />
+                                                <span className="text-sm text-gray-300">Yes</span>
+                                              </label>
+                                              <label className="flex items-center space-x-2 cursor-pointer">
+                                                <input
+                                                  type="radio"
+                                                  checked={corp.otherFunding === 'no'}
+                                                  onChange={() => setOtherFunding('no')}
+                                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                />
+                                                <span className="text-sm text-gray-300">No</span>
+                                              </label>
+                                            </div>
+                                            {otherFunding && (
+                                              <div className="mt-3">
+                                                <label className="block text-sm font-medium text-gray-300 mb-1">Details:</label>
+                                                <textarea
+                                                  value={(corp.otherFundingDetails as string) || ''}
+                                                  onChange={(e) => handleCorporationChange(index, 'otherFundingDetails', e.target.value)}
+                                                  rows={3}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                              </div>
+                                            )}
+                                          </div>
+
+                                          <div className="mb-4 mt-6">
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                              Does {companyName} have any Key Person Insurance?
+                                            </label>
+                                            <div className="flex gap-4">
+                                              <label className="flex items-center space-x-2 cursor-pointer">
+                                                <input
+                                                  type="radio"
+                                                  checked={keyPersonHas}
+                                                  onChange={() => setKeyPersonHas('yes')}
+                                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                />
+                                                <span className="text-sm text-gray-300">Yes</span>
+                                              </label>
+                                              <label className="flex items-center space-x-2 cursor-pointer">
+                                                <input
+                                                  type="radio"
+                                                  checked={corp.keyPersonHas === 'no'}
+                                                  onChange={() => setKeyPersonHas('no')}
+                                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                />
+                                                <span className="text-sm text-gray-300">No</span>
+                                              </label>
+                                            </div>
+                                          </div>
+
+                                          {keyPersonHas && (
+                                            <>
+                                              <h5 className="text-sm font-semibold text-gray-200 mt-4 mb-2">Key Person Insurance Details</h5>
+                                              {keyPolicies.map((policy, pIdx) => {
+                                                const insurerMode = (policy.insurerMode as string) || (previousInsurers.length > 0 ? '' : 'other');
+                                                return (
+                                                  <div key={pIdx} className="p-4 bg-gray-700/60 rounded-lg space-y-3 mb-3 relative">
+                                                    {pIdx > 0 && (
+                                                      <button
+                                                        type="button"
+                                                        onClick={() => removeKeyPolicy(pIdx)}
+                                                        className="absolute top-3 right-3 text-red-400 hover:text-red-300"
+                                                        aria-label="Remove policy"
+                                                      >
+                                                        <Trash2 className="w-4 h-4" />
+                                                      </button>
+                                                    )}
+                                                    {pIdx > 0 && <h6 className="text-xs font-semibold text-gray-400">Additional Key Person Policy {pIdx}</h6>}
+
+                                                    <div>
+                                                      <label className="block text-sm font-medium text-gray-300 mb-2">Insurance Type</label>
+                                                      <div className="space-y-2">
+                                                        {keyInsuranceTypeOptions.map((opt) => (
+                                                          <label key={opt} className="flex items-center space-x-3 cursor-pointer">
+                                                            <input
+                                                              type="radio"
+                                                              checked={(policy.insuranceType as string) === opt}
+                                                              onChange={() => handleKeyPolicyChange(pIdx, 'insuranceType', opt)}
+                                                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                            />
+                                                            <span className="text-sm text-gray-300">{opt}</span>
+                                                          </label>
+                                                        ))}
+                                                      </div>
+                                                    </div>
+
+                                                    <div>
+                                                      <label className="block text-sm font-medium text-gray-300 mb-1">Life Insured</label>
+                                                      <input
+                                                        type="text"
+                                                        value={(policy.lifeInsured as string) || ''}
+                                                        onChange={(e) => handleKeyPolicyChange(pIdx, 'lifeInsured', e.target.value)}
+                                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                      />
+                                                    </div>
+
+                                                    <div>
+                                                      <label className="block text-sm font-medium text-gray-300 mb-2">Insurer</label>
+                                                      <div className="space-y-2">
+                                                        {previousInsurers.map((ins) => (
+                                                          <label key={ins} className="flex items-center space-x-3 cursor-pointer">
+                                                            <input
+                                                              type="radio"
+                                                              checked={insurerMode === 'preselect' && (policy.insurer as string) === ins}
+                                                              onChange={() => {
+                                                                handleKeyPolicyChange(pIdx, 'insurerMode', 'preselect');
+                                                                handleKeyPolicyChange(pIdx, 'insurer', ins);
+                                                              }}
+                                                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                            />
+                                                            <span className="text-sm text-gray-300">{ins}</span>
+                                                          </label>
+                                                        ))}
+                                                        <label className="flex items-center space-x-3 cursor-pointer">
+                                                          <input
+                                                            type="radio"
+                                                            checked={insurerMode === 'other' || (insurerMode === '' && previousInsurers.length === 0)}
+                                                            onChange={() => {
+                                                              handleKeyPolicyChange(pIdx, 'insurerMode', 'other');
+                                                              if (previousInsurers.length === 0) handleKeyPolicyChange(pIdx, 'insurer', '');
+                                                            }}
+                                                            className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                          />
+                                                          <span className="text-sm text-gray-300">Other</span>
+                                                        </label>
+                                                      </div>
+                                                    </div>
+
+                                                    {(insurerMode === 'other' || (insurerMode === '' && previousInsurers.length === 0)) && (
+                                                      <>
+                                                        <div>
+                                                          <label className="block text-sm font-medium text-gray-300 mb-1">Insurer Name</label>
+                                                          <input
+                                                            type="text"
+                                                            value={(policy.insurer as string) || ''}
+                                                            onChange={(e) => handleKeyPolicyChange(pIdx, 'insurer', e.target.value)}
+                                                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                          />
+                                                        </div>
+                                                        {[
+                                                          { field: 'contactPerson', label: 'Contact Person' },
+                                                          { field: 'contactPersonFirm', label: "Contact Person's Firm" },
+                                                          { field: 'phone', label: 'Phone' },
+                                                          { field: 'email', label: 'Email' },
+                                                        ].map((f) => (
+                                                          <div key={f.field}>
+                                                            <label className="block text-sm font-medium text-gray-300 mb-1">{f.label}</label>
+                                                            <input
+                                                              type="text"
+                                                              value={(policy[f.field] as string) || ''}
+                                                              onChange={(e) => handleKeyPolicyChange(pIdx, f.field, e.target.value)}
+                                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                            />
+                                                          </div>
+                                                        ))}
+                                                      </>
+                                                    )}
+                                                  </div>
+                                                );
+                                              })}
+
+                                              <div className="mt-2">
+                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                  Are there additional Key Person Policies?
+                                                </label>
+                                                <div className="flex gap-4">
+                                                  <label className="flex items-center space-x-2 cursor-pointer">
+                                                    <input
+                                                      type="radio"
+                                                      checked={keyHasAdditional}
+                                                      onChange={() => setKeyHasAdditional('yes')}
+                                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                    />
+                                                    <span className="text-sm text-gray-300">Yes</span>
+                                                  </label>
+                                                  <label className="flex items-center space-x-2 cursor-pointer">
+                                                    <input
+                                                      type="radio"
+                                                      checked={corp.keyPersonHasAdditional === 'no'}
+                                                      onChange={() => setKeyHasAdditional('no')}
+                                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                    />
+                                                    <span className="text-sm text-gray-300">No</span>
+                                                  </label>
+                                                </div>
+                                              </div>
+
+                                              {keyHasAdditional && (
+                                                <button
+                                                  type="button"
+                                                  onClick={addKeyPolicy}
+                                                  className="mt-2 inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg"
+                                                >
+                                                  <Plus className="w-4 h-4" /> Add Another Key Person Policy
+                                                </button>
+                                              )}
+                                            </>
+                                          )}
+                                        </>
+                                      );
+                                    })()}
                                   </>
                                 );
                               })()}

@@ -101,7 +101,7 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
-      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpHasAdditionalAdvisor2', 'fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList'].forEach(key => {
+      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional', 'fpAdvisor1IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpHasAdditionalAdvisor2', 'fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -5556,10 +5556,48 @@ export default function StepForm({
             const spHealthQuestions = step.questions.filter(q => spHealthKeys.has(q.key));
             const phHealthQuestions = step.questions.filter(q => phHealthKeys.has(q.key));
 
+            const cameronSmithChecked = answers['fpAdvisor1IsCameronSmith'] === 'yes';
+
+            const handleCameronSmithToggle = () => {
+              if (!cameronSmithChecked) {
+                onAnswerChange('fpAdvisor1IsCameronSmith', 'yes');
+                onAnswerChange('fpAdvisor1Firm', 'Clarify Wealth');
+                onAnswerChange('fpAdvisor1Name', 'Cameron Smith');
+                onAnswerChange('fpAdvisor1Phone', '647.448.5963');
+                onAnswerChange('fpAdvisor1Email', 'Cameron.smith@ipcsecurities.com');
+                onAnswerChange('fpAdvisor1Website', 'www.clarifywealth.ca');
+              } else {
+                onAnswerChange('fpAdvisor1IsCameronSmith', undefined);
+                onAnswerChange('fpAdvisor1Firm', '');
+                onAnswerChange('fpAdvisor1Name', '');
+                onAnswerChange('fpAdvisor1Phone', '');
+                onAnswerChange('fpAdvisor1Email', '');
+                onAnswerChange('fpAdvisor1Website', '');
+              }
+            };
+
             return (
               <>
                 <h4 className="text-base font-semibold text-blue-400 mt-4 mb-1">Financial Planner / Investment Advisor</h4>
-                {fpQuestions.map(renderQuestion)}
+                {fpQuestions.map(q => {
+                  if (q.key === 'fpAdvisor1Firm' && answers['fpHasAdvisor'] === 'yes') {
+                    return (
+                      <React.Fragment key="fp-cameron-block">
+                        <label className="flex items-center gap-3 px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors mb-3">
+                          <input
+                            type="checkbox"
+                            checked={cameronSmithChecked}
+                            onChange={handleCameronSmithToggle}
+                            className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                          />
+                          <span className="text-sm text-gray-200">Is it Cameron Smith from Clarify Wealth?</span>
+                        </label>
+                        {renderQuestion(q)}
+                      </React.Fragment>
+                    );
+                  }
+                  return renderQuestion(q);
+                })}
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Accountant (CPA)</h4>
                 {acctQuestions.map(renderQuestion)}

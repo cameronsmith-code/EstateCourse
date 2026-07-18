@@ -3825,9 +3825,26 @@ export default function StepForm({
 
                                       return (
                                         <div key={aIdx} className="p-4 bg-gray-700/50 rounded-lg mb-4">
-                                          {accountants.length > 1 && (
-                                            <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Accountant / Book Keeper {aIdx + 1}</h5>
-                                          )}
+                                          <div className="flex items-center justify-between mb-3">
+                                            {accountants.length > 1 ? (
+                                              <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Accountant / Book Keeper {aIdx + 1}</h5>
+                                            ) : (
+                                              <span />
+                                            )}
+                                            {accountants.length > 1 && (
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  const updated = accountants.filter((_, i) => i !== aIdx);
+                                                  handleCorporationChange(index, 'acctBookkeepers', updated.length > 0 ? updated : [{}]);
+                                                  handleCorporationChange(index, `acctMore_${aIdx - 1}`, undefined);
+                                                }}
+                                                className="text-xs text-red-400 hover:text-red-300 underline underline-offset-2 transition-colors"
+                                              >
+                                                Remove
+                                              </button>
+                                            )}
+                                          </div>
                                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                               <label className="block text-xs font-medium text-gray-400 mb-1">Firm Name</label>

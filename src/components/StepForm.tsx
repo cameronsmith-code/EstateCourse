@@ -3982,12 +3982,68 @@ export default function StepForm({
                               {(() => {
                                 const corp = corporationsData[index] || {};
                                 const bankers: Record<string, string>[] = corp.corpBankers || [{}];
+                                const corp1Bankers: Record<string, string>[] = (index > 0 ? corporationsData[0]?.corpBankers : []) || [];
+                                const corp1BankerName = corp1Bankers[0]?.contactPerson || corp1Bankers[0]?.bankName || '';
+                                const canReuseBanker = index > 0 && !!corp1BankerName;
+                                const reuseBanker = corp.reuseCorp1Banker;
+                                const currentCorpName = corp.legalName || `Corporation ${index + 1}`;
 
                                 return (
                                   <>
                                     <h4 className="text-sm font-semibold text-gray-200 mt-6 mb-1">Corporate Banker</h4>
                                     <p className="text-xs text-gray-400 italic mb-4">Direct contact for the commercial lending officer or account manager</p>
 
+                                    {canReuseBanker && (
+                                      <div className="mb-4 p-4 bg-gray-700/50 rounded-lg">
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Is {currentCorpName} using {corp1BankerName}?
+                                        </label>
+                                        <div className="flex gap-4">
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`reuseBanker-${index}`}
+                                              value="yes"
+                                              checked={reuseBanker === 'yes'}
+                                              onChange={() => {
+                                                handleCorporationChange(index, 'reuseCorp1Banker', 'yes');
+                                                handleCorporationChange(index, 'corpBankers', corp1Bankers.map((b: Record<string, string>) => ({ ...b })));
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Yes</span>
+                                          </label>
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`reuseBanker-${index}`}
+                                              value="no"
+                                              checked={reuseBanker === 'no'}
+                                              onChange={() => {
+                                                handleCorporationChange(index, 'reuseCorp1Banker', 'no');
+                                                handleCorporationChange(index, 'corpBankers', [{}]);
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Other</span>
+                                          </label>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {canReuseBanker && reuseBanker === 'yes' ? (
+                                      <div className="p-4 bg-gray-700/50 rounded-lg mb-4">
+                                        <p className="text-sm text-gray-300 mb-3">Using {corp1BankerName} from {corporationsData[0]?.legalName || 'Corporation 1'}:</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                          <div><span className="text-xs text-gray-400">Bank Name: </span><span className="text-sm text-gray-200">{corp1Bankers[0]?.bankName || '—'}</span></div>
+                                          <div><span className="text-xs text-gray-400">Contact: </span><span className="text-sm text-gray-200">{corp1Bankers[0]?.contactPerson || '—'}</span></div>
+                                          <div><span className="text-xs text-gray-400">Phone: </span><span className="text-sm text-gray-200">{corp1Bankers[0]?.phone || '—'}</span></div>
+                                          <div><span className="text-xs text-gray-400">Email: </span><span className="text-sm text-gray-200">{corp1Bankers[0]?.email || '—'}</span></div>
+                                          {corp1Bankers[0]?.responsibilities && <div className="md:col-span-2"><span className="text-xs text-gray-400">Responsibilities: </span><span className="text-sm text-gray-200">{corp1Bankers[0].responsibilities}</span></div>}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <>
                                     {bankers.map((banker, bIdx) => {
                                       const isLast = bIdx === bankers.length - 1;
 
@@ -4117,6 +4173,8 @@ export default function StepForm({
                                         </div>
                                       );
                                     })}
+                                      </>
+                                    )}
                                   </>
                                 );
                               })()}
@@ -4125,6 +4183,11 @@ export default function StepForm({
                               {corporationsData[index]?.corporationType !== 'Holding Company' && (() => {
                                 const corp = corporationsData[index] || {};
                                 const payrollProviders: Record<string, string>[] = corp.payrollProviders || [{}];
+                                const corp1Payroll: Record<string, string>[] = (index > 0 ? corporationsData[0]?.payrollProviders : []) || [];
+                                const corp1PayrollName = corp1Payroll[0]?.name || corp1Payroll[0]?.selectedPerson || '';
+                                const canReusePayroll = index > 0 && !!corp1PayrollName;
+                                const reusePayroll = corp.reuseCorp1Payroll;
+                                const currentCorpName = corp.legalName || `Corporation ${index + 1}`;
 
                                 // Build list of internal people from the Corporate Step
                                 const internalPeople: { key: string; name: string; role: string }[] = [];
@@ -4143,6 +4206,58 @@ export default function StepForm({
                                     <h4 className="text-sm font-semibold text-gray-200 mt-6 mb-1">Payroll Provider</h4>
                                     <p className="text-xs text-gray-400 italic mb-4">Contact info for the internal or external party responsible for staff and shareholder remittances</p>
 
+                                    {canReusePayroll && (
+                                      <div className="mb-4 p-4 bg-gray-700/50 rounded-lg">
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Is {currentCorpName} using {corp1PayrollName}?
+                                        </label>
+                                        <div className="flex gap-4">
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`reusePayroll-${index}`}
+                                              value="yes"
+                                              checked={reusePayroll === 'yes'}
+                                              onChange={() => {
+                                                handleCorporationChange(index, 'reuseCorp1Payroll', 'yes');
+                                                handleCorporationChange(index, 'payrollProviders', corp1Payroll.map((p: Record<string, string>) => ({ ...p })));
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Yes</span>
+                                          </label>
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`reusePayroll-${index}`}
+                                              value="no"
+                                              checked={reusePayroll === 'no'}
+                                              onChange={() => {
+                                                handleCorporationChange(index, 'reuseCorp1Payroll', 'no');
+                                                handleCorporationChange(index, 'payrollProviders', [{}]);
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Other</span>
+                                          </label>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {canReusePayroll && reusePayroll === 'yes' ? (
+                                      <div className="p-4 bg-gray-700/50 rounded-lg mb-4">
+                                        <p className="text-sm text-gray-300 mb-3">Using {corp1PayrollName} from {corporationsData[0]?.legalName || 'Corporation 1'}:</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                          <div><span className="text-xs text-gray-400">Type: </span><span className="text-sm text-gray-200">{corp1Payroll[0]?.type || '—'}</span></div>
+                                          <div><span className="text-xs text-gray-400">Name: </span><span className="text-sm text-gray-200">{corp1Payroll[0]?.name || '—'}</span></div>
+                                          <div><span className="text-xs text-gray-400">Title: </span><span className="text-sm text-gray-200">{corp1Payroll[0]?.title || '—'}</span></div>
+                                          <div><span className="text-xs text-gray-400">Phone: </span><span className="text-sm text-gray-200">{corp1Payroll[0]?.phone || '—'}</span></div>
+                                          <div><span className="text-xs text-gray-400">Email: </span><span className="text-sm text-gray-200">{corp1Payroll[0]?.email || '—'}</span></div>
+                                          {corp1Payroll[0]?.responsibilities && <div className="md:col-span-2"><span className="text-xs text-gray-400">Responsibilities: </span><span className="text-sm text-gray-200">{corp1Payroll[0].responsibilities}</span></div>}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <>
                                     {payrollProviders.map((provider, pIdx) => {
                                       const isLast = pIdx === payrollProviders.length - 1;
                                       const providerType = provider.type || '';
@@ -4443,6 +4558,8 @@ export default function StepForm({
                                         </div>
                                       );
                                     })}
+                                      </>
+                                    )}
                                   </>
                                 );
                               })()}
@@ -4452,6 +4569,11 @@ export default function StepForm({
                                 const corp = corporationsData[index] || {};
                                 const hasLawyer = corp.lawHasLawyer;
                                 const lawyers: Record<string, any>[] = corp.lawLawyers || [{}];
+                                const corp1Lawyers: Record<string, any>[] = (index > 0 ? corporationsData[0]?.lawLawyers : []) || [];
+                                const corp1LawyerName = corp1Lawyers[0]?.contactName || corp1Lawyers[0]?.firmName || '';
+                                const canReuseLawyer = index > 0 && !!corp1LawyerName;
+                                const reuseLawyer = corp.reuseCorp1Lawyer;
+                                const currentCorpName = corp.legalName || `Corporation ${index + 1}`;
 
                                 const responsibilityOptions = [
                                   'Incorporation of the business',
@@ -4505,6 +4627,59 @@ export default function StepForm({
                                       Your corporate lawyer helps ensure your corporation can continue operating smoothly if you become incapacitated or pass away. They prepare and maintain the legal documents that govern ownership, management, and succession, helping reduce delays, disputes, and unnecessary taxes.
                                     </p>
 
+                                    {canReuseLawyer && (
+                                      <div className="mb-4 p-4 bg-gray-700/50 rounded-lg">
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Is {currentCorpName} using {corp1LawyerName}?
+                                        </label>
+                                        <div className="flex gap-4">
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`reuseLawyer-${index}`}
+                                              value="yes"
+                                              checked={reuseLawyer === 'yes'}
+                                              onChange={() => {
+                                                handleCorporationChange(index, 'reuseCorp1Lawyer', 'yes');
+                                                handleCorporationChange(index, 'lawHasLawyer', 'yes');
+                                                handleCorporationChange(index, 'lawLawyers', corp1Lawyers.map((l: Record<string, any>) => ({ ...l })));
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Yes</span>
+                                          </label>
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`reuseLawyer-${index}`}
+                                              value="no"
+                                              checked={reuseLawyer === 'no'}
+                                              onChange={() => {
+                                                handleCorporationChange(index, 'reuseCorp1Lawyer', 'no');
+                                                handleCorporationChange(index, 'lawHasLawyer', undefined);
+                                                handleCorporationChange(index, 'lawLawyers', [{}]);
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Other</span>
+                                          </label>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {canReuseLawyer && reuseLawyer === 'yes' ? (
+                                      <div className="p-4 bg-gray-700/50 rounded-lg mb-4">
+                                        <p className="text-sm text-gray-300 mb-3">Using {corp1LawyerName} from {corporationsData[0]?.legalName || 'Corporation 1'}:</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                          <div><span className="text-xs text-gray-400">Firm: </span><span className="text-sm text-gray-200">{corp1Lawyers[0]?.firmName || '—'}</span></div>
+                                          <div><span className="text-xs text-gray-400">Contact: </span><span className="text-sm text-gray-200">{corp1Lawyers[0]?.contactName || '—'}</span></div>
+                                          <div><span className="text-xs text-gray-400">Title: </span><span className="text-sm text-gray-200">{corp1Lawyers[0]?.title || '—'}</span></div>
+                                          <div><span className="text-xs text-gray-400">Phone: </span><span className="text-sm text-gray-200">{corp1Lawyers[0]?.phone || '—'}</span></div>
+                                          <div className="md:col-span-2"><span className="text-xs text-gray-400">Email: </span><span className="text-sm text-gray-200">{corp1Lawyers[0]?.email || '—'}</span></div>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <>
                                     <div className="mb-4">
                                       <label className="block text-sm font-medium text-gray-300 mb-2">
                                         Do you regularly work with a corporate lawyer?
@@ -4710,6 +4885,8 @@ export default function StepForm({
                                         </div>
                                       );
                                     })}
+                                      </>
+                                    )}
                                   </>
                                 );
                               })()}

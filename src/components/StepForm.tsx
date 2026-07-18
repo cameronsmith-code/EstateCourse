@@ -4122,7 +4122,7 @@ export default function StepForm({
                               })()}
 
                               {/* Payroll Provider */}
-                              {(() => {
+                              {corporationsData[index]?.corporationType !== 'Holding Company' && (() => {
                                 const corp = corporationsData[index] || {};
                                 const payrollProviders: Record<string, string>[] = corp.payrollProviders || [{}];
 
@@ -4715,6 +4715,7 @@ export default function StepForm({
                               })()}
 
                               {/* Buy/Sell Provisions and Insurance Funding */}
+                              {corporationsData[index]?.corporationType !== 'Holding Company' && (
                               <Subsection title="Buy/Sell Provisions and Insurance Funding">
                               {(() => {
                                 const corp = corporationsData[index] || {};
@@ -5274,6 +5275,7 @@ export default function StepForm({
                                 );
                               })()}
                               </Subsection>
+                              )}
                             </div>
                       </div>
                     </div>

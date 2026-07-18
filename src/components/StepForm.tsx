@@ -5638,6 +5638,19 @@ export default function StepForm({
             const childrenData = (step3Answers['childrenData'] as Array<Record<string, string>>) || [];
             childrenData.forEach(c => { if (c?.name) knownIndividuals.push({ name: c.name, relationship: 'Child' }); });
 
+            const step7Answers = (allAnswers?.get(7) || {}) as Record<string, unknown>;
+            const advisorInstitutionOptions: { value: string; label: string }[] = [];
+            if (step7Answers['fpHasAdvisor'] === 'yes') {
+              const advisorGates = [true, step7Answers['fpHasAdditionalAdvisor'] === 'yes', step7Answers['fpHasAdditionalAdvisor2'] === 'yes'];
+              for (let i = 1; i <= 3; i++) {
+                if (!advisorGates[i - 1]) continue;
+                const firm = (step7Answers[`fpAdvisor${i}Firm`] as string) || '';
+                const name = (step7Answers[`fpAdvisor${i}Name`] as string) || '';
+                if (firm) advisorInstitutionOptions.push({ value: `advisor${i}_firm:${firm}`, label: firm });
+                if (name) advisorInstitutionOptions.push({ value: `advisor${i}_name:${name}`, label: name });
+              }
+            }
+
             const renderInstitutions = (key: string, count: string, label: string) => {
               const institutionCount = parseInt(answers[count] as string) || 0;
               if (institutionCount === 0) return null;
@@ -5756,20 +5769,82 @@ export default function StepForm({
 
                     return (
                       <div key={index} className="p-4 bg-gray-700 rounded-lg space-y-4">
-                        <h4 className="text-sm font-semibold text-gray-200">Institution {index + 1}</h4>
+                        <h4 className="text-sm font-semibold text-gray-200">Institution/advisor {index + 1}</h4>
 
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Institution Name:
                           </label>
                           <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., TD Bank, RBC, Scotiabank</p>
-                          <input
-                            type="text"
-                            value={(institution.name as string) || ''}
-                            onChange={(e) => handleInstitutionFieldChange(index, 'name', e.target.value)}
-                            placeholder=""
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
+                          <div className="space-y-2">
+                            {advisorInstitutionOptions.length > 0 && advisorInstitutionOptions.map((opt) => {
+                              const selectedAdvisors = (institution.selectedAdvisorOptions as string[]) || [];
+                              const checked = selectedAdvisors.includes(opt.value);
+                              return (
+                                <label key={opt.value} className="flex items-center space-x-3 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => {
+                                      const updated = [...institutionsData];
+                                      if (!updated[index]) updated[index] = {};
+                                      const current = (updated[index].selectedAdvisorOptions as string[]) || [];
+                                      const next = checked ? current.filter(v => v !== opt.value) : [...current, opt.value];
+                                      updated[index].selectedAdvisorOptions = next;
+                                      const otherSelected = !!updated[index].hasCustomInstitutionName;
+                                      const customName = (updated[index].customInstitutionName as string) || '';
+                                      const selectedLabels = next.map(v => v.split(':').slice(1).join(':'));
+                                      updated[index].name = [...selectedLabels, ...(otherSelected && customName ? [customName] : [])].join(', ') || '';
+                                      onAnswerChange(key, updated);
+                                    }}
+                                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                  />
+                                  <span className="text-white">{opt.label}</span>
+                                </label>
+                              );
+                            })}
+                            <label className="flex items-center space-x-3 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={!!institution.hasCustomInstitutionName}
+                                onChange={() => {
+                                  const updated = [...institutionsData];
+                                  if (!updated[index]) updated[index] = {};
+                                  updated[index].hasCustomInstitutionName = !updated[index].hasCustomInstitutionName;
+                                  if (!updated[index].hasCustomInstitutionName) {
+                                    updated[index].customInstitutionName = '';
+                                  }
+                                  const selectedAdvisors = (updated[index].selectedAdvisorOptions as string[]) || [];
+                                  const selectedLabels = selectedAdvisors.map(v => v.split(':').slice(1).join(':'));
+                                  const customName = (updated[index].customInstitutionName as string) || '';
+                                  updated[index].name = [...selectedLabels, ...(updated[index].hasCustomInstitutionName && customName ? [customName] : [])].join(', ') || '';
+                                  onAnswerChange(key, updated);
+                                }}
+                                className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                              />
+                              <span className="text-white">Other</span>
+                            </label>
+                            {!!institution.hasCustomInstitutionName && (
+                              <input
+                                type="text"
+                                value={(institution.customInstitutionName as string) || ''}
+                                onChange={(e) => {
+                                  const updated = [...institutionsData];
+                                  if (!updated[index]) updated[index] = {};
+                                  updated[index].customInstitutionName = e.target.value;
+                                  const selectedAdvisors = (updated[index].selectedAdvisorOptions as string[]) || [];
+                                  const selectedLabels = selectedAdvisors.map(v => v.split(':').slice(1).join(':'));
+                                  updated[index].name = [...selectedLabels, e.target.value].join(', ') || '';
+                                  onAnswerChange(key, updated);
+                                }}
+                                placeholder="Enter institution name"
+                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            )}
+                            {advisorInstitutionOptions.length === 0 && !institution.hasCustomInstitutionName && (
+                              <p className="text-xs text-gray-400 italic">No advisors from the previous step. Select "Other" to enter a name.</p>
+                            )}
+                          </div>
                         </div>
 
                         <div>

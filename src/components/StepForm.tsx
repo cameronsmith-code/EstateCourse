@@ -4446,6 +4446,273 @@ export default function StepForm({
                                   </>
                                 );
                               })()}
+
+                              {/* Legal Counsel */}
+                              {(() => {
+                                const corp = corporationsData[index] || {};
+                                const hasLawyer = corp.lawHasLawyer;
+                                const lawyers: Record<string, any>[] = corp.lawLawyers || [{}];
+
+                                const responsibilityOptions = [
+                                  'Incorporation of the business',
+                                  'Corporate minute book maintenance',
+                                  'Annual corporate resolutions',
+                                  'Shareholder agreements',
+                                  'Buy-sell agreements',
+                                  'Corporate succession planning',
+                                  'Estate planning for business owners',
+                                  'Secondary Will planning',
+                                  'Family trust planning',
+                                  'Holding company structure',
+                                  'Corporate reorganizations',
+                                  'Share freezes',
+                                  'Estate freezes',
+                                  'Section 85 rollovers',
+                                  'Asset protection strategies',
+                                  'Professional corporation planning',
+                                  'Partnership agreements',
+                                  'Business purchases or acquisitions',
+                                  'Business sales or succession',
+                                  'Commercial contracts',
+                                  'Employment agreements',
+                                  'Intellectual property or trademarks',
+                                  'Real estate owned by the corporation',
+                                  'Corporate financing or lending',
+                                  'Regulatory or licensing matters',
+                                  'Other',
+                                ];
+
+                                const updateLawyer = (lIdx: number, patch: Record<string, any>) => {
+                                  const updated = [...lawyers];
+                                  updated[lIdx] = { ...(updated[lIdx] || {}), ...patch };
+                                  handleCorporationChange(index, 'lawLawyers', updated);
+                                };
+
+                                const toggleResponsibility = (lIdx: number, resp: string) => {
+                                  const current = (lawyers[lIdx]?.responsibilities as string[]) || [];
+                                  const next = current.includes(resp)
+                                    ? current.filter(r => r !== resp)
+                                    : [...current, resp];
+                                  const docLocations = { ...(lawyers[lIdx]?.docLocations || {}) };
+                                  if (!next.includes(resp)) delete docLocations[resp];
+                                  updateLawyer(lIdx, { responsibilities: next, docLocations });
+                                };
+
+                                return (
+                                  <>
+                                    <h4 className="text-sm font-semibold text-gray-200 mt-6 mb-1">Legal Counsel</h4>
+                                    <p className="text-xs text-gray-400 italic mb-2">
+                                      Your corporate lawyer helps ensure your corporation can continue operating smoothly if you become incapacitated or pass away. They prepare and maintain the legal documents that govern ownership, management, and succession, helping reduce delays, disputes, and unnecessary taxes.
+                                    </p>
+
+                                    <div className="mb-4">
+                                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Do you regularly work with a corporate lawyer?
+                                      </label>
+                                      <div className="flex gap-4">
+                                        <label className="flex items-center">
+                                          <input
+                                            type="radio"
+                                            name={`lawHasLawyer-${index}`}
+                                            value="yes"
+                                            checked={hasLawyer === 'yes'}
+                                            onChange={() => {
+                                              handleCorporationChange(index, 'lawHasLawyer', 'yes');
+                                              if (!lawyers[0]) handleCorporationChange(index, 'lawLawyers', [{}]);
+                                            }}
+                                            className="mr-2"
+                                          />
+                                          <span className="text-gray-300">Yes</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                          <input
+                                            type="radio"
+                                            name={`lawHasLawyer-${index}`}
+                                            value="no"
+                                            checked={hasLawyer === 'no'}
+                                            onChange={() => {
+                                              handleCorporationChange(index, 'lawHasLawyer', 'no');
+                                              handleCorporationChange(index, 'lawLawyers', undefined);
+                                              handleCorporationChange(index, 'lawMore_0', undefined);
+                                            }}
+                                            className="mr-2"
+                                          />
+                                          <span className="text-gray-300">No</span>
+                                        </label>
+                                      </div>
+                                    </div>
+
+                                    {hasLawyer === 'yes' && lawyers.map((lawyer, lIdx) => {
+                                      const isLast = lIdx === lawyers.length - 1;
+                                      const responsibilities = (lawyer.responsibilities as string[]) || [];
+                                      const docLocations = (lawyer.docLocations as Record<string, string>) || {};
+
+                                      return (
+                                        <div key={lIdx} className="p-4 bg-gray-700/50 rounded-lg mb-4">
+                                          <div className="flex items-center justify-between mb-3">
+                                            {lawyers.length > 1 ? (
+                                              <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Legal Counsel {lIdx + 1}</h5>
+                                            ) : (
+                                              <span />
+                                            )}
+                                            {lIdx > 0 && (
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  const updated = lawyers.filter((_, i) => i !== lIdx);
+                                                  handleCorporationChange(index, 'lawLawyers', updated.length > 0 ? updated : [{}]);
+                                                  handleCorporationChange(index, `lawMore_${lIdx - 1}`, undefined);
+                                                }}
+                                                className="text-xs text-red-400 hover:text-red-300 underline underline-offset-2 transition-colors"
+                                              >
+                                                Remove
+                                              </button>
+                                            )}
+                                          </div>
+
+                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Firm Name</label>
+                                              <input
+                                                type="text"
+                                                value={lawyer.firmName || ''}
+                                                onChange={(e) => updateLawyer(lIdx, { firmName: e.target.value })}
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Contact Name</label>
+                                              <input
+                                                type="text"
+                                                value={lawyer.contactName || ''}
+                                                onChange={(e) => updateLawyer(lIdx, { contactName: e.target.value })}
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Title</label>
+                                              <input
+                                                type="text"
+                                                value={lawyer.title || ''}
+                                                onChange={(e) => updateLawyer(lIdx, { title: e.target.value })}
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Phone</label>
+                                              <input
+                                                type="tel"
+                                                value={lawyer.phone || ''}
+                                                onChange={(e) => updateLawyer(lIdx, { phone: e.target.value })}
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Email</label>
+                                              <input
+                                                type="email"
+                                                value={lawyer.email || ''}
+                                                onChange={(e) => updateLawyer(lIdx, { email: e.target.value })}
+                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              />
+                                            </div>
+                                          </div>
+
+                                          {/* Responsibilities checklist */}
+                                          <div className="mt-4">
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">Responsibilities</label>
+                                            <div className="space-y-2">
+                                              {responsibilityOptions.map((resp) => {
+                                                const checked = responsibilities.includes(resp);
+                                                const isOther = resp === 'Other';
+                                                return (
+                                                  <div key={resp}>
+                                                    <label className="flex items-center space-x-3 cursor-pointer">
+                                                      <input
+                                                        type="checkbox"
+                                                        checked={checked}
+                                                        onChange={() => toggleResponsibility(lIdx, resp)}
+                                                        className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                                      />
+                                                      <span className="text-sm text-gray-300">{resp}</span>
+                                                    </label>
+                                                    {checked && (
+                                                      <div className="ml-7 mt-2 mb-2">
+                                                        <label className="block text-xs font-medium text-gray-400 mb-1">
+                                                          Location of the documents
+                                                        </label>
+                                                        <input
+                                                          type="text"
+                                                          value={docLocations[resp] || ''}
+                                                          onChange={(e) => {
+                                                            const next = { ...docLocations, [resp]: e.target.value };
+                                                            updateLawyer(lIdx, { docLocations: next });
+                                                          }}
+                                                          placeholder="Where are these documents stored?"
+                                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        />
+                                                      </div>
+                                                    )}
+                                                    {isOther && checked && (
+                                                      <div className="ml-7 mt-2">
+                                                        <label className="block text-xs font-medium text-gray-400 mb-1">
+                                                          Please specify
+                                                        </label>
+                                                        <input
+                                                          type="text"
+                                                          value={lawyer.otherResponsibility || ''}
+                                                          onChange={(e) => updateLawyer(lIdx, { otherResponsibility: e.target.value })}
+                                                          placeholder="Describe the other responsibility"
+                                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        />
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+
+                                          {isLast && (
+                                            <div className="mt-4">
+                                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                Are there additional lawyers that you regularly work with?
+                                              </label>
+                                              <div className="flex gap-4">
+                                                <label className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`lawMore-${index}-${lIdx}`}
+                                                    value="yes"
+                                                    checked={corp[`lawMore_${lIdx}`] === 'yes'}
+                                                    onChange={() => {
+                                                      handleCorporationChange(index, `lawMore_${lIdx}`, 'yes');
+                                                      handleCorporationChange(index, 'lawLawyers', [...lawyers, {}]);
+                                                    }}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">Yes</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    name={`lawMore-${index}-${lIdx}`}
+                                                    value="no"
+                                                    checked={corp[`lawMore_${lIdx}`] === 'no'}
+                                                    onChange={() => handleCorporationChange(index, `lawMore_${lIdx}`, 'no')}
+                                                    className="mr-2"
+                                                  />
+                                                  <span className="text-gray-300">No</span>
+                                                </label>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </>
+                                );
+                              })()}
                             </div>
                       </div>
                     </div>

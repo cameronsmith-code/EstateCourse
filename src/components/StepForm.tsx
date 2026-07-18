@@ -4778,6 +4778,43 @@ export default function StepForm({
                                         ))}
                                       </div>
                                     </div>
+
+                                    {!noAgreement && (() => {
+                                      const valuationMethods: string[] = corp.buysellValuation || [];
+                                      const valuationOptions = [
+                                        { value: 'Book Value', label: 'Book Value: Based on the balance sheet.' },
+                                        { value: 'Formula', label: 'Formula: (e.g., a multiple of historical earnings/EBITDA).' },
+                                        { value: 'Fixed Price', label: 'Fixed Price: A set value updated periodically by shareholders.' },
+                                        { value: 'Independent Valuation', label: 'Independent Valuation: Requirement to hire a professional Business Valuator at the time of the trigger.' },
+                                        { value: 'Unsure', label: 'Unsure' },
+                                      ];
+                                      const toggleValuation = (value: string) => {
+                                        const next = valuationMethods.includes(value)
+                                          ? valuationMethods.filter(v => v !== value)
+                                          : [...valuationMethods, value];
+                                        handleCorporationChange(index, 'buysellValuation', next);
+                                      };
+                                      return (
+                                        <div className="mb-4">
+                                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            Valuation Methodology: Identify how the price is determined
+                                          </label>
+                                          <div className="space-y-2">
+                                            {valuationOptions.map((opt) => (
+                                              <label key={opt.value} className="flex items-start space-x-3 cursor-pointer">
+                                                <input
+                                                  type="checkbox"
+                                                  checked={valuationMethods.includes(opt.value)}
+                                                  onChange={() => toggleValuation(opt.value)}
+                                                  className="w-4 h-4 mt-0.5 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                                />
+                                                <span className="text-sm text-gray-300">{opt.label}</span>
+                                              </label>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      );
+                                    })()}
                                   </>
                                 );
                               })()}

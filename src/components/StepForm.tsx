@@ -3581,358 +3581,211 @@ export default function StepForm({
                                 Location of passwords for corporate banking, cloud-based bookkeeping (e.g., Xero/QuickBooks), and online personas (websites/social media).
                               </p>
 
-                              {(() => {
-                                const corp = corporationsData[index] || {};
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Location of Passwords:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={corporationsData[index]?.digitalAssetPasswordLocation || ''}
+                                  onChange={(e) => handleCorporationChange(index, 'digitalAssetPasswordLocation', e.target.value)}
+                                  placeholder="e.g., 1Password vault, physical safe in office, shared with bookkeeper"
+                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
 
-                                // Build list of all people entered so far in this corporate step
-                                const listedPeople: { key: string; name: string; role: string }[] = [];
-                                if (corp.interimManager?.name) {
-                                  listedPeople.push({ key: 'interimManager', name: corp.interimManager.name, role: 'Designated Interim Manager' });
-                                }
-                                (corp.additionalKeyPeople || []).forEach((p: Record<string, string>, i: number) => {
-                                  if (p?.name) listedPeople.push({ key: `addKey_${i}`, name: p.name, role: 'Additional Key Person' });
-                                });
-                                (corp.signingAuthorityOtherPeople || []).forEach((p: Record<string, string>, i: number) => {
-                                  if (p?.name) listedPeople.push({ key: `signAuthOther_${i}`, name: p.name, role: 'Signing Authority' });
-                                });
-
-                                const selectedPeople = (corp.digitalAssetAccessPeople as string[]) || [];
-                                const hasOther = selectedPeople.includes('__other__');
-
-                                const togglePerson = (key: string) => {
-                                  const current = [...selectedPeople];
-                                  if (current.includes(key)) {
-                                    handleCorporationChange(index, 'digitalAssetAccessPeople', current.filter(k => k !== key));
-                                  } else {
-                                    handleCorporationChange(index, 'digitalAssetAccessPeople', [...current, key]);
+                              <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Is there anyone else with access to these passwords?
+                                </label>
+                                <p className="text-xs text-gray-400 mb-3">Check all that apply from the people listed in this section, or select "Other" to add a new person.</p>
+                                {(() => {
+                                  const corp = corporationsData[index] || {};
+                                  const listedPeople: { key: string; name: string; role: string }[] = [];
+                                  if (corp.interimManager?.name) {
+                                    listedPeople.push({ key: 'interimManager', name: corp.interimManager.name, role: 'Designated Interim Manager' });
                                   }
-                                };
+                                  (corp.additionalKeyPeople || []).forEach((p: Record<string, string>, i: number) => {
+                                    if (p?.name) listedPeople.push({ key: `addKey_${i}`, name: p.name, role: 'Additional Key Person' });
+                                  });
+                                  if (corp.signingAuthSameAsInterim === 'no' && corp.signingAuthority?.name) {
+                                    listedPeople.push({ key: 'signingAuthority', name: corp.signingAuthority.name, role: 'Signing Authority' });
+                                  }
+                                  (corp.signingAuthAdditional || []).forEach((p: Record<string, string>, i: number) => {
+                                    if (p?.name) listedPeople.push({ key: `signAuthAdd_${i}`, name: p.name, role: 'Additional Signing Authority' });
+                                  });
 
-                                const centralLocation = corp.digitalAssetCentralLocation;
-                                const digitalAccounts: Record<string, string>[] = corp.digitalAssetAccounts || [{}];
+                                  const selectedPeople = (corp.digitalAssetAccessPeople as string[]) || [];
+                                  const hasOther = selectedPeople.includes('__other__');
 
-                                const renderAccessPeople = () => (
-                                  <div className="mt-4">
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Is there anyone else with access to these passwords?
-                                    </label>
-                                    <p className="text-xs text-gray-400 mb-3">Check all that apply from the people listed in this section, or select "Other" to add a new person.</p>
-                                    {listedPeople.length > 0 && (
-                                      <div className="space-y-2 mb-3">
-                                        {listedPeople.map(person => (
-                                          <label key={person.key} className="flex items-center space-x-3 cursor-pointer">
-                                            <input
-                                              type="checkbox"
-                                              checked={selectedPeople.includes(person.key)}
-                                              onChange={() => togglePerson(person.key)}
-                                              className="rounded"
-                                            />
-                                            <span className="text-sm text-gray-300">
-                                              <span className="font-medium text-gray-200">{person.name}</span>
-                                              <span className="text-gray-500"> — {person.role}</span>
-                                            </span>
-                                          </label>
-                                        ))}
-                                      </div>
-                                    )}
+                                  const togglePerson = (key: string) => {
+                                    const current = [...selectedPeople];
+                                    if (current.includes(key)) {
+                                      handleCorporationChange(index, 'digitalAssetAccessPeople', current.filter(k => k !== key));
+                                    } else {
+                                      handleCorporationChange(index, 'digitalAssetAccessPeople', [...current, key]);
+                                    }
+                                  };
 
-                                    <label className="flex items-center space-x-3 cursor-pointer mb-3">
-                                      <input
-                                        type="checkbox"
-                                        checked={hasOther}
-                                        onChange={() => {
-                                          if (hasOther) {
-                                            handleCorporationChange(index, 'digitalAssetAccessPeople', selectedPeople.filter(k => k !== '__other__'));
-                                            handleCorporationChange(index, 'digitalAssetOtherPeople', undefined);
-                                          } else {
-                                            handleCorporationChange(index, 'digitalAssetAccessPeople', [...selectedPeople, '__other__']);
-                                            handleCorporationChange(index, 'digitalAssetOtherPeople', [{}]);
-                                          }
-                                        }}
-                                        className="rounded"
-                                      />
-                                      <span className="text-sm text-gray-300 font-medium">Other</span>
-                                    </label>
-
-                                    {hasOther && (corp.digitalAssetOtherPeople || []).map((person: Record<string, string>, oIdx: number) => {
-                                      const others = corp.digitalAssetOtherPeople || [];
-                                      const isLast = oIdx === others.length - 1;
-                                      return (
-                                        <div key={oIdx} className="p-4 bg-gray-700/50 rounded-lg mb-4">
-                                          <h4 className="text-sm font-semibold text-gray-200 mb-3">Other Person with Access {oIdx + 1}</h4>
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
+                                  return (
+                                    <>
+                                      {listedPeople.length > 0 && (
+                                        <div className="space-y-2 mb-3">
+                                          {listedPeople.map(person => (
+                                            <label key={person.key} className="flex items-center space-x-3 cursor-pointer">
                                               <input
-                                                type="text"
-                                                value={person?.name || ''}
-                                                onChange={(e) => {
-                                                  const updated = [...others];
-                                                  updated[oIdx] = { ...(updated[oIdx] || {}), name: e.target.value };
-                                                  handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
-                                                }}
-                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                type="checkbox"
+                                                checked={selectedPeople.includes(person.key)}
+                                                onChange={() => togglePerson(person.key)}
+                                                className="rounded"
                                               />
-                                            </div>
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Title</label>
-                                              <input
-                                                type="text"
-                                                value={person?.title || ''}
-                                                onChange={(e) => {
-                                                  const updated = [...others];
-                                                  updated[oIdx] = { ...(updated[oIdx] || {}), title: e.target.value };
-                                                  handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
-                                                }}
-                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                              />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Responsibilities</label>
-                                              <textarea
-                                                value={person?.responsibilities || ''}
-                                                onChange={(e) => {
-                                                  const updated = [...others];
-                                                  updated[oIdx] = { ...(updated[oIdx] || {}), responsibilities: e.target.value };
-                                                  handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
-                                                }}
-                                                rows={2}
-                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                              />
-                                            </div>
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Phone Number</label>
-                                              <input
-                                                type="tel"
-                                                value={person?.phone || ''}
-                                                onChange={(e) => {
-                                                  const updated = [...others];
-                                                  updated[oIdx] = { ...(updated[oIdx] || {}), phone: e.target.value };
-                                                  handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
-                                                }}
-                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                              />
-                                            </div>
-                                            <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
-                                              <input
-                                                type="email"
-                                                value={person?.email || ''}
-                                                onChange={(e) => {
-                                                  const updated = [...others];
-                                                  updated[oIdx] = { ...(updated[oIdx] || {}), email: e.target.value };
-                                                  handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
-                                                }}
-                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                              />
-                                            </div>
-                                          </div>
-                                          {isLast && (
-                                            <div className="mt-4 flex gap-4">
-                                              <label className="flex items-center space-x-2 cursor-pointer">
-                                                <input
-                                                  type="checkbox"
-                                                  checked={corp[`digitalAssetOtherMore_${oIdx}`] === 'yes'}
-                                                  onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                      handleCorporationChange(index, `digitalAssetOtherMore_${oIdx}`, 'yes');
-                                                      handleCorporationChange(index, 'digitalAssetOtherPeople', [...others, {}]);
-                                                    } else {
-                                                      handleCorporationChange(index, `digitalAssetOtherMore_${oIdx}`, 'no');
-                                                    }
-                                                  }}
-                                                  className="rounded"
-                                                />
-                                                <span className="text-sm text-gray-300">Add another person with access</span>
-                                              </label>
-                                            </div>
-                                          )}
+                                              <span className="text-sm text-gray-300">
+                                                <span className="font-medium text-gray-200">{person.name}</span>
+                                                <span className="text-gray-500"> — {person.role}</span>
+                                              </span>
+                                            </label>
+                                          ))}
                                         </div>
-                                      );
-                                    })}
-                                  </div>
-                                );
+                                      )}
 
-                                return (
-                                  <>
-                                    {/* Yes/No: Are passwords all stored in one central location? */}
-                                    <div>
-                                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Are your passwords all stored in one central location?
-                                      </label>
-                                      <div className="flex gap-4">
-                                        <label className="flex items-center">
-                                          <input
-                                            type="radio"
-                                            name={`digitalAssetCentral-${index}`}
-                                            value="yes"
-                                            checked={centralLocation === 'yes'}
-                                            onChange={(e) => {
-                                              handleCorporationChange(index, 'digitalAssetCentralLocation', e.target.value);
-                                              handleCorporationChange(index, 'digitalAssetAccounts', undefined);
-                                            }}
-                                            className="mr-2"
-                                          />
-                                          <span className="text-gray-300">Yes</span>
-                                        </label>
-                                        <label className="flex items-center">
-                                          <input
-                                            type="radio"
-                                            name={`digitalAssetCentral-${index}`}
-                                            value="no"
-                                            checked={centralLocation === 'no'}
-                                            onChange={(e) => {
-                                              handleCorporationChange(index, 'digitalAssetCentralLocation', e.target.value);
-                                              handleCorporationChange(index, 'digitalAssetPasswordLocation', undefined);
-                                              if (!corp.digitalAssetAccounts?.length) {
-                                                handleCorporationChange(index, 'digitalAssetAccounts', [{}]);
-                                              }
-                                            }}
-                                            className="mr-2"
-                                          />
-                                          <span className="text-gray-300">No</span>
-                                        </label>
-                                      </div>
-                                    </div>
-
-                                    {/* If yes: single Location of Passwords field */}
-                                    {centralLocation === 'yes' && (
-                                      <div className="mt-4">
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                                          Location of Passwords:
-                                        </label>
+                                      <label className="flex items-center space-x-3 cursor-pointer mb-3">
                                         <input
-                                          type="text"
-                                          value={corp.digitalAssetPasswordLocation || ''}
-                                          onChange={(e) => handleCorporationChange(index, 'digitalAssetPasswordLocation', e.target.value)}
-                                          placeholder="e.g., 1Password vault, physical safe in office, shared with bookkeeper"
-                                          className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          type="checkbox"
+                                          checked={hasOther}
+                                          onChange={() => {
+                                            if (hasOther) {
+                                              handleCorporationChange(index, 'digitalAssetAccessPeople', selectedPeople.filter(k => k !== '__other__'));
+                                              handleCorporationChange(index, 'digitalAssetOtherPeople', undefined);
+                                              handleCorporationChange(index, 'digitalAssetHasMoreOther', undefined);
+                                            } else {
+                                              handleCorporationChange(index, 'digitalAssetAccessPeople', [...selectedPeople, '__other__']);
+                                              handleCorporationChange(index, 'digitalAssetOtherPeople', [{}]);
+                                            }
+                                          }}
+                                          className="rounded"
                                         />
-                                        {renderAccessPeople()}
-                                      </div>
-                                    )}
+                                        <span className="text-sm text-gray-300 font-medium">Other</span>
+                                      </label>
 
-                                    {/* If no: repeating flow of Digital Account Name / Password Location / Other Important Contact */}
-                                    {centralLocation === 'no' && (
-                                      <div className="mt-4">
-                                        {digitalAccounts.map((acct: Record<string, string>, aIdx: number) => {
-                                          const isLast = aIdx === digitalAccounts.length - 1;
-                                          return (
-                                            <div key={aIdx} className="p-4 bg-gray-700/50 rounded-lg mb-4">
-                                              <div className="flex items-center justify-between mb-3">
-                                                <h4 className="text-sm font-semibold text-gray-200">Digital Asset {aIdx + 1}</h4>
-                                                {digitalAccounts.length > 1 && (
-                                                  <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                      const updated = digitalAccounts.filter((_, i) => i !== aIdx);
-                                                      handleCorporationChange(index, 'digitalAssetAccounts', updated);
-                                                    }}
-                                                    className="text-xs text-red-400 hover:text-red-300 transition-colors"
-                                                  >
-                                                    Remove
-                                                  </button>
-                                                )}
+                                      {hasOther && (corporationsData[index]?.digitalAssetOtherPeople || []).map((person: Record<string, string>, oIdx: number) => {
+                                        const others = corporationsData[index]?.digitalAssetOtherPeople || [];
+                                        const isLast = oIdx === others.length - 1;
+                                        return (
+                                          <div key={oIdx} className="p-4 bg-gray-700/50 rounded-lg mb-4">
+                                            <h4 className="text-sm font-semibold text-gray-200 mb-3">Other Person with Access {oIdx + 1}</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
+                                                <input
+                                                  type="text"
+                                                  value={person?.name || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...others];
+                                                    updated[oIdx] = { ...(updated[oIdx] || {}), name: e.target.value };
+                                                    handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
+                                                  }}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
                                               </div>
-                                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                  <label className="block text-xs font-medium text-gray-400 mb-1">Digital Account Name</label>
-                                                  <input
-                                                    type="text"
-                                                    value={acct?.accountName || ''}
-                                                    onChange={(e) => {
-                                                      const updated = [...digitalAccounts];
-                                                      updated[aIdx] = { ...(updated[aIdx] || {}), accountName: e.target.value };
-                                                      handleCorporationChange(index, 'digitalAssetAccounts', updated);
-                                                    }}
-                                                    placeholder="e.g., Corporate Banking, Xero, Company Website"
-                                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                  />
-                                                </div>
-                                                <div>
-                                                  <label className="block text-xs font-medium text-gray-400 mb-1">Password Location</label>
-                                                  <input
-                                                    type="text"
-                                                    value={acct?.passwordLocation || ''}
-                                                    onChange={(e) => {
-                                                      const updated = [...digitalAccounts];
-                                                      updated[aIdx] = { ...(updated[aIdx] || {}), passwordLocation: e.target.value };
-                                                      handleCorporationChange(index, 'digitalAssetAccounts', updated);
-                                                    }}
-                                                    placeholder="e.g., 1Password, physical safe, browser saved"
-                                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                  />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                  <label className="block text-xs font-medium text-gray-400 mb-1">Other Important Contact</label>
-                                                  <input
-                                                    type="text"
-                                                    value={acct?.importantContact || ''}
-                                                    onChange={(e) => {
-                                                      const updated = [...digitalAccounts];
-                                                      updated[aIdx] = { ...(updated[aIdx] || {}), importantContact: e.target.value };
-                                                      handleCorporationChange(index, 'digitalAssetAccounts', updated);
-                                                    }}
-                                                    placeholder="e.g., IT consultant, bookkeeper, web developer"
-                                                    className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                  />
-                                                </div>
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-400 mb-1">Title</label>
+                                                <input
+                                                  type="text"
+                                                  value={person?.title || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...others];
+                                                    updated[oIdx] = { ...(updated[oIdx] || {}), title: e.target.value };
+                                                    handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
+                                                  }}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
                                               </div>
-                                              {isLast && (
-                                                <div className="mt-4">
-                                                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                    Are there additional passwords or digital assets?
-                                                  </label>
-                                                  <div className="flex gap-4">
-                                                    <label className="flex items-center">
-                                                      <input
-                                                        type="radio"
-                                                        name={`digitalAssetAcctMore-${index}-${aIdx}`}
-                                                        value="yes"
-                                                        checked={corp[`digitalAssetAcctMore_${aIdx}`] === 'yes'}
-                                                        onChange={(e) => {
-                                                          handleCorporationChange(index, `digitalAssetAcctMore_${aIdx}`, e.target.value);
-                                                          handleCorporationChange(index, 'digitalAssetAccounts', [...digitalAccounts, {}]);
-                                                        }}
-                                                        className="mr-2"
-                                                      />
-                                                      <span className="text-gray-300">Yes</span>
-                                                    </label>
-                                                    <label className="flex items-center">
-                                                      <input
-                                                        type="radio"
-                                                        name={`digitalAssetAcctMore-${index}-${aIdx}`}
-                                                        value="no"
-                                                        checked={corp[`digitalAssetAcctMore_${aIdx}`] === 'no'}
-                                                        onChange={(e) => {
-                                                          handleCorporationChange(index, `digitalAssetAcctMore_${aIdx}`, e.target.value);
-                                                        }}
-                                                        className="mr-2"
-                                                      />
-                                                      <span className="text-gray-300">No</span>
-                                                    </label>
-                                                  </div>
-                                                </div>
-                                              )}
+                                              <div className="md:col-span-2">
+                                                <label className="block text-xs font-medium text-gray-400 mb-1">Responsibilities</label>
+                                                <textarea
+                                                  value={person?.responsibilities || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...others];
+                                                    updated[oIdx] = { ...(updated[oIdx] || {}), responsibilities: e.target.value };
+                                                    handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
+                                                  }}
+                                                  placeholder="e.g., IT consultant with access to cloud bookkeeping and website admin"
+                                                  rows={2}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-400 mb-1">Phone Number</label>
+                                                <input
+                                                  type="tel"
+                                                  value={person?.phone || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...others];
+                                                    updated[oIdx] = { ...(updated[oIdx] || {}), phone: e.target.value };
+                                                    handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
+                                                  }}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
+                                                <input
+                                                  type="email"
+                                                  value={person?.email || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...others];
+                                                    updated[oIdx] = { ...(updated[oIdx] || {}), email: e.target.value };
+                                                    handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
+                                                  }}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                              </div>
                                             </div>
-                                          );
-                                        })}
-                                        {renderAccessPeople()}
-                                      </div>
-                                    )}
-                                  </>
-                                );
-                              })()}
-                            </div>
 
-                            {/* Professional Advisory Directory */}
-                            <div className="mt-8 pt-6 border-t border-gray-600">
-                              <h3 className="text-base font-semibold text-blue-400 mb-1">
-                                Professional Advisory Directory
-                              </h3>
-                              <p className="text-xs italic text-gray-400 mb-4">
-                                {(corporationsData[index]?.corporationName || "(Company's name)")}’s key contacts and professional resources that a Power of Attorney or Estate Trustee would coordinate with as a support team of specialists to manage tax filings and valuations.
-                              </p>
+                                            {isLast && (
+                                              <div className="mt-4">
+                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                  Are there other people with access to digital assets?
+                                                </label>
+                                                <div className="flex gap-4">
+                                                  <label className="flex items-center">
+                                                    <input
+                                                      type="radio"
+                                                      name={`digitalAssetMore-${index}-${oIdx}`}
+                                                      value="yes"
+                                                      checked={corporationsData[index]?.[`digitalAssetMore_${oIdx}`] === 'yes'}
+                                                      onChange={(e) => {
+                                                        handleCorporationChange(index, `digitalAssetMore_${oIdx}`, e.target.value);
+                                                        const updated = [...others, {}];
+                                                        handleCorporationChange(index, 'digitalAssetOtherPeople', updated);
+                                                      }}
+                                                      className="mr-2"
+                                                    />
+                                                    <span className="text-gray-300">Yes</span>
+                                                  </label>
+                                                  <label className="flex items-center">
+                                                    <input
+                                                      type="radio"
+                                                      name={`digitalAssetMore-${index}-${oIdx}`}
+                                                      value="no"
+                                                      checked={corporationsData[index]?.[`digitalAssetMore_${oIdx}`] === 'no'}
+                                                      onChange={(e) => {
+                                                        handleCorporationChange(index, `digitalAssetMore_${oIdx}`, e.target.value);
+                                                      }}
+                                                      className="mr-2"
+                                                    />
+                                                    <span className="text-gray-300">No</span>
+                                                  </label>
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </>
+                                  );
+                                })()}
+                              </div>
                             </div>
                           </Subsection>
                         )}

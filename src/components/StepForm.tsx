@@ -4715,6 +4715,7 @@ export default function StepForm({
                               })()}
 
                               {/* Buy/Sell Provisions and Insurance Funding */}
+                              <Subsection title="Buy/Sell Provisions and Insurance Funding">
                               {(() => {
                                 const corp = corporationsData[index] || {};
                                 const companyName = corp.legalName || `Corporation ${index + 1}`;
@@ -4745,7 +4746,7 @@ export default function StepForm({
 
                                 return (
                                   <>
-                                    <h4 className="text-sm font-semibold text-gray-200 mt-6 mb-1">Buy/Sell Provisions and Insurance Funding</h4>
+                                    <h4 className="sr-only">Buy/Sell Provisions and Insurance Funding</h4>
                                     <p className="text-xs text-gray-400 italic mb-3">
                                       A well-drafted USA (Unanimous Shareholder Agreement) typically contains these provisions to prevent "fire sales" or unwanted business partners.
                                     </p>
@@ -5272,6 +5273,7 @@ export default function StepForm({
                                   </>
                                 );
                               })()}
+                              </Subsection>
                             </div>
                       </div>
                     </div>

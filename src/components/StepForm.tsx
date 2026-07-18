@@ -3795,160 +3795,126 @@ export default function StepForm({
                               <h3 className="text-base font-semibold text-blue-400 mb-1">
                                 Professional Advisory Directory
                               </h3>
-                              <p className="text-xs italic text-gray-400 mb-4">
+                              <p className="text-xs italic text-gray-400 mb-6">
                                 {(corporationsData[index]?.legalName || "(Company's name)")}'s key contacts and professional resources that a Power of Attorney or Estate Trustee would coordinate with as a support team of specialists to manage tax filings and valuations.
                               </p>
 
+                              {/* Accountant / Book Keeper */}
                               {(() => {
                                 const corp = corporationsData[index] || {};
-                                const listedPeople: { key: string; name: string; role: string }[] = [];
-                                if (corp.interimManager?.name) {
-                                  listedPeople.push({ key: 'interimManager', name: corp.interimManager.name, role: 'Designated Interim Manager' });
-                                }
-                                (corp.additionalKeyPeople || []).forEach((p: Record<string, string>, i: number) => {
-                                  if (p?.name) listedPeople.push({ key: `addKey_${i}`, name: p.name, role: 'Additional Key Person' });
-                                });
-                                if (corp.signingAuthSameAsInterim === 'no' && corp.signingAuthority?.name) {
-                                  listedPeople.push({ key: 'signingAuthority', name: corp.signingAuthority.name, role: 'Signing Authority' });
-                                }
-                                (corp.signingAuthAdditional || []).forEach((p: Record<string, string>, i: number) => {
-                                  if (p?.name) listedPeople.push({ key: `signAuthAdd_${i}`, name: p.name, role: 'Additional Signing Authority' });
-                                });
-                                (corp.signingAuthorityOtherPeople || []).forEach((p: Record<string, string>, i: number) => {
-                                  if (p?.name) listedPeople.push({ key: `signAuthOther_${i}`, name: p.name, role: 'Signing Authority (Other)' });
-                                });
-                                (corp.digitalAssetOtherPeople || []).forEach((p: Record<string, string>, i: number) => {
-                                  if (p?.name) listedPeople.push({ key: `digitalOther_${i}`, name: p.name, role: 'Digital Asset Access' });
-                                });
-
-                                const selectedPeople = (corp.advisoryDirectoryPeople as string[]) || [];
-                                const hasOther = selectedPeople.includes('__other__');
-
-                                const togglePerson = (key: string) => {
-                                  const current = [...selectedPeople];
-                                  if (current.includes(key)) {
-                                    handleCorporationChange(index, 'advisoryDirectoryPeople', current.filter(k => k !== key));
-                                  } else {
-                                    handleCorporationChange(index, 'advisoryDirectoryPeople', [...current, key]);
-                                  }
-                                };
+                                const accountants: Record<string, string>[] = corp.acctBookkeepers || [{}];
+                                const responsibilityOptions = ['Accounting', 'Taxes', 'Book Keeping'];
 
                                 return (
                                   <>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Select the key contacts for the professional advisory directory:
-                                    </label>
-                                    <p className="text-xs text-gray-400 mb-3">Check all that apply from the people identified in this Corporate step, or select "Other" to add a new contact.</p>
+                                    <h4 className="text-sm font-semibold text-gray-200 mb-1">Accountant / Book Keeper</h4>
+                                    <p className="text-xs text-gray-400 italic mb-4">Name and firm of the person who prepares the annual T2 corporate returns and manages daily ledgers</p>
 
-                                    {listedPeople.length === 0 && (
-                                      <p className="text-xs text-gray-400 italic mb-3">No people from this Corporate step have been identified yet.</p>
-                                    )}
+                                    {accountants.map((acct, aIdx) => {
+                                      const isLast = aIdx === accountants.length - 1;
+                                      const selectedResponsibilities: string[] = acct.responsibilities ? JSON.parse(acct.responsibilities) : [];
 
-                                    {listedPeople.length > 0 && (
-                                      <div className="space-y-2 mb-3">
-                                        {listedPeople.map(person => (
-                                          <label key={person.key} className="flex items-center space-x-3 cursor-pointer">
-                                            <input
-                                              type="checkbox"
-                                              checked={selectedPeople.includes(person.key)}
-                                              onChange={() => togglePerson(person.key)}
-                                              className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
-                                            />
-                                            <span className="text-sm text-gray-300">
-                                              <span className="font-medium text-gray-200">{person.name}</span>
-                                              <span className="text-gray-500"> — {person.role}</span>
-                                            </span>
-                                          </label>
-                                        ))}
-                                      </div>
-                                    )}
+                                      const toggleResp = (resp: string) => {
+                                        const updated = [...accountants];
+                                        const current = selectedResponsibilities.includes(resp)
+                                          ? selectedResponsibilities.filter(r => r !== resp)
+                                          : [...selectedResponsibilities, resp];
+                                        updated[aIdx] = { ...(updated[aIdx] || {}), responsibilities: JSON.stringify(current) };
+                                        handleCorporationChange(index, 'acctBookkeepers', updated);
+                                      };
 
-                                    <label className="flex items-center space-x-3 cursor-pointer mb-3">
-                                      <input
-                                        type="checkbox"
-                                        checked={hasOther}
-                                        onChange={() => {
-                                          if (hasOther) {
-                                            handleCorporationChange(index, 'advisoryDirectoryPeople', selectedPeople.filter(k => k !== '__other__'));
-                                            handleCorporationChange(index, 'advisoryDirectoryOtherPeople', undefined);
-                                          } else {
-                                            handleCorporationChange(index, 'advisoryDirectoryPeople', [...selectedPeople, '__other__']);
-                                            handleCorporationChange(index, 'advisoryDirectoryOtherPeople', [{}]);
-                                          }
-                                        }}
-                                        className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
-                                      />
-                                      <span className="text-sm text-gray-300 font-medium">Other</span>
-                                    </label>
-
-                                    {hasOther && (corp.advisoryDirectoryOtherPeople || []).map((person: Record<string, string>, oIdx: number) => {
-                                      const others = corp.advisoryDirectoryOtherPeople || [];
-                                      const isLast = oIdx === others.length - 1;
                                       return (
-                                        <div key={oIdx} className="p-4 bg-gray-700/50 rounded-lg mb-4">
-                                          <h4 className="text-sm font-semibold text-gray-200 mb-3">Other Advisory Contact {oIdx + 1}</h4>
+                                        <div key={aIdx} className="p-4 bg-gray-700/50 rounded-lg mb-4">
+                                          {accountants.length > 1 && (
+                                            <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Accountant / Book Keeper {aIdx + 1}</h5>
+                                          )}
                                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Name</label>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Firm Name</label>
                                               <input
                                                 type="text"
-                                                value={person?.name || ''}
+                                                value={acct.firmName || ''}
                                                 onChange={(e) => {
-                                                  const updated = [...others];
-                                                  updated[oIdx] = { ...(updated[oIdx] || {}), name: e.target.value };
-                                                  handleCorporationChange(index, 'advisoryDirectoryOtherPeople', updated);
+                                                  const updated = [...accountants];
+                                                  updated[aIdx] = { ...(updated[aIdx] || {}), firmName: e.target.value };
+                                                  handleCorporationChange(index, 'acctBookkeepers', updated);
                                                 }}
                                                 className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                               />
                                             </div>
                                             <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Title</label>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Contact Person</label>
                                               <input
                                                 type="text"
-                                                value={person?.title || ''}
+                                                value={acct.contactPerson || ''}
                                                 onChange={(e) => {
-                                                  const updated = [...others];
-                                                  updated[oIdx] = { ...(updated[oIdx] || {}), title: e.target.value };
-                                                  handleCorporationChange(index, 'advisoryDirectoryOtherPeople', updated);
+                                                  const updated = [...accountants];
+                                                  updated[aIdx] = { ...(updated[aIdx] || {}), contactPerson: e.target.value };
+                                                  handleCorporationChange(index, 'acctBookkeepers', updated);
                                                 }}
                                                 className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                               />
                                             </div>
                                             <div className="md:col-span-2">
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Responsibilities</label>
-                                              <textarea
-                                                value={person?.responsibilities || ''}
-                                                onChange={(e) => {
-                                                  const updated = [...others];
-                                                  updated[oIdx] = { ...(updated[oIdx] || {}), responsibilities: e.target.value };
-                                                  handleCorporationChange(index, 'advisoryDirectoryOtherPeople', updated);
-                                                }}
-                                                rows={2}
-                                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                              />
+                                              <label className="block text-xs font-medium text-gray-400 mb-2">Responsibilities</label>
+                                              <div className="flex flex-wrap gap-3 mb-2">
+                                                {responsibilityOptions.map(resp => (
+                                                  <label key={resp} className="flex items-center space-x-2 cursor-pointer">
+                                                    <input
+                                                      type="checkbox"
+                                                      checked={selectedResponsibilities.includes(resp)}
+                                                      onChange={() => toggleResp(resp)}
+                                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                                    />
+                                                    <span className="text-sm text-gray-300">{resp}</span>
+                                                  </label>
+                                                ))}
+                                                <label className="flex items-center space-x-2 cursor-pointer">
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={selectedResponsibilities.includes('Other')}
+                                                    onChange={() => toggleResp('Other')}
+                                                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                                  />
+                                                  <span className="text-sm text-gray-300">Other</span>
+                                                </label>
+                                              </div>
+                                              {selectedResponsibilities.includes('Other') && (
+                                                <input
+                                                  type="text"
+                                                  placeholder="Describe other responsibilities..."
+                                                  value={acct.responsibilitiesOther || ''}
+                                                  onChange={(e) => {
+                                                    const updated = [...accountants];
+                                                    updated[aIdx] = { ...(updated[aIdx] || {}), responsibilitiesOther: e.target.value };
+                                                    handleCorporationChange(index, 'acctBookkeepers', updated);
+                                                  }}
+                                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                              )}
                                             </div>
                                             <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Phone Number</label>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Phone</label>
                                               <input
                                                 type="tel"
-                                                value={person?.phone || ''}
+                                                value={acct.phone || ''}
                                                 onChange={(e) => {
-                                                  const updated = [...others];
-                                                  updated[oIdx] = { ...(updated[oIdx] || {}), phone: e.target.value };
-                                                  handleCorporationChange(index, 'advisoryDirectoryOtherPeople', updated);
+                                                  const updated = [...accountants];
+                                                  updated[aIdx] = { ...(updated[aIdx] || {}), phone: e.target.value };
+                                                  handleCorporationChange(index, 'acctBookkeepers', updated);
                                                 }}
                                                 className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                               />
                                             </div>
                                             <div>
-                                              <label className="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
+                                              <label className="block text-xs font-medium text-gray-400 mb-1">Email</label>
                                               <input
                                                 type="email"
-                                                value={person?.email || ''}
+                                                value={acct.email || ''}
                                                 onChange={(e) => {
-                                                  const updated = [...others];
-                                                  updated[oIdx] = { ...(updated[oIdx] || {}), email: e.target.value };
-                                                  handleCorporationChange(index, 'advisoryDirectoryOtherPeople', updated);
+                                                  const updated = [...accountants];
+                                                  updated[aIdx] = { ...(updated[aIdx] || {}), email: e.target.value };
+                                                  handleCorporationChange(index, 'acctBookkeepers', updated);
                                                 }}
                                                 className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                               />
@@ -3957,18 +3923,18 @@ export default function StepForm({
                                           {isLast && (
                                             <div className="mt-4">
                                               <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                Are there other advisory contacts to add?
+                                                Are there other Accountants / Book Keepers to add?
                                               </label>
                                               <div className="flex gap-4">
                                                 <label className="flex items-center">
                                                   <input
                                                     type="radio"
-                                                    name={`advisoryMore-${index}-${oIdx}`}
+                                                    name={`acctMore-${index}-${aIdx}`}
                                                     value="yes"
-                                                    checked={corp[`advisoryMore_${oIdx}`] === 'yes'}
-                                                    onChange={(e) => {
-                                                      handleCorporationChange(index, `advisoryMore_${oIdx}`, e.target.value);
-                                                      handleCorporationChange(index, 'advisoryDirectoryOtherPeople', [...others, {}]);
+                                                    checked={corp[`acctMore_${aIdx}`] === 'yes'}
+                                                    onChange={() => {
+                                                      handleCorporationChange(index, `acctMore_${aIdx}`, 'yes');
+                                                      handleCorporationChange(index, 'acctBookkeepers', [...accountants, {}]);
                                                     }}
                                                     className="mr-2"
                                                   />
@@ -3977,12 +3943,10 @@ export default function StepForm({
                                                 <label className="flex items-center">
                                                   <input
                                                     type="radio"
-                                                    name={`advisoryMore-${index}-${oIdx}`}
+                                                    name={`acctMore-${index}-${aIdx}`}
                                                     value="no"
-                                                    checked={corp[`advisoryMore_${oIdx}`] === 'no'}
-                                                    onChange={(e) => {
-                                                      handleCorporationChange(index, `advisoryMore_${oIdx}`, e.target.value);
-                                                    }}
+                                                    checked={corp[`acctMore_${aIdx}`] === 'no'}
+                                                    onChange={() => handleCorporationChange(index, `acctMore_${aIdx}`, 'no')}
                                                     className="mr-2"
                                                   />
                                                   <span className="text-gray-300">No</span>

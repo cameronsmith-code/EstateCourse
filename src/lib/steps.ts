@@ -1733,7 +1733,10 @@ export const STEPS: Step[] = [
     questions: [
       {
         key: 'bankingStructure',
-        label: 'For your personal banking, are your bank accounts joint, individually held, or some individual or joint?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+          return `${name}, do you have personal banking accounts that are joint, individually held, or some individual or joint?`;
+        },
         type: 'radio',
         options: [
           { value: 'individual', label: 'Individually' },
@@ -1744,7 +1747,10 @@ export const STEPS: Step[] = [
       },
       {
         key: 'jointBankCount',
-        label: 'How many banks, trust companies or credit unions do you have accounts with?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+          return `${name}, how many banks, trust companies or credit unions do you have joint accounts with?`;
+        },
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1757,7 +1763,10 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1BankCount',
-        label: 'How many banks, trust companies or credit unions do you have accounts with?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+          return `${name}, how many banks, trust companies or credit unions do you have accounts with?`;
+        },
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1770,7 +1779,10 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2BankCount',
-        label: 'How many banks, trust companies or credit unions does your spouse have accounts with?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+          return `${name}, how many banks, trust companies or credit unions do you have accounts with?`;
+        },
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1783,7 +1795,10 @@ export const STEPS: Step[] = [
       },
       {
         key: 'mixedJointBankCount',
-        label: 'How many joint accounts are held?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+          return `${name}, how many joint accounts are held?`;
+        },
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1796,7 +1811,10 @@ export const STEPS: Step[] = [
       },
       {
         key: 'mixedClient1BankCount',
-        label: 'How many individually held accounts do you have?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+          return `${name}, how many individually held accounts do you have?`;
+        },
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1809,7 +1827,10 @@ export const STEPS: Step[] = [
       },
       {
         key: 'mixedClient2BankCount',
-        label: 'How many individually held accounts does your spouse have?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+          return `${name}, how many individually held accounts do you have?`;
+        },
         type: 'number',
         placeholder: '0',
         required: false,

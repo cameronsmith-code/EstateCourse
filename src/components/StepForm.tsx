@@ -10593,6 +10593,45 @@ export default function StepForm({
               </>
             );
           })()}
+
+          {validationError && (
+            <div className="mt-6 p-3 bg-red-900/50 border border-red-700 rounded-lg">
+              <p className="text-sm text-red-300">{validationError}</p>
+            </div>
+          )}
+
+          <div className="mt-8 flex items-center justify-between gap-3 pt-6 border-t border-gray-700">
+            <button
+              type="button"
+              onClick={onPrevious}
+              disabled={isFirstStep}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-colors ${
+                isFirstStep
+                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  : 'bg-gray-700 text-white hover:bg-gray-600'
+              }`}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous
+            </button>
+
+            <button
+              type="submit"
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-500 transition-colors"
+            >
+              {isLastStep ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Complete Questionnaire
+                </>
+              ) : (
+                <>
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
         </form>
       </div>
     </div>

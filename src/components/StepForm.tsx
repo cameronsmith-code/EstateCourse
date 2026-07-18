@@ -6,7 +6,7 @@ import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprie
 import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
 import PropertyDetails, { PropertyData } from './PropertyDetails';
 import Subsection from './Subsection';
-import { ChevronLeft, ChevronRight, Check, Trash2, Info, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
 type StepFormProps = {
   step: Step;
@@ -4813,6 +4813,190 @@ export default function StepForm({
                                             ))}
                                           </div>
                                         </div>
+                                      );
+                                    })()}
+
+                                    {!noAgreement && (() => {
+                                      const fundingTypes: string[] = corp.buysellFunding || [];
+                                      const fundingNA = fundingTypes.includes('__na__');
+                                      const fundingOptions = [
+                                        { value: 'Life', label: 'Life' },
+                                        { value: 'Disability', label: 'Disability' },
+                                        { value: 'Critical Illness', label: 'Critical Illness' },
+                                        { value: '__na__', label: 'N/A' },
+                                      ];
+                                      const toggleFunding = (value: string) => {
+                                        if (value === '__na__') {
+                                          const next = fundingNA ? [] : ['__na__'];
+                                          handleCorporationChange(index, 'buysellFunding', next as unknown as string);
+                                        } else {
+                                          if (fundingNA) return;
+                                          const next = fundingTypes.includes(value)
+                                            ? fundingTypes.filter(t => t !== value)
+                                            : [...fundingTypes, value];
+                                          handleCorporationChange(index, 'buysellFunding', next as unknown as string);
+                                        }
+                                      };
+
+                                      const policies: Array<Record<string, unknown>> = (corp.buysellInsurance as Array<Record<string, unknown>>) || [{}];
+                                      const insuranceTypeOptions = ['Life', 'Disability', 'Critical Illness'];
+
+                                      const handlePolicyChange = (pIdx: number, field: string, value: unknown) => {
+                                        const updated = [...policies];
+                                        if (!updated[pIdx]) updated[pIdx] = {};
+                                        updated[pIdx][field] = value;
+                                        handleCorporationChange(index, 'buysellInsurance', updated as unknown as string);
+                                      };
+                                      const togglePolicyInsuranceType = (pIdx: number, value: string) => {
+                                        const updated = [...policies];
+                                        if (!updated[pIdx]) updated[pIdx] = {};
+                                        const current = (updated[pIdx].insuranceType as string[]) || [];
+                                        updated[pIdx].insuranceType = current.includes(value)
+                                          ? current.filter(t => t !== value)
+                                          : [...current, value];
+                                        handleCorporationChange(index, 'buysellInsurance', updated as unknown as string);
+                                      };
+                                      const addPolicy = () => {
+                                        handleCorporationChange(index, 'buysellInsurance', [...policies, {}] as unknown as string);
+                                      };
+                                      const removePolicy = (pIdx: number) => {
+                                        const updated = policies.filter((_, i) => i !== pIdx);
+                                        handleCorporationChange(index, 'buysellInsurance', updated as unknown as string);
+                                      };
+
+                                      const hasAdditional = corp.buysellHasAdditionalPolicy === 'yes';
+                                      const setHasAdditional = (v: string) => {
+                                        handleCorporationChange(index, 'buysellHasAdditionalPolicy', v);
+                                        if (v === 'yes' && policies.length === 1) {
+                                          addPolicy();
+                                        }
+                                        if (v === 'no') {
+                                          handleCorporationChange(index, 'buysellInsurance', [policies[0] || {}] as unknown as string);
+                                        }
+                                      };
+
+                                      return (
+                                        <>
+                                          <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                              Funding Strategy: Insurance-Funded: Identify if the buy-sell is funded by life, disability, or critical illness insurance
+                                            </label>
+                                            <div className="space-y-2">
+                                              {fundingOptions.map((opt) => (
+                                                <label
+                                                  key={opt.value}
+                                                  className={`flex items-center space-x-3 ${opt.value !== '__na__' && fundingNA ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                                                >
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={fundingTypes.includes(opt.value)}
+                                                    onChange={() => toggleFunding(opt.value)}
+                                                    disabled={opt.value !== '__na__' && fundingNA}
+                                                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                                  />
+                                                  <span className="text-sm text-gray-300">{opt.label}</span>
+                                                </label>
+                                              ))}
+                                            </div>
+                                          </div>
+
+                                          {!fundingNA && (
+                                            <>
+                                              <h5 className="text-sm font-semibold text-gray-200 mt-4 mb-2">Insurance Amount and Ownership</h5>
+                                              {policies.map((policy, pIdx) => (
+                                                <div key={pIdx} className="p-4 bg-gray-700/60 rounded-lg space-y-3 mb-3 relative">
+                                                  {pIdx > 0 && (
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => removePolicy(pIdx)}
+                                                      className="absolute top-3 right-3 text-red-400 hover:text-red-300"
+                                                      aria-label="Remove policy"
+                                                    >
+                                                      <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                  )}
+                                                  {pIdx > 0 && <h6 className="text-xs font-semibold text-gray-400">Additional Policy {pIdx}</h6>}
+
+                                                  <div>
+                                                    <label className="block text-sm font-medium text-gray-300 mb-2">Insurance Type</label>
+                                                    <div className="space-y-2">
+                                                      {insuranceTypeOptions.map((opt) => (
+                                                        <label key={opt} className="flex items-center space-x-3 cursor-pointer">
+                                                          <input
+                                                            type="checkbox"
+                                                            checked={((policy.insuranceType as string[]) || []).includes(opt)}
+                                                            onChange={() => togglePolicyInsuranceType(pIdx, opt)}
+                                                            className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                                          />
+                                                          <span className="text-sm text-gray-300">{opt}</span>
+                                                        </label>
+                                                      ))}
+                                                    </div>
+                                                  </div>
+
+                                                  {[
+                                                    { field: 'insurer', label: 'Insurer' },
+                                                    { field: 'contactPerson', label: 'Contact Person' },
+                                                    { field: 'contactPersonFirm', label: 'Contact Person Firm' },
+                                                    { field: 'phone', label: 'Phone' },
+                                                    { field: 'email', label: 'Email' },
+                                                    { field: 'faceValue', label: 'Face Value of Policy' },
+                                                    { field: 'lifeInsured', label: 'Life Insured' },
+                                                    { field: 'beneficiary', label: 'Beneficiary' },
+                                                    { field: 'policyOwner', label: 'Policy Owner' },
+                                                    { field: 'documentLocation', label: 'Document Location' },
+                                                  ].map((f) => (
+                                                    <div key={f.field}>
+                                                      <label className="block text-sm font-medium text-gray-300 mb-1">{f.label}</label>
+                                                      <input
+                                                        type="text"
+                                                        value={(policy[f.field] as string) || ''}
+                                                        onChange={(e) => handlePolicyChange(pIdx, f.field, e.target.value)}
+                                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                      />
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              ))}
+
+                                              <div className="mt-2">
+                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                  Are there additional life, disability, or critical illness policies?
+                                                </label>
+                                                <div className="flex gap-4">
+                                                  <label className="flex items-center space-x-2 cursor-pointer">
+                                                    <input
+                                                      type="radio"
+                                                      checked={hasAdditional}
+                                                      onChange={() => setHasAdditional('yes')}
+                                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                    />
+                                                    <span className="text-sm text-gray-300">Yes</span>
+                                                  </label>
+                                                  <label className="flex items-center space-x-2 cursor-pointer">
+                                                    <input
+                                                      type="radio"
+                                                      checked={corp.buysellHasAdditionalPolicy === 'no'}
+                                                      onChange={() => setHasAdditional('no')}
+                                                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                                                    />
+                                                    <span className="text-sm text-gray-300">No</span>
+                                                  </label>
+                                                </div>
+                                              </div>
+
+                                              {hasAdditional && (
+                                                <button
+                                                  type="button"
+                                                  onClick={addPolicy}
+                                                  className="mt-2 inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg"
+                                                >
+                                                  <Plus className="w-4 h-4" /> Add Another Policy
+                                                </button>
+                                              )}
+                                            </>
+                                          )}
+                                        </>
                                       );
                                     })()}
                                   </>

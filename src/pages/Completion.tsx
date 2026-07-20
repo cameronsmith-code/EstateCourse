@@ -23,7 +23,6 @@ export default function Completion() {
     const step12 = answers.get(12) || {};
     const step13 = answers.get(13) || {};
     const step14 = answers.get(14) || {};
-    const step15 = answers.get(15) || {};
 
     const data = {
       ...step1,
@@ -40,11 +39,10 @@ export default function Completion() {
       ...step10,
       ...step11,
       ...step12,
+      client1PensionsData: step13.client1PensionsData,
+      client2PensionsData: step13.client2PensionsData,
       ...step13,
       ...step14,
-      client1PensionsData: step15.client1PensionsData,
-      client2PensionsData: step15.client2PensionsData,
-      ...step15,
     };
 
     setFormData(data);

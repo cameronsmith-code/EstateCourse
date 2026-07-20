@@ -678,7 +678,6 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter firm name',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Name',
@@ -686,7 +685,6 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter advisor name',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Phone',
@@ -694,7 +692,6 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter phone number',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Email',
@@ -702,7 +699,6 @@ export const STEPS: Step[] = [
         type: 'email',
         placeholder: 'Enter email address',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Website',
@@ -710,28 +706,6 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter website URL',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor1WorksWith',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          const advisorName = (answers.get(1)?.['fpAdvisor1Name'] as string) || 'this advisor';
-          return hasSpouse ? `Which client(s) does ${advisorName} work with?` : `Do you work with ${advisorName}?`;
-        },
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: 'Yes' }];
-        },
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Services',
@@ -748,7 +722,6 @@ export const STEPS: Step[] = [
           { value: 'other', label: 'Other' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Duration',
@@ -756,7 +729,6 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'e.g., 5 years',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1IncludeInContactList',
@@ -767,7 +739,6 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpHasAdditionalAdvisor',
@@ -778,212 +749,6 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor2Firm',
-        label: 'Firm',
-        type: 'text',
-        placeholder: 'Enter firm name',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor2Name',
-        label: 'Advisor name',
-        type: 'text',
-        placeholder: 'Enter advisor name',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor2Phone',
-        label: 'Phone',
-        type: 'text',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor2Email',
-        label: 'Email',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor2Website',
-        label: 'Website (optional)',
-        type: 'text',
-        placeholder: 'Enter website URL',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor2WorksWith',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          const advisorName = (answers.get(1)?.['fpAdvisor2Name'] as string) || 'this advisor';
-          return hasSpouse ? `Which client(s) does ${advisorName} work with?` : `Do you work with ${advisorName}?`;
-        },
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: 'Yes' }];
-        },
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor2Services',
-        label: 'What do they help you with?',
-        type: 'checkbox-group',
-        options: [
-          { value: 'investments', label: 'Investments' },
-          { value: 'retirement_planning', label: 'Retirement planning' },
-          { value: 'insurance', label: 'Insurance' },
-          { value: 'estate_planning', label: 'Estate planning' },
-          { value: 'tax_planning', label: 'Tax planning' },
-          { value: 'cash_flow', label: 'Cash flow' },
-          { value: 'business_planning', label: 'Business planning' },
-          { value: 'other', label: 'Other' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor2Duration',
-        label: 'How long have you worked together?',
-        type: 'text',
-        placeholder: 'e.g., 5 years',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor2IncludeInContactList',
-        label: 'May we include this professional in your executor\'s contact list and action guide?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
-      },
-      {
-        key: 'fpHasAdditionalAdvisor2',
-        label: 'Is there an additional Financial Planner/Wealth Advisor that you work with?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
-      },
-      {
-        key: 'fpAdvisor3Firm',
-        label: 'Firm',
-        type: 'text',
-        placeholder: 'Enter firm name',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && formData.fpHasAdditionalAdvisor2 === 'yes',
-      },
-      {
-        key: 'fpAdvisor3Name',
-        label: 'Advisor name',
-        type: 'text',
-        placeholder: 'Enter advisor name',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && formData.fpHasAdditionalAdvisor2 === 'yes',
-      },
-      {
-        key: 'fpAdvisor3Phone',
-        label: 'Phone',
-        type: 'text',
-        placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && formData.fpHasAdditionalAdvisor2 === 'yes',
-      },
-      {
-        key: 'fpAdvisor3Email',
-        label: 'Email',
-        type: 'email',
-        placeholder: 'Enter email address',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && formData.fpHasAdditionalAdvisor2 === 'yes',
-      },
-      {
-        key: 'fpAdvisor3Website',
-        label: 'Website (optional)',
-        type: 'text',
-        placeholder: 'Enter website URL',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && formData.fpHasAdditionalAdvisor2 === 'yes',
-      },
-      {
-        key: 'fpAdvisor3WorksWith',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          const advisorName = (answers.get(1)?.['fpAdvisor3Name'] as string) || 'this advisor';
-          return hasSpouse ? `Which client(s) does ${advisorName} work with?` : `Do you work with ${advisorName}?`;
-        },
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: 'Yes' }];
-        },
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && formData.fpHasAdditionalAdvisor2 === 'yes',
-      },
-      {
-        key: 'fpAdvisor3Services',
-        label: 'What do they help you with?',
-        type: 'checkbox-group',
-        options: [
-          { value: 'investments', label: 'Investments' },
-          { value: 'retirement_planning', label: 'Retirement planning' },
-          { value: 'insurance', label: 'Insurance' },
-          { value: 'estate_planning', label: 'Estate planning' },
-          { value: 'tax_planning', label: 'Tax planning' },
-          { value: 'cash_flow', label: 'Cash flow' },
-          { value: 'business_planning', label: 'Business planning' },
-          { value: 'other', label: 'Other' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && formData.fpHasAdditionalAdvisor2 === 'yes',
-      },
-      {
-        key: 'fpAdvisor3Duration',
-        label: 'How long have you worked together?',
-        type: 'text',
-        placeholder: 'e.g., 5 years',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && formData.fpHasAdditionalAdvisor2 === 'yes',
-      },
-      {
-        key: 'fpAdvisor3IncludeInContactList',
-        label: 'May we include this professional in your executor\'s contact list and action guide?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && formData.fpHasAdditionalAdvisor2 === 'yes',
       },
       {
         key: 'acctHasAccountant',
@@ -1363,22 +1128,6 @@ export const STEPS: Step[] = [
         required: false,
       },
       {
-        key: 'fp_health_0_patients',
-        label: 'Patients:',
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
-        },
-        required: false,
-      },
-      {
         key: 'fp_health_0_has_additional',
         label: 'Do you have an additional Family Physician?',
         type: 'radio',
@@ -1409,23 +1158,6 @@ export const STEPS: Step[] = [
         label: 'Phone',
         type: 'text',
         placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fp_health_0_has_additional === 'yes',
-      },
-      {
-        key: 'fp_health_1_patients',
-        label: 'Patients:',
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
-        },
         required: false,
         condition: (formData: Record<string, string>) => formData.fp_health_0_has_additional === 'yes',
       },
@@ -1465,23 +1197,6 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.fp_health_1_has_additional === 'yes',
       },
       {
-        key: 'fp_health_2_patients',
-        label: 'Patients:',
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
-        },
-        required: false,
-        condition: (formData: Record<string, string>) => formData.fp_health_1_has_additional === 'yes',
-      },
-      {
         key: 'sp_health_has',
         label: 'Do you see any specialists?',
         type: 'radio',
@@ -1512,23 +1227,6 @@ export const STEPS: Step[] = [
         label: 'Phone',
         type: 'text',
         placeholder: 'Enter phone number',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.sp_health_has === 'yes',
-      },
-      {
-        key: 'sp_health_0_patients',
-        label: 'Patients:',
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
-        },
         required: false,
         condition: (formData: Record<string, string>) => formData.sp_health_has === 'yes',
       },
@@ -1568,23 +1266,6 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.sp_health_0_has_additional === 'yes',
       },
       {
-        key: 'sp_health_1_patients',
-        label: 'Patients:',
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
-        },
-        required: false,
-        condition: (formData: Record<string, string>) => formData.sp_health_0_has_additional === 'yes',
-      },
-      {
         key: 'sp_health_1_has_additional',
         label: 'Do you have another additional Specialist?',
         type: 'radio',
@@ -1620,23 +1301,6 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.sp_health_1_has_additional === 'yes',
       },
       {
-        key: 'sp_health_2_patients',
-        label: 'Patients:',
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
-        },
-        required: false,
-        condition: (formData: Record<string, string>) => formData.sp_health_1_has_additional === 'yes',
-      },
-      {
         key: 'ph_health_0_name',
         label: 'Pharmacist Name',
         type: 'text',
@@ -1655,22 +1319,6 @@ export const STEPS: Step[] = [
         label: 'Phone',
         type: 'text',
         placeholder: 'Enter phone number',
-        required: false,
-      },
-      {
-        key: 'ph_health_0_of',
-        label: 'Pharmacist of',
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
-        },
         required: false,
       },
       {
@@ -1707,23 +1355,6 @@ export const STEPS: Step[] = [
         required: false,
         condition: (formData: Record<string, string>) => formData.ph_health_0_has_additional === 'yes',
       },
-      {
-        key: 'ph_health_1_of',
-        label: 'Pharmacist of',
-        type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          if (hasSpouse) {
-            return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
-            ];
-          }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
-        },
-        required: false,
-        condition: (formData: Record<string, string>) => formData.ph_health_0_has_additional === 'yes',
-      },
     ],
   },
   {
@@ -1733,10 +1364,7 @@ export const STEPS: Step[] = [
     questions: [
       {
         key: 'bankingStructure',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
-          return `${name}, do you have personal banking accounts that are joint, individually held, or some individual or joint?`;
-        },
+        label: 'For your personal banking, are your bank accounts joint, individually held, or some individual or joint?',
         type: 'radio',
         options: [
           { value: 'individual', label: 'Individually' },
@@ -1747,10 +1375,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'jointBankCount',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
-          return `${name}, how many banks, trust companies or credit unions do you have joint accounts with?`;
-        },
+        label: 'How many banks, trust companies or credit unions do you have accounts with?',
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1763,10 +1388,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client1BankCount',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
-          return `${name}, how many banks, trust companies or credit unions do you have accounts with?`;
-        },
+        label: 'How many banks, trust companies or credit unions do you have accounts with?',
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1779,10 +1401,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'client2BankCount',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
-          return `${name}, how many banks, trust companies or credit unions do you have accounts with?`;
-        },
+        label: 'How many banks, trust companies or credit unions does your spouse have accounts with?',
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1795,10 +1414,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'mixedJointBankCount',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
-          return `${name}, how many joint accounts are held?`;
-        },
+        label: 'How many joint accounts are held?',
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1811,10 +1427,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'mixedClient1BankCount',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
-          return `${name}, how many individually held accounts do you have?`;
-        },
+        label: 'How many individually held accounts do you have?',
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1827,10 +1440,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'mixedClient2BankCount',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
-          return `${name}, how many individually held accounts do you have?`;
-        },
+        label: 'How many individually held accounts does your spouse have?',
         type: 'number',
         placeholder: '0',
         required: false,
@@ -1860,166 +1470,6 @@ export const STEPS: Step[] = [
           { value: 'other', label: 'Other' },
         ],
         required: true,
-      },
-      {
-        key: 'ownSameAddress',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const step1 = answers.get(1) as Record<string, string> | undefined;
-          const addr = step1?.address || '';
-          const shortAddr = addr.split(',')[0] || addr;
-          return `Is this your current home address? (Is this the same address you entered earlier in the "About You" section${shortAddr ? ` — ${shortAddr}` : ''}?)`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.livingSituation === 'own',
-      },
-      {
-        key: 'ownPropertyCountry',
-        label: 'Which country is the property located in?',
-        type: 'select',
-        options: [
-          { value: 'canada', label: 'Canada' },
-          { value: 'united_states', label: 'United States' },
-          { value: 'other', label: 'Other' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress === 'no',
-      },
-      {
-        key: 'ownProvince',
-        label: 'Province/Territory',
-        type: 'select',
-        options: [
-          { value: 'Alberta', label: 'Alberta' },
-          { value: 'British Columbia', label: 'British Columbia' },
-          { value: 'Manitoba', label: 'Manitoba' },
-          { value: 'New Brunswick', label: 'New Brunswick' },
-          { value: 'Newfoundland and Labrador', label: 'Newfoundland and Labrador' },
-          { value: 'Northwest Territories', label: 'Northwest Territories' },
-          { value: 'Nova Scotia', label: 'Nova Scotia' },
-          { value: 'Nunavut', label: 'Nunavut' },
-          { value: 'Ontario', label: 'Ontario' },
-          { value: 'Prince Edward Island', label: 'Prince Edward Island' },
-          { value: 'Quebec', label: 'Quebec' },
-          { value: 'Saskatchewan', label: 'Saskatchewan' },
-          { value: 'Yukon', label: 'Yukon' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress === 'no' && formData.ownPropertyCountry === 'canada',
-      },
-      {
-        key: 'ownState',
-        label: 'State',
-        type: 'select',
-        options: [
-          { value: 'Alabama', label: 'Alabama' },
-          { value: 'Alaska', label: 'Alaska' },
-          { value: 'Arizona', label: 'Arizona' },
-          { value: 'Arkansas', label: 'Arkansas' },
-          { value: 'California', label: 'California' },
-          { value: 'Colorado', label: 'Colorado' },
-          { value: 'Connecticut', label: 'Connecticut' },
-          { value: 'Delaware', label: 'Delaware' },
-          { value: 'Florida', label: 'Florida' },
-          { value: 'Georgia', label: 'Georgia' },
-          { value: 'Hawaii', label: 'Hawaii' },
-          { value: 'Idaho', label: 'Idaho' },
-          { value: 'Illinois', label: 'Illinois' },
-          { value: 'Indiana', label: 'Indiana' },
-          { value: 'Iowa', label: 'Iowa' },
-          { value: 'Kansas', label: 'Kansas' },
-          { value: 'Kentucky', label: 'Kentucky' },
-          { value: 'Louisiana', label: 'Louisiana' },
-          { value: 'Maine', label: 'Maine' },
-          { value: 'Maryland', label: 'Maryland' },
-          { value: 'Massachusetts', label: 'Massachusetts' },
-          { value: 'Michigan', label: 'Michigan' },
-          { value: 'Minnesota', label: 'Minnesota' },
-          { value: 'Mississippi', label: 'Mississippi' },
-          { value: 'Missouri', label: 'Missouri' },
-          { value: 'Montana', label: 'Montana' },
-          { value: 'Nebraska', label: 'Nebraska' },
-          { value: 'Nevada', label: 'Nevada' },
-          { value: 'New Hampshire', label: 'New Hampshire' },
-          { value: 'New Jersey', label: 'New Jersey' },
-          { value: 'New Mexico', label: 'New Mexico' },
-          { value: 'New York', label: 'New York' },
-          { value: 'North Carolina', label: 'North Carolina' },
-          { value: 'North Dakota', label: 'North Dakota' },
-          { value: 'Ohio', label: 'Ohio' },
-          { value: 'Oklahoma', label: 'Oklahoma' },
-          { value: 'Oregon', label: 'Oregon' },
-          { value: 'Pennsylvania', label: 'Pennsylvania' },
-          { value: 'Rhode Island', label: 'Rhode Island' },
-          { value: 'South Carolina', label: 'South Carolina' },
-          { value: 'South Dakota', label: 'South Dakota' },
-          { value: 'Tennessee', label: 'Tennessee' },
-          { value: 'Texas', label: 'Texas' },
-          { value: 'Utah', label: 'Utah' },
-          { value: 'Vermont', label: 'Vermont' },
-          { value: 'Virginia', label: 'Virginia' },
-          { value: 'Washington', label: 'Washington' },
-          { value: 'West Virginia', label: 'West Virginia' },
-          { value: 'Wisconsin', label: 'Wisconsin' },
-          { value: 'Wyoming', label: 'Wyoming' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress === 'no' && formData.ownPropertyCountry === 'united_states',
-      },
-      {
-        key: 'ownCountryOther',
-        label: 'Country',
-        type: 'text',
-        placeholder: 'Enter country',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress === 'no' && formData.ownPropertyCountry === 'other',
-      },
-      {
-        key: 'ownProvinceRegion',
-        label: 'State / Province / Region',
-        type: 'text',
-        placeholder: 'Enter state, province, or region',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress === 'no' && formData.ownPropertyCountry === 'other',
-      },
-      {
-        key: 'ownAddress',
-        label: 'Street Address',
-        type: 'text',
-        placeholder: 'Enter street address',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress === 'no',
-      },
-      {
-        key: 'ownCity',
-        label: 'City',
-        type: 'text',
-        placeholder: 'Enter city',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress === 'no',
-      },
-      {
-        key: 'ownPostalCode',
-        label: 'Postal/ZIP Code',
-        type: 'text',
-        placeholder: 'Enter postal or ZIP code',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress === 'no',
-      },
-      {
-        key: 'ownHasMortgage',
-        label: 'Is there a mortgage or other debt secured against this property?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.livingSituation === 'own',
       },
       {
         key: 'rentLandlordName',
@@ -2300,85 +1750,6 @@ export const STEPS: Step[] = [
   },
   {
     id: 10,
-    title: 'Debts',
-    description: 'Understanding your debts and liabilities helps your executor identify what must be settled from your estate and whether any are secured or jointly held. This section covers credit card debt, mortgage and property debt, and other debts.',
-    questions: [
-      {
-        key: 'hasCreditCardDebt',
-        label: 'Do you have any credit card debt?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'creditCardDebtCount',
-        label: 'How many credit cards with outstanding balances do you have?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasCreditCardDebt === 'yes',
-      },
-      {
-        key: 'creditCardDebtData',
-        label: 'Credit Card Debt Details',
-        type: 'dynamic',
-        required: false,
-      },
-      {
-        key: 'hasMortgageDebt',
-        label: 'Do you have any mortgage or property-related debt (mortgage, HELOC, second mortgage)?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'mortgageDebtCount',
-        label: 'How many mortgage or property-related debts do you have?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasMortgageDebt === 'yes',
-      },
-      {
-        key: 'mortgageDebtData',
-        label: 'Mortgage and Property Debt Details',
-        type: 'dynamic',
-        required: false,
-      },
-      {
-        key: 'hasOtherDebt',
-        label: 'Do you have any other debts (personal loans, car loans, student loans, lines of credit, tax debt, business loans)?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      {
-        key: 'otherDebtCount',
-        label: 'How many other debts do you have?',
-        type: 'number',
-        placeholder: '0',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasOtherDebt === 'yes',
-      },
-      {
-        key: 'otherDebtData',
-        label: 'Other Debt Details',
-        type: 'dynamic',
-        required: false,
-      },
-    ],
-  },
-  {
-    id: 11,
     title: 'Wills',
     description: 'A Will is the foundation of your estate plan. It directs how your assets are distributed, names your executor, and can include trusts for beneficiaries with special needs. This section helps us understand the current state of your Will(s) and whether updates may be needed.',
     questions: [
@@ -2577,7 +1948,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 12,
+    id: 11,
     title: 'Powers of Attorney',
     description: 'A Power of Attorney (POA) lets you appoint someone to make decisions on your behalf if you become unable to do so. There are two types: one for personal care (health decisions) and one for property (financial decisions).',
     questions: [
@@ -2887,7 +2258,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 13,
+    id: 12,
     title: 'Estate Trustees (Executors)',
     description: 'An Estate Trustee (also called an Executor) is the person or institution responsible for administering your estate after you pass away. This includes paying debts, filing taxes, and distributing assets according to your Will.',
     questions: [
@@ -3303,7 +2674,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 14,
+    id: 13,
     title: 'Funeral Arrangements',
     description: 'Planning your funeral arrangements in advance can relieve your family of difficult decisions during an emotional time. This section captures your wishes regarding funeral arrangements and whether they have been documented.',
     questions: [
@@ -3411,7 +2782,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 15,
+    id: 14,
     title: 'Pensions & Registered Accounts',
     description: 'Pensions and registered accounts (RRSP, RRIF, TFSA, etc.) often form a significant part of your estate. Understanding what you have and where it is located helps ensure these assets are properly managed and distributed.',
     questions: [

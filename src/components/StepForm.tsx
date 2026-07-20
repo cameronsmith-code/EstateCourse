@@ -6229,7 +6229,7 @@ export default function StepForm({
                                       <div className="space-y-4">
                                         <div>
                                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                                            Who purchased the property? <span className="text-gray-500 font-normal">(Select all that apply)</span>
+                                            Who owns the property? <span className="text-gray-500 font-normal">(Select all that apply)</span>
                                           </label>
                                           <div className="space-y-2">
                                             {ownerCheckboxOptions.map(opt => (

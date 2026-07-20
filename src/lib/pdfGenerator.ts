@@ -726,6 +726,7 @@ interface FormData {
   ownCountryOther?: string;
   ownProvinceRegion?: string;
   ownPostalCode?: string;
+  ownHasMortgage?: string;
   rentLandlordName?: string;
   rentSameAddress?: string;
   rentAddress?: string;
@@ -9118,7 +9119,10 @@ You should explore this as an option with your legal and CFP® professionals bec
         const debtType = item.debtType === 'Other'
           ? `Other (${item.debtTypeOther || ''})`
           : item.debtType as string || '';
-        renderDebtItem('Mortgage / Property Debt', index, item, [
+        const itemLabel = item.isPrimaryResidence === true && item.propertyAddress
+          ? `${item.propertyAddress} Debt Information`
+          : `Mortgage / Property Debt ${index + 1}`;
+        renderDebtItem(itemLabel, -1, item, [
           ['Type', debtType],
           ['Lender', item.lender as string || ''],
           ['Property Address', item.propertyAddress as string || ''],

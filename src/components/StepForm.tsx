@@ -267,6 +267,57 @@ export default function StepForm({
     });
   }, [answers['ownPropertyCountry']]);
 
+  // Real Estate — sync primary residence mortgage into Step 10 Mortgage subsection
+  useEffect(() => {
+    if (answers['ownHasMortgage'] !== 'yes') return;
+    const step1 = allAnswers?.get(1) as Record<string, string> | undefined;
+    const ownRegion = (answers['ownProvince'] as string) || (answers['ownState'] as string) || (answers['ownProvinceRegion'] as string) || (step1?.province || '');
+    const ownCity = (answers['ownCity'] as string) || (step1?.city || '');
+    const ownAddress = (answers['ownAddress'] as string) || (step1?.address || '');
+    const fullAddress = [ownAddress, ownCity, ownRegion].filter(Boolean).join(', ');
+    if (!fullAddress) return;
+    const existingData = (answers['mortgageDebtData'] as Array<Record<string, unknown>>) || [];
+    // Check if there's already a primary residence debt entry
+    const primaryIndex = existingData.findIndex(item => item.isPrimaryResidence === true);
+    const primaryEntry: Record<string, unknown> = {
+      debtType: 'Mortgage',
+      propertyAddress: fullAddress,
+      isPrimaryResidence: true,
+    };
+    if (primaryIndex >= 0) {
+      // Update existing primary residence entry address
+      const updated = [...existingData];
+      updated[primaryIndex] = { ...updated[primaryIndex], propertyAddress: fullAddress, isPrimaryResidence: true };
+      onAnswerChange('mortgageDebtData', updated);
+    } else {
+      // Prepend primary residence entry and ensure count is at least 1
+      const updated = [primaryEntry, ...existingData];
+      onAnswerChange('mortgageDebtData', updated);
+      const currentCount = parseInt(answers['mortgageDebtCount'] as string) || 0;
+      if (currentCount < updated.length) {
+        onAnswerChange('mortgageDebtCount', String(updated.length));
+      }
+      if (answers['hasMortgageDebt'] !== 'yes') {
+        onAnswerChange('hasMortgageDebt', 'yes');
+      }
+    }
+  }, [answers['ownHasMortgage'], answers['ownAddress'], answers['ownCity'], answers['ownProvince'], answers['ownState'], answers['ownProvinceRegion'], answers['ownCountryOther']]);
+
+  // Real Estate — remove primary residence debt entry when ownHasMortgage is no longer 'yes'
+  useEffect(() => {
+    if (answers['ownHasMortgage'] === 'yes') return;
+    const existingData = (answers['mortgageDebtData'] as Array<Record<string, unknown>>) || [];
+    const hasPrimary = existingData.some(item => item.isPrimaryResidence === true);
+    if (!hasPrimary) return;
+    const updated = existingData.filter(item => item.isPrimaryResidence !== true);
+    onAnswerChange('mortgageDebtData', updated);
+    const newCount = updated.length;
+    onAnswerChange('mortgageDebtCount', String(newCount));
+    if (newCount === 0 && answers['hasMortgageDebt'] === 'yes') {
+      onAnswerChange('hasMortgageDebt', undefined);
+    }
+  }, [answers['ownHasMortgage']]);
+
   // Real Estate — prefill rental address from About You when rentSameAddress is 'yes'
   useEffect(() => {
     if (answers['rentSameAddress'] === 'yes') {
@@ -10517,7 +10568,7 @@ export default function StepForm({
               'retSecurityDeposit', 'retParkingStorage', 'retKeyLocation', 'retNotifyName',
             ]);
             const ownQuestionKeys = new Set([
-              'ownSameAddress', 'ownPropertyCountry', 'ownAddress', 'ownCity', 'ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion', 'ownPostalCode',
+              'ownSameAddress', 'ownPropertyCountry', 'ownAddress', 'ownCity', 'ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion', 'ownPostalCode', 'ownHasMortgage',
             ]);
             const livingSituationQuestions = globalQuestions.filter(q => !rentQuestionKeys.has(q.key) && !retQuestionKeys.has(q.key) && !ownQuestionKeys.has(q.key) && q.key !== 'hasRealEstate' && q.key !== 'propertyCount' && q.key !== 'propertyTypes');
             const rentQuestions = globalQuestions.filter(q => rentQuestionKeys.has(q.key));
@@ -10619,9 +10670,11 @@ export default function StepForm({
                               Cancel editing
                             </button>
                           )}
-                          {ownQuestions.filter(q => q.key !== 'ownSameAddress').map(renderQuestion)}
+                          {ownQuestions.filter(q => q.key !== 'ownSameAddress' && q.key !== 'ownHasMortgage').map(renderQuestion)}
                         </div>
                       )}
+                      {/* Mortgage question — shown after address is entered/confirmed */}
+                      {ownQuestions.filter(q => q.key === 'ownHasMortgage').map(renderQuestion)}
                     </>
                   );
                 })()}
@@ -10892,9 +10945,13 @@ export default function StepForm({
                 <div className="space-y-6 mt-6">
                   {Array.from({ length: count }).map((_, index) => {
                     const item = data[index] || {};
+                    const isPrimaryResidence = item.isPrimaryResidence === true;
+                    const title = isPrimaryResidence && item.propertyAddress
+                      ? `${item.propertyAddress} Debt Information`
+                      : `${itemLabel} ${index + 1}`;
                     return (
-                      <div key={index} className="p-4 bg-gray-700 rounded-lg space-y-4">
-                        <h4 className="text-sm font-semibold text-gray-200">{itemLabel} {index + 1}</h4>
+                      <div key={index} className={`p-4 rounded-lg space-y-4 ${isPrimaryResidence ? 'bg-blue-900/30 border border-blue-700' : 'bg-gray-700'}`}>
+                        <h4 className="text-sm font-semibold text-blue-300">{title}</h4>
                         {fields(item, (field, value) => handleFieldChange(index, field, value), index)}
                       </div>
                     );
@@ -10959,7 +11016,16 @@ export default function StepForm({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Property Address:</label>
-                    {renderTextField(item.propertyAddress as string, (v) => hfc('propertyAddress', v), 'e.g., 123 Main St, Toronto, ON')}
+                    {item.isPrimaryResidence === true ? (
+                      <input
+                        type="text"
+                        value={(item.propertyAddress as string) || ''}
+                        readOnly
+                        className="w-full px-4 py-2 bg-gray-800 border border-gray-600 text-gray-300 rounded-lg cursor-not-allowed"
+                      />
+                    ) : (
+                      renderTextField(item.propertyAddress as string, (v) => hfc('propertyAddress', v), 'e.g., 123 Main St, Toronto, ON')
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Approximate Balance:</label>

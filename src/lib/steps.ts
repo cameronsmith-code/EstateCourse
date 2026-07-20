@@ -2011,6 +2011,17 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress === 'no',
       },
       {
+        key: 'ownHasMortgage',
+        label: 'Is there a mortgage or other debt secured against this property?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.livingSituation === 'own',
+      },
+      {
         key: 'rentLandlordName',
         label: 'Landlord / Company Name',
         type: 'text',

@@ -590,31 +590,43 @@ interface FormData {
     revenueExpensesLocation?: string;
     capitalExpendituresLocation?: string;
   }>;
-  hasDebts?: string;
-  debtsData?: Array<{
+  hasCreditCardDebt?: string;
+  creditCardDebtCount?: string;
+  creditCardDebtData?: Array<{
+    company?: string;
+    lastFourDigits?: string;
+    balance?: string;
+    debtOwner?: string;
+    hasOtherOnLoan?: string;
+    otherPersonName?: string;
+    otherPersonPhone?: string;
+  }>;
+  hasMortgageDebt?: string;
+  mortgageDebtCount?: string;
+  mortgageDebtData?: Array<{
     debtType?: string;
+    debtTypeOther?: string;
+    lender?: string;
+    propertyAddress?: string;
+    balance?: string;
+    debtOwner?: string;
+    hasOtherOnLoan?: string;
+    otherPersonName?: string;
+    otherPersonPhone?: string;
+  }>;
+  hasOtherDebt?: string;
+  otherDebtCount?: string;
+  otherDebtData?: Array<{
+    debtType?: string;
+    debtTypeOther?: string;
+    lender?: string;
+    balance?: string;
     debtOwner?: string;
     hasOtherOnLoan?: string;
     otherPersonName?: string;
     otherPersonPhone?: string;
     isSecured?: string;
     securedBy?: string;
-  }>;
-  client1HasCreditCards?: string;
-  client1CreditCardCount?: string;
-  creditCardsData?: Array<{
-    company?: string;
-    lastFourDigits?: string;
-    expiryDate?: string;
-    otherParties?: string;
-  }>;
-  client2HasCreditCards?: string;
-  client2CreditCardCount?: string;
-  client2CreditCardsData?: Array<{
-    company?: string;
-    lastFourDigits?: string;
-    expiryDate?: string;
-    otherParties?: string;
   }>;
   client1HasWorkBenefits?: string;
   client2HasWorkBenefits?: string;
@@ -705,6 +717,16 @@ interface FormData {
   client1RegisteredAccountData?: Record<string, Array<Record<string, unknown>>>;
   client2RegisteredAccountData?: Record<string, Array<Record<string, unknown>>>;
   livingSituation?: string;
+  ownSameAddress?: string;
+  ownPropertyCountry?: string;
+  ownAddress?: string;
+  ownCity?: string;
+  ownProvince?: string;
+  ownState?: string;
+  ownCountryOther?: string;
+  ownProvinceRegion?: string;
+  ownPostalCode?: string;
+  ownHasMortgage?: string;
   rentLandlordName?: string;
   rentSameAddress?: string;
   rentAddress?: string;
@@ -8878,6 +8900,35 @@ You should explore this as an option with your legal and CFP® professionals bec
     yPosition += 14;
   }
 
+  // Primary residence (own) details
+  if (formData.livingSituation === 'own' && (formData.ownAddress || formData.ownCity || formData.ownProvince || formData.ownState || formData.ownProvinceRegion || formData.ownPostalCode || formData.ownCountryOther)) {
+    addSectionHeader('Primary Residence');
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.darkText);
+
+    const ownRegion = formData.ownProvince || formData.ownState || formData.ownProvinceRegion || '';
+    const ownCountry = formData.ownPropertyCountry === 'canada' ? 'Canada'
+      : formData.ownPropertyCountry === 'united_states' ? 'United States'
+      : formData.ownCountryOther || '';
+
+    const ownFields: { label: string; value?: string }[] = [
+      { label: 'Address', value: [formData.ownAddress, formData.ownCity, ownRegion, formData.ownPostalCode].filter(Boolean).join(', ') },
+      { label: 'Country', value: ownCountry },
+    ];
+
+    ownFields.forEach(({ label, value }) => {
+      if (value) {
+        checkPageBreak(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${label}:`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(String(value), margin + 40, yPosition);
+        yPosition += 14;
+      }
+    });
+    yPosition += 6;
+  }
+
   // Rental details
   if (formData.livingSituation === 'rent') {
     addSectionHeader('Rental Details');
@@ -8972,6 +9023,147 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.setTextColor(...colors.darkText);
       yPosition += 6;
     }
+  }
+
+  // Debts section
+  if (formData.hasCreditCardDebt === 'yes' || formData.hasMortgageDebt === 'yes' || formData.hasOtherDebt === 'yes') {
+    addSectionHeader('Debts & Liabilities');
+
+    const ownerLabels: Record<string, string> = {
+      client1: formData.fullName || 'Client 1',
+      client2: formData.spouseName || 'Client 2',
+      joint: 'Joint',
+      other: 'Other',
+    };
+
+    const renderDebtItem = (label: string, index: number, item: Record<string, unknown>, rows: [string, string][]) => {
+      checkPageBreak(40);
+      doc.setFontSize(11);
+      doc.setTextColor(...colors.navyBlue);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${label} ${index + 1}`, margin, yPosition);
+      yPosition += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(...colors.darkText);
+
+      rows.forEach(([fieldLabel, value]) => {
+        if (!value) return;
+        checkPageBreak(6);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${fieldLabel}:`, margin, yPosition);
+        doc.setFont('helvetica', 'normal');
+        const valueLines = doc.splitTextToSize(value, fieldWidth - 70);
+        doc.text(valueLines, margin + 70, yPosition);
+        yPosition += 6;
+      });
+
+      if (item.hasOtherOnLoan === 'yes') {
+        if (item.otherPersonName) {
+          checkPageBreak(6);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Other Person:', margin, yPosition);
+          doc.setFont('helvetica', 'normal');
+          doc.text(item.otherPersonName as string, margin + 70, yPosition);
+          yPosition += 6;
+        }
+        if (item.otherPersonPhone) {
+          checkPageBreak(6);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Other Person Phone:', margin, yPosition);
+          doc.setFont('helvetica', 'normal');
+          doc.text(item.otherPersonPhone as string, margin + 70, yPosition);
+          yPosition += 6;
+        }
+      }
+
+      yPosition += 4;
+    };
+
+    // Credit Card Debt
+    if (formData.hasCreditCardDebt === 'yes') {
+      checkPageBreak(20);
+      doc.setFontSize(12);
+      doc.setTextColor(...colors.navyBlue);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Credit Card Debt', margin, yPosition);
+      yPosition += 8;
+
+      const data = (formData.creditCardDebtData as Array<Record<string, unknown>>) || [];
+      data.forEach((item, index) => {
+        if (!item || Object.keys(item).length === 0) return;
+        const debtType = item.debtType === 'Other'
+          ? `Other (${item.debtTypeOther || ''})`
+          : item.debtType as string || '';
+        renderDebtItem('Credit Card', index, item, [
+          ['Issuer / Company', item.company as string || ''],
+          ['Last Four Digits', item.lastFourDigits as string || ''],
+          ['Approximate Balance', item.balance as string || ''],
+          ['Owner', item.debtOwner ? ownerLabels[item.debtOwner as string] || item.debtOwner as string : ''],
+        ]);
+      });
+    }
+
+    // Mortgage and Property Debt
+    if (formData.hasMortgageDebt === 'yes') {
+      checkPageBreak(20);
+      doc.setFontSize(12);
+      doc.setTextColor(...colors.navyBlue);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Mortgage and Property Debt', margin, yPosition);
+      yPosition += 8;
+
+      const data = (formData.mortgageDebtData as Array<Record<string, unknown>>) || [];
+      data.forEach((item, index) => {
+        if (!item || Object.keys(item).length === 0) return;
+        const debtType = item.debtType === 'Other'
+          ? `Other (${item.debtTypeOther || ''})`
+          : item.debtType as string || '';
+        const itemLabel = item.isPrimaryResidence === true && item.propertyAddress
+          ? `${item.propertyAddress} Debt Information`
+          : `Mortgage / Property Debt ${index + 1}`;
+        renderDebtItem(itemLabel, -1, item, [
+          ['Type', debtType],
+          ['Lender', item.lender as string || ''],
+          ['Property Address', item.propertyAddress as string || ''],
+          ['Approximate Balance', item.balance as string || ''],
+          ['Owner', item.debtOwner ? ownerLabels[item.debtOwner as string] || item.debtOwner as string : ''],
+        ]);
+      });
+    }
+
+    // Other Debts
+    if (formData.hasOtherDebt === 'yes') {
+      checkPageBreak(20);
+      doc.setFontSize(12);
+      doc.setTextColor(...colors.navyBlue);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Other Debts', margin, yPosition);
+      yPosition += 8;
+
+      const data = (formData.otherDebtData as Array<Record<string, unknown>>) || [];
+      data.forEach((item, index) => {
+        if (!item || Object.keys(item).length === 0) return;
+        const debtType = item.debtType === 'Other'
+          ? `Other (${item.debtTypeOther || ''})`
+          : item.debtType as string || '';
+        const rows: [string, string][] = [
+          ['Type', debtType],
+          ['Lender / Creditor', item.lender as string || ''],
+          ['Approximate Balance', item.balance as string || ''],
+          ['Owner', item.debtOwner ? ownerLabels[item.debtOwner as string] || item.debtOwner as string : ''],
+        ];
+        if (item.isSecured === 'yes') {
+          rows.push(['Secured', 'Yes']);
+          rows.push(['Secured By', item.securedBy as string || '']);
+        } else if (item.isSecured === 'no') {
+          rows.push(['Secured', 'No']);
+        }
+        renderDebtItem('Other Debt', index, item, rows);
+      });
+    }
+
+    yPosition += 6;
   }
 
   const fileName = `estate-planning-${formData.fullName?.replace(/\s+/g, '-').toLowerCase() || 'form'}.pdf`;

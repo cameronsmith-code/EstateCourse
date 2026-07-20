@@ -6,7 +6,7 @@ import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprie
 import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
 import PropertyDetails, { PropertyData } from './PropertyDetails';
 import Subsection from './Subsection';
-import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus, Pencil } from 'lucide-react';
 
 type StepFormProps = {
   step: Step;
@@ -82,6 +82,7 @@ export default function StepForm({
   const [validationError, setValidationError] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [openInfoTooltip, setOpenInfoTooltip] = useState<string | null>(null);
+  const [ownAddressEdit, setOwnAddressEdit] = useState(false);
 
   useEffect(() => {
     if (answers['spouseIsPoaPersonalCare'] === 'no') {
@@ -101,7 +102,7 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
-      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional'].forEach(key => {
+      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional', 'fpAdvisor1IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpHasAdditionalAdvisor2', 'fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList', 'fpAdvisor3WorksWith'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -111,14 +112,23 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdditionalAdvisor'] !== 'yes') {
-      if (answers['fpAdditionalAdvisorsData'] !== undefined) {
-        onAnswerChange('fpAdditionalAdvisorsData', undefined);
-      }
-      if (answers['fpAdditionalHasAdditional'] !== undefined) {
-        onAnswerChange('fpAdditionalHasAdditional', undefined);
-      }
+      ['fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpHasAdditionalAdvisor2', 'fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList', 'fpAdvisor3WorksWith'].forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
     }
   }, [answers['fpHasAdditionalAdvisor']]);
+
+  useEffect(() => {
+    if (answers['fpHasAdditionalAdvisor2'] !== 'yes') {
+      ['fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone', 'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services', 'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList', 'fpAdvisor3WorksWith'].forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['fpHasAdditionalAdvisor2']]);
 
   useEffect(() => {
     if (answers['acctHasAccountant'] !== 'yes') {
@@ -222,6 +232,91 @@ export default function StepForm({
       });
     }
   }, [answers['livingSituation']]);
+
+  // Real Estate — prefill primary residence address from About You when ownSameAddress is 'yes'
+  useEffect(() => {
+    if (answers['ownSameAddress'] === 'yes') {
+      const step1 = allAnswers?.get(1) as Record<string, string> | undefined;
+      if (step1) {
+        if (step1.address) onAnswerChange('ownAddress', step1.address);
+        if (step1.city) onAnswerChange('ownCity', step1.city);
+        if (step1.province) onAnswerChange('ownProvince', step1.province);
+        if (step1.postalCode) onAnswerChange('ownPostalCode', step1.postalCode);
+      }
+    } else if (answers['ownSameAddress'] === 'no') {
+      ['ownPropertyCountry', 'ownAddress', 'ownCity', 'ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion', 'ownPostalCode'].forEach(key => {
+        onAnswerChange(key, undefined);
+      });
+    }
+  }, [answers['ownSameAddress']]);
+
+  // Real Estate — clear country-specific own address fields when ownPropertyCountry changes
+  useEffect(() => {
+    const country = answers['ownPropertyCountry'];
+    if (!country) return;
+    // Clear fields not relevant to the selected country
+    const allCountryFields = ['ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion'];
+    const keepByCountry: Record<string, string[]> = {
+      canada: ['ownProvince'],
+      united_states: ['ownState'],
+      other: ['ownCountryOther', 'ownProvinceRegion'],
+    };
+    const keep = keepByCountry[country] || [];
+    allCountryFields.filter(k => !keep.includes(k)).forEach(key => {
+      if (answers[key] !== undefined) onAnswerChange(key, undefined);
+    });
+  }, [answers['ownPropertyCountry']]);
+
+  // Real Estate — sync primary residence mortgage into Step 10 Mortgage subsection
+  useEffect(() => {
+    if (answers['ownHasMortgage'] !== 'yes') return;
+    const step1 = allAnswers?.get(1) as Record<string, string> | undefined;
+    const ownRegion = (answers['ownProvince'] as string) || (answers['ownState'] as string) || (answers['ownProvinceRegion'] as string) || (step1?.province || '');
+    const ownCity = (answers['ownCity'] as string) || (step1?.city || '');
+    const ownAddress = (answers['ownAddress'] as string) || (step1?.address || '');
+    const fullAddress = [ownAddress, ownCity, ownRegion].filter(Boolean).join(', ');
+    if (!fullAddress) return;
+    const existingData = (answers['mortgageDebtData'] as Array<Record<string, unknown>>) || [];
+    // Check if there's already a primary residence debt entry
+    const primaryIndex = existingData.findIndex(item => item.isPrimaryResidence === true);
+    const primaryEntry: Record<string, unknown> = {
+      debtType: 'Traditional Mortgage',
+      propertyAddress: fullAddress,
+      isPrimaryResidence: true,
+    };
+    if (primaryIndex >= 0) {
+      // Update existing primary residence entry address
+      const updated = [...existingData];
+      updated[primaryIndex] = { ...updated[primaryIndex], propertyAddress: fullAddress, isPrimaryResidence: true };
+      onAnswerChange('mortgageDebtData', updated);
+    } else {
+      // Prepend primary residence entry and ensure count is at least 1
+      const updated = [primaryEntry, ...existingData];
+      onAnswerChange('mortgageDebtData', updated);
+      const currentCount = parseInt(answers['mortgageDebtCount'] as string) || 0;
+      if (currentCount < updated.length) {
+        onAnswerChange('mortgageDebtCount', String(updated.length));
+      }
+      if (answers['hasMortgageDebt'] !== 'yes') {
+        onAnswerChange('hasMortgageDebt', 'yes');
+      }
+    }
+  }, [answers['ownHasMortgage'], answers['ownAddress'], answers['ownCity'], answers['ownProvince'], answers['ownState'], answers['ownProvinceRegion'], answers['ownCountryOther']]);
+
+  // Real Estate — remove primary residence debt entry when ownHasMortgage is no longer 'yes'
+  useEffect(() => {
+    if (answers['ownHasMortgage'] === 'yes') return;
+    const existingData = (answers['mortgageDebtData'] as Array<Record<string, unknown>>) || [];
+    const hasPrimary = existingData.some(item => item.isPrimaryResidence === true);
+    if (!hasPrimary) return;
+    const updated = existingData.filter(item => item.isPrimaryResidence !== true);
+    onAnswerChange('mortgageDebtData', updated);
+    const newCount = updated.length;
+    onAnswerChange('mortgageDebtCount', String(newCount));
+    if (newCount === 0 && answers['hasMortgageDebt'] === 'yes') {
+      onAnswerChange('hasMortgageDebt', undefined);
+    }
+  }, [answers['ownHasMortgage']]);
 
   // Real Estate — prefill rental address from About You when rentSameAddress is 'yes'
   useEffect(() => {
@@ -5499,6 +5594,13 @@ export default function StepForm({
               'fpHasAdvisor', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone',
               'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services',
               'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpHasAdditionalAdvisor',
+              'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone',
+              'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services',
+              'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpHasAdditionalAdvisor2',
+              'fpAdvisor3Firm', 'fpAdvisor3Name', 'fpAdvisor3Phone',
+              'fpAdvisor3Email', 'fpAdvisor3Website', 'fpAdvisor3Services',
+              'fpAdvisor3Duration', 'fpAdvisor3IncludeInContactList',
+              'fpAdvisor1WorksWith', 'fpAdvisor2WorksWith', 'fpAdvisor3WorksWith',
             ]);
             const acctKeys = new Set([
               'acctHasAccountant', 'acctAdvisor1Firm', 'acctAdvisor1Name', 'acctAdvisor1Phone',
@@ -5519,18 +5621,18 @@ export default function StepForm({
               'insHasAdditional',
             ]);
             const fpHealthKeys = new Set([
-              'fp_health_0_name', 'fp_health_0_clinic', 'fp_health_0_phone', 'fp_health_0_has_additional',
-              'fp_health_1_name', 'fp_health_1_clinic', 'fp_health_1_phone', 'fp_health_1_has_additional',
-              'fp_health_2_name', 'fp_health_2_clinic', 'fp_health_2_phone',
+              'fp_health_0_name', 'fp_health_0_clinic', 'fp_health_0_phone', 'fp_health_0_has_additional', 'fp_health_0_patients',
+              'fp_health_1_name', 'fp_health_1_clinic', 'fp_health_1_phone', 'fp_health_1_has_additional', 'fp_health_1_patients',
+              'fp_health_2_name', 'fp_health_2_clinic', 'fp_health_2_phone', 'fp_health_2_patients',
             ]);
             const spHealthKeys = new Set([
-              'sp_health_has', 'sp_health_0_name', 'sp_health_0_specialty', 'sp_health_0_phone',
-              'sp_health_0_has_additional', 'sp_health_1_name', 'sp_health_1_specialty', 'sp_health_1_phone',
-              'sp_health_1_has_additional', 'sp_health_2_name', 'sp_health_2_specialty', 'sp_health_2_phone',
+              'sp_health_has', 'sp_health_0_name', 'sp_health_0_specialty', 'sp_health_0_phone', 'sp_health_0_patients',
+              'sp_health_0_has_additional', 'sp_health_1_name', 'sp_health_1_specialty', 'sp_health_1_phone', 'sp_health_1_patients',
+              'sp_health_1_has_additional', 'sp_health_2_name', 'sp_health_2_specialty', 'sp_health_2_phone', 'sp_health_2_patients',
             ]);
             const phHealthKeys = new Set([
-              'ph_health_0_name', 'ph_health_0_pharmacy', 'ph_health_0_phone', 'ph_health_0_has_additional',
-              'ph_health_1_name', 'ph_health_1_pharmacy', 'ph_health_1_phone',
+              'ph_health_0_name', 'ph_health_0_pharmacy', 'ph_health_0_phone', 'ph_health_0_has_additional', 'ph_health_0_of',
+              'ph_health_1_name', 'ph_health_1_pharmacy', 'ph_health_1_phone', 'ph_health_1_of',
             ]);
 
             const fpQuestions = step.questions.filter(q => fpKeys.has(q.key));
@@ -5541,10 +5643,48 @@ export default function StepForm({
             const spHealthQuestions = step.questions.filter(q => spHealthKeys.has(q.key));
             const phHealthQuestions = step.questions.filter(q => phHealthKeys.has(q.key));
 
+            const cameronSmithChecked = answers['fpAdvisor1IsCameronSmith'] === 'yes';
+
+            const handleCameronSmithToggle = () => {
+              if (!cameronSmithChecked) {
+                onAnswerChange('fpAdvisor1IsCameronSmith', 'yes');
+                onAnswerChange('fpAdvisor1Firm', 'Clarify Wealth');
+                onAnswerChange('fpAdvisor1Name', 'Cameron Smith');
+                onAnswerChange('fpAdvisor1Phone', '647.448.5963');
+                onAnswerChange('fpAdvisor1Email', 'Cameron.smith@ipcsecurities.com');
+                onAnswerChange('fpAdvisor1Website', 'www.clarifywealth.ca');
+              } else {
+                onAnswerChange('fpAdvisor1IsCameronSmith', undefined);
+                onAnswerChange('fpAdvisor1Firm', '');
+                onAnswerChange('fpAdvisor1Name', '');
+                onAnswerChange('fpAdvisor1Phone', '');
+                onAnswerChange('fpAdvisor1Email', '');
+                onAnswerChange('fpAdvisor1Website', '');
+              }
+            };
+
             return (
               <>
                 <h4 className="text-base font-semibold text-blue-400 mt-4 mb-1">Financial Planner / Investment Advisor</h4>
-                {fpQuestions.map(renderQuestion)}
+                {fpQuestions.map(q => {
+                  if (q.key === 'fpAdvisor1Firm' && answers['fpHasAdvisor'] === 'yes') {
+                    return (
+                      <React.Fragment key="fp-cameron-block">
+                        <label className="flex items-center gap-3 px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors mb-3">
+                          <input
+                            type="checkbox"
+                            checked={cameronSmithChecked}
+                            onChange={handleCameronSmithToggle}
+                            className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                          />
+                          <span className="text-sm text-gray-200">Is it Cameron Smith from Clarify Wealth?</span>
+                        </label>
+                        {renderQuestion(q)}
+                      </React.Fragment>
+                    );
+                  }
+                  return renderQuestion(q);
+                })}
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Accountant (CPA)</h4>
                 {acctQuestions.map(renderQuestion)}
@@ -10427,7 +10567,10 @@ export default function StepForm({
               'retLeaseRenewalDate', 'retLeaseStorage', 'retAutoPayments',
               'retSecurityDeposit', 'retParkingStorage', 'retKeyLocation', 'retNotifyName',
             ]);
-            const livingSituationQuestions = globalQuestions.filter(q => !rentQuestionKeys.has(q.key) && !retQuestionKeys.has(q.key) && q.key !== 'hasRealEstate' && q.key !== 'propertyCount' && q.key !== 'propertyTypes');
+            const ownQuestionKeys = new Set([
+              'ownSameAddress', 'ownPropertyCountry', 'ownAddress', 'ownCity', 'ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion', 'ownPostalCode', 'ownHasMortgage',
+            ]);
+            const livingSituationQuestions = globalQuestions.filter(q => !rentQuestionKeys.has(q.key) && !retQuestionKeys.has(q.key) && !ownQuestionKeys.has(q.key) && q.key !== 'hasRealEstate' && q.key !== 'propertyCount' && q.key !== 'propertyTypes');
             const rentQuestions = globalQuestions.filter(q => rentQuestionKeys.has(q.key));
             const retQuestions = globalQuestions.filter(q => retQuestionKeys.has(q.key));
             const ownershipGateQuestions = globalQuestions.filter(q => q.key === 'hasRealEstate' || q.key === 'propertyCount' || q.key === 'propertyTypes');
@@ -10475,6 +10618,323 @@ export default function StepForm({
                   </>
                 )}
 
+                {/* Own — primary residence address confirmation */}
+                {answers['livingSituation'] === 'own' && (() => {
+                  const ownQuestions = globalQuestions.filter(q =>
+                    ['ownSameAddress', 'ownPropertyCountry', 'ownAddress', 'ownCity', 'ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion', 'ownPostalCode', 'ownHasMortgage'].includes(q.key)
+                  );
+                  const ownSameAddr = answers['ownSameAddress'];
+                  const showSummary = ownSameAddr === 'yes' && !ownAddressEdit;
+                  const ownAddress = (answers['ownAddress'] as string) || '';
+                  const ownCity = (answers['ownCity'] as string) || '';
+                  const ownProvince = (answers['ownProvince'] as string) || '';
+                  const ownState = (answers['ownState'] as string) || '';
+                  const ownRegion = ownProvince || ownState || (answers['ownProvinceRegion'] as string) || '';
+                  const ownPostal = (answers['ownPostalCode'] as string) || '';
+                  const ownCountry = answers['ownPropertyCountry'] === 'canada' ? 'Canada'
+                    : answers['ownPropertyCountry'] === 'united_states' ? 'United States'
+                    : (answers['ownCountryOther'] as string) || '';
+
+                  return (
+                    <>
+                      <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Your Primary Residence</h4>
+                      {ownQuestions.filter(q => q.key === 'ownSameAddress').map(renderQuestion)}
+
+                      {showSummary ? (
+                        <div className="mt-4 p-4 bg-gray-700 rounded-lg border border-gray-600">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-semibold text-blue-400">Primary Residence</span>
+                            <button
+                              type="button"
+                              onClick={() => setOwnAddressEdit(true)}
+                              className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                            >
+                              <Pencil className="w-3 h-3" />
+                              Edit Address
+                            </button>
+                          </div>
+                          <div className="text-white text-sm space-y-0.5">
+                            <p>{ownAddress}</p>
+                            <p>{ownCity}{ownRegion ? `${ownCity ? ', ' : ''}${ownRegion}` : ''} {ownPostal}</p>
+                            {ownCountry && <p>{ownCountry}</p>}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-4 space-y-4">
+                          {ownAddressEdit && ownSameAddr === 'yes' && (
+                            <button
+                              type="button"
+                              onClick={() => setOwnAddressEdit(false)}
+                              className="text-xs text-gray-400 hover:text-gray-300 transition-colors"
+                            >
+                              Cancel editing
+                            </button>
+                          )}
+                          {ownQuestions.filter(q => q.key !== 'ownSameAddress' && q.key !== 'ownHasMortgage').map(renderQuestion)}
+                        </div>
+                      )}
+                      {/* Mortgage question — shown after address is entered/confirmed */}
+                      {ownQuestions.filter(q => q.key === 'ownHasMortgage').map(q => {
+                        const displayLabel = typeof q.label === 'function' ? q.label(allAnswers || new Map()) : q.label;
+                        return (
+                          <FormField
+                            key={q.key}
+                            question={{ ...q, label: displayLabel, condition: undefined }}
+                            value={answers[q.key]}
+                            onChange={(value) => onAnswerChange(q.key, value)}
+                            answers={allAnswers}
+                          />
+                        );
+                      })}
+
+                      {/* Ownership questions for primary residence */}
+                      {answers['ownHasMortgage'] && (() => {
+                        const basicAnswers = allAnswers?.get(1) || {};
+                        const allFormData = Object.fromEntries(
+                          Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                            Object.entries(stepAnswers)
+                          )
+                        );
+                        const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
+                        const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
+                        const hasSpouseStep9 = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law') && !!client2Name;
+                        const ownerOptions: Array<{ value: string; label: string }> = [
+                          { value: client1Name, label: client1Name },
+                        ];
+                        if (hasSpouseStep9) {
+                          ownerOptions.push({ value: client2Name, label: client2Name });
+                        }
+                        const step1Children = (basicAnswers['childrenData'] as Array<Record<string, string>>) || [];
+                        step1Children.forEach((child) => {
+                          const childName = child?.name || child?.nickname;
+                          if (childName) ownerOptions.push({ value: childName, label: childName });
+                        });
+                        const step1Trusts: string[] = [];
+                        for (let i = 1; i <= 4; i++) {
+                          const tn = allFormData[`trust${i > 1 ? i : ''}LegalName`];
+                          if (tn) step1Trusts.push(tn as string);
+                        }
+                        if (allFormData['trustLegalName']) step1Trusts.push(allFormData['trustLegalName'] as string);
+                        step1Trusts.forEach(tn => ownerOptions.push({ value: tn, label: tn }));
+                        const step1Corps = (allFormData['corporationsData'] as Array<Record<string, string>>) || [];
+                        step1Corps.forEach((corp) => {
+                          if (corp?.legalName) ownerOptions.push({ value: corp.legalName, label: corp.legalName });
+                        });
+                        ownerOptions.push({ value: 'other', label: 'Other' });
+
+                        const selectedOwners: string[] = (answers['ownPropertyOwners'] as string[]) || [];
+                        type OtherOwner = { name: string; relationship: string; hasMore: 'yes' | 'no' | '' };
+                        const otherOwners: OtherOwner[] = (answers['ownOtherOwners'] as OtherOwner[]) || [];
+
+                        const toggleOwner = (val: string, checked: boolean) => {
+                          let updated: string[];
+                          if (checked) {
+                            updated = [...selectedOwners, val];
+                          } else {
+                            updated = selectedOwners.filter(o => o !== val);
+                          }
+                          if (val === 'other') {
+                            if (checked && otherOwners.length === 0) {
+                              onAnswerChange('ownOtherOwners', [{ name: '', relationship: '', hasMore: '' }]);
+                            } else if (!checked) {
+                              onAnswerChange('ownOtherOwners', []);
+                              onAnswerChange('ownOwnershipType', '');
+                              onAnswerChange('ownOwnershipPercentages', {});
+                            }
+                          }
+                          onAnswerChange('ownPropertyOwners', updated);
+                        };
+
+                        const updateOtherOwner = (i: number, field: keyof OtherOwner, value: string) => {
+                          const updated = [...otherOwners];
+                          if (!updated[i]) updated[i] = { name: '', relationship: '', hasMore: '' };
+                          updated[i] = { ...updated[i], [field]: value };
+                          onAnswerChange('ownOtherOwners', updated);
+                        };
+
+                        const addOtherOwner = () => {
+                          onAnswerChange('ownOtherOwners', [...otherOwners, { name: '', relationship: '', hasMore: '' }]);
+                        };
+
+                        const allOwnerNames: string[] = [
+                          ...selectedOwners.filter(o => o !== 'other'),
+                          ...otherOwners.filter(o => o.name?.trim()).map(o => o.name),
+                        ];
+
+                        const ownershipType = (answers['ownOwnershipType'] as string) || '';
+                        const ownershipPercentages = (answers['ownOwnershipPercentages'] as Record<string, string>) || {};
+                        const totalPct = allOwnerNames.reduce((sum, name) => {
+                          const pct = parseFloat(ownershipPercentages[name] || '0');
+                          return sum + (isNaN(pct) ? 0 : pct);
+                        }, 0);
+
+                        const handlePctChange = (name: string, value: string) => {
+                          onAnswerChange('ownOwnershipPercentages', { ...ownershipPercentages, [name]: value });
+                        };
+
+                        const otherComplete = !selectedOwners.includes('other') ||
+                          otherOwners.every(o => o.name?.trim() && o.hasMore === 'no');
+                        const showJointQ = allOwnerNames.length >= 2 && otherComplete;
+
+                        return (
+                          <div className="mt-6 space-y-5">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Who owns the property? <span className="text-gray-500 font-normal">(Select all that apply)</span>
+                              </label>
+                              <div className="space-y-2">
+                                {ownerOptions.map(opt => (
+                                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedOwners.includes(opt.value)}
+                                      onChange={(e) => toggleOwner(opt.value, e.target.checked)}
+                                      className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                                    />
+                                    <span className="text-gray-300">{opt.label}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+
+                            {selectedOwners.includes('other') && (
+                              <div className="pl-4 border-l-2 border-blue-500 space-y-4">
+                                {otherOwners.map((oo, oi) => (
+                                  <div key={oi} className="space-y-3 p-4 bg-gray-700 rounded-lg border border-gray-600">
+                                    <p className="text-sm font-medium text-gray-300">Other owner {oi + 1}:</p>
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                                      <input
+                                        type="text"
+                                        value={oo.name}
+                                        onChange={(e) => updateOtherOwner(oi, 'name', e.target.value)}
+                                        placeholder="Full name"
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                                        Relationship to {hasSpouseStep9 ? `${client1Name} and/or ${client2Name}` : client1Name}
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={oo.relationship}
+                                        onChange={(e) => updateOtherOwner(oi, 'relationship', e.target.value)}
+                                        placeholder="e.g., Son, Daughter, Friend"
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    {oo.name?.trim() && (
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Are there additional parties with ownership of this property?
+                                        </label>
+                                        <div className="flex gap-4">
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`own-has-more-${oi}`}
+                                              value="yes"
+                                              checked={oo.hasMore === 'yes'}
+                                              onChange={() => {
+                                                updateOtherOwner(oi, 'hasMore', 'yes');
+                                                addOtherOwner();
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Yes</span>
+                                          </label>
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`own-has-more-${oi}`}
+                                              value="no"
+                                              checked={oo.hasMore === 'no'}
+                                              onChange={() => updateOtherOwner(oi, 'hasMore', 'no')}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">No</span>
+                                          </label>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {showJointQ && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Is it Joint-with-Rights-of-Survivorship or Joint-Tenants-in-Common?
+                                </label>
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name="own-ownership-type"
+                                      value="joint_survivorship"
+                                      checked={ownershipType === 'joint_survivorship'}
+                                      onChange={(e) => onAnswerChange('ownOwnershipType', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">Joint with Rights of Survivorship</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name="own-ownership-type"
+                                      value="joint_tenants_in_common"
+                                      checked={ownershipType === 'joint_tenants_in_common'}
+                                      onChange={(e) => onAnswerChange('ownOwnershipType', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">Joint Tenants in Common</span>
+                                  </label>
+                                </div>
+                              </div>
+                            )}
+
+                            {showJointQ && ownershipType && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Enter the ownership percentage for each party (must add to 100%):
+                                </label>
+                                <div className="space-y-3">
+                                  {allOwnerNames.map((name) => (
+                                    <div key={name} className="flex items-center gap-3">
+                                      <span className="text-white text-sm flex-1">{name}</span>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={ownershipPercentages[name] || ''}
+                                        onChange={(e) => handlePctChange(name, e.target.value)}
+                                        placeholder="0"
+                                        className="w-20 px-3 py-1 bg-gray-700 border border-gray-600 rounded-lg text-white text-right"
+                                      />
+                                      <span className="text-gray-400 text-sm">%</span>
+                                    </div>
+                                  ))}
+                                  <div className="flex items-center gap-2 pt-2 border-t border-gray-700">
+                                    <span className="text-sm font-medium text-gray-300">Total:</span>
+                                    <span className={`text-sm font-bold ${totalPct === 100 ? 'text-green-400' : 'text-red-400'}`}>
+                                      {totalPct}%
+                                    </span>
+                                    {totalPct !== 100 && totalPct > 0 && (
+                                      <span className="text-xs text-red-400 ml-2">Must add up to 100%</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </>
+                  );
+                })()}
+
                 {/* Additional Properties subheading */}
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Additional Properties</h4>
 
@@ -10484,7 +10944,7 @@ export default function StepForm({
                 {/* Property types and inline property forms */}
                 {answers['hasRealEstate'] === 'yes' && (() => {
                   const PROPERTY_TYPES = [
-                    'Principal residence', 'Cottage', 'Vacation property', 'Rental property',
+                    'Cottage', 'Vacation property', 'Rental property',
                     'Commercial property', 'Vacant land', 'Farm', 'Condo', 'Foreign property', 'Other',
                   ];
                   const selectedTypes = (answers['propertyTypes'] as string[]) || [];
@@ -10590,6 +11050,332 @@ export default function StepForm({
                     </div>
                   );
                 })()}
+              </>
+            );
+          })()}
+
+          {step.id === 10 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
+            const maritalStatus = basicAnswers['maritalStatus'] as string;
+            const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+            const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
+
+            const allFormData = Object.fromEntries(
+              Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                Object.entries(stepAnswers)
+              )
+            );
+
+            const isVisible = (question: typeof step.questions[0]) => {
+              if (!question.condition) return true;
+              return question.condition(allFormData);
+            };
+
+            const renderQuestion = (question: typeof step.questions[0]) => {
+              if (!isVisible(question)) return null;
+              const displayLabel = typeof question.label === 'function'
+                ? question.label(allAnswers || new Map())
+                : question.label;
+              return (
+                <FormField
+                  key={question.key}
+                  question={{ ...question, label: displayLabel }}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                  answers={allAnswers}
+                />
+              );
+            };
+
+            const ownerOptions = [
+              { value: 'client1', label: client1Name },
+              ...(hasSpouse ? [{ value: 'client2', label: client2Name }] : []),
+              { value: 'joint', label: 'Joint' },
+              { value: 'other', label: 'Other' },
+            ];
+
+            const renderOwnerRadios = (
+              name: string,
+              value: string | undefined,
+              onChange: (v: string) => void,
+            ) => (
+              <div className="space-y-2">
+                {ownerOptions.map(opt => (
+                  <label key={opt.value} className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name={name}
+                      value={opt.value}
+                      checked={value === opt.value}
+                      onChange={() => onChange(opt.value)}
+                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="text-white">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            );
+
+            const renderYesNo = (
+              name: string,
+              value: string | undefined,
+              onChange: (v: string) => void,
+            ) => (
+              <div className="space-y-2">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input type="radio" name={name} value="yes" checked={value === 'yes'}
+                    onChange={() => onChange('yes')}
+                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2" />
+                  <span className="text-white">Yes</span>
+                </label>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input type="radio" name={name} value="no" checked={value === 'no'}
+                    onChange={() => onChange('no')}
+                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2" />
+                  <span className="text-white">No</span>
+                </label>
+              </div>
+            );
+
+            const renderTextField = (
+              value: string | undefined,
+              onChange: (v: string) => void,
+              placeholder?: string,
+              maxLength?: number,
+            ) => (
+              <input
+                type="text"
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                maxLength={maxLength}
+                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            );
+
+            const renderOtherPersonFields = (
+              prefix: string,
+              item: Record<string, unknown>,
+              handleFieldChange: (field: string, value: unknown) => void,
+            ) => {
+              if (item.hasOtherOnLoan !== 'yes') return null;
+              return (
+                <div className="pl-4 border-l-2 border-blue-500/40 space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Other Person Name:</label>
+                    {renderTextField(
+                      item.otherPersonName as string,
+                      (v) => handleFieldChange('otherPersonName', v),
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Other Person Phone:</label>
+                    {renderTextField(
+                      item.otherPersonPhone as string,
+                      (v) => handleFieldChange('otherPersonPhone', v),
+                    )}
+                  </div>
+                </div>
+              );
+            };
+
+            const makeDynamicRenderer = (
+              dataKey: string,
+              countKey: string,
+              itemLabel: string,
+              fields: (item: Record<string, unknown>, handleFieldChange: (field: string, value: unknown) => void, index: number) => React.ReactNode,
+            ) => {
+              const count = parseInt(answers[countKey] as string) || 0;
+              if (count === 0) return null;
+              const data = (answers[dataKey] as Array<Record<string, unknown>>) || [];
+
+              const handleFieldChange = (index: number, field: string, value: unknown) => {
+                const updated = [...data];
+                if (!updated[index]) updated[index] = {};
+                updated[index][field] = value;
+                onAnswerChange(dataKey, updated);
+              };
+
+              return (
+                <div className="space-y-6 mt-6">
+                  {Array.from({ length: count }).map((_, index) => {
+                    const item = data[index] || {};
+                    const isPrimaryResidence = item.isPrimaryResidence === true;
+                    const title = isPrimaryResidence && item.propertyAddress
+                      ? `${item.propertyAddress} Debt Information`
+                      : `${itemLabel} ${index + 1}`;
+                    return (
+                      <div key={index} className={`p-4 rounded-lg space-y-4 ${isPrimaryResidence ? 'bg-blue-900/30 border border-blue-700' : 'bg-gray-700'}`}>
+                        <h4 className="text-sm font-semibold text-blue-300">{title}</h4>
+                        {fields(item, (field, value) => handleFieldChange(index, field, value), index)}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            };
+
+            // --- Subsection 1: Credit Card Debt ---
+            const renderCreditCardDebt = () =>
+              makeDynamicRenderer('creditCardDebtData', 'creditCardDebtCount', 'Credit Card', (item, hfc) => (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Card Issuer / Company:</label>
+                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Visa, Mastercard, Amex, TD, RBC</p>
+                    {renderTextField(item.company as string, (v) => hfc('company', v))}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Last Four Digits:</label>
+                    {renderTextField(item.lastFourDigits as string, (v) => hfc('lastFourDigits', v), 'e.g., 1234', 4)}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Approximate Balance:</label>
+                    {renderTextField(item.balance as string, (v) => hfc('balance', v), 'e.g., $5,000')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Who owns this debt?</label>
+                    {renderOwnerRadios('ccdOwner', item.debtOwner as string, (v) => hfc('debtOwner', v))}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Is anyone else on this account?</label>
+                    {renderYesNo('ccdHasOther', item.hasOtherOnLoan as string, (v) => hfc('hasOtherOnLoan', v))}
+                  </div>
+                  {renderOtherPersonFields('ccd', item, hfc)}
+                </>
+              ));
+
+            // --- Subsection 2: Mortgage and Property Debt ---
+            const MORTGAGE_TYPES = ['Traditional Mortgage', 'Home Equity Line of Credit (HELOC)', 'Private Mortgage', 'Other'];
+            const renderMortgageDebt = () =>
+              makeDynamicRenderer('mortgageDebtData', 'mortgageDebtCount', 'Mortgage / Property Debt', (item, hfc) => (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">What type of debt is on this property?</label>
+                    <select
+                      value={(item.debtType as string) || ''}
+                      onChange={(e) => hfc('debtType', e.target.value)}
+                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select...</option>
+                      {MORTGAGE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    {item.debtType === 'Other' && (
+                      <div className="mt-2">
+                        {renderTextField(item.debtTypeOther as string, (v) => hfc('debtTypeOther', v), 'Please specify')}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Lender / Financial Institution:</label>
+                    {renderTextField(item.lender as string, (v) => hfc('lender', v), 'e.g., RBC, TD, BMO')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Property Address:</label>
+                    {item.isPrimaryResidence === true ? (
+                      <input
+                        type="text"
+                        value={(item.propertyAddress as string) || ''}
+                        readOnly
+                        className="w-full px-4 py-2 bg-gray-800 border border-gray-600 text-gray-300 rounded-lg cursor-not-allowed"
+                      />
+                    ) : (
+                      renderTextField(item.propertyAddress as string, (v) => hfc('propertyAddress', v), 'e.g., 123 Main St, Toronto, ON')
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Approximate Balance:</label>
+                    {renderTextField(item.balance as string, (v) => hfc('balance', v), 'e.g., $350,000')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Who owns this debt?</label>
+                    {renderOwnerRadios('mdOwner', item.debtOwner as string, (v) => hfc('debtOwner', v))}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Is anyone else on this loan?</label>
+                    {renderYesNo('mdHasOther', item.hasOtherOnLoan as string, (v) => hfc('hasOtherOnLoan', v))}
+                  </div>
+                  {renderOtherPersonFields('md', item, hfc)}
+                </>
+              ));
+
+            // --- Subsection 3: Other Debts ---
+            const OTHER_DEBT_TYPES = ['Personal Loan', 'Car Loan', 'Student Loan', 'Line of Credit', 'Tax Debt', 'Business Loan', 'Other'];
+            const renderOtherDebt = () =>
+              makeDynamicRenderer('otherDebtData', 'otherDebtCount', 'Other Debt', (item, hfc) => (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Type of Debt:</label>
+                    <select
+                      value={(item.debtType as string) || ''}
+                      onChange={(e) => hfc('debtType', e.target.value)}
+                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select...</option>
+                      {OTHER_DEBT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    {item.debtType === 'Other' && (
+                      <div className="mt-2">
+                        {renderTextField(item.debtTypeOther as string, (v) => hfc('debtTypeOther', v), 'Please specify')}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Lender / Creditor:</label>
+                    {renderTextField(item.lender as string, (v) => hfc('lender', v), 'e.g., Bank, dealership, CRA')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Approximate Balance:</label>
+                    {renderTextField(item.balance as string, (v) => hfc('balance', v), 'e.g., $15,000')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Who owns this debt?</label>
+                    {renderOwnerRadios('odOwner', item.debtOwner as string, (v) => hfc('debtOwner', v))}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Is anyone else on this loan?</label>
+                    {renderYesNo('odHasOther', item.hasOtherOnLoan as string, (v) => hfc('hasOtherOnLoan', v))}
+                  </div>
+                  {renderOtherPersonFields('od', item, hfc)}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Is this debt secured?</label>
+                    {renderYesNo('odSecured', item.isSecured as string, (v) => hfc('isSecured', v))}
+                  </div>
+                  {item.isSecured === 'yes' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Secured by:</label>
+                      <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Vehicle, Investments, Equipment</p>
+                      {renderTextField(item.securedBy as string, (v) => hfc('securedBy', v))}
+                    </div>
+                  )}
+                </>
+              ));
+
+            return (
+              <>
+                {/* Subsection 1: Credit Card Debt */}
+                <div className="space-y-4">
+                  <h3 className="text-base font-semibold text-blue-400">Credit Card Debt</h3>
+                  {step.questions.filter(q => q.key === 'hasCreditCardDebt').map(renderQuestion)}
+                  {answers['hasCreditCardDebt'] === 'yes' && step.questions.filter(q => q.key === 'creditCardDebtCount').map(renderQuestion)}
+                  {answers['hasCreditCardDebt'] === 'yes' && renderCreditCardDebt()}
+                </div>
+
+                {/* Subsection 2: Mortgage and Property Debt */}
+                <div className="space-y-4 mt-8">
+                  <h3 className="text-base font-semibold text-blue-400">Mortgage and Property Debt</h3>
+                  {step.questions.filter(q => q.key === 'hasMortgageDebt').map(renderQuestion)}
+                  {answers['hasMortgageDebt'] === 'yes' && step.questions.filter(q => q.key === 'mortgageDebtCount').map(renderQuestion)}
+                  {answers['hasMortgageDebt'] === 'yes' && renderMortgageDebt()}
+                </div>
+
+                {/* Subsection 3: Other Debts */}
+                <div className="space-y-4 mt-8">
+                  <h3 className="text-base font-semibold text-blue-400">Other Debts</h3>
+                  {step.questions.filter(q => q.key === 'hasOtherDebt').map(renderQuestion)}
+                  {answers['hasOtherDebt'] === 'yes' && step.questions.filter(q => q.key === 'otherDebtCount').map(renderQuestion)}
+                  {answers['hasOtherDebt'] === 'yes' && renderOtherDebt()}
+                </div>
               </>
             );
           })()}

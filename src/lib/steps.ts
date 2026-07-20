@@ -1862,6 +1862,62 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
+        key: 'ownSameAddress',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const step1 = answers.get(1) as Record<string, string> | undefined;
+          const addr = step1?.address || '';
+          const shortAddr = addr.split(',')[0] || addr;
+          return `Is this your current home address? (Is this the same address you entered earlier in the "About You" section${shortAddr ? ` — ${shortAddr}` : ''}?)`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.livingSituation === 'own',
+      },
+      {
+        key: 'ownAddress',
+        label: 'Property Address',
+        type: 'text',
+        placeholder: 'Enter street address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress !== 'yes',
+      },
+      {
+        key: 'ownCity',
+        label: 'City',
+        type: 'text',
+        placeholder: 'Enter city',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress !== 'yes',
+      },
+      {
+        key: 'ownProvince',
+        label: 'Province/State',
+        type: 'text',
+        placeholder: 'Enter province or state',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress !== 'yes',
+      },
+      {
+        key: 'ownPostalCode',
+        label: 'Postal/ZIP Code',
+        type: 'text',
+        placeholder: 'Enter postal or ZIP code',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress !== 'yes',
+      },
+      {
+        key: 'ownCountry',
+        label: 'Country',
+        type: 'text',
+        placeholder: 'Enter country',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.livingSituation === 'own' && formData.ownSameAddress !== 'yes',
+      },
+      {
         key: 'rentLandlordName',
         label: 'Landlord / Company Name',
         type: 'text',

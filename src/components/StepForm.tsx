@@ -6,7 +6,7 @@ import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprie
 import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
 import PropertyDetails, { PropertyData } from './PropertyDetails';
 import Subsection from './Subsection';
-import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus, Pencil } from 'lucide-react';
 
 type StepFormProps = {
   step: Step;
@@ -82,6 +82,7 @@ export default function StepForm({
   const [validationError, setValidationError] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [openInfoTooltip, setOpenInfoTooltip] = useState<string | null>(null);
+  const [ownAddressEdit, setOwnAddressEdit] = useState(false);
 
   useEffect(() => {
     if (answers['spouseIsPoaPersonalCare'] === 'no') {
@@ -231,6 +232,24 @@ export default function StepForm({
       });
     }
   }, [answers['livingSituation']]);
+
+  // Real Estate — prefill primary residence address from About You when ownSameAddress is 'yes'
+  useEffect(() => {
+    if (answers['ownSameAddress'] === 'yes') {
+      const step1 = allAnswers?.get(1) as Record<string, string> | undefined;
+      if (step1) {
+        if (step1.address) onAnswerChange('ownAddress', step1.address);
+        if (step1.city) onAnswerChange('ownCity', step1.city);
+        if (step1.province) onAnswerChange('ownProvince', step1.province);
+        if (step1.postalCode) onAnswerChange('ownPostalCode', step1.postalCode);
+        onAnswerChange('ownCountry', 'Canada');
+      }
+    } else if (answers['ownSameAddress'] === 'no') {
+      ['ownAddress', 'ownCity', 'ownProvince', 'ownPostalCode', 'ownCountry'].forEach(key => {
+        onAnswerChange(key, undefined);
+      });
+    }
+  }, [answers['ownSameAddress']]);
 
   // Real Estate — prefill rental address from About You when rentSameAddress is 'yes'
   useEffect(() => {
@@ -10481,7 +10500,10 @@ export default function StepForm({
               'retLeaseRenewalDate', 'retLeaseStorage', 'retAutoPayments',
               'retSecurityDeposit', 'retParkingStorage', 'retKeyLocation', 'retNotifyName',
             ]);
-            const livingSituationQuestions = globalQuestions.filter(q => !rentQuestionKeys.has(q.key) && !retQuestionKeys.has(q.key) && q.key !== 'hasRealEstate' && q.key !== 'propertyCount' && q.key !== 'propertyTypes');
+            const ownQuestionKeys = new Set([
+              'ownSameAddress', 'ownAddress', 'ownCity', 'ownProvince', 'ownPostalCode', 'ownCountry',
+            ]);
+            const livingSituationQuestions = globalQuestions.filter(q => !rentQuestionKeys.has(q.key) && !retQuestionKeys.has(q.key) && !ownQuestionKeys.has(q.key) && q.key !== 'hasRealEstate' && q.key !== 'propertyCount' && q.key !== 'propertyTypes');
             const rentQuestions = globalQuestions.filter(q => rentQuestionKeys.has(q.key));
             const retQuestions = globalQuestions.filter(q => retQuestionKeys.has(q.key));
             const ownershipGateQuestions = globalQuestions.filter(q => q.key === 'hasRealEstate' || q.key === 'propertyCount' || q.key === 'propertyTypes');
@@ -10528,6 +10550,61 @@ export default function StepForm({
                     {retQuestions.map(renderQuestion)}
                   </>
                 )}
+
+                {/* Own — primary residence address confirmation */}
+                {answers['livingSituation'] === 'own' && (() => {
+                  const ownQuestions = globalQuestions.filter(q =>
+                    ['ownSameAddress', 'ownAddress', 'ownCity', 'ownProvince', 'ownPostalCode', 'ownCountry'].includes(q.key)
+                  );
+                  const ownSameAddr = answers['ownSameAddress'];
+                  const showSummary = ownSameAddr === 'yes' && !ownAddressEdit;
+                  const ownAddress = (answers['ownAddress'] as string) || '';
+                  const ownCity = (answers['ownCity'] as string) || '';
+                  const ownProvince = (answers['ownProvince'] as string) || '';
+                  const ownPostal = (answers['ownPostalCode'] as string) || '';
+                  const ownCountry = (answers['ownCountry'] as string) || '';
+
+                  return (
+                    <>
+                      <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Your Primary Residence</h4>
+                      {ownQuestions.filter(q => q.key === 'ownSameAddress').map(renderQuestion)}
+
+                      {showSummary ? (
+                        <div className="mt-4 p-4 bg-gray-700 rounded-lg border border-gray-600">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-semibold text-blue-400">Primary Residence</span>
+                            <button
+                              type="button"
+                              onClick={() => setOwnAddressEdit(true)}
+                              className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                            >
+                              <Pencil className="w-3 h-3" />
+                              Edit Address
+                            </button>
+                          </div>
+                          <div className="text-white text-sm space-y-0.5">
+                            <p>{ownAddress}</p>
+                            <p>{ownCity}{ownProvince ? `${ownCity ? ', ' : ''}${ownProvince}` : ''} {ownPostal}</p>
+                            {ownCountry && <p>{ownCountry}</p>}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-4 space-y-4">
+                          {ownAddressEdit && ownSameAddr === 'yes' && (
+                            <button
+                              type="button"
+                              onClick={() => setOwnAddressEdit(false)}
+                              className="text-xs text-gray-400 hover:text-gray-300 transition-colors"
+                            >
+                              Cancel editing
+                            </button>
+                          )}
+                          {ownQuestions.filter(q => q.key !== 'ownSameAddress').map(renderQuestion)}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
 
                 {/* Additional Properties subheading */}
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Additional Properties</h4>

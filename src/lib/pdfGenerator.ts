@@ -717,6 +717,12 @@ interface FormData {
   client1RegisteredAccountData?: Record<string, Array<Record<string, unknown>>>;
   client2RegisteredAccountData?: Record<string, Array<Record<string, unknown>>>;
   livingSituation?: string;
+  ownSameAddress?: string;
+  ownAddress?: string;
+  ownCity?: string;
+  ownProvince?: string;
+  ownPostalCode?: string;
+  ownCountry?: string;
   rentLandlordName?: string;
   rentSameAddress?: string;
   rentAddress?: string;
@@ -8888,6 +8894,30 @@ You should explore this as an option with your legal and CFP® professionals bec
     doc.setTextColor(...colors.darkText);
     doc.text(livingSituationLabels[formData.livingSituation] || formData.livingSituation, margin, yPosition);
     yPosition += 14;
+  }
+
+  // Primary residence (own) details
+  if (formData.livingSituation === 'own' && (formData.ownAddress || formData.ownCity || formData.ownProvince || formData.ownPostalCode || formData.ownCountry)) {
+    addSectionHeader('Primary Residence');
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.darkText);
+
+    const ownFields: { label: string; value?: string }[] = [
+      { label: 'Address', value: [formData.ownAddress, formData.ownCity, formData.ownProvince, formData.ownPostalCode].filter(Boolean).join(', ') },
+      { label: 'Country', value: formData.ownCountry },
+    ];
+
+    ownFields.forEach(({ label, value }) => {
+      if (value) {
+        checkPageBreak(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${label}:`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(String(value), margin + 40, yPosition);
+        yPosition += 14;
+      }
+    });
+    yPosition += 6;
   }
 
   // Rental details

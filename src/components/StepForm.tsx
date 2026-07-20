@@ -10686,6 +10686,251 @@ export default function StepForm({
                           />
                         );
                       })}
+
+                      {/* Ownership questions for primary residence */}
+                      {answers['ownHasMortgage'] && (() => {
+                        const basicAnswers = allAnswers?.get(1) || {};
+                        const allFormData = Object.fromEntries(
+                          Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                            Object.entries(stepAnswers)
+                          )
+                        );
+                        const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
+                        const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
+                        const hasSpouseStep9 = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law') && !!client2Name;
+                        const ownerOptions: Array<{ value: string; label: string }> = [
+                          { value: client1Name, label: client1Name },
+                        ];
+                        if (hasSpouseStep9) {
+                          ownerOptions.push({ value: client2Name, label: client2Name });
+                        }
+                        const step1Children = (basicAnswers['childrenData'] as Array<Record<string, string>>) || [];
+                        step1Children.forEach((child) => {
+                          const childName = child?.name || child?.nickname;
+                          if (childName) ownerOptions.push({ value: childName, label: childName });
+                        });
+                        const step1Trusts: string[] = [];
+                        for (let i = 1; i <= 4; i++) {
+                          const tn = allFormData[`trust${i > 1 ? i : ''}LegalName`];
+                          if (tn) step1Trusts.push(tn as string);
+                        }
+                        if (allFormData['trustLegalName']) step1Trusts.push(allFormData['trustLegalName'] as string);
+                        step1Trusts.forEach(tn => ownerOptions.push({ value: tn, label: tn }));
+                        const step1Corps = (allFormData['corporationsData'] as Array<Record<string, string>>) || [];
+                        step1Corps.forEach((corp) => {
+                          if (corp?.legalName) ownerOptions.push({ value: corp.legalName, label: corp.legalName });
+                        });
+                        ownerOptions.push({ value: 'other', label: 'Other' });
+
+                        const selectedOwners: string[] = (answers['ownPropertyOwners'] as string[]) || [];
+                        type OtherOwner = { name: string; relationship: string; hasMore: 'yes' | 'no' | '' };
+                        const otherOwners: OtherOwner[] = (answers['ownOtherOwners'] as OtherOwner[]) || [];
+
+                        const toggleOwner = (val: string, checked: boolean) => {
+                          let updated: string[];
+                          if (checked) {
+                            updated = [...selectedOwners, val];
+                          } else {
+                            updated = selectedOwners.filter(o => o !== val);
+                          }
+                          if (val === 'other') {
+                            if (checked && otherOwners.length === 0) {
+                              onAnswerChange('ownOtherOwners', [{ name: '', relationship: '', hasMore: '' }]);
+                            } else if (!checked) {
+                              onAnswerChange('ownOtherOwners', []);
+                              onAnswerChange('ownOwnershipType', '');
+                              onAnswerChange('ownOwnershipPercentages', {});
+                            }
+                          }
+                          onAnswerChange('ownPropertyOwners', updated);
+                        };
+
+                        const updateOtherOwner = (i: number, field: keyof OtherOwner, value: string) => {
+                          const updated = [...otherOwners];
+                          if (!updated[i]) updated[i] = { name: '', relationship: '', hasMore: '' };
+                          updated[i] = { ...updated[i], [field]: value };
+                          onAnswerChange('ownOtherOwners', updated);
+                        };
+
+                        const addOtherOwner = () => {
+                          onAnswerChange('ownOtherOwners', [...otherOwners, { name: '', relationship: '', hasMore: '' }]);
+                        };
+
+                        const allOwnerNames: string[] = [
+                          ...selectedOwners.filter(o => o !== 'other'),
+                          ...otherOwners.filter(o => o.name?.trim()).map(o => o.name),
+                        ];
+
+                        const ownershipType = (answers['ownOwnershipType'] as string) || '';
+                        const ownershipPercentages = (answers['ownOwnershipPercentages'] as Record<string, string>) || {};
+                        const totalPct = allOwnerNames.reduce((sum, name) => {
+                          const pct = parseFloat(ownershipPercentages[name] || '0');
+                          return sum + (isNaN(pct) ? 0 : pct);
+                        }, 0);
+
+                        const handlePctChange = (name: string, value: string) => {
+                          onAnswerChange('ownOwnershipPercentages', { ...ownershipPercentages, [name]: value });
+                        };
+
+                        const otherComplete = !selectedOwners.includes('other') ||
+                          otherOwners.every(o => o.name?.trim() && o.hasMore === 'no');
+                        const showJointQ = allOwnerNames.length >= 2 && otherComplete;
+
+                        return (
+                          <div className="mt-6 space-y-5">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Who owns the property? <span className="text-gray-500 font-normal">(Select all that apply)</span>
+                              </label>
+                              <div className="space-y-2">
+                                {ownerOptions.map(opt => (
+                                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedOwners.includes(opt.value)}
+                                      onChange={(e) => toggleOwner(opt.value, e.target.checked)}
+                                      className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
+                                    />
+                                    <span className="text-gray-300">{opt.label}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+
+                            {selectedOwners.includes('other') && (
+                              <div className="pl-4 border-l-2 border-blue-500 space-y-4">
+                                {otherOwners.map((oo, oi) => (
+                                  <div key={oi} className="space-y-3 p-4 bg-gray-700 rounded-lg border border-gray-600">
+                                    <p className="text-sm font-medium text-gray-300">Other owner {oi + 1}:</p>
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                                      <input
+                                        type="text"
+                                        value={oo.name}
+                                        onChange={(e) => updateOtherOwner(oi, 'name', e.target.value)}
+                                        placeholder="Full name"
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                                        Relationship to {hasSpouseStep9 ? `${client1Name} and/or ${client2Name}` : client1Name}
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={oo.relationship}
+                                        onChange={(e) => updateOtherOwner(oi, 'relationship', e.target.value)}
+                                        placeholder="e.g., Son, Daughter, Friend"
+                                        className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    {oo.name?.trim() && (
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Are there additional parties with ownership of this property?
+                                        </label>
+                                        <div className="flex gap-4">
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`own-has-more-${oi}`}
+                                              value="yes"
+                                              checked={oo.hasMore === 'yes'}
+                                              onChange={() => {
+                                                updateOtherOwner(oi, 'hasMore', 'yes');
+                                                addOtherOwner();
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Yes</span>
+                                          </label>
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`own-has-more-${oi}`}
+                                              value="no"
+                                              checked={oo.hasMore === 'no'}
+                                              onChange={() => updateOtherOwner(oi, 'hasMore', 'no')}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">No</span>
+                                          </label>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {showJointQ && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Is it Joint-with-Rights-of-Survivorship or Joint-Tenants-in-Common?
+                                </label>
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name="own-ownership-type"
+                                      value="joint_survivorship"
+                                      checked={ownershipType === 'joint_survivorship'}
+                                      onChange={(e) => onAnswerChange('ownOwnershipType', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">Joint with Rights of Survivorship</span>
+                                  </label>
+                                  <label className="flex items-center">
+                                    <input
+                                      type="radio"
+                                      name="own-ownership-type"
+                                      value="joint_tenants_in_common"
+                                      checked={ownershipType === 'joint_tenants_in_common'}
+                                      onChange={(e) => onAnswerChange('ownOwnershipType', e.target.value)}
+                                      className="mr-2"
+                                    />
+                                    <span className="text-gray-300">Joint Tenants in Common</span>
+                                  </label>
+                                </div>
+                              </div>
+                            )}
+
+                            {showJointQ && ownershipType && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Enter the ownership percentage for each party (must add to 100%):
+                                </label>
+                                <div className="space-y-3">
+                                  {allOwnerNames.map((name) => (
+                                    <div key={name} className="flex items-center gap-3">
+                                      <span className="text-white text-sm flex-1">{name}</span>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={ownershipPercentages[name] || ''}
+                                        onChange={(e) => handlePctChange(name, e.target.value)}
+                                        placeholder="0"
+                                        className="w-20 px-3 py-1 bg-gray-700 border border-gray-600 rounded-lg text-white text-right"
+                                      />
+                                      <span className="text-gray-400 text-sm">%</span>
+                                    </div>
+                                  ))}
+                                  <div className="flex items-center gap-2 pt-2 border-t border-gray-700">
+                                    <span className="text-sm font-medium text-gray-300">Total:</span>
+                                    <span className={`text-sm font-bold ${totalPct === 100 ? 'text-green-400' : 'text-red-400'}`}>
+                                      {totalPct}%
+                                    </span>
+                                    {totalPct !== 100 && totalPct > 0 && (
+                                      <span className="text-xs text-red-400 ml-2">Must add up to 100%</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </>
                   );
                 })()}

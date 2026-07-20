@@ -593,6 +593,7 @@ interface FormData {
   hasDebts?: string;
   debtsData?: Array<{
     debtType?: string;
+    debtTypeOther?: string;
     debtOwner?: string;
     hasOtherOnLoan?: string;
     otherPersonName?: string;
@@ -8972,6 +8973,119 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.setTextColor(...colors.darkText);
       yPosition += 6;
     }
+  }
+
+  // Debts section
+  if (formData.hasDebts === 'yes') {
+    addSectionHeader('Debts & Liabilities');
+
+    const debtsData = (formData.debtsData as Array<Record<string, unknown>>) || [];
+    const debtCount = parseInt(formData.debtCount || '0') || debtsData.length;
+
+    if (debtCount > 0 && debtsData.length > 0) {
+      debtsData.forEach((debt, index) => {
+        if (!debt || Object.keys(debt).length === 0) return;
+
+        checkPageBreak(40);
+        doc.setFontSize(11);
+        doc.setTextColor(...colors.navyBlue);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Debt ${index + 1}`, margin, yPosition);
+        yPosition += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(...colors.darkText);
+
+        const debtType = debt.debtType === 'Other'
+          ? `Other (${debt.debtTypeOther || ''})`
+          : debt.debtType || '';
+        const ownerLabels: Record<string, string> = {
+          client1: formData.fullName || 'Client 1',
+          client2: formData.spouseName || 'Client 2',
+          joint: 'Joint',
+          other: 'Other',
+        };
+        const debtOwner = debt.debtOwner ? ownerLabels[debt.debtOwner as string] || debt.debtOwner as string : '';
+
+        const rows: [string, string][] = [
+          ['Type of Debt', debtType],
+          ['Owner', debtOwner],
+        ];
+
+        if (debt.hasOtherOnLoan === 'yes') {
+          rows.push(['Other Person on Loan', debt.otherPersonName as string || '']);
+          rows.push(['Other Person Phone', debt.otherPersonPhone as string || '']);
+        }
+
+        rows.push(['Secured', debt.isSecured === 'yes' ? 'Yes' : debt.isSecured === 'no' ? 'No' : '']);
+        if (debt.isSecured === 'yes') {
+          rows.push(['Secured By', debt.securedBy as string || '']);
+        }
+
+        rows.forEach(([label, value]) => {
+          if (!value) return;
+          checkPageBreak(6);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${label}:`, margin, yPosition);
+          doc.setFont('helvetica', 'normal');
+          const valueLines = doc.splitTextToSize(value, fieldWidth - 70);
+          doc.text(valueLines, margin + 70, yPosition);
+          yPosition += 6;
+        });
+
+        yPosition += 4;
+      });
+    }
+
+    // Credit cards
+    const renderCreditCardsPdf = (data: Array<Record<string, unknown>> | undefined, title: string) => {
+      if (!data || data.length === 0) return;
+      checkPageBreak(20);
+      doc.setFontSize(11);
+      doc.setTextColor(...colors.navyBlue);
+      doc.setFont('helvetica', 'bold');
+      doc.text(title, margin, yPosition);
+      yPosition += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(...colors.darkText);
+
+      data.forEach((card, index) => {
+        if (!card || Object.keys(card).length === 0) return;
+        checkPageBreak(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Card ${index + 1}`, margin, yPosition);
+        yPosition += 5;
+        doc.setFont('helvetica', 'normal');
+
+        const cardRows: [string, string][] = [
+          ['Company', card.company as string || ''],
+          ['Last Four Digits', card.lastFourDigits as string || ''],
+          ['Expiry Date', card.expiryDate as string || ''],
+          ['Other Parties', card.otherParties as string || ''],
+        ];
+
+        cardRows.forEach(([label, value]) => {
+          if (!value) return;
+          checkPageBreak(6);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${label}:`, margin, yPosition);
+          doc.setFont('helvetica', 'normal');
+          doc.text(value, margin + 70, yPosition);
+          yPosition += 5;
+        });
+        yPosition += 3;
+      });
+    };
+
+    if (formData.client1HasCreditCards === 'yes') {
+      renderCreditCardsPdf(formData.creditCardsData as Array<Record<string, unknown>> | undefined, `${formData.fullName || 'Client 1'} - Credit Cards`);
+    }
+    if (formData.client2HasCreditCards === 'yes') {
+      renderCreditCardsPdf(formData.client2CreditCardsData as Array<Record<string, unknown>> | undefined, `${formData.spouseName || 'Client 2'} - Credit Cards`);
+    }
+
+    yPosition += 6;
   }
 
   const fileName = `estate-planning-${formData.fullName?.replace(/\s+/g, '-').toLowerCase() || 'form'}.pdf`;

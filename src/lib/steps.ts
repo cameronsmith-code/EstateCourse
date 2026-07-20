@@ -2140,6 +2140,99 @@ export const STEPS: Step[] = [
   },
   {
     id: 10,
+    title: 'Debts',
+    description: 'Understanding your debts and liabilities helps your executor identify what must be settled from your estate and whether any are secured or jointly held. This section covers mortgages, loans, lines of credit, and credit cards.',
+    questions: [
+      {
+        key: 'hasDebts',
+        label: 'Do you have any debts or liabilities (mortgages, loans, lines of credit, credit cards)?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      {
+        key: 'debtCount',
+        label: 'How many debts or liabilities do you have?',
+        type: 'number',
+        placeholder: '0',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasDebts === 'yes',
+      },
+      {
+        key: 'debtsData',
+        label: 'Debt Details',
+        type: 'dynamic',
+        required: false,
+      },
+      {
+        key: 'client1HasCreditCards',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+          return `Does ${name} have any credit cards?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasDebts === 'yes',
+      },
+      {
+        key: 'client1CreditCardCount',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+          return `How many credit cards does ${name} have?`;
+        },
+        type: 'number',
+        placeholder: '0',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasDebts === 'yes' && formData.client1HasCreditCards === 'yes',
+      },
+      {
+        key: 'creditCardsData',
+        label: 'Credit Card Details',
+        type: 'dynamic',
+        required: false,
+      },
+      {
+        key: 'client2HasCreditCards',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+          return `Does ${name} have any credit cards?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasDebts === 'yes' && (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law'),
+      },
+      {
+        key: 'client2CreditCardCount',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+          return `How many credit cards does ${name} have?`;
+        },
+        type: 'number',
+        placeholder: '0',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.hasDebts === 'yes' && formData.client2HasCreditCards === 'yes' && (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law'),
+      },
+      {
+        key: 'client2CreditCardsData',
+        label: 'Spouse Credit Card Details',
+        type: 'dynamic',
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 11,
     title: 'Wills',
     description: 'A Will is the foundation of your estate plan. It directs how your assets are distributed, names your executor, and can include trusts for beneficiaries with special needs. This section helps us understand the current state of your Will(s) and whether updates may be needed.',
     questions: [
@@ -2338,7 +2431,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 11,
+    id: 12,
     title: 'Powers of Attorney',
     description: 'A Power of Attorney (POA) lets you appoint someone to make decisions on your behalf if you become unable to do so. There are two types: one for personal care (health decisions) and one for property (financial decisions).',
     questions: [
@@ -2648,7 +2741,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 12,
+    id: 13,
     title: 'Estate Trustees (Executors)',
     description: 'An Estate Trustee (also called an Executor) is the person or institution responsible for administering your estate after you pass away. This includes paying debts, filing taxes, and distributing assets according to your Will.',
     questions: [
@@ -3064,7 +3157,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 13,
+    id: 14,
     title: 'Funeral Arrangements',
     description: 'Planning your funeral arrangements in advance can relieve your family of difficult decisions during an emotional time. This section captures your wishes regarding funeral arrangements and whether they have been documented.',
     questions: [
@@ -3172,7 +3265,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 14,
+    id: 15,
     title: 'Pensions & Registered Accounts',
     description: 'Pensions and registered accounts (RRSP, RRIF, TFSA, etc.) often form a significant part of your estate. Understanding what you have and where it is located helps ensure these assets are properly managed and distributed.',
     questions: [

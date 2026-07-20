@@ -10699,7 +10699,7 @@ export default function StepForm({
                 {/* Property types and inline property forms */}
                 {answers['hasRealEstate'] === 'yes' && (() => {
                   const PROPERTY_TYPES = [
-                    'Principal residence', 'Cottage', 'Vacation property', 'Rental property',
+                    'Cottage', 'Vacation property', 'Rental property',
                     'Commercial property', 'Vacant land', 'Farm', 'Condo', 'Foreign property', 'Other',
                   ];
                   const selectedTypes = (answers['propertyTypes'] as string[]) || [];

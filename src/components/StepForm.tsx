@@ -10682,94 +10682,123 @@ export default function StepForm({
               );
             };
 
-            const DEBT_TYPES = [
-              'Mortgage', 'Line of Credit', 'Personal Loan', 'Car Loan',
-              'Student Loan', 'Business Loan', 'Credit Card Balance', 'Other',
+            const ownerOptions = [
+              { value: 'client1', label: client1Name },
+              ...(hasSpouse ? [{ value: 'client2', label: client2Name }] : []),
+              { value: 'joint', label: 'Joint' },
+              { value: 'other', label: 'Other' },
             ];
 
-            const debtCount = parseInt(answers['debtCount'] as string) || 0;
-            const debtsData = (answers['debtsData'] as Array<Record<string, unknown>>) || [];
+            const renderOwnerRadios = (
+              name: string,
+              value: string | undefined,
+              onChange: (v: string) => void,
+            ) => (
+              <div className="space-y-2">
+                {ownerOptions.map(opt => (
+                  <label key={opt.value} className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name={name}
+                      value={opt.value}
+                      checked={value === opt.value}
+                      onChange={() => onChange(opt.value)}
+                      className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="text-white">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            );
 
-            const handleDebtFieldChange = (index: number, field: string, value: unknown) => {
-              const updated = [...debtsData];
-              if (!updated[index]) updated[index] = {};
-              updated[index][field] = value;
-              onAnswerChange('debtsData', updated);
+            const renderYesNo = (
+              name: string,
+              value: string | undefined,
+              onChange: (v: string) => void,
+            ) => (
+              <div className="space-y-2">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input type="radio" name={name} value="yes" checked={value === 'yes'}
+                    onChange={() => onChange('yes')}
+                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2" />
+                  <span className="text-white">Yes</span>
+                </label>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input type="radio" name={name} value="no" checked={value === 'no'}
+                    onChange={() => onChange('no')}
+                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2" />
+                  <span className="text-white">No</span>
+                </label>
+              </div>
+            );
+
+            const renderTextField = (
+              value: string | undefined,
+              onChange: (v: string) => void,
+              placeholder?: string,
+              maxLength?: number,
+            ) => (
+              <input
+                type="text"
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                maxLength={maxLength}
+                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            );
+
+            const renderOtherPersonFields = (
+              prefix: string,
+              item: Record<string, unknown>,
+              handleFieldChange: (field: string, value: unknown) => void,
+            ) => {
+              if (item.hasOtherOnLoan !== 'yes') return null;
+              return (
+                <div className="pl-4 border-l-2 border-blue-500/40 space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Other Person Name:</label>
+                    {renderTextField(
+                      item.otherPersonName as string,
+                      (v) => handleFieldChange('otherPersonName', v),
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Other Person Phone:</label>
+                    {renderTextField(
+                      item.otherPersonPhone as string,
+                      (v) => handleFieldChange('otherPersonPhone', v),
+                    )}
+                  </div>
+                </div>
+              );
             };
 
-            const renderCreditCards = (key: string, countKey: string, ownerLabel: string) => {
+            const makeDynamicRenderer = (
+              dataKey: string,
+              countKey: string,
+              itemLabel: string,
+              fields: (item: Record<string, unknown>, handleFieldChange: (field: string, value: unknown) => void, index: number) => React.ReactNode,
+            ) => {
               const count = parseInt(answers[countKey] as string) || 0;
               if (count === 0) return null;
-              const cardsData = (answers[key] as Array<Record<string, unknown>>) || [];
+              const data = (answers[dataKey] as Array<Record<string, unknown>>) || [];
 
-              const handleCardFieldChange = (index: number, field: string, value: unknown) => {
-                const updated = [...cardsData];
+              const handleFieldChange = (index: number, field: string, value: unknown) => {
+                const updated = [...data];
                 if (!updated[index]) updated[index] = {};
                 updated[index][field] = value;
-                onAnswerChange(key, updated);
+                onAnswerChange(dataKey, updated);
               };
 
               return (
                 <div className="space-y-6 mt-6">
-                  <h3 className="text-md font-semibold text-white">{ownerLabel}</h3>
                   {Array.from({ length: count }).map((_, index) => {
-                    const card = cardsData[index] || {};
+                    const item = data[index] || {};
                     return (
                       <div key={index} className="p-4 bg-gray-700 rounded-lg space-y-4">
-                        <h4 className="text-sm font-semibold text-gray-200">Credit Card {index + 1}</h4>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Company / Issuer:
-                          </label>
-                          <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Visa, Mastercard, Amex, TD, RBC</p>
-                          <input
-                            type="text"
-                            value={(card.company as string) || ''}
-                            onChange={(e) => handleCardFieldChange(index, 'company', e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Last Four Digits:
-                          </label>
-                          <input
-                            type="text"
-                            maxLength={4}
-                            value={(card.lastFourDigits as string) || ''}
-                            onChange={(e) => handleCardFieldChange(index, 'lastFourDigits', e.target.value)}
-                            placeholder="e.g., 1234"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Expiry Date:
-                          </label>
-                          <input
-                            type="text"
-                            value={(card.expiryDate as string) || ''}
-                            onChange={(e) => handleCardFieldChange(index, 'expiryDate', e.target.value)}
-                            placeholder="MM/YY"
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Other Parties on the Account:
-                          </label>
-                          <p className="text-xs italic text-gray-400 mt-1 mb-2">If anyone else is named on this card</p>
-                          <input
-                            type="text"
-                            value={(card.otherParties as string) || ''}
-                            onChange={(e) => handleCardFieldChange(index, 'otherParties', e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        </div>
+                        <h4 className="text-sm font-semibold text-gray-200">{itemLabel} {index + 1}</h4>
+                        {fields(item, (field, value) => handleFieldChange(index, field, value), index)}
                       </div>
                     );
                   })}
@@ -10777,194 +10806,157 @@ export default function StepForm({
               );
             };
 
+            // --- Subsection 1: Credit Card Debt ---
+            const renderCreditCardDebt = () =>
+              makeDynamicRenderer('creditCardDebtData', 'creditCardDebtCount', 'Credit Card', (item, hfc) => (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Card Issuer / Company:</label>
+                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Visa, Mastercard, Amex, TD, RBC</p>
+                    {renderTextField(item.company as string, (v) => hfc('company', v))}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Last Four Digits:</label>
+                    {renderTextField(item.lastFourDigits as string, (v) => hfc('lastFourDigits', v), 'e.g., 1234', 4)}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Approximate Balance:</label>
+                    {renderTextField(item.balance as string, (v) => hfc('balance', v), 'e.g., $5,000')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Who owns this debt?</label>
+                    {renderOwnerRadios('ccdOwner', item.debtOwner as string, (v) => hfc('debtOwner', v))}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Is anyone else on this account?</label>
+                    {renderYesNo('ccdHasOther', item.hasOtherOnLoan as string, (v) => hfc('hasOtherOnLoan', v))}
+                  </div>
+                  {renderOtherPersonFields('ccd', item, hfc)}
+                </>
+              ));
+
+            // --- Subsection 2: Mortgage and Property Debt ---
+            const MORTGAGE_TYPES = ['Mortgage', 'HELOC', 'Second Mortgage', 'Other'];
+            const renderMortgageDebt = () =>
+              makeDynamicRenderer('mortgageDebtData', 'mortgageDebtCount', 'Mortgage / Property Debt', (item, hfc) => (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Type:</label>
+                    <select
+                      value={(item.debtType as string) || ''}
+                      onChange={(e) => hfc('debtType', e.target.value)}
+                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select...</option>
+                      {MORTGAGE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    {item.debtType === 'Other' && (
+                      <div className="mt-2">
+                        {renderTextField(item.debtTypeOther as string, (v) => hfc('debtTypeOther', v), 'Please specify')}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Lender / Financial Institution:</label>
+                    {renderTextField(item.lender as string, (v) => hfc('lender', v), 'e.g., RBC, TD, BMO')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Property Address:</label>
+                    {renderTextField(item.propertyAddress as string, (v) => hfc('propertyAddress', v), 'e.g., 123 Main St, Toronto, ON')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Approximate Balance:</label>
+                    {renderTextField(item.balance as string, (v) => hfc('balance', v), 'e.g., $350,000')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Who owns this debt?</label>
+                    {renderOwnerRadios('mdOwner', item.debtOwner as string, (v) => hfc('debtOwner', v))}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Is anyone else on this loan?</label>
+                    {renderYesNo('mdHasOther', item.hasOtherOnLoan as string, (v) => hfc('hasOtherOnLoan', v))}
+                  </div>
+                  {renderOtherPersonFields('md', item, hfc)}
+                </>
+              ));
+
+            // --- Subsection 3: Other Debts ---
+            const OTHER_DEBT_TYPES = ['Personal Loan', 'Car Loan', 'Student Loan', 'Line of Credit', 'Tax Debt', 'Business Loan', 'Other'];
+            const renderOtherDebt = () =>
+              makeDynamicRenderer('otherDebtData', 'otherDebtCount', 'Other Debt', (item, hfc) => (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Type of Debt:</label>
+                    <select
+                      value={(item.debtType as string) || ''}
+                      onChange={(e) => hfc('debtType', e.target.value)}
+                      className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select...</option>
+                      {OTHER_DEBT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    {item.debtType === 'Other' && (
+                      <div className="mt-2">
+                        {renderTextField(item.debtTypeOther as string, (v) => hfc('debtTypeOther', v), 'Please specify')}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Lender / Creditor:</label>
+                    {renderTextField(item.lender as string, (v) => hfc('lender', v), 'e.g., Bank, dealership, CRA')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Approximate Balance:</label>
+                    {renderTextField(item.balance as string, (v) => hfc('balance', v), 'e.g., $15,000')}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Who owns this debt?</label>
+                    {renderOwnerRadios('odOwner', item.debtOwner as string, (v) => hfc('debtOwner', v))}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Is anyone else on this loan?</label>
+                    {renderYesNo('odHasOther', item.hasOtherOnLoan as string, (v) => hfc('hasOtherOnLoan', v))}
+                  </div>
+                  {renderOtherPersonFields('od', item, hfc)}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Is this debt secured?</label>
+                    {renderYesNo('odSecured', item.isSecured as string, (v) => hfc('isSecured', v))}
+                  </div>
+                  {item.isSecured === 'yes' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Secured by:</label>
+                      <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Vehicle, Investments, Equipment</p>
+                      {renderTextField(item.securedBy as string, (v) => hfc('securedBy', v))}
+                    </div>
+                  )}
+                </>
+              ));
+
             return (
               <>
-                {/* Main debt question */}
-                {step.questions.filter(q => q.key === 'hasDebts').map(renderQuestion)}
+                {/* Subsection 1: Credit Card Debt */}
+                <div className="space-y-4">
+                  <h3 className="text-base font-semibold text-blue-400">Credit Card Debt</h3>
+                  {step.questions.filter(q => q.key === 'hasCreditCardDebt').map(renderQuestion)}
+                  {answers['hasCreditCardDebt'] === 'yes' && step.questions.filter(q => q.key === 'creditCardDebtCount').map(renderQuestion)}
+                  {answers['hasCreditCardDebt'] === 'yes' && renderCreditCardDebt()}
+                </div>
 
-                {/* Debt count */}
-                {answers['hasDebts'] === 'yes' && step.questions.filter(q => q.key === 'debtCount').map(renderQuestion)}
+                {/* Subsection 2: Mortgage and Property Debt */}
+                <div className="space-y-4 mt-8">
+                  <h3 className="text-base font-semibold text-blue-400">Mortgage and Property Debt</h3>
+                  {step.questions.filter(q => q.key === 'hasMortgageDebt').map(renderQuestion)}
+                  {answers['hasMortgageDebt'] === 'yes' && step.questions.filter(q => q.key === 'mortgageDebtCount').map(renderQuestion)}
+                  {answers['hasMortgageDebt'] === 'yes' && renderMortgageDebt()}
+                </div>
 
-                {/* Debt details */}
-                {answers['hasDebts'] === 'yes' && debtCount > 0 && (
-                  <div className="space-y-6 mt-6">
-                    <h3 className="text-md font-semibold text-white">Debt Details</h3>
-                    {Array.from({ length: debtCount }).map((_, index) => {
-                      const debt = debtsData[index] || {};
-                      return (
-                        <div key={index} className="p-4 bg-gray-700 rounded-lg space-y-4">
-                          <h4 className="text-sm font-semibold text-gray-200">Debt {index + 1}</h4>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Type of Debt:
-                            </label>
-                            <select
-                              value={(debt.debtType as string) || ''}
-                              onChange={(e) => handleDebtFieldChange(index, 'debtType', e.target.value)}
-                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                              <option value="">Select...</option>
-                              {DEBT_TYPES.map(t => (
-                                <option key={t} value={t}>{t}</option>
-                              ))}
-                            </select>
-                            {debt.debtType === 'Other' && (
-                              <input
-                                type="text"
-                                value={(debt.debtTypeOther as string) || ''}
-                                onChange={(e) => handleDebtFieldChange(index, 'debtTypeOther', e.target.value)}
-                                placeholder="Please specify"
-                                className="w-full mt-2 px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              />
-                            )}
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Who owns this debt?
-                            </label>
-                            <div className="space-y-2">
-                              {[
-                                { value: 'client1', label: client1Name },
-                                ...(hasSpouse ? [{ value: 'client2', label: client2Name }] : []),
-                                { value: 'joint', label: 'Joint' },
-                                { value: 'other', label: 'Other' },
-                              ].map(opt => (
-                                <label key={opt.value} className="flex items-center space-x-3 cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name={`debtOwner-${index}`}
-                                    value={opt.value}
-                                    checked={(debt.debtOwner as string) === opt.value}
-                                    onChange={() => handleDebtFieldChange(index, 'debtOwner', opt.value)}
-                                    className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
-                                  />
-                                  <span className="text-white">{opt.label}</span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Is anyone else on this loan?
-                            </label>
-                            <div className="space-y-2">
-                              <label className="flex items-center space-x-3 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name={`hasOtherOnLoan-${index}`}
-                                  value="yes"
-                                  checked={(debt.hasOtherOnLoan as string) === 'yes'}
-                                  onChange={() => handleDebtFieldChange(index, 'hasOtherOnLoan', 'yes')}
-                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
-                                />
-                                <span className="text-white">Yes</span>
-                              </label>
-                              <label className="flex items-center space-x-3 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name={`hasOtherOnLoan-${index}`}
-                                  value="no"
-                                  checked={(debt.hasOtherOnLoan as string) === 'no'}
-                                  onChange={() => handleDebtFieldChange(index, 'hasOtherOnLoan', 'no')}
-                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
-                                />
-                                <span className="text-white">No</span>
-                              </label>
-                            </div>
-                          </div>
-
-                          {(debt.hasOtherOnLoan as string) === 'yes' && (
-                            <div className="pl-4 border-l-2 border-blue-500/40 space-y-3">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">
-                                  Other Person Name:
-                                </label>
-                                <input
-                                  type="text"
-                                  value={(debt.otherPersonName as string) || ''}
-                                  onChange={(e) => handleDebtFieldChange(index, 'otherPersonName', e.target.value)}
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">
-                                  Other Person Phone:
-                                </label>
-                                <input
-                                  type="text"
-                                  value={(debt.otherPersonPhone as string) || ''}
-                                  onChange={(e) => handleDebtFieldChange(index, 'otherPersonPhone', e.target.value)}
-                                  className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Is this debt secured?
-                            </label>
-                            <div className="space-y-2">
-                              <label className="flex items-center space-x-3 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name={`isSecured-${index}`}
-                                  value="yes"
-                                  checked={(debt.isSecured as string) === 'yes'}
-                                  onChange={() => handleDebtFieldChange(index, 'isSecured', 'yes')}
-                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
-                                />
-                                <span className="text-white">Yes</span>
-                              </label>
-                              <label className="flex items-center space-x-3 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name={`isSecured-${index}`}
-                                  value="no"
-                                  checked={(debt.isSecured as string) === 'no'}
-                                  onChange={() => handleDebtFieldChange(index, 'isSecured', 'no')}
-                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500 focus:ring-2"
-                                />
-                                <span className="text-white">No</span>
-                              </label>
-                            </div>
-                          </div>
-
-                          {(debt.isSecured as string) === 'yes' && (
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-1">
-                                Secured by:
-                              </label>
-                              <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., Home, Vehicle, Investments</p>
-                              <input
-                                type="text"
-                                value={(debt.securedBy as string) || ''}
-                                onChange={(e) => handleDebtFieldChange(index, 'securedBy', e.target.value)}
-                                className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Credit cards */}
-                {answers['hasDebts'] === 'yes' && (
-                  <div className="mt-6 space-y-4">
-                    <h3 className="text-base font-semibold text-blue-400 mt-6 mb-1">Credit Cards</h3>
-                    {step.questions.filter(q => q.key === 'client1HasCreditCards').map(renderQuestion)}
-                    {answers['client1HasCreditCards'] === 'yes' && step.questions.filter(q => q.key === 'client1CreditCardCount').map(renderQuestion)}
-                    {answers['client1HasCreditCards'] === 'yes' && renderCreditCards('creditCardsData', 'client1CreditCardCount', `${client1Name}'s Credit Cards`)}
-                    {hasSpouse && step.questions.filter(q => q.key === 'client2HasCreditCards').map(renderQuestion)}
-                    {hasSpouse && answers['client2HasCreditCards'] === 'yes' && step.questions.filter(q => q.key === 'client2CreditCardCount').map(renderQuestion)}
-                    {hasSpouse && answers['client2HasCreditCards'] === 'yes' && renderCreditCards('client2CreditCardsData', 'client2CreditCardCount', `${client2Name}'s Credit Cards`)}
-                  </div>
-                )}
+                {/* Subsection 3: Other Debts */}
+                <div className="space-y-4 mt-8">
+                  <h3 className="text-base font-semibold text-blue-400">Other Debts</h3>
+                  {step.questions.filter(q => q.key === 'hasOtherDebt').map(renderQuestion)}
+                  {answers['hasOtherDebt'] === 'yes' && step.questions.filter(q => q.key === 'otherDebtCount').map(renderQuestion)}
+                  {answers['hasOtherDebt'] === 'yes' && renderOtherDebt()}
+                </div>
               </>
             );
           })()}

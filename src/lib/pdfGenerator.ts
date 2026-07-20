@@ -590,32 +590,43 @@ interface FormData {
     revenueExpensesLocation?: string;
     capitalExpendituresLocation?: string;
   }>;
-  hasDebts?: string;
-  debtsData?: Array<{
+  hasCreditCardDebt?: string;
+  creditCardDebtCount?: string;
+  creditCardDebtData?: Array<{
+    company?: string;
+    lastFourDigits?: string;
+    balance?: string;
+    debtOwner?: string;
+    hasOtherOnLoan?: string;
+    otherPersonName?: string;
+    otherPersonPhone?: string;
+  }>;
+  hasMortgageDebt?: string;
+  mortgageDebtCount?: string;
+  mortgageDebtData?: Array<{
     debtType?: string;
     debtTypeOther?: string;
+    lender?: string;
+    propertyAddress?: string;
+    balance?: string;
+    debtOwner?: string;
+    hasOtherOnLoan?: string;
+    otherPersonName?: string;
+    otherPersonPhone?: string;
+  }>;
+  hasOtherDebt?: string;
+  otherDebtCount?: string;
+  otherDebtData?: Array<{
+    debtType?: string;
+    debtTypeOther?: string;
+    lender?: string;
+    balance?: string;
     debtOwner?: string;
     hasOtherOnLoan?: string;
     otherPersonName?: string;
     otherPersonPhone?: string;
     isSecured?: string;
     securedBy?: string;
-  }>;
-  client1HasCreditCards?: string;
-  client1CreditCardCount?: string;
-  creditCardsData?: Array<{
-    company?: string;
-    lastFourDigits?: string;
-    expiryDate?: string;
-    otherParties?: string;
-  }>;
-  client2HasCreditCards?: string;
-  client2CreditCardCount?: string;
-  client2CreditCardsData?: Array<{
-    company?: string;
-    lastFourDigits?: string;
-    expiryDate?: string;
-    otherParties?: string;
   }>;
   client1HasWorkBenefits?: string;
   client2HasWorkBenefits?: string;
@@ -8976,113 +8987,138 @@ You should explore this as an option with your legal and CFP® professionals bec
   }
 
   // Debts section
-  if (formData.hasDebts === 'yes') {
+  if (formData.hasCreditCardDebt === 'yes' || formData.hasMortgageDebt === 'yes' || formData.hasOtherDebt === 'yes') {
     addSectionHeader('Debts & Liabilities');
 
-    const debtsData = (formData.debtsData as Array<Record<string, unknown>>) || [];
-    const debtCount = parseInt(formData.debtCount || '0') || debtsData.length;
+    const ownerLabels: Record<string, string> = {
+      client1: formData.fullName || 'Client 1',
+      client2: formData.spouseName || 'Client 2',
+      joint: 'Joint',
+      other: 'Other',
+    };
 
-    if (debtCount > 0 && debtsData.length > 0) {
-      debtsData.forEach((debt, index) => {
-        if (!debt || Object.keys(debt).length === 0) return;
-
-        checkPageBreak(40);
-        doc.setFontSize(11);
-        doc.setTextColor(...colors.navyBlue);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`Debt ${index + 1}`, margin, yPosition);
-        yPosition += 6;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
-        doc.setTextColor(...colors.darkText);
-
-        const debtType = debt.debtType === 'Other'
-          ? `Other (${debt.debtTypeOther || ''})`
-          : debt.debtType || '';
-        const ownerLabels: Record<string, string> = {
-          client1: formData.fullName || 'Client 1',
-          client2: formData.spouseName || 'Client 2',
-          joint: 'Joint',
-          other: 'Other',
-        };
-        const debtOwner = debt.debtOwner ? ownerLabels[debt.debtOwner as string] || debt.debtOwner as string : '';
-
-        const rows: [string, string][] = [
-          ['Type of Debt', debtType],
-          ['Owner', debtOwner],
-        ];
-
-        if (debt.hasOtherOnLoan === 'yes') {
-          rows.push(['Other Person on Loan', debt.otherPersonName as string || '']);
-          rows.push(['Other Person Phone', debt.otherPersonPhone as string || '']);
-        }
-
-        rows.push(['Secured', debt.isSecured === 'yes' ? 'Yes' : debt.isSecured === 'no' ? 'No' : '']);
-        if (debt.isSecured === 'yes') {
-          rows.push(['Secured By', debt.securedBy as string || '']);
-        }
-
-        rows.forEach(([label, value]) => {
-          if (!value) return;
-          checkPageBreak(6);
-          doc.setFont('helvetica', 'bold');
-          doc.text(`${label}:`, margin, yPosition);
-          doc.setFont('helvetica', 'normal');
-          const valueLines = doc.splitTextToSize(value, fieldWidth - 70);
-          doc.text(valueLines, margin + 70, yPosition);
-          yPosition += 6;
-        });
-
-        yPosition += 4;
-      });
-    }
-
-    // Credit cards
-    const renderCreditCardsPdf = (data: Array<Record<string, unknown>> | undefined, title: string) => {
-      if (!data || data.length === 0) return;
-      checkPageBreak(20);
+    const renderDebtItem = (label: string, index: number, item: Record<string, unknown>, rows: [string, string][]) => {
+      checkPageBreak(40);
       doc.setFontSize(11);
       doc.setTextColor(...colors.navyBlue);
       doc.setFont('helvetica', 'bold');
-      doc.text(title, margin, yPosition);
+      doc.text(`${label} ${index + 1}`, margin, yPosition);
       yPosition += 6;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(...colors.darkText);
 
-      data.forEach((card, index) => {
-        if (!card || Object.keys(card).length === 0) return;
-        checkPageBreak(20);
+      rows.forEach(([fieldLabel, value]) => {
+        if (!value) return;
+        checkPageBreak(6);
         doc.setFont('helvetica', 'bold');
-        doc.text(`Card ${index + 1}`, margin, yPosition);
-        yPosition += 5;
+        doc.text(`${fieldLabel}:`, margin, yPosition);
         doc.setFont('helvetica', 'normal');
+        const valueLines = doc.splitTextToSize(value, fieldWidth - 70);
+        doc.text(valueLines, margin + 70, yPosition);
+        yPosition += 6;
+      });
 
-        const cardRows: [string, string][] = [
-          ['Company', card.company as string || ''],
-          ['Last Four Digits', card.lastFourDigits as string || ''],
-          ['Expiry Date', card.expiryDate as string || ''],
-          ['Other Parties', card.otherParties as string || ''],
-        ];
-
-        cardRows.forEach(([label, value]) => {
-          if (!value) return;
+      if (item.hasOtherOnLoan === 'yes') {
+        if (item.otherPersonName) {
           checkPageBreak(6);
           doc.setFont('helvetica', 'bold');
-          doc.text(`${label}:`, margin, yPosition);
+          doc.text('Other Person:', margin, yPosition);
           doc.setFont('helvetica', 'normal');
-          doc.text(value, margin + 70, yPosition);
-          yPosition += 5;
-        });
-        yPosition += 3;
-      });
+          doc.text(item.otherPersonName as string, margin + 70, yPosition);
+          yPosition += 6;
+        }
+        if (item.otherPersonPhone) {
+          checkPageBreak(6);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Other Person Phone:', margin, yPosition);
+          doc.setFont('helvetica', 'normal');
+          doc.text(item.otherPersonPhone as string, margin + 70, yPosition);
+          yPosition += 6;
+        }
+      }
+
+      yPosition += 4;
     };
 
-    if (formData.client1HasCreditCards === 'yes') {
-      renderCreditCardsPdf(formData.creditCardsData as Array<Record<string, unknown>> | undefined, `${formData.fullName || 'Client 1'} - Credit Cards`);
+    // Credit Card Debt
+    if (formData.hasCreditCardDebt === 'yes') {
+      checkPageBreak(20);
+      doc.setFontSize(12);
+      doc.setTextColor(...colors.navyBlue);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Credit Card Debt', margin, yPosition);
+      yPosition += 8;
+
+      const data = (formData.creditCardDebtData as Array<Record<string, unknown>>) || [];
+      data.forEach((item, index) => {
+        if (!item || Object.keys(item).length === 0) return;
+        const debtType = item.debtType === 'Other'
+          ? `Other (${item.debtTypeOther || ''})`
+          : item.debtType as string || '';
+        renderDebtItem('Credit Card', index, item, [
+          ['Issuer / Company', item.company as string || ''],
+          ['Last Four Digits', item.lastFourDigits as string || ''],
+          ['Approximate Balance', item.balance as string || ''],
+          ['Owner', item.debtOwner ? ownerLabels[item.debtOwner as string] || item.debtOwner as string : ''],
+        ]);
+      });
     }
-    if (formData.client2HasCreditCards === 'yes') {
-      renderCreditCardsPdf(formData.client2CreditCardsData as Array<Record<string, unknown>> | undefined, `${formData.spouseName || 'Client 2'} - Credit Cards`);
+
+    // Mortgage and Property Debt
+    if (formData.hasMortgageDebt === 'yes') {
+      checkPageBreak(20);
+      doc.setFontSize(12);
+      doc.setTextColor(...colors.navyBlue);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Mortgage and Property Debt', margin, yPosition);
+      yPosition += 8;
+
+      const data = (formData.mortgageDebtData as Array<Record<string, unknown>>) || [];
+      data.forEach((item, index) => {
+        if (!item || Object.keys(item).length === 0) return;
+        const debtType = item.debtType === 'Other'
+          ? `Other (${item.debtTypeOther || ''})`
+          : item.debtType as string || '';
+        renderDebtItem('Mortgage / Property Debt', index, item, [
+          ['Type', debtType],
+          ['Lender', item.lender as string || ''],
+          ['Property Address', item.propertyAddress as string || ''],
+          ['Approximate Balance', item.balance as string || ''],
+          ['Owner', item.debtOwner ? ownerLabels[item.debtOwner as string] || item.debtOwner as string : ''],
+        ]);
+      });
+    }
+
+    // Other Debts
+    if (formData.hasOtherDebt === 'yes') {
+      checkPageBreak(20);
+      doc.setFontSize(12);
+      doc.setTextColor(...colors.navyBlue);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Other Debts', margin, yPosition);
+      yPosition += 8;
+
+      const data = (formData.otherDebtData as Array<Record<string, unknown>>) || [];
+      data.forEach((item, index) => {
+        if (!item || Object.keys(item).length === 0) return;
+        const debtType = item.debtType === 'Other'
+          ? `Other (${item.debtTypeOther || ''})`
+          : item.debtType as string || '';
+        const rows: [string, string][] = [
+          ['Type', debtType],
+          ['Lender / Creditor', item.lender as string || ''],
+          ['Approximate Balance', item.balance as string || ''],
+          ['Owner', item.debtOwner ? ownerLabels[item.debtOwner as string] || item.debtOwner as string : ''],
+        ];
+        if (item.isSecured === 'yes') {
+          rows.push(['Secured', 'Yes']);
+          rows.push(['Secured By', item.securedBy as string || '']);
+        } else if (item.isSecured === 'no') {
+          rows.push(['Secured', 'No']);
+        }
+        renderDebtItem('Other Debt', index, item, rows);
+      });
     }
 
     yPosition += 6;

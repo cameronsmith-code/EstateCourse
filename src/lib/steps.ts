@@ -2141,11 +2141,11 @@ export const STEPS: Step[] = [
   {
     id: 10,
     title: 'Debts',
-    description: 'Understanding your debts and liabilities helps your executor identify what must be settled from your estate and whether any are secured or jointly held. This section covers mortgages, loans, lines of credit, and credit cards.',
+    description: 'Understanding your debts and liabilities helps your executor identify what must be settled from your estate and whether any are secured or jointly held. This section covers credit card debt, mortgage and property debt, and other debts.',
     questions: [
       {
-        key: 'hasDebts',
-        label: 'Do you have any debts or liabilities (mortgages, loans, lines of credit, credit cards)?',
+        key: 'hasCreditCardDebt',
+        label: 'Do you have any credit card debt?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -2154,78 +2154,64 @@ export const STEPS: Step[] = [
         required: true,
       },
       {
-        key: 'debtCount',
-        label: 'How many debts or liabilities do you have?',
+        key: 'creditCardDebtCount',
+        label: 'How many credit cards with outstanding balances do you have?',
         type: 'number',
         placeholder: '0',
         required: false,
-        condition: (formData: Record<string, string>) => formData.hasDebts === 'yes',
+        condition: (formData: Record<string, string>) => formData.hasCreditCardDebt === 'yes',
       },
       {
-        key: 'debtsData',
-        label: 'Debt Details',
+        key: 'creditCardDebtData',
+        label: 'Credit Card Debt Details',
         type: 'dynamic',
         required: false,
       },
       {
-        key: 'client1HasCreditCards',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
-          return `Does ${name} have any credit cards?`;
-        },
+        key: 'hasMortgageDebt',
+        label: 'Do you have any mortgage or property-related debt (mortgage, HELOC, second mortgage)?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
         ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasDebts === 'yes',
+        required: true,
       },
       {
-        key: 'client1CreditCardCount',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
-          return `How many credit cards does ${name} have?`;
-        },
+        key: 'mortgageDebtCount',
+        label: 'How many mortgage or property-related debts do you have?',
         type: 'number',
         placeholder: '0',
         required: false,
-        condition: (formData: Record<string, string>) => formData.hasDebts === 'yes' && formData.client1HasCreditCards === 'yes',
+        condition: (formData: Record<string, string>) => formData.hasMortgageDebt === 'yes',
       },
       {
-        key: 'creditCardsData',
-        label: 'Credit Card Details',
+        key: 'mortgageDebtData',
+        label: 'Mortgage and Property Debt Details',
         type: 'dynamic',
         required: false,
       },
       {
-        key: 'client2HasCreditCards',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
-          return `Does ${name} have any credit cards?`;
-        },
+        key: 'hasOtherDebt',
+        label: 'Do you have any other debts (personal loans, car loans, student loans, lines of credit, tax debt, business loans)?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
         ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.hasDebts === 'yes' && (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law'),
+        required: true,
       },
       {
-        key: 'client2CreditCardCount',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
-          return `How many credit cards does ${name} have?`;
-        },
+        key: 'otherDebtCount',
+        label: 'How many other debts do you have?',
         type: 'number',
         placeholder: '0',
         required: false,
-        condition: (formData: Record<string, string>) => formData.hasDebts === 'yes' && formData.client2HasCreditCards === 'yes' && (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law'),
+        condition: (formData: Record<string, string>) => formData.hasOtherDebt === 'yes',
       },
       {
-        key: 'client2CreditCardsData',
-        label: 'Spouse Credit Card Details',
+        key: 'otherDebtData',
+        label: 'Other Debt Details',
         type: 'dynamic',
         required: false,
       },

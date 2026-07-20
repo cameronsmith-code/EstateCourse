@@ -718,11 +718,14 @@ interface FormData {
   client2RegisteredAccountData?: Record<string, Array<Record<string, unknown>>>;
   livingSituation?: string;
   ownSameAddress?: string;
+  ownPropertyCountry?: string;
   ownAddress?: string;
   ownCity?: string;
   ownProvince?: string;
+  ownState?: string;
+  ownCountryOther?: string;
+  ownProvinceRegion?: string;
   ownPostalCode?: string;
-  ownCountry?: string;
   rentLandlordName?: string;
   rentSameAddress?: string;
   rentAddress?: string;
@@ -8897,14 +8900,19 @@ You should explore this as an option with your legal and CFP® professionals bec
   }
 
   // Primary residence (own) details
-  if (formData.livingSituation === 'own' && (formData.ownAddress || formData.ownCity || formData.ownProvince || formData.ownPostalCode || formData.ownCountry)) {
+  if (formData.livingSituation === 'own' && (formData.ownAddress || formData.ownCity || formData.ownProvince || formData.ownState || formData.ownProvinceRegion || formData.ownPostalCode || formData.ownCountryOther)) {
     addSectionHeader('Primary Residence');
     doc.setFontSize(10);
     doc.setTextColor(...colors.darkText);
 
+    const ownRegion = formData.ownProvince || formData.ownState || formData.ownProvinceRegion || '';
+    const ownCountry = formData.ownPropertyCountry === 'canada' ? 'Canada'
+      : formData.ownPropertyCountry === 'united_states' ? 'United States'
+      : formData.ownCountryOther || '';
+
     const ownFields: { label: string; value?: string }[] = [
-      { label: 'Address', value: [formData.ownAddress, formData.ownCity, formData.ownProvince, formData.ownPostalCode].filter(Boolean).join(', ') },
-      { label: 'Country', value: formData.ownCountry },
+      { label: 'Address', value: [formData.ownAddress, formData.ownCity, ownRegion, formData.ownPostalCode].filter(Boolean).join(', ') },
+      { label: 'Country', value: ownCountry },
     ];
 
     ownFields.forEach(({ label, value }) => {

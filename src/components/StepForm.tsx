@@ -242,14 +242,30 @@ export default function StepForm({
         if (step1.city) onAnswerChange('ownCity', step1.city);
         if (step1.province) onAnswerChange('ownProvince', step1.province);
         if (step1.postalCode) onAnswerChange('ownPostalCode', step1.postalCode);
-        onAnswerChange('ownCountry', 'Canada');
       }
     } else if (answers['ownSameAddress'] === 'no') {
-      ['ownAddress', 'ownCity', 'ownProvince', 'ownPostalCode', 'ownCountry'].forEach(key => {
+      ['ownPropertyCountry', 'ownAddress', 'ownCity', 'ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion', 'ownPostalCode'].forEach(key => {
         onAnswerChange(key, undefined);
       });
     }
   }, [answers['ownSameAddress']]);
+
+  // Real Estate — clear country-specific own address fields when ownPropertyCountry changes
+  useEffect(() => {
+    const country = answers['ownPropertyCountry'];
+    if (!country) return;
+    // Clear fields not relevant to the selected country
+    const allCountryFields = ['ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion'];
+    const keepByCountry: Record<string, string[]> = {
+      canada: ['ownProvince'],
+      united_states: ['ownState'],
+      other: ['ownCountryOther', 'ownProvinceRegion'],
+    };
+    const keep = keepByCountry[country] || [];
+    allCountryFields.filter(k => !keep.includes(k)).forEach(key => {
+      if (answers[key] !== undefined) onAnswerChange(key, undefined);
+    });
+  }, [answers['ownPropertyCountry']]);
 
   // Real Estate — prefill rental address from About You when rentSameAddress is 'yes'
   useEffect(() => {
@@ -10501,7 +10517,7 @@ export default function StepForm({
               'retSecurityDeposit', 'retParkingStorage', 'retKeyLocation', 'retNotifyName',
             ]);
             const ownQuestionKeys = new Set([
-              'ownSameAddress', 'ownAddress', 'ownCity', 'ownProvince', 'ownPostalCode', 'ownCountry',
+              'ownSameAddress', 'ownPropertyCountry', 'ownAddress', 'ownCity', 'ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion', 'ownPostalCode',
             ]);
             const livingSituationQuestions = globalQuestions.filter(q => !rentQuestionKeys.has(q.key) && !retQuestionKeys.has(q.key) && !ownQuestionKeys.has(q.key) && q.key !== 'hasRealEstate' && q.key !== 'propertyCount' && q.key !== 'propertyTypes');
             const rentQuestions = globalQuestions.filter(q => rentQuestionKeys.has(q.key));
@@ -10554,15 +10570,19 @@ export default function StepForm({
                 {/* Own — primary residence address confirmation */}
                 {answers['livingSituation'] === 'own' && (() => {
                   const ownQuestions = globalQuestions.filter(q =>
-                    ['ownSameAddress', 'ownAddress', 'ownCity', 'ownProvince', 'ownPostalCode', 'ownCountry'].includes(q.key)
+                    ['ownSameAddress', 'ownPropertyCountry', 'ownAddress', 'ownCity', 'ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion', 'ownPostalCode'].includes(q.key)
                   );
                   const ownSameAddr = answers['ownSameAddress'];
                   const showSummary = ownSameAddr === 'yes' && !ownAddressEdit;
                   const ownAddress = (answers['ownAddress'] as string) || '';
                   const ownCity = (answers['ownCity'] as string) || '';
                   const ownProvince = (answers['ownProvince'] as string) || '';
+                  const ownState = (answers['ownState'] as string) || '';
+                  const ownRegion = ownProvince || ownState || (answers['ownProvinceRegion'] as string) || '';
                   const ownPostal = (answers['ownPostalCode'] as string) || '';
-                  const ownCountry = (answers['ownCountry'] as string) || '';
+                  const ownCountry = answers['ownPropertyCountry'] === 'canada' ? 'Canada'
+                    : answers['ownPropertyCountry'] === 'united_states' ? 'United States'
+                    : (answers['ownCountryOther'] as string) || '';
 
                   return (
                     <>
@@ -10584,7 +10604,7 @@ export default function StepForm({
                           </div>
                           <div className="text-white text-sm space-y-0.5">
                             <p>{ownAddress}</p>
-                            <p>{ownCity}{ownProvince ? `${ownCity ? ', ' : ''}${ownProvince}` : ''} {ownPostal}</p>
+                            <p>{ownCity}{ownRegion ? `${ownCity ? ', ' : ''}${ownRegion}` : ''} {ownPostal}</p>
                             {ownCountry && <p>{ownCountry}</p>}
                           </div>
                         </div>

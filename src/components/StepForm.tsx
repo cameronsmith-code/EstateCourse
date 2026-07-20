@@ -10621,7 +10621,7 @@ export default function StepForm({
                 {/* Own — primary residence address confirmation */}
                 {answers['livingSituation'] === 'own' && (() => {
                   const ownQuestions = globalQuestions.filter(q =>
-                    ['ownSameAddress', 'ownPropertyCountry', 'ownAddress', 'ownCity', 'ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion', 'ownPostalCode'].includes(q.key)
+                    ['ownSameAddress', 'ownPropertyCountry', 'ownAddress', 'ownCity', 'ownProvince', 'ownState', 'ownCountryOther', 'ownProvinceRegion', 'ownPostalCode', 'ownHasMortgage'].includes(q.key)
                   );
                   const ownSameAddr = answers['ownSameAddress'];
                   const showSummary = ownSameAddr === 'yes' && !ownAddressEdit;

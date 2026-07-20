@@ -280,7 +280,7 @@ export default function StepForm({
     // Check if there's already a primary residence debt entry
     const primaryIndex = existingData.findIndex(item => item.isPrimaryResidence === true);
     const primaryEntry: Record<string, unknown> = {
-      debtType: 'Mortgage',
+      debtType: 'Traditional Mortgage',
       propertyAddress: fullAddress,
       isPrimaryResidence: true,
     };
@@ -10990,12 +10990,12 @@ export default function StepForm({
               ));
 
             // --- Subsection 2: Mortgage and Property Debt ---
-            const MORTGAGE_TYPES = ['Mortgage', 'HELOC', 'Second Mortgage', 'Other'];
+            const MORTGAGE_TYPES = ['Traditional Mortgage', 'Home Equity Line of Credit (HELOC)', 'Private Mortgage', 'Other'];
             const renderMortgageDebt = () =>
               makeDynamicRenderer('mortgageDebtData', 'mortgageDebtCount', 'Mortgage / Property Debt', (item, hfc) => (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Type:</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">What type of debt is on this property?</label>
                     <select
                       value={(item.debtType as string) || ''}
                       onChange={(e) => hfc('debtType', e.target.value)}

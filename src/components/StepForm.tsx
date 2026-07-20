@@ -10674,7 +10674,18 @@ export default function StepForm({
                         </div>
                       )}
                       {/* Mortgage question — shown after address is entered/confirmed */}
-                      {ownQuestions.filter(q => q.key === 'ownHasMortgage').map(renderQuestion)}
+                      {ownQuestions.filter(q => q.key === 'ownHasMortgage').map(q => {
+                        const displayLabel = typeof q.label === 'function' ? q.label(allAnswers || new Map()) : q.label;
+                        return (
+                          <FormField
+                            key={q.key}
+                            question={{ ...q, label: displayLabel, condition: undefined }}
+                            value={answers[q.key]}
+                            onChange={(value) => onAnswerChange(q.key, value)}
+                            answers={allAnswers}
+                          />
+                        );
+                      })}
                     </>
                   );
                 })()}

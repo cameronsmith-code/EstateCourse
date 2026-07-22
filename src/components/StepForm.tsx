@@ -5606,7 +5606,24 @@ export default function StepForm({
                   return q.condition(answers);
                 }) && (
                   <>
-                    <h5 className="text-sm font-semibold text-blue-300 mt-6 mb-1">Second Advisor Information</h5>
+                    <div className="flex items-center justify-between mt-6 mb-1">
+                      <h5 className="text-sm font-semibold text-blue-300">Second Advisor Information</h5>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          ['fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
+                            onAnswerChange(key, undefined);
+                          });
+                          onAnswerChange('fpHasAdditionalAdvisor', 'no');
+                          onAnswerChange('fpAdditionalAdvisorsData', undefined);
+                        }}
+                        className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-md transition-colors"
+                        aria-label="Remove second advisor"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Remove</span>
+                      </button>
+                    </div>
                     {fpAdvisor2Questions.map(renderQuestion)}
                   </>
                 )}
@@ -5659,7 +5676,30 @@ export default function StepForm({
 
                     sections.push(
                       <React.Fragment key={i}>
-                        <h5 className="text-sm font-semibold text-blue-300 mt-6 mb-1">{ordinals[i]} Advisor Information</h5>
+                        <div className="flex items-center justify-between mt-6 mb-1">
+                          <h5 className="text-sm font-semibold text-blue-300">{ordinals[i]} Advisor Information</h5>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const prevIdx = i - 1;
+                              if (prevIdx >= 0) {
+                                const prevAdvisor = additionalData[prevIdx] || {};
+                                if (prevAdvisor.hasAdditional === 'yes') {
+                                  updateAdvisor(prevIdx, 'hasAdditional', 'no');
+                                }
+                              } else {
+                                onAnswerChange('fpAdvisor2HasAdditionalAdvisor', 'no');
+                              }
+                              const trimmed = additionalData.slice(0, i);
+                              onAnswerChange('fpAdditionalAdvisorsData', trimmed.length > 0 ? trimmed : undefined);
+                            }}
+                            className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-md transition-colors"
+                            aria-label={`Remove ${ordinals[i].toLowerCase()} advisor`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Remove</span>
+                          </button>
+                        </div>
                         <div className="mb-6">
                           <label className="block text-sm font-medium text-gray-300 mb-3">Who does this financial planner work with?</label>
                           <div className="space-y-2">

@@ -5606,10 +5606,169 @@ export default function StepForm({
                   return q.condition(answers);
                 }) && (
                   <>
-                    <h5 className="text-sm font-semibold text-blue-300 mt-6 mb-1">Advisor Information</h5>
+                    <h5 className="text-sm font-semibold text-blue-300 mt-6 mb-1">Second Advisor Information</h5>
                     {fpAdvisor2Questions.map(renderQuestion)}
                   </>
                 )}
+                {(() => {
+                  if (answers['fpAdvisor2HasAdditionalAdvisor'] !== 'yes') return null;
+                  const ordinals = ['Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh'];
+                  const additionalData = (answers['fpAdditionalAdvisorsData'] as Array<Record<string, unknown>>) || [];
+                  const serviceOptions = [
+                    { value: 'investments', label: 'Investments' },
+                    { value: 'retirement_planning', label: 'Retirement planning' },
+                    { value: 'insurance', label: 'Insurance' },
+                    { value: 'estate_planning', label: 'Estate planning' },
+                    { value: 'tax_planning', label: 'Tax planning' },
+                    { value: 'cash_flow', label: 'Cash flow' },
+                    { value: 'business_planning', label: 'Business planning' },
+                    { value: 'other', label: 'Other' },
+                  ];
+                  const allStepAnswers = Object.fromEntries(
+                    Array.from(allAnswers?.entries() || []).flatMap(([_, s]) => Object.entries(s))
+                  );
+                  const hasSpouseAdv = (allStepAnswers['maritalStatus'] === 'married' || allStepAnswers['maritalStatus'] === 'common_law');
+                  const client1NameAdv = (allStepAnswers['fullName'] as string) || 'Client 1';
+                  const client2NameAdv = (allStepAnswers['spouseName'] as string) || 'Client 2';
+                  const worksWithOptions = hasSpouseAdv
+                    ? [{ value: 'client1', label: client1NameAdv }, { value: 'client2', label: client2NameAdv }]
+                    : [{ value: 'client1', label: client1NameAdv }];
+
+                  const updateAdvisor = (idx: number, field: string, val: unknown) => {
+                    const updated = [...additionalData];
+                    while (updated.length <= idx) updated.push({});
+                    updated[idx] = { ...updated[idx], [field]: val };
+                    onAnswerChange('fpAdditionalAdvisorsData', updated);
+                  };
+
+                  const sections: React.ReactElement[] = [];
+                  let showNext = true;
+                  for (let i = 0; i < ordinals.length && showNext; i++) {
+                    const advisor = additionalData[i] || {};
+                    const isCameron = !!(advisor.isCameronSmith);
+                    const selectedServices = (advisor.services as string[]) || [];
+                    const selectedWorksWith = (advisor.worksWith as string[]) || [];
+
+                    if (isCameron) {
+                      if (!advisor.firm) updateAdvisor(i, 'firm', 'Clarify Wealth Ltd.');
+                      if (!advisor.name) updateAdvisor(i, 'name', 'Cameron Smith');
+                      if (!advisor.phone) updateAdvisor(i, 'phone', '647-448-5963');
+                      if (!advisor.email) updateAdvisor(i, 'email', 'cameron.smith@ipcsecurities.com');
+                      if (!advisor.website) updateAdvisor(i, 'website', 'www.clarifywealth.ca');
+                    }
+
+                    sections.push(
+                      <React.Fragment key={i}>
+                        <h5 className="text-sm font-semibold text-blue-300 mt-6 mb-1">{ordinals[i]} Advisor Information</h5>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-3">Who does this financial planner work with?</label>
+                          <div className="space-y-2">
+                            {worksWithOptions.map(opt => (
+                              <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                <input type="checkbox" checked={selectedWorksWith.includes(opt.value)}
+                                  onChange={(e) => {
+                                    const next = e.target.checked ? [...selectedWorksWith, opt.value] : selectedWorksWith.filter(v => v !== opt.value);
+                                    updateAdvisor(i, 'worksWith', next);
+                                  }}
+                                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                                <span className="ml-3 text-gray-300">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="mb-6">
+                          <label className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                            <input type="checkbox" checked={isCameron}
+                              onChange={(e) => {
+                                updateAdvisor(i, 'isCameronSmith', e.target.checked);
+                                if (!e.target.checked) {
+                                  ['firm','name','phone','email','website'].forEach(f => updateAdvisor(i, f, ''));
+                                }
+                              }}
+                              className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                            <span className="ml-3 text-gray-300">Cameron Smith CFP®</span>
+                          </label>
+                        </div>
+                        {!isCameron && (
+                          <>
+                            {(['firm','name','phone','email','website'] as const).map(field => (
+                              <div key={field} className="mb-6">
+                                <label className="block text-sm font-medium text-gray-300 mb-2 capitalize">
+                                  {field === 'name' ? 'Advisor name' : field === 'firm' ? 'Firm' : field === 'website' ? 'Website (optional)' : field.charAt(0).toUpperCase() + field.slice(1)}
+                                </label>
+                                <input type={field === 'email' ? 'email' : 'text'} value={(advisor[field] as string) || ''}
+                                  onChange={(e) => updateAdvisor(i, field, e.target.value)}
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                              </div>
+                            ))}
+                          </>
+                        )}
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-3">What do they help you with?</label>
+                          <div className="space-y-2">
+                            {serviceOptions.map(opt => (
+                              <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                <input type="checkbox" checked={selectedServices.includes(opt.value)}
+                                  onChange={(e) => {
+                                    const next = e.target.checked ? [...selectedServices, opt.value] : selectedServices.filter(v => v !== opt.value);
+                                    updateAdvisor(i, 'services', next);
+                                  }}
+                                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                                <span className="ml-3 text-gray-300">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">How long have you worked together?</label>
+                          <input type="text" value={(advisor.duration as string) || ''}
+                            onChange={(e) => updateAdvisor(i, 'duration', e.target.value)}
+                            placeholder="e.g., 5 years"
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-3">May we include this professional in your executor's contact list and action guide?</label>
+                          <div className="space-y-2">
+                            {[{value:'yes',label:'Yes'},{value:'no',label:'No'}].map(opt => (
+                              <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                <input type="radio" name={`fpAdditional_${i}_include`} value={opt.value}
+                                  checked={advisor.includeInContactList === opt.value}
+                                  onChange={() => updateAdvisor(i, 'includeInContactList', opt.value)}
+                                  className="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                                <span className="ml-3 text-gray-300">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        {i < ordinals.length - 1 && (
+                          <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-300 mb-3">Is there an additional Financial Planner/Wealth Advisor that you work with?</label>
+                            <div className="space-y-2">
+                              {[{value:'yes',label:'Yes'},{value:'no',label:'No'}].map(opt => (
+                                <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                  <input type="radio" name={`fpAdditional_${i}_hasMore`} value={opt.value}
+                                    checked={advisor.hasAdditional === opt.value}
+                                    onChange={() => {
+                                      updateAdvisor(i, 'hasAdditional', opt.value);
+                                      if (opt.value === 'no') {
+                                        const trimmed = additionalData.slice(0, i + 1);
+                                        onAnswerChange('fpAdditionalAdvisorsData', trimmed);
+                                      }
+                                    }}
+                                    className="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                                  <span className="ml-3 text-gray-300">{opt.label}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+
+                    showNext = advisor.hasAdditional === 'yes' && i < ordinals.length - 1;
+                  }
+                  return <>{sections}</>;
+                })()}
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Accountant (CPA)</h4>
                 {acctQuestions.map(renderQuestion)}

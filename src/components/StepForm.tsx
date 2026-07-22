@@ -5496,7 +5496,7 @@ export default function StepForm({
             };
 
             const fpKeys = new Set([
-              'fpHasAdvisor', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone',
+              'fpHasAdvisor', 'fpAdvisor1WorksWith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone',
               'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services',
               'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpHasAdditionalAdvisor',
             ]);

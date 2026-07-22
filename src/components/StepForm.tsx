@@ -5558,10 +5558,21 @@ export default function StepForm({
             const spHealthQuestions = step.questions.filter(q => spHealthKeys.has(q.key));
             const phHealthQuestions = step.questions.filter(q => phHealthKeys.has(q.key));
 
+            const fpCheckboxKey = 'fpAdvisor1IsCameronSmith';
+            const fpCheckboxIdx = fpQuestions.findIndex(q => q.key === fpCheckboxKey);
+            const fpPreCheckbox = fpCheckboxIdx >= 0 ? fpQuestions.slice(0, fpCheckboxIdx) : [];
+            const fpCheckboxAndRest = fpCheckboxIdx >= 0 ? fpQuestions.slice(fpCheckboxIdx) : fpQuestions;
+
             return (
               <>
                 <h4 className="text-base font-semibold text-blue-400 mt-4 mb-1">Financial Planner / Investment Advisor</h4>
-                {fpQuestions.map(renderQuestion)}
+                {fpPreCheckbox.map(renderQuestion)}
+                {fpCheckboxAndRest.length > 0 && (
+                  <>
+                    <h5 className="text-sm font-semibold text-blue-300 mt-4 mb-1">Advisor Information</h5>
+                    {fpCheckboxAndRest.map(renderQuestion)}
+                  </>
+                )}
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Accountant (CPA)</h4>
                 {acctQuestions.map(renderQuestion)}

@@ -261,6 +261,17 @@ interface FormData {
   fpAdvisor1DocLocation?: string;
   fpAdvisor1IncludeInContactList?: string;
   fpHasAdditionalAdvisor?: string;
+  fpAdvisor2WorksWith?: string;
+  fpAdvisor2IsCameronSmith?: boolean;
+  fpAdvisor2Firm?: string;
+  fpAdvisor2Name?: string;
+  fpAdvisor2Phone?: string;
+  fpAdvisor2Email?: string;
+  fpAdvisor2Website?: string;
+  fpAdvisor2Services?: string[];
+  fpAdvisor2Duration?: string;
+  fpAdvisor2IncludeInContactList?: string;
+  fpAdvisor2HasAdditionalAdvisor?: string;
   fpAdditionalAdvisorsData?: Array<{
     firm?: string;
     name?: string;
@@ -7993,9 +8004,23 @@ You should explore this as an option with your legal and CFP® professionals bec
       includeInContactList: formData.fpAdvisor1IncludeInContactList,
     }, 'fp_adv1');
 
+    if (formData.fpAdvisor1IsCameronSmith && (formData.fpAdvisor2Name || formData.fpAdvisor2Firm)) {
+      renderAdvisorSection('Financial Planner / Wealth Advisor — Second Advisor:', {
+        firm: formData.fpAdvisor2Firm,
+        name: formData.fpAdvisor2Name,
+        phone: formData.fpAdvisor2Phone,
+        email: formData.fpAdvisor2Email,
+        website: formData.fpAdvisor2Website,
+        worksWith: formData.fpAdvisor2WorksWith,
+        services: formData.fpAdvisor2Services,
+        duration: formData.fpAdvisor2Duration,
+        includeInContactList: formData.fpAdvisor2IncludeInContactList,
+      }, 'fp_adv2');
+    }
+
     const additionalAdvisors = formData.fpAdditionalAdvisorsData || [];
     additionalAdvisors.forEach((advisor, i) => {
-      renderAdvisorSection(`Financial Planner / Wealth Advisor — Additional #${i + 1}:`, advisor, `fp_adv${i + 2}`);
+      renderAdvisorSection(`Financial Planner / Wealth Advisor — Additional #${i + 1}:`, advisor, `fp_adv${i + 3}`);
     });
   }
 

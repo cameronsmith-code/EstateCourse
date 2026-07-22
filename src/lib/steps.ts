@@ -784,6 +784,117 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
+        key: 'fpAdvisor2WorksWith',
+        label: 'Who does this financial planner work with?',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+          if (hasSpouse) {
+            return [
+              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+            ];
+          }
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+      },
+      {
+        key: 'fpAdvisor2IsCameronSmith',
+        label: 'Cameron Smith CFP®',
+        type: 'checkbox',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+      },
+      {
+        key: 'fpAdvisor2Firm',
+        label: 'Firm',
+        type: 'text',
+        placeholder: 'Enter firm name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith && !formData.fpAdvisor2IsCameronSmith,
+      },
+      {
+        key: 'fpAdvisor2Name',
+        label: 'Advisor name',
+        type: 'text',
+        placeholder: 'Enter advisor name',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith && !formData.fpAdvisor2IsCameronSmith,
+      },
+      {
+        key: 'fpAdvisor2Phone',
+        label: 'Phone',
+        type: 'text',
+        placeholder: 'Enter phone number',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith && !formData.fpAdvisor2IsCameronSmith,
+      },
+      {
+        key: 'fpAdvisor2Email',
+        label: 'Email',
+        type: 'email',
+        placeholder: 'Enter email address',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith && !formData.fpAdvisor2IsCameronSmith,
+      },
+      {
+        key: 'fpAdvisor2Website',
+        label: 'Website (optional)',
+        type: 'text',
+        placeholder: 'Enter website URL',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith && !formData.fpAdvisor2IsCameronSmith,
+      },
+      {
+        key: 'fpAdvisor2Services',
+        label: 'What do they help you with?',
+        type: 'checkbox-group',
+        options: [
+          { value: 'investments', label: 'Investments' },
+          { value: 'retirement_planning', label: 'Retirement planning' },
+          { value: 'insurance', label: 'Insurance' },
+          { value: 'estate_planning', label: 'Estate planning' },
+          { value: 'tax_planning', label: 'Tax planning' },
+          { value: 'cash_flow', label: 'Cash flow' },
+          { value: 'business_planning', label: 'Business planning' },
+          { value: 'other', label: 'Other' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+      },
+      {
+        key: 'fpAdvisor2Duration',
+        label: 'How long have you worked together?',
+        type: 'text',
+        placeholder: 'e.g., 5 years',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+      },
+      {
+        key: 'fpAdvisor2IncludeInContactList',
+        label: 'May we include this professional in your executor\'s contact list and action guide?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+      },
+      {
+        key: 'fpAdvisor2HasAdditionalAdvisor',
+        label: 'Is there an additional Financial Planner/Wealth Advisor that you work with?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+      },
+      {
         key: 'acctHasAccountant',
         label: 'Do you currently work with an accountant (CPA)?',
         type: 'radio',

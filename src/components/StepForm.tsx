@@ -101,7 +101,8 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
-      ['fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional'].forEach(key => {
+      ['fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional',
+       'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -118,13 +119,31 @@ export default function StepForm({
       onAnswerChange('fpAdvisor1Email', 'cameron.smith@ipcsecurities.com');
       onAnswerChange('fpAdvisor1Website', 'www.clarifywealth.ca');
     } else if (answers['fpAdvisor1IsCameronSmith'] === false) {
-      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website'].forEach(key => {
+      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website',
+       'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
       });
     }
   }, [answers['fpAdvisor1IsCameronSmith']]);
+
+  // Auto-populate second Cameron Smith CFP® details when checkbox is selected
+  useEffect(() => {
+    if (answers['fpAdvisor2IsCameronSmith'] === true) {
+      onAnswerChange('fpAdvisor2Firm', 'Clarify Wealth Ltd.');
+      onAnswerChange('fpAdvisor2Name', 'Cameron Smith');
+      onAnswerChange('fpAdvisor2Phone', '647-448-5963');
+      onAnswerChange('fpAdvisor2Email', 'cameron.smith@ipcsecurities.com');
+      onAnswerChange('fpAdvisor2Website', 'www.clarifywealth.ca');
+    } else if (answers['fpAdvisor2IsCameronSmith'] === false) {
+      ['fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website'].forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['fpAdvisor2IsCameronSmith']]);
 
   useEffect(() => {
     if (answers['fpHasAdditionalAdvisor'] !== 'yes') {
@@ -5516,6 +5535,14 @@ export default function StepForm({
               'fpHasAdvisor', 'fpAdvisor1WorksWith', 'fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone',
               'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services',
               'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpHasAdditionalAdvisor',
+              'fpAdvisor2WorksWith', 'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone',
+              'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services',
+              'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2HasAdditionalAdvisor',
+            ]);
+            const fpAdvisor2Keys = new Set([
+              'fpAdvisor2WorksWith', 'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone',
+              'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services',
+              'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2HasAdditionalAdvisor',
             ]);
             const acctKeys = new Set([
               'acctHasAccountant', 'acctAdvisor1Firm', 'acctAdvisor1Name', 'acctAdvisor1Phone',
@@ -5550,7 +5577,8 @@ export default function StepForm({
               'ph_health_1_name', 'ph_health_1_pharmacy', 'ph_health_1_phone',
             ]);
 
-            const fpQuestions = step.questions.filter(q => fpKeys.has(q.key));
+            const fpQuestions = step.questions.filter(q => fpKeys.has(q.key) && !fpAdvisor2Keys.has(q.key));
+            const fpAdvisor2Questions = step.questions.filter(q => fpAdvisor2Keys.has(q.key));
             const acctQuestions = step.questions.filter(q => acctKeys.has(q.key));
             const lawQuestions = step.questions.filter(q => lawKeys.has(q.key));
             const insQuestions = step.questions.filter(q => insKeys.has(q.key));
@@ -5571,6 +5599,15 @@ export default function StepForm({
                   <>
                     <h5 className="text-sm font-semibold text-blue-300 mt-4 mb-1">Advisor Information</h5>
                     {fpCheckboxAndRest.map(renderQuestion)}
+                  </>
+                )}
+                {fpAdvisor2Questions.length > 0 && fpAdvisor2Questions.some(q => {
+                  if (!q.condition) return true;
+                  return q.condition(answers);
+                }) && (
+                  <>
+                    <h5 className="text-sm font-semibold text-blue-300 mt-6 mb-1">Advisor Information</h5>
+                    {fpAdvisor2Questions.map(renderQuestion)}
                   </>
                 )}
 

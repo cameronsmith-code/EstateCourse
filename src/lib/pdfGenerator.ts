@@ -7963,9 +7963,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       const worksWithStr = (advisor as { worksWithClients?: string }).worksWithClients || (advisor as { worksWith?: string }).worksWith || '';
       const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
       const worksWithLabels = worksWithArr.map((c: string) => c === 'client1' ? client1Name : c === 'client2' ? client2Name : '').filter(Boolean);
-      if (hasSpouse) {
-        renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
-      }
+      renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
 
       renderEstateRow('Firm:', advisor.firm || '', `${fieldPrefix}_firm`);
       renderEstateRow('Advisor Name:', advisor.name || '', `${fieldPrefix}_name`);
@@ -8036,9 +8034,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       const worksWithStr = acct.worksWithClients || '';
       const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
       const worksWithLabels = worksWithArr.map((c: string) => c === 'client1' ? client1Name : c === 'client2' ? client2Name : '').filter(Boolean);
-      if (hasSpouse) {
-        renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
-      }
+      renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
 
       renderEstateRow('Firm:', acct.firm || '', `${fieldPrefix}_firm`);
       renderEstateRow('Accountant Name:', acct.name || '', `${fieldPrefix}_name`);
@@ -8106,9 +8102,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       const worksWithStr = lawyer.worksWithClients || '';
       const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
       const worksWithLabels = worksWithArr.map((c: string) => c === 'client1' ? client1Name : c === 'client2' ? client2Name : '').filter(Boolean);
-      if (hasSpouse) {
-        renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
-      }
+      renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
 
       renderEstateRow('Firm:', lawyer.firm || '', `${fieldPrefix}_firm`);
       renderEstateRow('Lawyer Name:', lawyer.name || '', `${fieldPrefix}_name`);
@@ -8190,9 +8184,7 @@ You should explore this as an option with your legal and CFP® professionals bec
       const worksWithStr = ins.worksWithClients || '';
       const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
       const worksWithLabels = worksWithArr.map((c: string) => c === 'client1' ? client1Name : c === 'client2' ? client2Name : '').filter(Boolean);
-      if (hasSpouse) {
-        renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
-      }
+      renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
 
       renderEstateRow('Firm:', ins.firm || '', `${fieldPrefix}_firm`);
       renderEstateRow('Advisor Name:', ins.name || '', `${fieldPrefix}_name`);

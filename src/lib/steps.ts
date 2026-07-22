@@ -713,6 +713,23 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
+        key: 'fpAdvisor1WorksWith',
+        label: 'Who does this person work for?',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+          if (hasSpouse) {
+            return [
+              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+            ];
+          }
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+        },
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
+      },
+      {
         key: 'fpAdvisor1Services',
         label: 'What do they help you with?',
         type: 'checkbox-group',
@@ -803,10 +820,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'acctAdvisor1WorksWith',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          return hasSpouse ? 'Which client(s) does this accountant work with?' : 'Do you work with this accountant?';
-        },
+        label: 'Who does this person work for?',
         type: 'checkbox-group',
         options: (answers: Map<number, Record<string, unknown>>) => {
           const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
@@ -816,7 +830,7 @@ export const STEPS: Step[] = [
               { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
             ];
           }
-          return [{ value: 'client1', label: 'Yes' }];
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
         },
         required: false,
         condition: (formData: Record<string, string>) => formData.acctHasAccountant === 'yes',
@@ -919,10 +933,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'lawAdvisor1WorksWith',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          return hasSpouse ? 'Which client(s) does this lawyer work with?' : 'Do you work with this lawyer?';
-        },
+        label: 'Who does this person work for?',
         type: 'checkbox-group',
         options: (answers: Map<number, Record<string, unknown>>) => {
           const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
@@ -932,7 +943,7 @@ export const STEPS: Step[] = [
               { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
             ];
           }
-          return [{ value: 'client1', label: 'Yes' }];
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
         },
         required: false,
         condition: (formData: Record<string, string>) => formData.lawHasLawyer === 'yes',
@@ -1036,10 +1047,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'insAdvisor1WorksWith',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
-          return hasSpouse ? 'Which client(s) does this advisor work with?' : 'Do you work with this advisor?';
-        },
+        label: 'Who does this person work for?',
         type: 'checkbox-group',
         options: (answers: Map<number, Record<string, unknown>>) => {
           const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
@@ -1049,7 +1057,7 @@ export const STEPS: Step[] = [
               { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
             ];
           }
-          return [{ value: 'client1', label: 'Yes' }];
+          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
         },
         required: false,
         condition: (formData: Record<string, string>) => formData.insHasAdvisor && formData.insHasAdvisor !== 'na',

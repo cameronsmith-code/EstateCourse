@@ -678,6 +678,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter firm name',
         required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Name',
@@ -685,6 +686,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter advisor name',
         required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Phone',
@@ -692,6 +694,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter phone number',
         required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Email',
@@ -699,6 +702,7 @@ export const STEPS: Step[] = [
         type: 'email',
         placeholder: 'Enter email address',
         required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Website',
@@ -706,6 +710,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter website URL',
         required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Services',
@@ -722,6 +727,7 @@ export const STEPS: Step[] = [
           { value: 'other', label: 'Other' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1Duration',
@@ -729,6 +735,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'e.g., 5 years',
         required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor1IncludeInContactList',
@@ -739,6 +746,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'fpHasAdditionalAdvisor',
@@ -749,6 +757,7 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
         key: 'acctHasAccountant',

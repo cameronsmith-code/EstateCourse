@@ -690,12 +690,19 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
       },
       {
+        key: 'fpAdvisor1IsCameronSmith',
+        label: 'Cameron Smith CFP®',
+        type: 'checkbox',
+        required: false,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
+      },
+      {
         key: 'fpAdvisor1Firm',
         label: 'Firm',
         type: 'text',
         placeholder: 'Enter firm name',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !formData.fpAdvisor1IsCameronSmith,
       },
       {
         key: 'fpAdvisor1Name',
@@ -703,7 +710,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter advisor name',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !formData.fpAdvisor1IsCameronSmith,
       },
       {
         key: 'fpAdvisor1Phone',
@@ -711,7 +718,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter phone number',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !formData.fpAdvisor1IsCameronSmith,
       },
       {
         key: 'fpAdvisor1Email',
@@ -719,7 +726,7 @@ export const STEPS: Step[] = [
         type: 'email',
         placeholder: 'Enter email address',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !formData.fpAdvisor1IsCameronSmith,
       },
       {
         key: 'fpAdvisor1Website',
@@ -727,7 +734,7 @@ export const STEPS: Step[] = [
         type: 'text',
         placeholder: 'Enter website URL',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !formData.fpAdvisor1IsCameronSmith,
       },
       {
         key: 'fpAdvisor1Services',

@@ -101,13 +101,30 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
-      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional'].forEach(key => {
+      ['fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
       });
     }
   }, [answers['fpHasAdvisor']]);
+
+  // Auto-populate Cameron Smith CFP® details when checkbox is selected
+  useEffect(() => {
+    if (answers['fpAdvisor1IsCameronSmith'] === true) {
+      onAnswerChange('fpAdvisor1Firm', 'Clarify Wealth Ltd.');
+      onAnswerChange('fpAdvisor1Name', 'Cameron Smith');
+      onAnswerChange('fpAdvisor1Phone', '647-448-5963');
+      onAnswerChange('fpAdvisor1Email', 'cameron.smith@ipcsecurities.com');
+      onAnswerChange('fpAdvisor1Website', 'www.clarifywealth.ca');
+    } else if (answers['fpAdvisor1IsCameronSmith'] === false) {
+      ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website'].forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['fpAdvisor1IsCameronSmith']]);
 
   useEffect(() => {
     if (answers['fpHasAdditionalAdvisor'] !== 'yes') {
@@ -5496,7 +5513,7 @@ export default function StepForm({
             };
 
             const fpKeys = new Set([
-              'fpHasAdvisor', 'fpAdvisor1WorksWith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone',
+              'fpHasAdvisor', 'fpAdvisor1WorksWith', 'fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone',
               'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services',
               'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpHasAdditionalAdvisor',
             ]);

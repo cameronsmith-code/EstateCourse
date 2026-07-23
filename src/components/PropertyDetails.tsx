@@ -306,7 +306,7 @@ export default function PropertyDetails({
       {/* Ownership */}
       {country && (
         <div className="pt-2 border-t border-gray-700">
-          <label className="block text-sm font-semibold text-gray-200 mb-3">Ownership</label>
+          <label className="block text-sm font-semibold text-gray-200 mb-3">Current Ownership</label>
           <div className="space-y-2">
             {/* Client 1 */}
             <label className="flex items-center">

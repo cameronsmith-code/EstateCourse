@@ -23,6 +23,12 @@ export type PropertyData = {
   purchasedByOtherOwners: OtherOwner[];
   purchasedByOwners: string[];
   purchasedByOwnershipPercentages: Record<string, string>;
+  inhabitedAnnually: string;
+  usedForIncome: string;
+  claimedCCA: string;
+  recordsLocation: string;
+  claimedPREOtherProperty: string;
+  preDesignatedYears: string[];
 };
 
 type Props = {
@@ -830,6 +836,221 @@ export default function PropertyDetails({
               </div>
             )}
           </div>
+
+          {/* Inhabited annually */}
+          <div>
+            <label className={labelClass}>
+              Has {propertyName} been inhabited by {client1Name}{hasSpouse && client2Name ? `, ${client2Name}` : ''} or one or more of your children for at least some part of every year since it was purchased?
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name={`inhabitedAnnually-${index}`}
+                  value="yes"
+                  checked={data.inhabitedAnnually === 'yes'}
+                  onChange={() => onChange('inhabitedAnnually', 'yes')}
+                  className="mr-2"
+                />
+                <span className="text-gray-300">Yes</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name={`inhabitedAnnually-${index}`}
+                  value="no"
+                  checked={data.inhabitedAnnually === 'no'}
+                  onChange={() => onChange('inhabitedAnnually', 'no')}
+                  className="mr-2"
+                />
+                <span className="text-gray-300">No</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Used for income */}
+          <div>
+            <label className={labelClass}>
+              Since the date of purchase, has this property ever been used primarily to earn income (e.g., rented to third parties)?
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name={`usedForIncome-${index}`}
+                  value="yes"
+                  checked={data.usedForIncome === 'yes'}
+                  onChange={() => {
+                    onChange('usedForIncome', 'yes');
+                  }}
+                  className="mr-2"
+                />
+                <span className="text-gray-300">Yes</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name={`usedForIncome-${index}`}
+                  value="no"
+                  checked={data.usedForIncome === 'no'}
+                  onChange={() => {
+                    onChange('usedForIncome', 'no');
+                    onMultiChange({ claimedCCA: '', recordsLocation: '' });
+                  }}
+                  className="mr-2"
+                />
+                <span className="text-gray-300">No</span>
+              </label>
+            </div>
+          </div>
+
+          {/* CCA claim (conditional on usedForIncome = yes) */}
+          {data.usedForIncome === 'yes' && (
+            <div className="ml-6 space-y-5">
+              <div>
+                <label className={labelClass}>
+                  Did you ever claim Capital Cost Allowance (depreciation) when filing with the CRA?
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`claimedCCA-${index}`}
+                      value="yes"
+                      checked={data.claimedCCA === 'yes'}
+                      onChange={() => onChange('claimedCCA', 'yes')}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">Yes</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`claimedCCA-${index}`}
+                      value="no"
+                      checked={data.claimedCCA === 'no'}
+                      onChange={() => {
+                        onChange('claimedCCA', 'no');
+                        onChange('recordsLocation', '');
+                      }}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">No</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`claimedCCA-${index}`}
+                      value="not_sure"
+                      checked={data.claimedCCA === 'not_sure'}
+                      onChange={() => {
+                        onChange('claimedCCA', 'not_sure');
+                        onChange('recordsLocation', '');
+                      }}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">I'm/We're not sure</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Records location (conditional on claimedCCA = yes) */}
+              {data.claimedCCA === 'yes' && (
+                <div>
+                  <label className={labelClass}>Where are your records kept?</label>
+                  <input
+                    type="text"
+                    value={data.recordsLocation || ''}
+                    onChange={(e) => onChange('recordsLocation', e.target.value)}
+                    placeholder="Enter where records are kept"
+                    className={inputClass}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PRE claimed for another property */}
+          <div>
+            <label className={labelClass}>
+              Aside from the year you purchased this property, were there any other years where you already claimed the Principal Residence Exemption for a different property you sold?
+            </label>
+            <p className="text-xs text-gray-400 mb-3 italic">
+              Guidance: If you sold your previous home in 2011 and bought this one in 2011, the 'one-plus' rule covers both for that year, so you would answer 'No' unless you sold another property later during your ownership of this home.
+            </p>
+            <div className="flex gap-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name={`claimedPREOtherProperty-${index}`}
+                  value="yes"
+                  checked={data.claimedPREOtherProperty === 'yes'}
+                  onChange={() => onChange('claimedPREOtherProperty', 'yes')}
+                  className="mr-2"
+                />
+                <span className="text-gray-300">Yes</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name={`claimedPREOtherProperty-${index}`}
+                  value="no"
+                  checked={data.claimedPREOtherProperty === 'no'}
+                  onChange={() => {
+                    onChange('claimedPREOtherProperty', 'no');
+                    onChange('preDesignatedYears', []);
+                  }}
+                  className="mr-2"
+                />
+                <span className="text-gray-300">No</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Designated years checkboxes (conditional on claimedPREOtherProperty = yes) */}
+          {data.claimedPREOtherProperty === 'yes' && (
+            <div className="ml-6">
+              <label className={labelClass}>What specific years were designated for the other property(ies) sold?</label>
+              <p className="text-xs text-yellow-400 mb-3">
+                This data will be important for a POA or Executor to use when filing taxes.
+              </p>
+              {(() => {
+                const startYear = parseInt(data.purchaseYear || '', 10);
+                if (isNaN(startYear)) {
+                  return (
+                    <p className="text-sm text-gray-400">
+                      Please select a purchase year above to see the list of eligible years.
+                    </p>
+                  );
+                }
+                const selectedYears = data.preDesignatedYears || [];
+                const yearList: number[] = [];
+                for (let y = startYear; y <= currentYear; y++) yearList.push(y);
+                const toggleYear = (year: string) => {
+                  if (selectedYears.includes(year)) {
+                    onChange('preDesignatedYears', selectedYears.filter(yr => yr !== year));
+                  } else {
+                    onChange('preDesignatedYears', [...selectedYears, year]);
+                  }
+                };
+                return (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                    {yearList.map((y) => (
+                      <label key={y} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedYears.includes(String(y))}
+                          onChange={() => toggleYear(String(y))}
+                          className="mr-2"
+                        />
+                        <span className="text-gray-300 text-sm">{y}</span>
+                      </label>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </div>
       )}
     </div>

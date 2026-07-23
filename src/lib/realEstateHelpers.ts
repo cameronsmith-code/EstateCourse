@@ -1,7 +1,7 @@
 import type { StepQuestion } from './steps';
 
 const PROPERTY_TYPES = [
-  'Principal residence',
+  'Primary residence',
   'Cottage',
   'Vacation property',
   'Rental property',
@@ -14,7 +14,7 @@ const PROPERTY_TYPES = [
 ];
 
 const PROPERTY_USE_OPTIONS = [
-  { value: 'principal_residence', label: 'Principal residence' },
+  { value: 'principal_residence', label: 'Primary residence' },
   { value: 'cottage', label: 'Cottage / Seasonal home' },
   { value: 'vacation', label: 'Vacation property' },
   { value: 'rental', label: 'Rental property' },

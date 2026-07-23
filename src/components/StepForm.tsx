@@ -241,6 +241,15 @@ export default function StepForm({
     });
   }, [answers['propertyCount']]);
 
+  // Real Estate — primary home cleanup when living situation changes away from 'own'
+  useEffect(() => {
+    if (answers['livingSituation'] !== 'own') {
+      if (answers['primaryHomeData'] !== undefined) {
+        onAnswerChange('primaryHomeData', undefined);
+      }
+    }
+  }, [answers['livingSituation']]);
+
   // Real Estate — living situation gate cleanup
   useEffect(() => {
     if (answers['livingSituation'] !== 'rent') {
@@ -11270,6 +11279,60 @@ export default function StepForm({
                     {retQuestions.map(renderQuestion)}
                   </>
                 )}
+
+                {/* Primary Home subsection (only when living situation is 'own') */}
+                {answers['livingSituation'] === 'own' && (() => {
+                  const primaryHomeData = (answers['primaryHomeData'] as Partial<PropertyData>) || { type: 'Primary Home', name: '', country: '', province: '', state: '', city: '', owners: [], otherOwners: [], ownershipPercentages: {} };
+
+                  const handlePrimaryHomeChange = (field: keyof PropertyData, value: unknown) => {
+                    const updated = { ...primaryHomeData, [field]: value };
+                    onAnswerChange('primaryHomeData', updated);
+                  };
+                  const handlePrimaryHomeMultiChange = (updates: Partial<PropertyData>) => {
+                    const updated = { ...primaryHomeData, ...updates };
+                    onAnswerChange('primaryHomeData', updated);
+                  };
+
+                  // Gather predefined entities (same logic as Additional Properties)
+                  const corporationsData = (allFormData['corporationsData'] as Array<Record<string, string>>) || [];
+                  const trusts: string[] = [];
+                  for (let i = 1; i <= 4; i++) {
+                    const tn = allFormData[`trust${i > 1 ? i : ''}LegalName`];
+                    if (tn) trusts.push(tn);
+                  }
+                  if (allFormData['trustLegalName']) trusts.push(allFormData['trustLegalName']);
+                  const partnerships: string[] = [];
+                  const c1Partnerships = (allFormData['client1PartnershipsData'] as Array<Record<string, string>>) || [];
+                  c1Partnerships.forEach(p => { if (p.registeredName) partnerships.push(p.registeredName); });
+                  const c2Partnerships = (allFormData['client2PartnershipsData'] as Array<Record<string, string>>) || [];
+                  c2Partnerships.forEach(p => { if (p.registeredName) partnerships.push(p.registeredName); });
+
+                  const predefinedPeople: Array<{ name: string; phone?: string; city?: string }> = [];
+                  if (basicAnswers['fullName']) predefinedPeople.push({ name: basicAnswers['fullName'] as string });
+                  if (hasSpouseStep9 && basicAnswers['spouseName']) predefinedPeople.push({ name: basicAnswers['spouseName'] as string });
+                  const c1SoleProps = (allFormData['client1SolePropsData'] as Array<Record<string, string>>) || [];
+                  c1SoleProps.forEach(sp => { if (sp.registeredName) predefinedPeople.push({ name: sp.registeredName }); });
+
+                  return (
+                    <div className="mt-6 space-y-4">
+                      <h4 className="text-base font-semibold text-blue-400 mb-1">Primary Home</h4>
+                      <PropertyDetails
+                        index={0}
+                        propertyType="Primary Home"
+                        data={primaryHomeData}
+                        client1Name={client1Name}
+                        client2Name={client2Name}
+                        hasSpouse={hasSpouseStep9}
+                        corporations={corporationsData}
+                        trusts={trusts}
+                        partnerships={partnerships}
+                        predefinedPeople={predefinedPeople}
+                        onChange={(field, value) => handlePrimaryHomeChange(field, value)}
+                        onMultiChange={(updates) => handlePrimaryHomeMultiChange(updates)}
+                      />
+                    </div>
+                  );
+                })()}
 
                 {/* Additional Properties subheading */}
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Additional Properties</h4>

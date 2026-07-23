@@ -6186,7 +6186,6 @@ export default function StepForm({
                   );
                 })()}
 
-                <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Family Physician</h4>
                 {(() => {
                   const basicAns = allAnswers?.get(1) || {};
                   const step3Ans = allAnswers?.get(3) || {};
@@ -6215,86 +6214,144 @@ export default function StepForm({
                     ...eligibleChildPatients.map(c => ({ value: `child:${c.name}`, label: c.name })),
                   ];
 
-                  const physicianCards = [0, 1, 2];
-                  const nameKeys = ['fp_health_0_name', 'fp_health_1_name', 'fp_health_2_name'];
-
-                  return physicianCards.map((physIdx) => {
-                    const nameQ = fpHealthQuestions.find(q => q.key === nameKeys[physIdx]);
-                    if (!nameQ) return null;
-                    if (nameQ.condition && !nameQ.condition(answers)) return null;
-                    const nameVal = (answers[nameKeys[physIdx]] as string) || '';
-                    if (!nameVal && physIdx > 0) return null;
-
-                    const restKeys = physIdx === 0
-                      ? ['fp_health_0_clinic', 'fp_health_0_city', 'fp_health_0_phone', 'fp_health_0_has_additional']
-                      : physIdx === 1
-                        ? ['fp_health_1_clinic', 'fp_health_1_city', 'fp_health_1_phone', 'fp_health_1_has_additional']
-                        : ['fp_health_2_clinic', 'fp_health_2_city', 'fp_health_2_phone'];
-                    const restQuestions = restKeys.map(k => fpHealthQuestions.find(q => q.key === k)).filter(Boolean) as typeof fpHealthQuestions;
-
-                    const patientsKey = `fp_health_${physIdx}_patients`;
+                  const renderPatientsBlock = (prefix: string, idx: number) => {
+                    const patientsKey = `${prefix}_health_${idx}_patients`;
                     const selectedPatients = (answers[patientsKey] as string[]) || [];
-
                     const togglePatient = (val: string) => {
                       const next = selectedPatients.includes(val)
                         ? selectedPatients.filter(v => v !== val)
                         : [...selectedPatients, val];
                       onAnswerChange(patientsKey, next);
                     };
-
-                    const removePhysician = () => {
-                      const keysToRemove = [
-                        `fp_health_${physIdx}_name`, `fp_health_${physIdx}_patients`,
-                        `fp_health_${physIdx}_clinic`, `fp_health_${physIdx}_city`,
-                        `fp_health_${physIdx}_phone`, `fp_health_${physIdx}_has_additional`,
-                      ];
-                      keysToRemove.forEach(key => onAnswerChange(key, undefined));
-                      onAnswerChange(`fp_health_${physIdx - 1}_has_additional`, 'no');
-                    };
-
                     return (
-                      <div key={physIdx} className="mt-4 pt-3 border-t border-gray-700 first:border-0 first:pt-0 first:mt-0 space-y-4">
-                        {physIdx > 0 && (
-                          <div className="flex items-center justify-between -mb-1">
-                            <h5 className="text-sm font-semibold text-blue-300">
-                              {physIdx === 1 ? 'Additional Family Physician #1' : 'Additional Family Physician #2'}
-                            </h5>
-                            <button
-                              type="button"
-                              onClick={removePhysician}
-                              className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-md transition-colors"
-                              aria-label="Remove additional family physician"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                              <span>Remove</span>
-                            </button>
-                          </div>
-                        )}
-                        {renderQuestion(nameQ)}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">Patients:</label>
-                          <div className="space-y-2">
-                            {patientOptions.map(opt => (
-                              <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" checked={selectedPatients.includes(opt.value)}
-                                  onChange={() => togglePatient(opt.value)}
-                                  className="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" />
-                                <span className="text-gray-300 text-sm">({opt.label})</span>
-                              </label>
-                            ))}
-                          </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Patients:</label>
+                        <div className="space-y-2">
+                          {patientOptions.map(opt => (
+                            <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
+                              <input type="checkbox" checked={selectedPatients.includes(opt.value)}
+                                onChange={() => togglePatient(opt.value)}
+                                className="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" />
+                              <span className="text-gray-300 text-sm">({opt.label})</span>
+                            </label>
+                          ))}
                         </div>
-                        {restQuestions.map(renderQuestion)}
                       </div>
                     );
-                  });
+                  };
+
+                  const renderHealthCards = (params: {
+                    sectionTitle: string;
+                    prefix: 'fp' | 'sp' | 'ph';
+                    nameKeys: string[];
+                    restKeySets: string[][];
+                    questions: typeof step.questions;
+                    additionalLabel: string;
+                  }) => {
+                    const { sectionTitle, prefix, nameKeys, restKeySets, questions, additionalLabel } = params;
+                    const cards = nameKeys.map((_, i) => i);
+                    return (
+                      <>
+                        <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">{sectionTitle}</h4>
+                        {cards.map((cardIdx) => {
+                          const nameQ = questions.find(q => q.key === nameKeys[cardIdx]);
+                          if (!nameQ) return null;
+                          if (nameQ.condition && !nameQ.condition(answers)) return null;
+                          const nameVal = (answers[nameKeys[cardIdx]] as string) || '';
+                          if (!nameVal && cardIdx > 0) return null;
+                          const restQuestions = restKeySets[cardIdx]
+                            .map(k => questions.find(q => q.key === k))
+                            .filter(Boolean) as typeof questions;
+
+                          const removeCard = () => {
+                            const keysToRemove = [
+                              `${prefix}_health_${cardIdx}_name`, `${prefix}_health_${cardIdx}_patients`,
+                              ...restKeySets[cardIdx],
+                            ];
+                            keysToRemove.forEach(key => onAnswerChange(key, undefined));
+                            if (cardIdx > 0) {
+                              onAnswerChange(`${prefix}_health_${cardIdx - 1}_has_additional`, 'no');
+                            } else if (prefix === 'sp') {
+                              onAnswerChange('sp_health_has', 'no');
+                            }
+                          };
+
+                          return (
+                            <div key={cardIdx} className="mt-4 pt-3 border-t border-gray-700 first:border-0 first:pt-0 first:mt-0 space-y-4">
+                              {cardIdx > 0 && (
+                                <div className="flex items-center justify-between -mb-1">
+                                  <h5 className="text-sm font-semibold text-blue-300">
+                                    {additionalLabel} #{cardIdx}
+                                  </h5>
+                                  <button
+                                    type="button"
+                                    onClick={removeCard}
+                                    className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-md transition-colors"
+                                    aria-label={`Remove additional ${sectionTitle.toLowerCase()}`}
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>Remove</span>
+                                  </button>
+                                </div>
+                              )}
+                              {renderQuestion(nameQ)}
+                              {renderPatientsBlock(prefix, cardIdx)}
+                              {restQuestions.map(renderQuestion)}
+                            </div>
+                          );
+                        })}
+                      </>
+                    );
+                  };
+
+                  return (
+                    <>
+                      {renderHealthCards({
+                        sectionTitle: 'Family Physician',
+                        prefix: 'fp',
+                        nameKeys: ['fp_health_0_name', 'fp_health_1_name', 'fp_health_2_name'],
+                        restKeySets: [
+                          ['fp_health_0_clinic', 'fp_health_0_city', 'fp_health_0_phone', 'fp_health_0_has_additional'],
+                          ['fp_health_1_clinic', 'fp_health_1_city', 'fp_health_1_phone', 'fp_health_1_has_additional'],
+                          ['fp_health_2_clinic', 'fp_health_2_city', 'fp_health_2_phone'],
+                        ],
+                        questions: fpHealthQuestions,
+                        additionalLabel: 'Additional Family Physician',
+                      })}
+
+                      {renderHealthCards({
+                        sectionTitle: 'Specialists',
+                        prefix: 'sp',
+                        nameKeys: ['sp_health_0_name', 'sp_health_1_name', 'sp_health_2_name'],
+                        restKeySets: [
+                          ['sp_health_0_specialty', 'sp_health_0_phone', 'sp_health_0_has_additional'],
+                          ['sp_health_1_specialty', 'sp_health_1_phone', 'sp_health_1_has_additional'],
+                          ['sp_health_2_specialty', 'sp_health_2_phone'],
+                        ],
+                        questions: spHealthQuestions,
+                        additionalLabel: 'Additional Specialist',
+                      })}
+
+                      {renderHealthCards({
+                        sectionTitle: 'Pharmacist',
+                        prefix: 'ph',
+                        nameKeys: ['ph_health_0_name', 'ph_health_1_name'],
+                        restKeySets: [
+                          ['ph_health_0_pharmacy', 'ph_health_0_phone', 'ph_health_0_has_additional'],
+                          ['ph_health_1_pharmacy', 'ph_health_1_phone'],
+                        ],
+                        questions: phHealthQuestions,
+                        additionalLabel: 'Additional Pharmacist',
+                      })}
+                    </>
+                  );
                 })()}
 
-                <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Specialists</h4>
-                {spHealthQuestions.map(renderQuestion)}
-
-                <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Pharmacist</h4>
-                {phHealthQuestions.map(renderQuestion)}
+                {/* sp_health_has gate question rendered separately */}
+                {(() => {
+                  const spGateQ = spHealthQuestions.find(q => q.key === 'sp_health_has');
+                  return spGateQ ? renderQuestion(spGateQ) : null;
+                })()}
               </>
             );
           })()}

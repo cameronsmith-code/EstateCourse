@@ -15,6 +15,7 @@ export type PropertyData = {
   province: string;
   state: string;
   city: string;
+  locationOfDeeds: string;
   owners: string[];
   otherOwners: OtherOwner[];
   ownershipPercentages: Record<string, string>;
@@ -305,6 +306,20 @@ export default function PropertyDetails({
             value={data.city || ''}
             onChange={(e) => onChange('city', e.target.value)}
             placeholder="Enter city"
+            className={inputClass}
+          />
+        </div>
+      )}
+
+      {/* Location of Deeds */}
+      {country && (
+        <div>
+          <label className={labelClass}>Location of Deeds</label>
+          <input
+            type="text"
+            value={data.locationOfDeeds || ''}
+            onChange={(e) => onChange('locationOfDeeds', e.target.value)}
+            placeholder="Enter location of deeds"
             className={inputClass}
           />
         </div>

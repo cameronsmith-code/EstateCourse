@@ -664,7 +664,7 @@ export const STEPS: Step[] = [
     questions: [
       {
         key: 'fpHasAdvisor',
-        label: 'Do you currently work with a financial planner or wealth advisor?',
+        label: 'Do you currently work with a Financial Planner or Wealth Advisor?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
@@ -674,7 +674,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'fpAdvisor1WorksWith',
-        label: 'Who does this financial planner work with?',
+        label: 'Who does this Financial Planner work with?',
         type: 'checkbox-group',
         options: (answers: Map<number, Record<string, unknown>>) => {
           const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
@@ -793,7 +793,7 @@ export const STEPS: Step[] = [
       },
       {
         key: 'fpAdvisor2WorksWith',
-        label: 'Who does this financial planner work with?',
+        label: 'Who does this Financial Planner work with?',
         type: 'checkbox-group',
         options: (answers: Map<number, Record<string, unknown>>) => {
           const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';

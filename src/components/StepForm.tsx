@@ -5700,7 +5700,7 @@ export default function StepForm({
                           </button>
                         </div>
                         <div className="mb-6">
-                          <label className="block text-sm font-medium text-gray-300 mb-3">Who does this financial planner work with?</label>
+                          <label className="block text-sm font-medium text-gray-300 mb-3">Who does this Financial Planner work with?</label>
                           <div className="space-y-2">
                             {worksWithOptions.map(opt => (
                               <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">

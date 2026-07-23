@@ -11282,7 +11282,7 @@ export default function StepForm({
 
                 {/* Primary Home subsection (only when living situation is 'own') */}
                 {answers['livingSituation'] === 'own' && (() => {
-                  const primaryHomeData = (answers['primaryHomeData'] as Partial<PropertyData>) || { type: 'Primary Home', name: '', country: '', province: '', state: '', city: '', locationOfDeeds: '', owners: [], otherOwners: [], ownershipPercentages: {} };
+                  const primaryHomeData = (answers['primaryHomeData'] as Partial<PropertyData>) || { type: 'Primary Home', name: '', country: '', province: '', state: '', city: '', locationOfDeeds: '', owners: [], otherOwners: [], ownershipPercentages: {}, purchasePrice: '', documentsLocation: '', hasRenovations: '', renovationDetails: '' };
 
                   const handlePrimaryHomeChange = (field: keyof PropertyData, value: unknown) => {
                     const updated = { ...primaryHomeData, [field]: value };
@@ -11425,7 +11425,7 @@ export default function StepForm({
                           // Initialize property data for this type
                           setTimeout(() => {
                             const updated = [...propertiesData];
-                            updated[actualIndex] = { type, name: '', country: '', province: '', state: '', city: '', locationOfDeeds: '', owners: [], otherOwners: [], ownershipPercentages: {} };
+                            updated[actualIndex] = { type, name: '', country: '', province: '', state: '', city: '', locationOfDeeds: '', owners: [], otherOwners: [], ownershipPercentages: {}, purchasePrice: '', documentsLocation: '', hasRenovations: '', renovationDetails: '' };
                             onAnswerChange('propertiesData', updated);
                           }, 0);
                         }

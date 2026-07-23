@@ -24,6 +24,10 @@ export type PropertyData = {
   purchasedByOtherOwners: OtherOwner[];
   purchasedByOwners: string[];
   purchasedByOwnershipPercentages: Record<string, string>;
+  purchasePrice: string;
+  documentsLocation: string;
+  hasRenovations: string;
+  renovationDetails: string;
   inhabitedAnnually: string;
   usedForIncome: string;
   claimedCCA: string;
@@ -899,6 +903,79 @@ export default function PropertyDetails({
               </div>
             )}
           </div>
+
+          {/* Total purchase price */}
+          <div>
+            <label className={labelClass}>What was the total purchase price including legal fees and land transfer taxes?</label>
+            <input
+              type="text"
+              value={data.purchasePrice || ''}
+              onChange={(e) => onChange('purchasePrice', e.target.value)}
+              placeholder="Enter total purchase price"
+              className={inputClass}
+            />
+          </div>
+
+          {/* Documents location */}
+          <div>
+            <label className={labelClass}>Where are the documents kept?</label>
+            <input
+              type="text"
+              value={data.documentsLocation || ''}
+              onChange={(e) => onChange('documentsLocation', e.target.value)}
+              placeholder="Enter where documents are kept"
+              className={inputClass}
+            />
+          </div>
+
+          {/* Renovations */}
+          <div>
+            <label className={labelClass}>Have there been any renovations?</label>
+            <p className="text-xs text-gray-400 mb-3 italic">
+              Note: the CRA distinguishes between these two based on whether the work improves the property beyond its original condition or merely maintains it. Examples of Capital Improvement are structural additions, substantial upgrades (replacing carpeting with hardwood floors, replacing a bathroom/kitchen). When in doubt of which is which, include it here.
+            </p>
+            <div className="flex gap-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name={`hasRenovations-${index}`}
+                  value="yes"
+                  checked={data.hasRenovations === 'yes'}
+                  onChange={() => onChange('hasRenovations', 'yes')}
+                  className="mr-2"
+                />
+                <span className="text-gray-300">Yes</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name={`hasRenovations-${index}`}
+                  value="no"
+                  checked={data.hasRenovations === 'no'}
+                  onChange={() => {
+                    onChange('hasRenovations', 'no');
+                    onChange('renovationDetails', '');
+                  }}
+                  className="mr-2"
+                />
+                <span className="text-gray-300">No</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Renovation details (conditional on hasRenovations = yes) */}
+          {data.hasRenovations === 'yes' && (
+            <div className="ml-6">
+              <label className={labelClass}>Please describe the renovations</label>
+              <textarea
+                value={data.renovationDetails || ''}
+                onChange={(e) => onChange('renovationDetails', e.target.value)}
+                placeholder="Enter renovation details"
+                rows={3}
+                className={inputClass}
+              />
+            </div>
+          )}
 
           {/* Inhabited annually */}
           <div>

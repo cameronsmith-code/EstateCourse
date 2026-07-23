@@ -959,10 +959,11 @@ export default function PropertyDetails({
                   value="yes"
                   checked={data.hasRenovations === 'yes'}
                   onChange={() => {
-                    onChange('hasRenovations', 'yes');
-                    if (!data.capitalImprovements || data.capitalImprovements.length === 0) {
-                      onChange('capitalImprovements', [{ description: '', cost: '', year: '', recordsLocation: '' }]);
-                    }
+                    const existing = data.capitalImprovements || [];
+                    onMultiChange({
+                      hasRenovations: 'yes',
+                      capitalImprovements: existing.length > 0 ? existing : [{ description: '', cost: '', year: '', recordsLocation: '' }],
+                    });
                   }}
                   className="mr-2"
                 />
@@ -975,8 +976,10 @@ export default function PropertyDetails({
                   value="no"
                   checked={data.hasRenovations === 'no'}
                   onChange={() => {
-                    onChange('hasRenovations', 'no');
-                    onChange('capitalImprovements', []);
+                    onMultiChange({
+                      hasRenovations: 'no',
+                      capitalImprovements: [],
+                    });
                   }}
                   className="mr-2"
                 />

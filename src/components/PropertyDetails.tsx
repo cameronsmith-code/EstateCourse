@@ -212,13 +212,15 @@ export default function PropertyDetails({
   const c2Pct = ownershipPercentages[client2Name] || '';
 
   const handlePurchasedByChange = (value: string) => {
-    onChange('purchasedBy', value);
     if (value !== 'other') {
       onMultiChange({
+        purchasedBy: value,
         purchasedByOwners: [],
         purchasedByOtherOwners: [],
         purchasedByOwnershipPercentages: {},
       });
+    } else {
+      onChange('purchasedBy', value);
     }
   };
 

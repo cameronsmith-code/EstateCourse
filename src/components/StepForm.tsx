@@ -6141,7 +6141,49 @@ export default function StepForm({
                 })()}
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Insurance Advisor</h4>
-                {insQuestions.map(renderQuestion)}
+                {(() => {
+                  const splitIdx = insQuestions.findIndex(q => q.key === 'insAdvisor1Firm');
+                  const beforeFirm = splitIdx === -1 ? insQuestions : insQuestions.slice(0, splitIdx);
+                  const fromFirm = splitIdx === -1 ? [] : insQuestions.slice(splitIdx);
+                  const isCameronIns = !!(answers['insAdvisor1IsCameronSmith']);
+                  const showInsFields = answers['insHasAdvisor'] && answers['insHasAdvisor'] !== 'na';
+                  return (
+                    <>
+                      {beforeFirm.map(renderQuestion)}
+                      {showInsFields && (
+                        <>
+                          <div className="mb-6">
+                            <label className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={isCameronIns}
+                                onChange={(e) => {
+                                  onAnswerChange('insAdvisor1IsCameronSmith', e.target.checked);
+                                  if (e.target.checked) {
+                                    onAnswerChange('insAdvisor1Firm', 'Clarify Wealth Ltd.');
+                                    onAnswerChange('insAdvisor1Name', 'Cameron Smith');
+                                    onAnswerChange('insAdvisor1Phone', '647-448-5963');
+                                    onAnswerChange('insAdvisor1Email', 'cameron.smith@ipcsecurities.com');
+                                  } else {
+                                    onAnswerChange('insAdvisor1Firm', '');
+                                    onAnswerChange('insAdvisor1Name', '');
+                                    onAnswerChange('insAdvisor1Phone', '');
+                                    onAnswerChange('insAdvisor1Email', '');
+                                  }
+                                }}
+                                className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded"
+                              />
+                              <span className="ml-3 text-gray-300">Cameron Smith CFP®</span>
+                            </label>
+                          </div>
+                          {!isCameronIns && fromFirm.map(renderQuestion)}
+                          {isCameronIns && fromFirm.filter(q => !['insAdvisor1Firm','insAdvisor1Name','insAdvisor1Phone','insAdvisor1Email'].includes(q.key)).map(renderQuestion)}
+                        </>
+                      )}
+                      {!showInsFields && fromFirm.map(renderQuestion)}
+                    </>
+                  );
+                })()}
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Family Physician</h4>
                 {fpHealthQuestions.map(renderQuestion)}

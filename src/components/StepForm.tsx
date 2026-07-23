@@ -101,8 +101,8 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
-      ['fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional',
-       'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
+      ['fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1RecordsLocation', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional',
+       'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2RecordsLocation', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -120,7 +120,7 @@ export default function StepForm({
       onAnswerChange('fpAdvisor1Website', 'www.clarifywealth.ca');
     } else if (answers['fpAdvisor1IsCameronSmith'] === false) {
       ['fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website',
-       'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
+       'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2RecordsLocation', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -5534,15 +5534,15 @@ export default function StepForm({
             const fpKeys = new Set([
               'fpHasAdvisor', 'fpAdvisor1WorksWith', 'fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone',
               'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services',
-              'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpHasAdditionalAdvisor',
+              'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1RecordsLocation', 'fpHasAdditionalAdvisor',
               'fpAdvisor2WorksWith', 'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone',
               'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services',
-              'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2HasAdditionalAdvisor',
+              'fpAdvisor2Duration', 'fpAdvisor2RecordsLocation', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2HasAdditionalAdvisor',
             ]);
             const fpAdvisor2Keys = new Set([
               'fpAdvisor2WorksWith', 'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone',
               'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services',
-              'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2HasAdditionalAdvisor',
+              'fpAdvisor2Duration', 'fpAdvisor2RecordsLocation', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2HasAdditionalAdvisor',
             ]);
             const acctKeys = new Set([
               'acctHasAccountant', 'acctAdvisor1Firm', 'acctAdvisor1Name', 'acctAdvisor1Phone',
@@ -5611,7 +5611,7 @@ export default function StepForm({
                       <button
                         type="button"
                         onClick={() => {
-                          ['fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
+                          ['fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2RecordsLocation', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
                             onAnswerChange(key, undefined);
                           });
                           onAnswerChange('fpHasAdditionalAdvisor', 'no');
@@ -5763,6 +5763,12 @@ export default function StepForm({
                           <input type="text" value={(advisor.duration as string) || ''}
                             onChange={(e) => updateAdvisor(i, 'duration', e.target.value)}
                             placeholder="e.g., 5 years"
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Where do you keep your records?</label>
+                          <input type="text" value={(advisor.recordsLocation as string) || ''}
+                            onChange={(e) => updateAdvisor(i, 'recordsLocation', e.target.value)}
                             className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
                         </div>
                         <div className="mb-6">

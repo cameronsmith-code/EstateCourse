@@ -5593,7 +5593,7 @@ export default function StepForm({
 
             return (
               <>
-                <h4 className="text-base font-semibold text-blue-400 mt-4 mb-1">Financial Planner / Investment Advisor</h4>
+                <h4 className="text-base font-semibold text-blue-400 mt-4 mb-1">Financial Planner / Wealth Advisor</h4>
                 {fpPreCheckbox.map(renderQuestion)}
                 {fpCheckboxAndRest.length > 0 && (
                   <>

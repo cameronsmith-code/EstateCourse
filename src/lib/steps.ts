@@ -664,7 +664,7 @@ export const STEPS: Step[] = [
     questions: [
       {
         key: 'fpHasAdvisor',
-        label: 'Do you currently work with a financial planner or investment advisor?',
+        label: 'Do you currently work with a financial planner or wealth advisor?',
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },

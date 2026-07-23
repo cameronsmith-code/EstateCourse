@@ -355,23 +355,33 @@ interface FormData {
   }>;
   insAdditionalHasAdditional?: string[];
   fp_health_0_name?: string;
+  fp_health_0_patients?: string[];
   fp_health_0_clinic?: string;
+  fp_health_0_city?: string;
   fp_health_0_phone?: string;
   fp_health_0_has_additional?: string;
   fp_health_1_name?: string;
+  fp_health_1_patients?: string[];
   fp_health_1_clinic?: string;
+  fp_health_1_city?: string;
   fp_health_1_phone?: string;
   fp_health_1_has_additional?: string;
   fp_health_2_name?: string;
+  fp_health_2_patients?: string[];
   fp_health_2_clinic?: string;
+  fp_health_2_city?: string;
   fp_health_2_phone?: string;
   fp_health_2_has_additional?: string;
   fp_health_3_name?: string;
+  fp_health_3_patients?: string[];
   fp_health_3_clinic?: string;
+  fp_health_3_city?: string;
   fp_health_3_phone?: string;
   fp_health_3_has_additional?: string;
   fp_health_4_name?: string;
+  fp_health_4_patients?: string[];
   fp_health_4_clinic?: string;
+  fp_health_4_city?: string;
   fp_health_4_phone?: string;
   fp_health_4_has_additional?: string;
   sp_health_has?: string;
@@ -8276,7 +8286,22 @@ You should explore this as an option with your legal and CFP® professionals bec
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
     renderHealthProRow('Name:', (formData[`fp_health_${idx}_name` as keyof typeof formData] as string) || '', `fp_health_${idx}_name`);
+    const patientsList = (formData[`fp_health_${idx}_patients` as keyof typeof formData] as string[]) || [];
+    if (patientsList.length > 0) {
+      const c1NameFp = formData.fullName || 'Client 1';
+      const c2NameFp = formData.spouseName || 'Client 2';
+      const patientLabels = patientsList.map((p: string) => {
+        if (p === 'client1') return c1NameFp;
+        if (p === 'client2') return c2NameFp;
+        if (p.startsWith('child:')) return p.slice(6);
+        return p;
+      });
+      renderHealthProRow('Patients:', patientLabels.join(', '), `fp_health_${idx}_patients`);
+    } else {
+      renderHealthProRow('Patients:', '', `fp_health_${idx}_patients`);
+    }
     renderHealthProRow('Clinic:', (formData[`fp_health_${idx}_clinic` as keyof typeof formData] as string) || '', `fp_health_${idx}_clinic`);
+    renderHealthProRow('City:', (formData[`fp_health_${idx}_city` as keyof typeof formData] as string) || '', `fp_health_${idx}_city`);
     renderHealthProRow('Phone:', (formData[`fp_health_${idx}_phone` as keyof typeof formData] as string) || '', `fp_health_${idx}_phone`);
     yPosition += 4;
   }

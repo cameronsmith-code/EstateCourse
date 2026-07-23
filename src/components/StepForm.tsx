@@ -5563,9 +5563,9 @@ export default function StepForm({
               'insHasAdditional',
             ]);
             const fpHealthKeys = new Set([
-              'fp_health_0_name', 'fp_health_0_clinic', 'fp_health_0_phone', 'fp_health_0_has_additional',
-              'fp_health_1_name', 'fp_health_1_clinic', 'fp_health_1_phone', 'fp_health_1_has_additional',
-              'fp_health_2_name', 'fp_health_2_clinic', 'fp_health_2_phone',
+              'fp_health_0_name', 'fp_health_0_clinic', 'fp_health_0_city', 'fp_health_0_phone', 'fp_health_0_has_additional',
+              'fp_health_1_name', 'fp_health_1_clinic', 'fp_health_1_city', 'fp_health_1_phone', 'fp_health_1_has_additional',
+              'fp_health_2_name', 'fp_health_2_clinic', 'fp_health_2_city', 'fp_health_2_phone',
             ]);
             const spHealthKeys = new Set([
               'sp_health_has', 'sp_health_0_name', 'sp_health_0_specialty', 'sp_health_0_phone',
@@ -6187,7 +6187,82 @@ export default function StepForm({
                 })()}
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Family Physician</h4>
-                {fpHealthQuestions.map(renderQuestion)}
+                {(() => {
+                  const basicAns = allAnswers?.get(1) || {};
+                  const step3Ans = allAnswers?.get(3) || {};
+                  const hasSpouseFp = (basicAns['maritalStatus'] === 'married' || basicAns['maritalStatus'] === 'common_law');
+                  const c1NameFp = (basicAns['fullName'] as string) || 'Client 1';
+                  const c2NameFp = (basicAns['spouseName'] as string) || 'Client 2';
+                  const provinceFp = ((basicAns['province'] as string) || '').toLowerCase();
+                  const higherMajorityFp = ['bc', 'british columbia', 'nova scotia', 'new brunswick', 'newfoundland', 'nl', 'ns', 'nb'];
+                  const ageOfMajorityFp = higherMajorityFp.some(p => provinceFp.includes(p)) ? 19 : 18;
+                  const todayFp = new Date();
+                  const childrenDataFp = (step3Ans['childrenData'] as Array<Record<string, string>>) || [];
+                  const eligibleChildPatients = childrenDataFp.filter(c => {
+                    if (!c?.name) return false;
+                    const isDisabled = c.disabled === 'yes';
+                    const isFinanciallyDependent = c.independent === 'no';
+                    let isUnderMajority = false;
+                    if (c?.dateOfBirth) {
+                      const ageMs = todayFp.getTime() - new Date(c.dateOfBirth).getTime();
+                      isUnderMajority = (ageMs / (365.25 * 24 * 60 * 60 * 1000)) < ageOfMajorityFp;
+                    }
+                    return isDisabled || isFinanciallyDependent || isUnderMajority;
+                  });
+                  const patientOptions: { value: string; label: string }[] = [
+                    { value: 'client1', label: c1NameFp },
+                    ...(hasSpouseFp ? [{ value: 'client2', label: c2NameFp }] : []),
+                    ...eligibleChildPatients.map(c => ({ value: `child:${c.name}`, label: c.name })),
+                  ];
+
+                  const physicianCards = [0, 1, 2];
+                  const nameKeys = ['fp_health_0_name', 'fp_health_1_name', 'fp_health_2_name'];
+
+                  return physicianCards.map((physIdx) => {
+                    const nameQ = fpHealthQuestions.find(q => q.key === nameKeys[physIdx]);
+                    if (!nameQ) return null;
+                    if (nameQ.condition && !nameQ.condition(answers)) return null;
+                    const nameVal = (answers[nameKeys[physIdx]] as string) || '';
+                    if (!nameVal && physIdx > 0) return null;
+
+                    const restKeys = physIdx === 0
+                      ? ['fp_health_0_clinic', 'fp_health_0_city', 'fp_health_0_phone', 'fp_health_0_has_additional']
+                      : physIdx === 1
+                        ? ['fp_health_1_clinic', 'fp_health_1_city', 'fp_health_1_phone', 'fp_health_1_has_additional']
+                        : ['fp_health_2_clinic', 'fp_health_2_city', 'fp_health_2_phone'];
+                    const restQuestions = restKeys.map(k => fpHealthQuestions.find(q => q.key === k)).filter(Boolean) as typeof fpHealthQuestions;
+
+                    const patientsKey = `fp_health_${physIdx}_patients`;
+                    const selectedPatients = (answers[patientsKey] as string[]) || [];
+
+                    const togglePatient = (val: string) => {
+                      const next = selectedPatients.includes(val)
+                        ? selectedPatients.filter(v => v !== val)
+                        : [...selectedPatients, val];
+                      onAnswerChange(patientsKey, next);
+                    };
+
+                    return (
+                      <div key={physIdx} className="mt-4 pt-3 border-t border-gray-700 first:border-0 first:pt-0 first:mt-0 space-y-4">
+                        {renderQuestion(nameQ)}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Patients:</label>
+                          <div className="space-y-2">
+                            {patientOptions.map(opt => (
+                              <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" checked={selectedPatients.includes(opt.value)}
+                                  onChange={() => togglePatient(opt.value)}
+                                  className="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" />
+                                <span className="text-gray-300 text-sm">({opt.label})</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        {restQuestions.map(renderQuestion)}
+                      </div>
+                    );
+                  });
+                })()}
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Specialists</h4>
                 {spHealthQuestions.map(renderQuestion)}

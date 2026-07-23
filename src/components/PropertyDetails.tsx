@@ -1044,7 +1044,7 @@ export default function PropertyDetails({
                           type="radio"
                           name={`addMoreImprovements-${index}-${impIndex}`}
                           value="yes"
-                          checked={impIndex < capitalImprovements.length - 1}
+                          checked={capitalImprovements[impIndex]?.hasMore === 'yes'}
                           onChange={() => {
                             const updated = [...capitalImprovements];
                             updated[impIndex] = { ...updated[impIndex], hasMore: 'yes' };
@@ -1059,7 +1059,7 @@ export default function PropertyDetails({
                           type="radio"
                           name={`addMoreImprovements-${index}-${impIndex}`}
                           value="no"
-                          checked={impIndex === capitalImprovements.length - 1 && capitalImprovements[impIndex]?.hasMore !== 'yes'}
+                          checked={capitalImprovements[impIndex]?.hasMore === 'no'}
                           onChange={() => {
                             const updated = capitalImprovements.slice(0, impIndex + 1);
                             updated[impIndex] = { ...updated[impIndex], hasMore: 'no' };

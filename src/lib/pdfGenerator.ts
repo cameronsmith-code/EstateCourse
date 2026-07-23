@@ -8056,8 +8056,8 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.text('Contact details and scope of work for this professional.', margin, yPosition);
       yPosition += 6;
 
-      const worksWithStr = acct.worksWithClients || '';
-      const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
+      const worksWithRaw = (acct as { worksWithClients?: string; worksWith?: string[] | string }).worksWithClients || (acct as { worksWith?: string[] | string }).worksWith || '';
+      const worksWithArr = Array.isArray(worksWithRaw) ? worksWithRaw : (worksWithRaw ? worksWithRaw.split(',') : []);
       const worksWithLabels = worksWithArr.map((c: string) => c === 'client1' ? client1Name : c === 'client2' ? client2Name : '').filter(Boolean);
       renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
 
@@ -8124,8 +8124,8 @@ You should explore this as an option with your legal and CFP® professionals bec
       doc.text('Contact details and scope of work for this professional.', margin, yPosition);
       yPosition += 6;
 
-      const worksWithStr = lawyer.worksWithClients || '';
-      const worksWithArr = worksWithStr ? worksWithStr.split(',') : [];
+      const worksWithRaw = (lawyer as { worksWithClients?: string; worksWith?: string[] | string }).worksWithClients || (lawyer as { worksWith?: string[] | string }).worksWith || '';
+      const worksWithArr = Array.isArray(worksWithRaw) ? worksWithRaw : (worksWithRaw ? worksWithRaw.split(',') : []);
       const worksWithLabels = worksWithArr.map((c: string) => c === 'client1' ? client1Name : c === 'client2' ? client2Name : '').filter(Boolean);
       renderEstateRow('Works with:', worksWithLabels.join(', '), `${fieldPrefix}_workswith`);
 

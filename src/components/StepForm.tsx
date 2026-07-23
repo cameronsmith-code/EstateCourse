@@ -5817,9 +5817,328 @@ export default function StepForm({
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Accountant (CPA)</h4>
                 {acctQuestions.map(renderQuestion)}
+                {(() => {
+                  if (answers['acctHasAdditional'] !== 'yes') return null;
+                  const ordinals = ['Second', 'Third', 'Fourth', 'Fifth', 'Sixth'];
+                  const additionalData = (answers['acctAdditionalData'] as Array<Record<string, unknown>>) || [];
+                  const acctServiceOptions = [
+                    { value: 'personal_tax_returns', label: 'Personal tax returns' },
+                    { value: 'corporate_tax', label: 'Corporate tax' },
+                    { value: 'trust_tax_returns', label: 'Trust tax returns' },
+                    { value: 'bookkeeping', label: 'Bookkeeping' },
+                    { value: 'payroll', label: 'Payroll' },
+                    { value: 'estate_tax', label: 'Estate tax' },
+                    { value: 'other', label: 'Other' },
+                  ];
+                  const allStepAnswers = Object.fromEntries(
+                    Array.from(allAnswers?.entries() || []).flatMap(([_, s]) => Object.entries(s))
+                  );
+                  const hasSpouseAcct = (allStepAnswers['maritalStatus'] === 'married' || allStepAnswers['maritalStatus'] === 'common_law');
+                  const client1NameAcct = (allStepAnswers['fullName'] as string) || 'Client 1';
+                  const client2NameAcct = (allStepAnswers['spouseName'] as string) || 'Client 2';
+                  const worksWithOptionsAcct = hasSpouseAcct
+                    ? [{ value: 'client1', label: client1NameAcct }, { value: 'client2', label: client2NameAcct }]
+                    : [{ value: 'client1', label: client1NameAcct }];
+
+                  const updateAcct = (idx: number, field: string, val: unknown) => {
+                    const updated = [...additionalData];
+                    while (updated.length <= idx) updated.push({});
+                    updated[idx] = { ...updated[idx], [field]: val };
+                    onAnswerChange('acctAdditionalData', updated);
+                  };
+
+                  const sections: React.ReactElement[] = [];
+                  let showNext = true;
+                  for (let i = 0; i < ordinals.length && showNext; i++) {
+                    const advisor = additionalData[i] || {};
+                    const selectedServices = (advisor.services as string[]) || [];
+                    const selectedWorksWith = (advisor.worksWith as string[]) || [];
+
+                    sections.push(
+                      <React.Fragment key={i}>
+                        <div className="flex items-center justify-between mt-6 mb-1">
+                          <h5 className="text-sm font-semibold text-blue-300">{ordinals[i]} Accountant (CPA) Information</h5>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (i === 0) {
+                                onAnswerChange('acctHasAdditional', 'no');
+                                onAnswerChange('acctAdditionalData', undefined);
+                              } else {
+                                const trimmed = additionalData.slice(0, i);
+                                if (trimmed.length > 0) {
+                                  trimmed[trimmed.length - 1] = { ...trimmed[trimmed.length - 1], hasAdditional: 'no' };
+                                }
+                                onAnswerChange('acctAdditionalData', trimmed.length > 0 ? trimmed : undefined);
+                              }
+                            }}
+                            className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-md transition-colors"
+                            aria-label={`Remove ${ordinals[i].toLowerCase()} accountant`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Remove</span>
+                          </button>
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-3">Who does this accountant work with?</label>
+                          <div className="space-y-2">
+                            {worksWithOptionsAcct.map(opt => (
+                              <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                <input type="checkbox" checked={selectedWorksWith.includes(opt.value)}
+                                  onChange={(e) => {
+                                    const next = e.target.checked ? [...selectedWorksWith, opt.value] : selectedWorksWith.filter(v => v !== opt.value);
+                                    updateAcct(i, 'worksWith', next);
+                                  }}
+                                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                                <span className="ml-3 text-gray-300">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        {(['firm','name','phone','email'] as const).map(field => (
+                          <div key={field} className="mb-6">
+                            <label className="block text-sm font-medium text-gray-300 mb-2 capitalize">
+                              {field === 'name' ? 'Accountant name' : field === 'firm' ? 'Firm' : field.charAt(0).toUpperCase() + field.slice(1)}
+                            </label>
+                            <input type={field === 'email' ? 'email' : 'text'} value={(advisor[field] as string) || ''}
+                              onChange={(e) => updateAcct(i, field, e.target.value)}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                          </div>
+                        ))}
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-3">What do they help you with?</label>
+                          <div className="space-y-2">
+                            {acctServiceOptions.map(opt => (
+                              <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                <input type="checkbox" checked={selectedServices.includes(opt.value)}
+                                  onChange={(e) => {
+                                    const next = e.target.checked ? [...selectedServices, opt.value] : selectedServices.filter(v => v !== opt.value);
+                                    updateAcct(i, 'services', next);
+                                  }}
+                                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                                <span className="ml-3 text-gray-300">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">How long have you worked together?</label>
+                          <input type="text" value={(advisor.duration as string) || ''}
+                            onChange={(e) => updateAcct(i, 'duration', e.target.value)}
+                            placeholder="e.g., 5 years"
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Where are your tax documents stored?</label>
+                          <input type="text" value={(advisor.docLocation as string) || ''}
+                            onChange={(e) => updateAcct(i, 'docLocation', e.target.value)}
+                            placeholder="Enter document location"
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-3">May we include this professional in your executor's contact list and action guide?</label>
+                          <div className="space-y-2">
+                            {[{value:'yes',label:'Yes'},{value:'no',label:'No'}].map(opt => (
+                              <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                <input type="radio" name={`acctAdditional_${i}_include`} value={opt.value}
+                                  checked={advisor.includeInContactList === opt.value}
+                                  onChange={() => updateAcct(i, 'includeInContactList', opt.value)}
+                                  className="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                                <span className="ml-3 text-gray-300">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        {i < ordinals.length - 1 && (
+                          <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-300 mb-3">Is there an additional Accountant (CPA) that you work with?</label>
+                            <div className="space-y-2">
+                              {[{value:'yes',label:'Yes'},{value:'no',label:'No'}].map(opt => (
+                                <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                  <input type="radio" name={`acctAdditional_${i}_hasMore`} value={opt.value}
+                                    checked={advisor.hasAdditional === opt.value}
+                                    onChange={() => {
+                                      updateAcct(i, 'hasAdditional', opt.value);
+                                      if (opt.value === 'no') {
+                                        const trimmed = additionalData.slice(0, i + 1);
+                                        onAnswerChange('acctAdditionalData', trimmed);
+                                      }
+                                    }}
+                                    className="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                                  <span className="ml-3 text-gray-300">{opt.label}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+                    showNext = advisor.hasAdditional === 'yes' && i < ordinals.length - 1;
+                  }
+                  return <>{sections}</>;
+                })()}
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Lawyer</h4>
                 {lawQuestions.map(renderQuestion)}
+                {(() => {
+                  if (answers['lawHasAdditional'] !== 'yes') return null;
+                  const ordinals = ['Second', 'Third', 'Fourth', 'Fifth', 'Sixth'];
+                  const additionalData = (answers['lawAdditionalData'] as Array<Record<string, unknown>>) || [];
+                  const lawServiceOptions = [
+                    { value: 'wills_powers_of_attorney', label: 'Wills & Powers of Attorney' },
+                    { value: 'real_estate', label: 'Real estate' },
+                    { value: 'corporate_law', label: 'Corporate law' },
+                    { value: 'family_law', label: 'Family law' },
+                    { value: 'litigation', label: 'Litigation' },
+                    { value: 'other', label: 'Other' },
+                  ];
+                  const allStepAnswers = Object.fromEntries(
+                    Array.from(allAnswers?.entries() || []).flatMap(([_, s]) => Object.entries(s))
+                  );
+                  const hasSpouseLaw = (allStepAnswers['maritalStatus'] === 'married' || allStepAnswers['maritalStatus'] === 'common_law');
+                  const client1NameLaw = (allStepAnswers['fullName'] as string) || 'Client 1';
+                  const client2NameLaw = (allStepAnswers['spouseName'] as string) || 'Client 2';
+                  const worksWithOptionsLaw = hasSpouseLaw
+                    ? [{ value: 'client1', label: client1NameLaw }, { value: 'client2', label: client2NameLaw }]
+                    : [{ value: 'client1', label: client1NameLaw }];
+
+                  const updateLaw = (idx: number, field: string, val: unknown) => {
+                    const updated = [...additionalData];
+                    while (updated.length <= idx) updated.push({});
+                    updated[idx] = { ...updated[idx], [field]: val };
+                    onAnswerChange('lawAdditionalData', updated);
+                  };
+
+                  const sections: React.ReactElement[] = [];
+                  let showNext = true;
+                  for (let i = 0; i < ordinals.length && showNext; i++) {
+                    const advisor = additionalData[i] || {};
+                    const selectedServices = (advisor.services as string[]) || [];
+                    const selectedWorksWith = (advisor.worksWith as string[]) || [];
+
+                    sections.push(
+                      <React.Fragment key={i}>
+                        <div className="flex items-center justify-between mt-6 mb-1">
+                          <h5 className="text-sm font-semibold text-blue-300">{ordinals[i]} Lawyer Information</h5>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (i === 0) {
+                                onAnswerChange('lawHasAdditional', 'no');
+                                onAnswerChange('lawAdditionalData', undefined);
+                              } else {
+                                const trimmed = additionalData.slice(0, i);
+                                if (trimmed.length > 0) {
+                                  trimmed[trimmed.length - 1] = { ...trimmed[trimmed.length - 1], hasAdditional: 'no' };
+                                }
+                                onAnswerChange('lawAdditionalData', trimmed.length > 0 ? trimmed : undefined);
+                              }
+                            }}
+                            className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-md transition-colors"
+                            aria-label={`Remove ${ordinals[i].toLowerCase()} lawyer`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Remove</span>
+                          </button>
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-3">Who does this lawyer work with?</label>
+                          <div className="space-y-2">
+                            {worksWithOptionsLaw.map(opt => (
+                              <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                <input type="checkbox" checked={selectedWorksWith.includes(opt.value)}
+                                  onChange={(e) => {
+                                    const next = e.target.checked ? [...selectedWorksWith, opt.value] : selectedWorksWith.filter(v => v !== opt.value);
+                                    updateLaw(i, 'worksWith', next);
+                                  }}
+                                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                                <span className="ml-3 text-gray-300">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        {(['firm','name','phone','email'] as const).map(field => (
+                          <div key={field} className="mb-6">
+                            <label className="block text-sm font-medium text-gray-300 mb-2 capitalize">
+                              {field === 'name' ? 'Lawyer name' : field === 'firm' ? 'Firm' : field.charAt(0).toUpperCase() + field.slice(1)}
+                            </label>
+                            <input type={field === 'email' ? 'email' : 'text'} value={(advisor[field] as string) || ''}
+                              onChange={(e) => updateLaw(i, field, e.target.value)}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                          </div>
+                        ))}
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-3">What do they help you with?</label>
+                          <div className="space-y-2">
+                            {lawServiceOptions.map(opt => (
+                              <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                <input type="checkbox" checked={selectedServices.includes(opt.value)}
+                                  onChange={(e) => {
+                                    const next = e.target.checked ? [...selectedServices, opt.value] : selectedServices.filter(v => v !== opt.value);
+                                    updateLaw(i, 'services', next);
+                                  }}
+                                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded" />
+                                <span className="ml-3 text-gray-300">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">How long have you worked together?</label>
+                          <input type="text" value={(advisor.duration as string) || ''}
+                            onChange={(e) => updateLaw(i, 'duration', e.target.value)}
+                            placeholder="e.g., 5 years"
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Where are your legal documents stored?</label>
+                          <input type="text" value={(advisor.docLocation as string) || ''}
+                            onChange={(e) => updateLaw(i, 'docLocation', e.target.value)}
+                            placeholder="Enter document location"
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" />
+                        </div>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-300 mb-3">May we include this professional in your executor's contact list and action guide?</label>
+                          <div className="space-y-2">
+                            {[{value:'yes',label:'Yes'},{value:'no',label:'No'}].map(opt => (
+                              <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                <input type="radio" name={`lawAdditional_${i}_include`} value={opt.value}
+                                  checked={advisor.includeInContactList === opt.value}
+                                  onChange={() => updateLaw(i, 'includeInContactList', opt.value)}
+                                  className="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                                <span className="ml-3 text-gray-300">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        {i < ordinals.length - 1 && (
+                          <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-300 mb-3">Is there an additional Lawyer that you work with?</label>
+                            <div className="space-y-2">
+                              {[{value:'yes',label:'Yes'},{value:'no',label:'No'}].map(opt => (
+                                <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                                  <input type="radio" name={`lawAdditional_${i}_hasMore`} value={opt.value}
+                                    checked={advisor.hasAdditional === opt.value}
+                                    onChange={() => {
+                                      updateLaw(i, 'hasAdditional', opt.value);
+                                      if (opt.value === 'no') {
+                                        const trimmed = additionalData.slice(0, i + 1);
+                                        onAnswerChange('lawAdditionalData', trimmed);
+                                      }
+                                    }}
+                                    className="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                                  <span className="ml-3 text-gray-300">{opt.label}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+                    showNext = advisor.hasAdditional === 'yes' && i < ordinals.length - 1;
+                  }
+                  return <>{sections}</>;
+                })()}
 
                 <h4 className="text-base font-semibold text-blue-400 mt-6 mb-1">Insurance Advisor</h4>
                 {insQuestions.map(renderQuestion)}

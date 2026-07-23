@@ -8,6 +8,14 @@ export type OtherOwner = {
   hasMore: 'yes' | 'no' | '';
 };
 
+export type CapitalImprovement = {
+  description: string;
+  cost: string;
+  year: string;
+  recordsLocation: string;
+  hasMore?: string;
+};
+
 export type PropertyData = {
   type: string;
   name: string;
@@ -27,7 +35,7 @@ export type PropertyData = {
   purchasePrice: string;
   documentsLocation: string;
   hasRenovations: string;
-  renovationDetails: string;
+  capitalImprovements: CapitalImprovement[];
   inhabitedAnnually: string;
   usedForIncome: string;
   claimedCCA: string;
@@ -93,6 +101,15 @@ export default function PropertyDetails({
   const ownershipPercentages = data.ownershipPercentages || {};
 
   const [showOwnershipPct, setShowOwnershipPct] = useState(false);
+
+  const capitalImprovements = data.capitalImprovements || [];
+
+  const handleCapitalImprovementChange = (i: number, field: keyof CapitalImprovement, value: string) => {
+    const updated = [...capitalImprovements];
+    if (!updated[i]) updated[i] = { description: '', cost: '', year: '', recordsLocation: '' };
+    updated[i] = { ...updated[i], [field]: value };
+    onChange('capitalImprovements', updated);
+  };
 
   const isCanada = country.toLowerCase() === 'canada';
   const isUS = country.toLowerCase() === 'united states' || country.toLowerCase() === 'usa' || country.toLowerCase() === 'us';
@@ -932,7 +949,7 @@ export default function PropertyDetails({
           <div>
             <label className={labelClass}>Have there been any renovations?</label>
             <p className="text-xs text-gray-400 mb-3 italic">
-              Note: the CRA distinguishes between these two based on whether the work improves the property beyond its original condition or merely maintains it. Examples of Capital Improvement are structural additions, substantial upgrades (replacing carpeting with hardwood floors, replacing a bathroom/kitchen). When in doubt of which is which, include it here.
+              Note: the CRA distinguishes between these two based on whether the work improves the property beyond its original condition or merely maintains it. Examples of Capital Improvement are structural additions, substantial upgrades (replacing carpeting with hardwood floors, replacing a bathroom/kitchen), or new major systems (new roof, HVAC system). Things that typically do not qualify are expenses/maintenance (routine repairs, cleaning). When in doubt of which is which, include it here.
             </p>
             <div className="flex gap-4">
               <label className="flex items-center">
@@ -941,7 +958,12 @@ export default function PropertyDetails({
                   name={`hasRenovations-${index}`}
                   value="yes"
                   checked={data.hasRenovations === 'yes'}
-                  onChange={() => onChange('hasRenovations', 'yes')}
+                  onChange={() => {
+                    onChange('hasRenovations', 'yes');
+                    if (!data.capitalImprovements || data.capitalImprovements.length === 0) {
+                      onChange('capitalImprovements', [{ description: '', cost: '', year: '', recordsLocation: '' }]);
+                    }
+                  }}
                   className="mr-2"
                 />
                 <span className="text-gray-300">Yes</span>
@@ -954,7 +976,7 @@ export default function PropertyDetails({
                   checked={data.hasRenovations === 'no'}
                   onChange={() => {
                     onChange('hasRenovations', 'no');
-                    onChange('renovationDetails', '');
+                    onChange('capitalImprovements', []);
                   }}
                   className="mr-2"
                 />
@@ -963,17 +985,94 @@ export default function PropertyDetails({
             </div>
           </div>
 
-          {/* Renovation details (conditional on hasRenovations = yes) */}
-          {data.hasRenovations === 'yes' && (
-            <div className="ml-6">
-              <label className={labelClass}>Please describe the renovations</label>
-              <textarea
-                value={data.renovationDetails || ''}
-                onChange={(e) => onChange('renovationDetails', e.target.value)}
-                placeholder="Enter renovation details"
-                rows={3}
-                className={inputClass}
-              />
+          {/* Capital improvements (conditional on hasRenovations = yes) */}
+          {data.hasRenovations === 'yes' && capitalImprovements.length > 0 && (
+            <div className="ml-6 space-y-5">
+              {capitalImprovements.map((imp, impIndex) => (
+                <div key={impIndex} className="bg-gray-750 rounded-lg p-4 border border-gray-600 space-y-4">
+                  <h4 className="text-sm font-semibold text-white">Capital Improvement {impIndex + 1}</h4>
+                  <div>
+                    <label className={labelClass}>Description</label>
+                    <input
+                      type="text"
+                      value={imp.description || ''}
+                      onChange={(e) => handleCapitalImprovementChange(impIndex, 'description', e.target.value)}
+                      placeholder="Enter description of the improvement"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className={labelClass}>Cost</label>
+                      <input
+                        type="text"
+                        value={imp.cost || ''}
+                        onChange={(e) => handleCapitalImprovementChange(impIndex, 'cost', e.target.value)}
+                        placeholder="Enter cost"
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Year</label>
+                      <select
+                        value={imp.year || ''}
+                        onChange={(e) => handleCapitalImprovementChange(impIndex, 'year', e.target.value)}
+                        className={inputClass}
+                      >
+                        <option value="">Select year</option>
+                        {yearOptions.map((y) => (
+                          <option key={y} value={String(y)}>{y}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Location of the receipt/records</label>
+                    <input
+                      type="text"
+                      value={imp.recordsLocation || ''}
+                      onChange={(e) => handleCapitalImprovementChange(impIndex, 'recordsLocation', e.target.value)}
+                      placeholder="Enter where receipt/records are kept"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Are there any additional capital improvements to add?</label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name={`addMoreImprovements-${index}-${impIndex}`}
+                          value="yes"
+                          checked={impIndex < capitalImprovements.length - 1}
+                          onChange={() => {
+                            const updated = [...capitalImprovements];
+                            updated[impIndex] = { ...updated[impIndex], hasMore: 'yes' };
+                            onChange('capitalImprovements', [...updated, { description: '', cost: '', year: '', recordsLocation: '' }]);
+                          }}
+                          className="mr-2"
+                        />
+                        <span className="text-gray-300">Yes</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name={`addMoreImprovements-${index}-${impIndex}`}
+                          value="no"
+                          checked={impIndex === capitalImprovements.length - 1 && capitalImprovements[impIndex]?.hasMore !== 'yes'}
+                          onChange={() => {
+                            const updated = capitalImprovements.slice(0, impIndex + 1);
+                            updated[impIndex] = { ...updated[impIndex], hasMore: 'no' };
+                            onChange('capitalImprovements', updated);
+                          }}
+                          className="mr-2"
+                        />
+                        <span className="text-gray-300">No</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 

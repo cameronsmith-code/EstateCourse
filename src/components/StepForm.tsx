@@ -321,7 +321,7 @@ export default function StepForm({
         }
       }
     });
-  }, [answers['fp_health_0_has_additional'], answers['fp_health_1_has_additional'], answers['fp_health_2_has_additional'], answers['sp_health_0_has_additional'], answers['sp_health_1_has_additional'], answers['sp_health_2_has_additional'], answers['ph_health_0_has_additional'], answers['ph_health_1_has_additional'], answers['ph_health_2_has_additional'], answers['sp_health_has']]);
+  }, [answers['fp_health_0_has_additional'], answers['fp_health_1_has_additional'], answers['fp_health_2_has_additional'], answers['sp_health_0_has_additional'], answers['sp_health_1_has_additional'], answers['sp_health_2_has_additional'], answers['sp_health_3_has_additional'], answers['ph_health_0_has_additional'], answers['ph_health_1_has_additional'], answers['ph_health_2_has_additional'], answers['ph_health_3_has_additional'], answers['sp_health_has']]);
 
   useEffect(() => {
     if (answers['client2SpouseIsPoaPersonalCare'] === 'no') {
@@ -5571,10 +5571,15 @@ export default function StepForm({
               'sp_health_has', 'sp_health_0_name', 'sp_health_0_specialty', 'sp_health_0_phone',
               'sp_health_0_has_additional', 'sp_health_1_name', 'sp_health_1_specialty', 'sp_health_1_phone',
               'sp_health_1_has_additional', 'sp_health_2_name', 'sp_health_2_specialty', 'sp_health_2_phone',
+              'sp_health_2_has_additional', 'sp_health_3_name', 'sp_health_3_specialty', 'sp_health_3_phone',
+              'sp_health_3_has_additional', 'sp_health_4_name', 'sp_health_4_specialty', 'sp_health_4_phone',
             ]);
             const phHealthKeys = new Set([
               'ph_health_0_name', 'ph_health_0_pharmacy', 'ph_health_0_phone', 'ph_health_0_has_additional',
-              'ph_health_1_name', 'ph_health_1_pharmacy', 'ph_health_1_phone',
+              'ph_health_1_name', 'ph_health_1_pharmacy', 'ph_health_1_phone', 'ph_health_1_has_additional',
+              'ph_health_2_name', 'ph_health_2_pharmacy', 'ph_health_2_phone', 'ph_health_2_has_additional',
+              'ph_health_3_name', 'ph_health_3_pharmacy', 'ph_health_3_phone', 'ph_health_3_has_additional',
+              'ph_health_4_name', 'ph_health_4_pharmacy', 'ph_health_4_phone',
             ]);
 
             const fpQuestions = step.questions.filter(q => fpKeys.has(q.key) && !fpAdvisor2Keys.has(q.key));
@@ -6257,8 +6262,6 @@ export default function StepForm({
                           const nameQ = questions.find(q => q.key === nameKeys[cardIdx]);
                           if (!nameQ) return null;
                           if (nameQ.condition && !nameQ.condition(answers)) return null;
-                          const nameVal = (answers[nameKeys[cardIdx]] as string) || '';
-                          if (!nameVal && cardIdx > 0) return null;
                           const restQuestions = restKeySets[cardIdx]
                             .map(k => questions.find(q => q.key === k))
                             .filter(Boolean) as typeof questions;
@@ -6304,6 +6307,8 @@ export default function StepForm({
                     );
                   };
 
+                  const spGateQ = spHealthQuestions.find(q => q.key === 'sp_health_has');
+
                   return (
                     <>
                       {renderHealthCards({
@@ -6319,14 +6324,18 @@ export default function StepForm({
                         additionalLabel: 'Additional Family Physician',
                       })}
 
-                      {renderHealthCards({
+                      {spGateQ && renderQuestion(spGateQ)}
+
+                      {answers['sp_health_has'] === 'yes' && renderHealthCards({
                         sectionTitle: 'Specialists',
                         prefix: 'sp',
-                        nameKeys: ['sp_health_0_name', 'sp_health_1_name', 'sp_health_2_name'],
+                        nameKeys: ['sp_health_0_name', 'sp_health_1_name', 'sp_health_2_name', 'sp_health_3_name', 'sp_health_4_name'],
                         restKeySets: [
                           ['sp_health_0_specialty', 'sp_health_0_phone', 'sp_health_0_has_additional'],
                           ['sp_health_1_specialty', 'sp_health_1_phone', 'sp_health_1_has_additional'],
-                          ['sp_health_2_specialty', 'sp_health_2_phone'],
+                          ['sp_health_2_specialty', 'sp_health_2_phone', 'sp_health_2_has_additional'],
+                          ['sp_health_3_specialty', 'sp_health_3_phone', 'sp_health_3_has_additional'],
+                          ['sp_health_4_specialty', 'sp_health_4_phone'],
                         ],
                         questions: spHealthQuestions,
                         additionalLabel: 'Additional Specialist',
@@ -6335,10 +6344,13 @@ export default function StepForm({
                       {renderHealthCards({
                         sectionTitle: 'Pharmacist',
                         prefix: 'ph',
-                        nameKeys: ['ph_health_0_name', 'ph_health_1_name'],
+                        nameKeys: ['ph_health_0_name', 'ph_health_1_name', 'ph_health_2_name', 'ph_health_3_name', 'ph_health_4_name'],
                         restKeySets: [
                           ['ph_health_0_pharmacy', 'ph_health_0_phone', 'ph_health_0_has_additional'],
-                          ['ph_health_1_pharmacy', 'ph_health_1_phone'],
+                          ['ph_health_1_pharmacy', 'ph_health_1_phone', 'ph_health_1_has_additional'],
+                          ['ph_health_2_pharmacy', 'ph_health_2_phone', 'ph_health_2_has_additional'],
+                          ['ph_health_3_pharmacy', 'ph_health_3_phone', 'ph_health_3_has_additional'],
+                          ['ph_health_4_pharmacy', 'ph_health_4_phone'],
                         ],
                         questions: phHealthQuestions,
                         additionalLabel: 'Additional Pharmacist',
@@ -6347,11 +6359,6 @@ export default function StepForm({
                   );
                 })()}
 
-                {/* sp_health_has gate question rendered separately */}
-                {(() => {
-                  const spGateQ = spHealthQuestions.find(q => q.key === 'sp_health_has');
-                  return spGateQ ? renderQuestion(spGateQ) : null;
-                })()}
               </>
             );
           })()}

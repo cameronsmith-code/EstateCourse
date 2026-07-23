@@ -8170,7 +8170,7 @@ You should explore this as an option with your legal and CFP® professionals bec
 
     const insTypeLabels: Record<string, string> = {
       financial_planner: 'Financial Planner',
-      insurance_advisor: 'Insurance advisor',
+      insurance_advisor: 'Insurance Advisor',
       other: 'Other',
     };
 

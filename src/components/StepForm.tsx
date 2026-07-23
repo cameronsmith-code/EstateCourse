@@ -5597,7 +5597,7 @@ export default function StepForm({
                 {fpPreCheckbox.map(renderQuestion)}
                 {fpCheckboxAndRest.length > 0 && (
                   <>
-                    <h5 className="text-sm font-semibold text-blue-300 mt-4 mb-1">Advisor Information</h5>
+                    <h5 className="text-sm font-semibold text-blue-300 mt-4 mb-1">Financial Planner or Wealth Advisor Information</h5>
                     {fpCheckboxAndRest.map(renderQuestion)}
                   </>
                 )}
@@ -5607,7 +5607,7 @@ export default function StepForm({
                 }) && (
                   <>
                     <div className="flex items-center justify-between mt-6 mb-1">
-                      <h5 className="text-sm font-semibold text-blue-300">Second Advisor Information</h5>
+                      <h5 className="text-sm font-semibold text-blue-300">Second Financial Planner or Wealth Advisor Information</h5>
                       <button
                         type="button"
                         onClick={() => {
@@ -5677,7 +5677,7 @@ export default function StepForm({
                     sections.push(
                       <React.Fragment key={i}>
                         <div className="flex items-center justify-between mt-6 mb-1">
-                          <h5 className="text-sm font-semibold text-blue-300">{ordinals[i]} Advisor Information</h5>
+                          <h5 className="text-sm font-semibold text-blue-300">{ordinals[i]} Financial Planner or Wealth Advisor Information</h5>
                           <button
                             type="button"
                             onClick={() => {
@@ -6176,6 +6176,7 @@ export default function StepForm({
                               <span className="ml-3 text-gray-300">Cameron Smith CFP®</span>
                             </label>
                           </div>
+                          <h5 className="text-sm font-semibold text-blue-300 mt-4 mb-1">Insurance Advisor Information</h5>
                           {!isCameronIns && fromFirm.map(renderQuestion)}
                           {isCameronIns && fromFirm.filter(q => !['insAdvisor1Firm','insAdvisor1Name','insAdvisor1Phone','insAdvisor1Email'].includes(q.key)).map(renderQuestion)}
                         </>

@@ -4,10 +4,13 @@ type FormFieldProps = {
   question: StepQuestion;
   value: unknown;
   onChange: (value: unknown) => void;
+  answers?: Map<number, Record<string, unknown>>;
 };
 
-export default function FormField({ question, value, onChange }: FormFieldProps) {
+export default function FormField({ question, value, onChange, answers }: FormFieldProps) {
   const { key, label, type, placeholder, options, required, max } = question;
+
+  const resolvedOptions = typeof options === 'function' ? options(answers || new Map()) : options;
 
   const commonClasses =
     'w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all';
@@ -49,7 +52,6 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
   }
 
   if (type === 'select') {
-    const resolvedOptions = typeof options === 'function' ? options() : options;
     return (
       <div className="mb-6">
         <label htmlFor={key} className="block text-sm font-medium text-gray-300 mb-2">
@@ -75,7 +77,6 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
   }
 
   if (type === 'checkbox-group') {
-    const resolvedOptions = typeof options === 'function' ? options() : options;
     const selectedValues = (value as string[]) || [];
     return (
       <div className="mb-6">
@@ -107,7 +108,6 @@ export default function FormField({ question, value, onChange }: FormFieldProps)
   }
 
   if (type === 'radio') {
-    const resolvedOptions = typeof options === 'function' ? options() : options;
     return (
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-300 mb-3">

@@ -1811,13 +1811,27 @@ export const STEPS: Step[] = [
         key: 'livingSituation',
         label: 'Which best describes your current living situation?',
         type: 'radio',
-        options: [
-          { value: 'own', label: 'I own my home' },
-          { value: 'rent', label: 'I rent my home' },
-          { value: 'family', label: 'I live with family' },
-          { value: 'retirement', label: 'I live in a retirement residence' },
-          { value: 'other', label: 'Other' },
-        ],
+        options: (answers) => {
+          const basicAnswers = answers.get(1) || {};
+          const maritalStatus = basicAnswers['maritalStatus'] as string;
+          const hasMultipleClients = maritalStatus === 'married' || maritalStatus === 'common_law';
+          if (hasMultipleClients) {
+            return [
+              { value: 'own', label: 'I/We own a home' },
+              { value: 'rent', label: 'I/We rent a home' },
+              { value: 'family', label: 'I/We live with family' },
+              { value: 'retirement', label: 'I/We live in a retirement residence' },
+              { value: 'other', label: 'Other' },
+            ];
+          }
+          return [
+            { value: 'own', label: 'I own my home' },
+            { value: 'rent', label: 'I rent my home' },
+            { value: 'family', label: 'I live with family' },
+            { value: 'retirement', label: 'I live in a retirement residence' },
+            { value: 'other', label: 'Other' },
+          ];
+        },
         required: true,
       },
       {

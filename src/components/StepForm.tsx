@@ -6242,8 +6242,34 @@ export default function StepForm({
                       onAnswerChange(patientsKey, next);
                     };
 
+                    const removePhysician = () => {
+                      const keysToRemove = [
+                        `fp_health_${physIdx}_name`, `fp_health_${physIdx}_patients`,
+                        `fp_health_${physIdx}_clinic`, `fp_health_${physIdx}_city`,
+                        `fp_health_${physIdx}_phone`, `fp_health_${physIdx}_has_additional`,
+                      ];
+                      keysToRemove.forEach(key => onAnswerChange(key, undefined));
+                      onAnswerChange(`fp_health_${physIdx - 1}_has_additional`, 'no');
+                    };
+
                     return (
                       <div key={physIdx} className="mt-4 pt-3 border-t border-gray-700 first:border-0 first:pt-0 first:mt-0 space-y-4">
+                        {physIdx > 0 && (
+                          <div className="flex items-center justify-between -mb-1">
+                            <h5 className="text-sm font-semibold text-blue-300">
+                              {physIdx === 1 ? 'Additional Family Physician #1' : 'Additional Family Physician #2'}
+                            </h5>
+                            <button
+                              type="button"
+                              onClick={removePhysician}
+                              className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-md transition-colors"
+                              aria-label="Remove additional family physician"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Remove</span>
+                            </button>
+                          </div>
+                        )}
                         {renderQuestion(nameQ)}
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">Patients:</label>

@@ -5601,7 +5601,7 @@ export default function StepForm({
                     {fpCheckboxAndRest.map(renderQuestion)}
                   </>
                 )}
-                {fpAdvisor2Questions.length > 0 && fpAdvisor2Questions.some(q => {
+                {answers['fpHasAdditionalAdvisor'] === 'yes' && fpAdvisor2Questions.length > 0 && fpAdvisor2Questions.some(q => {
                   if (!q.condition) return true;
                   return q.condition(answers);
                 }) && (
@@ -5681,17 +5681,16 @@ export default function StepForm({
                           <button
                             type="button"
                             onClick={() => {
-                              const prevIdx = i - 1;
-                              if (prevIdx >= 0) {
-                                const prevAdvisor = additionalData[prevIdx] || {};
-                                if (prevAdvisor.hasAdditional === 'yes') {
-                                  updateAdvisor(prevIdx, 'hasAdditional', 'no');
-                                }
-                              } else {
+                              if (i === 0) {
                                 onAnswerChange('fpAdvisor2HasAdditionalAdvisor', 'no');
+                                onAnswerChange('fpAdditionalAdvisorsData', undefined);
+                              } else {
+                                const trimmed = additionalData.slice(0, i);
+                                if (trimmed.length > 0) {
+                                  trimmed[trimmed.length - 1] = { ...trimmed[trimmed.length - 1], hasAdditional: 'no' };
+                                }
+                                onAnswerChange('fpAdditionalAdvisorsData', trimmed.length > 0 ? trimmed : undefined);
                               }
-                              const trimmed = additionalData.slice(0, i);
-                              onAnswerChange('fpAdditionalAdvisorsData', trimmed.length > 0 ? trimmed : undefined);
                             }}
                             className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-md transition-colors"
                             aria-label={`Remove ${ordinals[i].toLowerCase()} advisor`}

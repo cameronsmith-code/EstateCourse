@@ -29,6 +29,7 @@ export type PropertyData = {
   recordsLocation: string;
   claimedPREOtherProperty: string;
   preDesignatedYears: string[];
+  titleHolding: string;
 };
 
 type Props = {
@@ -536,6 +537,51 @@ export default function PropertyDetails({
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Title holding — only when more than one owner */}
+          {allOwnerNames.length > 1 && (
+            <div className="mt-5 pt-4 border-t border-gray-700">
+              <label className="block text-sm font-semibold text-gray-200 mb-1">Ownership Details</label>
+              <p className="text-sm text-gray-300 mb-3">
+                Is the title held as Joint Tenants with Right-of-Survivorship, or as Tenants-in-Common?
+              </p>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name={`titleHolding-${index}`}
+                    value="joint_tenants"
+                    checked={data.titleHolding === 'joint_tenants'}
+                    onChange={() => onChange('titleHolding', 'joint_tenants')}
+                    className="mr-2"
+                  />
+                  <span className="text-gray-300">Joint Tenants with Right-of-Survivorship</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name={`titleHolding-${index}`}
+                    value="tenants_in_common"
+                    checked={data.titleHolding === 'tenants_in_common'}
+                    onChange={() => onChange('titleHolding', 'tenants_in_common')}
+                    className="mr-2"
+                  />
+                  <span className="text-gray-300">Tenants-in-Common</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name={`titleHolding-${index}`}
+                    value="not_sure"
+                    checked={data.titleHolding === 'not_sure'}
+                    onChange={() => onChange('titleHolding', 'not_sure')}
+                    className="mr-2"
+                  />
+                  <span className="text-gray-300">I/We are not sure</span>
+                </label>
+              </div>
             </div>
           )}
         </div>

@@ -45,6 +45,8 @@ export type PropertyData = {
   titleHolding: string;
   hasAdditionalOwners: string;
   purchasedByHasAdditionalOwners: string;
+  coOwnershipAgreement: string;
+  coOwnershipAgreementLocation: string;
 };
 
 type Props = {
@@ -607,7 +609,7 @@ export default function PropertyDetails({
                       value="no"
                       checked={data.hasAdditionalOwners === 'no'}
                       onChange={() => {
-                        onMultiChange({ hasAdditionalOwners: 'no', otherOwners: [], ownershipPercentages: Object.fromEntries(Object.entries(ownershipPercentages).filter(([n]) => owners.includes(n))) });
+                        onMultiChange({ hasAdditionalOwners: 'no', otherOwners: [], ownershipPercentages: Object.fromEntries(Object.entries(ownershipPercentages).filter(([n]) => owners.includes(n))), coOwnershipAgreement: '', coOwnershipAgreementLocation: '' });
                       }}
                       className="mr-2"
                     />
@@ -705,6 +707,57 @@ export default function PropertyDetails({
           )}
         </div>
       )}
+
+      {/* Co-ownership agreement — shown when any non-spouse other owner exists */}
+      {(() => {
+        const nonSpouseOthers = otherOwners.filter(o => o.name?.trim() && o.name !== client2Name);
+        return nonSpouseOthers.length > 0 ? (
+          <div className="pt-4 border-t border-gray-700 space-y-4">
+            <div>
+              <label className={labelClass}>Is there a co-ownership agreement?</label>
+              <p className="text-xs text-gray-400 mb-3 italic">
+                If the property is owned with someone other than a spouse, is there a written agreement detailing how expenses are shared or how a buyout is triggered?
+              </p>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name={`coOwnershipAgreement-${index}`}
+                    value="yes"
+                    checked={data.coOwnershipAgreement === 'yes'}
+                    onChange={() => onChange('coOwnershipAgreement', 'yes')}
+                    className="mr-2"
+                  />
+                  <span className="text-gray-300">Yes</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name={`coOwnershipAgreement-${index}`}
+                    value="no"
+                    checked={data.coOwnershipAgreement === 'no'}
+                    onChange={() => onMultiChange({ coOwnershipAgreement: 'no', coOwnershipAgreementLocation: '' })}
+                    className="mr-2"
+                  />
+                  <span className="text-gray-300">No</span>
+                </label>
+              </div>
+            </div>
+            {data.coOwnershipAgreement === 'yes' && (
+              <div>
+                <label className={labelClass}>Location of the co-ownership agreement</label>
+                <input
+                  type="text"
+                  value={data.coOwnershipAgreementLocation || ''}
+                  onChange={(e) => onChange('coOwnershipAgreementLocation', e.target.value)}
+                  placeholder="Enter where the agreement is kept"
+                  className={inputClass}
+                />
+              </div>
+            )}
+          </div>
+        ) : null;
+      })()}
 
       {/* Purchase year + purchased by (shown once ownership structure is established) */}
       {country && allOwnerNames.length > 0 && (

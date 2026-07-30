@@ -43,6 +43,8 @@ export type PropertyData = {
   claimedPREOtherProperty: string;
   preDesignatedYears: string[];
   titleHolding: string;
+  hasAdditionalOwners: string;
+  purchasedByHasAdditionalOwners: string;
 };
 
 type Props = {
@@ -536,7 +538,7 @@ export default function PropertyDetails({
                     />
                   </div>
                 </div>
-                {oo.name?.trim() && (
+                {oo.name?.trim() && oi === otherOwners.length - 1 && (
                   <div>
                     <label className={labelClass}>Are there additional owners?</label>
                     <div className="flex gap-4">
@@ -572,13 +574,38 @@ export default function PropertyDetails({
             ))}
 
             {otherOwners.length === 0 && (
-              <button
-                type="button"
-                onClick={handleAddOtherOwner}
-                className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300"
-              >
-                <Plus size={16} /> Add other owner
-              </button>
+              <div>
+                <label className={labelClass}>Are there additional owners?</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`hasAdditionalOwners-${index}`}
+                      value="yes"
+                      checked={data.hasAdditionalOwners === 'yes'}
+                      onChange={() => {
+                        onMultiChange({ hasAdditionalOwners: 'yes' });
+                        handleAddOtherOwner();
+                      }}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">Yes</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`hasAdditionalOwners-${index}`}
+                      value="no"
+                      checked={data.hasAdditionalOwners === 'no'}
+                      onChange={() => {
+                        onMultiChange({ hasAdditionalOwners: 'no', otherOwners: [], ownershipPercentages: Object.fromEntries(Object.entries(ownershipPercentages).filter(([n]) => owners.includes(n))) });
+                      }}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">No</span>
+                  </label>
+                </div>
+              </div>
             )}
           </div>
 
@@ -873,7 +900,7 @@ export default function PropertyDetails({
                           />
                         </div>
                       </div>
-                      {oo.name?.trim() && (
+                      {oo.name?.trim() && oi === purchasedByOtherOwners.length - 1 && (
                         <div>
                           <label className={labelClass}>Are there additional purchasers?</label>
                           <div className="flex gap-4">
@@ -909,13 +936,38 @@ export default function PropertyDetails({
                   ))}
 
                   {purchasedByOtherOwners.length === 0 && (
-                    <button
-                      type="button"
-                      onClick={handleAddPurchasedByOtherOwner}
-                      className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300"
-                    >
-                      <Plus size={16} /> Add other purchaser
-                    </button>
+                    <div>
+                      <label className={labelClass}>Are there additional purchasers?</label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`purchasedByHasAdditionalOwners-${index}`}
+                            value="yes"
+                            checked={data.purchasedByHasAdditionalOwners === 'yes'}
+                            onChange={() => {
+                              onMultiChange({ purchasedByHasAdditionalOwners: 'yes' });
+                              handleAddPurchasedByOtherOwner();
+                            }}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">Yes</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`purchasedByHasAdditionalOwners-${index}`}
+                            value="no"
+                            checked={data.purchasedByHasAdditionalOwners === 'no'}
+                            onChange={() => {
+                              onMultiChange({ purchasedByHasAdditionalOwners: 'no', purchasedByOtherOwners: [], purchasedByOwnershipPercentages: Object.fromEntries(Object.entries(purchasedByOwnershipPercentages).filter(([n]) => purchasedByOwners.includes(n))) });
+                            }}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">No</span>
+                        </label>
+                      </div>
+                    </div>
                   )}
                 </div>
 

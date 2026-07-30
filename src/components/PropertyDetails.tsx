@@ -947,7 +947,7 @@ export default function PropertyDetails({
 
           {/* Renovations */}
           <div>
-            <label className={labelClass}>Have there been any renovations?</label>
+            <label className={labelClass}>Have there been any Capital Improvements to {propertyName}?</label>
             <p className="text-xs text-gray-400 mb-3 italic">
               Note: the CRA distinguishes between these two based on whether the work improves the property beyond its original condition or merely maintains it. Examples of Capital Improvement are structural additions, substantial upgrades (replacing carpeting with hardwood floors, replacing a bathroom/kitchen), or new major systems (new roof, HVAC system). Things that typically do not qualify are expenses/maintenance (routine repairs, cleaning). When in doubt of which is which, include it here.
             </p>

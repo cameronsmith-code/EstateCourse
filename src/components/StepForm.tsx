@@ -1010,6 +1010,68 @@ export default function StepForm({
     }
   }, [answers['client2HasPartnership']]);
 
+  const clearLifePolicyFields = (prefix: string) => {
+    const fields = [
+      'InsuredPerson', 'InsuredPersonOther', 'PolicyOwner', 'PolicyOwnerOther',
+      'Provider', 'Employer', 'CoverageAmount', 'CoverageEndType', 'CoverageEndDate',
+      'Purpose', 'Beneficiary', 'BeneficiaryOther',
+      'HasContingentBeneficiaries', 'ContingentBeneficiary', 'ContingentBeneficiaryOther',
+      'HasAdditional',
+    ];
+    fields.forEach(f => {
+      const key = `${prefix}${f}`;
+      if (answers[key] !== undefined) onAnswerChange(key, undefined);
+    });
+  };
+
+  useEffect(() => {
+    if (answers['client1HasLifeInsurance'] !== 'yes') {
+      for (let i = 1; i <= 4; i++) clearLifePolicyFields(`client1LifePolicy${i}`);
+    }
+  }, [answers['client1HasLifeInsurance']]);
+
+  useEffect(() => {
+    if (answers['client2HasLifeInsurance'] !== 'yes') {
+      for (let i = 1; i <= 4; i++) clearLifePolicyFields(`client2LifePolicy${i}`);
+    }
+  }, [answers['client2HasLifeInsurance']]);
+
+  useEffect(() => {
+    if (answers['client1LifePolicy1HasAdditional'] !== 'yes') {
+      for (let ni = 2; ni <= 4; ni++) clearLifePolicyFields(`client1LifePolicy${ni}`);
+    }
+  }, [answers['client1LifePolicy1HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1LifePolicy2HasAdditional'] !== 'yes') {
+      for (let ni = 3; ni <= 4; ni++) clearLifePolicyFields(`client1LifePolicy${ni}`);
+    }
+  }, [answers['client1LifePolicy2HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1LifePolicy3HasAdditional'] !== 'yes') {
+      clearLifePolicyFields('client1LifePolicy4');
+    }
+  }, [answers['client1LifePolicy3HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2LifePolicy1HasAdditional'] !== 'yes') {
+      for (let ni = 2; ni <= 4; ni++) clearLifePolicyFields(`client2LifePolicy${ni}`);
+    }
+  }, [answers['client2LifePolicy1HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2LifePolicy2HasAdditional'] !== 'yes') {
+      for (let ni = 3; ni <= 4; ni++) clearLifePolicyFields(`client2LifePolicy${ni}`);
+    }
+  }, [answers['client2LifePolicy2HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2LifePolicy3HasAdditional'] !== 'yes') {
+      clearLifePolicyFields('client2LifePolicy4');
+    }
+  }, [answers['client2LifePolicy3HasAdditional']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');
@@ -11626,13 +11688,11 @@ export default function StepForm({
               return question.condition(allFormData);
             };
 
-            const client1Keys = new Set([
-              'client1HasLifeInsurance',
-            ]);
+            const isClient1Key = (key: string) =>
+              key === 'client1HasLifeInsurance' || key.startsWith('client1LifePolicy');
 
-            const client2Keys = new Set([
-              'client2HasLifeInsurance',
-            ]);
+            const isClient2Key = (key: string) =>
+              key === 'client2HasLifeInsurance' || key.startsWith('client2LifePolicy');
 
             const renderQuestion = (question: typeof step.questions[0]) => {
               if (!isVisible(question)) return null;
@@ -11653,11 +11713,11 @@ export default function StepForm({
             return (
               <>
                 <Subsection title={`${client1Name} - Group Benefits`}>
-                  {step.questions.filter(q => client1Keys.has(q.key)).map(renderQuestion)}
+                  {step.questions.filter(q => isClient1Key(q.key)).map(renderQuestion)}
                 </Subsection>
                 {hasSpouse && (
                   <Subsection title={`${client2Name} - Group Benefits`}>
-                    {step.questions.filter(q => client2Keys.has(q.key)).map(renderQuestion)}
+                    {step.questions.filter(q => isClient2Key(q.key)).map(renderQuestion)}
                   </Subsection>
                 )}
               </>

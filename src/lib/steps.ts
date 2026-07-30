@@ -11,7 +11,7 @@ const generateYearOptions = () => {
 export type StepQuestion = {
   key: string;
   label: string | ((answers: Map<number, Record<string, unknown>>) => string);
-  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'email' | 'tel' | 'date' | 'number' | 'checkbox-group' | 'dynamic';
+  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'email' | 'tel' | 'date' | 'number' | 'checkbox-group' | 'dynamic' | 'label' | 'display';
   placeholder?: string;
   options?: Array<{ value: string; label: string }> | ((answers: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>);
   required?: boolean;
@@ -27,6 +27,342 @@ export type Step = {
   description?: string;
   questions: StepQuestion[];
   videoUrl?: string;
+};
+
+type OptionEntry = { value: string; label: string };
+
+const buildInsuredPersonOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
+  const step1 = answers.get(1) || {};
+  const step2 = answers.get(2) || {};
+  const step3 = answers.get(3) || {};
+  const opts: OptionEntry[] = [];
+  const seen = new Set<string>();
+
+  const add = (value: string, label: string) => {
+    const trimmed = label.trim();
+    if (!trimmed) return;
+    const key = value || trimmed.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    opts.push({ value, label: trimmed });
+  };
+
+  add('client1', (step1['fullName'] as string) || 'Client 1');
+  const ms = step1['maritalStatus'] as string;
+  if (ms === 'married' || ms === 'common_law') {
+    add('client2', (step1['spouseName'] as string) || 'Client 2');
+  }
+
+  const childrenData = (step3['childrenData'] as Array<Record<string, string>>) || [];
+  childrenData.forEach((c, i) => {
+    const name = (c?.name || '').trim();
+    if (name) add(`child_${i}`, name);
+  });
+
+  const c1PrevRels = (step2['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+  c1PrevRels.forEach((r, i) => add(`c1prevrel_${i}`, r?.name || ''));
+  const c2PrevRels = (step2['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+  c2PrevRels.forEach((r, i) => add(`c2prevrel_${i}`, r?.name || ''));
+
+  opts.push({ value: 'other', label: 'Other' });
+  return opts;
+};
+
+const buildPolicyOwnerOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
+  const step1 = answers.get(1) || {};
+  const step2 = answers.get(2) || {};
+  const step3 = answers.get(3) || {};
+  const step4 = answers.get(4) || {};
+  const step6 = answers.get(6) || {};
+  const opts: OptionEntry[] = [];
+  const seen = new Set<string>();
+
+  const add = (value: string, label: string) => {
+    const trimmed = label.trim();
+    if (!trimmed) return;
+    const key = value || trimmed.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    opts.push({ value, label: trimmed });
+  };
+
+  add('client1', (step1['fullName'] as string) || 'Client 1');
+  const ms = step1['maritalStatus'] as string;
+  if (ms === 'married' || ms === 'common_law') {
+    add('client2', (step1['spouseName'] as string) || 'Client 2');
+  }
+
+  const childrenData = (step3['childrenData'] as Array<Record<string, string>>) || [];
+  childrenData.forEach((c, i) => {
+    const name = (c?.name || '').trim();
+    if (name) add(`child_${i}`, name);
+  });
+
+  const c1PrevRels = (step2['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+  c1PrevRels.forEach((r, i) => add(`c1prevrel_${i}`, r?.name || ''));
+  const c2PrevRels = (step2['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+  c2PrevRels.forEach((r, i) => add(`c2prevrel_${i}`, r?.name || ''));
+
+  const corporationsData = (step6['corporationsData'] as Array<Record<string, string>>) || [];
+  corporationsData.forEach((c, i) => add(`corp_${i}`, c?.legalName || ''));
+
+  for (let t = 1; t <= 4; t++) {
+    const trustKey = t === 1 ? 'trustLegalName' : `trust${t}LegalName`;
+    const trustName = step4[trustKey] as string;
+    add(`trust_${t}`, trustName || '');
+  }
+
+  opts.push({ value: 'other', label: 'Other' });
+  return opts;
+};
+
+const buildBeneficiaryOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
+  const step1 = answers.get(1) || {};
+  const step2 = answers.get(2) || {};
+  const step3 = answers.get(3) || {};
+  const step4 = answers.get(4) || {};
+  const step6 = answers.get(6) || {};
+  const opts: OptionEntry[] = [];
+  const seen = new Set<string>();
+
+  const add = (value: string, label: string) => {
+    const trimmed = label.trim();
+    if (!trimmed) return;
+    const key = value || trimmed.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    opts.push({ value, label: trimmed });
+  };
+
+  add('client1', (step1['fullName'] as string) || 'Client 1');
+  const ms = step1['maritalStatus'] as string;
+  if (ms === 'married' || ms === 'common_law') {
+    add('client2', (step1['spouseName'] as string) || 'Client 2');
+  }
+
+  const childrenData = (step3['childrenData'] as Array<Record<string, string>>) || [];
+  childrenData.forEach((c, i) => {
+    const name = (c?.name || '').trim();
+    if (name) add(`child_${i}`, name);
+  });
+
+  const c1PrevRels = (step2['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+  c1PrevRels.forEach((r, i) => add(`c1prevrel_${i}`, r?.name || ''));
+  const c2PrevRels = (step2['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+  c2PrevRels.forEach((r, i) => add(`c2prevrel_${i}`, r?.name || ''));
+
+  const corporationsData = (step6['corporationsData'] as Array<Record<string, string>>) || [];
+  corporationsData.forEach((c, i) => add(`corp_${i}`, c?.legalName || ''));
+
+  for (let t = 1; t <= 4; t++) {
+    const trustKey = t === 1 ? 'trustLegalName' : `trust${t}LegalName`;
+    const trustName = step4[trustKey] as string;
+    add(`trust_${t}`, trustName || '');
+  }
+
+  opts.push({ value: 'other', label: 'Other' });
+  return opts;
+};
+
+const MAX_POLICIES = 4;
+
+const generateLifeInsurancePolicyQuestions = (clientPrefix: 'client1' | 'client2'): StepQuestion[] => {
+  const questions: StepQuestion[] = [];
+
+  for (let i = 1; i <= MAX_POLICIES; i++) {
+    const p = `${clientPrefix}LifePolicy${i}`;
+    const prevGate = i === 1
+      ? `${clientPrefix}HasLifeInsurance`
+      : `${clientPrefix}LifePolicy${i - 1}HasAdditional`;
+
+    const gateCondition = (formData: Record<string, string>): boolean => formData[prevGate] === 'yes';
+
+    questions.push({
+      key: p,
+      label: i === 1 ? 'Life Insurance Policy Details' : `Additional Life Insurance Policy (${i})`,
+      type: 'label',
+      required: false,
+      condition: gateCondition,
+    });
+
+    questions.push({
+      key: `${p}InsuredPerson`,
+      label: 'Insured Person',
+      type: 'select',
+      options: buildInsuredPersonOptions,
+      required: false,
+      condition: gateCondition,
+    });
+
+    questions.push({
+      key: `${p}InsuredPersonOther`,
+      label: 'Please specify the insured person:',
+      type: 'text',
+      placeholder: 'Enter name',
+      required: false,
+      condition: (formData: Record<string, string>) =>
+        gateCondition(formData) && formData[`${p}InsuredPerson`] === 'other',
+    });
+
+    questions.push({
+      key: `${p}PolicyOwner`,
+      label: 'Policy Owner',
+      type: 'select',
+      options: buildPolicyOwnerOptions,
+      required: false,
+      condition: gateCondition,
+    });
+
+    questions.push({
+      key: `${p}PolicyOwnerOther`,
+      label: 'Please specify the policy owner:',
+      type: 'text',
+      placeholder: 'Enter name',
+      required: false,
+      condition: (formData: Record<string, string>) =>
+        gateCondition(formData) && formData[`${p}PolicyOwner`] === 'other',
+    });
+
+    questions.push({
+      key: `${p}Provider`,
+      label: 'Insurance Provider',
+      type: 'text',
+      placeholder: 'e.g., Sun Life, Manulife',
+      required: false,
+      condition: gateCondition,
+    });
+
+    questions.push({
+      key: `${p}Employer`,
+      label: 'Employer (if applicable)',
+      type: 'text',
+      placeholder: 'e.g., ABC Corp, or leave blank if personal',
+      required: false,
+      condition: gateCondition,
+    });
+
+    questions.push({
+      key: `${p}CoverageAmount`,
+      label: 'Coverage Amount',
+      type: 'text',
+      placeholder: 'e.g., $500,000',
+      required: false,
+      condition: gateCondition,
+    });
+
+    questions.push({
+      key: `${p}CoverageEndType`,
+      label: 'When does the coverage end?',
+      type: 'radio',
+      options: [
+        { value: 'retirement', label: 'Retirement' },
+        { value: 'job_change', label: 'Job change' },
+        { value: 'specific_date', label: 'Specific date' },
+      ],
+      required: false,
+      condition: gateCondition,
+    });
+
+    questions.push({
+      key: `${p}CoverageEndDate`,
+      label: 'Please specify the date coverage ends:',
+      type: 'date',
+      required: false,
+      condition: (formData: Record<string, string>) =>
+        gateCondition(formData) && formData[`${p}CoverageEndType`] === 'specific_date',
+    });
+
+    questions.push({
+      key: `${p}Purpose`,
+      label: 'Purpose',
+      type: 'textarea',
+      placeholder: 'e.g., Income replacement, mortgage protection, estate liquidity',
+      required: false,
+      condition: gateCondition,
+    });
+
+    questions.push({
+      key: `${p}Beneficiary`,
+      label: 'Beneficiary(ies)',
+      type: 'checkbox-group',
+      options: buildBeneficiaryOptions,
+      required: false,
+      condition: gateCondition,
+    });
+
+    questions.push({
+      key: `${p}BeneficiaryOther`,
+      label: 'Please specify the beneficiary(ies):',
+      type: 'text',
+      placeholder: 'Enter beneficiary name(s)',
+      required: false,
+      condition: (formData: Record<string, string>) => {
+        if (!gateCondition(formData)) return false;
+        const beneficiaries = formData[`${p}Beneficiary`];
+        if (!beneficiaries) return false;
+        return beneficiaries.split(',').includes('other');
+      },
+    });
+
+    questions.push({
+      key: `${p}HasContingentBeneficiaries`,
+      label: 'Are there any Contingent Beneficiaries?',
+      type: 'radio',
+      options: [
+        { value: 'yes', label: 'Yes' },
+        { value: 'no', label: 'No' },
+      ],
+      required: false,
+      condition: gateCondition,
+    });
+
+    questions.push({
+      key: `${p}ContingentBeneficiary`,
+      label: 'Contingent Beneficiary(ies)',
+      type: 'checkbox-group',
+      options: buildBeneficiaryOptions,
+      required: false,
+      condition: (formData: Record<string, string>) =>
+        gateCondition(formData) && formData[`${p}HasContingentBeneficiaries`] === 'yes',
+    });
+
+    questions.push({
+      key: `${p}ContingentBeneficiaryOther`,
+      label: 'Please specify the contingent beneficiary(ies):',
+      type: 'text',
+      placeholder: 'Enter contingent beneficiary name(s)',
+      required: false,
+      condition: (formData: Record<string, string>) => {
+        if (!gateCondition(formData)) return false;
+        if (formData[`${p}HasContingentBeneficiaries`] !== 'yes') return false;
+        const contingent = formData[`${p}ContingentBeneficiary`];
+        if (!contingent) return false;
+        return contingent.split(',').includes('other');
+      },
+    });
+
+    if (i < MAX_POLICIES) {
+      const clientNameFn = clientPrefix === 'client1'
+        ? (answers: Map<number, Record<string, unknown>>) =>
+            `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
+        : (answers: Map<number, Record<string, unknown>>) =>
+            `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get(1)?.['fullName'] as string) || 'Client 1'}'s employer?`;
+
+      questions.push({
+        key: `${p}HasAdditional`,
+        label: clientNameFn,
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: gateCondition,
+      });
+    }
+  }
+
+  return questions;
 };
 
 export const STEPS: Step[] = [
@@ -2167,6 +2503,8 @@ export const STEPS: Step[] = [
         },
       },
 
+      ...generateLifeInsurancePolicyQuestions('client1'),
+      ...generateLifeInsurancePolicyQuestions('client2'),
     ],
   },
   {

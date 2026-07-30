@@ -190,6 +190,23 @@ export default function PropertyDetails({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [validOwnerOptions.join('|')]);
 
+  const hasOtherOwners = otherOwners.some(o => o.name?.trim());
+
+  useEffect(() => {
+    if (allOwnerNames.length === 1 && !hasOtherOwners) {
+      const name = allOwnerNames[0];
+      const updates: Partial<PropertyData> = {};
+      if (ownershipPercentages[name] !== '100') {
+        updates.ownershipPercentages = { [name]: '100' };
+      }
+      if (!data.purchasedBy) {
+        updates.purchasedBy = 'clients';
+      }
+      if (Object.keys(updates).length > 0) onMultiChange(updates);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allOwnerNames.join('|'), hasOtherOwners]);
+
   const totalPct = allOwnerNames.reduce((sum, name) => {
     const pct = parseFloat(ownershipPercentages[name] || '0');
     return sum + (isNaN(pct) ? 0 : pct);
@@ -315,7 +332,7 @@ export default function PropertyDetails({
 
   const currentOwnerNames = [...allOwnerNames, ...otherOwners.map(o => o.name).filter(n => n?.trim())].sort();
   const purchaserNames = data.purchasedBy === 'clients'
-    ? [client1Name, ...(hasSpouse ? [client2Name] : [])].sort()
+    ? allOwnerNames.slice().sort()
     : [...purchasedByAllOwnerNames, ...purchasedByOtherOwners.map(o => o.name).filter(n => n?.trim())].sort();
   const ownersDifferFromPurchasers =
     data.purchasedBy !== undefined && data.purchasedBy !== '' &&
@@ -894,9 +911,12 @@ export default function PropertyDetails({
                   className="mr-2"
                 />
                 <span className="text-white">
-                  {client1Name}
-                  {c1Pct ? ` (${c1Pct}%)` : ''}
-                  {hasSpouse && client2Name ? ` and ${client2Name}${c2Pct ? ` (${c2Pct}%)` : ''}` : ''}
+                  {allOwnerNames.length > 0
+                    ? allOwnerNames.map((name, i) => {
+                        const pct = ownershipPercentages[name];
+                        return (i > 0 ? ' and ' : '') + name + (pct ? ` (${pct}%)` : '');
+                      }).join('')
+                    : client1Name + (c1Pct ? ` (${c1Pct}%)` : '') + (hasSpouse && client2Name ? ` and ${client2Name}${c2Pct ? ` (${c2Pct}%)` : ''}` : '')}
                 </span>
               </label>
               <label className="flex items-center">

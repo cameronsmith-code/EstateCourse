@@ -348,6 +348,7 @@ export default function PropertyDetails({
   const yearOptions: number[] = [];
   for (let y = currentYear; y >= 1900; y--) yearOptions.push(y);
 
+  const isRental = propertyType.toLowerCase().includes('rental');
   const propertyName = data.name || `${propertyType} ${index + 1}`;
   const c1Pct = ownershipPercentages[client1Name] || '';
   const c2Pct = ownershipPercentages[client2Name] || '';
@@ -1412,7 +1413,7 @@ export default function PropertyDetails({
           )}
 
           {/* Rental-specific questions */}
-          {propertyType === 'Rental' && (
+          {isRental && (
             <>
               {/* Lease documents location */}
               <div>
@@ -1553,7 +1554,7 @@ export default function PropertyDetails({
           )}
 
           {/* Inhabited annually / used for income / PRE — hidden for Rental properties */}
-          {propertyType !== 'Rental' && (
+          {!isRental && (
             <>
           <div>
             <label className={labelClass}>

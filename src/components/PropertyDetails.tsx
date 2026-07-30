@@ -166,10 +166,9 @@ export default function PropertyDetails({
   const isCanada = country.toLowerCase() === 'canada';
   const isUS = country.toLowerCase() === 'united states' || country.toLowerCase() === 'usa' || country.toLowerCase() === 'us';
 
-  const allOwnerNames: string[] = [
-    ...owners,
-    ...otherOwners.filter(o => o.name?.trim()).map(o => o.name),
-  ];
+  const allOwnerNames: string[] = Array.from(new Set(
+    [...owners.filter(n => n?.trim()), ...otherOwners.filter(o => o.name?.trim()).map(o => o.name)]
+  ));
 
   const totalPct = allOwnerNames.reduce((sum, name) => {
     const pct = parseFloat(ownershipPercentages[name] || '0');
@@ -224,10 +223,9 @@ export default function PropertyDetails({
 
   const [showPurchasedByPct, setShowPurchasedByPct] = useState(false);
 
-  const purchasedByAllOwnerNames: string[] = [
-    ...purchasedByOwners,
-    ...purchasedByOtherOwners.filter(o => o.name?.trim()).map(o => o.name),
-  ];
+  const purchasedByAllOwnerNames: string[] = Array.from(new Set(
+    [...purchasedByOwners.filter(n => n?.trim()), ...purchasedByOtherOwners.filter(o => o.name?.trim()).map(o => o.name)]
+  ));
 
   const purchasedByTotalPct = purchasedByAllOwnerNames.reduce((sum, name) => {
     const pct = parseFloat(purchasedByOwnershipPercentages[name] || '0');
@@ -479,15 +477,17 @@ export default function PropertyDetails({
 
             {/* Other owners added so far */}
             {otherOwners.map((oo, oi) => (
-              <label key={`oo-${oi}`} className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={owners.includes(oo.name)}
-                  onChange={(e) => handleOwnerToggle(oo.name, e.target.checked)}
-                  className="mr-2"
-                />
-                <span className="text-white">{oo.name || `Other ${oi + 1}`}</span>
-              </label>
+              oo.name?.trim() ? (
+                <label key={`oo-${oi}`} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={owners.includes(oo.name)}
+                    onChange={(e) => handleOwnerToggle(oo.name, e.target.checked)}
+                    className="mr-2"
+                  />
+                  <span className="text-white">{oo.name}</span>
+                </label>
+              ) : null
             ))}
           </div>
 
@@ -513,8 +513,20 @@ export default function PropertyDetails({
                     selectedName={oo.name}
                     onSelect={(name, phone, city) => {
                       const updated = [...otherOwners];
+                      const oldName = updated[oi].name;
                       updated[oi] = { ...updated[oi], name, phone, city };
-                      onChange('otherOwners', updated);
+                      const oldKey = oldName || '';
+                      let newOwners = [...owners];
+                      if (newOwners.includes(oldKey)) {
+                        newOwners = newOwners.map(o => o === oldKey ? name : o);
+                      }
+                      newOwners = newOwners.filter(n => n?.trim());
+                      const newPct: Record<string, string> = { ...ownershipPercentages };
+                      if (newPct[oldKey] !== undefined) {
+                        newPct[name] = newPct[oldKey];
+                        delete newPct[oldKey];
+                      }
+                      onMultiChange({ otherOwners: updated, owners: newOwners, ownershipPercentages: newPct });
                     }}
                   />
                 </div>
@@ -901,15 +913,17 @@ export default function PropertyDetails({
 
                   {/* Other owners added so far */}
                   {purchasedByOtherOwners.map((oo, oi) => (
-                    <label key={`pb-oo-${oi}`} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={purchasedByOwners.includes(oo.name)}
-                        onChange={(e) => handlePurchasedByOwnerToggle(oo.name, e.target.checked)}
-                      className="mr-2"
-                    />
-                    <span className="text-white">{oo.name || `Other ${oi + 1}`}</span>
-                  </label>
+                    oo.name?.trim() ? (
+                      <label key={`pb-oo-${oi}`} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={purchasedByOwners.includes(oo.name)}
+                          onChange={(e) => handlePurchasedByOwnerToggle(oo.name, e.target.checked)}
+                          className="mr-2"
+                        />
+                        <span className="text-white">{oo.name}</span>
+                      </label>
+                    ) : null
                   ))}
                 </div>
 
@@ -935,8 +949,20 @@ export default function PropertyDetails({
                           selectedName={oo.name}
                           onSelect={(name, phone, city) => {
                             const updated = [...purchasedByOtherOwners];
+                            const oldName = updated[oi].name;
                             updated[oi] = { ...updated[oi], name, phone, city };
-                            onChange('purchasedByOtherOwners', updated);
+                            const oldKey = oldName || '';
+                            let newOwners = [...purchasedByOwners];
+                            if (newOwners.includes(oldKey)) {
+                              newOwners = newOwners.map(o => o === oldKey ? name : o);
+                            }
+                            newOwners = newOwners.filter(n => n?.trim());
+                            const newPct: Record<string, string> = { ...purchasedByOwnershipPercentages };
+                            if (newPct[oldKey] !== undefined) {
+                              newPct[name] = newPct[oldKey];
+                              delete newPct[oldKey];
+                            }
+                            onMultiChange({ purchasedByOtherOwners: updated, purchasedByOwners: newOwners, purchasedByOwnershipPercentages: newPct });
                           }}
                         />
                       </div>

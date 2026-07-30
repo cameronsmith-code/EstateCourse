@@ -2137,7 +2137,8 @@ export const STEPS: Step[] = [
         key: 'client1HasLifeInsurance',
         label: (answers) => {
           const name = answers.get(1)?.fullName as string || 'Client 1';
-          return `Does ${name} have any life insurance?`;
+          const spouseName = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}, do you have any Life Insurance through your employer or through ${spouseName}'s employer?`;
         },
         type: 'radio',
         options: [
@@ -2198,7 +2199,8 @@ export const STEPS: Step[] = [
         key: 'client2HasLifeInsurance',
         label: (answers) => {
           const name = answers.get(1)?.spouseName as string || 'Client 2';
-          return `Does ${name} have any life insurance?`;
+          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}, do you have any Life Insurance through your employer or through ${client1Name}'s employer?`;
         },
         type: 'radio',
         options: [

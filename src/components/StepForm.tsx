@@ -11308,10 +11308,20 @@ export default function StepForm({
                   c2Partnerships.forEach(p => { if (p.registeredName) partnerships.push(p.registeredName); });
 
                   const predefinedPeople: Array<{ name: string; phone?: string; city?: string }> = [];
-                  if (basicAnswers['fullName']) predefinedPeople.push({ name: basicAnswers['fullName'] as string });
-                  if (hasSpouseStep9 && basicAnswers['spouseName']) predefinedPeople.push({ name: basicAnswers['spouseName'] as string });
+                  const seenPeople = new Set<string>();
+                  const addPerson = (name?: string, phone?: string, city?: string) => {
+                    const trimmed = (name || '').trim();
+                    if (!trimmed || seenPeople.has(trimmed.toLowerCase())) return;
+                    seenPeople.add(trimmed.toLowerCase());
+                    predefinedPeople.push({ name: trimmed, phone: (phone || '').trim() || undefined, city: (city || '').trim() || undefined });
+                  };
+                  addPerson(basicAnswers['fullName'] as string);
+                  if (hasSpouseStep9) addPerson(basicAnswers['spouseName'] as string, basicAnswers['spousePhone'] as string, basicAnswers['spouseCity'] as string);
+                  ((allFormData['childrenData'] as Array<Record<string, string>>) || []).forEach(c => addPerson(c.name, c.phone, c.city));
+                  ((allFormData['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || []).forEach(r => addPerson(r.name, r.phone, r.city));
+                  ((allFormData['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || []).forEach(r => addPerson(r.name, r.phone, r.city));
                   const c1SoleProps = (allFormData['client1SolePropsData'] as Array<Record<string, string>>) || [];
-                  c1SoleProps.forEach(sp => { if (sp.registeredName) predefinedPeople.push({ name: sp.registeredName }); });
+                  c1SoleProps.forEach(sp => addPerson(sp.registeredName));
 
                   return (
                     <div className="mt-6 space-y-4">
@@ -11392,10 +11402,20 @@ export default function StepForm({
 
                   // Predefined people (already identified)
                   const predefinedPeople: Array<{ name: string; phone?: string; city?: string }> = [];
-                  if (basicAnswers['fullName']) predefinedPeople.push({ name: basicAnswers['fullName'] as string });
-                  if (hasSpouseStep9 && basicAnswers['spouseName']) predefinedPeople.push({ name: basicAnswers['spouseName'] as string });
+                  const seenPeople = new Set<string>();
+                  const addPerson = (name?: string, phone?: string, city?: string) => {
+                    const trimmed = (name || '').trim();
+                    if (!trimmed || seenPeople.has(trimmed.toLowerCase())) return;
+                    seenPeople.add(trimmed.toLowerCase());
+                    predefinedPeople.push({ name: trimmed, phone: (phone || '').trim() || undefined, city: (city || '').trim() || undefined });
+                  };
+                  addPerson(basicAnswers['fullName'] as string);
+                  if (hasSpouseStep9) addPerson(basicAnswers['spouseName'] as string, basicAnswers['spousePhone'] as string, basicAnswers['spouseCity'] as string);
+                  ((allFormData['childrenData'] as Array<Record<string, string>>) || []).forEach(c => addPerson(c.name, c.phone, c.city));
+                  ((allFormData['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || []).forEach(r => addPerson(r.name, r.phone, r.city));
+                  ((allFormData['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || []).forEach(r => addPerson(r.name, r.phone, r.city));
                   const c1SoleProps = (allFormData['client1SolePropsData'] as Array<Record<string, string>>) || [];
-                  c1SoleProps.forEach(sp => { if (sp.registeredName) predefinedPeople.push({ name: sp.registeredName }); });
+                  c1SoleProps.forEach(sp => addPerson(sp.registeredName));
 
                   return (
                     <div className="mt-4 space-y-4">

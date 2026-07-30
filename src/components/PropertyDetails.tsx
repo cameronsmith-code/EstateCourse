@@ -81,6 +81,54 @@ const US_STATES = [
   'Wisconsin', 'Wyoming',
 ];
 
+function PersonNameSelect({
+  idPrefix,
+  people,
+  selectedName,
+  onSelect,
+}: {
+  idPrefix: string;
+  people: Array<{ name: string; phone?: string; city?: string }>;
+  selectedName: string;
+  onSelect: (name: string, phone: string, city: string) => void;
+}) {
+  const OTHER_VALUE = '__other__';
+  const currentPerson = people.find(p => p.name.toLowerCase() === (selectedName || '').trim().toLowerCase());
+  const selectValue = currentPerson ? currentPerson.name : selectedName ? OTHER_VALUE : '';
+
+  return (
+    <div className="space-y-2">
+      <select
+        value={selectValue}
+        onChange={(e) => {
+          if (e.target.value === OTHER_VALUE) {
+            onSelect('', '', '');
+          } else {
+            const person = people.find(p => p.name === e.target.value);
+            onSelect(person?.name || '', person?.phone || '', person?.city || '');
+          }
+        }}
+        className={inputClass}
+      >
+        <option value="">Select a person or add a new one</option>
+        {people.map((p, i) => (
+          <option key={`${idPrefix}-${i}`} value={p.name}>{p.name}</option>
+        ))}
+        <option value={OTHER_VALUE}>Other (new person)</option>
+      </select>
+      {selectValue === OTHER_VALUE && (
+        <input
+          type="text"
+          value={selectedName}
+          onChange={(e) => onSelect(e.target.value, '', '')}
+          placeholder="Enter name"
+          className={inputClass}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function PropertyDetails({
   index,
   propertyType,
@@ -455,19 +503,16 @@ export default function PropertyDetails({
                 </div>
                 <div>
                   <label className={labelClass}>Name</label>
-                  <input
-                    type="text"
-                    list={`predefined-people-${index}-${oi}`}
-                    value={oo.name}
-                    onChange={(e) => handleOtherOwnerChange(oi, 'name', e.target.value)}
-                    placeholder="Enter name or select from list"
-                    className={inputClass}
+                  <PersonNameSelect
+                    idPrefix={`other-owner-${index}-${oi}`}
+                    people={predefinedPeople}
+                    selectedName={oo.name}
+                    onSelect={(name, phone, city) => {
+                      const updated = [...otherOwners];
+                      updated[oi] = { ...updated[oi], name, phone, city };
+                      onChange('otherOwners', updated);
+                    }}
                   />
-                  <datalist id={`predefined-people-${index}-${oi}`}>
-                    {predefinedPeople.map((p, pi) => (
-                      <option key={pi} value={p.name} />
-                    ))}
-                  </datalist>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -795,19 +840,16 @@ export default function PropertyDetails({
                       </div>
                       <div>
                         <label className={labelClass}>Name</label>
-                        <input
-                          type="text"
-                          list={`purchasedBy-predefined-people-${index}-${oi}`}
-                          value={oo.name}
-                          onChange={(e) => handlePurchasedByOtherOwnerChange(oi, 'name', e.target.value)}
-                          placeholder="Enter name or select from list"
-                          className={inputClass}
+                        <PersonNameSelect
+                          idPrefix={`purchasedby-owner-${index}-${oi}`}
+                          people={predefinedPeople}
+                          selectedName={oo.name}
+                          onSelect={(name, phone, city) => {
+                            const updated = [...purchasedByOtherOwners];
+                            updated[oi] = { ...updated[oi], name, phone, city };
+                            onChange('purchasedByOtherOwners', updated);
+                          }}
                         />
-                        <datalist id={`purchasedBy-predefined-people-${index}-${oi}`}>
-                          {predefinedPeople.map((p, pi) => (
-                            <option key={pi} value={p.name} />
-                          ))}
-                        </datalist>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>

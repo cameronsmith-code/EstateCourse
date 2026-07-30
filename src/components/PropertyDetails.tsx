@@ -538,9 +538,9 @@ export default function PropertyDetails({
                     />
                   </div>
                 </div>
-                {oo.name?.trim() && oi === otherOwners.length - 1 && (
+                {oi === otherOwners.length - 1 && (
                   <div>
-                    <label className={labelClass}>Are there additional owners?</label>
+                    <label className={labelClass}>Are there additional owners of {propertyName}?</label>
                     <div className="flex gap-4">
                       <label className="flex items-center">
                         <input
@@ -562,7 +562,16 @@ export default function PropertyDetails({
                           name={`hasMore-${index}-${oi}`}
                           value="no"
                           checked={oo.hasMore === 'no'}
-                          onChange={() => handleOtherOwnerChange(oi, 'hasMore', 'no')}
+                          onChange={() => {
+                            handleOtherOwnerChange(oi, 'hasMore', 'no');
+                            const trimmed = otherOwners.slice(0, oi + 1).map((o, idx) =>
+                              idx === oi ? { ...o, hasMore: 'no' as const } : o
+                            );
+                            const removedNames = otherOwners.slice(oi + 1).map((o) => o.name).filter(Boolean);
+                            const newPct = { ...ownershipPercentages };
+                            removedNames.forEach((n) => delete newPct[n]);
+                            onMultiChange({ otherOwners: trimmed, ownershipPercentages: newPct });
+                          }}
                           className="mr-2"
                         />
                         <span className="text-gray-300">No</span>
@@ -575,7 +584,7 @@ export default function PropertyDetails({
 
             {otherOwners.length === 0 && (
               <div>
-                <label className={labelClass}>Are there additional owners?</label>
+                <label className={labelClass}>Are there additional owners of {propertyName}?</label>
                 <div className="flex gap-4">
                   <label className="flex items-center">
                     <input
@@ -900,9 +909,9 @@ export default function PropertyDetails({
                           />
                         </div>
                       </div>
-                      {oo.name?.trim() && oi === purchasedByOtherOwners.length - 1 && (
+                      {oi === purchasedByOtherOwners.length - 1 && (
                         <div>
-                          <label className={labelClass}>Are there additional purchasers?</label>
+                          <label className={labelClass}>Are there additional purchasers of {propertyName}?</label>
                           <div className="flex gap-4">
                             <label className="flex items-center">
                               <input
@@ -924,7 +933,16 @@ export default function PropertyDetails({
                                 name={`purchasedBy-hasMore-${index}-${oi}`}
                                 value="no"
                                 checked={oo.hasMore === 'no'}
-                                onChange={() => handlePurchasedByOtherOwnerChange(oi, 'hasMore', 'no')}
+                                onChange={() => {
+                                  handlePurchasedByOtherOwnerChange(oi, 'hasMore', 'no');
+                                  const trimmed = purchasedByOtherOwners.slice(0, oi + 1).map((o, idx) =>
+                                    idx === oi ? { ...o, hasMore: 'no' as const } : o
+                                  );
+                                  const removedNames = purchasedByOtherOwners.slice(oi + 1).map((o) => o.name).filter(Boolean);
+                                  const newPct = { ...purchasedByOwnershipPercentages };
+                                  removedNames.forEach((n) => delete newPct[n]);
+                                  onMultiChange({ purchasedByOtherOwners: trimmed, purchasedByOwnershipPercentages: newPct });
+                                }}
                                 className="mr-2"
                               />
                               <span className="text-gray-300">No</span>
@@ -937,7 +955,7 @@ export default function PropertyDetails({
 
                   {purchasedByOtherOwners.length === 0 && (
                     <div>
-                      <label className={labelClass}>Are there additional purchasers?</label>
+                      <label className={labelClass}>Are there additional purchasers of {propertyName}?</label>
                       <div className="flex gap-4">
                         <label className="flex items-center">
                           <input

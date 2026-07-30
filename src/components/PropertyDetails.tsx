@@ -47,6 +47,8 @@ export type PropertyData = {
   purchasedByHasAdditionalOwners: string;
   coOwnershipAgreement: string;
   coOwnershipAgreementLocation: string;
+  ownershipChangeYear: string;
+  ownershipChangeDocLocation: string;
 };
 
 type Props = {
@@ -309,6 +311,14 @@ export default function PropertyDetails({
   };
 
   const currentYear = new Date().getFullYear();
+
+  const currentOwnerNames = [...allOwnerNames, ...otherOwners.map(o => o.name).filter(n => n?.trim())].sort();
+  const purchaserNames = data.purchasedBy === 'clients'
+    ? [client1Name, ...(hasSpouse ? [client2Name] : [])].sort()
+    : [...purchasedByAllOwnerNames, ...purchasedByOtherOwners.map(o => o.name).filter(n => n?.trim())].sort();
+  const ownersDifferFromPurchasers =
+    data.purchasedBy !== undefined && data.purchasedBy !== '' &&
+    JSON.stringify(currentOwnerNames) !== JSON.stringify(purchaserNames);
   const yearOptions: number[] = [];
   for (let y = currentYear; y >= 1900; y--) yearOptions.push(y);
 
@@ -1169,6 +1179,35 @@ export default function PropertyDetails({
               className={inputClass}
             />
           </div>
+
+          {/* Ownership change (conditional: purchasers differ from current owners) */}
+          {ownersDifferFromPurchasers && (
+            <>
+              <div>
+                <label className={labelClass}>What year did the ownership change?</label>
+                <select
+                  value={data.ownershipChangeYear || ''}
+                  onChange={(e) => onChange('ownershipChangeYear', e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">Select year</option>
+                  {yearOptions.map((y) => (
+                    <option key={y} value={String(y)}>{y}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={labelClass}>Location of the change of ownership documentation</label>
+                <input
+                  type="text"
+                  value={data.ownershipChangeDocLocation || ''}
+                  onChange={(e) => onChange('ownershipChangeDocLocation', e.target.value)}
+                  placeholder="Enter where the documentation is kept"
+                  className={inputClass}
+                />
+              </div>
+            </>
+          )}
 
           {/* Renovations */}
           <div>

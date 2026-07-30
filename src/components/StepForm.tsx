@@ -11608,6 +11608,64 @@ export default function StepForm({
             );
           })()}
 
+          {step.id === 11 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
+            const maritalStatus = basicAnswers['maritalStatus'] as string;
+            const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+            const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
+
+            const allFormData = Object.fromEntries(
+              Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                Object.entries(stepAnswers)
+              )
+            );
+
+            const isVisible = (question: typeof step.questions[0]) => {
+              if (!question.condition) return true;
+              return question.condition(allFormData);
+            };
+
+            const client1Keys = new Set([
+              'client1HasLifeInsurance', 'client1LifeInsuranceOwnership', 'client1LifeInsuranceCount',
+              'client1LifeInsuranceDocLocation', 'client1LifeInsuranceBeneficiary', 'client1WorkBenefitsDetails',
+            ]);
+
+            const client2Keys = new Set([
+              'client2HasLifeInsurance', 'client2LifeInsuranceOwnership', 'client2LifeInsuranceCount',
+              'client2LifeInsuranceDocLocation', 'client2LifeInsuranceBeneficiary', 'client2WorkBenefitsDetails',
+            ]);
+
+            const renderQuestion = (question: typeof step.questions[0]) => {
+              if (!isVisible(question)) return null;
+              const displayLabel = typeof question.label === 'function'
+                ? question.label(allAnswers || new Map())
+                : question.label;
+              return (
+                <FormField
+                  key={question.key}
+                  question={{ ...question, label: displayLabel }}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                  answers={allAnswers}
+                />
+              );
+            };
+
+            return (
+              <>
+                <Subsection title={`${client1Name} - Group Benefits`}>
+                  {step.questions.filter(q => client1Keys.has(q.key)).map(renderQuestion)}
+                </Subsection>
+                {hasSpouse && (
+                  <Subsection title={`${client2Name} - Group Benefits`}>
+                    {step.questions.filter(q => client2Keys.has(q.key)).map(renderQuestion)}
+                  </Subsection>
+                )}
+              </>
+            );
+          })()}
+
           {validationError && (
             <div className="mt-6 p-3 bg-red-900/50 border border-red-700 rounded-lg">
               <p className="text-sm text-red-300">{validationError}</p>

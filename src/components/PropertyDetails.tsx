@@ -1383,7 +1383,9 @@ export default function PropertyDetails({
             </div>
           )}
 
-          {/* Inhabited annually */}
+          {/* Inhabited annually / used for income / PRE — hidden for Rental properties */}
+          {propertyType !== 'Rental' && (
+            <>
           <div>
             <label className={labelClass}>
               Has {propertyName} been inhabited by {client1Name}{hasSpouse && client2Name ? `, ${client2Name}` : ''} or one or more of your children for at least some part of every year since it was purchased?
@@ -1596,6 +1598,8 @@ export default function PropertyDetails({
                 );
               })()}
             </div>
+          )}
+            </>
           )}
         </div>
       )}

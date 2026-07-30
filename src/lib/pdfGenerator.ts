@@ -663,9 +663,7 @@ interface FormData {
   client1HasWorkBenefits?: string;
   client2HasWorkBenefits?: string;
   client1HasLifeInsurance?: string;
-  client1LifeInsuranceCount?: string;
   client2HasLifeInsurance?: string;
-  client2LifeInsuranceCount?: string;
   client1HasDisabilityInsurance?: string;
   client1DisabilityInsuranceCount?: string;
   client2HasDisabilityInsurance?: string;

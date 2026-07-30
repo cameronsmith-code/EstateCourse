@@ -11627,13 +11627,11 @@ export default function StepForm({
             };
 
             const client1Keys = new Set([
-              'client1HasLifeInsurance', 'client1LifeInsuranceOwnership', 'client1LifeInsuranceCount',
-              'client1LifeInsuranceDocLocation', 'client1LifeInsuranceBeneficiary', 'client1WorkBenefitsDetails',
+              'client1HasLifeInsurance',
             ]);
 
             const client2Keys = new Set([
-              'client2HasLifeInsurance', 'client2LifeInsuranceOwnership', 'client2LifeInsuranceCount',
-              'client2LifeInsuranceDocLocation', 'client2LifeInsuranceBeneficiary', 'client2WorkBenefitsDetails',
+              'client2HasLifeInsurance',
             ]);
 
             const renderQuestion = (question: typeof step.questions[0]) => {

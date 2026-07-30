@@ -2147,54 +2147,7 @@ export const STEPS: Step[] = [
         ],
         required: true,
       },
-      {
-        key: 'client1LifeInsuranceOwnership',
-        label: 'Is the life insurance owned personally or through employer/work benefits?',
-        type: 'radio',
-        options: [
-          { value: 'personal', label: 'Personally owned' },
-          { value: 'work_benefits', label: 'Through employer / work benefits' },
-          { value: 'both', label: 'Both' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasLifeInsurance === 'yes',
-      },
-      {
-        key: 'client1LifeInsuranceCount',
-        label: 'How many personally owned life insurance policies do you have?',
-        type: 'number',
-        placeholder: 'Enter number of policies',
-        required: false,
-        condition: (formData: Record<string, string>) =>
-          formData.client1HasLifeInsurance === 'yes' &&
-          (formData.client1LifeInsuranceOwnership === 'personal' || formData.client1LifeInsuranceOwnership === 'both'),
-      },
-      {
-        key: 'client1LifeInsuranceDocLocation',
-        label: 'Where are your life insurance policy documents stored?',
-        type: 'text',
-        placeholder: 'e.g., Home safe, advisor\u2019s office, employer HR portal',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasLifeInsurance === 'yes',
-      },
-      {
-        key: 'client1LifeInsuranceBeneficiary',
-        label: 'Who is the named beneficiary (or beneficiaries)?',
-        type: 'text',
-        placeholder: 'e.g., Spouse, Children, Estate',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasLifeInsurance === 'yes',
-      },
-      {
-        key: 'client1WorkBenefitsDetails',
-        label: 'Please describe your employer/work benefits life insurance coverage:',
-        type: 'textarea',
-        placeholder: 'e.g., 2x salary group life insurance through employer',
-        required: false,
-        condition: (formData: Record<string, string>) =>
-          formData.client1HasLifeInsurance === 'yes' &&
-          (formData.client1LifeInsuranceOwnership === 'work_benefits' || formData.client1LifeInsuranceOwnership === 'both'),
-      },
+
       {
         key: 'client2HasLifeInsurance',
         label: (answers) => {
@@ -2213,54 +2166,7 @@ export const STEPS: Step[] = [
           return marital === 'married' || marital === 'common_law';
         },
       },
-      {
-        key: 'client2LifeInsuranceOwnership',
-        label: 'Is the life insurance owned personally or through employer/work benefits?',
-        type: 'radio',
-        options: [
-          { value: 'personal', label: 'Personally owned' },
-          { value: 'work_benefits', label: 'Through employer / work benefits' },
-          { value: 'both', label: 'Both' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasLifeInsurance === 'yes',
-      },
-      {
-        key: 'client2LifeInsuranceCount',
-        label: 'How many personally owned life insurance policies do you have?',
-        type: 'number',
-        placeholder: 'Enter number of policies',
-        required: false,
-        condition: (formData: Record<string, string>) =>
-          formData.client2HasLifeInsurance === 'yes' &&
-          (formData.client2LifeInsuranceOwnership === 'personal' || formData.client2LifeInsuranceOwnership === 'both'),
-      },
-      {
-        key: 'client2LifeInsuranceDocLocation',
-        label: 'Where are your life insurance policy documents stored?',
-        type: 'text',
-        placeholder: 'e.g., Home safe, advisor\u2019s office, employer HR portal',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasLifeInsurance === 'yes',
-      },
-      {
-        key: 'client2LifeInsuranceBeneficiary',
-        label: 'Who is the named beneficiary (or beneficiaries)?',
-        type: 'text',
-        placeholder: 'e.g., Spouse, Children, Estate',
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasLifeInsurance === 'yes',
-      },
-      {
-        key: 'client2WorkBenefitsDetails',
-        label: 'Please describe your employer/work benefits life insurance coverage:',
-        type: 'textarea',
-        placeholder: 'e.g., 2x salary group life insurance through employer',
-        required: false,
-        condition: (formData: Record<string, string>) =>
-          formData.client2HasLifeInsurance === 'yes' &&
-          (formData.client2LifeInsuranceOwnership === 'work_benefits' || formData.client2LifeInsuranceOwnership === 'both'),
-      },
+
     ],
   },
   {

@@ -49,6 +49,7 @@ export type PropertyData = {
   coOwnershipAgreementLocation: string;
   ownershipChangeYear: string;
   ownershipChangeDocLocation: string;
+  farmActiveEngagement: string;
 };
 
 type Props = {
@@ -439,6 +440,39 @@ export default function PropertyDetails({
             placeholder="Enter location of deeds"
             className={inputClass}
           />
+        </div>
+      )}
+
+      {/* Farm active engagement — Farm properties only */}
+      {propertyType === 'Farm' && country && (
+        <div>
+          <label className={labelClass}>
+            Has {client1Name}{hasSpouse ? `, ${client2Name}` : ''} or any children been actively engaged in the farm on a regular basis for at least two years?
+          </label>
+          <div className="flex gap-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name={`farmActiveEngagement-${index}`}
+                value="yes"
+                checked={data.farmActiveEngagement === 'yes'}
+                onChange={() => onChange('farmActiveEngagement', 'yes')}
+                className="mr-2"
+              />
+              <span className="text-gray-300">Yes</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name={`farmActiveEngagement-${index}`}
+                value="no"
+                checked={data.farmActiveEngagement === 'no'}
+                onChange={() => onChange('farmActiveEngagement', 'no')}
+                className="mr-2"
+              />
+              <span className="text-gray-300">No</span>
+            </label>
+          </div>
         </div>
       )}
 

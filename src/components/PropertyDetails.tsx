@@ -50,6 +50,14 @@ export type PropertyData = {
   ownershipChangeYear: string;
   ownershipChangeDocLocation: string;
   farmActiveEngagement: string;
+  leaseDocumentsLocation: string;
+  hasPropertyManager: string;
+  propertyManagerName: string;
+  propertyManagerPhone: string;
+  propertyManagerEmail: string;
+  propertyManagerCompany: string;
+  hasLandlordInsurance: string;
+  landlordInsuranceLocation: string;
 };
 
 type Props = {
@@ -1401,6 +1409,147 @@ export default function PropertyDetails({
                 </div>
               ))}
             </div>
+          )}
+
+          {/* Rental-specific questions */}
+          {propertyType === 'Rental' && (
+            <>
+              {/* Lease documents location */}
+              <div>
+                <label className={labelClass}>Where are lease documents and rental agreements kept?</label>
+                <input
+                  type="text"
+                  value={data.leaseDocumentsLocation || ''}
+                  onChange={(e) => onChange('leaseDocumentsLocation', e.target.value)}
+                  placeholder="Enter where lease documents and rental agreements are kept"
+                  className={inputClass}
+                />
+              </div>
+
+              {/* Property manager */}
+              <div>
+                <label className={labelClass}>Is there a designated property manager?</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`hasPropertyManager-${index}`}
+                      value="yes"
+                      checked={data.hasPropertyManager === 'yes'}
+                      onChange={() => onChange('hasPropertyManager', 'yes')}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">Yes</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`hasPropertyManager-${index}`}
+                      value="no"
+                      checked={data.hasPropertyManager === 'no'}
+                      onChange={() => onMultiChange({
+                        hasPropertyManager: 'no',
+                        propertyManagerName: '',
+                        propertyManagerPhone: '',
+                        propertyManagerEmail: '',
+                        propertyManagerCompany: '',
+                      })}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">No</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Property manager contact details (conditional on hasPropertyManager = yes) */}
+              {data.hasPropertyManager === 'yes' && (
+                <div className="ml-6 space-y-4">
+                  <div>
+                    <label className={labelClass}>Contact Name:</label>
+                    <input
+                      type="text"
+                      value={data.propertyManagerName || ''}
+                      onChange={(e) => onChange('propertyManagerName', e.target.value)}
+                      placeholder="Enter contact name"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Phone</label>
+                    <input
+                      type="text"
+                      value={data.propertyManagerPhone || ''}
+                      onChange={(e) => onChange('propertyManagerPhone', e.target.value)}
+                      placeholder="Enter phone number"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Email</label>
+                    <input
+                      type="text"
+                      value={data.propertyManagerEmail || ''}
+                      onChange={(e) => onChange('propertyManagerEmail', e.target.value)}
+                      placeholder="Enter email address"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Company:</label>
+                    <input
+                      type="text"
+                      value={data.propertyManagerCompany || ''}
+                      onChange={(e) => onChange('propertyManagerCompany', e.target.value)}
+                      placeholder="Enter company name"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Landlord insurance */}
+              <div>
+                <label className={labelClass}>Do you have a specific Landlord insurance policy?</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`hasLandlordInsurance-${index}`}
+                      value="yes"
+                      checked={data.hasLandlordInsurance === 'yes'}
+                      onChange={() => onChange('hasLandlordInsurance', 'yes')}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">Yes</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`hasLandlordInsurance-${index}`}
+                      value="no"
+                      checked={data.hasLandlordInsurance === 'no'}
+                      onChange={() => onMultiChange({ hasLandlordInsurance: 'no', landlordInsuranceLocation: '' })}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">No</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Landlord insurance document location (conditional on hasLandlordInsurance = yes) */}
+              {data.hasLandlordInsurance === 'yes' && (
+                <div className="ml-6">
+                  <label className={labelClass}>Landlord insurance policy document location:</label>
+                  <input
+                    type="text"
+                    value={data.landlordInsuranceLocation || ''}
+                    onChange={(e) => onChange('landlordInsuranceLocation', e.target.value)}
+                    placeholder="Enter where the policy document is kept"
+                    className={inputClass}
+                  />
+                </div>
+              )}
+            </>
           )}
 
           {/* Inhabited annually / used for income / PRE — hidden for Rental properties */}

@@ -6991,6 +6991,140 @@ export default function StepForm({
                                       </div>
                                     </>
                                   )}
+                                  {propertiesData[index]?.propertyType === 'Rental' && (
+                                    <>
+                                      {/* Property manager */}
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Is there a designated property manager?
+                                        </label>
+                                        <div className="flex gap-4">
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`hasPropertyManager-${index}`}
+                                              value="yes"
+                                              checked={propertiesData[index]?.hasPropertyManager === 'yes'}
+                                              onChange={(e) => handlePropertyChange(index, 'hasPropertyManager', e.target.value)}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Yes</span>
+                                          </label>
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`hasPropertyManager-${index}`}
+                                              value="no"
+                                              checked={propertiesData[index]?.hasPropertyManager === 'no'}
+                                              onChange={(e) => {
+                                                handlePropertyChange(index, 'hasPropertyManager', e.target.value);
+                                                handlePropertyChange(index, 'propertyManagerName', '');
+                                                handlePropertyChange(index, 'propertyManagerPhone', '');
+                                                handlePropertyChange(index, 'propertyManagerEmail', '');
+                                                handlePropertyChange(index, 'propertyManagerCompany', '');
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">No</span>
+                                          </label>
+                                        </div>
+                                      </div>
+
+                                      {/* Property manager contact details (conditional on hasPropertyManager = yes) */}
+                                      {propertiesData[index]?.hasPropertyManager === 'yes' && (
+                                        <div className="ml-6 space-y-4">
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">Contact Name:</label>
+                                            <input
+                                              type="text"
+                                              value={propertiesData[index]?.propertyManagerName || ''}
+                                              onChange={(e) => handlePropertyChange(index, 'propertyManagerName', e.target.value)}
+                                              placeholder="Enter contact name"
+                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+                                            <input
+                                              type="text"
+                                              value={propertiesData[index]?.propertyManagerPhone || ''}
+                                              onChange={(e) => handlePropertyChange(index, 'propertyManagerPhone', e.target.value)}
+                                              placeholder="Enter phone number"
+                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                                            <input
+                                              type="text"
+                                              value={propertiesData[index]?.propertyManagerEmail || ''}
+                                              onChange={(e) => handlePropertyChange(index, 'propertyManagerEmail', e.target.value)}
+                                              placeholder="Enter email address"
+                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                          </div>
+                                          <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">Company:</label>
+                                            <input
+                                              type="text"
+                                              value={propertiesData[index]?.propertyManagerCompany || ''}
+                                              onChange={(e) => handlePropertyChange(index, 'propertyManagerCompany', e.target.value)}
+                                              placeholder="Enter company name"
+                                              className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {/* Landlord insurance */}
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                          Do you have a specific Landlord insurance policy?
+                                        </label>
+                                        <div className="flex gap-4">
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`hasLandlordInsurance-${index}`}
+                                              value="yes"
+                                              checked={propertiesData[index]?.hasLandlordInsurance === 'yes'}
+                                              onChange={(e) => handlePropertyChange(index, 'hasLandlordInsurance', e.target.value)}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">Yes</span>
+                                          </label>
+                                          <label className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`hasLandlordInsurance-${index}`}
+                                              value="no"
+                                              checked={propertiesData[index]?.hasLandlordInsurance === 'no'}
+                                              onChange={(e) => {
+                                                handlePropertyChange(index, 'hasLandlordInsurance', e.target.value);
+                                                handlePropertyChange(index, 'landlordInsuranceLocation', '');
+                                              }}
+                                              className="mr-2"
+                                            />
+                                            <span className="text-gray-300">No</span>
+                                          </label>
+                                        </div>
+                                      </div>
+
+                                      {/* Landlord insurance document location (conditional on hasLandlordInsurance = yes) */}
+                                      {propertiesData[index]?.hasLandlordInsurance === 'yes' && (
+                                        <div className="ml-6">
+                                          <label className="block text-sm font-medium text-gray-300 mb-2">Landlord insurance policy document location:</label>
+                                          <input
+                                            type="text"
+                                            value={propertiesData[index]?.landlordInsuranceLocation || ''}
+                                            onChange={(e) => handlePropertyChange(index, 'landlordInsuranceLocation', e.target.value)}
+                                            placeholder="Enter where the policy document is kept"
+                                            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          />
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
                                   </div>{/* end Property Details space-y-4 */}
                                   </div>{/* end Property Details subsection */}
 

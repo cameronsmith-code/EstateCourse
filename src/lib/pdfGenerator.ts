@@ -620,6 +620,19 @@ interface FormData {
     rentalAgreementsLocation?: string;
     revenueExpensesLocation?: string;
     capitalExpendituresLocation?: string;
+    leaseDocumentsLocation?: string;
+    hasPropertyManager?: string;
+    propertyManagerName?: string;
+    propertyManagerPhone?: string;
+    propertyManagerEmail?: string;
+    propertyManagerCompany?: string;
+    hasLandlordInsurance?: string;
+    landlordInsuranceLocation?: string;
+    wasAlwaysRental?: string;
+    inhabitedYears?: string[];
+    name?: string;
+    type?: string;
+    purchaseYear?: string;
   }>;
   hasDebts?: string;
   debtsData?: Array<{
@@ -9039,6 +9052,50 @@ You should explore this as an option with your legal and CFP® professionals bec
 
       doc.setTextColor(...colors.darkText);
       yPosition += 6;
+    }
+  }
+
+  // Rental Property — prior inhabitants (wasAlwaysRental / inhabitedYears)
+  if (formData.hasRealEstate === 'yes') {
+    const propertiesData = (formData['propertiesData'] as Array<Record<string, unknown>>) || [];
+    const rentalProps = propertiesData.filter((p) => {
+      const type = String(p.type || '').toLowerCase();
+      return type.includes('rental') && (p.wasAlwaysRental === 'yes' || p.leaseDocumentsLocation || p.revenueExpensesLocation || p.capitalExpendituresLocation);
+    });
+
+    if (rentalProps.length > 0) {
+      addSectionHeader('Rental Property Details');
+      doc.setFontSize(10);
+      doc.setTextColor(...colors.darkText);
+
+      rentalProps.forEach((p) => {
+        const propName = String(p.name || p.type || 'Rental Property');
+        checkPageBreak(20);
+        doc.setFont(undefined, 'bold');
+        doc.text(propName, margin, yPosition);
+        yPosition += 12;
+
+        const rentalFields: { label: string; value?: string }[] = [
+          { label: 'Lease Documents Location', value: String(p.leaseDocumentsLocation || '') },
+          { label: 'Revenue/Expense Records Location', value: String(p.revenueExpensesLocation || '') },
+          { label: 'Capital Expenditure Records Location', value: String(p.capitalExpendituresLocation || '') },
+          { label: 'Always a Rental', value: p.wasAlwaysRental === 'no' ? 'Yes, always a rental' : p.wasAlwaysRental === 'yes' ? 'No, previously inhabited by client/spouse/child' : undefined },
+          { label: 'Years Inhabited by Client/Spouse/Child', value: Array.isArray(p.inhabitedYears) ? (p.inhabitedYears as string[]).join(', ') : undefined },
+        ];
+
+        rentalFields.forEach(({ label, value }) => {
+          if (value) {
+            checkPageBreak(14);
+            doc.setFont(undefined, 'bold');
+            doc.text(`${label}:`, margin, yPosition);
+            doc.setFont(undefined, 'normal');
+            const valLines = doc.splitTextToSize(String(value), fieldWidth - 40);
+            doc.text(valLines, margin + 40, yPosition);
+            yPosition += 14;
+          }
+        });
+        yPosition += 6;
+      });
     }
   }
 

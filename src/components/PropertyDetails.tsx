@@ -58,6 +58,8 @@ export type PropertyData = {
   propertyManagerCompany: string;
   hasLandlordInsurance: string;
   landlordInsuranceLocation: string;
+  wasAlwaysRental: string;
+  inhabitedYears: string[];
 };
 
 type Props = {
@@ -1426,6 +1428,85 @@ export default function PropertyDetails({
                   className={inputClass}
                 />
               </div>
+
+              {/* Was it always a rental or ever inhabited by client/spouse/child */}
+              <div>
+                <label className={labelClass}>
+                  Has {propertyName} always been a rental, or was it ever inhabited by {client1Name}{hasSpouse && client2Name ? `, ${client2Name}` : ''} or a child?
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`wasAlwaysRental-${index}`}
+                      value="yes"
+                      checked={data.wasAlwaysRental === 'yes'}
+                      onChange={() => onChange('wasAlwaysRental', 'yes')}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">Yes, it was inhabited by {client1Name}{hasSpouse && client2Name ? `, ${client2Name}` : ''} or a child</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`wasAlwaysRental-${index}`}
+                      value="no"
+                      checked={data.wasAlwaysRental === 'no'}
+                      onChange={() => onMultiChange({ wasAlwaysRental: 'no', inhabitedYears: [] })}
+                      className="mr-2"
+                    />
+                    <span className="text-gray-300">No, it has always been a rental</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Inhabited years (conditional on wasAlwaysRental = yes) */}
+              {data.wasAlwaysRental === 'yes' && (() => {
+                const purchaseYearNum = parseInt(data.purchaseYear || '', 10);
+                const selectedYears: string[] = data.inhabitedYears || [];
+                const years: number[] = [];
+                if (!isNaN(purchaseYearNum) && purchaseYearNum <= currentYear) {
+                  for (let y = purchaseYearNum; y <= currentYear; y++) years.push(y);
+                }
+                const toggleYear = (year: number) => {
+                  const yearStr = String(year);
+                  const updated = selectedYears.includes(yearStr)
+                    ? selectedYears.filter(y => y !== yearStr)
+                    : [...selectedYears, yearStr].sort((a, b) => Number(a) - Number(b));
+                  onChange('inhabitedYears', updated);
+                };
+                return (
+                  <div className="ml-6 space-y-3">
+                    <label className={labelClass}>
+                      What years was {propertyName} inhabited by {client1Name}{hasSpouse && client2Name ? `, ${client2Name}` : ''}, or a child?
+                    </label>
+                    <p className="text-xs text-gray-400 italic">
+                      Select all years that apply, from the purchase date to the present.
+                    </p>
+                    <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                      {years.map(year => (
+                        <button
+                          key={year}
+                          type="button"
+                          onClick={() => toggleYear(year)}
+                          className={`px-2 py-1.5 text-sm rounded-lg border transition-colors ${
+                            selectedYears.includes(String(year))
+                              ? 'bg-blue-600 border-blue-500 text-white'
+                              : 'bg-gray-600 border-gray-500 text-gray-300 hover:bg-gray-500'
+                          }`}
+                        >
+                          {year}
+                        </button>
+                      ))}
+                    </div>
+                    {years.length === 0 && (
+                      <p className="text-xs text-gray-400 italic">
+                        Enter a purchase date for this property above to enable year selection.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Property manager */}
               <div>

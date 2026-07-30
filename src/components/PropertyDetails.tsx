@@ -1191,9 +1191,15 @@ export default function PropertyDetails({
                   className={inputClass}
                 >
                   <option value="">Select year</option>
-                  {yearOptions.map((y) => (
-                    <option key={y} value={String(y)}>{y}</option>
-                  ))}
+                  {(() => {
+                    const startYear = parseInt(data.purchaseYear || '', 10);
+                    const from = isNaN(startYear) ? 1900 : startYear;
+                    const opts: number[] = [];
+                    for (let y = currentYear; y >= from; y--) opts.push(y);
+                    return opts.map((y) => (
+                      <option key={y} value={String(y)}>{y}</option>
+                    ));
+                  })()}
                 </select>
               </div>
               <div>

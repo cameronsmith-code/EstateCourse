@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, AlertTriangle } from 'lucide-react';
 
 export type OtherOwner = {
@@ -166,9 +166,26 @@ export default function PropertyDetails({
   const isCanada = country.toLowerCase() === 'canada';
   const isUS = country.toLowerCase() === 'united states' || country.toLowerCase() === 'usa' || country.toLowerCase() === 'us';
 
-  const allOwnerNames: string[] = Array.from(new Set(
-    [...owners.filter(n => n?.trim()), ...otherOwners.filter(o => o.name?.trim()).map(o => o.name)]
-  ));
+  const validOwnerOptions: string[] = Array.from(new Set([
+    client1Name,
+    ...(hasSpouse ? [client2Name] : []),
+    ...corporations.map(c => c.legalName).filter(Boolean),
+    ...trusts.filter(Boolean),
+    ...partnerships.filter(Boolean),
+    ...otherOwners.map(o => o.name).filter(n => n?.trim()),
+  ]));
+  const allOwnerNames: string[] = validOwnerOptions.filter(n => owners.includes(n));
+
+  useEffect(() => {
+    const stale = owners.filter(o => o?.trim() && !validOwnerOptions.includes(o));
+    if (stale.length > 0) {
+      const cleanedOwners = owners.filter(o => validOwnerOptions.includes(o));
+      const cleanedPct = { ...ownershipPercentages };
+      stale.forEach(name => delete cleanedPct[name]);
+      onMultiChange({ owners: cleanedOwners, ownershipPercentages: cleanedPct });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [validOwnerOptions.join('|')]);
 
   const totalPct = allOwnerNames.reduce((sum, name) => {
     const pct = parseFloat(ownershipPercentages[name] || '0');
@@ -223,9 +240,26 @@ export default function PropertyDetails({
 
   const [showPurchasedByPct, setShowPurchasedByPct] = useState(false);
 
-  const purchasedByAllOwnerNames: string[] = Array.from(new Set(
-    [...purchasedByOwners.filter(n => n?.trim()), ...purchasedByOtherOwners.filter(o => o.name?.trim()).map(o => o.name)]
-  ));
+  const validPurchasedByOptions: string[] = Array.from(new Set([
+    client1Name,
+    ...(hasSpouse ? [client2Name] : []),
+    ...corporations.map(c => c.legalName).filter(Boolean),
+    ...trusts.filter(Boolean),
+    ...partnerships.filter(Boolean),
+    ...purchasedByOtherOwners.map(o => o.name).filter(n => n?.trim()),
+  ]));
+  const purchasedByAllOwnerNames: string[] = validPurchasedByOptions.filter(n => purchasedByOwners.includes(n));
+
+  useEffect(() => {
+    const stale = purchasedByOwners.filter(o => o?.trim() && !validPurchasedByOptions.includes(o));
+    if (stale.length > 0) {
+      const cleanedOwners = purchasedByOwners.filter(o => validPurchasedByOptions.includes(o));
+      const cleanedPct = { ...purchasedByOwnershipPercentages };
+      stale.forEach(name => delete cleanedPct[name]);
+      onMultiChange({ purchasedByOwners: cleanedOwners, purchasedByOwnershipPercentages: cleanedPct });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [validPurchasedByOptions.join('|')]);
 
   const purchasedByTotalPct = purchasedByAllOwnerNames.reduce((sum, name) => {
     const pct = parseFloat(purchasedByOwnershipPercentages[name] || '0');

@@ -160,6 +160,7 @@ const buildBeneficiaryOptions = (answers: Map<number, Record<string, unknown>>):
     add(`trust_${t}`, trustName || '');
   }
 
+  opts.push({ value: 'estate', label: 'Estate' });
   opts.push({ value: 'other', label: 'Other' });
   return opts;
 };

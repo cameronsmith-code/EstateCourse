@@ -1168,6 +1168,151 @@ export default function StepForm({
     }
   }, [answers['client2DiPolicy3HasAdditional']]);
 
+  // ── Personal Insurance gate cleanup ──
+  useEffect(() => {
+    if (answers['client1HasLifeInsurancePersonal'] !== 'yes') {
+      for (let i = 1; i <= 4; i++) clearLifePolicyFields(`client1PersonalLifePolicy${i}`);
+    }
+  }, [answers['client1HasLifeInsurancePersonal']]);
+
+  useEffect(() => {
+    if (answers['client2HasLifeInsurancePersonal'] !== 'yes') {
+      for (let i = 1; i <= 4; i++) clearLifePolicyFields(`client2PersonalLifePolicy${i}`);
+    }
+  }, [answers['client2HasLifeInsurancePersonal']]);
+
+  useEffect(() => {
+    if (answers['client1PersonalLifePolicy1HasAdditional'] !== 'yes') {
+      for (let ni = 2; ni <= 4; ni++) clearLifePolicyFields(`client1PersonalLifePolicy${ni}`);
+    }
+  }, [answers['client1PersonalLifePolicy1HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1PersonalLifePolicy2HasAdditional'] !== 'yes') {
+      for (let ni = 3; ni <= 4; ni++) clearLifePolicyFields(`client1PersonalLifePolicy${ni}`);
+    }
+  }, [answers['client1PersonalLifePolicy2HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1PersonalLifePolicy3HasAdditional'] !== 'yes') {
+      clearLifePolicyFields('client1PersonalLifePolicy4');
+    }
+  }, [answers['client1PersonalLifePolicy3HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2PersonalLifePolicy1HasAdditional'] !== 'yes') {
+      for (let ni = 2; ni <= 4; ni++) clearLifePolicyFields(`client2PersonalLifePolicy${ni}`);
+    }
+  }, [answers['client2PersonalLifePolicy1HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2PersonalLifePolicy2HasAdditional'] !== 'yes') {
+      for (let ni = 3; ni <= 4; ni++) clearLifePolicyFields(`client2PersonalLifePolicy${ni}`);
+    }
+  }, [answers['client2PersonalLifePolicy2HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2PersonalLifePolicy3HasAdditional'] !== 'yes') {
+      clearLifePolicyFields('client2PersonalLifePolicy4');
+    }
+  }, [answers['client2PersonalLifePolicy3HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1HasCriticalIllnessInsurancePersonal'] !== 'yes') {
+      for (let i = 1; i <= 4; i++) clearLifePolicyFields(`client1PersonalCiPolicy${i}`);
+    }
+  }, [answers['client1HasCriticalIllnessInsurancePersonal']]);
+
+  useEffect(() => {
+    if (answers['client2HasCriticalIllnessInsurancePersonal'] !== 'yes') {
+      for (let i = 1; i <= 4; i++) clearLifePolicyFields(`client2PersonalCiPolicy${i}`);
+    }
+  }, [answers['client2HasCriticalIllnessInsurancePersonal']]);
+
+  useEffect(() => {
+    if (answers['client1PersonalCiPolicy1HasAdditional'] !== 'yes') {
+      for (let ni = 2; ni <= 4; ni++) clearLifePolicyFields(`client1PersonalCiPolicy${ni}`);
+    }
+  }, [answers['client1PersonalCiPolicy1HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1PersonalCiPolicy2HasAdditional'] !== 'yes') {
+      for (let ni = 3; ni <= 4; ni++) clearLifePolicyFields(`client1PersonalCiPolicy${ni}`);
+    }
+  }, [answers['client1PersonalCiPolicy2HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1PersonalCiPolicy3HasAdditional'] !== 'yes') {
+      clearLifePolicyFields('client1PersonalCiPolicy4');
+    }
+  }, [answers['client1PersonalCiPolicy3HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2PersonalCiPolicy1HasAdditional'] !== 'yes') {
+      for (let ni = 2; ni <= 4; ni++) clearLifePolicyFields(`client2PersonalCiPolicy${ni}`);
+    }
+  }, [answers['client2PersonalCiPolicy1HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2PersonalCiPolicy2HasAdditional'] !== 'yes') {
+      for (let ni = 3; ni <= 4; ni++) clearLifePolicyFields(`client2PersonalCiPolicy${ni}`);
+    }
+  }, [answers['client2PersonalCiPolicy2HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2PersonalCiPolicy3HasAdditional'] !== 'yes') {
+      clearLifePolicyFields('client2PersonalCiPolicy4');
+    }
+  }, [answers['client2PersonalCiPolicy3HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1HasDisabilityInsurancePersonal'] !== 'yes') {
+      for (let i = 1; i <= 4; i++) clearLifePolicyFields(`client1PersonalDiPolicy${i}`);
+    }
+  }, [answers['client1HasDisabilityInsurancePersonal']]);
+
+  useEffect(() => {
+    if (answers['client2HasDisabilityInsurancePersonal'] !== 'yes') {
+      for (let i = 1; i <= 4; i++) clearLifePolicyFields(`client2PersonalDiPolicy${i}`);
+    }
+  }, [answers['client2HasDisabilityInsurancePersonal']]);
+
+  useEffect(() => {
+    if (answers['client1PersonalDiPolicy1HasAdditional'] !== 'yes') {
+      for (let ni = 2; ni <= 4; ni++) clearLifePolicyFields(`client1PersonalDiPolicy${ni}`);
+    }
+  }, [answers['client1PersonalDiPolicy1HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1PersonalDiPolicy2HasAdditional'] !== 'yes') {
+      for (let ni = 3; ni <= 4; ni++) clearLifePolicyFields(`client1PersonalDiPolicy${ni}`);
+    }
+  }, [answers['client1PersonalDiPolicy2HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1PersonalDiPolicy3HasAdditional'] !== 'yes') {
+      clearLifePolicyFields('client1PersonalDiPolicy4');
+    }
+  }, [answers['client1PersonalDiPolicy3HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2PersonalDiPolicy1HasAdditional'] !== 'yes') {
+      for (let ni = 2; ni <= 4; ni++) clearLifePolicyFields(`client2PersonalDiPolicy${ni}`);
+    }
+  }, [answers['client2PersonalDiPolicy1HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2PersonalDiPolicy2HasAdditional'] !== 'yes') {
+      for (let ni = 3; ni <= 4; ni++) clearLifePolicyFields(`client2PersonalDiPolicy${ni}`);
+    }
+  }, [answers['client2PersonalDiPolicy2HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2PersonalDiPolicy3HasAdditional'] !== 'yes') {
+      clearLifePolicyFields('client2PersonalDiPolicy4');
+    }
+  }, [answers['client2PersonalDiPolicy3HasAdditional']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');
@@ -11787,12 +11932,18 @@ export default function StepForm({
             const isClient1Key = (key: string) =>
               key === 'client1HasLifeInsurance' || key.startsWith('client1LifePolicy') ||
               key === 'client1HasCriticalIllnessInsurance' || key.startsWith('client1CiPolicy') ||
-              key === 'client1HasDisabilityInsuranceEmployer' || key.startsWith('client1DiPolicy');
+              key === 'client1HasDisabilityInsuranceEmployer' || key.startsWith('client1DiPolicy') ||
+              key === 'client1HasLifeInsurancePersonal' || key.startsWith('client1PersonalLifePolicy') ||
+              key === 'client1HasCriticalIllnessInsurancePersonal' || key.startsWith('client1PersonalCiPolicy') ||
+              key === 'client1HasDisabilityInsurancePersonal' || key.startsWith('client1PersonalDiPolicy');
 
             const isClient2Key = (key: string) =>
               key === 'client2HasLifeInsurance' || key.startsWith('client2LifePolicy') ||
               key === 'client2HasCriticalIllnessInsurance' || key.startsWith('client2CiPolicy') ||
-              key === 'client2HasDisabilityInsuranceEmployer' || key.startsWith('client2DiPolicy');
+              key === 'client2HasDisabilityInsuranceEmployer' || key.startsWith('client2DiPolicy') ||
+              key === 'client2HasLifeInsurancePersonal' || key.startsWith('client2PersonalLifePolicy') ||
+              key === 'client2HasCriticalIllnessInsurancePersonal' || key.startsWith('client2PersonalCiPolicy') ||
+              key === 'client2HasDisabilityInsurancePersonal' || key.startsWith('client2PersonalDiPolicy');
 
             const renderQuestion = (question: typeof step.questions[0]) => {
               if (!isVisible(question)) return null;

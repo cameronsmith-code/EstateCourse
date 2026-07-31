@@ -679,6 +679,15 @@ interface FormData {
   client1CiPolicyData?: Array<Record<string, string>>;
   client2CiPolicyData?: Array<Record<string, string>>;
   [key: `${'client1' | 'client2'}CiPolicy${number}${string}`]: string | undefined;
+  client1HasLifeInsurancePersonal?: string;
+  client2HasLifeInsurancePersonal?: string;
+  [key: `${'client1' | 'client2'}PersonalLifePolicy${number}${string}`]: string | undefined;
+  client1HasCriticalIllnessInsurancePersonal?: string;
+  client2HasCriticalIllnessInsurancePersonal?: string;
+  [key: `${'client1' | 'client2'}PersonalCiPolicy${number}${string}`]: string | undefined;
+  client1HasDisabilityInsurancePersonal?: string;
+  client2HasDisabilityInsurancePersonal?: string;
+  [key: `${'client1' | 'client2'}PersonalDiPolicy${number}${string}`]: string | undefined;
   client1HasDisabilityInsuranceEmployer?: string;
   client2HasDisabilityInsuranceEmployer?: string;
   client1DiPolicyData?: Array<Record<string, string>>;
@@ -5803,6 +5812,228 @@ export const generatePDF = (formData: FormData) => {
       if (hasSpouseForDI && formData.client2HasDisabilityInsuranceEmployer === 'yes') {
         for (let i = 1; i <= MAX_DI_POLICIES_PDF; i++) {
           if (!renderDiPolicySection(diClient2Name, 'client2', i)) break;
+        }
+      }
+    }
+  }
+
+  // ── Personal Insurance (purchased outside work plans / employer benefits) ──
+  {
+    const hasSpouseForPI = (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law');
+    const piClient1Name = formData.fullName || 'Client 1';
+    const piClient2Name = formData.spouseName || 'Client 2';
+    const MAX_PI_POLICIES_PDF = 4;
+
+    const resolveInsuredPersonLabel = (val: string, c1: string, c2: string): string => {
+      if (val === 'client1') return c1;
+      if (val === 'client2') return c2;
+      if (val === 'other') return 'Other';
+      if (val.startsWith('child_')) {
+        const idx = parseInt(val.replace('child_', ''));
+        const children = (formData.childrenData as Array<Record<string, string>>) || [];
+        return children[idx]?.name || `Child ${idx + 1}`;
+      }
+      if (val.startsWith('c1prevrel_')) {
+        const idx = parseInt(val.replace('c1prevrel_', ''));
+        const rels = (formData.client1PreviousRelationshipsData as Array<Record<string, string>>) || [];
+        return rels[idx]?.name || val;
+      }
+      if (val.startsWith('c2prevrel_')) {
+        const idx = parseInt(val.replace('c2prevrel_', ''));
+        const rels = (formData.client2PreviousRelationshipsData as Array<Record<string, string>>) || [];
+        return rels[idx]?.name || val;
+      }
+      return val;
+    };
+
+    const resolvePolicyOwnerLabel = (val: string, c1: string, c2: string): string => {
+      if (val === 'client1') return c1;
+      if (val === 'client2') return c2;
+      if (val === 'other') return 'Other';
+      if (val.startsWith('child_')) {
+        const idx = parseInt(val.replace('child_', ''));
+        const children = (formData.childrenData as Array<Record<string, string>>) || [];
+        return children[idx]?.name || `Child ${idx + 1}`;
+      }
+      if (val.startsWith('corp_')) {
+        const idx = parseInt(val.replace('corp_', ''));
+        const corps = (formData.corporationsData as Array<Record<string, string>>) || [];
+        return corps[idx]?.legalName || val;
+      }
+      if (val.startsWith('trust_')) {
+        const t = parseInt(val.replace('trust_', ''));
+        const trustKey = t === 1 ? 'trustLegalName' : `trust${t}LegalName`;
+        return (formData[trustKey as keyof typeof formData] as string) || val;
+      }
+      if (val.startsWith('c1prevrel_')) {
+        const idx = parseInt(val.replace('c1prevrel_', ''));
+        const rels = (formData.client1PreviousRelationshipsData as Array<Record<string, string>>) || [];
+        return rels[idx]?.name || val;
+      }
+      if (val.startsWith('c2prevrel_')) {
+        const idx = parseInt(val.replace('c2prevrel_', ''));
+        const rels = (formData.client2PreviousRelationshipsData as Array<Record<string, string>>) || [];
+        return rels[idx]?.name || val;
+      }
+      return val;
+    };
+
+    const resolveBeneficiaryList = (raw: string, c1: string, c2: string): string => {
+      if (!raw) return '';
+      const arr = Array.isArray(raw) ? raw : raw.split(',');
+      const labels = arr.map((v: string) => resolvePolicyOwnerLabel(v.trim(), c1, c2)).filter(Boolean);
+      return labels.join(', ');
+    };
+
+    const coverageEndLabel = (val: string): string => {
+      if (val === 'retirement') return 'Retirement';
+      if (val === 'job_change') return 'Job change';
+      if (val === 'specific_date') return 'Specific date';
+      return val;
+    };
+
+    type PolicyType = 'Life' | 'Ci' | 'Di';
+
+    const renderPersonalPolicySection = (
+      clientName: string,
+      clientPrefix: 'client1' | 'client2',
+      policyNum: number,
+      policyType: PolicyType,
+      gateKey: string,
+      policyKeyPrefix: string,
+      sectionTitle: string
+    ): boolean => {
+      const p = `${policyKeyPrefix}${policyNum}`;
+      const prevGate = policyNum === 1
+        ? gateKey
+        : `${policyKeyPrefix}${policyNum - 1}HasAdditional`;
+
+      if (formData[prevGate as keyof typeof formData] !== 'yes') return false;
+
+      const insuredPerson = formData[`${p}InsuredPerson` as keyof typeof formData] as string || '';
+      const hasAnyField = insuredPerson ||
+        formData[`${p}Provider` as keyof typeof formData] ||
+        formData[`${p}Employer` as keyof typeof formData] ||
+        formData[`${p}CoverageAmount` as keyof typeof formData];
+      if (!hasAnyField && policyNum > 1) return false;
+
+      addSubsectionHeader(`${clientName} — ${sectionTitle} ${policyNum}`);
+      checkPageBreak(30);
+
+      const c1 = clientPrefix === 'client1' ? clientName : piClient1Name;
+      const c2 = clientPrefix === 'client2' ? clientName : piClient2Name;
+
+      const insuredLabel = insuredPerson ? resolveInsuredPersonLabel(insuredPerson, c1, c2) : '';
+      const insuredOther = formData[`${p}InsuredPersonOther` as keyof typeof formData] as string || '';
+      renderEstateRow('Insured Person:', insuredPerson === 'other' ? insuredOther : insuredLabel, `${p}_insured`);
+
+      const ownerVal = formData[`${p}PolicyOwner` as keyof typeof formData] as string || '';
+      const ownerOther = formData[`${p}PolicyOwnerOther` as keyof typeof formData] as string || '';
+      renderEstateRow('Policy Owner:', ownerVal === 'other' ? ownerOther : resolvePolicyOwnerLabel(ownerVal, c1, c2), `${p}_owner`);
+
+      renderEstateRow('Insurance Provider:', formData[`${p}Provider` as keyof typeof formData] as string || '', `${p}_provider`);
+      renderEstateRow('Employer (if applicable):', formData[`${p}Employer` as keyof typeof formData] as string || '', `${p}_employer`);
+      renderEstateRow('Coverage Amount:', formData[`${p}CoverageAmount` as keyof typeof formData] as string || '', `${p}_amount`);
+
+      const endType = formData[`${p}CoverageEndType` as keyof typeof formData] as string || '';
+      const endDate = formData[`${p}CoverageEndDate` as keyof typeof formData] as string || '';
+      renderEstateRow('Coverage End:', endType === 'specific_date' && endDate ? endDate : coverageEndLabel(endType), `${p}_end`);
+
+      renderEstateRow('Purpose:', formData[`${p}Purpose` as keyof typeof formData] as string || '', `${p}_purpose`);
+
+      const benRaw = formData[`${p}Beneficiary` as keyof typeof formData] as string || '';
+      const benOther = formData[`${p}BeneficiaryOther` as keyof typeof formData] as string || '';
+      const benList = resolveBeneficiaryList(benRaw, c1, c2);
+      const benDisplay = benRaw.split(',').includes('other') && benOther
+        ? (benList ? `${benList} (Other: ${benOther})` : benOther)
+        : benList;
+      renderEstateRow('Beneficiary(ies):', benDisplay, `${p}_beneficiary`);
+
+      const hasContingent = formData[`${p}HasContingentBeneficiaries` as keyof typeof formData] as string || '';
+      renderEstateRow('Contingent Beneficiaries?', hasContingent === 'yes' ? 'Yes' : 'No', `${p}_hascontingent`);
+
+      if (hasContingent === 'yes') {
+        const conRaw = formData[`${p}ContingentBeneficiary` as keyof typeof formData] as string || '';
+        const conOther = formData[`${p}ContingentBeneficiaryOther` as keyof typeof formData] as string || '';
+        const conList = resolveBeneficiaryList(conRaw, c1, c2);
+        const conDisplay = conRaw.split(',').includes('other') && conOther
+          ? (conList ? `${conList} (Other: ${conOther})` : conOther)
+          : conList;
+        renderEstateRow('Contingent Beneficiary(ies):', conDisplay, `${p}_contingent`);
+      }
+
+      renderEstateRow('Location of the policy documentation:', formData[`${p}DocLocation` as keyof typeof formData] as string || '', `${p}_doclocation`);
+
+      yPosition += 4;
+      return true;
+    };
+
+    const client1HasAnyPersonal = formData.client1HasLifeInsurancePersonal === 'yes' ||
+      formData.client1HasCriticalIllnessInsurancePersonal === 'yes' ||
+      formData.client1HasDisabilityInsurancePersonal === 'yes';
+    const client2HasAnyPersonal = hasSpouseForPI && (
+      formData.client2HasLifeInsurancePersonal === 'yes' ||
+      formData.client2HasCriticalIllnessInsurancePersonal === 'yes' ||
+      formData.client2HasDisabilityInsurancePersonal === 'yes'
+    );
+
+    if (client1HasAnyPersonal || client2HasAnyPersonal) {
+      addPage();
+      yPosition = 12;
+      addSectionHeader('Personal Insurance');
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text('The following insurance policies were purchased outside of work plans or employer benefits.', margin, yPosition);
+      yPosition += 8;
+
+      if (client1HasAnyPersonal) {
+        addSubsectionHeader(`${piClient1Name} - Personal Insurance`);
+
+        if (formData.client1HasLifeInsurancePersonal === 'yes') {
+          for (let i = 1; i <= MAX_PI_POLICIES_PDF; i++) {
+            if (!renderPersonalPolicySection(piClient1Name, 'client1', i, 'Life',
+              'client1HasLifeInsurancePersonal', 'client1PersonalLifePolicy', 'Life Insurance Policy')) break;
+          }
+        }
+
+        if (formData.client1HasCriticalIllnessInsurancePersonal === 'yes') {
+          for (let i = 1; i <= MAX_PI_POLICIES_PDF; i++) {
+            if (!renderPersonalPolicySection(piClient1Name, 'client1', i, 'Ci',
+              'client1HasCriticalIllnessInsurancePersonal', 'client1PersonalCiPolicy', 'Critical Illness Policy')) break;
+          }
+        }
+
+        if (formData.client1HasDisabilityInsurancePersonal === 'yes') {
+          for (let i = 1; i <= MAX_PI_POLICIES_PDF; i++) {
+            if (!renderPersonalPolicySection(piClient1Name, 'client1', i, 'Di',
+              'client1HasDisabilityInsurancePersonal', 'client1PersonalDiPolicy', 'Disability Insurance Policy')) break;
+          }
+        }
+      }
+
+      if (client2HasAnyPersonal) {
+        addSubsectionHeader(`${piClient2Name} - Personal Insurance`);
+
+        if (formData.client2HasLifeInsurancePersonal === 'yes') {
+          for (let i = 1; i <= MAX_PI_POLICIES_PDF; i++) {
+            if (!renderPersonalPolicySection(piClient2Name, 'client2', i, 'Life',
+              'client2HasLifeInsurancePersonal', 'client2PersonalLifePolicy', 'Life Insurance Policy')) break;
+          }
+        }
+
+        if (formData.client2HasCriticalIllnessInsurancePersonal === 'yes') {
+          for (let i = 1; i <= MAX_PI_POLICIES_PDF; i++) {
+            if (!renderPersonalPolicySection(piClient2Name, 'client2', i, 'Ci',
+              'client2HasCriticalIllnessInsurancePersonal', 'client2PersonalCiPolicy', 'Critical Illness Policy')) break;
+          }
+        }
+
+        if (formData.client2HasDisabilityInsurancePersonal === 'yes') {
+          for (let i = 1; i <= MAX_PI_POLICIES_PDF; i++) {
+            if (!renderPersonalPolicySection(piClient2Name, 'client2', i, 'Di',
+              'client2HasDisabilityInsurancePersonal', 'client2PersonalDiPolicy', 'Disability Insurance Policy')) break;
+          }
         }
       }
     }

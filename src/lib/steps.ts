@@ -166,14 +166,20 @@ const buildBeneficiaryOptions = (answers: Map<number, Record<string, unknown>>):
 
 const MAX_POLICIES = 4;
 
-const generateLifeInsurancePolicyQuestions = (clientPrefix: 'client1' | 'client2'): StepQuestion[] => {
+const generateLifeInsurancePolicyQuestions = (
+  clientPrefix: 'client1' | 'client2',
+  source: 'employer' | 'personal' = 'employer'
+): StepQuestion[] => {
+  const sourcePrefix = source === 'personal' ? 'Personal' : '';
+  const policyKey = `${clientPrefix}${sourcePrefix}LifePolicy`;
+  const gateKey = `${clientPrefix}HasLifeInsurance${source === 'personal' ? 'Personal' : ''}`;
   const questions: StepQuestion[] = [];
 
   for (let i = 1; i <= MAX_POLICIES; i++) {
-    const p = `${clientPrefix}LifePolicy${i}`;
+    const p = `${policyKey}${i}`;
     const prevGate = i === 1
-      ? `${clientPrefix}HasLifeInsurance`
-      : `${clientPrefix}LifePolicy${i - 1}HasAdditional`;
+      ? gateKey
+      : `${policyKey}${i - 1}HasAdditional`;
 
     const gateCondition = (formData: Record<string, string>): boolean => formData[prevGate] === 'yes';
 
@@ -351,11 +357,13 @@ const generateLifeInsurancePolicyQuestions = (clientPrefix: 'client1' | 'client2
     });
 
     if (i < MAX_POLICIES) {
-      const clientNameFn = clientPrefix === 'client1'
-        ? (answers: Map<number, Record<string, unknown>>) =>
-            `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
-        : (answers: Map<number, Record<string, unknown>>) =>
-            `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get(1)?.['fullName'] as string) || 'Client 1'}'s employer?`;
+      const clientNameFn = source === 'personal'
+        ? () => 'Are there any other Life Insurance Policies purchased outside of work plans or employer benefits?'
+        : clientPrefix === 'client1'
+          ? (answers: Map<number, Record<string, unknown>>) =>
+              `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
+          : (answers: Map<number, Record<string, unknown>>) =>
+              `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get(1)?.['fullName'] as string) || 'Client 1'}'s employer?`;
 
       questions.push({
         key: `${p}HasAdditional`,
@@ -374,14 +382,20 @@ const generateLifeInsurancePolicyQuestions = (clientPrefix: 'client1' | 'client2
   return questions;
 };
 
-const generateCriticalIllnessPolicyQuestions = (clientPrefix: 'client1' | 'client2'): StepQuestion[] => {
+const generateCriticalIllnessPolicyQuestions = (
+  clientPrefix: 'client1' | 'client2',
+  source: 'employer' | 'personal' = 'employer'
+): StepQuestion[] => {
+  const sourcePrefix = source === 'personal' ? 'Personal' : '';
+  const policyKey = `${clientPrefix}${sourcePrefix}CiPolicy`;
+  const gateKey = `${clientPrefix}HasCriticalIllnessInsurance${source === 'personal' ? 'Personal' : ''}`;
   const questions: StepQuestion[] = [];
 
   for (let i = 1; i <= MAX_POLICIES; i++) {
-    const p = `${clientPrefix}CiPolicy${i}`;
+    const p = `${policyKey}${i}`;
     const prevGate = i === 1
-      ? `${clientPrefix}HasCriticalIllnessInsurance`
-      : `${clientPrefix}CiPolicy${i - 1}HasAdditional`;
+      ? gateKey
+      : `${policyKey}${i - 1}HasAdditional`;
 
     const gateCondition = (formData: Record<string, string>): boolean => formData[prevGate] === 'yes';
 
@@ -559,11 +573,13 @@ const generateCriticalIllnessPolicyQuestions = (clientPrefix: 'client1' | 'clien
     });
 
     if (i < MAX_POLICIES) {
-      const clientNameFn = clientPrefix === 'client1'
-        ? (answers: Map<number, Record<string, unknown>>) =>
-            `Are there any other Critical Illness Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
-        : (answers: Map<number, Record<string, unknown>>) =>
-            `Are there any other Critical Illness Policies owned through your employer or through ${(answers.get(1)?.['fullName'] as string) || 'Client 1'}'s employer?`;
+      const clientNameFn = source === 'personal'
+        ? () => 'Are there any other Critical Illness Policies purchased outside of work plans or employer benefits?'
+        : clientPrefix === 'client1'
+          ? (answers: Map<number, Record<string, unknown>>) =>
+              `Are there any other Critical Illness Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
+          : (answers: Map<number, Record<string, unknown>>) =>
+              `Are there any other Critical Illness Policies owned through your employer or through ${(answers.get(1)?.['fullName'] as string) || 'Client 1'}'s employer?`;
 
       questions.push({
         key: `${p}HasAdditional`,
@@ -582,14 +598,22 @@ const generateCriticalIllnessPolicyQuestions = (clientPrefix: 'client1' | 'clien
   return questions;
 };
 
-const generateDisabilityInsurancePolicyQuestions = (clientPrefix: 'client1' | 'client2'): StepQuestion[] => {
+const generateDisabilityInsurancePolicyQuestions = (
+  clientPrefix: 'client1' | 'client2',
+  source: 'employer' | 'personal' = 'employer'
+): StepQuestion[] => {
+  const sourcePrefix = source === 'personal' ? 'Personal' : '';
+  const policyKey = `${clientPrefix}${sourcePrefix}DiPolicy`;
+  const gateKey = source === 'personal'
+    ? `${clientPrefix}HasDisabilityInsurancePersonal`
+    : `${clientPrefix}HasDisabilityInsuranceEmployer`;
   const questions: StepQuestion[] = [];
 
   for (let i = 1; i <= MAX_POLICIES; i++) {
-    const p = `${clientPrefix}DiPolicy${i}`;
+    const p = `${policyKey}${i}`;
     const prevGate = i === 1
-      ? `${clientPrefix}HasDisabilityInsuranceEmployer`
-      : `${clientPrefix}DiPolicy${i - 1}HasAdditional`;
+      ? gateKey
+      : `${policyKey}${i - 1}HasAdditional`;
 
     const gateCondition = (formData: Record<string, string>): boolean => formData[prevGate] === 'yes';
 
@@ -767,11 +791,13 @@ const generateDisabilityInsurancePolicyQuestions = (clientPrefix: 'client1' | 'c
     });
 
     if (i < MAX_POLICIES) {
-      const clientNameFn = clientPrefix === 'client1'
-        ? (answers: Map<number, Record<string, unknown>>) =>
-            `Are there any other Disability Insurance Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
-        : (answers: Map<number, Record<string, unknown>>) =>
-            `Are there any other Disability Insurance Policies owned through your employer or through ${(answers.get(1)?.['fullName'] as string) || 'Client 1'}'s employer?`;
+      const clientNameFn = source === 'personal'
+        ? () => 'Are there any other Disability Insurance Policies purchased outside of work plans or employer benefits?'
+        : clientPrefix === 'client1'
+          ? (answers: Map<number, Record<string, unknown>>) =>
+              `Are there any other Disability Insurance Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
+          : (answers: Map<number, Record<string, unknown>>) =>
+              `Are there any other Disability Insurance Policies owned through your employer or through ${(answers.get(1)?.['fullName'] as string) || 'Client 1'}'s employer?`;
 
       questions.push({
         key: `${p}HasAdditional`,
@@ -3002,6 +3028,121 @@ export const STEPS: Step[] = [
 
       ...generateDisabilityInsurancePolicyQuestions('client1'),
       ...generateDisabilityInsurancePolicyQuestions('client2'),
+
+      // ── Personal Insurance (purchased outside work plans / employer benefits) ──
+      {
+        key: 'personalInsuranceSubsectionClient1',
+        label: (answers) => `${(answers.get(1)?.['fullName'] as string) || 'Client 1'} - Personal Insurance`,
+        type: 'label',
+        required: false,
+      },
+      {
+        key: 'client1HasLifeInsurancePersonal',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}, do you have any Life Insurance purchased outside of work plans or employer benefits?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      ...generateLifeInsurancePolicyQuestions('client1', 'personal'),
+
+      {
+        key: 'client1HasCriticalIllnessInsurancePersonal',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}, do you have any Critical Illness Insurance purchased outside of work plans or employer benefits?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasLifeInsurancePersonal !== undefined,
+      },
+      ...generateCriticalIllnessPolicyQuestions('client1', 'personal'),
+
+      {
+        key: 'client1HasDisabilityInsurancePersonal',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}, do you have any Disability Insurance purchased outside of work plans or employer benefits?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasCriticalIllnessInsurancePersonal !== undefined,
+      },
+      ...generateDisabilityInsurancePolicyQuestions('client1', 'personal'),
+
+      {
+        key: 'personalInsuranceSubsectionClient2',
+        label: (answers) => `${(answers.get(1)?.['spouseName'] as string) || 'Client 2'} - Personal Insurance`,
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const marital = formData.maritalStatus;
+          return marital === 'married' || marital === 'common_law';
+        },
+      },
+      {
+        key: 'client2HasLifeInsurancePersonal',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}, do you have any Life Insurance purchased outside of work plans or employer benefits?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const marital = formData.maritalStatus;
+          return marital === 'married' || marital === 'common_law';
+        },
+      },
+      ...generateLifeInsurancePolicyQuestions('client2', 'personal'),
+
+      {
+        key: 'client2HasCriticalIllnessInsurancePersonal',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}, do you have any Critical Illness Insurance purchased outside of work plans or employer benefits?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasLifeInsurancePersonal !== undefined,
+      },
+      ...generateCriticalIllnessPolicyQuestions('client2', 'personal'),
+
+      {
+        key: 'client2HasDisabilityInsurancePersonal',
+        label: (answers) => {
+          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}, do you have any Disability Insurance purchased outside of work plans or employer benefits?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasCriticalIllnessInsurancePersonal !== undefined,
+      },
+      ...generateDisabilityInsurancePolicyQuestions('client2', 'personal'),
     ],
   },
   {

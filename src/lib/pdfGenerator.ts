@@ -679,6 +679,11 @@ interface FormData {
   client1CiPolicyData?: Array<Record<string, string>>;
   client2CiPolicyData?: Array<Record<string, string>>;
   [key: `${'client1' | 'client2'}CiPolicy${number}${string}`]: string | undefined;
+  client1HasDisabilityInsuranceEmployer?: string;
+  client2HasDisabilityInsuranceEmployer?: string;
+  client1DiPolicyData?: Array<Record<string, string>>;
+  client2DiPolicyData?: Array<Record<string, string>>;
+  [key: `${'client1' | 'client2'}DiPolicy${number}${string}`]: string | undefined;
   hasHomeInsurance?: string;
   homeInsuranceDocLocation?: string;
   hasAdditionalProperties?: string;
@@ -5628,6 +5633,170 @@ export const generatePDF = (formData: FormData) => {
       if (hasSpouseForCI && formData.client2HasCriticalIllnessInsurance === 'yes') {
         for (let i = 1; i <= MAX_CI_POLICIES_PDF; i++) {
           if (!renderCiPolicySection(ciClient2Name, 'client2', i)) break;
+        }
+      }
+    }
+  }
+
+  // ── Disability Insurance / Group Benefits ──
+  {
+    const hasSpouseForDI = (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law');
+    const diClient1Name = formData.fullName || 'Client 1';
+    const diClient2Name = formData.spouseName || 'Client 2';
+    const MAX_DI_POLICIES_PDF = 4;
+
+    const resolveDiInsuredPersonLabel = (val: string): string => {
+      if (val === 'client1') return diClient1Name;
+      if (val === 'client2') return diClient2Name;
+      if (val === 'other') return 'Other';
+      if (val.startsWith('child_')) {
+        const idx = parseInt(val.replace('child_', ''));
+        const children = (formData.childrenData as Array<Record<string, string>>) || [];
+        return children[idx]?.name || `Child ${idx + 1}`;
+      }
+      if (val.startsWith('c1prevrel_')) {
+        const idx = parseInt(val.replace('c1prevrel_', ''));
+        const rels = (formData.client1PreviousRelationshipsData as Array<Record<string, string>>) || [];
+        return rels[idx]?.name || val;
+      }
+      if (val.startsWith('c2prevrel_')) {
+        const idx = parseInt(val.replace('c2prevrel_', ''));
+        const rels = (formData.client2PreviousRelationshipsData as Array<Record<string, string>>) || [];
+        return rels[idx]?.name || val;
+      }
+      return val;
+    };
+
+    const resolveDiPolicyOwnerLabel = (val: string): string => {
+      if (val === 'client1') return diClient1Name;
+      if (val === 'client2') return diClient2Name;
+      if (val === 'other') return 'Other';
+      if (val.startsWith('child_')) {
+        const idx = parseInt(val.replace('child_', ''));
+        const children = (formData.childrenData as Array<Record<string, string>>) || [];
+        return children[idx]?.name || `Child ${idx + 1}`;
+      }
+      if (val.startsWith('corp_')) {
+        const idx = parseInt(val.replace('corp_', ''));
+        const corps = (formData.corporationsData as Array<Record<string, string>>) || [];
+        return corps[idx]?.legalName || val;
+      }
+      if (val.startsWith('trust_')) {
+        const t = parseInt(val.replace('trust_', ''));
+        const trustKey = t === 1 ? 'trustLegalName' : `trust${t}LegalName`;
+        return (formData[trustKey as keyof typeof formData] as string) || val;
+      }
+      if (val.startsWith('c1prevrel_')) {
+        const idx = parseInt(val.replace('c1prevrel_', ''));
+        const rels = (formData.client1PreviousRelationshipsData as Array<Record<string, string>>) || [];
+        return rels[idx]?.name || val;
+      }
+      if (val.startsWith('c2prevrel_')) {
+        const idx = parseInt(val.replace('c2prevrel_', ''));
+        const rels = (formData.client2PreviousRelationshipsData as Array<Record<string, string>>) || [];
+        return rels[idx]?.name || val;
+      }
+      return val;
+    };
+
+    const resolveDiBeneficiaryList = (raw: string): string => {
+      if (!raw) return '';
+      const arr = Array.isArray(raw) ? raw : raw.split(',');
+      const labels = arr.map((v: string) => resolveDiPolicyOwnerLabel(v.trim())).filter(Boolean);
+      return labels.join(', ');
+    };
+
+    const diCoverageEndLabel = (val: string): string => {
+      if (val === 'retirement') return 'Retirement';
+      if (val === 'job_change') return 'Job change';
+      if (val === 'specific_date') return 'Specific date';
+      return val;
+    };
+
+    const renderDiPolicySection = (
+      clientName: string,
+      clientPrefix: 'client1' | 'client2',
+      policyNum: number
+    ): boolean => {
+      const p = `${clientPrefix}DiPolicy${policyNum}`;
+      const prevGate = policyNum === 1
+        ? `${clientPrefix}HasDisabilityInsuranceEmployer`
+        : `${clientPrefix}DiPolicy${policyNum - 1}HasAdditional`;
+
+      if (formData[prevGate as keyof typeof formData] !== 'yes') return false;
+
+      const insuredPerson = formData[`${p}InsuredPerson` as keyof typeof formData] as string || '';
+      const hasAnyField = insuredPerson ||
+        formData[`${p}Provider` as keyof typeof formData] ||
+        formData[`${p}Employer` as keyof typeof formData] ||
+        formData[`${p}CoverageAmount` as keyof typeof formData];
+      if (!hasAnyField && policyNum > 1) return false;
+
+      addSubsectionHeader(`${clientName} — Disability Insurance Policy ${policyNum}`);
+      checkPageBreak(30);
+
+      const insuredLabel = insuredPerson ? resolveDiInsuredPersonLabel(insuredPerson) : '';
+      const insuredOther = formData[`${p}InsuredPersonOther` as keyof typeof formData] as string || '';
+      renderEstateRow('Insured Person:', insuredPerson === 'other' ? insuredOther : insuredLabel, `${p}_insured`);
+
+      const ownerVal = formData[`${p}PolicyOwner` as keyof typeof formData] as string || '';
+      const ownerOther = formData[`${p}PolicyOwnerOther` as keyof typeof formData] as string || '';
+      renderEstateRow('Policy Owner:', ownerVal === 'other' ? ownerOther : resolveDiPolicyOwnerLabel(ownerVal), `${p}_owner`);
+
+      renderEstateRow('Insurance Provider:', formData[`${p}Provider` as keyof typeof formData] as string || '', `${p}_provider`);
+      renderEstateRow('Employer (if applicable):', formData[`${p}Employer` as keyof typeof formData] as string || '', `${p}_employer`);
+      renderEstateRow('Coverage Amount:', formData[`${p}CoverageAmount` as keyof typeof formData] as string || '', `${p}_amount`);
+
+      const endType = formData[`${p}CoverageEndType` as keyof typeof formData] as string || '';
+      const endDate = formData[`${p}CoverageEndDate` as keyof typeof formData] as string || '';
+      renderEstateRow('Coverage End:', endType === 'specific_date' && endDate ? endDate : diCoverageEndLabel(endType), `${p}_end`);
+
+      renderEstateRow('Purpose:', formData[`${p}Purpose` as keyof typeof formData] as string || '', `${p}_purpose`);
+
+      const benRaw = formData[`${p}Beneficiary` as keyof typeof formData] as string || '';
+      const benOther = formData[`${p}BeneficiaryOther` as keyof typeof formData] as string || '';
+      const benList = resolveDiBeneficiaryList(benRaw);
+      const benDisplay = benRaw.split(',').includes('other') && benOther
+        ? (benList ? `${benList} (Other: ${benOther})` : benOther)
+        : benList;
+      renderEstateRow('Beneficiary(ies):', benDisplay, `${p}_beneficiary`);
+
+      const hasContingent = formData[`${p}HasContingentBeneficiaries` as keyof typeof formData] as string || '';
+      renderEstateRow('Contingent Beneficiaries?', hasContingent === 'yes' ? 'Yes' : 'No', `${p}_hascontingent`);
+
+      if (hasContingent === 'yes') {
+        const conRaw = formData[`${p}ContingentBeneficiary` as keyof typeof formData] as string || '';
+        const conOther = formData[`${p}ContingentBeneficiaryOther` as keyof typeof formData] as string || '';
+        const conList = resolveDiBeneficiaryList(conRaw);
+        const conDisplay = conRaw.split(',').includes('other') && conOther
+          ? (conList ? `${conList} (Other: ${conOther})` : conOther)
+          : conList;
+        renderEstateRow('Contingent Beneficiary(ies):', conDisplay, `${p}_contingent`);
+      }
+
+      yPosition += 4;
+      return true;
+    };
+
+    if (formData.client1HasDisabilityInsuranceEmployer === 'yes' || formData.client2HasDisabilityInsuranceEmployer === 'yes') {
+      addPage();
+      yPosition = 12;
+      addSectionHeader('Disability Insurance / Group Benefits');
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text('The following disability insurance policies are held through employer or group benefits.', margin, yPosition);
+      yPosition += 8;
+
+      if (formData.client1HasDisabilityInsuranceEmployer === 'yes') {
+        for (let i = 1; i <= MAX_DI_POLICIES_PDF; i++) {
+          if (!renderDiPolicySection(diClient1Name, 'client1', i)) break;
+        }
+      }
+
+      if (hasSpouseForDI && formData.client2HasDisabilityInsuranceEmployer === 'yes') {
+        for (let i = 1; i <= MAX_DI_POLICIES_PDF; i++) {
+          if (!renderDiPolicySection(diClient2Name, 'client2', i)) break;
         }
       }
     }

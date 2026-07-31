@@ -3147,6 +3147,12 @@ export const STEPS: Step[] = [
   },
   {
     id: 12,
+    title: 'Property and Liability Insurance',
+    description: 'This section captures details about your property and liability insurance coverage, including policies for your home, vehicles, and other assets, as well as any umbrella liability policies.',
+    questions: [],
+  },
+  {
+    id: 13,
     title: 'Wills',
     description: 'A Will is the foundation of your estate plan. It directs how your assets are distributed, names your executor, and can include trusts for beneficiaries with special needs. This section helps us understand the current state of your Will(s) and whether updates may be needed.',
     questions: [
@@ -3345,7 +3351,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 13,
+    id: 14,
     title: 'Powers of Attorney',
     description: 'A Power of Attorney (POA) lets you appoint someone to make decisions on your behalf if you become unable to do so. There are two types: one for personal care (health decisions) and one for property (financial decisions).',
     questions: [
@@ -3655,7 +3661,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 14,
+    id: 15,
     title: 'Estate Trustees (Executors)',
     description: 'An Estate Trustee (also called an Executor) is the person or institution responsible for administering your estate after you pass away. This includes paying debts, filing taxes, and distributing assets according to your Will.',
     questions: [
@@ -4071,7 +4077,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 15,
+    id: 16,
     title: 'Funeral Arrangements',
     description: 'Planning your funeral arrangements in advance can relieve your family of difficult decisions during an emotional time. This section captures your wishes regarding funeral arrangements and whether they have been documented.',
     questions: [
@@ -4179,7 +4185,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 16,
+    id: 17,
     title: 'Pensions & Registered Accounts',
     description: 'Pensions and registered accounts (RRSP, RRIF, TFSA, etc.) often form a significant part of your estate. Understanding what you have and where it is located helps ensure these assets are properly managed and distributed.',
     questions: [

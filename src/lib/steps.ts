@@ -341,6 +341,15 @@ const generateLifeInsurancePolicyQuestions = (clientPrefix: 'client1' | 'client2
       },
     });
 
+    questions.push({
+      key: `${p}DocLocation`,
+      label: 'Location of the policy documentation',
+      type: 'text',
+      placeholder: 'e.g., Home safe, lawyer\'s office, employer HR portal',
+      required: false,
+      condition: gateCondition,
+    });
+
     if (i < MAX_POLICIES) {
       const clientNameFn = clientPrefix === 'client1'
         ? (answers: Map<number, Record<string, unknown>>) =>
@@ -540,6 +549,15 @@ const generateCriticalIllnessPolicyQuestions = (clientPrefix: 'client1' | 'clien
       },
     });
 
+    questions.push({
+      key: `${p}DocLocation`,
+      label: 'Location of the policy documentation',
+      type: 'text',
+      placeholder: 'e.g., Home safe, lawyer\'s office, employer HR portal',
+      required: false,
+      condition: gateCondition,
+    });
+
     if (i < MAX_POLICIES) {
       const clientNameFn = clientPrefix === 'client1'
         ? (answers: Map<number, Record<string, unknown>>) =>
@@ -737,6 +755,15 @@ const generateDisabilityInsurancePolicyQuestions = (clientPrefix: 'client1' | 'c
         if (!contingent) return false;
         return contingent.split(',').includes('other');
       },
+    });
+
+    questions.push({
+      key: `${p}DocLocation`,
+      label: 'Location of the policy documentation',
+      type: 'text',
+      placeholder: 'e.g., Home safe, lawyer\'s office, employer HR portal',
+      required: false,
+      condition: gateCondition,
     });
 
     if (i < MAX_POLICIES) {

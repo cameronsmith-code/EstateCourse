@@ -5446,6 +5446,8 @@ export const generatePDF = (formData: FormData) => {
         renderEstateRow('Contingent Beneficiary(ies):', conDisplay, `${p}_contingent`);
       }
 
+      renderEstateRow('Location of the policy documentation:', formData[`${p}DocLocation` as keyof typeof formData] as string || '', `${p}_doclocation`);
+
       yPosition += 4;
       return true;
     };
@@ -5610,6 +5612,8 @@ export const generatePDF = (formData: FormData) => {
         renderEstateRow('Contingent Beneficiary(ies):', conDisplay, `${p}_contingent`);
       }
 
+      renderEstateRow('Location of the policy documentation:', formData[`${p}DocLocation` as keyof typeof formData] as string || '', `${p}_doclocation`);
+
       yPosition += 4;
       return true;
     };
@@ -5773,6 +5777,8 @@ export const generatePDF = (formData: FormData) => {
           : conList;
         renderEstateRow('Contingent Beneficiary(ies):', conDisplay, `${p}_contingent`);
       }
+
+      renderEstateRow('Location of the policy documentation:', formData[`${p}DocLocation` as keyof typeof formData] as string || '', `${p}_doclocation`);
 
       yPosition += 4;
       return true;

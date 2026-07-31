@@ -1072,6 +1072,54 @@ export default function StepForm({
     }
   }, [answers['client2LifePolicy3HasAdditional']]);
 
+  useEffect(() => {
+    if (answers['client1HasCriticalIllnessInsurance'] !== 'yes') {
+      for (let i = 1; i <= 4; i++) clearLifePolicyFields(`client1CiPolicy${i}`);
+    }
+  }, [answers['client1HasCriticalIllnessInsurance']]);
+
+  useEffect(() => {
+    if (answers['client2HasCriticalIllnessInsurance'] !== 'yes') {
+      for (let i = 1; i <= 4; i++) clearLifePolicyFields(`client2CiPolicy${i}`);
+    }
+  }, [answers['client2HasCriticalIllnessInsurance']]);
+
+  useEffect(() => {
+    if (answers['client1CiPolicy1HasAdditional'] !== 'yes') {
+      for (let ni = 2; ni <= 4; ni++) clearLifePolicyFields(`client1CiPolicy${ni}`);
+    }
+  }, [answers['client1CiPolicy1HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1CiPolicy2HasAdditional'] !== 'yes') {
+      for (let ni = 3; ni <= 4; ni++) clearLifePolicyFields(`client1CiPolicy${ni}`);
+    }
+  }, [answers['client1CiPolicy2HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client1CiPolicy3HasAdditional'] !== 'yes') {
+      clearLifePolicyFields('client1CiPolicy4');
+    }
+  }, [answers['client1CiPolicy3HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2CiPolicy1HasAdditional'] !== 'yes') {
+      for (let ni = 2; ni <= 4; ni++) clearLifePolicyFields(`client2CiPolicy${ni}`);
+    }
+  }, [answers['client2CiPolicy1HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2CiPolicy2HasAdditional'] !== 'yes') {
+      for (let ni = 3; ni <= 4; ni++) clearLifePolicyFields(`client2CiPolicy${ni}`);
+    }
+  }, [answers['client2CiPolicy2HasAdditional']]);
+
+  useEffect(() => {
+    if (answers['client2CiPolicy3HasAdditional'] !== 'yes') {
+      clearLifePolicyFields('client2CiPolicy4');
+    }
+  }, [answers['client2CiPolicy3HasAdditional']]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');
@@ -11689,10 +11737,12 @@ export default function StepForm({
             };
 
             const isClient1Key = (key: string) =>
-              key === 'client1HasLifeInsurance' || key.startsWith('client1LifePolicy');
+              key === 'client1HasLifeInsurance' || key.startsWith('client1LifePolicy') ||
+              key === 'client1HasCriticalIllnessInsurance' || key.startsWith('client1CiPolicy');
 
             const isClient2Key = (key: string) =>
-              key === 'client2HasLifeInsurance' || key.startsWith('client2LifePolicy');
+              key === 'client2HasLifeInsurance' || key.startsWith('client2LifePolicy') ||
+              key === 'client2HasCriticalIllnessInsurance' || key.startsWith('client2CiPolicy');
 
             const renderQuestion = (question: typeof step.questions[0]) => {
               if (!isVisible(question)) return null;

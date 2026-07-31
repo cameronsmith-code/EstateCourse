@@ -11929,18 +11929,22 @@ export default function StepForm({
               return question.condition(allFormData);
             };
 
-            const isClient1Key = (key: string) =>
+            const isClient1GroupKey = (key: string) =>
               key === 'client1HasLifeInsurance' || key.startsWith('client1LifePolicy') ||
               key === 'client1HasCriticalIllnessInsurance' || key.startsWith('client1CiPolicy') ||
-              key === 'client1HasDisabilityInsuranceEmployer' || key.startsWith('client1DiPolicy') ||
+              key === 'client1HasDisabilityInsuranceEmployer' || key.startsWith('client1DiPolicy');
+
+            const isClient1PersonalKey = (key: string) =>
               key === 'client1HasLifeInsurancePersonal' || key.startsWith('client1PersonalLifePolicy') ||
               key === 'client1HasCriticalIllnessInsurancePersonal' || key.startsWith('client1PersonalCiPolicy') ||
               key === 'client1HasDisabilityInsurancePersonal' || key.startsWith('client1PersonalDiPolicy');
 
-            const isClient2Key = (key: string) =>
+            const isClient2GroupKey = (key: string) =>
               key === 'client2HasLifeInsurance' || key.startsWith('client2LifePolicy') ||
               key === 'client2HasCriticalIllnessInsurance' || key.startsWith('client2CiPolicy') ||
-              key === 'client2HasDisabilityInsuranceEmployer' || key.startsWith('client2DiPolicy') ||
+              key === 'client2HasDisabilityInsuranceEmployer' || key.startsWith('client2DiPolicy');
+
+            const isClient2PersonalKey = (key: string) =>
               key === 'client2HasLifeInsurancePersonal' || key.startsWith('client2PersonalLifePolicy') ||
               key === 'client2HasCriticalIllnessInsurancePersonal' || key.startsWith('client2PersonalCiPolicy') ||
               key === 'client2HasDisabilityInsurancePersonal' || key.startsWith('client2PersonalDiPolicy');
@@ -11964,12 +11968,20 @@ export default function StepForm({
             return (
               <>
                 <Subsection title={`${client1Name} - Group Benefits`}>
-                  {step.questions.filter(q => isClient1Key(q.key)).map(renderQuestion)}
+                  {step.questions.filter(q => isClient1GroupKey(q.key)).map(renderQuestion)}
+                </Subsection>
+                <Subsection title={`${client1Name} - Personally Owned Insurance Policies`}>
+                  {step.questions.filter(q => isClient1PersonalKey(q.key)).map(renderQuestion)}
                 </Subsection>
                 {hasSpouse && (
-                  <Subsection title={`${client2Name} - Group Benefits`}>
-                    {step.questions.filter(q => isClient2Key(q.key)).map(renderQuestion)}
-                  </Subsection>
+                  <>
+                    <Subsection title={`${client2Name} - Group Benefits`}>
+                      {step.questions.filter(q => isClient2GroupKey(q.key)).map(renderQuestion)}
+                    </Subsection>
+                    <Subsection title={`${client2Name} - Personally Owned Insurance Policies`}>
+                      {step.questions.filter(q => isClient2PersonalKey(q.key)).map(renderQuestion)}
+                    </Subsection>
+                  </>
                 )}
               </>
             );

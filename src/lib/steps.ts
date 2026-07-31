@@ -2801,13 +2801,6 @@ export const STEPS: Step[] = [
     title: 'Life Insurance',
     description: 'Life insurance can play a key role in your estate plan by providing liquidity to cover debts, taxes, and final expenses, and by protecting your loved ones financially. This section helps us understand your existing coverage so we can assess whether it aligns with your estate planning goals.',
     questions: [
-      // ── (Client 1) - Group Benefits ──
-      {
-        key: 'groupBenefitsSubsectionClient1',
-        label: (answers) => `${(answers.get(1)?.['fullName'] as string) || 'Client 1'} - Group Benefits`,
-        type: 'label',
-        required: false,
-      },
       {
         key: 'client1HasLifeInsurance',
         label: (answers) => {
@@ -2854,13 +2847,6 @@ export const STEPS: Step[] = [
       },
       ...generateDisabilityInsurancePolicyQuestions('client1'),
 
-      // ── (Client 1) - Personally Owned Insurance Policies ──
-      {
-        key: 'personalInsuranceSubsectionClient1',
-        label: (answers) => `${(answers.get(1)?.['fullName'] as string) || 'Client 1'} - Personally Owned Insurance Policies`,
-        type: 'label',
-        required: false,
-      },
       {
         key: 'client1HasLifeInsurancePersonal',
         label: (answers) => {
@@ -2906,17 +2892,6 @@ export const STEPS: Step[] = [
       },
       ...generateDisabilityInsurancePolicyQuestions('client1', 'personal'),
 
-      // ── (Client 2) - Group Benefits ──
-      {
-        key: 'groupBenefitsSubsectionClient2',
-        label: (answers) => `${(answers.get(1)?.['spouseName'] as string) || 'Client 2'} - Group Benefits`,
-        type: 'label',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          const marital = formData.maritalStatus;
-          return marital === 'married' || marital === 'common_law';
-        },
-      },
       {
         key: 'client2HasLifeInsurance',
         label: (answers) => {
@@ -2975,17 +2950,6 @@ export const STEPS: Step[] = [
       },
       ...generateDisabilityInsurancePolicyQuestions('client2'),
 
-      // ── (Client 2) - Personally Owned Insurance Policies ──
-      {
-        key: 'personalInsuranceSubsectionClient2',
-        label: (answers) => `${(answers.get(1)?.['spouseName'] as string) || 'Client 2'} - Personally Owned Insurance Policies`,
-        type: 'label',
-        required: false,
-        condition: (formData: Record<string, string>) => {
-          const marital = formData.maritalStatus;
-          return marital === 'married' || marital === 'common_law';
-        },
-      },
       {
         key: 'client2HasLifeInsurancePersonal',
         label: (answers) => {

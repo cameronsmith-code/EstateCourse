@@ -2879,7 +2879,6 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasLifeInsurancePersonal !== undefined,
       },
       ...generateCriticalIllnessPolicyQuestions('client1', 'personal'),
       {
@@ -2985,7 +2984,10 @@ export const STEPS: Step[] = [
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasLifeInsurancePersonal !== undefined,
+        condition: (formData: Record<string, string>) => {
+          const marital = formData.maritalStatus;
+          return marital === 'married' || marital === 'common_law';
+        },
       },
       ...generateCriticalIllnessPolicyQuestions('client2', 'personal'),
       {

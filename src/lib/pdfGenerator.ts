@@ -6035,6 +6035,63 @@ export const generatePDF = (formData: FormData) => {
         }
       }
     }
+
+    const corporationsData = formData.corporationsData as Array<Record<string, string>> | undefined;
+    const validCorps = (corporationsData || [])
+      .map((c, i) => ({ corp: c, index: i }))
+      .filter(({ corp }) => corp?.legalName?.trim());
+
+    const corpHasAny = validCorps.some(({ corp, index }) => {
+      const prefix = `corp${index + 1}`;
+      return formData[`${prefix}HasLifeInsurance` as keyof typeof formData] === 'yes' ||
+        formData[`${prefix}HasCriticalIllnessInsurance` as keyof typeof formData] === 'yes' ||
+        formData[`${prefix}HasDisabilityInsurance` as keyof typeof formData] === 'yes';
+    });
+
+    if (corpHasAny) {
+      addPage();
+      yPosition = 12;
+      addSectionHeader('Corporate Insurance');
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text('The following insurance policies are owned by your corporation(s).', margin, yPosition);
+      yPosition += 8;
+
+      validCorps.forEach(({ corp, index }) => {
+        const corpName = corp.legalName.trim();
+        const prefix = `corp${index + 1}`;
+
+        const hasLife = formData[`${prefix}HasLifeInsurance` as keyof typeof formData] === 'yes';
+        const hasCi = formData[`${prefix}HasCriticalIllnessInsurance` as keyof typeof formData] === 'yes';
+        const hasDi = formData[`${prefix}HasDisabilityInsurance` as keyof typeof formData] === 'yes';
+
+        if (!hasLife && !hasCi && !hasDi) return;
+
+        addSubsectionHeader(`${corpName} - Life Insurance Policies`);
+
+        if (hasLife) {
+          for (let i = 1; i <= MAX_PI_POLICIES_PDF; i++) {
+            if (!renderPersonalPolicySection(corpName, 'client1', i, 'Life',
+              `${prefix}HasLifeInsurance`, `${prefix}LifePolicy`, 'Life Insurance Policy')) break;
+          }
+        }
+
+        if (hasCi) {
+          for (let i = 1; i <= MAX_PI_POLICIES_PDF; i++) {
+            if (!renderPersonalPolicySection(corpName, 'client1', i, 'Ci',
+              `${prefix}HasCriticalIllnessInsurance`, `${prefix}CiPolicy`, 'Critical Illness Policy')) break;
+          }
+        }
+
+        if (hasDi) {
+          for (let i = 1; i <= MAX_PI_POLICIES_PDF; i++) {
+            if (!renderPersonalPolicySection(corpName, 'client1', i, 'Di',
+              `${prefix}HasDisabilityInsurance`, `${prefix}DiPolicy`, 'Disability Insurance Policy')) break;
+          }
+        }
+      });
+    }
   }
 
   addPage();

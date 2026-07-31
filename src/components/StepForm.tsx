@@ -1313,6 +1313,56 @@ export default function StepForm({
     }
   }, [answers['client2PersonalDiPolicy3HasAdditional']]);
 
+  useEffect(() => {
+    if (answers['ownsCorporation'] !== 'yes') {
+      for (let ci = 0; ci < 4; ci++) {
+        const prefix = `corp${ci + 1}`;
+        [
+          `${prefix}HasLifeInsurance`, `${prefix}HasCriticalIllnessInsurance`, `${prefix}HasDisabilityInsurance`,
+        ].forEach(key => { if (answers[key] !== undefined) onAnswerChange(key, undefined); });
+        for (let i = 1; i <= 4; i++) clearLifePolicyFields(`${prefix}LifePolicy${i}`);
+        for (let i = 1; i <= 4; i++) clearLifePolicyFields(`${prefix}CiPolicy${i}`);
+        for (let i = 1; i <= 4; i++) clearLifePolicyFields(`${prefix}DiPolicy${i}`);
+      }
+    }
+  }, [answers['ownsCorporation']]);
+
+  useEffect(() => {
+    const corps = answers['corporationsData'] as Array<Record<string, string>> | undefined;
+    for (let ci = 0; ci < 4; ci++) {
+      const prefix = `corp${ci + 1}`;
+      const stillExists = !!corps?.[ci]?.legalName?.trim();
+      if (!stillExists) {
+        [
+          `${prefix}HasLifeInsurance`, `${prefix}HasCriticalIllnessInsurance`, `${prefix}HasDisabilityInsurance`,
+        ].forEach(key => { if (answers[key] !== undefined) onAnswerChange(key, undefined); });
+        for (let i = 1; i <= 4; i++) clearLifePolicyFields(`${prefix}LifePolicy${i}`);
+        for (let i = 1; i <= 4; i++) clearLifePolicyFields(`${prefix}CiPolicy${i}`);
+        for (let i = 1; i <= 4; i++) clearLifePolicyFields(`${prefix}DiPolicy${i}`);
+      }
+    }
+  }, [answers['corporationsData']]);
+
+  useEffect(() => {
+    for (let ci = 0; ci < 4; ci++) {
+      const prefix = `corp${ci + 1}`;
+      if (answers[`${prefix}HasLifeInsurance`] !== 'yes') {
+        for (let i = 1; i <= 4; i++) clearLifePolicyFields(`${prefix}LifePolicy${i}`);
+      }
+      if (answers[`${prefix}HasCriticalIllnessInsurance`] !== 'yes') {
+        for (let i = 1; i <= 4; i++) clearLifePolicyFields(`${prefix}CiPolicy${i}`);
+      }
+      if (answers[`${prefix}HasDisabilityInsurance`] !== 'yes') {
+        for (let i = 1; i <= 4; i++) clearLifePolicyFields(`${prefix}DiPolicy${i}`);
+      }
+    }
+  }, [
+    answers['corp1HasLifeInsurance'], answers['corp1HasCriticalIllnessInsurance'], answers['corp1HasDisabilityInsurance'],
+    answers['corp2HasLifeInsurance'], answers['corp2HasCriticalIllnessInsurance'], answers['corp2HasDisabilityInsurance'],
+    answers['corp3HasLifeInsurance'], answers['corp3HasCriticalIllnessInsurance'], answers['corp3HasDisabilityInsurance'],
+    answers['corp4HasLifeInsurance'], answers['corp4HasCriticalIllnessInsurance'], answers['corp4HasDisabilityInsurance'],
+  ]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');
@@ -11949,6 +11999,13 @@ export default function StepForm({
               key === 'client2HasCriticalIllnessInsurancePersonal' || key.startsWith('client2PersonalCiPolicy') ||
               key === 'client2HasDisabilityInsurancePersonal' || key.startsWith('client2PersonalDiPolicy');
 
+            const isCorpKey = (key: string, corpIndex: number) => {
+              const prefix = `corp${corpIndex + 1}`;
+              return key === `${prefix}HasLifeInsurance` || key.startsWith(`${prefix}LifePolicy`) ||
+                key === `${prefix}HasCriticalIllnessInsurance` || key.startsWith(`${prefix}CiPolicy`) ||
+                key === `${prefix}HasDisabilityInsurance` || key.startsWith(`${prefix}DiPolicy`);
+            };
+
             const renderQuestion = (question: typeof step.questions[0]) => {
               if (!isVisible(question)) return null;
               const displayLabel = typeof question.label === 'function'
@@ -11983,6 +12040,33 @@ export default function StepForm({
                     </Subsection>
                   </>
                 )}
+
+                {(() => {
+                  const corporationsData = (allAnswers?.get(6) as Record<string, unknown> | undefined)?.['corporationsData'] as Array<Record<string, string>> | undefined;
+                  if (!corporationsData || corporationsData.length === 0) return null;
+                  const validCorps = corporationsData
+                    .map((c, i) => ({ corp: c, index: i }))
+                    .filter(({ corp }) => corp?.legalName?.trim());
+                  if (validCorps.length === 0) return null;
+                  return (
+                    <>
+                      {validCorps.map(({ corp, index }) => {
+                        const corpName = corp.legalName.trim();
+                        const corpQuestions = step.questions.filter(q => isCorpKey(q.key, index));
+                        if (corpQuestions.length === 0) return null;
+                        return (
+                          <Subsection
+                            key={`corp-insurance-${index}`}
+                            title={`${corpName} — Life Insurance Policies`}
+                            description={`Insurance policies owned by ${corpName}`}
+                          >
+                            {corpQuestions.map(renderQuestion)}
+                          </Subsection>
+                        );
+                      })}
+                    </>
+                  );
+                })()}
               </>
             );
           })()}

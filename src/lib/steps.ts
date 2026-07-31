@@ -505,66 +505,6 @@ const generateCriticalIllnessPolicyQuestions = (
     });
 
     questions.push({
-      key: `${p}Beneficiary`,
-      label: 'Beneficiary(ies)',
-      type: 'checkbox-group',
-      options: buildBeneficiaryOptions,
-      required: false,
-      condition: gateCondition,
-    });
-
-    questions.push({
-      key: `${p}BeneficiaryOther`,
-      label: 'Please specify the beneficiary(ies):',
-      type: 'text',
-      placeholder: 'Enter beneficiary name(s)',
-      required: false,
-      condition: (formData: Record<string, string>) => {
-        if (!gateCondition(formData)) return false;
-        const beneficiaries = formData[`${p}Beneficiary`];
-        if (!beneficiaries) return false;
-        return beneficiaries.split(',').includes('other');
-      },
-    });
-
-    questions.push({
-      key: `${p}HasContingentBeneficiaries`,
-      label: 'Are there any Contingent Beneficiaries?',
-      type: 'radio',
-      options: [
-        { value: 'yes', label: 'Yes' },
-        { value: 'no', label: 'No' },
-      ],
-      required: false,
-      condition: gateCondition,
-    });
-
-    questions.push({
-      key: `${p}ContingentBeneficiary`,
-      label: 'Contingent Beneficiary(ies)',
-      type: 'checkbox-group',
-      options: buildBeneficiaryOptions,
-      required: false,
-      condition: (formData: Record<string, string>) =>
-        gateCondition(formData) && formData[`${p}HasContingentBeneficiaries`] === 'yes',
-    });
-
-    questions.push({
-      key: `${p}ContingentBeneficiaryOther`,
-      label: 'Please specify the contingent beneficiary(ies):',
-      type: 'text',
-      placeholder: 'Enter contingent beneficiary name(s)',
-      required: false,
-      condition: (formData: Record<string, string>) => {
-        if (!gateCondition(formData)) return false;
-        if (formData[`${p}HasContingentBeneficiaries`] !== 'yes') return false;
-        const contingent = formData[`${p}ContingentBeneficiary`];
-        if (!contingent) return false;
-        return contingent.split(',').includes('other');
-      },
-    });
-
-    questions.push({
       key: `${p}DocLocation`,
       label: 'Location of the policy documentation',
       type: 'text',
@@ -720,66 +660,6 @@ const generateDisabilityInsurancePolicyQuestions = (
       placeholder: 'e.g., Income replacement, mortgage protection, estate liquidity',
       required: false,
       condition: gateCondition,
-    });
-
-    questions.push({
-      key: `${p}Beneficiary`,
-      label: 'Beneficiary(ies)',
-      type: 'checkbox-group',
-      options: buildBeneficiaryOptions,
-      required: false,
-      condition: gateCondition,
-    });
-
-    questions.push({
-      key: `${p}BeneficiaryOther`,
-      label: 'Please specify the beneficiary(ies):',
-      type: 'text',
-      placeholder: 'Enter beneficiary name(s)',
-      required: false,
-      condition: (formData: Record<string, string>) => {
-        if (!gateCondition(formData)) return false;
-        const beneficiaries = formData[`${p}Beneficiary`];
-        if (!beneficiaries) return false;
-        return beneficiaries.split(',').includes('other');
-      },
-    });
-
-    questions.push({
-      key: `${p}HasContingentBeneficiaries`,
-      label: 'Are there any Contingent Beneficiaries?',
-      type: 'radio',
-      options: [
-        { value: 'yes', label: 'Yes' },
-        { value: 'no', label: 'No' },
-      ],
-      required: false,
-      condition: gateCondition,
-    });
-
-    questions.push({
-      key: `${p}ContingentBeneficiary`,
-      label: 'Contingent Beneficiary(ies)',
-      type: 'checkbox-group',
-      options: buildBeneficiaryOptions,
-      required: false,
-      condition: (formData: Record<string, string>) =>
-        gateCondition(formData) && formData[`${p}HasContingentBeneficiaries`] === 'yes',
-    });
-
-    questions.push({
-      key: `${p}ContingentBeneficiaryOther`,
-      label: 'Please specify the contingent beneficiary(ies):',
-      type: 'text',
-      placeholder: 'Enter contingent beneficiary name(s)',
-      required: false,
-      condition: (formData: Record<string, string>) => {
-        if (!gateCondition(formData)) return false;
-        if (formData[`${p}HasContingentBeneficiaries`] !== 'yes') return false;
-        const contingent = formData[`${p}ContingentBeneficiary`];
-        if (!contingent) return false;
-        return contingent.split(',').includes('other');
-      },
     });
 
     questions.push({

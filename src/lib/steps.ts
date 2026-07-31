@@ -239,14 +239,16 @@ const generateLifeInsurancePolicyQuestions = (
       condition: gateCondition,
     });
 
-    questions.push({
-      key: `${p}Employer`,
-      label: 'Employer (if applicable)',
-      type: 'text',
-      placeholder: 'e.g., ABC Corp, or leave blank if personal',
-      required: false,
-      condition: gateCondition,
-    });
+    if (source === 'employer') {
+      questions.push({
+        key: `${p}Employer`,
+        label: 'Employer (if applicable)',
+        type: 'text',
+        placeholder: 'e.g., ABC Corp, or leave blank if personal',
+        required: false,
+        condition: gateCondition,
+      });
+    }
 
     questions.push({
       key: `${p}CoverageAmount`,
@@ -455,14 +457,16 @@ const generateCriticalIllnessPolicyQuestions = (
       condition: gateCondition,
     });
 
-    questions.push({
-      key: `${p}Employer`,
-      label: 'Employer (if applicable)',
-      type: 'text',
-      placeholder: 'e.g., ABC Corp, or leave blank if personal',
-      required: false,
-      condition: gateCondition,
-    });
+    if (source === 'employer') {
+      questions.push({
+        key: `${p}Employer`,
+        label: 'Employer (if applicable)',
+        type: 'text',
+        placeholder: 'e.g., ABC Corp, or leave blank if personal',
+        required: false,
+        condition: gateCondition,
+      });
+    }
 
     questions.push({
       key: `${p}CoverageAmount`,
@@ -613,14 +617,16 @@ const generateDisabilityInsurancePolicyQuestions = (
       condition: gateCondition,
     });
 
-    questions.push({
-      key: `${p}Employer`,
-      label: 'Employer (if applicable)',
-      type: 'text',
-      placeholder: 'e.g., ABC Corp, or leave blank if personal',
-      required: false,
-      condition: gateCondition,
-    });
+    if (source === 'employer') {
+      questions.push({
+        key: `${p}Employer`,
+        label: 'Employer (if applicable)',
+        type: 'text',
+        placeholder: 'e.g., ABC Corp, or leave blank if personal',
+        required: false,
+        condition: gateCondition,
+      });
+    }
 
     questions.push({
       key: `${p}CoverageAmount`,

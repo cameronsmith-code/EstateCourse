@@ -5913,7 +5913,6 @@ export const generatePDF = (formData: FormData) => {
       const insuredPerson = formData[`${p}InsuredPerson` as keyof typeof formData] as string || '';
       const hasAnyField = insuredPerson ||
         formData[`${p}Provider` as keyof typeof formData] ||
-        formData[`${p}Employer` as keyof typeof formData] ||
         formData[`${p}CoverageAmount` as keyof typeof formData];
       if (!hasAnyField && policyNum > 1) return false;
 
@@ -5932,7 +5931,6 @@ export const generatePDF = (formData: FormData) => {
       renderEstateRow('Policy Owner:', ownerVal === 'other' ? ownerOther : resolvePolicyOwnerLabel(ownerVal, c1, c2), `${p}_owner`);
 
       renderEstateRow('Insurance Provider:', formData[`${p}Provider` as keyof typeof formData] as string || '', `${p}_provider`);
-      renderEstateRow('Employer (if applicable):', formData[`${p}Employer` as keyof typeof formData] as string || '', `${p}_employer`);
       renderEstateRow('Coverage Amount:', formData[`${p}CoverageAmount` as keyof typeof formData] as string || '', `${p}_amount`);
 
       const endType = formData[`${p}CoverageEndType` as keyof typeof formData] as string || '';

@@ -2801,6 +2801,13 @@ export const STEPS: Step[] = [
     title: 'Life Insurance',
     description: 'Life insurance can play a key role in your estate plan by providing liquidity to cover debts, taxes, and final expenses, and by protecting your loved ones financially. This section helps us understand your existing coverage so we can assess whether it aligns with your estate planning goals.',
     questions: [
+      // ── (Client 1) - Group Benefits ──
+      {
+        key: 'groupBenefitsSubsectionClient1',
+        label: (answers) => `${(answers.get(1)?.['fullName'] as string) || 'Client 1'} - Group Benefits`,
+        type: 'label',
+        required: false,
+      },
       {
         key: 'client1HasLifeInsurance',
         label: (answers) => {
@@ -2815,7 +2822,101 @@ export const STEPS: Step[] = [
         ],
         required: true,
       },
+      ...generateLifeInsurancePolicyQuestions('client1'),
+      {
+        key: 'client1HasCriticalIllnessInsurance',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const spouseName = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}, do you have any Critical Illness Insurance through your employer or through ${spouseName}'s employer?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      ...generateCriticalIllnessPolicyQuestions('client1'),
+      {
+        key: 'client1HasDisabilityInsuranceEmployer',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const spouseName = answers.get(1)?.spouseName as string || 'Client 2';
+          return `${name}, do you have any Disability Insurance through your employer or through ${spouseName}'s employer?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      ...generateDisabilityInsurancePolicyQuestions('client1'),
 
+      // ── (Client 1) - Personally Owned Insurance Policies ──
+      {
+        key: 'personalInsuranceSubsectionClient1',
+        label: (answers) => `${(answers.get(1)?.['fullName'] as string) || 'Client 1'} - Personally Owned Insurance Policies`,
+        type: 'label',
+        required: false,
+      },
+      {
+        key: 'client1HasLifeInsurancePersonal',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}, do you have any Life Insurance purchased outside of work plans or employer benefits?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: true,
+      },
+      ...generateLifeInsurancePolicyQuestions('client1', 'personal'),
+      {
+        key: 'client1HasCriticalIllnessInsurancePersonal',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}, do you have any Critical Illness Insurance purchased outside of work plans or employer benefits?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasLifeInsurancePersonal !== undefined,
+      },
+      ...generateCriticalIllnessPolicyQuestions('client1', 'personal'),
+      {
+        key: 'client1HasDisabilityInsurancePersonal',
+        label: (answers) => {
+          const name = answers.get(1)?.fullName as string || 'Client 1';
+          return `${name}, do you have any Disability Insurance purchased outside of work plans or employer benefits?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasCriticalIllnessInsurancePersonal !== undefined,
+      },
+      ...generateDisabilityInsurancePolicyQuestions('client1', 'personal'),
+
+      // ── (Client 2) - Group Benefits ──
+      {
+        key: 'groupBenefitsSubsectionClient2',
+        label: (answers) => `${(answers.get(1)?.['spouseName'] as string) || 'Client 2'} - Group Benefits`,
+        type: 'label',
+        required: false,
+        condition: (formData: Record<string, string>) => {
+          const marital = formData.maritalStatus;
+          return marital === 'married' || marital === 'common_law';
+        },
+      },
       {
         key: 'client2HasLifeInsurance',
         label: (answers) => {
@@ -2834,24 +2935,7 @@ export const STEPS: Step[] = [
           return marital === 'married' || marital === 'common_law';
         },
       },
-
-      ...generateLifeInsurancePolicyQuestions('client1'),
       ...generateLifeInsurancePolicyQuestions('client2'),
-
-      {
-        key: 'client1HasCriticalIllnessInsurance',
-        label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          const spouseName = answers.get(1)?.spouseName as string || 'Client 2';
-          return `${name}, do you have any Critical Illness Insurance through your employer or through ${spouseName}'s employer?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
       {
         key: 'client2HasCriticalIllnessInsurance',
         label: (answers) => {
@@ -2870,24 +2954,7 @@ export const STEPS: Step[] = [
           return marital === 'married' || marital === 'common_law';
         },
       },
-
-      ...generateCriticalIllnessPolicyQuestions('client1'),
       ...generateCriticalIllnessPolicyQuestions('client2'),
-
-      {
-        key: 'client1HasDisabilityInsuranceEmployer',
-        label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          const spouseName = answers.get(1)?.spouseName as string || 'Client 2';
-          return `${name}, do you have any Disability Insurance through your employer or through ${spouseName}'s employer?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
       {
         key: 'client2HasDisabilityInsuranceEmployer',
         label: (answers) => {
@@ -2906,67 +2973,12 @@ export const STEPS: Step[] = [
           return marital === 'married' || marital === 'common_law';
         },
       },
-
-      ...generateDisabilityInsurancePolicyQuestions('client1'),
       ...generateDisabilityInsurancePolicyQuestions('client2'),
 
-      // ── Personal Insurance (purchased outside work plans / employer benefits) ──
-      {
-        key: 'personalInsuranceSubsectionClient1',
-        label: (answers) => `(${(answers.get(1)?.['fullName'] as string) || 'Client 1'}) Individual Insurance Policies`,
-        type: 'label',
-        required: false,
-      },
-      {
-        key: 'client1HasLifeInsurancePersonal',
-        label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          return `${name}, do you have any Life Insurance purchased outside of work plans or employer benefits?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: true,
-      },
-      ...generateLifeInsurancePolicyQuestions('client1', 'personal'),
-
-      {
-        key: 'client1HasCriticalIllnessInsurancePersonal',
-        label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          return `${name}, do you have any Critical Illness Insurance purchased outside of work plans or employer benefits?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasLifeInsurancePersonal !== undefined,
-      },
-      ...generateCriticalIllnessPolicyQuestions('client1', 'personal'),
-
-      {
-        key: 'client1HasDisabilityInsurancePersonal',
-        label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          return `${name}, do you have any Disability Insurance purchased outside of work plans or employer benefits?`;
-        },
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasCriticalIllnessInsurancePersonal !== undefined,
-      },
-      ...generateDisabilityInsurancePolicyQuestions('client1', 'personal'),
-
+      // ── (Client 2) - Personally Owned Insurance Policies ──
       {
         key: 'personalInsuranceSubsectionClient2',
-        label: (answers) => `(${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}) Individual Insurance Policies`,
+        label: (answers) => `${(answers.get(1)?.['spouseName'] as string) || 'Client 2'} - Personally Owned Insurance Policies`,
         type: 'label',
         required: false,
         condition: (formData: Record<string, string>) => {
@@ -2992,7 +3004,6 @@ export const STEPS: Step[] = [
         },
       },
       ...generateLifeInsurancePolicyQuestions('client2', 'personal'),
-
       {
         key: 'client2HasCriticalIllnessInsurancePersonal',
         label: (answers) => {
@@ -3008,7 +3019,6 @@ export const STEPS: Step[] = [
         condition: (formData: Record<string, string>) => formData.client2HasLifeInsurancePersonal !== undefined,
       },
       ...generateCriticalIllnessPolicyQuestions('client2', 'personal'),
-
       {
         key: 'client2HasDisabilityInsurancePersonal',
         label: (answers) => {

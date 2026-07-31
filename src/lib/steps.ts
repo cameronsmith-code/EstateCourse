@@ -2913,7 +2913,7 @@ export const STEPS: Step[] = [
       // ── Personal Insurance (purchased outside work plans / employer benefits) ──
       {
         key: 'personalInsuranceSubsectionClient1',
-        label: (answers) => `${(answers.get(1)?.['fullName'] as string) || 'Client 1'} - Personal Insurance`,
+        label: (answers) => `(${(answers.get(1)?.['fullName'] as string) || 'Client 1'}) Individual Insurance Policies`,
         type: 'label',
         required: false,
       },
@@ -2966,7 +2966,7 @@ export const STEPS: Step[] = [
 
       {
         key: 'personalInsuranceSubsectionClient2',
-        label: (answers) => `${(answers.get(1)?.['spouseName'] as string) || 'Client 2'} - Personal Insurance`,
+        label: (answers) => `(${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}) Individual Insurance Policies`,
         type: 'label',
         required: false,
         condition: (formData: Record<string, string>) => {

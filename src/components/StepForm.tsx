@@ -8711,53 +8711,135 @@ export default function StepForm({
                               const instLabel = (inst.institution as string) || '';
 
                               const renderAdvisorQuestion = () => {
-                                const advisorOptions: string[] = [];
-                                const fp1Name = s7['fpIsCameronSmith'] ? 'Cameron Smith' : (s7['fpName'] as string);
-                                if (fp1Name) advisorOptions.push(fp1Name);
+                                type AdvisorOption = { name: string; firm: string; label: string };
+                                const advisorOptions: AdvisorOption[] = [];
+                                const seen = new Set<string>();
+                                const addAdvisor = (isCameron: unknown, name: unknown, firm: unknown) => {
+                                  const n: string = isCameron ? 'Cameron Smith' : ((name as string) || '');
+                                  const f: string = isCameron ? 'Clarify Wealth Ltd.' : ((firm as string) || '');
+                                  if (!n || seen.has(n)) return;
+                                  seen.add(n);
+                                  advisorOptions.push({ name: n, firm: f, label: f ? `${n} — ${f}` : n });
+                                };
+                                addAdvisor(s7['fpIsCameronSmith'], s7['fpName'], s7['fpFirm']);
                                 if (s7['fpHasAdditionalAdvisor'] === 'yes') {
-                                  const fp2Name = s7['fpAdvisor2IsCameronSmith'] ? 'Cameron Smith' : (s7['fpAdvisor2Name'] as string);
-                                  if (fp2Name && !advisorOptions.includes(fp2Name)) advisorOptions.push(fp2Name);
+                                  addAdvisor(s7['fpAdvisor2IsCameronSmith'], s7['fpAdvisor2Name'], s7['fpAdvisor2Firm']);
                                 }
                                 ((s7['fpAdditionalAdvisorsData'] as Array<Record<string,unknown>>) || []).forEach(a => {
-                                  const n = a?.isCameronSmith ? 'Cameron Smith' : (a?.name as string);
-                                  if (n && !advisorOptions.includes(n)) advisorOptions.push(n);
+                                  if (a) addAdvisor(a.isCameronSmith, a.name, a.firm);
                                 });
-                                const isOther = instLabel !== '' && !advisorOptions.includes(instLabel);
-                                const radioVal = isOther ? '__other__' : instLabel;
-                                if (advisorOptions.length === 0) {
-                                  return (
-                                    <div>
-                                      <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., TD Waterhouse, Edward Jones, RBC Direct Investing</p>
-                                      <input type="text" value={instLabel}
-                                        onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
-                                        placeholder=""
-                                        className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                                    </div>
-                                  );
-                                }
+
+                                const dropdownVal = instLabel;
+                                const isOther = dropdownVal === '__other__';
+                                const updateOther = (field: string, val: unknown) => {
+                                  const cur = [...getInsts(key)];
+                                  cur[instIdx] = { ...cur[instIdx], [field]: val };
+                                  setInsts(key, cur);
+                                };
+                                const otherServices = (inst.otherServices as string[]) || [];
+                                const fpServiceOptions = [
+                                  { value: 'investments', label: 'Investments' },
+                                  { value: 'retirement_planning', label: 'Retirement planning' },
+                                  { value: 'insurance', label: 'Insurance' },
+                                  { value: 'estate_planning', label: 'Estate planning' },
+                                  { value: 'tax_planning', label: 'Tax planning' },
+                                  { value: 'cash_flow', label: 'Cash flow' },
+                                  { value: 'business_planning', label: 'Business planning' },
+                                  { value: 'other', label: 'Other' },
+                                ];
+
                                 return (
-                                  <div className="space-y-2">
-                                    {advisorOptions.map(name => (
-                                      <label key={name} className="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name={`advisor-${key}-${instIdx}`} value={name}
-                                          checked={radioVal === name}
-                                          onChange={() => updateInstField(key, instIdx, 'institution', name)}
-                                          className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                                        <span className="text-white text-sm">{name}</span>
-                                      </label>
-                                    ))}
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                      <input type="radio" name={`advisor-${key}-${instIdx}`} value="__other__"
-                                        checked={radioVal === '__other__'}
-                                        onChange={() => updateInstField(key, instIdx, 'institution', '')}
-                                        className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
-                                      <span className="text-white text-sm">Other</span>
-                                    </label>
-                                    {radioVal === '__other__' && (
-                                      <input type="text" value={instLabel}
-                                        onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
-                                        placeholder="e.g., TD Waterhouse, Edward Jones, RBC Direct Investing"
-                                        className="ml-6 w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                  <div className="space-y-3">
+                                    <select
+                                      value={dropdownVal}
+                                      onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
+                                      className="w-full px-4 py-2.5 bg-gray-500 border border-gray-400 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+                                    >
+                                      <option value="" className="bg-gray-700">— Select an advisor —</option>
+                                      {advisorOptions.map(opt => (
+                                        <option key={opt.name} value={opt.name} className="bg-gray-700">{opt.label}</option>
+                                      ))}
+                                      <option value="__other__" className="bg-gray-700">Other</option>
+                                    </select>
+
+                                    {isOther && (
+                                      <div className="mt-3 p-4 bg-gray-500 border border-gray-400 rounded-lg space-y-4">
+                                        <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Other Financial Planner / Wealth Advisor</p>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Firm</label>
+                                          <input type="text" value={(inst.otherFirm as string) || ''}
+                                            onChange={e => updateOther('otherFirm', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Advisor Name</label>
+                                          <input type="text" value={(inst.otherAdvisorName as string) || ''}
+                                            onChange={e => updateOther('otherAdvisorName', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Phone</label>
+                                          <input type="text" value={(inst.otherPhone as string) || ''}
+                                            onChange={e => updateOther('otherPhone', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                                          <input type="email" value={(inst.otherEmail as string) || ''}
+                                            onChange={e => updateOther('otherEmail', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Website (optional)</label>
+                                          <input type="text" value={(inst.otherWebsite as string) || ''}
+                                            onChange={e => updateOther('otherWebsite', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-2">What do they help you with?</label>
+                                          <div className="space-y-1.5">
+                                            {fpServiceOptions.map(opt => (
+                                              <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox"
+                                                  checked={otherServices.includes(opt.value)}
+                                                  onChange={e => {
+                                                    const next = e.target.checked ? [...otherServices, opt.value] : otherServices.filter(v => v !== opt.value);
+                                                    updateOther('otherServices', next);
+                                                  }}
+                                                  className="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" />
+                                                <span className="text-sm text-gray-200">{opt.label}</span>
+                                              </label>
+                                            ))}
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">How long have you worked together?</label>
+                                          <input type="text" value={(inst.otherDuration as string) || ''}
+                                            onChange={e => updateOther('otherDuration', e.target.value)}
+                                            placeholder="e.g., 5 years"
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Where do you keep your records?</label>
+                                          <input type="text" value={(inst.otherRecordsLocation as string) || ''}
+                                            onChange={e => updateOther('otherRecordsLocation', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-2">May we include this professional in your executor's contact list and action guide?</label>
+                                          <div className="flex gap-4">
+                                            {[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }].map(opt => (
+                                              <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                                                <input type="radio" name={`other-include-${key}-${instIdx}`} value={opt.value}
+                                                  checked={(inst.otherInclude as string) === opt.value}
+                                                  onChange={() => updateOther('otherInclude', opt.value)}
+                                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                                <span className="text-sm text-gray-200">{opt.label}</span>
+                                              </label>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      </div>
                                     )}
                                   </div>
                                 );

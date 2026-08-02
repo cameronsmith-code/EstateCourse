@@ -3529,14 +3529,6 @@ export default function StepForm({
                           const allChildNames = (childrenDataAll || []).map(c => c?.name).filter((n): n is string => !!n && n.trim() !== '');
                           if (allChildNames.length === 0) return null;
 
-                          const selectedOwners: string[] = (() => {
-                            const raw = corporationsData[index]?.owners;
-                            if (!raw) return [];
-                            return typeof raw === 'string' ? raw.split(',').filter(Boolean) : raw;
-                          })();
-                          const shareholdersHaveChildren = allChildNames.some(n => selectedOwners.includes(n));
-                          if (!shareholdersHaveChildren) return null;
-
                           const corpName = corporationsData[index]?.legalName || 'the corporation';
                           const employedChildren: string[] = corporationsData[index]?.childrenEmployed
                             ? (typeof corporationsData[index].childrenEmployed === 'string'

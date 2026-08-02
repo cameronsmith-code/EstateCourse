@@ -7904,6 +7904,11 @@ export default function StepForm({
                     const respHasChildSelected = isResp && selectedKnown.some(n => respChildNames.includes(n));
                     const respHasGrandchildSelected = isResp && selectedKnown.some(n => respGrandchildNames.includes(n));
 
+                    const isRdsp = typeKey === 'rdsp';
+                    const dtcQualifyingNames: string[] = allChildren
+                      .filter(c => c?.disabilityTaxCredit === 'yes' && c?.name)
+                      .map(c => c.name as string);
+
                     const isSingle = hasMultipleBen === 'no';
                     const singleIsCustom = isSingle && customBens.length > 0;
                     const singleSelected = isSingle ? (singleIsCustom ? '__custom__' : (selectedKnown[0] || '')) : '';
@@ -8160,7 +8165,7 @@ export default function StepForm({
                         {isSingle && (
                           <div className="space-y-2">
                             <label className="block text-sm font-medium text-gray-300">Select primary beneficiary:</label>
-                            {(isResp ? [...respChildNames, ...respGrandchildNames] : knownNames).map(name => (
+                            {(isResp ? [...respChildNames, ...respGrandchildNames] : isRdsp ? dtcQualifyingNames : knownNames).map(name => (
                               <label key={name} className="flex items-center gap-3 cursor-pointer">
                                 <input type="radio" name={`sben-${typeKey}-${instIdx}`} value={name} checked={singleSelected === name} onChange={() => selectSingleBen(name, false)} className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
                                 <span className="text-white text-sm">{name}</span>
@@ -8180,6 +8185,9 @@ export default function StepForm({
                             )}
                             {isResp && respChildNames.length === 0 && respGrandchildNames.length === 0 && (
                               <p className="text-sm text-gray-400">No children or grandchildren found. Please add them in the Children section.</p>
+                            )}
+                            {isRdsp && dtcQualifyingNames.length === 0 && (
+                              <p className="text-sm text-gray-400">No one has been identified as qualifying for the Disability Tax Credit. You can still enter a beneficiary manually using "Other".</p>
                             )}
                           </div>
                         )}
@@ -8223,12 +8231,15 @@ export default function StepForm({
                               </div>
                             ) : (
                               <>
-                                {knownNames.map(name => (
+                                {(isRdsp ? dtcQualifyingNames : knownNames).map(name => (
                                   <label key={name} className="flex items-center gap-3 cursor-pointer">
                                     <input type="checkbox" checked={selectedKnown.includes(name)} onChange={() => toggleKnownBen(typeKey, instIdx, name)} className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2" />
                                     <span className="text-white text-sm">{name}</span>
                                   </label>
                                 ))}
+                                {isRdsp && dtcQualifyingNames.length === 0 && (
+                                  <p className="text-sm text-gray-400">No one has been identified as qualifying for the Disability Tax Credit. You can still enter a beneficiary manually using "Other".</p>
+                                )}
                                 {customBens.map((name, bIdx) => (
                                   <div key={bIdx} className="space-y-2 pl-2">
                                     <div className="flex items-center gap-3">

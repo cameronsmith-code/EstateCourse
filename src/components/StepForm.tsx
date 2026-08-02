@@ -8711,13 +8711,54 @@ export default function StepForm({
                               const instLabel = (inst.institution as string) || '';
 
                               const renderAdvisorQuestion = () => {
+                                const advisorOptions: string[] = [];
+                                const fp1Name = s7['fpIsCameronSmith'] ? 'Cameron Smith' : (s7['fpName'] as string);
+                                if (fp1Name) advisorOptions.push(fp1Name);
+                                if (s7['fpHasAdditionalAdvisor'] === 'yes') {
+                                  const fp2Name = s7['fpAdvisor2IsCameronSmith'] ? 'Cameron Smith' : (s7['fpAdvisor2Name'] as string);
+                                  if (fp2Name && !advisorOptions.includes(fp2Name)) advisorOptions.push(fp2Name);
+                                }
+                                ((s7['fpAdditionalAdvisorsData'] as Array<Record<string,unknown>>) || []).forEach(a => {
+                                  const n = a?.isCameronSmith ? 'Cameron Smith' : (a?.name as string);
+                                  if (n && !advisorOptions.includes(n)) advisorOptions.push(n);
+                                });
+                                const isOther = instLabel !== '' && !advisorOptions.includes(instLabel);
+                                const radioVal = isOther ? '__other__' : instLabel;
+                                if (advisorOptions.length === 0) {
+                                  return (
+                                    <div>
+                                      <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., TD Waterhouse, Edward Jones, RBC Direct Investing</p>
+                                      <input type="text" value={instLabel}
+                                        onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
+                                        placeholder=""
+                                        className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                    </div>
+                                  );
+                                }
                                 return (
-                                  <div>
-                                    <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., TD Waterhouse, Edward Jones, RBC Direct Investing</p>
-                                    <input type="text" value={instLabel}
-                                      onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
-                                      placeholder=""
-                                      className="w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                  <div className="space-y-2">
+                                    {advisorOptions.map(name => (
+                                      <label key={name} className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name={`advisor-${key}-${instIdx}`} value={name}
+                                          checked={radioVal === name}
+                                          onChange={() => updateInstField(key, instIdx, 'institution', name)}
+                                          className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                        <span className="text-white text-sm">{name}</span>
+                                      </label>
+                                    ))}
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                      <input type="radio" name={`advisor-${key}-${instIdx}`} value="__other__"
+                                        checked={radioVal === '__other__'}
+                                        onChange={() => updateInstField(key, instIdx, 'institution', '')}
+                                        className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                      <span className="text-white text-sm">Other</span>
+                                    </label>
+                                    {radioVal === '__other__' && (
+                                      <input type="text" value={instLabel}
+                                        onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
+                                        placeholder="e.g., TD Waterhouse, Edward Jones, RBC Direct Investing"
+                                        className="ml-6 w-full px-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                    )}
                                   </div>
                                 );
                               };

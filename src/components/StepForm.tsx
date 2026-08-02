@@ -7732,6 +7732,9 @@ export default function StepForm({
                     { key: 'fhsa', label: 'Tax-Free First Home Savings Account (FHSA)' },
                     { key: 'resp', label: 'Registered Education Savings Plan (RESP)' },
                     { key: 'rdsp', label: 'Registered Disability Savings Plan (RDSP)' },
+                    { key: 'lira', label: 'Locked-In Retirement Account (LIRA) or Locked-In RRSP' },
+                    { key: 'ipp', label: 'Individual Pension Plan (IPP)' },
+                    { key: 'rca', label: 'Retirement Compensation Arrangement (RCA)' },
                   ];
 
                   const s2 = allAnswers?.get(2) || {};

@@ -9002,13 +9002,246 @@ export default function StepForm({
                               <label key={opt} className="flex items-center gap-2 cursor-pointer">
                                 <input type="radio" name="has-non-registered-account" value={opt}
                                   checked={(answers['client1HasNonRegisteredAccount'] as string) === opt}
-                                  onChange={() => onAnswerChange('client1HasNonRegisteredAccount', opt)}
+                                  onChange={() => {
+                                    onAnswerChange('client1HasNonRegisteredAccount', opt);
+                                    if (opt === 'no') onAnswerChange('client1NonRegisteredAccountData', []);
+                                  }}
                                   className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
                                 <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
                               </label>
                             ))}
                           </div>
                         </div>
+                        {(answers['client1HasNonRegisteredAccount'] as string) === 'yes' && (
+                          <div className="p-4 bg-gray-700 rounded-lg space-y-4">
+                            <h5 className="text-sm font-semibold text-white">Non-Registered (Taxable) Account</h5>
+                            {(() => {
+                              const nrData = (answers['client1NonRegisteredAccountData'] as Array<Record<string, unknown>>) || [];
+                              const setNrInsts = (insts: Array<Record<string, unknown>>) => onAnswerChange('client1NonRegisteredAccountData', insts);
+                              const updateNrField = (idx: number, field: string, value: unknown) => {
+                                const insts = [...nrData];
+                                insts[idx] = { ...insts[idx], [field]: value };
+                                setNrInsts(insts);
+                              };
+                              const CAMERON_SMITH_INFO = {
+                                firm: 'Clarify Wealth Ltd.',
+                                name: 'Cameron Smith',
+                                phone: '647-448-5963',
+                                email: 'cameron.smith@ipcsecurities.com',
+                                website: 'www.clarifywealth.ca',
+                              };
+                              const renderAdvisorQuestion = (instIdx: number, inst: Record<string, unknown>) => {
+                                type AdvisorContact = { firm: string; name: string; phone: string; email: string; website: string };
+                                const advisorOptions: AdvisorContact[] = [];
+                                const seen = new Set<string>();
+                                const addAdvisor = (isCameron: unknown, name: unknown, firm: unknown, phone: unknown, email: unknown, website: unknown) => {
+                                  const c: AdvisorContact = isCameron
+                                    ? { ...CAMERON_SMITH_INFO }
+                                    : { name: (name as string) || '', firm: (firm as string) || '', phone: (phone as string) || '', email: (email as string) || '', website: (website as string) || '' };
+                                  if (!c.name || seen.has(c.name)) return;
+                                  seen.add(c.name);
+                                  advisorOptions.push(c);
+                                };
+                                addAdvisor(s7['fpAdvisor1IsCameronSmith'], s7['fpAdvisor1Name'], s7['fpAdvisor1Firm'], s7['fpAdvisor1Phone'], s7['fpAdvisor1Email'], s7['fpAdvisor1Website']);
+                                if (s7['fpAdvisor2HasAdditionalAdvisor'] === 'yes' || s7['fpHasAdditionalAdvisor'] === 'yes') {
+                                  addAdvisor(s7['fpAdvisor2IsCameronSmith'], s7['fpAdvisor2Name'], s7['fpAdvisor2Firm'], s7['fpAdvisor2Phone'], s7['fpAdvisor2Email'], s7['fpAdvisor2Website']);
+                                }
+                                ((s7['fpAdditionalAdvisorsData'] as Array<Record<string,unknown>>) || []).forEach(a => {
+                                  if (a) addAdvisor(a.isCameronSmith, a.name, a.firm, a.phone, a.email, a.website);
+                                });
+
+                                const dropdownVal = (inst.institution as string) || '';
+                                const isOther = dropdownVal === '__other__';
+                                const selectAdvisor = (name: string) => {
+                                  const contact = advisorOptions.find(a => a.name === name);
+                                  const cur = [...nrData];
+                                  cur[instIdx] = { ...cur[instIdx], institution: name, advisorFirm: contact?.firm || '', advisorPhone: contact?.phone || '', advisorEmail: contact?.email || '', advisorWebsite: contact?.website || '' };
+                                  setNrInsts(cur);
+                                };
+                                const updateOther = (field: string, val: unknown) => {
+                                  const cur = [...nrData];
+                                  cur[instIdx] = { ...cur[instIdx], [field]: val };
+                                  setNrInsts(cur);
+                                };
+                                const otherServices = (inst.otherServices as string[]) || [];
+                                const fpServiceOptions = [
+                                  { value: 'investments', label: 'Investments' },
+                                  { value: 'retirement_planning', label: 'Retirement planning' },
+                                  { value: 'insurance', label: 'Insurance' },
+                                  { value: 'estate_planning', label: 'Estate planning' },
+                                  { value: 'tax_planning', label: 'Tax planning' },
+                                  { value: 'cash_flow', label: 'Cash flow' },
+                                  { value: 'business_planning', label: 'Business planning' },
+                                  { value: 'other', label: 'Other' },
+                                ];
+                                const selectedAdvisor = advisorOptions.find(a => a.name === dropdownVal);
+
+                                return (
+                                  <div className="space-y-3">
+                                    <select
+                                      value={dropdownVal}
+                                      onChange={e => {
+                                        if (e.target.value === '__other__') {
+                                          updateNrField(instIdx, 'institution', '__other__');
+                                        } else {
+                                          selectAdvisor(e.target.value);
+                                        }
+                                      }}
+                                      className="w-full px-4 py-2.5 bg-gray-500 border border-gray-400 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+                                    >
+                                      <option value="" className="bg-gray-700">— Select an advisor —</option>
+                                      {advisorOptions.map(opt => (
+                                        <option key={opt.name} value={opt.name} className="bg-gray-700">{opt.firm ? `${opt.name} — ${opt.firm}` : opt.name}</option>
+                                      ))}
+                                      <option value="__other__" className="bg-gray-700">Other</option>
+                                    </select>
+
+                                    {selectedAdvisor && (
+                                      <div className="p-3 bg-gray-600 border border-gray-500 rounded-lg space-y-1">
+                                        <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide mb-1">Linked Advisor Details</p>
+                                        <p className="text-sm text-white"><span className="text-gray-400">Firm:</span> {selectedAdvisor.firm || '—'}</p>
+                                        <p className="text-sm text-white"><span className="text-gray-400">Phone:</span> {selectedAdvisor.phone || '—'}</p>
+                                        <p className="text-sm text-white"><span className="text-gray-400">Email:</span> {selectedAdvisor.email || '—'}</p>
+                                        <p className="text-sm text-white"><span className="text-gray-400">Website:</span> {selectedAdvisor.website || '—'}</p>
+                                      </div>
+                                    )}
+
+                                    {isOther && (
+                                      <div className="mt-3 p-4 bg-gray-500 border border-gray-400 rounded-lg space-y-4">
+                                        <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Other Financial Planner / Wealth Advisor</p>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Firm</label>
+                                          <input type="text" value={(inst.otherFirm as string) || ''}
+                                            onChange={e => updateOther('otherFirm', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Advisor Name</label>
+                                          <input type="text" value={(inst.otherAdvisorName as string) || ''}
+                                            onChange={e => updateOther('otherAdvisorName', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Phone</label>
+                                          <input type="text" value={(inst.otherPhone as string) || ''}
+                                            onChange={e => updateOther('otherPhone', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                                          <input type="email" value={(inst.otherEmail as string) || ''}
+                                            onChange={e => updateOther('otherEmail', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Website (optional)</label>
+                                          <input type="text" value={(inst.otherWebsite as string) || ''}
+                                            onChange={e => updateOther('otherWebsite', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-2">What do they help you with?</label>
+                                          <div className="space-y-1.5">
+                                            {fpServiceOptions.map(opt => (
+                                              <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox"
+                                                  checked={otherServices.includes(opt.value)}
+                                                  onChange={e => {
+                                                    const next = e.target.checked ? [...otherServices, opt.value] : otherServices.filter(v => v !== opt.value);
+                                                    updateOther('otherServices', next);
+                                                  }}
+                                                  className="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" />
+                                                <span className="text-sm text-gray-200">{opt.label}</span>
+                                              </label>
+                                            ))}
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">How long have you worked together?</label>
+                                          <input type="text" value={(inst.otherDuration as string) || ''}
+                                            onChange={e => updateOther('otherDuration', e.target.value)}
+                                            placeholder="e.g., 5 years"
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-1">Where do you keep your records?</label>
+                                          <input type="text" value={(inst.otherRecordsLocation as string) || ''}
+                                            onChange={e => updateOther('otherRecordsLocation', e.target.value)}
+                                            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-medium text-gray-300 mb-2">May we include this professional in your executor's contact list and action guide?</label>
+                                          <div className="flex gap-4">
+                                            {[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }].map(opt => (
+                                              <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                                                <input type="radio" name={`nr-other-include-${instIdx}`} value={opt.value}
+                                                  checked={(inst.otherInclude as string) === opt.value}
+                                                  onChange={() => updateOther('otherInclude', opt.value)}
+                                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                                <span className="text-sm text-gray-200">{opt.label}</span>
+                                              </label>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              };
+
+                              return (
+                                <>
+                                  {nrData.map((inst, instIdx) => (
+                                    <div key={instIdx} className="p-4 bg-gray-600 rounded-lg space-y-3">
+                                      <div className="flex items-center justify-between">
+                                        <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide">Institution / Advisor {instIdx + 1}</p>
+                                        {instIdx > 0 && (
+                                          <button type="button"
+                                            onClick={() => {
+                                              const cur = [...nrData];
+                                              cur.splice(instIdx, 1);
+                                              setNrInsts(cur);
+                                            }}
+                                            className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition-colors">
+                                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                            </svg>
+                                            Remove
+                                          </button>
+                                        )}
+                                      </div>
+                                      {renderAdvisorQuestion(instIdx, inst)}
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Account Balance:</label>
+                                        <div className="relative max-w-xs">
+                                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                                          <input type="text" value={(inst.accountBalance as string) || ''}
+                                            onChange={e => updateNrField(instIdx, 'accountBalance', e.target.value)}
+                                            placeholder="0.00"
+                                            className="w-full pl-7 pr-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Adjusted Cost Base:</label>
+                                        <div className="relative max-w-xs">
+                                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                                          <input type="text" value={(inst.adjustedCostBase as string) || ''}
+                                            onChange={e => updateNrField(instIdx, 'adjustedCostBase', e.target.value)}
+                                            placeholder="0.00"
+                                            className="w-full pl-7 pr-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                  <button type="button" onClick={() => setNrInsts([...nrData, { institution: '' }])}
+                                    className="flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                                    <span>+</span><span>Add Additional Non-registered (taxable) account</span>
+                                  </button>
+                                </>
+                              );
+                            })()}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

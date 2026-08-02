@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import { Step } from '../lib/steps';
+import { Step, buildInsuredPersonOptions, buildPolicyOwnerOptions, buildBeneficiaryOptions } from '../lib/steps';
 import FormField from './FormField';
 import VideoPlayer from './VideoPlayer';
 import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprietorshipDetails';
@@ -1362,6 +1362,120 @@ export default function StepForm({
     answers['corp3HasLifeInsurance'], answers['corp3HasCriticalIllnessInsurance'], answers['corp3HasDisabilityInsurance'],
     answers['corp4HasLifeInsurance'], answers['corp4HasCriticalIllnessInsurance'], answers['corp4HasDisabilityInsurance'],
   ]);
+
+  // Pre-fill Step 11 corporate insurance from Step 6 corporate data
+  useEffect(() => {
+    if (step.id !== 11) return;
+
+    const step6Answers = allAnswers?.get(6);
+    if (!step6Answers) return;
+
+    const corporationsData = step6Answers['corporationsData'] as Array<Record<string, unknown>> | undefined;
+    if (!corporationsData || corporationsData.length === 0) return;
+
+    const insuredOpts = buildInsuredPersonOptions(allAnswers || new Map());
+    const ownerOpts = buildPolicyOwnerOptions(allAnswers || new Map());
+    const beneficiaryOpts = buildBeneficiaryOptions(allAnswers || new Map());
+
+    const matchToOption = (
+      options: Array<{ value: string; label: string }>,
+      text: string
+    ): { value: string; otherText?: string } => {
+      if (!text || !text.trim()) return { value: '' };
+      const trimmed = text.trim();
+      const match = options.find(
+        (opt) => opt.label.trim().toLowerCase() === trimmed.toLowerCase()
+      );
+      if (match) return { value: match.value };
+      return { value: 'other', otherText: trimmed };
+    };
+
+    const setKeys = new Set<string>();
+    const setIfEmpty = (key: string, value: unknown) => {
+      if (setKeys.has(key)) return;
+      if (answers[key] !== undefined) return;
+      if (value === undefined || value === null || value === '') return;
+      setKeys.add(key);
+      onAnswerChange(key, value);
+    };
+
+    for (let ci = 0; ci < Math.min(corporationsData.length, 4); ci++) {
+      const corp = corporationsData[ci];
+      const prefix = `corp${ci + 1}`;
+
+      const buysellPolicies = (corp.buysellInsurance as Array<Record<string, unknown>>) || [];
+      const keyPersonPolicies = (corp.keyPersonPolicies as Array<Record<string, unknown>>) || [];
+
+      const lifePolicies: Array<Record<string, unknown>> = [];
+      const ciPolicies: Array<Record<string, unknown>> = [];
+      const diPolicies: Array<Record<string, unknown>> = [];
+
+      const classify = (policy: Record<string, unknown>) => {
+        const insType = policy.insuranceType;
+        const types = Array.isArray(insType)
+          ? insType.filter(Boolean)
+          : [insType as string].filter(Boolean);
+        for (const t of types) {
+          const lower = String(t).toLowerCase().trim();
+          if (lower === 'life') lifePolicies.push(policy);
+          else if (lower.includes('critical')) ciPolicies.push(policy);
+          else if (lower.includes('disability')) diPolicies.push(policy);
+        }
+      };
+
+      buysellPolicies.forEach(classify);
+      keyPersonPolicies.forEach(classify);
+
+      const fillPolicy = (
+        policyKey: string,
+        policy: Record<string, unknown>,
+        hasBeneficiary: boolean
+      ) => {
+        const insured = matchToOption(insuredOpts, String(policy.lifeInsured || ''));
+        setIfEmpty(`${policyKey}InsuredPerson`, insured.value);
+        if (insured.otherText) setIfEmpty(`${policyKey}InsuredPersonOther`, insured.otherText);
+
+        const owner = matchToOption(ownerOpts, String(policy.policyOwner || ''));
+        setIfEmpty(`${policyKey}PolicyOwner`, owner.value);
+        if (owner.otherText) setIfEmpty(`${policyKey}PolicyOwnerOther`, owner.otherText);
+
+        setIfEmpty(`${policyKey}Provider`, String(policy.insurer || ''));
+        setIfEmpty(`${policyKey}CoverageAmount`, String(policy.faceValue || ''));
+
+        if (hasBeneficiary) {
+          const beneficiary = matchToOption(beneficiaryOpts, String(policy.beneficiary || ''));
+          if (beneficiary.value) {
+            setIfEmpty(`${policyKey}Beneficiary`, beneficiary.value);
+            if (beneficiary.otherText) setIfEmpty(`${policyKey}BeneficiaryOther`, beneficiary.otherText);
+          }
+        }
+
+        setIfEmpty(`${policyKey}DocLocation`, String(policy.documentLocation || ''));
+      };
+
+      const processType = (
+        gateKey: string,
+        policyPrefix: string,
+        policies: Array<Record<string, unknown>>,
+        hasBeneficiary: boolean
+      ) => {
+        if (policies.length === 0) return;
+        setIfEmpty(gateKey, 'yes');
+        const maxFill = Math.min(policies.length, 4);
+        for (let i = 0; i < maxFill; i++) {
+          fillPolicy(`${policyPrefix}${i + 1}`, policies[i], hasBeneficiary);
+          if (i < maxFill - 1) {
+            setIfEmpty(`${policyPrefix}${i + 1}HasAdditional`, 'yes');
+          }
+        }
+      };
+
+      processType(`${prefix}HasLifeInsurance`, `${prefix}LifePolicy`, lifePolicies, true);
+      processType(`${prefix}HasCriticalIllnessInsurance`, `${prefix}CiPolicy`, ciPolicies, false);
+      processType(`${prefix}HasDisabilityInsurance`, `${prefix}DiPolicy`, diPolicies, false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step.id, allAnswers?.get(6)]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

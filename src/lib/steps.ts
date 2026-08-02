@@ -31,7 +31,7 @@ export type Step = {
 
 type OptionEntry = { value: string; label: string };
 
-const buildInsuredPersonOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
+export const buildInsuredPersonOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
   const step1 = answers.get(1) || {};
   const step2 = answers.get(2) || {};
   const step3 = answers.get(3) || {};
@@ -68,7 +68,7 @@ const buildInsuredPersonOptions = (answers: Map<number, Record<string, unknown>>
   return opts;
 };
 
-const buildPolicyOwnerOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
+export const buildPolicyOwnerOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
   const step1 = answers.get(1) || {};
   const step2 = answers.get(2) || {};
   const step3 = answers.get(3) || {};
@@ -116,7 +116,7 @@ const buildPolicyOwnerOptions = (answers: Map<number, Record<string, unknown>>):
   return opts;
 };
 
-const buildBeneficiaryOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
+export const buildBeneficiaryOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
   const step1 = answers.get(1) || {};
   const step2 = answers.get(2) || {};
   const step3 = answers.get(3) || {};
@@ -363,7 +363,12 @@ const generateLifeInsurancePolicyQuestions = (
       const clientNameFn = source === 'personal'
         ? () => 'Are there any other Life Insurance Policies purchased outside of work plans or employer benefits?'
         : source === 'corporate'
-          ? () => 'Are there any other Life Insurance Policies?'
+          ? (answers: Map<number, Record<string, unknown>>) => {
+            const corpIdx = parseInt(prefix.replace('corp', '')) - 1;
+            const corps = answers.get(6)?.['corporationsData'] as Array<Record<string, string>> | undefined;
+            const name = corps?.[corpIdx]?.legalName?.trim() || `Corporation ${corpIdx + 1}`;
+            return `Does ${name} own any other Life Insurance Policies?`;
+          }
           : prefix === 'client1'
             ? (answers: Map<number, Record<string, unknown>>) =>
                 `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
@@ -523,7 +528,12 @@ const generateCriticalIllnessPolicyQuestions = (
       const clientNameFn = source === 'personal'
         ? () => 'Are there any other Critical Illness Policies purchased outside of work plans or employer benefits?'
         : source === 'corporate'
-          ? () => 'Are there any other Critical Illness Policies?'
+          ? (answers: Map<number, Record<string, unknown>>) => {
+            const corpIdx = parseInt(prefix.replace('corp', '')) - 1;
+            const corps = answers.get(6)?.['corporationsData'] as Array<Record<string, string>> | undefined;
+            const name = corps?.[corpIdx]?.legalName?.trim() || `Corporation ${corpIdx + 1}`;
+            return `Does ${name} own any other Critical Illness Policies?`;
+          }
           : prefix === 'client1'
             ? (answers: Map<number, Record<string, unknown>>) =>
                 `Are there any other Critical Illness Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
@@ -687,7 +697,12 @@ const generateDisabilityInsurancePolicyQuestions = (
       const clientNameFn = source === 'personal'
         ? () => 'Are there any other Disability Insurance Policies purchased outside of work plans or employer benefits?'
         : source === 'corporate'
-          ? () => 'Are there any other Disability Insurance Policies?'
+          ? (answers: Map<number, Record<string, unknown>>) => {
+            const corpIdx = parseInt(prefix.replace('corp', '')) - 1;
+            const corps = answers.get(6)?.['corporationsData'] as Array<Record<string, string>> | undefined;
+            const name = corps?.[corpIdx]?.legalName?.trim() || `Corporation ${corpIdx + 1}`;
+            return `Does ${name} own any other Disability Insurance Policies?`;
+          }
           : prefix === 'client1'
             ? (answers: Map<number, Record<string, unknown>>) =>
                 `Are there any other Disability Insurance Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`

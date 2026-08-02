@@ -3519,6 +3519,60 @@ export default function StepForm({
                           </div>
                         </div>
 
+                        {(() => {
+                          const corpType = corporationsData[index]?.corporationType;
+                          const isOperatingOrOther = corpType === 'Operating Company' || corpType === 'Other';
+                          if (!isOperatingOrOther) return null;
+
+                          const step3Answers = allAnswers?.get(3) || {};
+                          const childrenDataAll = step3Answers['childrenData'] as Array<Record<string, string>> | undefined;
+                          const allChildNames = (childrenDataAll || []).map(c => c?.name).filter((n): n is string => !!n && n.trim() !== '');
+                          if (allChildNames.length === 0) return null;
+
+                          const selectedOwners: string[] = (() => {
+                            const raw = corporationsData[index]?.owners;
+                            if (!raw) return [];
+                            return typeof raw === 'string' ? raw.split(',').filter(Boolean) : raw;
+                          })();
+                          const shareholdersHaveChildren = allChildNames.some(n => selectedOwners.includes(n));
+                          if (!shareholdersHaveChildren) return null;
+
+                          const corpName = corporationsData[index]?.legalName || 'the corporation';
+                          const employedChildren: string[] = corporationsData[index]?.childrenEmployed
+                            ? (typeof corporationsData[index].childrenEmployed === 'string'
+                                ? JSON.parse(corporationsData[index].childrenEmployed)
+                                : corporationsData[index].childrenEmployed)
+                            : [];
+
+                          const toggleChild = (name: string, checked: boolean) => {
+                            const updated = checked
+                              ? [...employedChildren, name]
+                              : employedChildren.filter(n => n !== name);
+                            handleCorporationChange(index, 'childrenEmployed', JSON.stringify(updated));
+                          };
+
+                          return (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-3">
+                                Are any of your children employed by {corpName} (greater than 20 hours/week)?
+                              </label>
+                              <div className="space-y-2">
+                                {allChildNames.map(name => (
+                                  <label key={name} className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={employedChildren.includes(name)}
+                                      onChange={e => toggleChild(name, e.target.checked)}
+                                      className="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500"
+                                    />
+                                    <span className="text-white text-sm">{name}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Location of the Articles of Incorporation

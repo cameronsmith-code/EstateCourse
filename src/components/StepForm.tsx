@@ -9004,7 +9004,12 @@ export default function StepForm({
                                   checked={(answers['client1HasNonRegisteredAccount'] as string) === opt}
                                   onChange={() => {
                                     onAnswerChange('client1HasNonRegisteredAccount', opt);
-                                    if (opt === 'no') onAnswerChange('client1NonRegisteredAccountData', []);
+                                    if (opt === 'no') {
+                                      onAnswerChange('client1NonRegisteredAccountData', []);
+                                    } else {
+                                      const existing = (answers['client1NonRegisteredAccountData'] as Array<Record<string, unknown>>) || [];
+                                      if (existing.length === 0) onAnswerChange('client1NonRegisteredAccountData', [{ institution: '' }]);
+                                    }
                                   }}
                                   className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
                                 <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
@@ -9016,7 +9021,8 @@ export default function StepForm({
                           <div className="p-4 bg-gray-700 rounded-lg space-y-4">
                             <h5 className="text-sm font-semibold text-white">Non-Registered (Taxable) Account</h5>
                             {(() => {
-                              const nrData = (answers['client1NonRegisteredAccountData'] as Array<Record<string, unknown>>) || [];
+                              const rawNrData = (answers['client1NonRegisteredAccountData'] as Array<Record<string, unknown>>) || [];
+                              const nrData = rawNrData.length === 0 ? [{ institution: '' }] : rawNrData;
                               const setNrInsts = (insts: Array<Record<string, unknown>>) => onAnswerChange('client1NonRegisteredAccountData', insts);
                               const updateNrField = (idx: number, field: string, value: unknown) => {
                                 const insts = [...nrData];
@@ -9222,11 +9228,11 @@ export default function StepForm({
                                         </div>
                                       </div>
                                       <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-1">Adjusted Cost Base:</label>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Book Value:</label>
                                         <div className="relative max-w-xs">
                                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                                          <input type="text" value={(inst.adjustedCostBase as string) || ''}
-                                            onChange={e => updateNrField(instIdx, 'adjustedCostBase', e.target.value)}
+                                          <input type="text" value={(inst.bookValue as string) || ''}
+                                            onChange={e => updateNrField(instIdx, 'bookValue', e.target.value)}
                                             placeholder="0.00"
                                             className="w-full pl-7 pr-4 py-2 bg-gray-500 border border-gray-400 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                                         </div>

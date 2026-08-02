@@ -8990,6 +8990,26 @@ export default function StepForm({
                           </div>
                         );
                       })}
+
+                      <div className="pb-2 border-b border-gray-600">
+                        <h4 className="text-sm font-semibold text-gray-200 uppercase tracking-wide">Non-Registered Account</h4>
+                      </div>
+                      <div className="space-y-3 pb-4">
+                        <div>
+                          <p className="text-sm font-medium text-gray-200 mb-2">Do you have a non-registered (taxable) account?</p>
+                          <div className="flex gap-4">
+                            {(['yes', 'no'] as const).map(opt => (
+                              <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="has-non-registered-account" value={opt}
+                                  checked={(answers['client1HasNonRegisteredAccount'] as string) === opt}
+                                  onChange={() => onAnswerChange('client1HasNonRegisteredAccount', opt)}
+                                  className="w-4 h-4 text-blue-500 bg-gray-600 border-gray-500 focus:ring-blue-500" />
+                                <span className="text-white text-sm">{opt === 'yes' ? 'Yes' : 'No'}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   );
                 })()}

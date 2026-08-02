@@ -8710,27 +8710,41 @@ export default function StepForm({
                             {insts.map((inst, instIdx) => {
                               const instLabel = (inst.institution as string) || '';
 
+                              const CAMERON_SMITH_INFO = {
+                                firm: 'Clarify Wealth Ltd.',
+                                name: 'Cameron Smith',
+                                phone: '647-448-5963',
+                                email: 'cameron.smith@ipcsecurities.com',
+                                website: 'www.clarifywealth.ca',
+                              };
                               const renderAdvisorQuestion = () => {
-                                type AdvisorOption = { name: string; firm: string; label: string };
-                                const advisorOptions: AdvisorOption[] = [];
+                                type AdvisorContact = { firm: string; name: string; phone: string; email: string; website: string };
+                                const advisorOptions: AdvisorContact[] = [];
                                 const seen = new Set<string>();
-                                const addAdvisor = (isCameron: unknown, name: unknown, firm: unknown) => {
-                                  const n: string = isCameron ? 'Cameron Smith' : ((name as string) || '');
-                                  const f: string = isCameron ? 'Clarify Wealth Ltd.' : ((firm as string) || '');
-                                  if (!n || seen.has(n)) return;
-                                  seen.add(n);
-                                  advisorOptions.push({ name: n, firm: f, label: f ? `${n} — ${f}` : n });
+                                const addAdvisor = (isCameron: unknown, name: unknown, firm: unknown, phone: unknown, email: unknown, website: unknown) => {
+                                  const c: AdvisorContact = isCameron
+                                    ? { ...CAMERON_SMITH_INFO }
+                                    : { name: (name as string) || '', firm: (firm as string) || '', phone: (phone as string) || '', email: (email as string) || '', website: (website as string) || '' };
+                                  if (!c.name || seen.has(c.name)) return;
+                                  seen.add(c.name);
+                                  advisorOptions.push(c);
                                 };
-                                addAdvisor(s7['fpIsCameronSmith'], s7['fpName'], s7['fpFirm']);
-                                if (s7['fpHasAdditionalAdvisor'] === 'yes') {
-                                  addAdvisor(s7['fpAdvisor2IsCameronSmith'], s7['fpAdvisor2Name'], s7['fpAdvisor2Firm']);
+                                addAdvisor(s7['fpAdvisor1IsCameronSmith'], s7['fpAdvisor1Name'], s7['fpAdvisor1Firm'], s7['fpAdvisor1Phone'], s7['fpAdvisor1Email'], s7['fpAdvisor1Website']);
+                                if (s7['fpAdvisor2HasAdditionalAdvisor'] === 'yes' || s7['fpHasAdditionalAdvisor'] === 'yes') {
+                                  addAdvisor(s7['fpAdvisor2IsCameronSmith'], s7['fpAdvisor2Name'], s7['fpAdvisor2Firm'], s7['fpAdvisor2Phone'], s7['fpAdvisor2Email'], s7['fpAdvisor2Website']);
                                 }
                                 ((s7['fpAdditionalAdvisorsData'] as Array<Record<string,unknown>>) || []).forEach(a => {
-                                  if (a) addAdvisor(a.isCameronSmith, a.name, a.firm);
+                                  if (a) addAdvisor(a.isCameronSmith, a.name, a.firm, a.phone, a.email, a.website);
                                 });
 
                                 const dropdownVal = instLabel;
                                 const isOther = dropdownVal === '__other__';
+                                const selectAdvisor = (name: string) => {
+                                  const contact = advisorOptions.find(a => a.name === name);
+                                  const cur = [...getInsts(key)];
+                                  cur[instIdx] = { ...cur[instIdx], institution: name, advisorFirm: contact?.firm || '', advisorPhone: contact?.phone || '', advisorEmail: contact?.email || '', advisorWebsite: contact?.website || '' };
+                                  setInsts(key, cur);
+                                };
                                 const updateOther = (field: string, val: unknown) => {
                                   const cur = [...getInsts(key)];
                                   cur[instIdx] = { ...cur[instIdx], [field]: val };
@@ -8747,20 +8761,37 @@ export default function StepForm({
                                   { value: 'business_planning', label: 'Business planning' },
                                   { value: 'other', label: 'Other' },
                                 ];
+                                const selectedAdvisor = advisorOptions.find(a => a.name === dropdownVal);
 
                                 return (
                                   <div className="space-y-3">
                                     <select
                                       value={dropdownVal}
-                                      onChange={e => updateInstField(key, instIdx, 'institution', e.target.value)}
+                                      onChange={e => {
+                                        if (e.target.value === '__other__') {
+                                          updateInstField(key, instIdx, 'institution', '__other__');
+                                        } else {
+                                          selectAdvisor(e.target.value);
+                                        }
+                                      }}
                                       className="w-full px-4 py-2.5 bg-gray-500 border border-gray-400 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
                                     >
                                       <option value="" className="bg-gray-700">— Select an advisor —</option>
                                       {advisorOptions.map(opt => (
-                                        <option key={opt.name} value={opt.name} className="bg-gray-700">{opt.label}</option>
+                                        <option key={opt.name} value={opt.name} className="bg-gray-700">{opt.firm ? `${opt.name} — ${opt.firm}` : opt.name}</option>
                                       ))}
                                       <option value="__other__" className="bg-gray-700">Other</option>
                                     </select>
+
+                                    {selectedAdvisor && (
+                                      <div className="p-3 bg-gray-600 border border-gray-500 rounded-lg space-y-1">
+                                        <p className="text-xs font-semibold text-gray-300 uppercase tracking-wide mb-1">Linked Advisor Details</p>
+                                        <p className="text-sm text-white"><span className="text-gray-400">Firm:</span> {selectedAdvisor.firm || '—'}</p>
+                                        <p className="text-sm text-white"><span className="text-gray-400">Phone:</span> {selectedAdvisor.phone || '—'}</p>
+                                        <p className="text-sm text-white"><span className="text-gray-400">Email:</span> {selectedAdvisor.email || '—'}</p>
+                                        <p className="text-sm text-white"><span className="text-gray-400">Website:</span> {selectedAdvisor.website || '—'}</p>
+                                      </div>
+                                    )}
 
                                     {isOther && (
                                       <div className="mt-3 p-4 bg-gray-500 border border-gray-400 rounded-lg space-y-4">

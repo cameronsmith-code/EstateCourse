@@ -98,6 +98,8 @@ export type PropertyData = {
   mortgageInsuranceProviders?: Record<string, string>;
   mortgageInsurancePolicyNumbers?: Record<string, string>;
   mortgageInsuranceDocLocations?: Record<string, string>;
+  mortgageSpecialNotes?: string;
+  mortgageDocLocation?: string;
 };
 
 type Props = {
@@ -1314,6 +1316,7 @@ export default function PropertyDetails({
                     mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
+                    mortgageSpecialNotes: '', mortgageDocLocation: '',
                   })}
                   className="mr-2"
                 />
@@ -1343,6 +1346,7 @@ export default function PropertyDetails({
                         mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
+                    mortgageSpecialNotes: '', mortgageDocLocation: '',
                       })}
                       className="mr-2"
                     />
@@ -1364,6 +1368,7 @@ export default function PropertyDetails({
                         mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
+                    mortgageSpecialNotes: '', mortgageDocLocation: '',
                       })}
                       className="mr-2"
                     />
@@ -1385,6 +1390,7 @@ export default function PropertyDetails({
                         mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
+                    mortgageSpecialNotes: '', mortgageDocLocation: '',
                       })}
                       className="mr-2"
                     />
@@ -2126,6 +2132,36 @@ export default function PropertyDetails({
                             ))}
                         </div>
                       )}
+                    </div>
+
+                    {/* Special notes about this mortgage */}
+                    <div>
+                      <label className={labelClass}>
+                        Is there anything someone managing your affairs should know about this mortgage?
+                      </label>
+                      <p className="text-xs text-gray-400 mb-3 italic">
+                        Examples: Variable-rate mortgage, Private lender, Family loan, HELOC attached,
+                        Special payment arrangements, Payments are temporarily interest-only
+                      </p>
+                      <textarea
+                        value={data.mortgageSpecialNotes || ''}
+                        onChange={(e) => onChange('mortgageSpecialNotes', e.target.value)}
+                        placeholder="Enter any special details about this mortgage"
+                        rows={5}
+                        className={inputClass}
+                      />
+                    </div>
+
+                    {/* Mortgage document location */}
+                    <div>
+                      <label className={labelClass}>Where are the mortgage documents kept?</label>
+                      <input
+                        type="text"
+                        value={data.mortgageDocLocation || ''}
+                        onChange={(e) => onChange('mortgageDocLocation', e.target.value)}
+                        placeholder="Enter where the mortgage documents are kept"
+                        className={inputClass}
+                      />
                     </div>
                   </Subsection>
                 </div>

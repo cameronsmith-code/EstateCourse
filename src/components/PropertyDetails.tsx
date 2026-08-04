@@ -82,6 +82,12 @@ export type PropertyData = {
     otherInfo: string;
     _addMore?: string;
   }>;
+  mortgageOtherParties: Array<{
+    name: string;
+    relationship: string;
+    otherInfo: string;
+    _addMore?: string;
+  }>;
 };
 
 type Props = {
@@ -1293,7 +1299,7 @@ export default function PropertyDetails({
                     mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
                     mortgageInterestRate: '', mortgageInterestRateType: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
                     mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
-                    mortgageResponsibleParties: [], mortgageOtherBorrowers: [],
+                    mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
                   })}
                   className="mr-2"
                 />
@@ -1319,7 +1325,7 @@ export default function PropertyDetails({
                         mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
                         mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
                         mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
-                        mortgageResponsibleParties: [], mortgageOtherBorrowers: [],
+                        mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
                       })}
                       className="mr-2"
                     />
@@ -1337,7 +1343,7 @@ export default function PropertyDetails({
                         mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
                         mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
                         mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
-                        mortgageResponsibleParties: [], mortgageOtherBorrowers: [],
+                        mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
                       })}
                       className="mr-2"
                     />
@@ -1355,7 +1361,7 @@ export default function PropertyDetails({
                         mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
                         mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
                         mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
-                        mortgageResponsibleParties: [], mortgageOtherBorrowers: [],
+                        mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
                       })}
                       className="mr-2"
                     />
@@ -1708,20 +1714,123 @@ export default function PropertyDetails({
                                       className={inputClass}
                                     />
                                   </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
 
+                        {/* Other */}
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={(data.mortgageResponsibleParties || []).includes('other')}
+                            onChange={(e) => {
+                              const current = data.mortgageResponsibleParties || [];
+                              const updated = e.target.checked
+                                ? [...current, 'other']
+                                : current.filter((p) => p !== 'other');
+                              onMultiChange({
+                                mortgageResponsibleParties: updated,
+                                mortgageOtherParties: e.target.checked
+                                  ? (data.mortgageOtherParties && data.mortgageOtherParties.length > 0 ? data.mortgageOtherParties : [{ name: '', relationship: '', otherInfo: '' }])
+                                  : [],
+                              });
+                            }}
+                            className="mr-2"
+                          />
+                          <span className="text-white">Other</span>
+                        </label>
+
+                        {/* Other party details — shown when "Other" is checked */}
+                        {(data.mortgageResponsibleParties || []).includes('other') && (
+                          <div className="ml-6 space-y-5 mt-3">
+                            {(data.mortgageOtherParties || []).map((party, pIdx) => (
+                              <div key={pIdx} className="bg-gray-700/50 rounded-lg p-4 border border-gray-600 space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="text-sm font-semibold text-white">Other {pIdx + 1}</h4>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = [...(data.mortgageOtherParties || [])];
+                                      const afterRemove = updated.filter((_, idx) => idx !== pIdx);
+                                      if (afterRemove.length === 0) {
+                                        const parties = (data.mortgageResponsibleParties || []).filter((p) => p !== 'other');
+                                        onMultiChange({
+                                          mortgageOtherParties: [],
+                                          mortgageResponsibleParties: parties,
+                                        });
+                                      } else {
+                                        onChange('mortgageOtherParties', afterRemove);
+                                      }
+                                    }}
+                                    className="text-red-400 hover:text-red-300 text-sm flex items-center gap-1 transition-colors"
+                                  >
+                                    <Trash2 size={16} />
+                                    Remove
+                                  </button>
+                                </div>
+
+                                <div>
+                                  <label className={labelClass}>Name</label>
+                                  <input
+                                    type="text"
+                                    value={party.name || ''}
+                                    onChange={(e) => {
+                                      const updated = [...(data.mortgageOtherParties || [])];
+                                      updated[pIdx] = { ...updated[pIdx], name: e.target.value };
+                                      onChange('mortgageOtherParties', updated);
+                                    }}
+                                    placeholder="Enter name"
+                                    className={inputClass}
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className={labelClass}>Relationship to {client1Name}{hasSpouse && client2Name ? ` and ${client2Name}` : ''}</label>
+                                  <input
+                                    type="text"
+                                    value={party.relationship || ''}
+                                    onChange={(e) => {
+                                      const updated = [...(data.mortgageOtherParties || [])];
+                                      updated[pIdx] = { ...updated[pIdx], relationship: e.target.value };
+                                      onChange('mortgageOtherParties', updated);
+                                    }}
+                                    placeholder="Enter relationship"
+                                    className={inputClass}
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className={labelClass}>Additional information</label>
+                                  <textarea
+                                    value={party.otherInfo || ''}
+                                    onChange={(e) => {
+                                      const updated = [...(data.mortgageOtherParties || [])];
+                                      updated[pIdx] = { ...updated[pIdx], otherInfo: e.target.value };
+                                      onChange('mortgageOtherParties', updated);
+                                    }}
+                                    placeholder="Enter any additional information"
+                                    rows={3}
+                                    className={inputClass}
+                                  />
+                                </div>
+
+                                {/* Are there additional parties responsible? Yes/No — only on last entry */}
+                                {pIdx === (data.mortgageOtherParties || []).length - 1 && (
                                   <div>
-                                    <label className={labelClass}>Add another other borrower?</label>
+                                    <label className={labelClass}>Are there additional parties responsible for this mortgage?</label>
                                     <div className="flex gap-4">
                                       <label className="flex items-center">
                                         <input
                                           type="radio"
-                                          name={`addOtherBorrower-${index}-${bIdx}`}
+                                          name={`addOtherParty-${index}`}
                                           value="yes"
-                                          checked={borrower._addMore !== 'no' && (bIdx === (data.mortgageOtherBorrowers || []).length - 1 ? borrower._addMore === 'yes' : false)}
+                                          checked={party._addMore === 'yes'}
                                           onChange={() => {
-                                            const updated = [...(data.mortgageOtherBorrowers || [])];
-                                            updated[bIdx] = { ...updated[bIdx], _addMore: 'yes' };
-                                            onChange('mortgageOtherBorrowers', [...updated, { name: '', relationship: '', otherInfo: '' }]);
+                                            const updated = [...(data.mortgageOtherParties || [])];
+                                            updated[pIdx] = { ...updated[pIdx], _addMore: 'yes' };
+                                            onChange('mortgageOtherParties', [...updated, { name: '', relationship: '', otherInfo: '' }]);
                                           }}
                                           className="mr-2"
                                         />
@@ -1730,13 +1839,13 @@ export default function PropertyDetails({
                                       <label className="flex items-center">
                                         <input
                                           type="radio"
-                                          name={`addOtherBorrower-${index}-${bIdx}`}
+                                          name={`addOtherParty-${index}`}
                                           value="no"
-                                          checked={borrower._addMore === 'no' || (bIdx < (data.mortgageOtherBorrowers || []).length - 1)}
+                                          checked={party._addMore === 'no' || !party._addMore}
                                           onChange={() => {
-                                            const updated = [...(data.mortgageOtherBorrowers || [])];
-                                            updated[bIdx] = { ...updated[bIdx], _addMore: 'no' };
-                                            onChange('mortgageOtherBorrowers', updated.slice(0, bIdx + 1));
+                                            const updated = [...(data.mortgageOtherParties || [])];
+                                            updated[pIdx] = { ...updated[pIdx], _addMore: 'no' };
+                                            onChange('mortgageOtherParties', updated);
                                           }}
                                           className="mr-2"
                                         />
@@ -1744,9 +1853,9 @@ export default function PropertyDetails({
                                       </label>
                                     </div>
                                   </div>
-                                </div>
-                              );
-                            })}
+                                )}
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>

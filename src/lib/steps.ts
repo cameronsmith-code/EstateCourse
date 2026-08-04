@@ -3102,7 +3102,7 @@ export const STEPS: Step[] = [
   {
     id: 13,
     title: 'Legacy Intent',
-    description: 'This section captures your intentions for how your assets and legacy should be managed and distributed.',
+    description: 'Your Will determines who legally inherits your assets. It doesn\'t always explain what you hope will happen to them.\nFor many families, uncertainty—not the legal documents themselves—is what leads to misunderstandings and conflict. This section gives you the opportunity to record your wishes for important assets, identify whether those wishes have been discussed, and note where any supporting documents can be found.\nThis information does not replace your Will or other legal documents, but it can provide valuable guidance to your family, executor, and professional advisors.',
     questions: [],
   },
   {

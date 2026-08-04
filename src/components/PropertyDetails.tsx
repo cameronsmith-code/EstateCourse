@@ -88,6 +88,8 @@ export type PropertyData = {
     otherInfo: string;
     _addMore?: string;
   }>;
+  mortgagePaymentSource?: string;
+  mortgagePaymentSourceOther?: string;
 };
 
 type Props = {
@@ -1300,6 +1302,7 @@ export default function PropertyDetails({
                     mortgageInterestRate: '', mortgageInterestRateType: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
                     mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
                     mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
+                    mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
                   })}
                   className="mr-2"
                 />
@@ -1326,6 +1329,7 @@ export default function PropertyDetails({
                         mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
                         mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
                         mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
+                        mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
                       })}
                       className="mr-2"
                     />
@@ -1344,6 +1348,7 @@ export default function PropertyDetails({
                         mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
                         mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
                         mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
+                        mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
                       })}
                       className="mr-2"
                     />
@@ -1362,6 +1367,7 @@ export default function PropertyDetails({
                         mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
                         mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
                         mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
+                        mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
                       })}
                       className="mr-2"
                     />
@@ -1856,6 +1862,102 @@ export default function PropertyDetails({
                                 )}
                               </div>
                             ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Where do the mortgage payments usually come from? */}
+                    <div>
+                      <label className={labelClass}>Where do the mortgage payments usually come from?</label>
+                      <div className="space-y-2">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`mortgagePaymentSource-${index}`}
+                            value="client1"
+                            checked={data.mortgagePaymentSource === 'client1'}
+                            onChange={() => onMultiChange({ mortgagePaymentSource: 'client1', mortgagePaymentSourceOther: '' })}
+                            className="mr-2"
+                          />
+                          <span className="text-white">{client1Name} personal account</span>
+                        </label>
+
+                        {hasSpouse && client2Name && (
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`mortgagePaymentSource-${index}`}
+                              value="client2"
+                              checked={data.mortgagePaymentSource === 'client2'}
+                              onChange={() => onMultiChange({ mortgagePaymentSource: 'client2', mortgagePaymentSourceOther: '' })}
+                              className="mr-2"
+                            />
+                            <span className="text-white">{client2Name} personal account</span>
+                          </label>
+                        )}
+
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`mortgagePaymentSource-${index}`}
+                            value="joint"
+                            checked={data.mortgagePaymentSource === 'joint'}
+                            onChange={() => onMultiChange({ mortgagePaymentSource: 'joint', mortgagePaymentSourceOther: '' })}
+                            className="mr-2"
+                          />
+                          <span className="text-white">Joint account</span>
+                        </label>
+
+                        {trusts.filter(Boolean).map((trustName) => (
+                          <label key={trustName} className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`mortgagePaymentSource-${index}`}
+                              value={`trust:${trustName}`}
+                              checked={data.mortgagePaymentSource === `trust:${trustName}`}
+                              onChange={() => onMultiChange({ mortgagePaymentSource: `trust:${trustName}`, mortgagePaymentSourceOther: '' })}
+                              className="mr-2"
+                            />
+                            <span className="text-white">{trustName}'s bank account</span>
+                          </label>
+                        ))}
+
+                        {corporations.filter((c) => c.legalName?.trim()).map((corp) => (
+                          <label key={corp.legalName} className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`mortgagePaymentSource-${index}`}
+                              value={`corp:${corp.legalName}`}
+                              checked={data.mortgagePaymentSource === `corp:${corp.legalName}`}
+                              onChange={() => onMultiChange({ mortgagePaymentSource: `corp:${corp.legalName}`, mortgagePaymentSourceOther: '' })}
+                              className="mr-2"
+                            />
+                            <span className="text-white">{corp.legalName}'s bank account</span>
+                          </label>
+                        ))}
+
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`mortgagePaymentSource-${index}`}
+                            value="other"
+                            checked={data.mortgagePaymentSource === 'other'}
+                            onChange={() => onChange('mortgagePaymentSource', 'other')}
+                            className="mr-2"
+                          />
+                          <span className="text-white">Other</span>
+                        </label>
+
+                        {data.mortgagePaymentSource === 'other' && (
+                          <div className="ml-6 mt-2">
+                            <input
+                              type="text"
+                              value={data.mortgagePaymentSourceOther || ''}
+                              onChange={(e) => onChange('mortgagePaymentSourceOther', e.target.value)}
+                              placeholder="Enter details"
+                              className={inputClass}
+                            />
                           </div>
                         )}
                       </div>

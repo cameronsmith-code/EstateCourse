@@ -6,6 +6,7 @@ export type OtherOwner = {
   name: string;
   phone: string;
   city: string;
+  relationship: string;
   hasMore: 'yes' | 'no' | '';
 };
 
@@ -312,13 +313,13 @@ export default function PropertyDetails({
 
   const handleOtherOwnerChange = (i: number, field: keyof OtherOwner, value: string) => {
     const updated = [...otherOwners];
-    if (!updated[i]) updated[i] = { name: '', phone: '', city: '', hasMore: '' };
+    if (!updated[i]) updated[i] = { name: '', phone: '', city: '', relationship: '', hasMore: '' };
     updated[i] = { ...updated[i], [field]: value };
     onChange('otherOwners', updated);
   };
 
   const handleAddOtherOwner = () => {
-    const updated = [...otherOwners, { name: '', phone: '', city: '', hasMore: '' }];
+    const updated = [...otherOwners, { name: '', phone: '', city: '', relationship: '', hasMore: '' }];
     onChange('otherOwners', updated);
   };
 
@@ -386,13 +387,13 @@ export default function PropertyDetails({
 
   const handlePurchasedByOtherOwnerChange = (i: number, field: keyof OtherOwner, value: string) => {
     const updated = [...purchasedByOtherOwners];
-    if (!updated[i]) updated[i] = { name: '', phone: '', city: '', hasMore: '' };
+    if (!updated[i]) updated[i] = { name: '', phone: '', city: '', relationship: '', hasMore: '' };
     updated[i] = { ...updated[i], [field]: value };
     onChange('purchasedByOtherOwners', updated);
   };
 
   const handleAddPurchasedByOtherOwner = () => {
-    const updated = [...purchasedByOtherOwners, { name: '', phone: '', city: '', hasMore: '' }];
+    const updated = [...purchasedByOtherOwners, { name: '', phone: '', city: '', relationship: '', hasMore: '' }];
     onChange('purchasedByOtherOwners', updated);
   };
 
@@ -729,6 +730,16 @@ export default function PropertyDetails({
                       value={oo.city}
                       onChange={(e) => handleOtherOwnerChange(oi, 'city', e.target.value)}
                       placeholder="Enter city"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Relationship</label>
+                    <input
+                      type="text"
+                      value={oo.relationship}
+                      onChange={(e) => handleOtherOwnerChange(oi, 'relationship', e.target.value)}
+                      placeholder="Enter relationship"
                       className={inputClass}
                     />
                   </div>
@@ -1168,6 +1179,16 @@ export default function PropertyDetails({
                             value={oo.city}
                             onChange={(e) => handlePurchasedByOtherOwnerChange(oi, 'city', e.target.value)}
                             placeholder="Enter city"
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Relationship</label>
+                          <input
+                            type="text"
+                            value={oo.relationship}
+                            onChange={(e) => handlePurchasedByOtherOwnerChange(oi, 'relationship', e.target.value)}
+                            placeholder="Enter relationship"
                             className={inputClass}
                           />
                         </div>

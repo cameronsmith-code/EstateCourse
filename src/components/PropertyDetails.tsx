@@ -90,6 +90,14 @@ export type PropertyData = {
   }>;
   mortgagePaymentSource?: string;
   mortgagePaymentSourceOther?: string;
+  mortgageBrokerLender?: string;
+  mortgageBrokerContactName?: string;
+  mortgageBrokerContactPhone?: string;
+  mortgageBrokerContactEmail?: string;
+  mortgageInsuranceTypes?: string[];
+  mortgageInsuranceProviders?: Record<string, string>;
+  mortgageInsurancePolicyNumbers?: Record<string, string>;
+  mortgageInsuranceDocLocations?: Record<string, string>;
 };
 
 type Props = {
@@ -110,6 +118,7 @@ type Props = {
 const inputClass =
   'w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all';
 const labelClass = 'block text-sm font-medium text-gray-300 mb-2';
+const subLabelClass = 'block text-xs font-medium text-gray-400 mb-1';
 
 const CANADA_PROVINCES = [
   'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador',
@@ -1303,6 +1312,8 @@ export default function PropertyDetails({
                     mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
                     mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
                     mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
+                    mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
+                    mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                   })}
                   className="mr-2"
                 />
@@ -1330,6 +1341,8 @@ export default function PropertyDetails({
                         mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
                         mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
                         mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
+                    mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
+                    mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                       })}
                       className="mr-2"
                     />
@@ -1349,6 +1362,8 @@ export default function PropertyDetails({
                         mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
                         mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
                         mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
+                    mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
+                    mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                       })}
                       className="mr-2"
                     />
@@ -1368,6 +1383,8 @@ export default function PropertyDetails({
                         mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
                         mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
                         mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
+                    mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
+                    mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                       })}
                       className="mr-2"
                     />
@@ -1961,6 +1978,154 @@ export default function PropertyDetails({
                           </div>
                         )}
                       </div>
+                    </div>
+
+                    {/* Mortgage Broker Information */}
+                    <div>
+                      <label className={labelClass}>Mortgage Broker Information</label>
+                      <div className="space-y-3 mt-2">
+                        <div>
+                          <label className={subLabelClass}>Lending Institution</label>
+                          <input
+                            type="text"
+                            value={data.mortgageBrokerLender || ''}
+                            onChange={(e) => onChange('mortgageBrokerLender', e.target.value)}
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className={subLabelClass}>Contact Name</label>
+                          <input
+                            type="text"
+                            value={data.mortgageBrokerContactName || ''}
+                            onChange={(e) => onChange('mortgageBrokerContactName', e.target.value)}
+                            className={inputClass}
+                          />
+                        </div>
+                        {data.mortgageBrokerContactName?.trim() && (
+                          <>
+                            <div>
+                              <label className={subLabelClass}>{data.mortgageBrokerContactName}'s Phone</label>
+                              <input
+                                type="tel"
+                                value={data.mortgageBrokerContactPhone || ''}
+                                onChange={(e) => onChange('mortgageBrokerContactPhone', e.target.value)}
+                                className={inputClass}
+                              />
+                            </div>
+                            <div>
+                              <label className={subLabelClass}>{data.mortgageBrokerContactName}'s Email</label>
+                              <input
+                                type="email"
+                                value={data.mortgageBrokerContactEmail || ''}
+                                onChange={(e) => onChange('mortgageBrokerContactEmail', e.target.value)}
+                                className={inputClass}
+                              />
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Mortgage Insurance */}
+                    <div>
+                      <label className={labelClass}>Is there insurance associated with this mortgage?</label>
+                      <div className="space-y-2">
+                        {['Mortgage Life Insurance', 'Mortgage Disability Insurance', 'Creditor Insurance', 'No', 'Not Sure'].map((opt) => {
+                          const current = data.mortgageInsuranceTypes || [];
+                          const isChecked = current.includes(opt);
+                          const isNoOrNotSure = opt === 'No' || opt === 'Not Sure';
+                          return (
+                            <label key={opt} className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    const next = isNoOrNotSure
+                                      ? [opt]
+                                      : current.filter((o) => o !== 'No' && o !== 'Not Sure').concat(opt);
+                                    onMultiChange({
+                                      mortgageInsuranceTypes: next,
+                                    });
+                                  } else {
+                                    const next = current.filter((o) => o !== opt);
+                                    onMultiChange({
+                                      mortgageInsuranceTypes: next,
+                                    });
+                                  }
+                                }}
+                                className="mr-2"
+                              />
+                              <span className="text-white">{opt}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+
+                      {(data.mortgageInsuranceTypes || []).filter(
+                        (t) => t !== 'No' && t !== 'Not Sure'
+                      ).length > 0 && (
+                        <div className="mt-4 space-y-6">
+                          {(data.mortgageInsuranceTypes || [])
+                            .filter((t) => t !== 'No' && t !== 'Not Sure')
+                            .map((insType) => (
+                              <div key={insType} className="border-l-2 border-white/20 pl-4">
+                                <h4 className="text-white font-medium mb-3">{insType}</h4>
+                                <div className="space-y-3">
+                                  <div>
+                                    <label className={subLabelClass}>Provider</label>
+                                    <input
+                                      type="text"
+                                      value={data.mortgageInsuranceProviders?.[insType] || ''}
+                                      onChange={(e) =>
+                                        onMultiChange({
+                                          mortgageInsuranceProviders: {
+                                            ...(data.mortgageInsuranceProviders || {}),
+                                            [insType]: e.target.value,
+                                          },
+                                        })
+                                      }
+                                      className={inputClass}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className={subLabelClass}>Policy Number (Optional)</label>
+                                    <input
+                                      type="text"
+                                      value={data.mortgageInsurancePolicyNumbers?.[insType] || ''}
+                                      onChange={(e) =>
+                                        onMultiChange({
+                                          mortgageInsurancePolicyNumbers: {
+                                            ...(data.mortgageInsurancePolicyNumbers || {}),
+                                            [insType]: e.target.value,
+                                          },
+                                        })
+                                      }
+                                      className={inputClass}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className={subLabelClass}>Document Location</label>
+                                    <input
+                                      type="text"
+                                      value={data.mortgageInsuranceDocLocations?.[insType] || ''}
+                                      onChange={(e) =>
+                                        onMultiChange({
+                                          mortgageInsuranceDocLocations: {
+                                            ...(data.mortgageInsuranceDocLocations || {}),
+                                            [insType]: e.target.value,
+                                          },
+                                        })
+                                      }
+                                      className={inputClass}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                   </Subsection>
                 </div>

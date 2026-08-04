@@ -114,7 +114,12 @@ export type PropertyData = {
   helocPaymentSource?: string;
   helocPaymentSourceOther?: string;
   helocResponsibleParties?: string[];
-  helocResponsibleOtherRelationship?: string;
+  helocOtherParties: Array<{
+    name: string;
+    relationship: string;
+    otherInfo: string;
+    _addMore?: string;
+  }>;
   helocPrimaryUse?: string;
   helocPrimaryUseOther?: string;
   helocActivelyUsed?: string;
@@ -1339,7 +1344,7 @@ export default function PropertyDetails({
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                     mortgageSpecialNotes: '', mortgageDocLocation: '',
-                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocResponsibleOtherRelationship: '', helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                   })}
                   className="mr-2"
                 />
@@ -1370,7 +1375,7 @@ export default function PropertyDetails({
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                     mortgageSpecialNotes: '', mortgageDocLocation: '',
-                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocResponsibleOtherRelationship: '', helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -1384,7 +1389,7 @@ export default function PropertyDetails({
                       checked={data.debtType === 'heloc'}
                       onChange={() => onMultiChange({
                         debtType: 'heloc',
-                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocResponsibleOtherRelationship: '', helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -1398,7 +1403,7 @@ export default function PropertyDetails({
                       checked={data.debtType === 'both'}
                       onChange={() => onMultiChange({
                         debtType: 'both',
-                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocResponsibleOtherRelationship: '', helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -2490,7 +2495,9 @@ export default function PropertyDetails({
                                   : current.filter((p) => p !== 'other');
                                 onMultiChange({
                                   helocResponsibleParties: updated,
-                                  helocResponsibleOtherRelationship: e.target.checked ? data.helocResponsibleOtherRelationship || '' : '',
+                                  helocOtherParties: e.target.checked
+                                    ? (data.helocOtherParties && data.helocOtherParties.length > 0 ? data.helocOtherParties : [{ name: '', relationship: '', otherInfo: '' }])
+                                    : [],
                                 });
                               }}
                               className="mr-2"
@@ -2499,15 +2506,117 @@ export default function PropertyDetails({
                           </label>
 
                           {(data.helocResponsibleParties || []).includes('other') && (
-                            <div className="ml-6">
-                              <label className={labelClass}>Relationship</label>
-                              <input
-                                type="text"
-                                value={data.helocResponsibleOtherRelationship || ''}
-                                onChange={(e) => onChange('helocResponsibleOtherRelationship', e.target.value)}
-                                placeholder="Enter relationship"
-                                className={inputClass}
-                              />
+                            <div className="ml-6 space-y-5 mt-3">
+                              {(data.helocOtherParties || []).map((party, pIdx) => (
+                                <div key={pIdx} className="bg-gray-700/50 rounded-lg p-4 border border-gray-600 space-y-4">
+                                  <div className="flex items-center justify-between">
+                                    <h4 className="text-sm font-semibold text-white">Other {pIdx + 1}</h4>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = [...(data.helocOtherParties || [])];
+                                        const afterRemove = updated.filter((_, idx) => idx !== pIdx);
+                                        if (afterRemove.length === 0) {
+                                          const parties = (data.helocResponsibleParties || []).filter((p) => p !== 'other');
+                                          onMultiChange({
+                                            helocOtherParties: [],
+                                            helocResponsibleParties: parties,
+                                          });
+                                        } else {
+                                          onChange('helocOtherParties', afterRemove);
+                                        }
+                                      }}
+                                      className="text-red-400 hover:text-red-300 text-sm flex items-center gap-1 transition-colors"
+                                    >
+                                      <Trash2 size={16} />
+                                      Remove
+                                    </button>
+                                  </div>
+
+                                  <div>
+                                    <label className={labelClass}>Name</label>
+                                    <input
+                                      type="text"
+                                      value={party.name || ''}
+                                      onChange={(e) => {
+                                        const updated = [...(data.helocOtherParties || [])];
+                                        updated[pIdx] = { ...updated[pIdx], name: e.target.value };
+                                        onChange('helocOtherParties', updated);
+                                      }}
+                                      placeholder="Enter name"
+                                      className={inputClass}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className={labelClass}>Relationship to {client1Name}{hasSpouse && client2Name ? ` and ${client2Name}` : ''}</label>
+                                    <input
+                                      type="text"
+                                      value={party.relationship || ''}
+                                      onChange={(e) => {
+                                        const updated = [...(data.helocOtherParties || [])];
+                                        updated[pIdx] = { ...updated[pIdx], relationship: e.target.value };
+                                        onChange('helocOtherParties', updated);
+                                      }}
+                                      placeholder="Enter relationship"
+                                      className={inputClass}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className={labelClass}>Additional information</label>
+                                    <textarea
+                                      value={party.otherInfo || ''}
+                                      onChange={(e) => {
+                                        const updated = [...(data.helocOtherParties || [])];
+                                        updated[pIdx] = { ...updated[pIdx], otherInfo: e.target.value };
+                                        onChange('helocOtherParties', updated);
+                                      }}
+                                      placeholder="Enter any additional information"
+                                      rows={3}
+                                      className={inputClass}
+                                    />
+                                  </div>
+
+                                  {pIdx === (data.helocOtherParties || []).length - 1 && (
+                                    <div>
+                                      <label className={labelClass}>Is there anyone else who is legally responsible for the HELOC on {propertyName}?</label>
+                                      <div className="flex gap-4">
+                                        <label className="flex items-center">
+                                          <input
+                                            type="radio"
+                                            name={`helocAddOtherParty-${index}`}
+                                            value="yes"
+                                            checked={party._addMore === 'yes'}
+                                            onChange={() => {
+                                              const updated = [...(data.helocOtherParties || [])];
+                                              updated[pIdx] = { ...updated[pIdx], _addMore: 'yes' };
+                                              onChange('helocOtherParties', [...updated, { name: '', relationship: '', otherInfo: '' }]);
+                                            }}
+                                            className="mr-2"
+                                          />
+                                          <span className="text-gray-300">Yes</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                          <input
+                                            type="radio"
+                                            name={`helocAddOtherParty-${index}`}
+                                            value="no"
+                                            checked={party._addMore === 'no' || !party._addMore}
+                                            onChange={() => {
+                                              const updated = [...(data.helocOtherParties || [])];
+                                              updated[pIdx] = { ...updated[pIdx], _addMore: 'no' };
+                                              onChange('helocOtherParties', updated);
+                                            }}
+                                            className="mr-2"
+                                          />
+                                          <span className="text-gray-300">No</span>
+                                        </label>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>

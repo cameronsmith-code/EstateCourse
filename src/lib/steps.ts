@@ -2869,7 +2869,7 @@ export const STEPS: Step[] = [
   },
   {
     id: 10,
-    title: 'Liabilities',
+    title: 'Debt and Obligations',
     description: 'Understanding your liabilities (debts and obligations) is essential for effective estate planning. This section helps us identify outstanding debts that may need to be settled from your estate, and ensures your executor has a complete picture of your financial obligations.',
     questions: [
       {

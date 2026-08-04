@@ -2128,7 +2128,7 @@ export default function PropertyDetails({
                     {/* Special notes about this mortgage */}
                     <div>
                       <label className={labelClass}>
-                        Is there anything someone managing your affairs should know about this mortgage?
+                        Is there anything someone managing your affairs (like a Power of Attorney for Property or Executor) should know about this mortgage?
                       </label>
                       <p className="text-xs text-gray-400 mb-3 italic">
                         Examples: Variable-rate mortgage, Private lender, Family loan, HELOC attached,

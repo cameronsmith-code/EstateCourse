@@ -8,7 +8,7 @@ type FormFieldProps = {
 };
 
 export default function FormField({ question, value, onChange, answers }: FormFieldProps) {
-  const { key, label, type, placeholder, options, required, max } = question;
+  const { key, label, type, placeholder, options, required, max, allowOther } = question;
 
   const resolvedOptions = typeof options === 'function' ? options(answers || new Map()) : options;
 
@@ -78,6 +78,21 @@ export default function FormField({ question, value, onChange, answers }: FormFi
 
   if (type === 'checkbox-group') {
     const selectedValues = (value as string[]) || [];
+    const otherEntries = selectedValues.filter(v => v.startsWith('other:'));
+    const otherValues = otherEntries.map(v => v.slice(6));
+    const presetValues = selectedValues.filter(v => !v.startsWith('other:'));
+
+    const addOther = () => {
+      const next = `other:New Obligation ${otherValues.length + 1}`;
+      onChange([...selectedValues, next]);
+    };
+    const removeOther = (entry: string) => {
+      onChange(selectedValues.filter(v => v !== entry));
+    };
+    const renameOther = (entry: string, newName: string) => {
+      onChange(selectedValues.map(v => v === entry ? `other:${newName}` : v));
+    };
+
     return (
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-300 mb-3">
@@ -89,7 +104,7 @@ export default function FormField({ question, value, onChange, answers }: FormFi
             <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
               <input
                 type="checkbox"
-                checked={selectedValues.includes(opt.value)}
+                checked={presetValues.includes(opt.value)}
                 onChange={(e) => {
                   if (e.target.checked) {
                     onChange([...selectedValues, opt.value]);
@@ -102,6 +117,43 @@ export default function FormField({ question, value, onChange, answers }: FormFi
               <span className="ml-3 text-gray-300">{opt.label}</span>
             </label>
           ))}
+
+          {allowOther && otherEntries.map((entry) => (
+            <div key={entry} className="flex items-center gap-2 p-3 border border-gray-600 bg-gray-700 rounded-lg">
+              <input
+                type="checkbox"
+                checked
+                readOnly
+                className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded"
+              />
+              <input
+                type="text"
+                value={entry.slice(6)}
+                onChange={(e) => renameOther(entry, e.target.value)}
+                className="flex-1 px-3 py-1.5 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                placeholder="Describe other obligation"
+              />
+              <button
+                type="button"
+                onClick={() => removeOther(entry)}
+                className="text-gray-400 hover:text-red-400 transition-colors p-1"
+                aria-label="Remove"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          ))}
+
+          {allowOther && (
+            <button
+              type="button"
+              onClick={addOther}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-dashed border-gray-500 text-gray-300 rounded-lg hover:border-blue-500 hover:text-blue-400 transition-colors"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Other
+            </button>
+          )}
         </div>
       </div>
     );

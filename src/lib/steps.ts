@@ -19,6 +19,7 @@ export type StepQuestion = {
   description?: string;
   condition?: (formData: Record<string, string>) => boolean | "";
   max?: number;
+  allowOther?: boolean;
 };
 
 export type Step = {
@@ -2873,12 +2874,27 @@ export const STEPS: Step[] = [
     description: 'Understanding your liabilities (debts and obligations) is essential for effective estate planning. This section helps us identify outstanding debts that may need to be settled from your estate, and ensures your executor has a complete picture of your financial obligations.',
     questions: [
       {
-        key: 'hasLiabilities',
-        label: 'Do you have any outstanding liabilities or debts?',
-        type: 'radio',
+        key: 'obligationsTypes',
+        label: 'Which of the following obligations do you currently have?\nSelect all that apply.',
+        type: 'checkbox-group',
+        allowOther: true,
         options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
+          { value: 'mortgage', label: 'Mortgage(s) (already captured in Real Estate)' },
+          { value: 'heloc', label: 'Home Equity Line of Credit (HELOC)' },
+          { value: 'personal_loc', label: 'Personal Line(s) of Credit' },
+          { value: 'credit_cards', label: 'Credit Card(s)' },
+          { value: 'vehicle_loans', label: 'Vehicle Loan(s)' },
+          { value: 'student_loans', label: 'Student Loan(s)' },
+          { value: 'personal_loans', label: 'Personal Loan(s)' },
+          { value: 'investment_loans', label: 'Investment Loan(s)' },
+          { value: 'business_loans', label: 'Business Loan(s)' },
+          { value: 'shareholder_loans', label: 'Shareholder Loan(s)' },
+          { value: 'spousal_loans', label: 'Spousal Loan(s)' },
+          { value: 'personal_guarantees', label: 'Personal Guarantee(s)' },
+          { value: 'cra_owing', label: 'CRA Amounts Owing' },
+          { value: 'family_loans', label: 'Family Loan(s)' },
+          { value: 'buy_sell', label: 'Buy-Sell / Shareholder Funding Obligations' },
+          { value: 'court_ordered_support', label: 'Court Ordered Support Obligations' },
         ],
         required: true,
       },

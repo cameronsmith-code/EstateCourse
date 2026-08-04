@@ -106,6 +106,22 @@ export type PropertyData = {
   helocNumber?: string;
   helocBalance?: string;
   helocCreditLimit?: string;
+  helocInterestRate?: string;
+  helocInterestRateType?: string;
+  helocPrimePlus?: string;
+  helocPaymentType?: string;
+  helocPaymentMethod?: string;
+  helocPaymentSource?: string;
+  helocPaymentSourceOther?: string;
+  helocResponsibleParties?: string[];
+  helocResponsibleOtherRelationship?: string;
+  helocPrimaryUse?: string;
+  helocPrimaryUseOther?: string;
+  helocActivelyUsed?: string;
+  helocSpecialNotes?: string;
+  helocDocLocation?: string;
+  helocHasAutoPayments?: string;
+  helocAutoPaymentsDescription?: string;
 };
 
 type Props = {
@@ -1323,7 +1339,7 @@ export default function PropertyDetails({
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                     mortgageSpecialNotes: '', mortgageDocLocation: '',
-                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '',
+                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocResponsibleOtherRelationship: '', helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                   })}
                   className="mr-2"
                 />
@@ -1354,7 +1370,7 @@ export default function PropertyDetails({
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                     mortgageSpecialNotes: '', mortgageDocLocation: '',
-                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '',
+                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocResponsibleOtherRelationship: '', helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -1368,7 +1384,7 @@ export default function PropertyDetails({
                       checked={data.debtType === 'heloc'}
                       onChange={() => onMultiChange({
                         debtType: 'heloc',
-                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '',
+                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocResponsibleOtherRelationship: '', helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -1382,7 +1398,7 @@ export default function PropertyDetails({
                       checked={data.debtType === 'both'}
                       onChange={() => onMultiChange({
                         debtType: 'both',
-                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '',
+                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocResponsibleOtherRelationship: '', helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -2236,6 +2252,398 @@ export default function PropertyDetails({
                           />
                         </div>
                       </div>
+
+                      {/* Interest rate + type */}
+                      <div>
+                        <label className={labelClass}>What is the current interest rate?</label>
+                        <div className="flex items-center gap-6 flex-wrap">
+                          <div className="relative max-w-[120px]">
+                            <input
+                              type="text"
+                              value={data.helocInterestRate || ''}
+                              onChange={(e) => onChange('helocInterestRate', e.target.value)}
+                              placeholder="____"
+                              className={inputClass}
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                          </div>
+                          <div className="flex gap-4 flex-wrap">
+                            {['Variable', 'Fixed'].map((rateType) => (
+                              <label key={rateType} className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`helocInterestRateType-${index}`}
+                                  value={rateType.toLowerCase()}
+                                  checked={data.helocInterestRateType === rateType.toLowerCase()}
+                                  onChange={() => onMultiChange({
+                                    helocInterestRateType: rateType.toLowerCase(),
+                                    helocPrimePlus: rateType.toLowerCase() === 'variable' ? data.helocPrimePlus || '' : '',
+                                  })}
+                                  className="mr-1"
+                                />
+                                <span className="text-white">{rateType}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* If Variable: Prime + ___% */}
+                      {data.helocInterestRateType === 'variable' && (
+                        <div className="ml-6">
+                          <label className={labelClass}>Prime + <span className="text-gray-400 font-normal">(optional)</span></label>
+                          <div className="relative max-w-[120px]">
+                            <input
+                              type="text"
+                              value={data.helocPrimePlus || ''}
+                              onChange={(e) => onChange('helocPrimePlus', e.target.value)}
+                              placeholder="____"
+                              className={inputClass}
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* How are payments normally made? */}
+                      <div>
+                        <label className={labelClass}>How are payments normally made?</label>
+                        <div className="space-y-2">
+                          {['Interest only', 'Fixed monthly payment'].map((pt) => (
+                            <label key={pt} className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`helocPaymentType-${index}`}
+                                value={pt.toLowerCase().replace(/\s+/g, '_')}
+                                checked={data.helocPaymentType === pt.toLowerCase().replace(/\s+/g, '_')}
+                                onChange={() => onChange('helocPaymentType', pt.toLowerCase().replace(/\s+/g, '_'))}
+                                className="mr-2"
+                              />
+                              <span className="text-white">{pt}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Paid Automatically / Paid Manually */}
+                      <div>
+                        <label className={labelClass}>How are payments made?</label>
+                        <div className="space-y-2">
+                          {['Paid Automatically', 'Paid Manually'].map((pm) => (
+                            <label key={pm} className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`helocPaymentMethod-${index}`}
+                                value={pm.toLowerCase().replace(/\s+/g, '_')}
+                                checked={data.helocPaymentMethod === pm.toLowerCase().replace(/\s+/g, '_')}
+                                onChange={() => onChange('helocPaymentMethod', pm.toLowerCase().replace(/\s+/g, '_'))}
+                                className="mr-2"
+                              />
+                              <span className="text-white">{pm}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Where do the payments usually come from? — same as mortgage flow */}
+                      <div>
+                        <label className={labelClass}>Where do the payments usually come from?</label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`helocPaymentSource-${index}`}
+                              value="client1"
+                              checked={data.helocPaymentSource === 'client1'}
+                              onChange={() => onMultiChange({ helocPaymentSource: 'client1', helocPaymentSourceOther: '' })}
+                              className="mr-2"
+                            />
+                            <span className="text-white">{client1Name} personal account</span>
+                          </label>
+
+                          {hasSpouse && client2Name && (
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`helocPaymentSource-${index}`}
+                                value="client2"
+                                checked={data.helocPaymentSource === 'client2'}
+                                onChange={() => onMultiChange({ helocPaymentSource: 'client2', helocPaymentSourceOther: '' })}
+                                className="mr-2"
+                              />
+                              <span className="text-white">{client2Name} personal account</span>
+                            </label>
+                          )}
+
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`helocPaymentSource-${index}`}
+                              value="joint"
+                              checked={data.helocPaymentSource === 'joint'}
+                              onChange={() => onMultiChange({ helocPaymentSource: 'joint', helocPaymentSourceOther: '' })}
+                              className="mr-2"
+                            />
+                            <span className="text-white">Joint account</span>
+                          </label>
+
+                          {trusts.filter(Boolean).map((trustName) => (
+                            <label key={trustName} className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`helocPaymentSource-${index}`}
+                                value={`trust:${trustName}`}
+                                checked={data.helocPaymentSource === `trust:${trustName}`}
+                                onChange={() => onMultiChange({ helocPaymentSource: `trust:${trustName}`, helocPaymentSourceOther: '' })}
+                                className="mr-2"
+                              />
+                              <span className="text-white">{trustName}'s bank account</span>
+                            </label>
+                          ))}
+
+                          {corporations.filter((c) => c.legalName?.trim()).map((corp) => (
+                            <label key={corp.legalName} className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`helocPaymentSource-${index}`}
+                                value={`corp:${corp.legalName}`}
+                                checked={data.helocPaymentSource === `corp:${corp.legalName}`}
+                                onChange={() => onMultiChange({ helocPaymentSource: `corp:${corp.legalName}`, helocPaymentSourceOther: '' })}
+                                className="mr-2"
+                              />
+                              <span className="text-white">{corp.legalName}'s bank account</span>
+                            </label>
+                          ))}
+
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`helocPaymentSource-${index}`}
+                              value="other"
+                              checked={data.helocPaymentSource === 'other'}
+                              onChange={() => onChange('helocPaymentSource', 'other')}
+                              className="mr-2"
+                            />
+                            <span className="text-white">Other</span>
+                          </label>
+
+                          {data.helocPaymentSource === 'other' && (
+                            <div className="ml-6 mt-2">
+                              <input
+                                type="text"
+                                value={data.helocPaymentSourceOther || ''}
+                                onChange={(e) => onChange('helocPaymentSourceOther', e.target.value)}
+                                placeholder="Enter details"
+                                className={inputClass}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Who is legally responsible? */}
+                      <div>
+                        <label className={labelClass}>Who is legally responsible?</label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={(data.helocResponsibleParties || []).includes('client1')}
+                              onChange={(e) => {
+                                const current = data.helocResponsibleParties || [];
+                                const updated = e.target.checked
+                                  ? [...current, 'client1']
+                                  : current.filter((p) => p !== 'client1');
+                                onChange('helocResponsibleParties', updated);
+                              }}
+                              className="mr-2"
+                            />
+                            <span className="text-white">{client1Name} - ({ownershipPercentages[client1Name] || '___'}% Owner)</span>
+                          </label>
+
+                          {hasSpouse && client2Name && (
+                            <label className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={(data.helocResponsibleParties || []).includes('client2')}
+                                onChange={(e) => {
+                                  const current = data.helocResponsibleParties || [];
+                                  const updated = e.target.checked
+                                    ? [...current, 'client2']
+                                    : current.filter((p) => p !== 'client2');
+                                  onChange('helocResponsibleParties', updated);
+                                }}
+                                className="mr-2"
+                              />
+                              <span className="text-white">{client2Name} - ({ownershipPercentages[client2Name] || '___'}% Owner)</span>
+                            </label>
+                          )}
+
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={(data.helocResponsibleParties || []).includes('other')}
+                              onChange={(e) => {
+                                const current = data.helocResponsibleParties || [];
+                                const updated = e.target.checked
+                                  ? [...current, 'other']
+                                  : current.filter((p) => p !== 'other');
+                                onMultiChange({
+                                  helocResponsibleParties: updated,
+                                  helocResponsibleOtherRelationship: e.target.checked ? data.helocResponsibleOtherRelationship || '' : '',
+                                });
+                              }}
+                              className="mr-2"
+                            />
+                            <span className="text-white">Other</span>
+                          </label>
+
+                          {(data.helocResponsibleParties || []).includes('other') && (
+                            <div className="ml-6">
+                              <label className={labelClass}>Relationship</label>
+                              <input
+                                type="text"
+                                value={data.helocResponsibleOtherRelationship || ''}
+                                onChange={(e) => onChange('helocResponsibleOtherRelationship', e.target.value)}
+                                placeholder="Enter relationship"
+                                className={inputClass}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* What is this HELOC primarily used for? */}
+                      <div>
+                        <label className={labelClass}>What is this HELOC primarily used for?</label>
+                        <div className="space-y-2">
+                          {[
+                            { value: 'emergency_fund', label: 'Emergency Fund' },
+                            { value: 'home_renovations', label: 'Home Renovations' },
+                            { value: 'investment_borrowing', label: 'Investment Borrowing' },
+                            { value: 'rental_property', label: 'Rental Property' },
+                            { value: 'business', label: 'Business' },
+                            { value: 'everyday_expenses', label: 'Everyday Expenses' },
+                            { value: 'other', label: 'Other' },
+                          ].map((opt) => (
+                            <label key={opt.value} className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`helocPrimaryUse-${index}`}
+                                value={opt.value}
+                                checked={data.helocPrimaryUse === opt.value}
+                                onChange={() => onMultiChange({
+                                  helocPrimaryUse: opt.value,
+                                  helocPrimaryUseOther: opt.value === 'other' ? data.helocPrimaryUseOther || '' : '',
+                                })}
+                                className="mr-2"
+                              />
+                              <span className="text-white">{opt.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                        {data.helocPrimaryUse === 'other' && (
+                          <div className="ml-6 mt-2">
+                            <input
+                              type="text"
+                              value={data.helocPrimaryUseOther || ''}
+                              onChange={(e) => onChange('helocPrimaryUseOther', e.target.value)}
+                              placeholder="Please specify"
+                              className={inputClass}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Is this HELOC actively used? */}
+                      <div>
+                        <label className={labelClass}>Is this HELOC actively used?</label>
+                        <div className="space-y-2">
+                          {[
+                            { value: 'frequently', label: 'Frequently' },
+                            { value: 'occasionally', label: 'Occasionally' },
+                            { value: 'rarely', label: 'Rarely' },
+                            { value: 'zero_balance', label: 'Zero balance / Available only' },
+                          ].map((opt) => (
+                            <label key={opt.value} className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`helocActivelyUsed-${index}`}
+                                value={opt.value}
+                                checked={data.helocActivelyUsed === opt.value}
+                                onChange={() => onChange('helocActivelyUsed', opt.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-white">{opt.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Special notes */}
+                      <div>
+                        <label className={labelClass}>Is there anything important someone managing your affairs should know about this HELOC?</label>
+                        <textarea
+                          value={data.helocSpecialNotes || ''}
+                          onChange={(e) => onChange('helocSpecialNotes', e.target.value)}
+                          placeholder="Enter any important notes"
+                          rows={3}
+                          className={inputClass}
+                        />
+                      </div>
+
+                      {/* Document location */}
+                      <div>
+                        <label className={labelClass}>Where are the HELOC documents for {propertyName} kept?</label>
+                        <input
+                          type="text"
+                          value={data.helocDocLocation || ''}
+                          onChange={(e) => onChange('helocDocLocation', e.target.value)}
+                          placeholder="Enter where the HELOC documents are kept"
+                          className={inputClass}
+                        />
+                      </div>
+
+                      {/* Automatic payments or recurring withdrawals */}
+                      <div>
+                        <label className={labelClass}>Are automatic payments or recurring withdrawals made using this HELOC?</label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`helocHasAutoPayments-${index}`}
+                              value="yes"
+                              checked={data.helocHasAutoPayments === 'yes'}
+                              onChange={() => onChange('helocHasAutoPayments', 'yes')}
+                              className="mr-2"
+                            />
+                            <span className="text-white">Yes</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`helocHasAutoPayments-${index}`}
+                              value="no"
+                              checked={data.helocHasAutoPayments === 'no'}
+                              onChange={() => onMultiChange({ helocHasAutoPayments: 'no', helocAutoPaymentsDescription: '' })}
+                              className="mr-2"
+                            />
+                            <span className="text-white">No</span>
+                          </label>
+                        </div>
+                      </div>
+                      {data.helocHasAutoPayments === 'yes' && (
+                        <div className="ml-6">
+                          <label className={labelClass}>Describe them.</label>
+                          <textarea
+                            value={data.helocAutoPaymentsDescription || ''}
+                            onChange={(e) => onChange('helocAutoPaymentsDescription', e.target.value)}
+                            placeholder="Describe the automatic payments or recurring withdrawals"
+                            rows={3}
+                            className={inputClass}
+                          />
+                        </div>
+                      )}
                     </div>
                   </Subsection>
                 </div>

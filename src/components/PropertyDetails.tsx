@@ -120,7 +120,7 @@ export type PropertyData = {
     otherInfo: string;
     _addMore?: string;
   }>;
-  helocPrimaryUse?: string;
+  helocPrimaryUses?: string[];
   helocPrimaryUseOther?: string;
   helocActivelyUsed?: string;
   helocSpecialNotes?: string;
@@ -1344,7 +1344,7 @@ export default function PropertyDetails({
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                     mortgageSpecialNotes: '', mortgageDocLocation: '',
-                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                   })}
                   className="mr-2"
                 />
@@ -1375,7 +1375,7 @@ export default function PropertyDetails({
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                     mortgageSpecialNotes: '', mortgageDocLocation: '',
-                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -1389,7 +1389,7 @@ export default function PropertyDetails({
                       checked={data.debtType === 'heloc'}
                       onChange={() => onMultiChange({
                         debtType: 'heloc',
-                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -1403,7 +1403,7 @@ export default function PropertyDetails({
                       checked={data.debtType === 'both'}
                       onChange={() => onMultiChange({
                         debtType: 'both',
-                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUse: '', helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -2637,21 +2637,25 @@ export default function PropertyDetails({
                           ].map((opt) => (
                             <label key={opt.value} className="flex items-center">
                               <input
-                                type="radio"
-                                name={`helocPrimaryUse-${index}`}
-                                value={opt.value}
-                                checked={data.helocPrimaryUse === opt.value}
-                                onChange={() => onMultiChange({
-                                  helocPrimaryUse: opt.value,
-                                  helocPrimaryUseOther: opt.value === 'other' ? data.helocPrimaryUseOther || '' : '',
-                                })}
+                                type="checkbox"
+                                checked={(data.helocPrimaryUses || []).includes(opt.value)}
+                                onChange={(e) => {
+                                  const current = data.helocPrimaryUses || [];
+                                  const updated = e.target.checked
+                                    ? [...current, opt.value]
+                                    : current.filter((v) => v !== opt.value);
+                                  onMultiChange({
+                                    helocPrimaryUses: updated,
+                                    helocPrimaryUseOther: e.target.checked && opt.value === 'other' ? data.helocPrimaryUseOther || '' : (opt.value === 'other' ? '' : data.helocPrimaryUseOther || ''),
+                                  });
+                                }}
                                 className="mr-2"
                               />
                               <span className="text-white">{opt.label}</span>
                             </label>
                           ))}
                         </div>
-                        {data.helocPrimaryUse === 'other' && (
+                        {(data.helocPrimaryUses || []).includes('other') && (
                           <div className="ml-6 mt-2">
                             <input
                               type="text"

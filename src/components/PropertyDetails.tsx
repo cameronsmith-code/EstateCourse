@@ -60,6 +60,8 @@ export type PropertyData = {
   landlordInsuranceLocation: string;
   wasAlwaysRental: string;
   inhabitedYears: string[];
+  hasDebt: string;
+  debtType: string;
 };
 
 type Props = {
@@ -1244,6 +1246,70 @@ export default function PropertyDetails({
               className={inputClass}
             />
           </div>
+
+          <div>
+            <label className={labelClass}>Is there a mortgage or debt associated with {propertyName}?</label>
+            <div className="flex gap-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name={`hasDebt-${index}`}
+                  value="yes"
+                  checked={data.hasDebt === 'yes'}
+                  onChange={(e) => {
+                    onChange('hasDebt', e.target.value);
+                    if (e.target.value !== 'yes') onChange('debtType', '');
+                  }}
+                  className="mr-2"
+                />
+                <span className="text-white">Yes</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name={`hasDebt-${index}`}
+                  value="no"
+                  checked={data.hasDebt === 'no'}
+                  onChange={(e) => {
+                    onChange('hasDebt', e.target.value);
+                    onChange('debtType', '');
+                  }}
+                  className="mr-2"
+                />
+                <span className="text-white">No</span>
+              </label>
+            </div>
+          </div>
+
+          {data.hasDebt === 'yes' && (
+            <div>
+              <label className={labelClass}>Debt type</label>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name={`debtType-${index}`}
+                    value="mortgage"
+                    checked={data.debtType === 'mortgage'}
+                    onChange={(e) => onChange('debtType', e.target.value)}
+                    className="mr-2"
+                  />
+                  <span className="text-white">Mortgage</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name={`debtType-${index}`}
+                    value="heloc"
+                    checked={data.debtType === 'heloc'}
+                    onChange={(e) => onChange('debtType', e.target.value)}
+                    className="mr-2"
+                  />
+                  <span className="text-white">Home Equity Line of Credit (HELOC)</span>
+                </label>
+              </div>
+            </div>
+          )}
 
           {/* Ownership change (conditional: purchasers differ from current owners) */}
           {ownersDifferFromPurchasers && (

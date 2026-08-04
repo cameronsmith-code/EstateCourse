@@ -12356,7 +12356,7 @@ export default function StepForm({
 
                 {/* Primary Home subsection (only when living situation is 'own') */}
                 {answers['livingSituation'] === 'own' && (() => {
-                  const primaryHomeData = (answers['primaryHomeData'] as Partial<PropertyData>) || { type: 'Primary Home', name: '', country: '', province: '', state: '', city: '', locationOfDeeds: '', owners: [], otherOwners: [], ownershipPercentages: {}, purchasePrice: '', documentsLocation: '', hasRenovations: '', capitalImprovements: [], coOwnershipAgreement: '', coOwnershipAgreementLocation: '' };
+                  const primaryHomeData = (answers['primaryHomeData'] as Partial<PropertyData>) || { type: 'Primary Home', name: '', country: '', province: '', state: '', city: '', locationOfDeeds: '', owners: [], otherOwners: [], ownershipPercentages: {}, purchasePrice: '', documentsLocation: '', hasRenovations: '', capitalImprovements: [], coOwnershipAgreement: '', coOwnershipAgreementLocation: '', hasDebt: '', debtType: '' };
 
                   const handlePrimaryHomeChange = (field: keyof PropertyData, value: unknown) => {
                     const updated = { ...primaryHomeData, [field]: value };
@@ -12519,7 +12519,7 @@ export default function StepForm({
                           // Initialize property data for this type
                           setTimeout(() => {
                             const updated = [...propertiesData];
-                            updated[actualIndex] = { type, name: '', country: '', province: '', state: '', city: '', locationOfDeeds: '', owners: [], otherOwners: [], ownershipPercentages: {}, purchasePrice: '', documentsLocation: '', hasRenovations: '', capitalImprovements: [], coOwnershipAgreement: '', coOwnershipAgreementLocation: '' };
+                            updated[actualIndex] = { type, name: '', country: '', province: '', state: '', city: '', locationOfDeeds: '', owners: [], otherOwners: [], ownershipPercentages: {}, purchasePrice: '', documentsLocation: '', hasRenovations: '', capitalImprovements: [], coOwnershipAgreement: '', coOwnershipAgreementLocation: '', hasDebt: '', debtType: '' };
                             onAnswerChange('propertiesData', updated);
                           }, 0);
                         }
@@ -12549,15 +12549,54 @@ export default function StepForm({
           })()}
 
           {step.id === 10 && (() => {
+            const step9Answers = allAnswers?.get(9) || {};
+            const primaryHomeData = (step9Answers['primaryHomeData'] as Partial<PropertyData>) || {};
+            const propertiesData = (step9Answers['propertiesData'] as Array<Partial<PropertyData>>) || [];
+
+            const allProperties = [primaryHomeData, ...propertiesData].filter(p => p && p.hasDebt === 'yes');
+
+            const autoSelected: string[] = [];
+            allProperties.forEach((p) => {
+              const name = (p.name || '').trim();
+              if (p.debtType === 'mortgage') {
+                autoSelected.push('mortgage');
+                autoSelected.push(`other:Mortgage - ${name}`);
+              } else if (p.debtType === 'heloc') {
+                autoSelected.push('heloc');
+                autoSelected.push(`other:Home Equity Line of Credit - ${name}`);
+              }
+            });
+
+            const userSelected = (answers['obligationsTypes'] as string[]) || [];
+            const autoOtherLabels = new Set(allProperties
+              .map(p => {
+                const name = (p.name || '').trim();
+                if (p.debtType === 'mortgage') return `Mortgage - ${name}`;
+                if (p.debtType === 'heloc') return `Home Equity Line of Credit - ${name}`;
+                return null;
+              })
+              .filter(Boolean) as string[]);
+
+            const userOtherEntries = userSelected.filter(v => v.startsWith('other:'));
+            const userPresetEntries = userSelected.filter(v => !v.startsWith('other:') && !autoSelected.includes(v));
+
+            const preservedUserOthers = userOtherEntries.filter(entry => {
+              const label = entry.slice(6);
+              return !autoOtherLabels.has(label);
+            });
+
+            const mergedValue = [...new Set([...autoSelected, ...preservedUserOthers, ...userPresetEntries])];
+
             const renderQuestion = (question: typeof step.questions[0]) => {
               const displayLabel = typeof question.label === 'function'
                 ? question.label(allAnswers || new Map())
                 : question.label;
+              const questionValue = question.key === 'obligationsTypes' ? mergedValue : answers[question.key];
               return (
                 <FormField
                   key={question.key}
                   question={{ ...question, label: displayLabel }}
-                  value={answers[question.key]}
+                  value={questionValue}
                   onChange={(value) => onAnswerChange(question.key, value)}
                   answers={allAnswers}
                 />

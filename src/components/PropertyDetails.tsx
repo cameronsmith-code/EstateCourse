@@ -1558,7 +1558,7 @@ export default function PropertyDetails({
                             }}
                             className="mr-2"
                           />
-                          <span className="text-white">{client1Name} - {ownershipPercentages[client1Name] || '___'}%</span>
+                          <span className="text-white">{client1Name} - ({ownershipPercentages[client1Name] || '___'}% Owner)</span>
                         </label>
 
                         {/* Client 2 (if spouse exists) */}
@@ -1576,7 +1576,7 @@ export default function PropertyDetails({
                               }}
                               className="mr-2"
                             />
-                            <span className="text-white">{client2Name} - {ownershipPercentages[client2Name] || '___'}%</span>
+                            <span className="text-white">{client2Name} - ({ownershipPercentages[client2Name] || '___'}% Owner)</span>
                           </label>
                         )}
 
@@ -1596,7 +1596,7 @@ export default function PropertyDetails({
                               className="mr-2"
                             />
                             <span className="text-white">
-                              {otherOwners.filter((o) => o.name?.trim()).map((o) => `${o.name} - ${ownershipPercentages[o.name] || '___'}%`).join(', ')}
+                              {otherOwners.filter((o) => o.name?.trim()).map((o) => `${o.name} - (${ownershipPercentages[o.name] || '___'}% Owner)`).join(', ')}
                             </span>
                           </label>
                         )}

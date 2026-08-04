@@ -179,7 +179,9 @@ function PersonNameSelect({
 }) {
   const OTHER_VALUE = '__other__';
   const currentPerson = people.find(p => p.name.toLowerCase() === (selectedName || '').trim().toLowerCase());
-  const selectValue = currentPerson ? currentPerson.name : selectedName ? OTHER_VALUE : '';
+  const isKnownPerson = !!currentPerson;
+  const [isOther, setIsOther] = useState(!isKnownPerson && selectedName !== '');
+  const selectValue = currentPerson ? currentPerson.name : isOther ? OTHER_VALUE : '';
 
   return (
     <div className="space-y-2">
@@ -187,8 +189,13 @@ function PersonNameSelect({
         value={selectValue}
         onChange={(e) => {
           if (e.target.value === OTHER_VALUE) {
+            setIsOther(true);
+            onSelect('', '', '');
+          } else if (e.target.value === '') {
+            setIsOther(false);
             onSelect('', '', '');
           } else {
+            setIsOther(false);
             const person = people.find(p => p.name === e.target.value);
             onSelect(person?.name || '', person?.phone || '', person?.city || '');
           }
@@ -201,7 +208,7 @@ function PersonNameSelect({
         ))}
         <option value={OTHER_VALUE}>Other (new person)</option>
       </select>
-      {selectValue === OTHER_VALUE && (
+      {isOther && (
         <input
           type="text"
           value={selectedName}

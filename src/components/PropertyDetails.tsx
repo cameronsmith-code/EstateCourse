@@ -1256,10 +1256,7 @@ export default function PropertyDetails({
                   name={`hasDebt-${index}`}
                   value="yes"
                   checked={data.hasDebt === 'yes'}
-                  onChange={(e) => {
-                    onChange('hasDebt', e.target.value);
-                    if (e.target.value !== 'yes') onChange('debtType', '');
-                  }}
+                  onChange={() => onMultiChange({ hasDebt: 'yes' })}
                   className="mr-2"
                 />
                 <span className="text-white">Yes</span>
@@ -1270,10 +1267,7 @@ export default function PropertyDetails({
                   name={`hasDebt-${index}`}
                   value="no"
                   checked={data.hasDebt === 'no'}
-                  onChange={(e) => {
-                    onChange('hasDebt', e.target.value);
-                    onChange('debtType', '');
-                  }}
+                  onChange={() => onMultiChange({ hasDebt: 'no', debtType: '' })}
                   className="mr-2"
                 />
                 <span className="text-white">No</span>
@@ -1291,7 +1285,7 @@ export default function PropertyDetails({
                     name={`debtType-${index}`}
                     value="mortgage"
                     checked={data.debtType === 'mortgage'}
-                    onChange={(e) => onChange('debtType', e.target.value)}
+                    onChange={() => onChange('debtType', 'mortgage')}
                     className="mr-2"
                   />
                   <span className="text-white">Mortgage</span>
@@ -1302,7 +1296,7 @@ export default function PropertyDetails({
                     name={`debtType-${index}`}
                     value="heloc"
                     checked={data.debtType === 'heloc'}
-                    onChange={(e) => onChange('debtType', e.target.value)}
+                    onChange={() => onChange('debtType', 'heloc')}
                     className="mr-2"
                   />
                   <span className="text-white">Home Equity Line of Credit (HELOC)</span>

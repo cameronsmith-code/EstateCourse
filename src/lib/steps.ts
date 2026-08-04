@@ -3103,7 +3103,20 @@ export const STEPS: Step[] = [
     id: 13,
     title: 'Legacy Intent',
     description: 'Your Will determines who legally inherits your assets. It doesn\'t always explain what you hope will happen to them.\nFor many families, uncertainty—not the legal documents themselves—is what leads to misunderstandings and conflict. This section gives you the opportunity to record your wishes for important assets, identify whether those wishes have been discussed, and note where any supporting documents can be found.\nThis information does not replace your Will or other legal documents, but it can provide valuable guidance to your family, executor, and professional advisors.',
-    questions: [],
+    questions: [
+      {
+        key: 'legacyIntentRealEstateAssets',
+        label: 'Which assets would you like to record Legacy Intent for?\nSelect all that apply.',
+        type: 'checkbox-group',
+        options: (answers: Map<number, Record<string, unknown>>) => {
+          const propertiesData = (answers.get(9)?.['propertiesData'] as Array<Record<string, string>>) || [];
+          return propertiesData
+            .map((p, i) => ({ value: `property_${i}`, label: (p.propertyName || `Property ${i + 1}`).trim() }))
+            .filter(o => o.label);
+        },
+        required: false,
+      },
+    ],
   },
   {
     id: 14,

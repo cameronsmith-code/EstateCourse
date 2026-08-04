@@ -12548,6 +12548,33 @@ export default function StepForm({
             );
           })()}
 
+          {step.id === 13 && (() => {
+            const renderQuestion = (question: typeof step.questions[0]) => {
+              const displayLabel = typeof question.label === 'function'
+                ? question.label(allAnswers || new Map())
+                : question.label;
+              return (
+                <FormField
+                  key={question.key}
+                  question={{ ...question, label: displayLabel }}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                  answers={allAnswers}
+                />
+              );
+            };
+
+            const realEstateQuestions = step.questions.filter(q => q.key === 'legacyIntentRealEstateAssets');
+
+            return (
+              <>
+                <Subsection title="Real Estate">
+                  {realEstateQuestions.map(renderQuestion)}
+                </Subsection>
+              </>
+            );
+          })()}
+
           {step.id === 11 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';

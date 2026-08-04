@@ -63,6 +63,17 @@ export type PropertyData = {
   inhabitedYears: string[];
   hasDebt: string;
   debtType: string;
+  mortgageBalance: string;
+  mortgageLender: string;
+  mortgageNumber: string;
+  mortgagePayment: string;
+  mortgagePaymentFrequency: string;
+  mortgagePaymentFrequencyOther: string;
+  mortgageInterestRate: string;
+  mortgageRenewalDate: string;
+  mortgageRenewalDateUnknown: string;
+  mortgageAmortizationYears: string;
+  mortgageAmortizationUnknown: string;
 };
 
 type Props = {
@@ -1268,7 +1279,13 @@ export default function PropertyDetails({
                   name={`hasDebt-${index}`}
                   value="no"
                   checked={data.hasDebt === 'no'}
-                  onChange={() => onMultiChange({ hasDebt: 'no', debtType: '' })}
+                  onChange={() => onMultiChange({
+                    hasDebt: 'no', debtType: '',
+                    mortgageBalance: '', mortgageLender: '', mortgageNumber: '',
+                    mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
+                    mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
+                    mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
+                  })}
                   className="mr-2"
                 />
                 <span className="text-white">No</span>
@@ -1287,7 +1304,13 @@ export default function PropertyDetails({
                       name={`debtType-${index}`}
                       value="mortgage"
                       checked={data.debtType === 'mortgage'}
-                      onChange={() => onChange('debtType', 'mortgage')}
+                      onChange={() => onMultiChange({
+                        debtType: 'mortgage',
+                        mortgageBalance: '', mortgageLender: '', mortgageNumber: '',
+                        mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
+                        mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
+                        mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
+                      })}
                       className="mr-2"
                     />
                     <span className="text-white">Mortgage</span>
@@ -1298,13 +1321,207 @@ export default function PropertyDetails({
                       name={`debtType-${index}`}
                       value="heloc"
                       checked={data.debtType === 'heloc'}
-                      onChange={() => onChange('debtType', 'heloc')}
+                      onChange={() => onMultiChange({
+                        debtType: 'heloc',
+                        mortgageBalance: '', mortgageLender: '', mortgageNumber: '',
+                        mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
+                        mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
+                        mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
+                      })}
                       className="mr-2"
                     />
                     <span className="text-white">Home Equity Line of Credit (HELOC)</span>
                   </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`debtType-${index}`}
+                      value="both"
+                      checked={data.debtType === 'both'}
+                      onChange={() => onMultiChange({
+                        debtType: 'both',
+                        mortgageBalance: '', mortgageLender: '', mortgageNumber: '',
+                        mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
+                        mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
+                        mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
+                      })}
+                      className="mr-2"
+                    />
+                    <span className="text-white">Both</span>
+                  </label>
                 </div>
               </div>
+
+              {/* Mortgage branch — shows when Mortgage or Both is selected */}
+              {(data.debtType === 'mortgage' || data.debtType === 'both') && (
+                <div className="ml-6 space-y-5">
+                  <Subsection title={`${propertyName} - Mortgage`}>
+                    <div>
+                      <label className={labelClass}>Approximately how much is still owing on this mortgage?</label>
+                      <p className="text-xs text-gray-400 mb-2 italic">Outstanding Balance</p>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <input
+                          type="text"
+                          value={data.mortgageBalance || ''}
+                          onChange={(e) => onChange('mortgageBalance', e.target.value)}
+                          placeholder="___________"
+                          className={`${inputClass} pl-7`}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>Who is the lender?</label>
+                      <p className="text-xs text-gray-400 mb-2 italic">Institution / Lender</p>
+                      <input
+                        type="text"
+                        value={data.mortgageLender || ''}
+                        onChange={(e) => onChange('mortgageLender', e.target.value)}
+                        placeholder="Enter institution / lender"
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>Mortgage Number (Optional)</label>
+                      <p className="text-xs text-gray-400 mb-2 italic">Mortgage / Loan Number</p>
+                      <input
+                        type="text"
+                        value={data.mortgageNumber || ''}
+                        onChange={(e) => onChange('mortgageNumber', e.target.value)}
+                        placeholder="Enter mortgage / loan number"
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>What is the regular mortgage payment?</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <input
+                          type="text"
+                          value={data.mortgagePayment || ''}
+                          onChange={(e) => onChange('mortgagePayment', e.target.value)}
+                          placeholder="___________"
+                          className={`${inputClass} pl-7`}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>How often is the payment made?</label>
+                      <div className="space-y-2">
+                        {['Weekly', 'Bi-weekly', 'Semi-monthly', 'Monthly'].map((freq) => (
+                          <label key={freq} className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`mortgagePaymentFreq-${index}`}
+                              value={freq.toLowerCase().replace('-', '_')}
+                              checked={data.mortgagePaymentFrequency === freq.toLowerCase().replace('-', '_')}
+                              onChange={() => onMultiChange({ mortgagePaymentFrequency: freq.toLowerCase().replace('-', '_'), mortgagePaymentFrequencyOther: '' })}
+                              className="mr-2"
+                            />
+                            <span className="text-white">{freq}</span>
+                          </label>
+                        ))}
+                        <div>
+                          <label className="flex items-center mb-2">
+                            <input
+                              type="radio"
+                              name={`mortgagePaymentFreq-${index}`}
+                              value="other"
+                              checked={data.mortgagePaymentFrequency === 'other'}
+                              onChange={() => onChange('mortgagePaymentFrequency', 'other')}
+                              className="mr-2"
+                            />
+                            <span className="text-white">Other</span>
+                          </label>
+                          {data.mortgagePaymentFrequency === 'other' && (
+                            <input
+                              type="text"
+                              value={data.mortgagePaymentFrequencyOther || ''}
+                              onChange={(e) => onChange('mortgagePaymentFrequencyOther', e.target.value)}
+                              placeholder="Specify other frequency"
+                              className={inputClass}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>What is the current interest rate?</label>
+                      <div className="relative max-w-[120px]">
+                        <input
+                          type="text"
+                          value={data.mortgageInterestRate || ''}
+                          onChange={(e) => onChange('mortgageInterestRate', e.target.value)}
+                          placeholder="____"
+                          className={inputClass}
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>When is the mortgage up for renewal?</label>
+                      <input
+                        type="date"
+                        value={data.mortgageRenewalDate || ''}
+                        onChange={(e) => onChange('mortgageRenewalDate', e.target.value)}
+                        disabled={data.mortgageRenewalDateUnknown === 'yes'}
+                        className={inputClass}
+                      />
+                      <label className="flex items-center mt-2">
+                        <input
+                          type="checkbox"
+                          checked={data.mortgageRenewalDateUnknown === 'yes'}
+                          onChange={(e) => onChange('mortgageRenewalDateUnknown', e.target.checked ? 'yes' : '')}
+                          className="mr-2"
+                        />
+                        <span className="text-white">I don't know</span>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>Approximately how many years remain on the amortization?</label>
+                      <select
+                        value={data.mortgageAmortizationYears || ''}
+                        onChange={(e) => onChange('mortgageAmortizationYears', e.target.value)}
+                        disabled={data.mortgageAmortizationUnknown === 'yes'}
+                        className={inputClass}
+                      >
+                        <option value="">Select years</option>
+                        {Array.from({ length: 30 }, (_, i) => i + 1).map((y) => (
+                          <option key={y} value={String(y)}>{y} Year{y > 1 ? 's' : ''}</option>
+                        ))}
+                      </select>
+                      <label className="flex items-center mt-2">
+                        <input
+                          type="checkbox"
+                          checked={data.mortgageAmortizationUnknown === 'yes'}
+                          onChange={(e) => onMultiChange({
+                            mortgageAmortizationUnknown: e.target.checked ? 'yes' : '',
+                            mortgageAmortizationYears: e.target.checked ? '' : data.mortgageAmortizationYears,
+                          })}
+                          className="mr-2"
+                        />
+                        <span className="text-white">Not sure</span>
+                      </label>
+                    </div>
+                  </Subsection>
+                </div>
+              )}
+
+              {/* HELOC branch — shows when HELOC or Both is selected */}
+              {(data.debtType === 'heloc' || data.debtType === 'both') && (
+                <div className="ml-6 space-y-5">
+                  <Subsection title={`${propertyName} - Home Equity Line of Credit (HELOC)`}>
+                    <p className="text-gray-400 italic text-sm">HELOC details to be added.</p>
+                  </Subsection>
+                </div>
+              )}
             </Subsection>
           )}
 

@@ -1991,15 +1991,6 @@ export default function PropertyDetails({
                       <label className={labelClass}>Mortgage Broker Information</label>
                       <div className="space-y-3 mt-2">
                         <div>
-                          <label className={subLabelClass}>Lending Institution</label>
-                          <input
-                            type="text"
-                            value={data.mortgageBrokerLender || ''}
-                            onChange={(e) => onChange('mortgageBrokerLender', e.target.value)}
-                            className={inputClass}
-                          />
-                        </div>
-                        <div>
                           <label className={subLabelClass}>Contact Name</label>
                           <input
                             type="text"

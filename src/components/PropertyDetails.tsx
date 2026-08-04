@@ -100,6 +100,12 @@ export type PropertyData = {
   mortgageInsuranceDocLocations?: Record<string, string>;
   mortgageSpecialNotes?: string;
   mortgageDocLocation?: string;
+  helocLenderChoice?: string;
+  helocLender?: string;
+  helocAccountNumber?: string;
+  helocNumber?: string;
+  helocBalance?: string;
+  helocCreditLimit?: string;
 };
 
 type Props = {
@@ -1317,6 +1323,7 @@ export default function PropertyDetails({
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                     mortgageSpecialNotes: '', mortgageDocLocation: '',
+                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '',
                   })}
                   className="mr-2"
                 />
@@ -1347,6 +1354,7 @@ export default function PropertyDetails({
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                     mortgageSpecialNotes: '', mortgageDocLocation: '',
+                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '',
                       })}
                       className="mr-2"
                     />
@@ -1360,15 +1368,7 @@ export default function PropertyDetails({
                       checked={data.debtType === 'heloc'}
                       onChange={() => onMultiChange({
                         debtType: 'heloc',
-                        mortgageBalance: '', mortgageLender: '', mortgageNumber: '',
-                        mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
-                        mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
-                        mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
-                        mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
-                        mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
-                    mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
-                    mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
-                    mortgageSpecialNotes: '', mortgageDocLocation: '',
+                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '',
                       })}
                       className="mr-2"
                     />
@@ -1382,15 +1382,7 @@ export default function PropertyDetails({
                       checked={data.debtType === 'both'}
                       onChange={() => onMultiChange({
                         debtType: 'both',
-                        mortgageBalance: '', mortgageLender: '', mortgageNumber: '',
-                        mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
-                        mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
-                        mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
-                        mortgageResponsibleParties: [], mortgageOtherBorrowers: [], mortgageOtherParties: [],
-                        mortgagePaymentSource: '', mortgagePaymentSourceOther: '',
-                    mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
-                    mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
-                    mortgageSpecialNotes: '', mortgageDocLocation: '',
+                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '',
                       })}
                       className="mr-2"
                     />
@@ -2162,7 +2154,99 @@ export default function PropertyDetails({
               {(data.debtType === 'heloc' || data.debtType === 'both') && (
                 <div className="ml-6 space-y-5">
                   <Subsection title={`${propertyName} - Home Equity Line of Credit (HELOC)`}>
-                    <p className="text-gray-400 italic text-sm">HELOC details to be added.</p>
+                    <div className="space-y-4">
+                      <div>
+                        <label className={labelClass}>Who is the lender?</label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`helocLenderChoice-${index}`}
+                              value="previous"
+                              checked={data.helocLenderChoice === 'previous'}
+                              onChange={() => onMultiChange({
+                                helocLenderChoice: 'previous',
+                                helocLender: data.mortgageLender || '',
+                              })}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">{data.mortgageLender ? `${data.mortgageLender} (Lender/Institution previously entered)` : 'Lender/Institution previously entered'}</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name={`helocLenderChoice-${index}`}
+                              value="other"
+                              checked={data.helocLenderChoice === 'other'}
+                              onChange={() => onMultiChange({
+                                helocLenderChoice: 'other',
+                                helocLender: '',
+                              })}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">Other Lender/Institution</span>
+                          </label>
+                        </div>
+                      </div>
+                      {data.helocLenderChoice === 'other' && (
+                        <div>
+                          <label className={labelClass}>Institution / Lender</label>
+                          <input
+                            type="text"
+                            value={data.helocLender || ''}
+                            onChange={(e) => onChange('helocLender', e.target.value)}
+                            placeholder="Enter the name of the lender/institution"
+                            className={inputClass}
+                          />
+                        </div>
+                      )}
+                      <div>
+                        <label className={labelClass}>Account Number <span className="text-gray-400 font-normal">(Optional)</span></label>
+                        <input
+                          type="text"
+                          value={data.helocAccountNumber || ''}
+                          onChange={(e) => onChange('helocAccountNumber', e.target.value)}
+                          placeholder="Enter account number (optional)"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>HELOC Number</label>
+                        <input
+                          type="text"
+                          value={data.helocNumber || ''}
+                          onChange={(e) => onChange('helocNumber', e.target.value)}
+                          placeholder="Enter HELOC number"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Approximately how much is currently owing? (Outstanding Balance)</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                          <input
+                            type="text"
+                            value={data.helocBalance || ''}
+                            onChange={(e) => onChange('helocBalance', e.target.value)}
+                            placeholder="0.00"
+                            className={`${inputClass} pl-7`}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className={labelClass}>What is the available credit limit?</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                          <input
+                            type="text"
+                            value={data.helocCreditLimit || ''}
+                            onChange={(e) => onChange('helocCreditLimit', e.target.value)}
+                            placeholder="0.00"
+                            className={`${inputClass} pl-7`}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </Subsection>
                 </div>
               )}

@@ -621,6 +621,9 @@ interface FormData {
     revenueExpensesLocation?: string;
     capitalExpendituresLocation?: string;
     leaseDocumentsLocation?: string;
+    rentalTaxDocLocation?: string;
+    canadianRentalTaxDocLocation?: string;
+    foreignRentalTaxDocLocation?: string;
     hasPropertyManager?: string;
     propertyManagerName?: string;
     propertyManagerPhone?: string;
@@ -9854,7 +9857,7 @@ You should explore this as an option with your legal and CFP® professionals bec
     const propertiesData = (formData['propertiesData'] as Array<Record<string, unknown>>) || [];
     const rentalProps = propertiesData.filter((p) => {
       const type = String(p.type || '').toLowerCase();
-      return type.includes('rental') && (p.wasAlwaysRental === 'yes' || p.leaseDocumentsLocation || p.revenueExpensesLocation || p.capitalExpendituresLocation);
+      return type.includes('rental') && (p.wasAlwaysRental === 'yes' || p.leaseDocumentsLocation || p.rentalTaxDocLocation || p.canadianRentalTaxDocLocation || p.foreignRentalTaxDocLocation || p.revenueExpensesLocation || p.capitalExpendituresLocation);
     });
 
     if (rentalProps.length > 0) {
@@ -9871,6 +9874,9 @@ You should explore this as an option with your legal and CFP® professionals bec
 
         const rentalFields: { label: string; value?: string }[] = [
           { label: 'Lease Documents Location', value: String(p.leaseDocumentsLocation || '') },
+          { label: `Location of tax documents for ${propName}`, value: String(p.rentalTaxDocLocation || '') },
+          { label: `Location of Canadian tax documents for ${propName}`, value: String(p.canadianRentalTaxDocLocation || '') },
+          { label: `Location of tax documents for ${propName} (${String(p.country || '')})`, value: String(p.foreignRentalTaxDocLocation || '') },
           { label: 'Revenue/Expense Records Location', value: String(p.revenueExpensesLocation || '') },
           { label: 'Capital Expenditure Records Location', value: String(p.capitalExpendituresLocation || '') },
           { label: 'Always a Rental', value: p.wasAlwaysRental === 'no' ? 'Yes, always a rental' : p.wasAlwaysRental === 'yes' ? 'No, previously inhabited by client/spouse/child' : undefined },

@@ -51,6 +51,9 @@ export type PropertyData = {
   coOwnershipAgreementLocation: string;
   farmActiveEngagement: string;
   leaseDocumentsLocation: string;
+  rentalTaxDocLocation: string;
+  canadianRentalTaxDocLocation: string;
+  foreignRentalTaxDocLocation: string;
   hasPropertyManager: string;
   propertyManagerName: string;
   propertyManagerPhone: string;
@@ -3129,6 +3132,42 @@ export default function PropertyDetails({
                   </label>
                 </div>
               </div>
+
+              {/* Tax document locations */}
+              <div>
+                <label className={labelClass}>Location of tax documents for {propertyName}</label>
+                <input
+                  type="text"
+                  value={data.rentalTaxDocLocation || ''}
+                  onChange={(e) => onChange('rentalTaxDocLocation', e.target.value)}
+                  placeholder="Enter where the tax documents are kept"
+                  className={inputClass}
+                />
+              </div>
+              {!isCanada && country && (
+                <>
+                  <div>
+                    <label className={labelClass}>Location of Canadian tax documents for {propertyName}</label>
+                    <input
+                      type="text"
+                      value={data.canadianRentalTaxDocLocation || ''}
+                      onChange={(e) => onChange('canadianRentalTaxDocLocation', e.target.value)}
+                      placeholder="Enter where the Canadian tax documents are kept"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Location of tax documents for {propertyName} for {country}?</label>
+                    <input
+                      type="text"
+                      value={data.foreignRentalTaxDocLocation || ''}
+                      onChange={(e) => onChange('foreignRentalTaxDocLocation', e.target.value)}
+                      placeholder={`Enter where the ${country} tax documents are kept`}
+                      className={inputClass}
+                    />
+                  </div>
+                </>
+              )}
 
               {/* Landlord insurance document location (conditional on hasLandlordInsurance = yes) */}
               {data.hasLandlordInsurance === 'yes' && (

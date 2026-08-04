@@ -227,14 +227,6 @@ export function generatePropertyQuestions(n: number): StepQuestion[] {
       required: false,
       condition: propCond(n, (fd) => fd[`${prefix}HasBeneficialOwner`] === 'yes'),
     },
-    {
-      key: `${prefix}OwnershipDocLocation`,
-      label: 'Where is the ownership document stored?',
-      type: 'text',
-      placeholder: 'Enter storage location',
-      required: false,
-      condition: propCond(n),
-    },
   ];
 
   return questions;

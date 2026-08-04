@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, AlertTriangle } from 'lucide-react';
+import Subsection from './Subsection';
 
 export type OtherOwner = {
   name: string;
@@ -1276,33 +1277,35 @@ export default function PropertyDetails({
           </div>
 
           {data.hasDebt === 'yes' && (
-            <div>
-              <label className={labelClass}>Debt type</label>
-              <div className="flex gap-4">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name={`debtType-${index}`}
-                    value="mortgage"
-                    checked={data.debtType === 'mortgage'}
-                    onChange={() => onChange('debtType', 'mortgage')}
-                    className="mr-2"
-                  />
-                  <span className="text-white">Mortgage</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name={`debtType-${index}`}
-                    value="heloc"
-                    checked={data.debtType === 'heloc'}
-                    onChange={() => onChange('debtType', 'heloc')}
-                    className="mr-2"
-                  />
-                  <span className="text-white">Home Equity Line of Credit (HELOC)</span>
-                </label>
+            <Subsection title={`${propertyName} - Debt Information`}>
+              <div>
+                <label className={labelClass}>Debt type</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`debtType-${index}`}
+                      value="mortgage"
+                      checked={data.debtType === 'mortgage'}
+                      onChange={() => onChange('debtType', 'mortgage')}
+                      className="mr-2"
+                    />
+                    <span className="text-white">Mortgage</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name={`debtType-${index}`}
+                      value="heloc"
+                      checked={data.debtType === 'heloc'}
+                      onChange={() => onChange('debtType', 'heloc')}
+                      className="mr-2"
+                    />
+                    <span className="text-white">Home Equity Line of Credit (HELOC)</span>
+                  </label>
+                </div>
               </div>
-            </div>
+            </Subsection>
           )}
 
           {/* Ownership change (conditional: purchasers differ from current owners) */}

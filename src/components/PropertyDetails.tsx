@@ -70,6 +70,7 @@ export type PropertyData = {
   mortgagePaymentFrequency: string;
   mortgagePaymentFrequencyOther: string;
   mortgageInterestRate: string;
+  mortgageInterestRateType: string;
   mortgageRenewalDate: string;
   mortgageRenewalDateUnknown: string;
   mortgageAmortizationYears: string;
@@ -1283,7 +1284,7 @@ export default function PropertyDetails({
                     hasDebt: 'no', debtType: '',
                     mortgageBalance: '', mortgageLender: '', mortgageNumber: '',
                     mortgagePayment: '', mortgagePaymentFrequency: '', mortgagePaymentFrequencyOther: '',
-                    mortgageInterestRate: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
+                    mortgageInterestRate: '', mortgageInterestRateType: '', mortgageRenewalDate: '', mortgageRenewalDateUnknown: '',
                     mortgageAmortizationYears: '', mortgageAmortizationUnknown: '',
                   })}
                   className="mr-2"
@@ -1452,15 +1453,32 @@ export default function PropertyDetails({
 
                     <div>
                       <label className={labelClass}>What is the current interest rate?</label>
-                      <div className="relative max-w-[120px]">
-                        <input
-                          type="text"
-                          value={data.mortgageInterestRate || ''}
-                          onChange={(e) => onChange('mortgageInterestRate', e.target.value)}
-                          placeholder="____"
-                          className={inputClass}
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                      <div className="flex items-center gap-6 flex-wrap">
+                        <div className="relative max-w-[120px]">
+                          <input
+                            type="text"
+                            value={data.mortgageInterestRate || ''}
+                            onChange={(e) => onChange('mortgageInterestRate', e.target.value)}
+                            placeholder="____"
+                            className={inputClass}
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                        </div>
+                        <div className="flex gap-4 flex-wrap">
+                          {['Fixed Rate', 'Floating Rate', 'I/We are not sure'].map((rateType) => (
+                            <label key={rateType} className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`mortgageInterestRateType-${index}`}
+                                value={rateType}
+                                checked={data.mortgageInterestRateType === rateType}
+                                onChange={() => onChange('mortgageInterestRateType', rateType)}
+                                className="mr-1"
+                              />
+                              <span className="text-white">{rateType}</span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
                     </div>
 

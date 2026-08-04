@@ -1343,6 +1343,9 @@ export default function PropertyDetails({
             </>
           )}
 
+          {/* History subsection */}
+          <Subsection title={`${propertyName} - History`}>
+
           {/* Renovations */}
           <div>
             <label className={labelClass}>Have there been any Capital Improvements to {propertyName}?</label>
@@ -1901,6 +1904,7 @@ export default function PropertyDetails({
           )}
             </>
           )}
+          </Subsection>
         </div>
       )}
     </div>

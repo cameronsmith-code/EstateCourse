@@ -1852,6 +1852,17 @@ export default function PropertyDetails({
           )}
             </>
           )}
+
+          {/* Legacy Intent */}
+          <div className="mt-8">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="h-px flex-1 bg-gradient-to-r from-blue-500/50 to-transparent" />
+              <h3 className="text-sm font-semibold tracking-widest text-blue-400 uppercase whitespace-nowrap">
+                Legacy Intent
+              </h3>
+              <div className="h-px flex-1 bg-gradient-to-l from-blue-500/50 to-transparent" />
+            </div>
+          </div>
         </div>
       )}
     </div>

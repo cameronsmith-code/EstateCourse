@@ -1739,9 +1739,7 @@ export default function PropertyDetails({
                   name={`usedForIncome-${index}`}
                   value="yes"
                   checked={data.usedForIncome === 'yes'}
-                  onChange={() => {
-                    onChange('usedForIncome', 'yes');
-                  }}
+                  onChange={() => onMultiChange({ usedForIncome: 'yes' })}
                   className="mr-2"
                 />
                 <span className="text-gray-300">Yes</span>
@@ -1752,10 +1750,7 @@ export default function PropertyDetails({
                   name={`usedForIncome-${index}`}
                   value="no"
                   checked={data.usedForIncome === 'no'}
-                  onChange={() => {
-                    onChange('usedForIncome', 'no');
-                    onMultiChange({ claimedCCA: '', recordsLocation: '' });
-                  }}
+                  onChange={() => onMultiChange({ usedForIncome: 'no', claimedCCA: '', recordsLocation: '' })}
                   className="mr-2"
                 />
                 <span className="text-gray-300">No</span>
@@ -1788,10 +1783,7 @@ export default function PropertyDetails({
                       name={`claimedCCA-${index}`}
                       value="no"
                       checked={data.claimedCCA === 'no'}
-                      onChange={() => {
-                        onChange('claimedCCA', 'no');
-                        onChange('recordsLocation', '');
-                      }}
+                      onChange={() => onMultiChange({ claimedCCA: 'no', recordsLocation: '' })}
                       className="mr-2"
                     />
                     <span className="text-gray-300">No</span>
@@ -1802,10 +1794,7 @@ export default function PropertyDetails({
                       name={`claimedCCA-${index}`}
                       value="not_sure"
                       checked={data.claimedCCA === 'not_sure'}
-                      onChange={() => {
-                        onChange('claimedCCA', 'not_sure');
-                        onChange('recordsLocation', '');
-                      }}
+                      onChange={() => onMultiChange({ claimedCCA: 'not_sure', recordsLocation: '' })}
                       className="mr-2"
                     />
                     <span className="text-gray-300">I'm/We're not sure</span>
@@ -1855,10 +1844,7 @@ export default function PropertyDetails({
                   name={`claimedPREOtherProperty-${index}`}
                   value="no"
                   checked={data.claimedPREOtherProperty === 'no'}
-                  onChange={() => {
-                    onChange('claimedPREOtherProperty', 'no');
-                    onChange('preDesignatedYears', []);
-                  }}
+                  onChange={() => onMultiChange({ claimedPREOtherProperty: 'no', preDesignatedYears: [] })}
                   className="mr-2"
                 />
                 <span className="text-gray-300">No</span>

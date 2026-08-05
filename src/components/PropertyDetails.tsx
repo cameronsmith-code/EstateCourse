@@ -116,6 +116,11 @@ export type PropertyData = {
   helocPaymentSource?: string;
   helocPaymentSourceOther?: string;
   helocResponsibleParties?: string[];
+  helocOtherBorrowers?: Array<{
+    name: string;
+    relationship: string;
+    otherInfo: string;
+  }>;
   helocOtherParties: Array<{
     name: string;
     relationship: string;
@@ -1354,7 +1359,7 @@ export default function PropertyDetails({
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                     mortgageSpecialNotes: '', mortgageDocLocation: '',
-                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherBorrowers: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                   })}
                   className="mr-2"
                 />
@@ -1385,7 +1390,7 @@ export default function PropertyDetails({
                     mortgageBrokerLender: '', mortgageBrokerContactName: '', mortgageBrokerContactPhone: '', mortgageBrokerContactEmail: '',
                     mortgageInsuranceTypes: [], mortgageInsuranceProviders: {}, mortgageInsurancePolicyNumbers: {}, mortgageInsuranceDocLocations: {},
                     mortgageSpecialNotes: '', mortgageDocLocation: '',
-                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                    helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherBorrowers: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -1399,7 +1404,7 @@ export default function PropertyDetails({
                       checked={data.debtType === 'heloc'}
                       onChange={() => onMultiChange({
                         debtType: 'heloc',
-                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherBorrowers: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -1413,7 +1418,7 @@ export default function PropertyDetails({
                       checked={data.debtType === 'both'}
                       onChange={() => onMultiChange({
                         debtType: 'both',
-                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
+                        helocLenderChoice: '', helocLender: '', helocAccountNumber: '', helocNumber: '', helocBalance: '', helocCreditLimit: '', helocInterestRate: '', helocInterestRateType: '', helocPrimePlus: '', helocPaymentType: '', helocPaymentMethod: '', helocPaymentSource: '', helocPaymentSourceOther: '', helocResponsibleParties: [], helocOtherBorrowers: [], helocOtherParties: [], helocPrimaryUses: [], helocPrimaryUseOther: '', helocActivelyUsed: '', helocSpecialNotes: '', helocDocLocation: '', helocHasAutoPayments: '', helocAutoPaymentsDescription: '',
                       })}
                       className="mr-2"
                     />
@@ -2492,6 +2497,140 @@ export default function PropertyDetails({
                               />
                               <span className="text-white">{client2Name} - ({ownershipPercentages[client2Name] || '___'}% Owner)</span>
                             </label>
+                          )}
+
+                          {/* Other owners listed on the property */}
+                          {otherOwners.filter((o) => o.name?.trim()).length > 0 && (
+                            <label className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={(data.helocResponsibleParties || []).includes('other-owners')}
+                                onChange={(e) => {
+                                  const current = data.helocResponsibleParties || [];
+                                  const updated = e.target.checked
+                                    ? [...current, 'other-owners']
+                                    : current.filter((p) => p !== 'other-owners');
+                                  onChange('helocResponsibleParties', updated);
+                                }}
+                                className="mr-2"
+                              />
+                              <span className="text-white">
+                                {otherOwners.filter((o) => o.name?.trim()).map((o) => `${o.name} - (${ownershipPercentages[o.name] || '___'}% Owner)`).join(', ')}
+                              </span>
+                            </label>
+                          )}
+
+                          {/* Other borrower(s) */}
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={(data.helocResponsibleParties || []).includes('other-borrowers')}
+                              onChange={(e) => {
+                                const current = data.helocResponsibleParties || [];
+                                const updated = e.target.checked
+                                  ? [...current, 'other-borrowers']
+                                  : current.filter((p) => p !== 'other-borrowers');
+                                onMultiChange({
+                                  helocResponsibleParties: updated,
+                                  helocOtherBorrowers: e.target.checked ? (data.helocOtherBorrowers || []) : [],
+                                });
+                              }}
+                              className="mr-2"
+                            />
+                            <span className="text-white">Other borrower(s)</span>
+                          </label>
+
+                          {/* Other borrower details — shown when "Other borrower(s)" is checked */}
+                          {(data.helocResponsibleParties || []).includes('other-borrowers') && (
+                            <div className="ml-6 space-y-5 mt-3">
+                              {/* Select family members from predefined people */}
+                              {predefinedPeople.filter((p) => p.name?.trim()).length > 0 && (
+                                <div>
+                                  <label className={labelClass}>Select any family members who are other borrowers on the HELOC for {propertyName}:</label>
+                                  <div className="space-y-2">
+                                    {predefinedPeople.filter((p) => p.name?.trim()).map((person) => {
+                                      const borrowers = data.helocOtherBorrowers || [];
+                                      const isSelected = borrowers.some((b) => b.name === person.name);
+                                      return (
+                                        <label key={person.name} className="flex items-center">
+                                          <input
+                                            type="checkbox"
+                                            checked={isSelected}
+                                            onChange={(e) => {
+                                              const current = data.helocOtherBorrowers || [];
+                                              if (e.target.checked) {
+                                                onChange('helocOtherBorrowers', [...current, { name: person.name, relationship: '', otherInfo: '' }]);
+                                              } else {
+                                                onChange('helocOtherBorrowers', current.filter((b) => b.name !== person.name));
+                                              }
+                                            }}
+                                            className="mr-2"
+                                          />
+                                          <span className="text-white">{person.name}</span>
+                                        </label>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Detail fields for each selected other borrower */}
+                              {(data.helocOtherBorrowers || []).map((borrower, bIdx) => {
+                                const debtLabel = 'HELOC';
+                                return (
+                                  <div key={bIdx} className="bg-gray-700/50 rounded-lg p-4 border border-gray-600 space-y-4">
+                                    <h4 className="text-sm font-semibold text-white">Other Borrower {bIdx + 1}</h4>
+
+                                    <div>
+                                      <label className={labelClass}>Name</label>
+                                      <input
+                                        type="text"
+                                        value={borrower.name || ''}
+                                        onChange={(e) => {
+                                          const updated = [...(data.helocOtherBorrowers || [])];
+                                          updated[bIdx] = { ...updated[bIdx], name: e.target.value };
+                                          onChange('helocOtherBorrowers', updated);
+                                        }}
+                                        placeholder="Enter name"
+                                        className={inputClass}
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label className={labelClass}>Relationship to {client1Name}{hasSpouse && client2Name ? ` and ${client2Name}` : ''}</label>
+                                      <input
+                                        type="text"
+                                        value={borrower.relationship || ''}
+                                        onChange={(e) => {
+                                          const updated = [...(data.helocOtherBorrowers || [])];
+                                          updated[bIdx] = { ...updated[bIdx], relationship: e.target.value };
+                                          onChange('helocOtherBorrowers', updated);
+                                        }}
+                                        placeholder="Enter relationship"
+                                        className={inputClass}
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label className={labelClass}>
+                                        Other information about {borrower.name || 'this borrower'} and the {debtLabel} on {propertyName}?
+                                      </label>
+                                      <textarea
+                                        value={borrower.otherInfo || ''}
+                                        onChange={(e) => {
+                                          const updated = [...(data.helocOtherBorrowers || [])];
+                                          updated[bIdx] = { ...updated[bIdx], otherInfo: e.target.value };
+                                          onChange('helocOtherBorrowers', updated);
+                                        }}
+                                        placeholder="Enter any additional information"
+                                        rows={3}
+                                        className={inputClass}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           )}
 
                           <label className="flex items-center">

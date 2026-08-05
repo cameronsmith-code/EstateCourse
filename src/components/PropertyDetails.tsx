@@ -242,7 +242,7 @@ export default function PropertyDetails({
   const otherOwners = data.otherOwners || [];
   const ownershipPercentages = data.ownershipPercentages || {};
 
-  const [showOwnershipPct, setShowOwnershipPct] = useState(false);
+
 
   const capitalImprovements = data.capitalImprovements || [];
 
@@ -345,7 +345,7 @@ export default function PropertyDetails({
   const purchasedByOtherOwners = data.purchasedByOtherOwners || [];
   const purchasedByOwnershipPercentages = data.purchasedByOwnershipPercentages || {};
 
-  const [showPurchasedByPct, setShowPurchasedByPct] = useState(false);
+
 
   const validPurchasedByOptions: string[] = Array.from(new Set([
     client1Name,
@@ -825,15 +825,8 @@ export default function PropertyDetails({
           {/* Ownership percentages */}
           {allOwnerNames.length > 0 && (
             <div className="mt-6">
-              <button
-                type="button"
-                onClick={() => setShowOwnershipPct(!showOwnershipPct)}
-                className="text-sm font-semibold text-blue-400 hover:text-blue-300"
-              >
-                {showOwnershipPct ? 'Hide' : 'Set'} ownership percentages
-              </button>
-              {showOwnershipPct && (
-                <div className="mt-3 space-y-3">
+              <label className="block text-sm font-semibold text-gray-200 mb-3">Ownership Percentages</label>
+                <div className="space-y-3">
                   {allOwnerNames.map((name) => (
                     <div key={name} className="flex items-center gap-3">
                       <span className="text-white text-sm flex-1">{name}</span>
@@ -859,7 +852,6 @@ export default function PropertyDetails({
                     )}
                   </div>
                 </div>
-              )}
             </div>
           )}
 
@@ -1274,15 +1266,8 @@ export default function PropertyDetails({
                 {/* Ownership percentages */}
                 {purchasedByAllOwnerNames.length > 0 && (
                   <div className="mt-6">
-                    <button
-                      type="button"
-                      onClick={() => setShowPurchasedByPct(!showPurchasedByPct)}
-                      className="text-sm font-semibold text-blue-400 hover:text-blue-300"
-                    >
-                      {showPurchasedByPct ? 'Hide' : 'Set'} ownership percentages
-                    </button>
-                    {showPurchasedByPct && (
-                      <div className="mt-3 space-y-3">
+                    <label className="block text-sm font-semibold text-gray-200 mb-3">Ownership Percentages</label>
+                      <div className="space-y-3">
                         {purchasedByAllOwnerNames.map((name) => (
                           <div key={name} className="flex items-center gap-3">
                             <span className="text-white text-sm flex-1">{name}</span>
@@ -1308,7 +1293,6 @@ export default function PropertyDetails({
                           )}
                         </div>
                       </div>
-                    )}
                   </div>
                 )}
               </div>

@@ -3117,6 +3117,20 @@ export default function PropertyDetails({
                 </div>
               </div>
 
+              {/* Landlord insurance document location (conditional on hasLandlordInsurance = yes) */}
+              {data.hasLandlordInsurance === 'yes' && (
+                <div className="ml-6">
+                  <label className={labelClass}>Landlord insurance policy document location for {propertyName}:</label>
+                  <input
+                    type="text"
+                    value={data.landlordInsuranceLocation || ''}
+                    onChange={(e) => onChange('landlordInsuranceLocation', e.target.value)}
+                    placeholder="Enter where the policy document is kept"
+                    className={inputClass}
+                  />
+                </div>
+              )}
+
               {/* Tax document locations */}
               <div>
                 <label className={labelClass}>Location of tax documents for {propertyName}</label>
@@ -3151,20 +3165,6 @@ export default function PropertyDetails({
                     />
                   </div>
                 </>
-              )}
-
-              {/* Landlord insurance document location (conditional on hasLandlordInsurance = yes) */}
-              {data.hasLandlordInsurance === 'yes' && (
-                <div className="ml-6">
-                  <label className={labelClass}>Landlord insurance policy document location for {propertyName}:</label>
-                  <input
-                    type="text"
-                    value={data.landlordInsuranceLocation || ''}
-                    onChange={(e) => onChange('landlordInsuranceLocation', e.target.value)}
-                    placeholder="Enter where the policy document is kept"
-                    className={inputClass}
-                  />
-                </div>
               )}
             </>
           )}

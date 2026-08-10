@@ -2212,8 +2212,8 @@ export default function StepForm({
       familyMembers.push({ id: 'spouse', name: spouseName, relationship: 'Spouse' });
     }
   }
-  const step1ChildrenData = (step1Answers['childrenData'] as Array<Record<string, string>>) || [];
-  step1ChildrenData.forEach((child, idx) => {
+  const step3ChildrenData = ((allAnswers?.get(3) || {})['childrenData'] as Array<Record<string, string>>) || [];
+  step3ChildrenData.forEach((child, idx) => {
     const childName = (child['name'] as string) || '';
     if (childName.trim()) {
       familyMembers.push({ id: `child_${idx}`, name: childName, relationship: 'Child' });

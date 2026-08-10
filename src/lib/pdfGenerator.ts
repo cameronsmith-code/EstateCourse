@@ -3351,7 +3351,7 @@ export const generatePDF = (formData: FormData) => {
     addSectionHeader('Family Trust Information');
 
     const trustInfoRows = [
-      { label: 'Trust 1 - Legal Name:', value: formData.trustLegalName || '' },
+      { label: formData.trustLegalName ? `${formData.trustLegalName} - Legal Name:` : 'Trust 1 - Legal Name:', value: formData.trustLegalName || '' },
       { label: 'Trust Deed Location:', value: formData.trustDeedLocation || '' },
       { label: 'Year Established:', value: formData.trustYearEstablished || '' },
       { label: 'Number of Beneficiaries:', value: (formData.trustBeneficiariesData?.length || 0).toString() },
@@ -3395,7 +3395,7 @@ export const generatePDF = (formData: FormData) => {
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
     doc.setTextColor(...colors.darkText);
-    doc.text('Trust Beneficiaries:', margin, yPosition);
+    doc.text(formData.trustLegalName ? `${formData.trustLegalName} Beneficiaries:` : 'Trust Beneficiaries:', margin, yPosition);
     doc.setFont(undefined, 'normal');
     yPosition += 6;
 
@@ -3654,10 +3654,10 @@ export const generatePDF = (formData: FormData) => {
       beneficiariesData: Array<{ beneficiaryName?: string; relationshipToSettlor?: string; countryOfResidence?: string; phoneNumber?: string; emailAddress?: string; }> | undefined,
     ) => {
       checkPageBreak(30);
-      addSubsectionHeader(`Family Trust ${trustNum}:`);
+      addSubsectionHeader(legalName ? `${legalName}:` : `Family Trust ${trustNum}:`);
 
       const atRows = [
-        { label: `Trust ${trustNum} - Legal Name:`, value: legalName || '' },
+        { label: legalName ? `${legalName} - Legal Name:` : `Trust ${trustNum} - Legal Name:`, value: legalName || '' },
         { label: 'Trust Deed Location:', value: deedLocation || '' },
         { label: 'Year Established:', value: yearEstablished || '' },
         { label: 'Number of Beneficiaries:', value: (beneficiariesData?.length || 0).toString() },
@@ -3699,7 +3699,7 @@ export const generatePDF = (formData: FormData) => {
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(...colors.darkText);
-        doc.text('Trust Beneficiaries:', margin, yPosition);
+        doc.text(legalName ? `${legalName} Beneficiaries:` : 'Trust Beneficiaries:', margin, yPosition);
         doc.setFont(undefined, 'normal');
         yPosition += 6;
 

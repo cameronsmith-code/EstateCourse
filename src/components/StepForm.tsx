@@ -2361,7 +2361,7 @@ export default function StepForm({
 
               {answers['hasFamilyTrust'] === 'yes' && (
                 <TrustBeneficiariesSection
-                  label="Trust Beneficiaries"
+                  label={`${answers['trustLegalName'] ? answers['trustLegalName'] + ' Beneficiaries' : 'Trust Beneficiaries'}`}
                   entries={trustBeneficiariesData}
                   familyMembers={familyMembers}
                   onChange={(entries) => onAnswerChange('trustBeneficiariesData', entries.length > 0 ? entries : undefined)}
@@ -2392,7 +2392,7 @@ export default function StepForm({
                       />
                     ))}
                   <TrustBeneficiariesSection
-                    label="Trust 2 Beneficiaries"
+                    label={`${answers['trust2LegalName'] ? answers['trust2LegalName'] + ' Beneficiaries' : 'Trust 2 Beneficiaries'}`}
                     entries={trust2BeneficiariesData}
                     familyMembers={familyMembers}
                     onChange={(entries) => onAnswerChange('trust2BeneficiariesData', entries.length > 0 ? entries : undefined)}
@@ -2422,7 +2422,7 @@ export default function StepForm({
                       />
                     ))}
                   <TrustBeneficiariesSection
-                    label="Trust 3 Beneficiaries"
+                    label={`${answers['trust3LegalName'] ? answers['trust3LegalName'] + ' Beneficiaries' : 'Trust 3 Beneficiaries'}`}
                     entries={trust3BeneficiariesData}
                     familyMembers={familyMembers}
                     onChange={(entries) => onAnswerChange('trust3BeneficiariesData', entries.length > 0 ? entries : undefined)}
@@ -2452,7 +2452,7 @@ export default function StepForm({
                       />
                     ))}
                   <TrustBeneficiariesSection
-                    label="Trust 4 Beneficiaries"
+                    label={`${answers['trust4LegalName'] ? answers['trust4LegalName'] + ' Beneficiaries' : 'Trust 4 Beneficiaries'}`}
                     entries={trust4BeneficiariesData}
                     familyMembers={familyMembers}
                     onChange={(entries) => onAnswerChange('trust4BeneficiariesData', entries.length > 0 ? entries : undefined)}

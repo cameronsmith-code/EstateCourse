@@ -8,7 +8,7 @@ type FormFieldProps = {
 };
 
 export default function FormField({ question, value, onChange, answers }: FormFieldProps) {
-  const { key, label, type, placeholder, options, required, max, allowOther } = question;
+  const { key, label, type, placeholder, options, required, max, allowOther, description } = question;
 
   const resolvedOptions = typeof options === 'function' ? options(answers || new Map()) : options;
 
@@ -99,6 +99,9 @@ export default function FormField({ question, value, onChange, answers }: FormFi
           {label}
           {required && <span className="text-red-400 ml-1">*</span>}
         </label>
+        {description && (
+          <p className="text-sm text-gray-400 italic mb-3">{description}</p>
+        )}
         <div className="space-y-2">
           {resolvedOptions?.map((opt) => (
             <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
@@ -166,6 +169,9 @@ export default function FormField({ question, value, onChange, answers }: FormFi
           {label}
           {required && <span className="text-red-400 ml-1">*</span>}
         </label>
+        {description && (
+          <p className="text-sm text-gray-400 italic mb-3">{description}</p>
+        )}
         <div className="space-y-2">
           {resolvedOptions?.map((opt) => (
             <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">

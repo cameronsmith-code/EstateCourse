@@ -3354,7 +3354,7 @@ export const generatePDF = (formData: FormData) => {
       { label: 'Trust 1 - Legal Name:', value: formData.trustLegalName || '' },
       { label: 'Trust Deed Location:', value: formData.trustDeedLocation || '' },
       { label: 'Year Established:', value: formData.trustYearEstablished || '' },
-      { label: 'Number of Beneficiaries:', value: formData.trustBeneficiariesCount || '' },
+      { label: 'Number of Beneficiaries:', value: (formData.trustBeneficiariesData?.length || 0).toString() },
     ];
 
     const cellHeight = 8;
@@ -3399,7 +3399,7 @@ export const generatePDF = (formData: FormData) => {
     doc.setFont(undefined, 'normal');
     yPosition += 6;
 
-    const beneficiaryCount = parseInt(formData.trustBeneficiariesCount || '0');
+    const beneficiaryCount = formData.trustBeneficiariesData?.length || 0;
     const beneCellHeight = 6;
     const beneLabelWidth = fieldWidth * 0.35;
     const beneValueWidth = fieldWidth * 0.65;
@@ -3660,7 +3660,7 @@ export const generatePDF = (formData: FormData) => {
         { label: `Trust ${trustNum} - Legal Name:`, value: legalName || '' },
         { label: 'Trust Deed Location:', value: deedLocation || '' },
         { label: 'Year Established:', value: yearEstablished || '' },
-        { label: 'Number of Beneficiaries:', value: beneficiariesCount || '' },
+        { label: 'Number of Beneficiaries:', value: (beneficiariesData?.length || 0).toString() },
       ];
 
       const atLabelW = fieldWidth * 0.35;
@@ -3694,7 +3694,7 @@ export const generatePDF = (formData: FormData) => {
 
       yPosition += 8;
 
-      const bCount = parseInt(beneficiariesCount || '0');
+      const bCount = beneficiariesData?.length || 0;
       if (bCount > 0) {
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
@@ -3755,13 +3755,13 @@ export const generatePDF = (formData: FormData) => {
     };
 
     if (formData.hasAdditionalFamilyTrust === 'yes') {
-      renderAdditionalTrust(2, formData.trust2LegalName, formData.trust2DeedLocation, formData.trust2YearEstablished, formData.trust2BeneficiariesCount, formData.trust2BeneficiariesData);
+      renderAdditionalTrust(2, formData.trust2LegalName, formData.trust2DeedLocation, formData.trust2YearEstablished, undefined, formData.trust2BeneficiariesData);
     }
     if (formData.hasAdditionalFamilyTrust2 === 'yes') {
-      renderAdditionalTrust(3, formData.trust3LegalName, formData.trust3DeedLocation, formData.trust3YearEstablished, formData.trust3BeneficiariesCount, formData.trust3BeneficiariesData);
+      renderAdditionalTrust(3, formData.trust3LegalName, formData.trust3DeedLocation, formData.trust3YearEstablished, undefined, formData.trust3BeneficiariesData);
     }
     if (formData.hasAdditionalFamilyTrust3 === 'yes') {
-      renderAdditionalTrust(4, formData.trust4LegalName, formData.trust4DeedLocation, formData.trust4YearEstablished, formData.trust4BeneficiariesCount, formData.trust4BeneficiariesData);
+      renderAdditionalTrust(4, formData.trust4LegalName, formData.trust4DeedLocation, formData.trust4YearEstablished, undefined, formData.trust4BeneficiariesData);
     }
   }
 

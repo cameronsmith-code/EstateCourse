@@ -2372,7 +2372,8 @@ export default function StepForm({
               {answers['hasFamilyTrust'] === 'yes' && (() => {
                 const q = step.questions.find(q => q.key === 'hasAdditionalFamilyTrust');
                 if (!q) return null;
-                return <FormField key={q.key} question={q} value={answers[q.key]} onChange={(v) => onAnswerChange(q.key, v)} />;
+                const displayLabel = typeof q.label === 'function' ? q.label(allAnswers || new Map()) : q.label;
+                return <FormField key={q.key} question={{ ...q, label: displayLabel }} value={answers[q.key]} onChange={(v) => onAnswerChange(q.key, v)} />;
               })()}
 
               {/* ── Trust 2 ── */}
@@ -2400,7 +2401,8 @@ export default function StepForm({
                   {(() => {
                     const q = step.questions.find(q => q.key === 'hasAdditionalFamilyTrust2');
                     if (!q) return null;
-                    return <FormField key={q.key} question={q} value={answers[q.key]} onChange={(v) => onAnswerChange(q.key, v)} />;
+                    const displayLabel = typeof q.label === 'function' ? q.label(allAnswers || new Map()) : q.label;
+                    return <FormField key={q.key} question={{ ...q, label: displayLabel }} value={answers[q.key]} onChange={(v) => onAnswerChange(q.key, v)} />;
                   })()}
                 </>
               )}
@@ -2430,7 +2432,8 @@ export default function StepForm({
                   {(() => {
                     const q = step.questions.find(q => q.key === 'hasAdditionalFamilyTrust3');
                     if (!q) return null;
-                    return <FormField key={q.key} question={q} value={answers[q.key]} onChange={(v) => onAnswerChange(q.key, v)} />;
+                    const displayLabel = typeof q.label === 'function' ? q.label(allAnswers || new Map()) : q.label;
+                    return <FormField key={q.key} question={{ ...q, label: displayLabel }} value={answers[q.key]} onChange={(v) => onAnswerChange(q.key, v)} />;
                   })()}
                 </>
               )}

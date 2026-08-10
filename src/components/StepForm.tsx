@@ -6084,6 +6084,10 @@ export default function StepForm({
                         corporations={corporations}
                         onChange={(field, value) => handlePgChange(idx, field, value)}
                         onMultiChange={(updates) => handlePgMultiChange(idx, updates)}
+                        onRemove={() => {
+                          const updated = pgEntries.filter((_, entryIndex) => entryIndex !== idx);
+                          onAnswerChange('personalGuaranteesData', updated.length > 0 ? updated : undefined);
+                        }}
                       />
                     ))}
 

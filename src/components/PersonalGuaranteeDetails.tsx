@@ -34,6 +34,7 @@ type Props = {
   corporations: Array<{ legalName: string }>;
   onChange: (field: keyof PersonalGuaranteeData, value: unknown) => void;
   onMultiChange: (updates: Partial<PersonalGuaranteeData>) => void;
+  onRemove: () => void;
 };
 
 const inputClass =
@@ -68,6 +69,7 @@ export default function PersonalGuaranteeDetails({
   corporations,
   onChange,
   onMultiChange,
+  onRemove,
 }: Props) {
   const companyName = data.selectedCompany || `Guarantee ${index + 1}`;
   const guarantors = data.guarantors || [];
@@ -105,6 +107,15 @@ export default function PersonalGuaranteeDetails({
           {index + 1}
         </div>
         <h3 className="text-lg font-semibold text-white">{companyName}</h3>
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`Remove ${companyName}`}
+          title="Remove this personal guarantee"
+          className="ml-auto inline-flex items-center justify-center rounded-lg p-2 text-red-400 transition-colors hover:bg-red-400/10 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-400"
+        >
+          <Trash2 size={18} />
+        </button>
       </div>
 
       {/* Which company has the borrowing that was personally guaranteed? */}

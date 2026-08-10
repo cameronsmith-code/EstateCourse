@@ -9,6 +9,7 @@ import PersonalGuaranteeDetails, { PersonalGuaranteeData } from './PersonalGuara
 import ShareholderLoanDetails, { ShareholderLoanData } from './ShareholderLoanDetails';
 import CompanyOwedDetails, { CompanyOwedData } from './CompanyOwedDetails';
 import IntercompanyLoanDetails, { IntercompanyLoanData } from './IntercompanyLoanDetails';
+import RelatedPartyLoanDetails, { RelatedPartyLoanData } from './RelatedPartyLoanDetails';
 import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
@@ -6569,6 +6570,142 @@ export default function StepForm({
                                   <input
                                     type="radio"
                                     name="ic-add-initial"
+                                    value="no"
+                                    checked={false}
+                                    onChange={() => {}}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+                        </Subsection>
+                      )}
+                    </>
+                  );
+                })()}
+
+                {corporations.length >= 1 && (() => {
+                  const rplQuestion = step.questions[4];
+                  if (!rplQuestion) return null;
+                  const rplDisplayLabel = typeof rplQuestion.label === 'function'
+                    ? rplQuestion.label(allAnswers || new Map())
+                    : rplQuestion.label;
+                  const rplResolvedOptions = typeof rplQuestion.options === 'function'
+                    ? (rplQuestion.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+                    : rplQuestion.options;
+                  const rplAnswer = answers['slRelatedPartyLoan'];
+
+                  const rplEntries = (answers['relatedPartyLoansData'] as RelatedPartyLoanData[]) || [];
+
+                  const handleRplChange = (idx: number, field: keyof RelatedPartyLoanData, value: unknown) => {
+                    const updated = [...rplEntries];
+                    while (updated.length <= idx) updated.push({} as RelatedPartyLoanData);
+                    updated[idx] = { ...updated[idx], [field]: value };
+                    onAnswerChange('relatedPartyLoansData', updated);
+                  };
+
+                  const handleRplMultiChange = (idx: number, updates: Partial<RelatedPartyLoanData>) => {
+                    const updated = [...rplEntries];
+                    while (updated.length <= idx) updated.push({} as RelatedPartyLoanData);
+                    updated[idx] = { ...updated[idx], ...updates };
+                    onAnswerChange('relatedPartyLoansData', updated);
+                  };
+
+                  return (
+                    <>
+                      <FormField
+                        question={{ ...rplQuestion, label: rplDisplayLabel, options: rplResolvedOptions }}
+                        value={rplAnswer}
+                        onChange={(value) => {
+                          onAnswerChange('slRelatedPartyLoan', value);
+                          if (value !== 'yes') {
+                            onAnswerChange('relatedPartyLoansData', undefined);
+                          }
+                        }}
+                      />
+
+                      {rplAnswer === 'yes' && (
+                        <Subsection title="Other Related-Party Loans">
+                          {rplEntries.map((entry, idx) => (
+                            <RelatedPartyLoanDetails
+                              key={idx}
+                              index={idx}
+                              data={entry}
+                              corporations={corporations}
+                              onChange={(field, value) => handleRplChange(idx, field, value)}
+                              onMultiChange={(updates) => handleRplMultiChange(idx, updates)}
+                              onRemove={() => {
+                                const updated = rplEntries.filter((_, entryIndex) => entryIndex !== idx);
+                                onAnswerChange('relatedPartyLoansData', updated.length > 0 ? updated : undefined);
+                              }}
+                            />
+                          ))}
+
+                          {rplEntries.length > 0 && (
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-3">
+                                Is there another financial arrangement like this involving one of your companies?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="rpl-has-another"
+                                    value="yes"
+                                    checked={rplEntries[rplEntries.length - 1]?.hasAdditional === 'yes'}
+                                    onChange={() => {
+                                      const updated = [...rplEntries];
+                                      updated[updated.length - 1] = { ...updated[updated.length - 1], hasAdditional: 'yes' };
+                                      onAnswerChange('relatedPartyLoansData', [...updated, {} as RelatedPartyLoanData]);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="rpl-has-another"
+                                    value="no"
+                                    checked={rplEntries[rplEntries.length - 1]?.hasAdditional === 'no' || !rplEntries[rplEntries.length - 1]?.hasAdditional}
+                                    onChange={() => {
+                                      const updated = [...rplEntries];
+                                      updated[updated.length - 1] = { ...updated[updated.length - 1], hasAdditional: 'no' };
+                                      onAnswerChange('relatedPartyLoansData', updated);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+
+                          {rplEntries.length === 0 && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-3">
+                                Would you like to add a related-party loan?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="rpl-add-initial"
+                                    value="yes"
+                                    checked={false}
+                                    onChange={() => {
+                                      onAnswerChange('relatedPartyLoansData', [{} as RelatedPartyLoanData]);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="rpl-add-initial"
                                     value="no"
                                     checked={false}
                                     onChange={() => {}}

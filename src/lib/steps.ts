@@ -1495,6 +1495,17 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         ],
         required: true,
       },
+      {
+        key: 'slRelatedPartyLoan',
+        label: 'Do any of your companies owe money to — or are they owed money by — a person or business that isn\'t one of the companies you\'ve told us about?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+          { value: 'not_sure', label: 'Not sure' },
+        ],
+        required: true,
+      },
     ],
   },
   {

@@ -109,12 +109,17 @@ export default function PersonalGuaranteeDetails({
         <h3 className="text-lg font-semibold text-white">{companyName}</h3>
         <button
           type="button"
-          onClick={onRemove}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onRemove();
+          }}
           aria-label={`Remove ${companyName}`}
           title="Remove this personal guarantee"
-          className="ml-auto inline-flex items-center justify-center rounded-lg p-2 text-red-400 transition-colors hover:bg-red-400/10 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-400"
+          className="ml-auto inline-flex items-center gap-1.5 justify-center rounded-lg px-3 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-400/10 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-400"
         >
-          <Trash2 size={18} />
+          <Trash2 size={16} />
+          Remove
         </button>
       </div>
 

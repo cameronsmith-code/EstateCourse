@@ -22,6 +22,11 @@ export type PersonalGuaranteeData = {
   maximumAmount: string;
   percentage: string;
   arrangementDescription: string;
+  hasPledgedSecurity: string;
+  pledgedAssets: string[];
+  pledgedAssetsOther: string;
+  hasDocCopy: string;
+  docLocation: string;
   hasAdditional: string;
 };
 
@@ -58,6 +63,15 @@ const GUARANTEE_SCOPES = [
   { value: 'percentage', label: 'A percentage of the debt' },
   { value: 'another_arrangement', label: 'Another arrangement' },
   { value: 'not_sure', label: "I'm not sure" },
+];
+
+const PLEDGED_ASSET_OPTIONS = [
+  { value: 'personal_residence', label: 'Personal residence' },
+  { value: 'other_real_estate', label: 'Other real estate' },
+  { value: 'investment_account', label: 'Investment account' },
+  { value: 'cash_gics', label: 'Cash / GICs' },
+  { value: 'other_personal_assets', label: 'Other personal assets' },
+  { value: 'other', label: 'Other' },
 ];
 
 export default function PersonalGuaranteeDetails({
@@ -97,6 +111,16 @@ export default function PersonalGuaranteeDetails({
       maximumAmount: '',
       percentage: '',
       arrangementDescription: '',
+    });
+  };
+
+  const pledgedAssets = data.pledgedAssets || [];
+
+  const handlePledgedAssetToggle = (value: string, checked: boolean) => {
+    const updated = checked ? [...pledgedAssets, value] : pledgedAssets.filter((v) => v !== value);
+    onMultiChange({
+      pledgedAssets: updated,
+      pledgedAssetsOther: value === 'other' && !checked ? '' : data.pledgedAssetsOther,
     });
   };
 
@@ -443,6 +467,111 @@ export default function PersonalGuaranteeDetails({
             onChange={(e) => onChange('arrangementDescription', e.target.value)}
             placeholder="Enter description of the guarantee arrangement"
             rows={3}
+            className={inputClass}
+          />
+        </div>
+      )}
+
+      {/* Has any personal property or investment been pledged as security for this borrowing? */}
+      <div>
+        <label className={labelClass}>Has any personal property or investment been pledged as security for this borrowing?</label>
+        <div className="space-y-2">
+          {[
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+            { value: 'not_sure', label: 'Not sure' },
+          ].map((opt) => (
+            <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+              <input
+                type="radio"
+                name={`pg-hasPledgedSecurity-${index}`}
+                value={opt.value}
+                checked={data.hasPledgedSecurity === opt.value}
+                onChange={() => {
+                  onMultiChange({
+                    hasPledgedSecurity: opt.value,
+                    pledgedAssets: [],
+                    pledgedAssetsOther: '',
+                  });
+                }}
+                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="ml-3 text-gray-300">{opt.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* If yes: What has been pledged? (multi-select) */}
+      {data.hasPledgedSecurity === 'yes' && (
+        <div className="ml-6">
+          <label className={labelClass}>What has been pledged?</label>
+          <div className="space-y-2">
+            {PLEDGED_ASSET_OPTIONS.map((opt) => (
+              <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={pledgedAssets.includes(opt.value)}
+                  onChange={(e) => handlePledgedAssetToggle(opt.value, e.target.checked)}
+                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded"
+                />
+                <span className="ml-3 text-gray-300">{opt.label}</span>
+              </label>
+            ))}
+          </div>
+          {pledgedAssets.includes('other') && (
+            <div className="mt-3">
+              <label className={labelClass}>Please describe:</label>
+              <input
+                type="text"
+                value={data.pledgedAssetsOther || ''}
+                onChange={(e) => onChange('pledgedAssetsOther', e.target.value)}
+                placeholder="Enter description of the other pledged asset"
+                className={inputClass}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Do you have a copy of the personal guarantee or lending documents? */}
+      <div>
+        <label className={labelClass}>Do you have a copy of the personal guarantee or lending documents?</label>
+        <div className="space-y-2">
+          {[
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+            { value: 'not_sure', label: 'Not sure' },
+          ].map((opt) => (
+            <label key={opt.value} className="flex items-center p-3 border border-gray-600 bg-gray-700 rounded-lg hover:bg-gray-600 cursor-pointer">
+              <input
+                type="radio"
+                name={`pg-hasDocCopy-${index}`}
+                value={opt.value}
+                checked={data.hasDocCopy === opt.value}
+                onChange={() => {
+                  onMultiChange({
+                    hasDocCopy: opt.value,
+                    docLocation: '',
+                  });
+                }}
+                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="ml-3 text-gray-300">{opt.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* If yes: Where can someone find these documents? */}
+      {data.hasDocCopy === 'yes' && (
+        <div className="ml-6">
+          <label className={labelClass}>Where can someone find these documents?</label>
+          <input
+            type="text"
+            value={data.docLocation || ''}
+            onChange={(e) => onChange('docLocation', e.target.value)}
+            placeholder="Enter location of the documents"
             className={inputClass}
           />
         </div>

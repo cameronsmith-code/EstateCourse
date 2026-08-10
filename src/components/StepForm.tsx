@@ -8,6 +8,7 @@ import PropertyDetails, { PropertyData } from './PropertyDetails';
 import PersonalGuaranteeDetails, { PersonalGuaranteeData } from './PersonalGuaranteeDetails';
 import ShareholderLoanDetails, { ShareholderLoanData } from './ShareholderLoanDetails';
 import CompanyOwedDetails, { CompanyOwedData } from './CompanyOwedDetails';
+import IntercompanyLoanDetails, { IntercompanyLoanData } from './IntercompanyLoanDetails';
 import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
@@ -6432,6 +6433,142 @@ export default function StepForm({
                                   <input
                                     type="radio"
                                     name="co-add-initial"
+                                    value="no"
+                                    checked={false}
+                                    onChange={() => {}}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+                        </Subsection>
+                      )}
+                    </>
+                  );
+                })()}
+
+                {corporations.length >= 2 && (() => {
+                  const icQuestion = step.questions[3];
+                  if (!icQuestion) return null;
+                  const icDisplayLabel = typeof icQuestion.label === 'function'
+                    ? icQuestion.label(allAnswers || new Map())
+                    : icQuestion.label;
+                  const icResolvedOptions = typeof icQuestion.options === 'function'
+                    ? (icQuestion.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+                    : icQuestion.options;
+                  const icAnswer = answers['slIntercompanyLoan'];
+
+                  const icEntries = (answers['intercompanyLoansData'] as IntercompanyLoanData[]) || [];
+
+                  const handleIcChange = (idx: number, field: keyof IntercompanyLoanData, value: unknown) => {
+                    const updated = [...icEntries];
+                    while (updated.length <= idx) updated.push({} as IntercompanyLoanData);
+                    updated[idx] = { ...updated[idx], [field]: value };
+                    onAnswerChange('intercompanyLoansData', updated);
+                  };
+
+                  const handleIcMultiChange = (idx: number, updates: Partial<IntercompanyLoanData>) => {
+                    const updated = [...icEntries];
+                    while (updated.length <= idx) updated.push({} as IntercompanyLoanData);
+                    updated[idx] = { ...updated[idx], ...updates };
+                    onAnswerChange('intercompanyLoansData', updated);
+                  };
+
+                  return (
+                    <>
+                      <FormField
+                        question={{ ...icQuestion, label: icDisplayLabel, options: icResolvedOptions }}
+                        value={icAnswer}
+                        onChange={(value) => {
+                          onAnswerChange('slIntercompanyLoan', value);
+                          if (value !== 'yes') {
+                            onAnswerChange('intercompanyLoansData', undefined);
+                          }
+                        }}
+                      />
+
+                      {icAnswer === 'yes' && (
+                        <Subsection title="Money Between Your Companies">
+                          {icEntries.map((entry, idx) => (
+                            <IntercompanyLoanDetails
+                              key={idx}
+                              index={idx}
+                              data={entry}
+                              corporations={corporations}
+                              onChange={(field, value) => handleIcChange(idx, field, value)}
+                              onMultiChange={(updates) => handleIcMultiChange(idx, updates)}
+                              onRemove={() => {
+                                const updated = icEntries.filter((_, entryIndex) => entryIndex !== idx);
+                                onAnswerChange('intercompanyLoansData', updated.length > 0 ? updated : undefined);
+                              }}
+                            />
+                          ))}
+
+                          {icEntries.length > 0 && (
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-3">
+                                Is there another amount owing between your companies?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="ic-has-another"
+                                    value="yes"
+                                    checked={icEntries[icEntries.length - 1]?.hasAdditional === 'yes'}
+                                    onChange={() => {
+                                      const updated = [...icEntries];
+                                      updated[updated.length - 1] = { ...updated[updated.length - 1], hasAdditional: 'yes' };
+                                      onAnswerChange('intercompanyLoansData', [...updated, {} as IntercompanyLoanData]);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="ic-has-another"
+                                    value="no"
+                                    checked={icEntries[icEntries.length - 1]?.hasAdditional === 'no' || !icEntries[icEntries.length - 1]?.hasAdditional}
+                                    onChange={() => {
+                                      const updated = [...icEntries];
+                                      updated[updated.length - 1] = { ...updated[updated.length - 1], hasAdditional: 'no' };
+                                      onAnswerChange('intercompanyLoansData', updated);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+
+                          {icEntries.length === 0 && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-3">
+                                Would you like to add an amount owing between your companies?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="ic-add-initial"
+                                    value="yes"
+                                    checked={false}
+                                    onChange={() => {
+                                      onAnswerChange('intercompanyLoansData', [{} as IntercompanyLoanData]);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="ic-add-initial"
                                     value="no"
                                     checked={false}
                                     onChange={() => {}}

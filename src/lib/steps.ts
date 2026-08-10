@@ -1484,6 +1484,17 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         ],
         required: true,
       },
+      {
+        key: 'slIntercompanyLoan',
+        label: 'Have any of your companies loaned or advanced money to another company you\'ve told us about?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+          { value: 'not_sure', label: 'Not sure' },
+        ],
+        required: true,
+      },
     ],
   },
   {

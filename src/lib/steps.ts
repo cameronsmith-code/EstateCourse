@@ -1416,6 +1416,12 @@ export const STEPS: Step[] = [
   },
   {
     id: 7,
+    title: 'Corporate Debt',
+    description: 'Details about debts and obligations related to your corporation(s).',
+    questions: [],
+  },
+  {
+    id: 8,
     title: 'Your Professional Team',
     description: 'The people who help manage your family\'s financial, legal, tax, and healthcare affairs.\nIf something happened to you, these are the professionals your executor, attorney for property, attorney for personal care, or future caregiver may need to contact.',
     questions: [
@@ -2464,7 +2470,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 8,
+    id: 9,
     title: 'Your Financial Footprint',
     description: 'Banking and financial account information',
     questions: [
@@ -2560,7 +2566,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 9,
+    id: 10,
     title: 'Real Estate',
     description: 'Real estate is often one of the largest and most emotionally significant parts of an estate. This section helps us understand what properties you own or rent, who owns them, where important documents are kept, and whether there are any planning opportunities or potential challenges for your executor and family.',
     questions: [
@@ -2869,7 +2875,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 10,
+    id: 11,
     title: 'Debt and Obligations',
     description: 'Understanding your liabilities (debts and obligations) is essential for effective estate planning. This section helps us identify outstanding debts that may need to be settled from your estate, and ensures your executor has a complete picture of your financial obligations.',
     questions: [
@@ -2901,7 +2907,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 11,
+    id: 12,
     title: 'Life Insurance',
     description: 'Life insurance can play a key role in your estate plan by providing liquidity to cover debts, taxes, and final expenses, and by protecting your loved ones financially. This section helps us understand your existing coverage so we can assess whether it aligns with your estate planning goals.',
     questions: [
@@ -3110,13 +3116,13 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 12,
+    id: 13,
     title: 'Property and Liability Insurance',
     description: 'This section captures details about your property and liability insurance coverage, including policies for your home, vehicles, and other assets, as well as any umbrella liability policies.',
     questions: [],
   },
   {
-    id: 13,
+    id: 14,
     title: 'Legacy Intent',
     description: 'Your Will determines who legally inherits your assets. It doesn\'t always explain what you hope will happen to them.\nFor many families, uncertainty—not the legal documents themselves—is what leads to misunderstandings and conflict. This section gives you the opportunity to record your wishes for important assets, identify whether those wishes have been discussed, and note where any supporting documents can be found.\nThis information does not replace your Will or other legal documents, but it can provide valuable guidance to your family, executor, and professional advisors.',
     questions: [
@@ -3125,7 +3131,7 @@ export const STEPS: Step[] = [
         label: 'Which assets would you like to record Legacy Intent for?\nSelect all that apply.',
         type: 'checkbox-group',
         options: (answers: Map<number, Record<string, unknown>>) => {
-          const propertiesData = (answers.get(9)?.['propertiesData'] as Array<Record<string, string>>) || [];
+          const propertiesData = (answers.get(10)?.['propertiesData'] as Array<Record<string, string>>) || [];
           return propertiesData
             .map((p, i) => ({ value: `property_${i}`, label: (p.propertyName || `Property ${i + 1}`).trim() }))
             .filter(o => o.label);
@@ -3135,7 +3141,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 14,
+    id: 15,
     title: 'Wills',
     description: 'A Will is the foundation of your estate plan. It directs how your assets are distributed, names your executor, and can include trusts for beneficiaries with special needs. This section helps us understand the current state of your Will(s) and whether updates may be needed.',
     questions: [
@@ -3334,7 +3340,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 15,
+    id: 16,
     title: 'Powers of Attorney',
     description: 'A Power of Attorney (POA) lets you appoint someone to make decisions on your behalf if you become unable to do so. There are two types: one for personal care (health decisions) and one for property (financial decisions).',
     questions: [
@@ -3644,7 +3650,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 16,
+    id: 17,
     title: 'Estate Trustees (Executors)',
     description: 'An Estate Trustee (also called an Executor) is the person or institution responsible for administering your estate after you pass away. This includes paying debts, filing taxes, and distributing assets according to your Will.',
     questions: [
@@ -4060,7 +4066,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 17,
+    id: 18,
     title: 'Funeral Arrangements',
     description: 'Planning your funeral arrangements in advance can relieve your family of difficult decisions during an emotional time. This section captures your wishes regarding funeral arrangements and whether they have been documented.',
     questions: [
@@ -4168,7 +4174,7 @@ export const STEPS: Step[] = [
     ],
   },
   {
-    id: 18,
+    id: 19,
     title: 'Pensions & Registered Accounts',
     description: 'Pensions and registered accounts (RRSP, RRIF, TFSA, etc.) often form a significant part of your estate. Understanding what you have and where it is located helps ensure these assets are properly managed and distributed.',
     questions: [

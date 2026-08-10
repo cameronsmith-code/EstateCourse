@@ -1365,7 +1365,7 @@ export default function StepForm({
 
   // Pre-fill Step 11 corporate insurance from Step 6 corporate data
   useEffect(() => {
-    if (step.id !== 11) return;
+    if (step.id !== 12) return;
 
     const step6Answers = allAnswers?.get(6);
     if (!step6Answers) return;
@@ -6020,7 +6020,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 7 && (() => {
+          {step.id === 8 && (() => {
             const allFormData = Object.fromEntries(
               Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
                 Object.entries(stepAnswers)
@@ -6885,7 +6885,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 8 && (() => {
+          {step.id === 9 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
@@ -12262,7 +12262,7 @@ export default function StepForm({
 
 
 
-          {step.id === 9 && (() => {
+          {step.id === 10 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
             const maritalStatus = basicAnswers['maritalStatus'] as string;
@@ -12548,7 +12548,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 10 && (() => {
+          {step.id === 11 && (() => {
             const step9Answers = allAnswers?.get(9) || {};
             const primaryHomeData = (step9Answers['primaryHomeData'] as Partial<PropertyData>) || {};
             const propertiesData = (step9Answers['propertiesData'] as Array<Partial<PropertyData>>) || [];
@@ -12610,7 +12610,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 13 && (() => {
+          {step.id === 14 && (() => {
             const renderQuestion = (question: typeof step.questions[0]) => {
               const displayLabel = typeof question.label === 'function'
                 ? question.label(allAnswers || new Map())
@@ -12637,7 +12637,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 11 && (() => {
+          {step.id === 12 && (() => {
             const basicAnswers = allAnswers?.get(1) || {};
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
             const maritalStatus = basicAnswers['maritalStatus'] as string;

@@ -38,6 +38,10 @@ export default function Wizard() {
     if (stepId === 3) {
       return hasChildren === 'yes';
     }
+    if (stepId === 7) {
+      const corpAnswers = answers.get(6) || {};
+      return corpAnswers['ownsCorporation'] === 'yes';
+    }
     return true;
   };
 

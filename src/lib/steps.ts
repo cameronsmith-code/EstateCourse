@@ -1506,6 +1506,22 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         ],
         required: true,
       },
+      {
+        key: 'cfcReviewConfirmed',
+        label: 'Does this look right?',
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes, continue' },
+          { value: 'no', label: 'I need to make changes' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) =>
+          formData.pgHasPersonalGuarantee === 'yes' ||
+          formData.slHasShareholderLoan === 'yes' ||
+          formData.slOwesCompany === 'yes' ||
+          formData.slIntercompanyLoan === 'yes' ||
+          formData.slRelatedPartyLoan === 'yes',
+      },
     ],
   },
   {

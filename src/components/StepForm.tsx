@@ -10,6 +10,7 @@ import ShareholderLoanDetails, { ShareholderLoanData } from './ShareholderLoanDe
 import CompanyOwedDetails, { CompanyOwedData } from './CompanyOwedDetails';
 import IntercompanyLoanDetails, { IntercompanyLoanData } from './IntercompanyLoanDetails';
 import RelatedPartyLoanDetails, { RelatedPartyLoanData } from './RelatedPartyLoanDetails';
+import CorporateFinancialReview from './CorporateFinancialReview';
 import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
@@ -6722,6 +6723,79 @@ export default function StepForm({
                   );
                 })()}
               </>
+            );
+          })()}
+
+          {step.id === 7 && (() => {
+            const step1Answers = allAnswers?.get(1) || {};
+            const client1Name = (step1Answers['fullName'] as string) || 'Client 1';
+            const client2Name = (step1Answers['spouseName'] as string) || 'Client 2';
+            const maritalStatus = step1Answers['maritalStatus'] as string;
+            const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+
+            const step6Answers = allAnswers?.get(6) || {};
+            const corporationsData = step6Answers['corporationsData'] as Array<Record<string, unknown>> | undefined;
+            const corporations = (corporationsData || []).map((c) => ({
+              legalName: (c['legalName'] as string) || '',
+            })).filter((c) => c.legalName.trim());
+
+            const allFormData = Object.fromEntries(
+              Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                Object.entries(stepAnswers)
+              )
+            );
+
+            const anyYes =
+              allFormData['pgHasPersonalGuarantee'] === 'yes' ||
+              allFormData['slHasShareholderLoan'] === 'yes' ||
+              allFormData['slOwesCompany'] === 'yes' ||
+              allFormData['slIntercompanyLoan'] === 'yes' ||
+              allFormData['slRelatedPartyLoan'] === 'yes';
+
+            if (!anyYes) return null;
+
+            const handleRemoveFromReview = (section: string, index: number) => {
+              const dataKeys: Record<string, string> = {
+                pg: 'personalGuaranteesData',
+                sl: 'shareholderLoansData',
+                co: 'companyOwedData',
+                ic: 'intercompanyLoansData',
+                rpl: 'relatedPartyLoansData',
+              };
+              const dataKey = dataKeys[section];
+              if (!dataKey) return;
+              const entries = (answers[dataKey] as Array<Record<string, unknown>>) || [];
+              const updated = entries.filter((_, idx) => idx !== index);
+              onAnswerChange(dataKey, updated.length > 0 ? updated : undefined);
+            };
+
+            const handleAddAnother = (section: string) => {
+              const dataKeys: Record<string, string> = {
+                pg: 'personalGuaranteesData',
+                sl: 'shareholderLoansData',
+                co: 'companyOwedData',
+                ic: 'intercompanyLoansData',
+                rpl: 'relatedPartyLoansData',
+              };
+              const dataKey = dataKeys[section];
+              if (!dataKey) return;
+              const entries = (answers[dataKey] as Array<Record<string, unknown>>) || [];
+              onAnswerChange(dataKey, [...entries, {}]);
+            };
+
+            return (
+              <CorporateFinancialReview
+                answers={answers}
+                client1Name={client1Name}
+                client2Name={client2Name}
+                hasSpouse={hasSpouse}
+                corporations={corporations}
+                onEdit={() => {}}
+                onRemove={handleRemoveFromReview}
+                onAddAnother={handleAddAnother}
+                onConfirm={() => onAnswerChange('cfcReviewConfirmed', 'yes')}
+                onMakeChanges={() => onAnswerChange('cfcReviewConfirmed', 'no')}
+              />
             );
           })()}
 

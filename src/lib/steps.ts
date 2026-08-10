@@ -1463,6 +1463,27 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         ],
         required: true,
       },
+      {
+        key: 'slOwesCompany',
+        label: (answers) => {
+          const step1 = answers.get(1) || {};
+          const client1Name = (step1['fullName'] as string) || 'Client 1';
+          const hasSpouse = (step1['maritalStatus'] as string) === 'married' || (step1['maritalStatus'] as string) === 'common_law';
+          const client2Name = (step1['spouseName'] as string) || 'Client 2';
+          if (hasSpouse) {
+            return `Have ${client1Name} or ${client2Name} taken money from any of your companies that is still expected to be repaid to the company?`;
+          }
+          return `Has ${client1Name} taken money from any of your companies that is still expected to be repaid to the company?`;
+        },
+        type: 'radio',
+        description: `This can happen when money is taken from a company personally and recorded as an amount that is expected to be repaid to the company.`,
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+          { value: 'not_sure', label: 'Not sure' },
+        ],
+        required: true,
+      },
     ],
   },
   {

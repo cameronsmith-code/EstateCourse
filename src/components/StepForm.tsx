@@ -7,6 +7,7 @@ import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
 import PropertyDetails, { PropertyData } from './PropertyDetails';
 import PersonalGuaranteeDetails, { PersonalGuaranteeData } from './PersonalGuaranteeDetails';
 import ShareholderLoanDetails, { ShareholderLoanData } from './ShareholderLoanDetails';
+import CompanyOwedDetails, { CompanyOwedData } from './CompanyOwedDetails';
 import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
@@ -6292,6 +6293,145 @@ export default function StepForm({
                                   <input
                                     type="radio"
                                     name="sl-add-initial"
+                                    value="no"
+                                    checked={false}
+                                    onChange={() => {}}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+                        </Subsection>
+                      )}
+                    </>
+                  );
+                })()}
+
+                {(() => {
+                  const coQuestion = step.questions[2];
+                  if (!coQuestion) return null;
+                  const coDisplayLabel = typeof coQuestion.label === 'function'
+                    ? coQuestion.label(allAnswers || new Map())
+                    : coQuestion.label;
+                  const coResolvedOptions = typeof coQuestion.options === 'function'
+                    ? (coQuestion.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+                    : coQuestion.options;
+                  const coAnswer = answers['slOwesCompany'];
+
+                  const coEntries = (answers['companyOwedData'] as CompanyOwedData[]) || [];
+
+                  const handleCoChange = (idx: number, field: keyof CompanyOwedData, value: unknown) => {
+                    const updated = [...coEntries];
+                    while (updated.length <= idx) updated.push({} as CompanyOwedData);
+                    updated[idx] = { ...updated[idx], [field]: value };
+                    onAnswerChange('companyOwedData', updated);
+                  };
+
+                  const handleCoMultiChange = (idx: number, updates: Partial<CompanyOwedData>) => {
+                    const updated = [...coEntries];
+                    while (updated.length <= idx) updated.push({} as CompanyOwedData);
+                    updated[idx] = { ...updated[idx], ...updates };
+                    onAnswerChange('companyOwedData', updated);
+                  };
+
+                  return (
+                    <>
+                      <FormField
+                        question={{ ...coQuestion, label: coDisplayLabel, options: coResolvedOptions }}
+                        value={coAnswer}
+                        onChange={(value) => {
+                          onAnswerChange('slOwesCompany', value);
+                          if (value !== 'yes') {
+                            onAnswerChange('companyOwedData', undefined);
+                          }
+                        }}
+                      />
+
+                      {coAnswer === 'yes' && (
+                        <Subsection title="Money You Owe Your Company(ies)">
+                          {coEntries.map((entry, idx) => (
+                            <CompanyOwedDetails
+                              key={idx}
+                              index={idx}
+                              data={entry}
+                              client1Name={client1Name}
+                              client2Name={client2Name}
+                              hasSpouse={hasSpouse}
+                              corporations={corporations}
+                              onChange={(field, value) => handleCoChange(idx, field, value)}
+                              onMultiChange={(updates) => handleCoMultiChange(idx, updates)}
+                              onRemove={() => {
+                                const updated = coEntries.filter((_, entryIndex) => entryIndex !== idx);
+                                onAnswerChange('companyOwedData', updated.length > 0 ? updated : undefined);
+                              }}
+                            />
+                          ))}
+
+                          {coEntries.length > 0 && (
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-3">
+                                Is there another amount that {client1Name}{hasSpouse ? ` or ${client2Name}` : ''} owes to a company?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="co-has-another"
+                                    value="yes"
+                                    checked={coEntries[coEntries.length - 1]?.hasAdditional === 'yes'}
+                                    onChange={() => {
+                                      const updated = [...coEntries];
+                                      updated[updated.length - 1] = { ...updated[updated.length - 1], hasAdditional: 'yes' };
+                                      onAnswerChange('companyOwedData', [...updated, {} as CompanyOwedData]);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="co-has-another"
+                                    value="no"
+                                    checked={coEntries[coEntries.length - 1]?.hasAdditional === 'no' || !coEntries[coEntries.length - 1]?.hasAdditional}
+                                    onChange={() => {
+                                      const updated = [...coEntries];
+                                      updated[updated.length - 1] = { ...updated[updated.length - 1], hasAdditional: 'no' };
+                                      onAnswerChange('companyOwedData', updated);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+
+                          {coEntries.length === 0 && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-3">
+                                Would you like to add an amount owed to a company?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="co-add-initial"
+                                    value="yes"
+                                    checked={false}
+                                    onChange={() => {
+                                      onAnswerChange('companyOwedData', [{} as CompanyOwedData]);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="co-add-initial"
                                     value="no"
                                     checked={false}
                                     onChange={() => {}}

@@ -1421,7 +1421,28 @@ export const STEPS: Step[] = [
 You may have put personal money into a company, borrowed money from one of your companies, moved money between companies, or personally guaranteed company borrowing.
 We'll help you identify these connections so that someone stepping in for you can understand how everything fits together.
 Don't worry if you aren't sure about an amount or arrangement. Your accountant or corporate records may be able to confirm the details later.`,
-    questions: [],
+    questions: [
+      {
+        key: 'pgHasPersonalGuarantee',
+        label: (answers) => {
+          const step1 = answers.get(1) || {};
+          const client1Name = (step1['fullName'] as string) || 'Client 1';
+          const hasSpouse = (step1['maritalStatus'] as string) === 'married' || (step1['maritalStatus'] as string) === 'common_law';
+          const client2Name = (step1['spouseName'] as string) || 'Client 2';
+          if (hasSpouse) {
+            return `Have ${client1Name} or ${client2Name} personally guaranteed any borrowing or debt for one of your companies?`;
+          }
+          return `Has ${client1Name} personally guaranteed any borrowing or debt for one of your companies?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+          { value: 'not_sure', label: 'Not sure' },
+        ],
+        required: true,
+      },
+    ],
   },
   {
     id: 8,

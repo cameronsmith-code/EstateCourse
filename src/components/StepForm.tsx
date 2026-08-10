@@ -5,6 +5,7 @@ import VideoPlayer from './VideoPlayer';
 import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprietorshipDetails';
 import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
 import PropertyDetails, { PropertyData } from './PropertyDetails';
+import PersonalGuaranteeDetails, { PersonalGuaranteeData } from './PersonalGuaranteeDetails';
 import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
@@ -6019,6 +6020,152 @@ export default function StepForm({
               )}
             </>
           )}
+
+          {step.id === 7 && (() => {
+            const step1 = allAnswers?.get(1) as Record<string, string> | undefined;
+            const client1Name = step1?.['fullName'] || 'Client 1';
+            const hasSpouse = step1?.['maritalStatus'] === 'married' || step1?.['maritalStatus'] === 'common_law';
+            const client2Name = step1?.['spouseName'] || 'Client 2';
+            const step6 = allAnswers?.get(6) as Record<string, unknown> | undefined;
+            const corporations = ((step6?.['corporationsData'] as Array<Record<string, string>>) || []).map((c) => ({ legalName: c.legalName || '' })).filter((c) => c.legalName.trim());
+
+            const gateQuestion = step.questions[0];
+            const displayLabel = typeof gateQuestion.label === 'function'
+              ? gateQuestion.label(allAnswers || new Map())
+              : gateQuestion.label;
+            const resolvedOptions = typeof gateQuestion.options === 'function'
+              ? (gateQuestion.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+              : gateQuestion.options;
+
+            const pgAnswer = answers['pgHasPersonalGuarantee'];
+            const pgEntries = (answers['personalGuaranteesData'] as PersonalGuaranteeData[]) || [];
+
+            const handlePgChange = (idx: number, field: keyof PersonalGuaranteeData, value: unknown) => {
+              const updated = [...pgEntries];
+              while (updated.length <= idx) updated.push({} as PersonalGuaranteeData);
+              updated[idx] = { ...updated[idx], [field]: value };
+              onAnswerChange('personalGuaranteesData', updated);
+            };
+
+            const handlePgMultiChange = (idx: number, updates: Partial<PersonalGuaranteeData>) => {
+              const updated = [...pgEntries];
+              while (updated.length <= idx) updated.push({} as PersonalGuaranteeData);
+              updated[idx] = { ...updated[idx], ...updates };
+              onAnswerChange('personalGuaranteesData', updated);
+            };
+
+            return (
+              <>
+                <FormField
+                  question={{ ...gateQuestion, label: displayLabel, options: resolvedOptions }}
+                  value={answers[gateQuestion.key]}
+                  onChange={(value) => {
+                    onAnswerChange(gateQuestion.key, value);
+                    if (value !== 'yes') {
+                      onAnswerChange('personalGuaranteesData', undefined);
+                    }
+                  }}
+                />
+
+                {pgAnswer === 'yes' && (
+                  <Subsection title="Personal Guarantees">
+                    <p className="text-sm text-gray-400 italic mb-4">
+                      A personal guarantee generally means that if the company cannot repay the debt, the lender may be able to require the person who provided the guarantee to repay some or all of it personally.
+                    </p>
+
+                    {pgEntries.map((entry, idx) => (
+                      <PersonalGuaranteeDetails
+                        key={idx}
+                        index={idx}
+                        data={entry}
+                        client1Name={client1Name}
+                        client2Name={client2Name}
+                        hasSpouse={hasSpouse}
+                        corporations={corporations}
+                        onChange={(field, value) => handlePgChange(idx, field, value)}
+                        onMultiChange={(updates) => handlePgMultiChange(idx, updates)}
+                      />
+                    ))}
+
+                    {pgEntries.length > 0 && (
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-300 mb-3">
+                          Is there another personal guarantee to add?
+                        </label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="pg-has-another"
+                              value="yes"
+                              checked={pgEntries[pgEntries.length - 1]?.hasAdditional === 'yes'}
+                              onChange={() => {
+                                const updated = [...pgEntries];
+                                updated[updated.length - 1] = { ...updated[updated.length - 1], hasAdditional: 'yes' };
+                                onAnswerChange('personalGuaranteesData', [...updated, {} as PersonalGuaranteeData]);
+                              }}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">Yes</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="pg-has-another"
+                              value="no"
+                              checked={pgEntries[pgEntries.length - 1]?.hasAdditional === 'no' || !pgEntries[pgEntries.length - 1]?.hasAdditional}
+                              onChange={() => {
+                                const updated = [...pgEntries];
+                                updated[updated.length - 1] = { ...updated[updated.length - 1], hasAdditional: 'no' };
+                                onAnswerChange('personalGuaranteesData', updated);
+                              }}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">No</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    {pgEntries.length === 0 && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-3">
+                          Would you like to add a personal guarantee?
+                        </label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="pg-add-initial"
+                              value="yes"
+                              checked={false}
+                              onChange={() => {
+                                onAnswerChange('personalGuaranteesData', [{} as PersonalGuaranteeData]);
+                              }}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">Yes</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="pg-add-initial"
+                              value="no"
+                              checked={false}
+                              onChange={() => {}}
+                              className="mr-2"
+                            />
+                            <span className="text-gray-300">No</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                  </Subsection>
+                )}
+              </>
+            );
+          })()}
 
           {step.id === 8 && (() => {
             const allFormData = Object.fromEntries(

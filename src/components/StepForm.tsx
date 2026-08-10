@@ -2349,10 +2349,11 @@ export default function StepForm({
                 .filter(q => ['hasFamilyTrust','trustLegalName','trustDeedLocation','trustYearEstablished'].includes(q.key))
                 .map((question) => {
                   if (question.key !== 'hasFamilyTrust' && answers['hasFamilyTrust'] !== 'yes') return null;
+                  const displayLabel = typeof question.label === 'function' ? question.label(allAnswers || new Map()) : question.label;
                   return (
                     <FormField
                       key={question.key}
-                      question={question}
+                      question={{ ...question, label: displayLabel }}
                       value={answers[question.key]}
                       onChange={(value) => onAnswerChange(question.key, value)}
                     />
@@ -2384,14 +2385,17 @@ export default function StepForm({
                   </div>
                   {step.questions
                     .filter(q => ['trust2LegalName','trust2DeedLocation','trust2YearEstablished'].includes(q.key))
-                    .map((question) => (
-                      <FormField
-                        key={question.key}
-                        question={question}
-                        value={answers[question.key]}
-                        onChange={(value) => onAnswerChange(question.key, value)}
-                      />
-                    ))}
+                    .map((question) => {
+                      const displayLabel = typeof question.label === 'function' ? question.label(allAnswers || new Map()) : question.label;
+                      return (
+                        <FormField
+                          key={question.key}
+                          question={{ ...question, label: displayLabel }}
+                          value={answers[question.key]}
+                          onChange={(value) => onAnswerChange(question.key, value)}
+                        />
+                      );
+                    })}
                   <TrustBeneficiariesSection
                     label={`${answers['trust2LegalName'] ? answers['trust2LegalName'] + ' Beneficiaries' : 'Trust 2 Beneficiaries'}`}
                     entries={trust2BeneficiariesData}
@@ -2415,14 +2419,17 @@ export default function StepForm({
                   </div>
                   {step.questions
                     .filter(q => ['trust3LegalName','trust3DeedLocation','trust3YearEstablished'].includes(q.key))
-                    .map((question) => (
-                      <FormField
-                        key={question.key}
-                        question={question}
-                        value={answers[question.key]}
-                        onChange={(value) => onAnswerChange(question.key, value)}
-                      />
-                    ))}
+                    .map((question) => {
+                      const displayLabel = typeof question.label === 'function' ? question.label(allAnswers || new Map()) : question.label;
+                      return (
+                        <FormField
+                          key={question.key}
+                          question={{ ...question, label: displayLabel }}
+                          value={answers[question.key]}
+                          onChange={(value) => onAnswerChange(question.key, value)}
+                        />
+                      );
+                    })}
                   <TrustBeneficiariesSection
                     label={`${answers['trust3LegalName'] ? answers['trust3LegalName'] + ' Beneficiaries' : 'Trust 3 Beneficiaries'}`}
                     entries={trust3BeneficiariesData}
@@ -2446,14 +2453,17 @@ export default function StepForm({
                   </div>
                   {step.questions
                     .filter(q => ['trust4LegalName','trust4DeedLocation','trust4YearEstablished'].includes(q.key))
-                    .map((question) => (
-                      <FormField
-                        key={question.key}
-                        question={question}
-                        value={answers[question.key]}
-                        onChange={(value) => onAnswerChange(question.key, value)}
-                      />
-                    ))}
+                    .map((question) => {
+                      const displayLabel = typeof question.label === 'function' ? question.label(allAnswers || new Map()) : question.label;
+                      return (
+                        <FormField
+                          key={question.key}
+                          question={{ ...question, label: displayLabel }}
+                          value={answers[question.key]}
+                          onChange={(value) => onAnswerChange(question.key, value)}
+                        />
+                      );
+                    })}
                   <TrustBeneficiariesSection
                     label={`${answers['trust4LegalName'] ? answers['trust4LegalName'] + ' Beneficiaries' : 'Trust 4 Beneficiaries'}`}
                     entries={trust4BeneficiariesData}

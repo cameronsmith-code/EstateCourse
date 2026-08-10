@@ -1116,7 +1116,7 @@ export const STEPS: Step[] = [
         key: 'trustDeedLocation',
         label: (answers: Map<number, Record<string, unknown>>) => {
           const trustName = (answers.get(4)?.['trustLegalName'] as string) || '';
-          return trustName ? `Where is ${trustName}'s Trust Deed located?` : 'Where is the Trust Deed located?';
+          return trustName ? `Location of ${trustName}'s Trust Deed:` : 'Location of the Trust Deed:';
         },
         type: 'text',
         placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
@@ -1126,7 +1126,7 @@ export const STEPS: Step[] = [
         key: 'trustYearEstablished',
         label: (answers: Map<number, Record<string, unknown>>) => {
           const trustName = (answers.get(4)?.['trustLegalName'] as string) || '';
-          return trustName ? `What year was ${trustName} established?` : 'What year was the Trust established?';
+          return trustName ? `Year that ${trustName} was established:` : 'Year that the Trust was established:';
         },
         type: 'number',
         placeholder: 'Enter year (e.g., 2020)',
@@ -1159,7 +1159,7 @@ export const STEPS: Step[] = [
         key: 'trust2DeedLocation',
         label: (answers: Map<number, Record<string, unknown>>) => {
           const trustName = (answers.get(4)?.['trust2LegalName'] as string) || '';
-          return trustName ? `Where is ${trustName}'s Trust Deed located?` : 'Where is the Trust Deed located?';
+          return trustName ? `Location of ${trustName}'s Trust Deed:` : 'Location of the Trust Deed:';
         },
         type: 'text',
         placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
@@ -1170,7 +1170,7 @@ export const STEPS: Step[] = [
         key: 'trust2YearEstablished',
         label: (answers: Map<number, Record<string, unknown>>) => {
           const trustName = (answers.get(4)?.['trust2LegalName'] as string) || '';
-          return trustName ? `What year was ${trustName} established?` : 'What year was the Trust established?';
+          return trustName ? `Year that ${trustName} was established:` : 'Year that the Trust was established:';
         },
         type: 'number',
         placeholder: 'Enter year (e.g., 2020)',
@@ -1206,7 +1206,7 @@ export const STEPS: Step[] = [
         key: 'trust3DeedLocation',
         label: (answers: Map<number, Record<string, unknown>>) => {
           const trustName = (answers.get(4)?.['trust3LegalName'] as string) || '';
-          return trustName ? `Where is ${trustName}'s Trust Deed located?` : 'Where is the Trust Deed located?';
+          return trustName ? `Location of ${trustName}'s Trust Deed:` : 'Location of the Trust Deed:';
         },
         type: 'text',
         placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
@@ -1217,7 +1217,7 @@ export const STEPS: Step[] = [
         key: 'trust3YearEstablished',
         label: (answers: Map<number, Record<string, unknown>>) => {
           const trustName = (answers.get(4)?.['trust3LegalName'] as string) || '';
-          return trustName ? `What year was ${trustName} established?` : 'What year was the Trust established?';
+          return trustName ? `Year that ${trustName} was established:` : 'Year that the Trust was established:';
         },
         type: 'number',
         placeholder: 'Enter year (e.g., 2020)',
@@ -1254,7 +1254,7 @@ export const STEPS: Step[] = [
         key: 'trust4DeedLocation',
         label: (answers: Map<number, Record<string, unknown>>) => {
           const trustName = (answers.get(4)?.['trust4LegalName'] as string) || '';
-          return trustName ? `Where is ${trustName}'s Trust Deed located?` : 'Where is the Trust Deed located?';
+          return trustName ? `Location of ${trustName}'s Trust Deed:` : 'Location of the Trust Deed:';
         },
         type: 'text',
         placeholder: 'e.g., Safe deposit box, lawyer\'s office, home safe',
@@ -1265,7 +1265,7 @@ export const STEPS: Step[] = [
         key: 'trust4YearEstablished',
         label: (answers: Map<number, Record<string, unknown>>) => {
           const trustName = (answers.get(4)?.['trust4LegalName'] as string) || '';
-          return trustName ? `What year was ${trustName} established?` : 'What year was the Trust established?';
+          return trustName ? `Year that ${trustName} was established:` : 'Year that the Trust was established:';
         },
         type: 'number',
         placeholder: 'Enter year (e.g., 2020)',

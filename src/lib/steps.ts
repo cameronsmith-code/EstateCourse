@@ -1442,6 +1442,27 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         ],
         required: true,
       },
+      {
+        key: 'slHasShareholderLoan',
+        label: (answers) => {
+          const step1 = answers.get(1) || {};
+          const client1Name = (step1['fullName'] as string) || 'Client 1';
+          const hasSpouse = (step1['maritalStatus'] as string) === 'married' || (step1['maritalStatus'] as string) === 'common_law';
+          const client2Name = (step1['spouseName'] as string) || 'Client 2';
+          if (hasSpouse) {
+            return `Have ${client1Name} or ${client2Name} put personal money into any of your companies that the company still owes back?`;
+          }
+          return `Has ${client1Name} put personal money into any of your companies that the company still owes back?`;
+        },
+        type: 'radio',
+        description: `This is sometimes called a shareholder loan. For example, you may have personally provided money to help start the business, purchase an asset, fund an investment, or cover company expenses.`,
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+          { value: 'not_sure', label: 'Not sure' },
+        ],
+        required: true,
+      },
     ],
   },
   {

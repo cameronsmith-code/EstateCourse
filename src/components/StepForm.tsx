@@ -6,6 +6,7 @@ import SoleProprietorshipDetails, { SoleProprietorshipData } from './SoleProprie
 import PartnershipDetails, { PartnershipData } from './PartnershipDetails';
 import PropertyDetails, { PropertyData } from './PropertyDetails';
 import PersonalGuaranteeDetails, { PersonalGuaranteeData } from './PersonalGuaranteeDetails';
+import ShareholderLoanDetails, { ShareholderLoanData } from './ShareholderLoanDetails';
 import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
@@ -6167,6 +6168,145 @@ export default function StepForm({
 
                   </Subsection>
                 )}
+
+                {(() => {
+                  const slQuestion = step.questions[1];
+                  if (!slQuestion) return null;
+                  const slDisplayLabel = typeof slQuestion.label === 'function'
+                    ? slQuestion.label(allAnswers || new Map())
+                    : slQuestion.label;
+                  const slResolvedOptions = typeof slQuestion.options === 'function'
+                    ? (slQuestion.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+                    : slQuestion.options;
+                  const slAnswer = answers['slHasShareholderLoan'];
+
+                  const slEntries = (answers['shareholderLoansData'] as ShareholderLoanData[]) || [];
+
+                  const handleSlChange = (idx: number, field: keyof ShareholderLoanData, value: unknown) => {
+                    const updated = [...slEntries];
+                    while (updated.length <= idx) updated.push({} as ShareholderLoanData);
+                    updated[idx] = { ...updated[idx], [field]: value };
+                    onAnswerChange('shareholderLoansData', updated);
+                  };
+
+                  const handleSlMultiChange = (idx: number, updates: Partial<ShareholderLoanData>) => {
+                    const updated = [...slEntries];
+                    while (updated.length <= idx) updated.push({} as ShareholderLoanData);
+                    updated[idx] = { ...updated[idx], ...updates };
+                    onAnswerChange('shareholderLoansData', updated);
+                  };
+
+                  return (
+                    <>
+                      <FormField
+                        question={{ ...slQuestion, label: slDisplayLabel, options: slResolvedOptions }}
+                        value={slAnswer}
+                        onChange={(value) => {
+                          onAnswerChange('slHasShareholderLoan', value);
+                          if (value !== 'yes') {
+                            onAnswerChange('shareholderLoansData', undefined);
+                          }
+                        }}
+                      />
+
+                      {slAnswer === 'yes' && (
+                        <Subsection title="Money You Have Put Into Your Company(ies)">
+                          {slEntries.map((entry, idx) => (
+                            <ShareholderLoanDetails
+                              key={idx}
+                              index={idx}
+                              data={entry}
+                              client1Name={client1Name}
+                              client2Name={client2Name}
+                              hasSpouse={hasSpouse}
+                              corporations={corporations}
+                              onChange={(field, value) => handleSlChange(idx, field, value)}
+                              onMultiChange={(updates) => handleSlMultiChange(idx, updates)}
+                              onRemove={() => {
+                                const updated = slEntries.filter((_, entryIndex) => entryIndex !== idx);
+                                onAnswerChange('shareholderLoansData', updated.length > 0 ? updated : undefined);
+                              }}
+                            />
+                          ))}
+
+                          {slEntries.length > 0 && (
+                            <div className="mt-4">
+                              <label className="block text-sm font-medium text-gray-300 mb-3">
+                                Is there another amount that one of your companies owes {client1Name}{hasSpouse ? ` or ${client2Name}` : ''}?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="sl-has-another"
+                                    value="yes"
+                                    checked={slEntries[slEntries.length - 1]?.hasAdditional === 'yes'}
+                                    onChange={() => {
+                                      const updated = [...slEntries];
+                                      updated[updated.length - 1] = { ...updated[updated.length - 1], hasAdditional: 'yes' };
+                                      onAnswerChange('shareholderLoansData', [...updated, {} as ShareholderLoanData]);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="sl-has-another"
+                                    value="no"
+                                    checked={slEntries[slEntries.length - 1]?.hasAdditional === 'no' || !slEntries[slEntries.length - 1]?.hasAdditional}
+                                    onChange={() => {
+                                      const updated = [...slEntries];
+                                      updated[updated.length - 1] = { ...updated[updated.length - 1], hasAdditional: 'no' };
+                                      onAnswerChange('shareholderLoansData', updated);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+
+                          {slEntries.length === 0 && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-3">
+                                Would you like to add a shareholder loan?
+                              </label>
+                              <div className="flex gap-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="sl-add-initial"
+                                    value="yes"
+                                    checked={false}
+                                    onChange={() => {
+                                      onAnswerChange('shareholderLoansData', [{} as ShareholderLoanData]);
+                                    }}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">Yes</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="sl-add-initial"
+                                    value="no"
+                                    checked={false}
+                                    onChange={() => {}}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-gray-300">No</span>
+                                </label>
+                              </div>
+                            </div>
+                          )}
+                        </Subsection>
+                      )}
+                    </>
+                  );
+                })()}
               </>
             );
           })()}

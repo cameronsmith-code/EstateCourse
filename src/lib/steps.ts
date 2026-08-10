@@ -1416,8 +1416,11 @@ export const STEPS: Step[] = [
   },
   {
     id: 7,
-    title: 'Corporate Debt',
-    description: 'Details about debts and obligations related to your corporation(s).',
+    title: 'Corporate Financial Connections',
+    description: `Owning one or more company(ies) can create financial connections that aren't always obvious from looking at each company individually.
+You may have put personal money into a company, borrowed money from one of your companies, moved money between companies, or personally guaranteed company borrowing.
+We'll help you identify these connections so that someone stepping in for you can understand how everything fits together.
+Don't worry if you aren't sure about an amount or arrangement. Your accountant or corporate records may be able to confirm the details later.`,
     questions: [],
   },
   {

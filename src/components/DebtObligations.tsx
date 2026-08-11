@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, ChevronRight, Home, Building2, Landmark, Shield, FileText, DollarSign, User, Phone, Mail, CreditCard } from 'lucide-react';
+import { Plus, Trash2, ChevronRight, Home, Building2, Landmark, Shield, FileText, DollarSign, User, Phone, Mail, CreditCard, Pencil } from 'lucide-react';
 import CreditCardIntake from './CreditCardIntake';
 
 type AdditionalDebt = {
@@ -291,6 +291,7 @@ function DebtCard({
   badgeIcon,
   badgeColor = 'blue',
   onDelete,
+  onEdit,
 }: {
   title: string;
   subtitle: string;
@@ -301,6 +302,7 @@ function DebtCard({
   badgeIcon?: React.ReactNode;
   badgeColor?: 'blue' | 'amber';
   onDelete?: () => void;
+  onEdit?: () => void;
 }) {
   const badgeColors = {
     blue: 'bg-blue-900/40 text-blue-300 border-blue-700/50',
@@ -321,15 +323,26 @@ function DebtCard({
           </div>
           <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>
         </div>
-        {onDelete && (
-          <button
-            type="button"
-            onClick={onDelete}
-            className="flex-shrink-0 p-2 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        )}
+        <div className="flex-shrink-0 flex items-center gap-1">
+          {onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              className="p-2 text-gray-500 hover:text-blue-400 hover:bg-blue-900/20 rounded-lg transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-4">
         {lender && (
@@ -411,10 +424,21 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
   const [intakeActive, setIntakeActive] = useState(false);
   const [intakeStep, setIntakeStep] = useState(0);
   const [draft, setDraft] = useState<AdditionalDebt>({ id: '' });
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   // Reset intake when starting fresh
   const startIntake = () => {
     setDraft({ id: `debt-${Date.now()}-${additionalDebts.length}` });
+    setIntakeStep(0);
+    setEditingIndex(null);
+    setIntakeActive(true);
+  };
+
+  const editDebt = (index: number) => {
+    const debt = additionalDebts[index];
+    if (!debt) return;
+    setDraft({ ...debt });
+    setEditingIndex(index);
     setIntakeStep(0);
     setIntakeActive(true);
   };
@@ -426,12 +450,19 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
   };
 
   const saveDraft = () => {
-    const updated = [...additionalDebts, draft];
-    onAnswerChange('additionalDebtsData', updated);
-    onAnswerChange('hasAdditionalDebts', 'yes');
+    if (editingIndex !== null) {
+      const updated = [...additionalDebts];
+      updated[editingIndex] = draft;
+      onAnswerChange('additionalDebtsData', updated);
+    } else {
+      const updated = [...additionalDebts, draft];
+      onAnswerChange('additionalDebtsData', updated);
+      onAnswerChange('hasAdditionalDebts', 'yes');
+    }
     setIntakeActive(false);
     setDraft({ id: '' });
     setIntakeStep(0);
+    setEditingIndex(null);
   };
 
   const deleteDebt = (index: number) => {
@@ -953,6 +984,7 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
                   debt.borrower === 'other' ? (debt.borrowerOtherName || 'Other') :
                   ''
                 }
+                onEdit={() => editDebt(i)}
                 onDelete={() => deleteDebt(i)}
               />
             ))}
@@ -1074,6 +1106,7 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
                   debt.borrower === 'other' ? (debt.borrowerOtherName || 'Other') :
                   ''
                 }
+                onEdit={() => editDebt(i)}
                 onDelete={() => deleteDebt(i)}
               />
             ))}

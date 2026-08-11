@@ -16,6 +16,7 @@ import TrustBeneficiariesSelector, { TrustBeneficiaryEntry } from './TrustBenefi
 import Subsection from './Subsection';
 import ChildPlanningSection, { PlanningPerson } from './ChildPlanningSection';
 import DebtObligations from './DebtObligations';
+import FinancialFootprintAssets from './FinancialFootprintAssets';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
 type StepFormProps = {
@@ -8269,6 +8270,29 @@ export default function StepForm({
                     return null;
                   }
 
+                  // Financial Assets & Retirement Benefits — rendered as a single composite component
+                  if (question.key === 'hasInvestments') {
+                    return (
+                      <React.Fragment key="financial-assets-section">
+                        <FinancialFootprintAssets
+                          answers={answers}
+                          allAnswers={allAnswers}
+                          onAnswerChange={onAnswerChange}
+                        />
+                      </React.Fragment>
+                    );
+                  }
+                  if (question.key === 'investmentAccountsData' ||
+                      question.key === 'hasPensions' ||
+                      question.key === 'pensionRecordsData' ||
+                      question.key === 'hasEquity' ||
+                      question.key === 'equityCompensationData' ||
+                      question.key === 'hasReceivables' ||
+                      question.key === 'receivablesData' ||
+                      question.key === 'hasOtherAssets' ||
+                      question.key === 'otherAssetsData') {
+                    return null;
+                  }
 
                   if (question.key === 'primaryResidenceOwner') {
                     const ownerOptions = [

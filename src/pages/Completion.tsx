@@ -9,50 +9,50 @@ export default function Completion() {
   const { answers } = useQuestionnaire();
 
   useEffect(() => {
-    const step1 = answers.get(1) || {};
-    const step2 = answers.get(2) || {};
-    const step3 = answers.get(3) || {};
-    const step4 = answers.get(4) || {};
-    const step5 = answers.get(5) || {};
-    const step6 = answers.get(6) || {};
-    const step7 = answers.get(7) || {};
-    const step8 = answers.get(8) || {};
-    const step9 = answers.get(9) || {};
-    const step10 = answers.get(10) || {};
-    const step11 = answers.get(11) || {};
-    const step12 = answers.get(12) || {};
-    const step13 = answers.get(13) || {};
-    const step14 = answers.get(14) || {};
-    const step15 = answers.get(15) || {};
-    const step16 = answers.get(16) || {};
-    const step17 = answers.get(17) || {};
-    const step18 = answers.get(18) || {};
-    const step19 = answers.get(19) || {};
+    const aboutYou = answers.get('aboutYou') || {};
+    const previousRelationships = answers.get('previousRelationships') || {};
+    const children = answers.get('children') || {};
+    const familyTrusts = answers.get('familyTrusts') || {};
+    const businessInterests = answers.get('businessInterests') || {};
+    const corporations = answers.get('corporations') || {};
+    const corporateFinancialConnections = answers.get('corporateFinancialConnections') || {};
+    const professionalTeam = answers.get('professionalTeam') || {};
+    const financialFootprint = answers.get('financialFootprint') || {};
+    const realEstate = answers.get('realEstate') || {};
+    const debtObligations = answers.get('debtObligations') || {};
+    const lifeInsurance = answers.get('lifeInsurance') || {};
+    const propertyLiabilityInsurance = answers.get('propertyLiabilityInsurance') || {};
+    const legacyIntent = answers.get('legacyIntent') || {};
+    const wills = answers.get('wills') || {};
+    const powersOfAttorney = answers.get('powersOfAttorney') || {};
+    const estateTrustees = answers.get('estateTrustees') || {};
+    const funeralArrangements = answers.get('funeralArrangements') || {};
+    const pensionsRegisteredAccounts = answers.get('pensionsRegisteredAccounts') || {};
 
     const data = {
-      ...step1,
-      client1PreviousRelationshipsData: step2.client1PreviousRelationshipsData,
-      client2PreviousRelationshipsData: step2.client2PreviousRelationshipsData,
-      childrenData: step3.childrenData,
-      ...step3,
-      ...step4,
-      ...step5,
-      ...step6,
-      ...step7,
-      ...step8,
-      ...step9,
-      ...step10,
-      ...step11,
-      ...step12,
-      ...step13,
-      client1PensionsData: step19.client1PensionsData,
-      client2PensionsData: step19.client2PensionsData,
-      ...step14,
-      ...step15,
-      ...step16,
-      ...step17,
-      ...step18,
-      ...step19,
+      ...aboutYou,
+      client1PreviousRelationshipsData: previousRelationships.client1PreviousRelationshipsData,
+      client2PreviousRelationshipsData: previousRelationships.client2PreviousRelationshipsData,
+      childrenData: children.childrenData,
+      ...children,
+      ...familyTrusts,
+      ...businessInterests,
+      ...corporations,
+      ...corporateFinancialConnections,
+      ...professionalTeam,
+      ...financialFootprint,
+      ...realEstate,
+      ...debtObligations,
+      ...lifeInsurance,
+      ...propertyLiabilityInsurance,
+      client1PensionsData: pensionsRegisteredAccounts.client1PensionsData,
+      client2PensionsData: pensionsRegisteredAccounts.client2PensionsData,
+      ...legacyIntent,
+      ...wills,
+      ...powersOfAttorney,
+      ...estateTrustees,
+      ...funeralArrangements,
+      ...pensionsRegisteredAccounts,
     };
 
     setFormData(data);

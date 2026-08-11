@@ -4,7 +4,7 @@ type FormFieldProps = {
   question: StepQuestion;
   value: unknown;
   onChange: (value: unknown) => void;
-  answers?: Map<number, Record<string, unknown>>;
+  answers?: Map<string, Record<string, unknown>>;
 };
 
 export default function FormField({ question, value, onChange, answers }: FormFieldProps) {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuestionnaire } from '../context/QuestionnaireContext';
-import { STEPS } from '../lib/steps';
+import { STEPS, Step } from '../lib/steps';
 import StepForm from '../components/StepForm';
 import ProgressBar from '../components/ProgressBar';
 import { FileText, Loader2, Trash2 } from 'lucide-react';
@@ -24,22 +24,22 @@ export default function Wizard() {
     clearCurrentStepAnswers,
   } = useQuestionnaire();
 
-  const prevStepVisibility = useRef<Record<number, boolean>>({});
+  const prevStepVisibility = useRef<Record<string, boolean>>({});
 
-  const isStepVisible = (stepId: number) => {
-    const basicAnswers = answers.get(1) || {};
+  const isStepVisible = (step: Step) => {
+    const basicAnswers = answers.get('aboutYou') || {};
     const client1HasPreviousRelationship = basicAnswers['client1HasPreviousRelationship'];
     const client2HasPreviousRelationship = basicAnswers['client2HasPreviousRelationship'];
     const hasChildren = basicAnswers['hasChildren'];
 
-    if (stepId === 2) {
+    if (step.sectionId === 'previousRelationships') {
       return client1HasPreviousRelationship === 'yes' || client2HasPreviousRelationship === 'yes';
     }
-    if (stepId === 3) {
+    if (step.sectionId === 'children') {
       return hasChildren === 'yes';
     }
-    if (stepId === 7) {
-      const corpAnswers = answers.get(6) || {};
+    if (step.sectionId === 'corporateFinancialConnections') {
+      const corpAnswers = answers.get('corporations') || {};
       return corpAnswers['ownsCorporation'] === 'yes';
     }
     return true;
@@ -50,11 +50,14 @@ export default function Wizard() {
   }, [initQuestionnaire]);
 
   useEffect(() => {
-    if (!loading && currentStep > 1 && !isStepVisible(currentStep)) {
-      const nextVisible = getNextVisibleStep(currentStep - 1);
-      if (nextVisible !== null && nextVisible !== currentStep) {
-        for (let i = 0; i < nextVisible - currentStep; i++) {
-          nextStep();
+    if (!loading && currentStep > 1) {
+      const stepData = STEPS.find(s => s.id === currentStep);
+      if (stepData && !isStepVisible(stepData)) {
+        const nextVisible = getNextVisibleStep(currentStep - 1);
+        if (nextVisible !== null && nextVisible !== currentStep) {
+          for (let i = 0; i < nextVisible - currentStep; i++) {
+            nextStep();
+          }
         }
       }
     }
@@ -62,17 +65,17 @@ export default function Wizard() {
 
   useEffect(() => {
     STEPS.forEach(step => {
-      const wasVisible = prevStepVisibility.current[step.id];
-      const isVisible = isStepVisible(step.id);
+      const wasVisible = prevStepVisibility.current[step.sectionId];
+      const isVisible = isStepVisible(step);
       if (wasVisible === true && isVisible === false) {
-        const stepAnswers = answers.get(step.id);
+        const stepAnswers = answers.get(step.sectionId);
         if (stepAnswers && Object.keys(stepAnswers).length > 0) {
           Object.keys(stepAnswers).forEach(key => {
-            updateAnswer(step.id, key, undefined);
+            updateAnswer(step.sectionId, key, undefined);
           });
         }
       }
-      prevStepVisibility.current[step.id] = isVisible;
+      prevStepVisibility.current[step.sectionId] = isVisible;
     });
   }, [answers]);
 
@@ -89,7 +92,8 @@ export default function Wizard() {
 
   const getNextVisibleStep = (fromStep: number): number | null => {
     for (let i = fromStep + 1; i <= STEPS.length; i++) {
-      if (isStepVisible(i)) {
+      const step = STEPS.find(s => s.id === i);
+      if (step && isStepVisible(step)) {
         return i;
       }
     }
@@ -98,7 +102,8 @@ export default function Wizard() {
 
   const getPreviousVisibleStep = (fromStep: number): number | null => {
     for (let i = fromStep - 1; i >= 1; i--) {
-      if (isStepVisible(i)) {
+      const step = STEPS.find(s => s.id === i);
+      if (step && isStepVisible(step)) {
         return i;
       }
     }
@@ -107,7 +112,7 @@ export default function Wizard() {
 
   const validCurrentStep = Math.min(Math.max(1, currentStep), STEPS.length);
   const currentStepData = STEPS.find((s) => s.id === validCurrentStep);
-  const currentAnswers = answers.get(validCurrentStep) || {};
+  const currentAnswers = currentStepData ? answers.get(currentStepData.sectionId) || {} : {};
 
   const handleNext = async () => {
     const nextVisible = getNextVisibleStep(validCurrentStep);
@@ -216,13 +221,13 @@ export default function Wizard() {
       </div>
 
       <ProgressBar
-        currentStep={STEPS.filter(s => s.id <= validCurrentStep && isStepVisible(s.id)).length}
-        totalSteps={STEPS.filter(s => isStepVisible(s.id)).length}
+        currentStep={STEPS.filter(s => s.id <= validCurrentStep && isStepVisible(s)).length}
+        totalSteps={STEPS.filter(s => isStepVisible(s)).length}
       />
 
       <div className="mb-6 bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
         <div className="flex overflow-x-auto">
-          {STEPS.filter(step => isStepVisible(step.id)).map((step, index) => (
+          {STEPS.filter(step => isStepVisible(step)).map((step, index) => (
             <button
               key={step.id}
               onClick={() => handleTabClick(step.id)}
@@ -251,8 +256,8 @@ export default function Wizard() {
         isLastStep={getNextVisibleStep(validCurrentStep) === null}
         onNext={handleNext}
         onPrevious={handlePrevious}
-        onAnswerChange={(key, value) => updateAnswer(validCurrentStep, key, value)}
-        onClearCurrentStep={() => clearCurrentStepAnswers(validCurrentStep)}
+        onAnswerChange={(key, value) => updateAnswer(currentStepData.sectionId, key, value)}
+        onClearCurrentStep={() => clearCurrentStepAnswers(currentStepData.sectionId, validCurrentStep)}
         currentStepNumber={validCurrentStep}
       />
 

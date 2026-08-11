@@ -20,7 +20,7 @@ import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-
 type StepFormProps = {
   step: Step;
   answers: Record<string, unknown>;
-  allAnswers?: Map<number, Record<string, unknown>>;
+  allAnswers?: Map<string, Record<string, unknown>>;
   isFirstStep: boolean;
   isLastStep: boolean;
   onNext: () => void;
@@ -255,7 +255,7 @@ export default function StepForm({
   // Real Estate — prefill rental address from About You when rentSameAddress is 'yes'
   useEffect(() => {
     if (answers['rentSameAddress'] === 'yes') {
-      const step1 = allAnswers?.get(1) as Record<string, string> | undefined;
+      const step1 = allAnswers?.get('aboutYou') as Record<string, string> | undefined;
       if (step1) {
         if (step1.address) onAnswerChange('rentAddress', step1.address);
         if (step1.city) onAnswerChange('rentCity', step1.city);
@@ -272,7 +272,7 @@ export default function StepForm({
   // Real Estate — prefill retirement residence address from About You when retSameAddress is 'yes'
   useEffect(() => {
     if (answers['retSameAddress'] === 'yes') {
-      const step1 = allAnswers?.get(1) as Record<string, string> | undefined;
+      const step1 = allAnswers?.get('aboutYou') as Record<string, string> | undefined;
       if (step1) {
         if (step1.address) onAnswerChange('retAddress', step1.address);
         if (step1.city) onAnswerChange('retCity', step1.city);
@@ -1050,28 +1050,28 @@ export default function StepForm({
   }, [answers['additionalPropertiesCount']]);
 
   useEffect(() => {
-    const count = parseInt((allAnswers?.get(1) || {})['numberOfChildren'] as string) || 0;
+    const count = parseInt((allAnswers?.get('aboutYou') || {})['numberOfChildren'] as string) || 0;
     const data = answers['childrenData'] as Array<unknown> | undefined;
     if (data && data.length > count) {
       onAnswerChange('childrenData', data.slice(0, count));
     }
-  }, [(allAnswers?.get(1) || {})['numberOfChildren']]);
+  }, [(allAnswers?.get('aboutYou') || {})['numberOfChildren']]);
 
   useEffect(() => {
-    const count = parseInt((allAnswers?.get(1) || {})['client1NumberOfPreviousRelationships'] as string) || 0;
+    const count = parseInt((allAnswers?.get('aboutYou') || {})['client1NumberOfPreviousRelationships'] as string) || 0;
     const data = answers['client1PreviousRelationshipsData'] as Array<unknown> | undefined;
     if (data && data.length > count) {
       onAnswerChange('client1PreviousRelationshipsData', data.slice(0, count));
     }
-  }, [(allAnswers?.get(1) || {})['client1NumberOfPreviousRelationships']]);
+  }, [(allAnswers?.get('aboutYou') || {})['client1NumberOfPreviousRelationships']]);
 
   useEffect(() => {
-    const count = parseInt((allAnswers?.get(1) || {})['client2NumberOfPreviousRelationships'] as string) || 0;
+    const count = parseInt((allAnswers?.get('aboutYou') || {})['client2NumberOfPreviousRelationships'] as string) || 0;
     const data = answers['client2PreviousRelationshipsData'] as Array<unknown> | undefined;
     if (data && data.length > count) {
       onAnswerChange('client2PreviousRelationshipsData', data.slice(0, count));
     }
-  }, [(allAnswers?.get(1) || {})['client2NumberOfPreviousRelationships']]);
+  }, [(allAnswers?.get('aboutYou') || {})['client2NumberOfPreviousRelationships']]);
 
   useEffect(() => {
     if (answers['hasPartnership'] !== 'yes') {
@@ -1450,9 +1450,9 @@ export default function StepForm({
 
   // Pre-fill Step 11 corporate insurance from Step 6 corporate data
   useEffect(() => {
-    if (step.id !== 12) return;
+    if (step.sectionId !== 'lifeInsurance') return;
 
-    const step6Answers = allAnswers?.get(6);
+    const step6Answers = allAnswers?.get('corporations');
     if (!step6Answers) return;
 
     const corporationsData = step6Answers['corporationsData'] as Array<Record<string, unknown>> | undefined;
@@ -1560,18 +1560,18 @@ export default function StepForm({
       processType(`${prefix}HasDisabilityInsurance`, `${prefix}DiPolicy`, diPolicies, false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step.id, allAnswers?.get(6)]);
+  }, [step.id, allAnswers?.get('corporations')]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setValidationError('');
 
-    const basicAnswers = allAnswers?.get(1) || {};
+    const basicAnswers = allAnswers?.get('aboutYou') || {};
     const numberOfChildren = basicAnswers['numberOfChildren'];
     const client1NumberOfPreviousRelationships = basicAnswers['client1NumberOfPreviousRelationships'];
     const client2NumberOfPreviousRelationships = basicAnswers['client2NumberOfPreviousRelationships'];
 
-    if (step.id === 2) {
+    if (step.sectionId === 'previousRelationships') {
       const client1Count = client1NumberOfPreviousRelationships ? parseInt(client1NumberOfPreviousRelationships as string) : 0;
       const client2Count = client2NumberOfPreviousRelationships ? parseInt(client2NumberOfPreviousRelationships as string) : 0;
       const totalCount = client1Count + client2Count;
@@ -1618,7 +1618,7 @@ export default function StepForm({
           }
         }
       }
-    } else if (step.id === 3) {
+    } else if (step.sectionId === 'children') {
       if (!numberOfChildren) {
         setValidationError('Please go back and specify number of children.');
         return;
@@ -1639,7 +1639,7 @@ export default function StepForm({
           return;
         }
       }
-    } else if (step.id === 4) {
+    } else if (step.sectionId === 'familyTrusts') {
       if (answers['hasFamilyTrust'] === 'yes') {
         const trustBeneficiariesData = answers['trustBeneficiariesData'] as Array<Record<string, string>> | undefined;
 
@@ -1653,7 +1653,7 @@ export default function StepForm({
           }
         }
       }
-    } else if (step.id === 6) {
+    } else if (step.sectionId === 'corporations') {
       if (answers['ownsCorporation'] === 'yes') {
         if (!answers['numberOfCorporations']) {
           setValidationError('Please specify the number of corporations you own.');
@@ -1755,7 +1755,7 @@ export default function StepForm({
     onNext();
   };
 
-  const numberOfChildren = allAnswers?.get(1)?.['numberOfChildren'];
+  const numberOfChildren = allAnswers?.get('aboutYou')?.['numberOfChildren'];
   const childCount = numberOfChildren ? (numberOfChildren === '6+' ? 6 : parseInt(numberOfChildren as string)) : 0;
   const childrenData = (answers['childrenData'] as Array<Record<string, string>>) || Array(Math.max(0, childCount || 0)).fill(null).map(() => ({}));
   const planningPersons = (answers['planningPersons'] as Array<PlanningPerson>) || [];
@@ -1766,7 +1766,7 @@ export default function StepForm({
 
   const getChildClassification = (child: Record<string, string> | undefined): 'minor' | 'independent_adult' | 'adult_dependant' => {
     if (!child?.dateOfBirth) return 'minor';
-    const step1 = allAnswers?.get(1) || {};
+    const step1 = allAnswers?.get('aboutYou') || {};
     const province = ((step1['province'] as string) || '').toLowerCase();
     const higherMajority = ['bc', 'british columbia', 'nova scotia', 'new brunswick', 'newfoundland', 'nl', 'ns', 'nb'];
     const ageOfMajority = higherMajority.some(p => province.includes(p)) ? 19 : 18;
@@ -1785,11 +1785,11 @@ export default function StepForm({
     .filter(({ c }) => getChildClassification(c) === 'minor')
     .map(({ i }) => i);
 
-  const client1NumberOfPreviousRelationships = allAnswers?.get(1)?.['client1NumberOfPreviousRelationships'];
+  const client1NumberOfPreviousRelationships = allAnswers?.get('aboutYou')?.['client1NumberOfPreviousRelationships'];
   const client1PrevRelCount = client1NumberOfPreviousRelationships ? parseInt(client1NumberOfPreviousRelationships as string) : 0;
   const client1PreviousRelationshipsData = (answers['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || Array(Math.max(0, client1PrevRelCount || 0)).fill(null).map(() => ({}));
 
-  const client2NumberOfPreviousRelationships = allAnswers?.get(1)?.['client2NumberOfPreviousRelationships'];
+  const client2NumberOfPreviousRelationships = allAnswers?.get('aboutYou')?.['client2NumberOfPreviousRelationships'];
   const client2PrevRelCount = client2NumberOfPreviousRelationships ? parseInt(client2NumberOfPreviousRelationships as string) : 0;
   const client2PreviousRelationshipsData = (answers['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || Array(Math.max(0, client2PrevRelCount || 0)).fill(null).map(() => ({}));
 
@@ -1863,11 +1863,11 @@ export default function StepForm({
       contacts.push({ id: c.id, name: trimmed, phone: c.phone || '', email: c.email || '', city: c.city || '', province: c.province || '', source: c.source });
     };
 
-    const step1 = allAnswers?.get(1) || {};
-    const step2 = allAnswers?.get(2) || {};
-    const step4 = allAnswers?.get(4) || {};
-    const step7 = allAnswers?.get(7) || {};
-    const step14 = allAnswers?.get(14) || {};
+    const step1 = allAnswers?.get('aboutYou') || {};
+    const step2 = allAnswers?.get('previousRelationships') || {};
+    const step4 = allAnswers?.get('familyTrusts') || {};
+    const step7 = allAnswers?.get('corporateFinancialConnections') || {};
+    const step14 = allAnswers?.get('legacyIntent') || {};
     const hasSpouse = step1['maritalStatus'] === 'married' || step1['maritalStatus'] === 'common_law';
 
     const po = child.parentsOption || '';
@@ -2386,7 +2386,7 @@ export default function StepForm({
   const trust3BeneficiariesData = (answers['trust3BeneficiariesData'] as TrustBeneficiaryEntry[]) || [];
   const trust4BeneficiariesData = (answers['trust4BeneficiariesData'] as TrustBeneficiaryEntry[]) || [];
 
-  const step1Answers = allAnswers?.get(1) || {};
+  const step1Answers = allAnswers?.get('aboutYou') || {};
   const familyMembers: Array<{ id: string; name: string; relationship: string }> = [];
   const client1Name = (step1Answers['fullName'] as string) || '';
   if (client1Name.trim()) {
@@ -2399,7 +2399,7 @@ export default function StepForm({
       familyMembers.push({ id: 'spouse', name: spouseName, relationship: 'Spouse' });
     }
   }
-  const step3ChildrenData = ((allAnswers?.get(3) || {})['childrenData'] as Array<Record<string, string>>) || [];
+  const step3ChildrenData = ((allAnswers?.get('children') || {})['childrenData'] as Array<Record<string, string>>) || [];
   step3ChildrenData.forEach((child, idx) => {
     const childName = (child['name'] as string) || '';
     if (childName.trim()) {
@@ -2436,7 +2436,7 @@ export default function StepForm({
         )}
 
         <form onSubmit={handleSubmit}>
-          {step.id === 1 && (
+          {step.sectionId === 'aboutYou' && (
             <>
               {step.questions.map((question) => {
                 if (question.key === 'spouseName' && (answers['maritalStatus'] !== 'married' && answers['maritalStatus'] !== 'common_law')) {
@@ -2529,7 +2529,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 4 && (
+          {step.sectionId === 'familyTrusts' && (
             <>
               {/* ── Trust 1 ── */}
               {step.questions
@@ -2662,7 +2662,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 5 && (
+          {step.sectionId === 'businessInterests' && (
             <>
               {step.questions.map((question) => {
                 if (question.condition) {
@@ -2691,7 +2691,7 @@ export default function StepForm({
 
                 if (question.key === 'soleProprietorshipCount' && answers['hasSoleProprietorship'] === 'yes') {
                   const count = parseInt(answers['soleProprietorshipCount'] as string) || 0;
-                  const client1Name = (allAnswers?.get(1)?.['fullName'] as string) || 'Client 1';
+                  const client1Name = (allAnswers?.get('aboutYou')?.['fullName'] as string) || 'Client 1';
                   const spData = (answers['client1SolePropsData'] as Array<Partial<SoleProprietorshipData>>) || [];
                   return (
                     <React.Fragment key={question.key}>
@@ -2725,11 +2725,11 @@ export default function StepForm({
                 }
 
                 if (question.key === 'client2SoleProprietorshipCount') {
-                  const maritalStatus = (allAnswers?.get(1)?.['maritalStatus'] as string);
+                  const maritalStatus = (allAnswers?.get('aboutYou')?.['maritalStatus'] as string);
                   const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
                   if (hasSpouse && answers['client2HasSoleProprietorship'] === 'yes') {
                     const count = parseInt(answers['client2SoleProprietorshipCount'] as string) || 0;
-                    const client2Name = (allAnswers?.get(1)?.['spouseName'] as string) || 'Client 2';
+                    const client2Name = (allAnswers?.get('aboutYou')?.['spouseName'] as string) || 'Client 2';
                     const spData = (answers['client2SolePropsData'] as Array<Partial<SoleProprietorshipData>>) || [];
                     return (
                       <React.Fragment key={question.key}>
@@ -2765,7 +2765,7 @@ export default function StepForm({
 
                 if (question.key === 'partnershipCount' && answers['hasPartnership'] === 'yes') {
                   const count = parseInt(answers['partnershipCount'] as string) || 0;
-                  const client1Name = (allAnswers?.get(1)?.['fullName'] as string) || 'Client 1';
+                  const client1Name = (allAnswers?.get('aboutYou')?.['fullName'] as string) || 'Client 1';
                   const pData = (answers['client1PartnershipsData'] as Array<Partial<PartnershipData>>) || [];
                   return (
                     <React.Fragment key={question.key}>
@@ -2799,11 +2799,11 @@ export default function StepForm({
                 }
 
                 if (question.key === 'client2PartnershipCount') {
-                  const maritalStatus = (allAnswers?.get(1)?.['maritalStatus'] as string);
+                  const maritalStatus = (allAnswers?.get('aboutYou')?.['maritalStatus'] as string);
                   const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
                   if (hasSpouse && answers['client2HasPartnership'] === 'yes') {
                     const count = parseInt(answers['client2PartnershipCount'] as string) || 0;
-                    const client2Name = (allAnswers?.get(1)?.['spouseName'] as string) || 'Client 2';
+                    const client2Name = (allAnswers?.get('aboutYou')?.['spouseName'] as string) || 'Client 2';
                     const pData = (answers['client2PartnershipsData'] as Array<Partial<PartnershipData>>) || [];
                     return (
                       <React.Fragment key={question.key}>
@@ -3164,7 +3164,7 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 6 && (
+          {step.sectionId === 'corporations' && (
             <>
               {step.questions.map((question) => {
                 if (question.key === 'numberOfCorporations' && answers['ownsCorporation'] !== 'yes') {
@@ -3329,16 +3329,16 @@ export default function StepForm({
                           </label>
                           <div className="space-y-2">
                             {(() => {
-                              const basicAnswers = allAnswers?.get(1) || {};
-                              const trustAnswers = allAnswers?.get(4) || {};
+                              const basicAnswers = allAnswers?.get('aboutYou') || {};
+                              const trustAnswers = allAnswers?.get('familyTrusts') || {};
                               const client1Name = basicAnswers['fullName'] as string || 'Client 1';
                               const client2Name = basicAnswers['spouseName'] as string || '';
                               const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law') && client2Name;
                               const trustName = trustAnswers['trustLegalName'] as string || '';
                               const hasTrust = trustAnswers['hasFamilyTrust'] === 'yes' && trustName;
 
-                              const step2Answers = allAnswers?.get(2) || {};
-                              const step3Answers = allAnswers?.get(3) || {};
+                              const step2Answers = allAnswers?.get('previousRelationships') || {};
+                              const step3Answers = allAnswers?.get('children') || {};
                               const childrenDataAll = step3Answers['childrenData'] as Array<Record<string, string>> | undefined;
                               const childNames = (childrenDataAll || []).map(c => c?.name).filter((n: string) => n && n.trim() !== '') as string[];
                               const client1PrevRels = step2Answers['client1PreviousRelationshipsData'] as Array<Record<string, string>> | undefined;
@@ -3782,7 +3782,7 @@ export default function StepForm({
                           const isOperatingOrOther = corpType === 'Operating Company' || corpType === 'Other';
                           if (!isOperatingOrOther) return null;
 
-                          const step3Answers = allAnswers?.get(3) || {};
+                          const step3Answers = allAnswers?.get('children') || {};
                           const childrenDataAll = step3Answers['childrenData'] as Array<Record<string, string>> | undefined;
                           const allChildNames = (childrenDataAll || []).map(c => c?.name).filter((n): n is string => !!n && n.trim() !== '');
                           if (allChildNames.length === 0) return null;
@@ -6164,12 +6164,12 @@ export default function StepForm({
             </>
           )}
 
-          {step.id === 7 && (() => {
-            const step1 = allAnswers?.get(1) as Record<string, string> | undefined;
+          {step.sectionId === 'corporateFinancialConnections' && (() => {
+            const step1 = allAnswers?.get('aboutYou') as Record<string, string> | undefined;
             const client1Name = step1?.['fullName'] || 'Client 1';
             const hasSpouse = step1?.['maritalStatus'] === 'married' || step1?.['maritalStatus'] === 'common_law';
             const client2Name = step1?.['spouseName'] || 'Client 2';
-            const step6 = allAnswers?.get(6) as Record<string, unknown> | undefined;
+            const step6 = allAnswers?.get('corporations') as Record<string, unknown> | undefined;
             const corporations = ((step6?.['corporationsData'] as Array<Record<string, string>>) || []).map((c) => ({ legalName: c.legalName || '' })).filter((c) => c.legalName.trim());
 
             const gateQuestion = step.questions[0];
@@ -6177,7 +6177,7 @@ export default function StepForm({
               ? gateQuestion.label(allAnswers || new Map())
               : gateQuestion.label;
             const resolvedOptions = typeof gateQuestion.options === 'function'
-              ? (gateQuestion.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+              ? (gateQuestion.options as (a: Map<string, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
               : gateQuestion.options;
 
             const pgAnswer = answers['pgHasPersonalGuarantee'];
@@ -6318,7 +6318,7 @@ export default function StepForm({
                     ? slQuestion.label(allAnswers || new Map())
                     : slQuestion.label;
                   const slResolvedOptions = typeof slQuestion.options === 'function'
-                    ? (slQuestion.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+                    ? (slQuestion.options as (a: Map<string, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
                     : slQuestion.options;
                   const slAnswer = answers['slHasShareholderLoan'];
 
@@ -6457,7 +6457,7 @@ export default function StepForm({
                     ? coQuestion.label(allAnswers || new Map())
                     : coQuestion.label;
                   const coResolvedOptions = typeof coQuestion.options === 'function'
-                    ? (coQuestion.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+                    ? (coQuestion.options as (a: Map<string, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
                     : coQuestion.options;
                   const coAnswer = answers['slOwesCompany'];
 
@@ -6596,7 +6596,7 @@ export default function StepForm({
                     ? icQuestion.label(allAnswers || new Map())
                     : icQuestion.label;
                   const icResolvedOptions = typeof icQuestion.options === 'function'
-                    ? (icQuestion.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+                    ? (icQuestion.options as (a: Map<string, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
                     : icQuestion.options;
                   const icAnswer = answers['slIntercompanyLoan'];
 
@@ -6732,7 +6732,7 @@ export default function StepForm({
                     ? rplQuestion.label(allAnswers || new Map())
                     : rplQuestion.label;
                   const rplResolvedOptions = typeof rplQuestion.options === 'function'
-                    ? (rplQuestion.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+                    ? (rplQuestion.options as (a: Map<string, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
                     : rplQuestion.options;
                   const rplAnswer = answers['slRelatedPartyLoan'];
 
@@ -6864,14 +6864,14 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 7 && (() => {
-            const step1Answers = allAnswers?.get(1) || {};
+          {step.sectionId === 'corporateFinancialConnections' && (() => {
+            const step1Answers = allAnswers?.get('aboutYou') || {};
             const client1Name = (step1Answers['fullName'] as string) || 'Client 1';
             const client2Name = (step1Answers['spouseName'] as string) || 'Client 2';
             const maritalStatus = step1Answers['maritalStatus'] as string;
             const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
 
-            const step6Answers = allAnswers?.get(6) || {};
+            const step6Answers = allAnswers?.get('corporations') || {};
             const corporationsData = step6Answers['corporationsData'] as Array<Record<string, unknown>> | undefined;
             const corporations = (corporationsData || []).map((c) => ({
               legalName: (c['legalName'] as string) || '',
@@ -6937,7 +6937,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 8 && (() => {
+          {step.sectionId === 'professionalTeam' && (() => {
             const allFormData = Object.fromEntries(
               Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
                 Object.entries(stepAnswers)
@@ -6957,7 +6957,7 @@ export default function StepForm({
                 : question.label;
 
               const resolvedOptions = typeof question.options === 'function'
-                ? (question.options as (a: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
+                ? (question.options as (a: Map<string, Record<string, unknown>>) => Array<{ value: string; label: string }>)(allAnswers || new Map())
                 : question.options;
 
               return (
@@ -7631,8 +7631,8 @@ export default function StepForm({
                 })()}
 
                 {(() => {
-                  const basicAns = allAnswers?.get(1) || {};
-                  const step3Ans = allAnswers?.get(3) || {};
+                  const basicAns = allAnswers?.get('aboutYou') || {};
+                  const step3Ans = allAnswers?.get('children') || {};
                   const hasSpouseFp = (basicAns['maritalStatus'] === 'married' || basicAns['maritalStatus'] === 'common_law');
                   const c1NameFp = (basicAns['fullName'] as string) || 'Client 1';
                   const c2NameFp = (basicAns['spouseName'] as string) || 'Client 2';
@@ -7802,15 +7802,15 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 9 && (() => {
-            const basicAnswers = allAnswers?.get(1) || {};
+          {step.sectionId === 'financialFootprint' && (() => {
+            const basicAnswers = allAnswers?.get('aboutYou') || {};
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
             const bankingStructure = answers['bankingStructure'];
 
-            const step2Answers = allAnswers?.get(2) || {};
-            const step3Answers = allAnswers?.get(3) || {};
+            const step2Answers = allAnswers?.get('previousRelationships') || {};
+            const step3Answers = allAnswers?.get('children') || {};
             const knownIndividuals: { name: string; relationship: string }[] = [];
             const c1PrevRels = (step2Answers['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
             c1PrevRels.forEach(r => { if (r?.name) knownIndividuals.push({ name: r.name, relationship: 'Previous Partner' }); });
@@ -8299,8 +8299,8 @@ export default function StepForm({
                       onAnswerChange('propertiesData', updated);
                     };
 
-                    const trustAnswers = allAnswers?.get(4) || {};
-                    const corporationAnswers = allAnswers?.get(5) || {};
+                    const trustAnswers = allAnswers?.get('familyTrusts') || {};
+                    const corporationAnswers = allAnswers?.get('businessInterests') || {};
 
                     const ownerOptions = [
                       { value: 'joint_survivorship', label: 'Jointly with right of survivorship' },
@@ -8814,9 +8814,9 @@ export default function StepForm({
                     { key: 'rca', label: 'Retirement Compensation Arrangement (RCA)' },
                   ];
 
-                  const s2 = allAnswers?.get(2) || {};
-                  const s3 = allAnswers?.get(3) || {};
-                  const s7 = allAnswers?.get(7) || {};
+                  const s2 = allAnswers?.get('previousRelationships') || {};
+                  const s3 = allAnswers?.get('children') || {};
+                  const s7 = allAnswers?.get('corporateFinancialConnections') || {};
                   const knownNames: string[] = [];
                   if (hasSpouse) knownNames.push(client2Name);
                   (s2['client1PreviousRelationshipsData'] as Array<Record<string,string>> || []).forEach(r => { if (r?.name && !knownNames.includes(r.name)) knownNames.push(r.name); });
@@ -10333,8 +10333,8 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 2 && (client1PrevRelCount > 0 || client2PrevRelCount > 0) && (() => {
-            const basicAnswers = allAnswers?.get(1) || {};
+          {step.sectionId === 'previousRelationships' && (client1PrevRelCount > 0 || client2PrevRelCount > 0) && (() => {
+            const basicAnswers = allAnswers?.get('aboutYou') || {};
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
 
@@ -10627,8 +10627,8 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 3 && childCount > 0 && (() => {
-            const basicAnswers = allAnswers?.get(1) || {};
+          {step.sectionId === 'children' && childCount > 0 && (() => {
+            const basicAnswers = allAnswers?.get('aboutYou') || {};
             const client1Name = basicAnswers['fullName'] as string || 'Client 1';
             const client2Name = basicAnswers['spouseName'] as string || 'Client 2';
             const hasSpouse = (basicAnswers['maritalStatus'] === 'married' || basicAnswers['maritalStatus'] === 'common_law');
@@ -11329,7 +11329,7 @@ export default function StepForm({
                         </label>
                         <div className="flex flex-col gap-2">
                           {(() => {
-                            const s1 = allAnswers?.get(1) || {};
+                            const s1 = allAnswers?.get('aboutYou') || {};
                             const pg1Name = (s1['fullName'] as string) || 'Parent / guardian 1';
                             const pg2Name = (s1['spouseName'] as string) || 'Parent / guardian 2';
                             const hasSpouse = (s1['maritalStatus'] === 'married' || s1['maritalStatus'] === 'common_law');
@@ -11573,7 +11573,7 @@ export default function StepForm({
                         handleChildChange(index, 'futureCareTeamSelection', next.join(','));
                       };
 
-                      const _step1ForLabels = allAnswers?.get(1) || {};
+                      const _step1ForLabels = allAnswers?.get('aboutYou') || {};
                       const _client1Name = (_step1ForLabels['fullName'] as string) || 'Client 1';
                       const _client2Name = (_step1ForLabels['spouseName'] as string) || 'Client 2';
                       const sourceLabels: Record<string, string> = {
@@ -13196,8 +13196,8 @@ export default function StepForm({
 
 
 
-          {step.id === 10 && (() => {
-            const basicAnswers = allAnswers?.get(1) || {};
+          {step.sectionId === 'realEstate' && (() => {
+            const basicAnswers = allAnswers?.get('aboutYou') || {};
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
             const maritalStatus = basicAnswers['maritalStatus'] as string;
             const hasSpouseStep9 = maritalStatus === 'married' || maritalStatus === 'common_law';
@@ -13492,8 +13492,8 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 11 && (() => {
-            const step9Answers = allAnswers?.get(9) || {};
+          {step.sectionId === 'debtObligations' && (() => {
+            const step9Answers = allAnswers?.get('financialFootprint') || {};
             const primaryHomeData = (step9Answers['primaryHomeData'] as Partial<PropertyData>) || {};
             const propertiesData = (step9Answers['propertiesData'] as Array<Partial<PropertyData>>) || [];
 
@@ -13554,8 +13554,8 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 16 && (() => {
-            const basicAnswers = allAnswers?.get(1) || {};
+          {step.sectionId === 'powersOfAttorney' && (() => {
+            const basicAnswers = allAnswers?.get('aboutYou') || {};
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
             const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
             const maritalStatus = basicAnswers['maritalStatus'] as string;
@@ -14123,8 +14123,8 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 17 && (() => {
-            const basicAnswers = allAnswers?.get(1) || {};
+          {step.sectionId === 'estateTrustees' && (() => {
+            const basicAnswers = allAnswers?.get('aboutYou') || {};
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
             const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
             const maritalStatus = basicAnswers['maritalStatus'] as string;
@@ -14174,7 +14174,7 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 14 && (() => {
+          {step.sectionId === 'legacyIntent' && (() => {
             const renderQuestion = (question: typeof step.questions[0]) => {
               const displayLabel = typeof question.label === 'function'
                 ? question.label(allAnswers || new Map())
@@ -14201,8 +14201,8 @@ export default function StepForm({
             );
           })()}
 
-          {step.id === 12 && (() => {
-            const basicAnswers = allAnswers?.get(1) || {};
+          {step.sectionId === 'lifeInsurance' && (() => {
+            const basicAnswers = allAnswers?.get('aboutYou') || {};
             const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
             const maritalStatus = basicAnswers['maritalStatus'] as string;
             const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
@@ -14282,7 +14282,7 @@ export default function StepForm({
                 )}
 
                 {(() => {
-                  const corporationsData = (allAnswers?.get(6) as Record<string, unknown> | undefined)?.['corporationsData'] as Array<Record<string, string>> | undefined;
+                  const corporationsData = (allAnswers?.get('corporations') as Record<string, unknown> | undefined)?.['corporationsData'] as Array<Record<string, string>> | undefined;
                   if (!corporationsData || corporationsData.length === 0) return null;
                   const validCorps = corporationsData
                     .map((c, i) => ({ corp: c, index: i }))

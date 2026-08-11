@@ -1,3 +1,78 @@
+/**
+ * IMPORTANT:
+ * Questionnaire section IDs are permanent identifiers.
+ *
+ * Never use section order/index as a data identifier.
+ * Sections may be reordered without changing their IDs.
+ *
+ * Cross-section logic must reference semantic section IDs.
+ */
+export type QuestionnaireSectionId =
+  | 'aboutYou'
+  | 'previousRelationships'
+  | 'children'
+  | 'familyTrusts'
+  | 'businessInterests'
+  | 'corporations'
+  | 'corporateFinancialConnections'
+  | 'professionalTeam'
+  | 'financialFootprint'
+  | 'realEstate'
+  | 'debtObligations'
+  | 'lifeInsurance'
+  | 'propertyLiabilityInsurance'
+  | 'legacyIntent'
+  | 'wills'
+  | 'powersOfAttorney'
+  | 'estateTrustees'
+  | 'funeralArrangements'
+  | 'pensionsRegisteredAccounts';
+
+export type QuestionnaireAnswers = Partial<Record<QuestionnaireSectionId, Record<string, unknown>>>;
+
+export function getSectionAnswers(
+  answers: Map<string, Record<string, unknown>>,
+  sectionId: QuestionnaireSectionId
+): Record<string, unknown> {
+  return answers.get(sectionId) ?? {};
+}
+
+/** Legacy migration: maps old numeric step positions to permanent section IDs. */
+const legacyStepIdMap: Record<number, QuestionnaireSectionId> = {
+  1: 'aboutYou',
+  2: 'previousRelationships',
+  3: 'children',
+  4: 'familyTrusts',
+  5: 'businessInterests',
+  6: 'corporations',
+  7: 'corporateFinancialConnections',
+  8: 'professionalTeam',
+  9: 'financialFootprint',
+  10: 'realEstate',
+  11: 'debtObligations',
+  12: 'lifeInsurance',
+  13: 'propertyLiabilityInsurance',
+  14: 'legacyIntent',
+  15: 'wills',
+  16: 'powersOfAttorney',
+  17: 'estateTrustees',
+  18: 'funeralArrangements',
+  19: 'pensionsRegisteredAccounts',
+};
+
+/** Convert a legacy numeric-keyed answers object to section-ID-keyed Map. */
+export function migrateLegacyAnswers(
+  legacy: Record<string, Record<string, unknown>>
+): Map<string, Record<string, unknown>> {
+  const migrated = new Map<string, Record<string, unknown>>();
+  for (const [numKey, value] of Object.entries(legacy)) {
+    const sectionId = legacyStepIdMap[parseInt(numKey, 10)];
+    if (sectionId && value && typeof value === 'object') {
+      migrated.set(sectionId, value as Record<string, unknown>);
+    }
+  }
+  return migrated;
+}
 
 const generateYearOptions = () => {
   const currentYear = new Date().getFullYear();
@@ -10,10 +85,10 @@ const generateYearOptions = () => {
 
 export type StepQuestion = {
   key: string;
-  label: string | ((answers: Map<number, Record<string, unknown>>) => string);
+  label: string | ((answers: Map<string, Record<string, unknown>>) => string);
   type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'email' | 'tel' | 'date' | 'number' | 'checkbox-group' | 'dynamic' | 'label' | 'display';
   placeholder?: string;
-  options?: Array<{ value: string; label: string }> | ((answers: Map<number, Record<string, unknown>>) => Array<{ value: string; label: string }>);
+  options?: Array<{ value: string; label: string }> | ((answers: Map<string, Record<string, unknown>>) => Array<{ value: string; label: string }>);
   required?: boolean;
   videoUrl?: string;
   description?: string;
@@ -24,6 +99,7 @@ export type StepQuestion = {
 
 export type Step = {
   id: number;
+  sectionId: QuestionnaireSectionId;
   title: string;
   description?: string;
   questions: StepQuestion[];
@@ -32,10 +108,10 @@ export type Step = {
 
 type OptionEntry = { value: string; label: string };
 
-export const buildInsuredPersonOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
-  const step1 = answers.get(1) || {};
-  const step2 = answers.get(2) || {};
-  const step3 = answers.get(3) || {};
+export const buildInsuredPersonOptions = (answers: Map<string, Record<string, unknown>>): OptionEntry[] => {
+  const step1 = answers.get('aboutYou') || {};
+  const step2 = answers.get('previousRelationships') || {};
+  const step3 = answers.get('children') || {};
   const opts: OptionEntry[] = [];
   const seen = new Set<string>();
 
@@ -69,12 +145,12 @@ export const buildInsuredPersonOptions = (answers: Map<number, Record<string, un
   return opts;
 };
 
-export const buildPolicyOwnerOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
-  const step1 = answers.get(1) || {};
-  const step2 = answers.get(2) || {};
-  const step3 = answers.get(3) || {};
-  const step4 = answers.get(4) || {};
-  const step6 = answers.get(6) || {};
+export const buildPolicyOwnerOptions = (answers: Map<string, Record<string, unknown>>): OptionEntry[] => {
+  const step1 = answers.get('aboutYou') || {};
+  const step2 = answers.get('previousRelationships') || {};
+  const step3 = answers.get('children') || {};
+  const step4 = answers.get('familyTrusts') || {};
+  const step6 = answers.get('corporations') || {};
   const opts: OptionEntry[] = [];
   const seen = new Set<string>();
 
@@ -117,12 +193,12 @@ export const buildPolicyOwnerOptions = (answers: Map<number, Record<string, unkn
   return opts;
 };
 
-export const buildBeneficiaryOptions = (answers: Map<number, Record<string, unknown>>): OptionEntry[] => {
-  const step1 = answers.get(1) || {};
-  const step2 = answers.get(2) || {};
-  const step3 = answers.get(3) || {};
-  const step4 = answers.get(4) || {};
-  const step6 = answers.get(6) || {};
+export const buildBeneficiaryOptions = (answers: Map<string, Record<string, unknown>>): OptionEntry[] => {
+  const step1 = answers.get('aboutYou') || {};
+  const step2 = answers.get('previousRelationships') || {};
+  const step3 = answers.get('children') || {};
+  const step4 = answers.get('familyTrusts') || {};
+  const step6 = answers.get('corporations') || {};
   const opts: OptionEntry[] = [];
   const seen = new Set<string>();
 
@@ -364,17 +440,17 @@ const generateLifeInsurancePolicyQuestions = (
       const clientNameFn = source === 'personal'
         ? () => 'Are there any other Life Insurance Policies purchased outside of work plans or employer benefits?'
         : source === 'corporate'
-          ? (answers: Map<number, Record<string, unknown>>) => {
+          ? (answers: Map<string, Record<string, unknown>>) => {
             const corpIdx = parseInt(prefix.replace('corp', '')) - 1;
-            const corps = answers.get(6)?.['corporationsData'] as Array<Record<string, string>> | undefined;
+            const corps = answers.get('corporations')?.['corporationsData'] as Array<Record<string, string>> | undefined;
             const name = corps?.[corpIdx]?.legalName?.trim() || `Corporation ${corpIdx + 1}`;
             return `Does ${name} own any other Life Insurance Policies?`;
           }
           : prefix === 'client1'
-            ? (answers: Map<number, Record<string, unknown>>) =>
-                `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
-            : (answers: Map<number, Record<string, unknown>>) =>
-                `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get(1)?.['fullName'] as string) || 'Client 1'}'s employer?`;
+            ? (answers: Map<string, Record<string, unknown>>) =>
+                `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2'}'s employer?`
+            : (answers: Map<string, Record<string, unknown>>) =>
+                `Are there any other Life Insurance Policies owned through your employer or through ${(answers.get('aboutYou')?.['fullName'] as string) || 'Client 1'}'s employer?`;
 
       questions.push({
         key: `${p}HasAdditional`,
@@ -529,17 +605,17 @@ const generateCriticalIllnessPolicyQuestions = (
       const clientNameFn = source === 'personal'
         ? () => 'Are there any other Critical Illness Policies purchased outside of work plans or employer benefits?'
         : source === 'corporate'
-          ? (answers: Map<number, Record<string, unknown>>) => {
+          ? (answers: Map<string, Record<string, unknown>>) => {
             const corpIdx = parseInt(prefix.replace('corp', '')) - 1;
-            const corps = answers.get(6)?.['corporationsData'] as Array<Record<string, string>> | undefined;
+            const corps = answers.get('corporations')?.['corporationsData'] as Array<Record<string, string>> | undefined;
             const name = corps?.[corpIdx]?.legalName?.trim() || `Corporation ${corpIdx + 1}`;
             return `Does ${name} own any other Critical Illness Policies?`;
           }
           : prefix === 'client1'
-            ? (answers: Map<number, Record<string, unknown>>) =>
-                `Are there any other Critical Illness Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
-            : (answers: Map<number, Record<string, unknown>>) =>
-                `Are there any other Critical Illness Policies owned through your employer or through ${(answers.get(1)?.['fullName'] as string) || 'Client 1'}'s employer?`;
+            ? (answers: Map<string, Record<string, unknown>>) =>
+                `Are there any other Critical Illness Policies owned through your employer or through ${(answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2'}'s employer?`
+            : (answers: Map<string, Record<string, unknown>>) =>
+                `Are there any other Critical Illness Policies owned through your employer or through ${(answers.get('aboutYou')?.['fullName'] as string) || 'Client 1'}'s employer?`;
 
       questions.push({
         key: `${p}HasAdditional`,
@@ -698,17 +774,17 @@ const generateDisabilityInsurancePolicyQuestions = (
       const clientNameFn = source === 'personal'
         ? () => 'Are there any other Disability Insurance Policies purchased outside of work plans or employer benefits?'
         : source === 'corporate'
-          ? (answers: Map<number, Record<string, unknown>>) => {
+          ? (answers: Map<string, Record<string, unknown>>) => {
             const corpIdx = parseInt(prefix.replace('corp', '')) - 1;
-            const corps = answers.get(6)?.['corporationsData'] as Array<Record<string, string>> | undefined;
+            const corps = answers.get('corporations')?.['corporationsData'] as Array<Record<string, string>> | undefined;
             const name = corps?.[corpIdx]?.legalName?.trim() || `Corporation ${corpIdx + 1}`;
             return `Does ${name} own any other Disability Insurance Policies?`;
           }
           : prefix === 'client1'
-            ? (answers: Map<number, Record<string, unknown>>) =>
-                `Are there any other Disability Insurance Policies owned through your employer or through ${(answers.get(1)?.['spouseName'] as string) || 'Client 2'}'s employer?`
-            : (answers: Map<number, Record<string, unknown>>) =>
-                `Are there any other Disability Insurance Policies owned through your employer or through ${(answers.get(1)?.['fullName'] as string) || 'Client 1'}'s employer?`;
+            ? (answers: Map<string, Record<string, unknown>>) =>
+                `Are there any other Disability Insurance Policies owned through your employer or through ${(answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2'}'s employer?`
+            : (answers: Map<string, Record<string, unknown>>) =>
+                `Are there any other Disability Insurance Policies owned through your employer or through ${(answers.get('aboutYou')?.['fullName'] as string) || 'Client 1'}'s employer?`;
 
       questions.push({
         key: `${p}HasAdditional`,
@@ -733,8 +809,8 @@ const generateCorporationInsuranceQuestions = (corpIndex: number): StepQuestion[
   const prefix = `corp${corpIndex + 1}`;
   const questions: StepQuestion[] = [];
 
-  const corpNameFn = (answers: Map<number, Record<string, unknown>>): string => {
-    const corps = answers.get(6)?.['corporationsData'] as Array<Record<string, string>> | undefined;
+  const corpNameFn = (answers: Map<string, Record<string, unknown>>): string => {
+    const corps = answers.get('corporations')?.['corporationsData'] as Array<Record<string, string>> | undefined;
     const name = corps?.[corpIndex]?.legalName;
     return (name && name.trim()) ? name.trim() : `Corporation ${corpIndex + 1}`;
   };
@@ -789,6 +865,7 @@ const generateCorporationInsuranceQuestions = (corpIndex: number): StepQuestion[
 export const STEPS: Step[] = [
   {
     id: 1,
+    sectionId: 'aboutYou',
     title: 'About You',
     description: 'Let\'s get started with a few quick questions',
     questions: [
@@ -802,7 +879,7 @@ export const STEPS: Step[] = [
       {
         key: 'dateOfBirth',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}'s Date of Birth`;
         },
         type: 'date',
@@ -811,7 +888,7 @@ export const STEPS: Step[] = [
       {
         key: 'address',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}'s Address`;
         },
         type: 'text',
@@ -821,7 +898,7 @@ export const STEPS: Step[] = [
       {
         key: 'city',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}'s City`;
         },
         type: 'text',
@@ -831,7 +908,7 @@ export const STEPS: Step[] = [
       {
         key: 'province',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}'s Province`;
         },
         type: 'text',
@@ -841,7 +918,7 @@ export const STEPS: Step[] = [
       {
         key: 'postalCode',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}'s Postal Code`;
         },
         type: 'text',
@@ -851,7 +928,7 @@ export const STEPS: Step[] = [
       {
         key: 'email',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}'s Email Address`;
         },
         type: 'email',
@@ -861,7 +938,7 @@ export const STEPS: Step[] = [
       {
         key: 'phone',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}'s Phone Number`;
         },
         type: 'text',
@@ -871,7 +948,7 @@ export const STEPS: Step[] = [
       {
         key: 'maritalStatus',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}'s Marital Status`;
         },
         type: 'select',
@@ -888,7 +965,7 @@ export const STEPS: Step[] = [
       {
         key: 'spouseName',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}'s Spouse or Common-Law Partner's Name`;
         },
         type: 'text',
@@ -898,8 +975,8 @@ export const STEPS: Step[] = [
       {
         key: 'spouseSameAddress',
         label: (answers) => {
-          const c1Full = answers.get(1)?.fullName as string || 'Client 1';
-          const c2Full = answers.get(1)?.spouseName as string || 'Client 2';
+          const c1Full = answers.get('aboutYou')?.fullName as string || 'Client 1';
+          const c2Full = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           const c1 = c1Full.split(' ')[0];
           const c2 = c2Full.split(' ')[0];
           return `Does ${c1} and ${c2} live at the same address?`;
@@ -914,7 +991,7 @@ export const STEPS: Step[] = [
       {
         key: 'spouseDateOfBirth',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}'s Date of Birth`;
         },
         type: 'date',
@@ -923,7 +1000,7 @@ export const STEPS: Step[] = [
       {
         key: 'spouseAddress',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}'s Address`;
         },
         type: 'text',
@@ -933,7 +1010,7 @@ export const STEPS: Step[] = [
       {
         key: 'spouseCity',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}'s City`;
         },
         type: 'text',
@@ -943,7 +1020,7 @@ export const STEPS: Step[] = [
       {
         key: 'spouseProvince',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}'s Province`;
         },
         type: 'text',
@@ -953,7 +1030,7 @@ export const STEPS: Step[] = [
       {
         key: 'spousePostalCode',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}'s Postal Code`;
         },
         type: 'text',
@@ -963,7 +1040,7 @@ export const STEPS: Step[] = [
       {
         key: 'spouseEmail',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}'s Email Address`;
         },
         type: 'email',
@@ -973,7 +1050,7 @@ export const STEPS: Step[] = [
       {
         key: 'spousePhone',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}'s Phone Number`;
         },
         type: 'text',
@@ -983,8 +1060,8 @@ export const STEPS: Step[] = [
       {
         key: 'hasMarriageContract',
         label: (answers) => {
-          const c1Full = answers.get(1)?.fullName as string || 'Client 1';
-          const c2Full = answers.get(1)?.spouseName as string || 'Client 2';
+          const c1Full = answers.get('aboutYou')?.fullName as string || 'Client 1';
+          const c2Full = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           const c1 = c1Full.split(' ')[0];
           const c2 = c2Full.split(' ')[0];
           return `Does ${c1} and ${c2} have a marriage contract (prenuptial agreement)?`;
@@ -1006,7 +1083,7 @@ export const STEPS: Step[] = [
       {
         key: 'client1HasPreviousRelationship',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `Has ${name} previously been married or in a common-law relationship?`;
         },
         type: 'radio',
@@ -1019,7 +1096,7 @@ export const STEPS: Step[] = [
       {
         key: 'client1NumberOfPreviousRelationships',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `How many previous marriages or common-law relationships has ${name} had?`;
         },
         type: 'number',
@@ -1029,7 +1106,7 @@ export const STEPS: Step[] = [
       {
         key: 'client2HasPreviousRelationship',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `Has ${name} previously been married or in a common-law relationship?`;
         },
         type: 'radio',
@@ -1042,7 +1119,7 @@ export const STEPS: Step[] = [
       {
         key: 'client2NumberOfPreviousRelationships',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `How many previous marriages or common-law relationships has ${name} had?`;
         },
         type: 'number',
@@ -1052,8 +1129,8 @@ export const STEPS: Step[] = [
       {
         key: 'hasChildren',
         label: (answers) => {
-          const c1 = answers.get(1)?.fullName as string || 'Client 1';
-          const c2 = answers.get(1)?.spouseName as string;
+          const c1 = answers.get('aboutYou')?.fullName as string || 'Client 1';
+          const c2 = answers.get('aboutYou')?.spouseName as string;
           return c2
             ? `Do ${c1} and ${c2} have any children (from their or any other relationship)?`
             : `Does ${c1} have any children (from their or any other relationship)?`;
@@ -1068,8 +1145,8 @@ export const STEPS: Step[] = [
       {
         key: 'numberOfChildren',
         label: (answers) => {
-          const c1 = answers.get(1)?.fullName as string || 'Client 1';
-          const c2 = answers.get(1)?.spouseName as string;
+          const c1 = answers.get('aboutYou')?.fullName as string || 'Client 1';
+          const c2 = answers.get('aboutYou')?.spouseName as string;
           return c2 ? `How many children do ${c1} and ${c2} have?` : `How many children does ${c1} have?`;
         },
         type: 'number',
@@ -1080,18 +1157,21 @@ export const STEPS: Step[] = [
   },
   {
     id: 2,
+    sectionId: 'previousRelationships',
     title: 'Previous Relationships',
     description: 'Please provide details about previous marriages or common law relationships',
     questions: [],
   },
   {
     id: 3,
+    sectionId: 'children',
     title: 'Children Information',
     description: 'Please provide details about each of your children',
     questions: [],
   },
   {
     id: 4,
+    sectionId: 'familyTrusts',
     title: 'Family Trusts',
     description: 'Information about family trusts you have established',
     questions: [
@@ -1114,8 +1194,8 @@ export const STEPS: Step[] = [
       },
       {
         key: 'trustDeedLocation',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trustName = (answers.get(4)?.['trustLegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trustName = (answers.get('familyTrusts')?.['trustLegalName'] as string) || '';
           return trustName ? `Location of ${trustName}'s Trust Deed:` : 'Location of the Trust Deed:';
         },
         type: 'text',
@@ -1124,8 +1204,8 @@ export const STEPS: Step[] = [
       },
       {
         key: 'trustYearEstablished',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trustName = (answers.get(4)?.['trustLegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trustName = (answers.get('familyTrusts')?.['trustLegalName'] as string) || '';
           return trustName ? `Year that ${trustName} was established:` : 'Year that the Trust was established:';
         },
         type: 'number',
@@ -1134,8 +1214,8 @@ export const STEPS: Step[] = [
       },
       {
         key: 'hasAdditionalFamilyTrust',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trustName = (answers.get(4)?.['trustLegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trustName = (answers.get('familyTrusts')?.['trustLegalName'] as string) || '';
           return trustName ? `Do you have additional Family Trusts beyond ${trustName}?` : 'Do you have additional Family Trusts?';
         },
         type: 'radio',
@@ -1157,8 +1237,8 @@ export const STEPS: Step[] = [
       },
       {
         key: 'trust2DeedLocation',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trustName = (answers.get(4)?.['trust2LegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trustName = (answers.get('familyTrusts')?.['trust2LegalName'] as string) || '';
           return trustName ? `Location of ${trustName}'s Trust Deed:` : 'Location of the Trust Deed:';
         },
         type: 'text',
@@ -1168,8 +1248,8 @@ export const STEPS: Step[] = [
       },
       {
         key: 'trust2YearEstablished',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trustName = (answers.get(4)?.['trust2LegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trustName = (answers.get('familyTrusts')?.['trust2LegalName'] as string) || '';
           return trustName ? `Year that ${trustName} was established:` : 'Year that the Trust was established:';
         },
         type: 'number',
@@ -1179,9 +1259,9 @@ export const STEPS: Step[] = [
       },
       {
         key: 'hasAdditionalFamilyTrust2',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trust1Name = (answers.get(4)?.['trustLegalName'] as string) || '';
-          const trust2Name = (answers.get(4)?.['trust2LegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trust1Name = (answers.get('familyTrusts')?.['trustLegalName'] as string) || '';
+          const trust2Name = (answers.get('familyTrusts')?.['trust2LegalName'] as string) || '';
           const named = [trust1Name, trust2Name].filter(Boolean).join(' and ');
           return named ? `Do you have additional Family Trusts beyond ${named}?` : 'Do you have additional Family Trusts?';
         },
@@ -1204,8 +1284,8 @@ export const STEPS: Step[] = [
       },
       {
         key: 'trust3DeedLocation',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trustName = (answers.get(4)?.['trust3LegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trustName = (answers.get('familyTrusts')?.['trust3LegalName'] as string) || '';
           return trustName ? `Location of ${trustName}'s Trust Deed:` : 'Location of the Trust Deed:';
         },
         type: 'text',
@@ -1215,8 +1295,8 @@ export const STEPS: Step[] = [
       },
       {
         key: 'trust3YearEstablished',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trustName = (answers.get(4)?.['trust3LegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trustName = (answers.get('familyTrusts')?.['trust3LegalName'] as string) || '';
           return trustName ? `Year that ${trustName} was established:` : 'Year that the Trust was established:';
         },
         type: 'number',
@@ -1226,10 +1306,10 @@ export const STEPS: Step[] = [
       },
       {
         key: 'hasAdditionalFamilyTrust3',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trust1Name = (answers.get(4)?.['trustLegalName'] as string) || '';
-          const trust2Name = (answers.get(4)?.['trust2LegalName'] as string) || '';
-          const trust3Name = (answers.get(4)?.['trust3LegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trust1Name = (answers.get('familyTrusts')?.['trustLegalName'] as string) || '';
+          const trust2Name = (answers.get('familyTrusts')?.['trust2LegalName'] as string) || '';
+          const trust3Name = (answers.get('familyTrusts')?.['trust3LegalName'] as string) || '';
           const named = [trust1Name, trust2Name, trust3Name].filter(Boolean).join(', ');
           return named ? `Do you have additional Family Trusts beyond ${named}?` : 'Do you have additional Family Trusts?';
         },
@@ -1252,8 +1332,8 @@ export const STEPS: Step[] = [
       },
       {
         key: 'trust4DeedLocation',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trustName = (answers.get(4)?.['trust4LegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trustName = (answers.get('familyTrusts')?.['trust4LegalName'] as string) || '';
           return trustName ? `Location of ${trustName}'s Trust Deed:` : 'Location of the Trust Deed:';
         },
         type: 'text',
@@ -1263,8 +1343,8 @@ export const STEPS: Step[] = [
       },
       {
         key: 'trust4YearEstablished',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const trustName = (answers.get(4)?.['trust4LegalName'] as string) || '';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const trustName = (answers.get('familyTrusts')?.['trust4LegalName'] as string) || '';
           return trustName ? `Year that ${trustName} was established:` : 'Year that the Trust was established:';
         },
         type: 'number',
@@ -1276,13 +1356,14 @@ export const STEPS: Step[] = [
   },
   {
     id: 5,
+    sectionId: 'businessInterests',
     title: 'Sole Proprietorships and Partnerships',
     description: 'Information about any non-incorporated businesses you have an interest in.',
     questions: [
       {
         key: 'hasSoleProprietorship',
         label: (answers) => {
-          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const client1Name = answers.get('aboutYou')?.fullName || 'Client 1';
           return `${client1Name}, do you have ownership in a sole proprietorship?`;
         },
         type: 'radio',
@@ -1303,7 +1384,7 @@ export const STEPS: Step[] = [
       {
         key: 'hasPartnership',
         label: (answers) => {
-          const client1Name = answers.get(1)?.fullName || 'Client 1';
+          const client1Name = answers.get('aboutYou')?.fullName || 'Client 1';
           return `${client1Name}, do you have ownership interests in a partnership?`;
         },
         type: 'radio',
@@ -1324,7 +1405,7 @@ export const STEPS: Step[] = [
       {
         key: 'client2HasSoleProprietorship',
         label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          const client2Name = answers.get('aboutYou')?.spouseName || 'Client 2';
           return `${client2Name}, do you have ownership in a sole proprietorship?`;
         },
         type: 'radio',
@@ -1353,7 +1434,7 @@ export const STEPS: Step[] = [
       {
         key: 'client2HasPartnership',
         label: (answers) => {
-          const client2Name = answers.get(1)?.spouseName || 'Client 2';
+          const client2Name = answers.get('aboutYou')?.spouseName || 'Client 2';
           return `${client2Name}, do you have ownership interests in a partnership?`;
         },
         type: 'radio',
@@ -1383,6 +1464,7 @@ export const STEPS: Step[] = [
   },
   {
     id: 6,
+    sectionId: 'corporations',
     title: 'Corporate Information',
     description: 'Information about corporations you own',
     questions: [
@@ -1423,6 +1505,7 @@ export const STEPS: Step[] = [
   },
   {
     id: 7,
+    sectionId: 'corporateFinancialConnections',
     title: 'Corporate Financial Connections',
     description: `Owning one or more company(ies) can create financial connections that aren't always obvious from looking at each company individually.
 You may have put personal money into a company, borrowed money from one of your companies, moved money between companies, or personally guaranteed company borrowing.
@@ -1432,7 +1515,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'pgHasPersonalGuarantee',
         label: (answers) => {
-          const step1 = answers.get(1) || {};
+          const step1 = answers.get('aboutYou') || {};
           const client1Name = (step1['fullName'] as string) || 'Client 1';
           const hasSpouse = (step1['maritalStatus'] as string) === 'married' || (step1['maritalStatus'] as string) === 'common_law';
           const client2Name = (step1['spouseName'] as string) || 'Client 2';
@@ -1452,7 +1535,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'slHasShareholderLoan',
         label: (answers) => {
-          const step1 = answers.get(1) || {};
+          const step1 = answers.get('aboutYou') || {};
           const client1Name = (step1['fullName'] as string) || 'Client 1';
           const hasSpouse = (step1['maritalStatus'] as string) === 'married' || (step1['maritalStatus'] as string) === 'common_law';
           const client2Name = (step1['spouseName'] as string) || 'Client 2';
@@ -1473,7 +1556,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'slOwesCompany',
         label: (answers) => {
-          const step1 = answers.get(1) || {};
+          const step1 = answers.get('aboutYou') || {};
           const client1Name = (step1['fullName'] as string) || 'Client 1';
           const hasSpouse = (step1['maritalStatus'] as string) === 'married' || (step1['maritalStatus'] as string) === 'common_law';
           const client2Name = (step1['spouseName'] as string) || 'Client 2';
@@ -1533,6 +1616,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 8,
+    sectionId: 'professionalTeam',
     title: 'Your Professional Team',
     description: 'The people who help manage your family\'s financial, legal, tax, and healthcare affairs.\nIf something happened to you, these are the professionals your executor, attorney for property, attorney for personal care, or future caregiver may need to contact.',
     questions: [
@@ -1550,15 +1634,15 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         key: 'fpAdvisor1WorksWith',
         label: 'Who does this Financial Planner work with?',
         type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+        options: (answers: Map<string, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get('aboutYou')?.['maritalStatus'] as string) === 'married' || (answers.get('aboutYou')?.['maritalStatus'] as string) === 'common_law';
           if (hasSpouse) {
             return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+              { value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2' },
             ];
           }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+          return [{ value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' }];
         },
         required: false,
         condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes',
@@ -1669,15 +1753,15 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         key: 'fpAdvisor2WorksWith',
         label: 'Who does this Financial Planner work with?',
         type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+        options: (answers: Map<string, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get('aboutYou')?.['maritalStatus'] as string) === 'married' || (answers.get('aboutYou')?.['maritalStatus'] as string) === 'common_law';
           if (hasSpouse) {
             return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+              { value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2' },
             ];
           }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+          return [{ value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' }];
         },
         required: false,
         condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
@@ -1798,15 +1882,15 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         key: 'acctAdvisor1WorksWith',
         label: 'Who does this accountant work with?',
         type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+        options: (answers: Map<string, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get('aboutYou')?.['maritalStatus'] as string) === 'married' || (answers.get('aboutYou')?.['maritalStatus'] as string) === 'common_law';
           if (hasSpouse) {
             return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+              { value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2' },
             ];
           }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+          return [{ value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' }];
         },
         required: false,
         condition: (formData: Record<string, string>) => formData.acctHasAccountant === 'yes',
@@ -1911,15 +1995,15 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         key: 'lawAdvisor1WorksWith',
         label: 'Who does this lawyer work with?',
         type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+        options: (answers: Map<string, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get('aboutYou')?.['maritalStatus'] as string) === 'married' || (answers.get('aboutYou')?.['maritalStatus'] as string) === 'common_law';
           if (hasSpouse) {
             return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+              { value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2' },
             ];
           }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+          return [{ value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' }];
         },
         required: false,
         condition: (formData: Record<string, string>) => formData.lawHasLawyer === 'yes',
@@ -2025,15 +2109,15 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         key: 'insAdvisor1WorksWith',
         label: 'Who does this insurance advisor work with?',
         type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const hasSpouse = (answers.get(1)?.['maritalStatus'] as string) === 'married' || (answers.get(1)?.['maritalStatus'] as string) === 'common_law';
+        options: (answers: Map<string, Record<string, unknown>>) => {
+          const hasSpouse = (answers.get('aboutYou')?.['maritalStatus'] as string) === 'married' || (answers.get('aboutYou')?.['maritalStatus'] as string) === 'common_law';
           if (hasSpouse) {
             return [
-              { value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' },
-              { value: 'client2', label: (answers.get(1)?.['spouseName'] as string) || 'Client 2' },
+              { value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' },
+              { value: 'client2', label: (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2' },
             ];
           }
-          return [{ value: 'client1', label: (answers.get(1)?.['fullName'] as string) || 'Client 1' }];
+          return [{ value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' }];
         },
         required: false,
         condition: (formData: Record<string, string>) => formData.insHasAdvisor && formData.insHasAdvisor !== 'na',
@@ -2582,6 +2666,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 9,
+    sectionId: 'financialFootprint',
     title: 'Your Financial Footprint',
     description: 'Banking and financial account information',
     questions: [
@@ -2678,6 +2763,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 10,
+    sectionId: 'realEstate',
     title: 'Real Estate',
     description: 'Real estate is often one of the largest and most emotionally significant parts of an estate. This section helps us understand what properties you own or rent, who owns them, where important documents are kept, and whether there are any planning opportunities or potential challenges for your executor and family.',
     questions: [
@@ -2686,7 +2772,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         label: 'Which best describes your current living situation?',
         type: 'radio',
         options: (answers) => {
-          const basicAnswers = answers.get(1) || {};
+          const basicAnswers = answers.get('aboutYou') || {};
           const maritalStatus = basicAnswers['maritalStatus'] as string;
           const hasMultipleClients = maritalStatus === 'married' || maritalStatus === 'common_law';
           if (hasMultipleClients) {
@@ -2718,8 +2804,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'rentSameAddress',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const step1 = answers.get(1) as Record<string, string> | undefined;
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const step1 = answers.get('aboutYou') as Record<string, string> | undefined;
           const addr = step1?.address || '';
           const shortAddr = addr.split(',')[0] || addr;
           return `Is the rental address the same as your address (${shortAddr || '123 Main Street'}?)`;
@@ -2854,8 +2940,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'retSameAddress',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const step1 = answers.get(1) as Record<string, string> | undefined;
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const step1 = answers.get('aboutYou') as Record<string, string> | undefined;
           const addr = step1?.address || '';
           const shortAddr = addr.split(',')[0] || addr;
           return `Is the retirement residence address the same as your address (${shortAddr || '123 Main Street'}?)`;
@@ -2987,6 +3073,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 11,
+    sectionId: 'debtObligations',
     title: 'Debt and Obligations',
     description: 'Understanding your liabilities (debts and obligations) is essential for effective estate planning. This section helps us identify outstanding debts that may need to be settled from your estate, and ensures your executor has a complete picture of your financial obligations.',
     questions: [
@@ -3019,14 +3106,15 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 12,
+    sectionId: 'lifeInsurance',
     title: 'Life Insurance',
     description: 'Life insurance can play a key role in your estate plan by providing liquidity to cover debts, taxes, and final expenses, and by protecting your loved ones financially. This section helps us understand your existing coverage so we can assess whether it aligns with your estate planning goals.',
     questions: [
       {
         key: 'client1HasLifeInsurance',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          const spouseName = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
+          const spouseName = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}, do you have any Life Insurance through your employer or through ${spouseName}'s employer?`;
         },
         type: 'radio',
@@ -3040,8 +3128,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client1HasCriticalIllnessInsurance',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          const spouseName = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
+          const spouseName = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}, do you have any Critical Illness Insurance through your employer or through ${spouseName}'s employer?`;
         },
         type: 'radio',
@@ -3055,8 +3143,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client1HasDisabilityInsuranceEmployer',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
-          const spouseName = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
+          const spouseName = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}, do you have any Disability Insurance through your employer or through ${spouseName}'s employer?`;
         },
         type: 'radio',
@@ -3071,7 +3159,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client1HasLifeInsurancePersonal',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}, do you have any Life Insurance purchased outside of work plans or employer benefits?`;
         },
         type: 'radio',
@@ -3085,7 +3173,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client1HasCriticalIllnessInsurancePersonal',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}, do you have any Critical Illness Insurance purchased outside of work plans or employer benefits?`;
         },
         type: 'radio',
@@ -3099,7 +3187,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client1HasDisabilityInsurancePersonal',
         label: (answers) => {
-          const name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}, do you have any Disability Insurance purchased outside of work plans or employer benefits?`;
         },
         type: 'radio',
@@ -3114,8 +3202,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client2HasLifeInsurance',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
+          const client1Name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}, do you have any Life Insurance through your employer or through ${client1Name}'s employer?`;
         },
         type: 'radio',
@@ -3133,8 +3221,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client2HasCriticalIllnessInsurance',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
+          const client1Name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}, do you have any Critical Illness Insurance through your employer or through ${client1Name}'s employer?`;
         },
         type: 'radio',
@@ -3152,8 +3240,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client2HasDisabilityInsuranceEmployer',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
-          const client1Name = answers.get(1)?.fullName as string || 'Client 1';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
+          const client1Name = answers.get('aboutYou')?.fullName as string || 'Client 1';
           return `${name}, do you have any Disability Insurance through your employer or through ${client1Name}'s employer?`;
         },
         type: 'radio',
@@ -3172,7 +3260,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client2HasLifeInsurancePersonal',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}, do you have any Life Insurance purchased outside of work plans or employer benefits?`;
         },
         type: 'radio',
@@ -3190,7 +3278,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client2HasCriticalIllnessInsurancePersonal',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}, do you have any Critical Illness Insurance purchased outside of work plans or employer benefits?`;
         },
         type: 'radio',
@@ -3208,7 +3296,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       {
         key: 'client2HasDisabilityInsurancePersonal',
         label: (answers) => {
-          const name = answers.get(1)?.spouseName as string || 'Client 2';
+          const name = answers.get('aboutYou')?.spouseName as string || 'Client 2';
           return `${name}, do you have any Disability Insurance purchased outside of work plans or employer benefits?`;
         },
         type: 'radio',
@@ -3228,12 +3316,14 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 13,
+    sectionId: 'propertyLiabilityInsurance',
     title: 'Property and Liability Insurance',
     description: 'This section captures details about your property and liability insurance coverage, including policies for your home, vehicles, and other assets, as well as any umbrella liability policies.',
     questions: [],
   },
   {
     id: 14,
+    sectionId: 'legacyIntent',
     title: 'Legacy Intent',
     description: 'Your Will determines who legally inherits your assets. It doesn\'t always explain what you hope will happen to them.\nFor many families, uncertainty—not the legal documents themselves—is what leads to misunderstandings and conflict. This section gives you the opportunity to record your wishes for important assets, identify whether those wishes have been discussed, and note where any supporting documents can be found.\nThis information does not replace your Will or other legal documents, but it can provide valuable guidance to your family, executor, and professional advisors.',
     questions: [
@@ -3241,8 +3331,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         key: 'legacyIntentRealEstateAssets',
         label: 'Which assets would you like to record Legacy Intent for?\nSelect all that apply.',
         type: 'checkbox-group',
-        options: (answers: Map<number, Record<string, unknown>>) => {
-          const propertiesData = (answers.get(10)?.['propertiesData'] as Array<Record<string, string>>) || [];
+        options: (answers: Map<string, Record<string, unknown>>) => {
+          const propertiesData = (answers.get('realEstate')?.['propertiesData'] as Array<Record<string, string>>) || [];
           return propertiesData
             .map((p, i) => ({ value: `property_${i}`, label: (p.propertyName || `Property ${i + 1}`).trim() }))
             .filter(o => o.label);
@@ -3253,13 +3343,14 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 15,
+    sectionId: 'wills',
     title: 'Wills',
     description: 'A Will is the foundation of your estate plan. It directs how your assets are distributed, names your executor, and can include trusts for beneficiaries with special needs. This section helps us understand the current state of your Will(s) and whether updates may be needed.',
     questions: [
       {
         key: 'client1HasWill',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1';
           return `Does ${name} have a Will?`;
         },
         type: 'radio',
@@ -3352,8 +3443,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2HasWill',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2';
           return `Does ${name} have a Will?`;
         },
         type: 'radio',
@@ -3452,13 +3543,14 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 16,
+    sectionId: 'powersOfAttorney',
     title: 'Powers of Attorney',
     description: 'A Power of Attorney (POA) lets you appoint someone to make decisions on your behalf if you become unable to do so. There are two types: one for personal care (health decisions) and one for property (financial decisions).',
     questions: [
       {
         key: 'client1HasPoaPersonalCare',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1';
           return `Does ${name} have a Power of Attorney for Personal Care?`;
         },
         type: 'radio',
@@ -3548,8 +3640,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client1PoaPersonalCareHasDocCopy',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const step1 = answers.get(1) || {};
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const step1 = answers.get('aboutYou') || {};
           const attorneyName = step1['spouseIsPoaPersonalCare'] === 'yes'
             ? (step1['spouseName'] as string) || 'the named attorney'
             : (step1['client1PoaPersonalCareName'] as string) || 'the named attorney';
@@ -3566,8 +3658,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client1HasAlternatePoaPersonalCare',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const step1 = answers.get(1) || {};
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const step1 = answers.get('aboutYou') || {};
           const attorneyName = step1['spouseIsPoaPersonalCare'] === 'yes'
             ? (step1['spouseName'] as string) || 'the named attorney'
             : (step1['client1PoaPersonalCareName'] as string) || 'the named attorney';
@@ -3607,8 +3699,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client1HasPoaProperty',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1';
           return `${name}, do you currently have a Power of Attorney for Property?`;
         },
         type: 'radio',
@@ -3621,8 +3713,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'spouseIsPoaProperty',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const spouseName = (answers.get(1)?.['spouseName'] as string) || 'your spouse';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const spouseName = (answers.get('aboutYou')?.['spouseName'] as string) || 'your spouse';
           return `Is ${spouseName} named as one of your attorneys for property?`;
         },
         type: 'radio',
@@ -3636,8 +3728,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2HasPoaPersonalCare',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2';
           return `Does ${name} have a Power of Attorney for Personal Care?`;
         },
         type: 'radio',
@@ -3717,8 +3809,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2PoaPersonalCareHasDocCopy',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const step1 = answers.get(1) || {};
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const step1 = answers.get('aboutYou') || {};
           const attorneyName = step1['client2SpouseIsPoaPersonalCare'] === 'yes'
             ? (step1['fullName'] as string) || 'the named attorney'
             : (step1['client2PoaPersonalCareName'] as string) || 'the named attorney';
@@ -3735,8 +3827,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2HasAlternatePoaPersonalCare',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const step1 = answers.get(1) || {};
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const step1 = answers.get('aboutYou') || {};
           const attorneyName = step1['client2SpouseIsPoaPersonalCare'] === 'yes'
             ? (step1['fullName'] as string) || 'the named attorney'
             : (step1['client2PoaPersonalCareName'] as string) || 'the named attorney';
@@ -3777,8 +3869,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2HasPoaProperty',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2';
           return `${name}, do you currently have a Power of Attorney for Property?`;
         },
         type: 'radio',
@@ -3792,8 +3884,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2SpouseIsPoaProperty',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const spouseName = (answers.get(1)?.['fullName'] as string) || 'your spouse';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const spouseName = (answers.get('aboutYou')?.['fullName'] as string) || 'your spouse';
           return `Is ${spouseName} named as one of your attorneys for property?`;
         },
         type: 'radio',
@@ -3809,13 +3901,14 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 17,
+    sectionId: 'estateTrustees',
     title: 'Estate Trustees (Executors)',
     description: 'An Estate Trustee (also called an Executor) is the person or institution responsible for administering your estate after you pass away. This includes paying debts, filing taxes, and distributing assets according to your Will.',
     questions: [
       {
         key: 'client1HasEstateTrustee',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1';
           return `Has ${name} named an Estate Trustee (Executor)?`;
         },
         type: 'radio',
@@ -4018,8 +4111,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2HasEstateTrustee',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2';
           return `Has ${name} named an Estate Trustee (Executor)?`;
         },
         type: 'radio',
@@ -4225,13 +4318,14 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 18,
+    sectionId: 'funeralArrangements',
     title: 'Funeral Arrangements',
     description: 'Planning your funeral arrangements in advance can relieve your family of difficult decisions during an emotional time. This section captures your wishes regarding funeral arrangements and whether they have been documented.',
     questions: [
       {
         key: 'client1HasFuneralArrangements',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1';
           return `Has ${name} made funeral arrangements?`;
         },
         type: 'radio',
@@ -4279,8 +4373,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2HasFuneralArrangements',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2';
           return `Has ${name} made funeral arrangements?`;
         },
         type: 'radio',
@@ -4333,13 +4427,14 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
   },
   {
     id: 19,
+    sectionId: 'pensionsRegisteredAccounts',
     title: 'Pensions & Registered Accounts',
     description: 'Pensions and registered accounts (RRSP, RRIF, TFSA, etc.) often form a significant part of your estate. Understanding what you have and where it is located helps ensure these assets are properly managed and distributed.',
     questions: [
       {
         key: 'client1HasPension',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1';
           return `Does ${name} have a pension or retirement plan?`;
         },
         type: 'radio',
@@ -4351,8 +4446,8 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2HasPension',
-        label: (answers: Map<number, Record<string, unknown>>) => {
-          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+        label: (answers: Map<string, Record<string, unknown>>) => {
+          const name = (answers.get('aboutYou')?.['spouseName'] as string) || 'Client 2';
           return `Does ${name} have a pension or retirement plan?`;
         },
         type: 'radio',

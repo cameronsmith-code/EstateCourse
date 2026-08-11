@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
+import { STEPS, migrateLegacyAnswers, QuestionnaireSectionId } from '../lib/steps';
 
 type Answer = Record<string, unknown>;
 
@@ -14,18 +15,18 @@ type Questionnaire = {
 
 type QuestionnaireContextType = {
   questionnaire: Questionnaire | null;
-  answers: Map<number, Answer>;
+  answers: Map<string, Answer>;
   currentStep: number;
   loading: boolean;
   error: string | null;
   initQuestionnaire: (questionnaireId?: string) => Promise<void>;
-  updateAnswer: (step: number, key: string, value: unknown) => void;
-  saveAnswers: (step: number) => Promise<void>;
+  updateAnswer: (sectionId: string, key: string, value: unknown) => void;
+  saveAnswers: (sectionId: string) => Promise<void>;
   nextStep: () => Promise<void>;
   previousStep: () => void;
   completeQuestionnaire: () => Promise<void>;
   clearAllAnswers: () => Promise<void>;
-  clearCurrentStepAnswers: (step: number) => Promise<void>;
+  clearCurrentStepAnswers: (sectionId: string, stepNumber: number) => Promise<void>;
 };
 
 const QuestionnaireContext = createContext<QuestionnaireContextType | undefined>(undefined);
@@ -34,14 +35,44 @@ const STORAGE_KEY = 'willprep_questionnaire';
 const ANSWERS_KEY = 'willprep_answers';
 const SESSION_KEY = 'willprep_session_id';
 
+function serializeAnswers(map: Map<string, Answer>): Record<string, Answer> {
+  const obj: Record<string, Answer> = {};
+  map.forEach((value, key) => {
+    obj[key] = value;
+  });
+  return obj;
+}
+
+function isLegacyNumericKey(key: string): boolean {
+  const n = Number(key);
+  return !isNaN(n) && n >= 1 && n <= 19 && Number.isInteger(n);
+}
+
+function loadAnswersFromStorage(): Map<string, Answer> {
+  const stored = localStorage.getItem(ANSWERS_KEY);
+  if (!stored) return new Map();
+  const parsed = JSON.parse(stored);
+  const hasNumericKeys = Object.keys(parsed).some(isLegacyNumericKey);
+  if (hasNumericKeys) {
+    return migrateLegacyAnswers(parsed as Record<number, Record<string, unknown>>);
+  }
+  const map = new Map<string, Answer>();
+  Object.entries(parsed).forEach(([key, value]) => {
+    if (value && typeof value === 'object') {
+      map.set(key, value as Answer);
+    }
+  });
+  return map;
+}
+
 export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   const [questionnaire, setQuestionnaire] = useState<Questionnaire | null>(null);
-  const [answers, setAnswers] = useState<Map<number, Answer>>(new Map());
+  const [answers, setAnswers] = useState<Map<string, Answer>>(new Map());
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const initQuestionnaire = useCallback(async (questionnaireId?: string) => {
+  const initQuestionnaire = useCallback(async (_questionnaireId?: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -52,25 +83,23 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
       }
 
       const stored = localStorage.getItem(STORAGE_KEY);
-      const storedAnswers = localStorage.getItem(ANSWERS_KEY);
 
       let loadedQuestionnaire: Questionnaire | null = null;
-      let loadedAnswers: Map<number, Answer> = new Map();
+      let loadedAnswers: Map<string, Answer> = new Map();
 
       if (stored) {
         loadedQuestionnaire = JSON.parse(stored);
-
-        if (storedAnswers) {
-          const answersData = JSON.parse(storedAnswers);
-          Object.entries(answersData).forEach(([step, stepAnswers]) => {
-            loadedAnswers.set(parseInt(step), stepAnswers as Answer);
-          });
-        }
+        loadedAnswers = loadAnswersFromStorage();
 
         setQuestionnaire(loadedQuestionnaire);
         setCurrentStep(loadedQuestionnaire.current_step);
         setAnswers(loadedAnswers);
         setLoading(false);
+
+        const migratedObj = serializeAnswers(loadedAnswers);
+        if (JSON.stringify(migratedObj) !== localStorage.getItem(ANSWERS_KEY)) {
+          localStorage.setItem(ANSWERS_KEY, JSON.stringify(migratedObj));
+        }
 
         if (supabase) {
           Promise.race([
@@ -86,14 +115,14 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
                     .select('*')
                     .eq('questionnaire_id', dbQuestionnaire.id);
 
-                  const syncedAnswers: Map<number, Answer> = new Map();
+                  const syncedAnswers: Map<string, Answer> = new Map();
                   if (dbAnswers && dbAnswers.length > 0) {
                     dbAnswers.forEach((ans) => {
-                      const step = ans.step;
-                      if (!syncedAnswers.has(step)) {
-                        syncedAnswers.set(step, {});
+                      const sectionId = ans.section_id as string;
+                      if (!syncedAnswers.has(sectionId)) {
+                        syncedAnswers.set(sectionId, {});
                       }
-                      syncedAnswers.get(step)![ans.question_key] = ans.answer;
+                      syncedAnswers.get(sectionId)![ans.question_key] = ans.answer;
                     });
                   }
 
@@ -142,58 +171,52 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const updateAnswer = useCallback((step: number, key: string, value: unknown) => {
+  const updateAnswer = useCallback((sectionId: string, key: string, value: unknown) => {
     setAnswers((prev) => {
       const updated = new Map(prev);
-      if (!updated.has(step)) {
-        updated.set(step, {});
+      if (!updated.has(sectionId)) {
+        updated.set(sectionId, {});
       }
-      const stepData = { ...updated.get(step)! };
+      const sectionData = { ...updated.get(sectionId)! };
       if (value === undefined) {
-        delete stepData[key];
+        delete sectionData[key];
       } else {
-        stepData[key] = value;
+        sectionData[key] = value;
       }
-      updated.set(step, stepData);
+      updated.set(sectionId, sectionData);
       return updated;
     });
   }, []);
 
   const saveAnswers = useCallback(
-    async (step: number) => {
+    async (sectionId: string) => {
       if (!questionnaire) return;
 
       setLoading(true);
       setError(null);
       try {
-        const answersObj: Record<number, Answer> = {};
-        answers.forEach((value, key) => {
-          answersObj[key] = value;
-        });
-        localStorage.setItem(ANSWERS_KEY, JSON.stringify(answersObj));
+        localStorage.setItem(ANSWERS_KEY, JSON.stringify(serializeAnswers(answers)));
 
         if (supabase) {
           try {
-            const stepAnswers = answers.get(step);
+            const sectionAnswers = answers.get(sectionId);
 
-            // Get all existing answers for this step
             const { data: existingAnswers } = await supabase
               .from('questionnaire_answers')
               .select('id, question_key')
               .eq('questionnaire_id', questionnaire.id)
-              .eq('step', step);
+              .eq('section_id', sectionId);
 
             const existingMap = new Map(
               (existingAnswers || []).map(a => [a.question_key, a.id])
             );
 
-            const toInsert = [];
-            const toUpdate = [];
-            const toDelete = [];
+            const toInsert: Array<{ questionnaire_id: string; section_id: string; question_key: string; answer: unknown }> = [];
+            const toUpdate: Array<{ id: string; answer: unknown; updated_at: string }> = [];
+            const toDelete: string[] = [];
 
-            // Handle current answers
-            if (stepAnswers && Object.keys(stepAnswers).length > 0) {
-              for (const [key, value] of Object.entries(stepAnswers)) {
+            if (sectionAnswers && Object.keys(sectionAnswers).length > 0) {
+              for (const [key, value] of Object.entries(sectionAnswers)) {
                 const existingId = existingMap.get(key);
                 if (existingId) {
                   toUpdate.push({
@@ -201,11 +224,11 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
                     answer: value,
                     updated_at: new Date().toISOString()
                   });
-                  existingMap.delete(key); // Remove from map
+                  existingMap.delete(key);
                 } else {
                   toInsert.push({
                     questionnaire_id: questionnaire.id,
-                    step,
+                    section_id: sectionId,
                     question_key: key,
                     answer: value,
                   });
@@ -213,12 +236,10 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
               }
             }
 
-            // Any remaining items in existingMap should be deleted
-            for (const [key, id] of existingMap.entries()) {
+            for (const [, id] of existingMap.entries()) {
               toDelete.push(id);
             }
 
-            // Execute database operations
             if (toInsert.length > 0) {
               await supabase.from('questionnaire_answers').insert(toInsert);
             }
@@ -253,11 +274,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   const nextStep = useCallback(async () => {
     if (!questionnaire) return;
 
-    const answersObj: Record<number, Answer> = {};
-    answers.forEach((value, key) => {
-      answersObj[key] = value;
-    });
-    localStorage.setItem(ANSWERS_KEY, JSON.stringify(answersObj));
+    localStorage.setItem(ANSWERS_KEY, JSON.stringify(serializeAnswers(answers)));
 
     const newStep = currentStep + 1;
     setCurrentStep(newStep);
@@ -270,9 +287,12 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     setQuestionnaire(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 
-    saveAnswers(currentStep).catch((err) => {
-      console.warn('Background save failed:', err);
-    });
+    const currentStepData = STEPS.find(s => s.id === currentStep);
+    if (currentStepData) {
+      saveAnswers(currentStepData.sectionId).catch((err) => {
+        console.warn('Background save failed:', err);
+      });
+    }
 
     if (supabase) {
       supabase
@@ -319,11 +339,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   const completeQuestionnaire = useCallback(async () => {
     if (!questionnaire) return;
 
-    const answersObj: Record<number, Answer> = {};
-    answers.forEach((value, key) => {
-      answersObj[key] = value;
-    });
-    localStorage.setItem(ANSWERS_KEY, JSON.stringify(answersObj));
+    localStorage.setItem(ANSWERS_KEY, JSON.stringify(serializeAnswers(answers)));
 
     const updated = {
       ...questionnaire,
@@ -334,9 +350,12 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     setQuestionnaire(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 
-    saveAnswers(currentStep).catch((err) => {
-      console.warn('Background save failed:', err);
-    });
+    const currentStepData = STEPS.find(s => s.id === currentStep);
+    if (currentStepData) {
+      saveAnswers(currentStepData.sectionId).catch((err) => {
+        console.warn('Background save failed:', err);
+      });
+    }
 
     if (supabase) {
       supabase
@@ -387,39 +406,36 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     }
   }, [questionnaire]);
 
-  const clearCurrentStepAnswers = useCallback(async (step: number) => {
+  const clearCurrentStepAnswers = useCallback(async (sectionId: string, stepNumber: number) => {
     if (!questionnaire) return;
+
+    const sectionsToClear = STEPS
+      .filter(s => s.id >= stepNumber)
+      .map(s => s.sectionId);
 
     setAnswers((prev) => {
       const updated = new Map(prev);
-      // Remove current step
-      updated.delete(step);
-
-      // Remove all subsequent steps (they may depend on this step's answers)
-      for (let i = step + 1; i <= 20; i++) {
-        updated.delete(i);
+      for (const sid of sectionsToClear) {
+        updated.delete(sid);
       }
-
       return updated;
     });
 
-    // Save to localStorage
-    const answersObj: Record<number, Answer> = {};
-    answers.forEach((value, key) => {
-      if (key !== step && key <= step) {
-        answersObj[key] = value;
-      }
-    });
+    const answersObj = serializeAnswers(answers);
+    for (const sid of sectionsToClear) {
+      delete answersObj[sid];
+    }
     localStorage.setItem(ANSWERS_KEY, JSON.stringify(answersObj));
 
-    // Delete from database
     if (supabase) {
       try {
-        await supabase
-          .from('questionnaire_answers')
-          .delete()
-          .eq('questionnaire_id', questionnaire.id)
-          .gte('step', step);
+        for (const sid of sectionsToClear) {
+          await supabase
+            .from('questionnaire_answers')
+            .delete()
+            .eq('questionnaire_id', questionnaire.id)
+            .eq('section_id', sid);
+        }
       } catch (dbErr) {
         console.warn('Failed to clear step answers in database:', dbErr);
       }

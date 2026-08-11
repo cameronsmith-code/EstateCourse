@@ -2062,43 +2062,37 @@ export default function StepForm({
         updated[index].notSureSituation = undefined;
         updated[index].notSureRelianceAreas = undefined;
         updated[index].notSureFuture = undefined;
-        if (ind !== 'no') {
-          updated[index].supportNeedTypes = undefined;
-          updated[index].supportNeedOther = undefined;
-          updated[index].disabilityTaxCredit = undefined;
-          updated[index].disabilityTaxCreditDocLocation = undefined;
-          clearCareCoordFields(updated[index]);
-          updated[index].futureIndependenceLevel = undefined;
-          updated[index].futureFinancialHelp = undefined;
-          updated[index].futurePersonalHealthHelp = undefined;
-          clearFutureCareTeamFields(updated[index]);
-        }
-      } else if (value === 'not_sure') {
-        if (ind !== 'no') {
-          updated[index].supportNeedTypes = undefined;
-          updated[index].supportNeedOther = undefined;
-          updated[index].disabilityTaxCredit = undefined;
-          updated[index].disabilityTaxCreditDocLocation = undefined;
-          clearCareCoordFields(updated[index]);
-          clearFutureCareTeamFields(updated[index]);
-        }
-      }
-    }
-
-    if (field === 'independent' && value !== 'no') {
-      const dis = updated[index].disabled || '';
-      if (dis === 'no' || dis === 'not_sure') {
         updated[index].supportNeedTypes = undefined;
         updated[index].supportNeedOther = undefined;
         updated[index].disabilityTaxCredit = undefined;
         updated[index].disabilityTaxCreditDocLocation = undefined;
         clearCareCoordFields(updated[index]);
-        if (dis === 'no') {
-          updated[index].futureIndependenceLevel = undefined;
-          updated[index].futureFinancialHelp = undefined;
-          updated[index].futurePersonalHealthHelp = undefined;
-          clearFutureCareTeamFields(updated[index]);
-        }
+        updated[index].futureIndependenceLevel = undefined;
+        updated[index].futureFinancialHelp = undefined;
+        updated[index].futurePersonalHealthHelp = undefined;
+        clearFutureCareTeamFields(updated[index]);
+      } else if (value === 'not_sure') {
+        updated[index].supportNeedTypes = undefined;
+        updated[index].supportNeedOther = undefined;
+        updated[index].disabilityTaxCredit = undefined;
+        updated[index].disabilityTaxCreditDocLocation = undefined;
+        clearCareCoordFields(updated[index]);
+        clearFutureCareTeamFields(updated[index]);
+      }
+    }
+
+    if (field === 'independent') {
+      const dis = updated[index].disabled || '';
+      if (dis === 'no') {
+        updated[index].supportNeedTypes = undefined;
+        updated[index].supportNeedOther = undefined;
+        updated[index].disabilityTaxCredit = undefined;
+        updated[index].disabilityTaxCreditDocLocation = undefined;
+        clearCareCoordFields(updated[index]);
+        updated[index].futureIndependenceLevel = undefined;
+        updated[index].futureFinancialHelp = undefined;
+        updated[index].futurePersonalHealthHelp = undefined;
+        clearFutureCareTeamFields(updated[index]);
       }
     }
 
@@ -11143,7 +11137,7 @@ export default function StepForm({
                       </>
                     )}
 
-                    {(childrenData[index]?.disabled === 'yes' || ((childrenData[index]?.disabled === 'no' || childrenData[index]?.disabled === 'not_sure') && childrenData[index]?.independent === 'no')) && (
+                    {(childrenData[index]?.disabled === 'yes' || childrenData[index]?.disabled === 'not_sure') && (
                       <>
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                           <h4 className="text-base font-semibold text-blue-400">Future Support &amp; Independence</h4>
@@ -11400,7 +11394,7 @@ export default function StepForm({
                     </>
                     )}
 
-                    {(childrenData[index]?.disabled === 'yes' || childrenData[index]?.disabled === 'not_sure' || (childrenData[index]?.disabled === 'no' && childrenData[index]?.independent === 'no')) && (
+                    {(childrenData[index]?.disabled === 'yes' || childrenData[index]?.disabled === 'not_sure') && (
                     <>
                     <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                       <h4 className="text-base font-semibold text-blue-400">Looking Ahead to Adulthood</h4>

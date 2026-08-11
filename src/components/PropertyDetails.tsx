@@ -134,6 +134,8 @@ export type PropertyData = {
   helocDocLocation?: string;
   helocHasAutoPayments?: string;
   helocAutoPaymentsDescription?: string;
+  collateralForCorpDebt?: string;
+  collateralCorpName?: string;
 };
 
 type Props = {
@@ -147,6 +149,7 @@ type Props = {
   trusts: string[];
   partnerships: string[];
   predefinedPeople: Array<{ name: string; phone?: string; city?: string }>;
+  collateralCorporations?: string[];
   onChange: (field: keyof PropertyData, value: unknown) => void;
   onMultiChange: (updates: Partial<PropertyData>) => void;
 };
@@ -239,6 +242,7 @@ export default function PropertyDetails({
   trusts,
   partnerships,
   predefinedPeople,
+  collateralCorporations,
   onChange,
   onMultiChange,
 }: Props) {
@@ -475,6 +479,48 @@ export default function PropertyDetails({
           className={inputClass}
         />
       </div>
+
+      {/* Collateral for corporate debt — only shown when real estate was pledged in the Corporate Financial Connections step */}
+      {collateralCorporations && collateralCorporations.length > 0 && (
+        <div className="ml-2">
+          <label className={labelClass}>
+            {collateralCorporations.length === 1
+              ? `Is this the property that is used as collateral for the debt of ${collateralCorporations[0]} as identified earlier in this questionnaire?`
+              : `Is this the property that is used as collateral for the debt of one of the following companies as identified earlier in this questionnaire?`}
+          </label>
+          {collateralCorporations.length > 1 && (
+            <ul className="text-sm text-gray-400 mb-3 ml-4 list-disc">
+              {collateralCorporations.map((corp) => (
+                <li key={corp}>{corp}</li>
+              ))}
+            </ul>
+          )}
+          <div className="flex gap-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name={`collateral-corp-${index}-${propertyType}`}
+                value="yes"
+                checked={data.collateralForCorpDebt === 'yes'}
+                onChange={() => onMultiChange({ collateralForCorpDebt: 'yes' })}
+                className="mr-2"
+              />
+              <span className="text-gray-300">Yes</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name={`collateral-corp-${index}-${propertyType}`}
+                value="no"
+                checked={data.collateralForCorpDebt === 'no'}
+                onChange={() => onMultiChange({ collateralForCorpDebt: 'no', collateralCorpName: undefined })}
+                className="mr-2"
+              />
+              <span className="text-gray-300">No</span>
+            </label>
+          </div>
+        </div>
+      )}
 
       {/* Country */}
       <div>

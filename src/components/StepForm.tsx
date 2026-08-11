@@ -13014,6 +13014,14 @@ export default function StepForm({
               )
             );
 
+            const pgEntriesForCollateral = (allFormData['personalGuaranteesData'] as Array<{ selectedCompany?: string; pledgedAssets?: string[] }>) || [];
+            const collateralCorporations = Array.from(new Set(
+              pgEntriesForCollateral
+                .filter(pg => pg.pledgedAssets?.some(a => a === 'personal_residence' || a === 'other_real_estate'))
+                .map(pg => pg.selectedCompany)
+                .filter((name): name is string => !!name?.trim())
+            ));
+
             const isVisible = (question: typeof step.questions[0]) => {
               if (!question.condition) return true;
               return question.condition(allFormData);
@@ -13141,6 +13149,7 @@ export default function StepForm({
                         trusts={trusts}
                         partnerships={partnerships}
                         predefinedPeople={predefinedPeople}
+                        collateralCorporations={collateralCorporations}
                         onChange={(field, value) => handlePrimaryHomeChange(field, value)}
                         onMultiChange={(updates) => handlePrimaryHomeMultiChange(updates)}
                       />
@@ -13266,6 +13275,7 @@ export default function StepForm({
                             trusts={trusts}
                             partnerships={partnerships}
                             predefinedPeople={predefinedPeople}
+                            collateralCorporations={collateralCorporations}
                             onChange={(field, value) => handlePropertyChange(actualIndex, field, value)}
                             onMultiChange={(updates) => handlePropertyMultiChange(actualIndex, updates)}
                           />

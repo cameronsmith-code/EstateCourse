@@ -15,6 +15,7 @@ import PoaPropertyAttorneyDetails, { PoaPropertyAttorneyData } from './PoaProper
 import TrustBeneficiariesSelector, { TrustBeneficiaryEntry } from './TrustBeneficiariesSelector';
 import Subsection from './Subsection';
 import ChildPlanningSection, { PlanningPerson } from './ChildPlanningSection';
+import DebtObligations from './DebtObligations';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
 type StepFormProps = {
@@ -13492,67 +13493,13 @@ export default function StepForm({
             );
           })()}
 
-          {step.sectionId === 'debtObligations' && (() => {
-            const step9Answers = allAnswers?.get('financialFootprint') || {};
-            const primaryHomeData = (step9Answers['primaryHomeData'] as Partial<PropertyData>) || {};
-            const propertiesData = (step9Answers['propertiesData'] as Array<Partial<PropertyData>>) || [];
-
-            const allProperties = [primaryHomeData, ...propertiesData].filter(p => p && p.hasDebt === 'yes');
-
-            const autoSelected: string[] = [];
-            allProperties.forEach((p) => {
-              const name = (p.name || '').trim();
-              if (p.debtType === 'mortgage') {
-                autoSelected.push('mortgage');
-                autoSelected.push(`other:Mortgage - ${name}`);
-              } else if (p.debtType === 'heloc') {
-                autoSelected.push('heloc');
-                autoSelected.push(`other:Home Equity Line of Credit - ${name}`);
-              }
-            });
-
-            const userSelected = (answers['obligationsTypes'] as string[]) || [];
-            const autoOtherLabels = new Set(allProperties
-              .map(p => {
-                const name = (p.name || '').trim();
-                if (p.debtType === 'mortgage') return `Mortgage - ${name}`;
-                if (p.debtType === 'heloc') return `Home Equity Line of Credit - ${name}`;
-                return null;
-              })
-              .filter(Boolean) as string[]);
-
-            const userOtherEntries = userSelected.filter(v => v.startsWith('other:'));
-            const userPresetEntries = userSelected.filter(v => !v.startsWith('other:') && !autoSelected.includes(v));
-
-            const preservedUserOthers = userOtherEntries.filter(entry => {
-              const label = entry.slice(6);
-              return !autoOtherLabels.has(label);
-            });
-
-            const mergedValue = [...new Set([...autoSelected, ...preservedUserOthers, ...userPresetEntries])];
-
-            const renderQuestion = (question: typeof step.questions[0]) => {
-              const displayLabel = typeof question.label === 'function'
-                ? question.label(allAnswers || new Map())
-                : question.label;
-              const questionValue = question.key === 'obligationsTypes' ? mergedValue : answers[question.key];
-              return (
-                <FormField
-                  key={question.key}
-                  question={{ ...question, label: displayLabel }}
-                  value={questionValue}
-                  onChange={(value) => onAnswerChange(question.key, value)}
-                  answers={allAnswers}
-                />
-              );
-            };
-
-            return (
-              <>
-                {step.questions.map(renderQuestion)}
-              </>
-            );
-          })()}
+          {step.sectionId === 'debtObligations' && (
+            <DebtObligations
+              answers={answers}
+              allAnswers={allAnswers}
+              onAnswerChange={onAnswerChange}
+            />
+          )}
 
           {step.sectionId === 'powersOfAttorney' && (() => {
             const basicAnswers = allAnswers?.get('aboutYou') || {};

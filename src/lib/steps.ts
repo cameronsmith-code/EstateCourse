@@ -3565,6 +3565,37 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
       },
       {
+        key: 'client1HasAlternatePoaPersonalCare',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const step1 = answers.get(1) || {};
+          const attorneyName = step1['spouseIsPoaPersonalCare'] === 'yes'
+            ? (step1['spouseName'] as string) || 'the named attorney'
+            : (step1['client1PoaPersonalCareName'] as string) || 'the named attorney';
+          return `Have you named any contingent Power(s) of Attorney for Personal Care, should ${attorneyName} be unable or unwilling to act?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasPoaPersonalCare === 'yes',
+      },
+      {
+        key: 'client1AlternatePoaPersonalCareCount',
+        label: 'How many contingent attorneys for personal care have you named?',
+        type: 'select',
+        options: [
+          { value: '1', label: '1' },
+          { value: '2', label: '2' },
+          { value: '3', label: '3' },
+          { value: '4', label: '4' },
+          { value: '5', label: '5' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client1HasAlternatePoaPersonalCare === 'yes',
+      },
+      {
         key: 'client1HasLivingWill',
         label: 'Do you have a Living Will (advance directive)?',
         type: 'radio',
@@ -3701,6 +3732,37 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         ],
         required: false,
         condition: (formData: Record<string, string>) => formData.client2HasPoaPersonalCare === 'yes',
+      },
+      {
+        key: 'client2HasAlternatePoaPersonalCare',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const step1 = answers.get(1) || {};
+          const attorneyName = step1['client2SpouseIsPoaPersonalCare'] === 'yes'
+            ? (step1['fullName'] as string) || 'the named attorney'
+            : (step1['client2PoaPersonalCareName'] as string) || 'the named attorney';
+          return `Have you named any contingent Power(s) of Attorney for Personal Care, should ${attorneyName} be unable or unwilling to act?`;
+        },
+        type: 'radio',
+        options: [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'No' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasPoaPersonalCare === 'yes',
+      },
+      {
+        key: 'client2AlternatePoaPersonalCareCount',
+        label: 'How many contingent attorneys for personal care have you named?',
+        type: 'select',
+        options: [
+          { value: '1', label: '1' },
+          { value: '2', label: '2' },
+          { value: '3', label: '3' },
+          { value: '4', label: '4' },
+          { value: '5', label: '5' },
+        ],
+        required: false,
+        condition: (formData: Record<string, string>) => formData.client2HasAlternatePoaPersonalCare === 'yes',
       },
       {
         key: 'client2HasLivingWill',

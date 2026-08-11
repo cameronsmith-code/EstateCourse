@@ -13498,11 +13498,15 @@ export default function StepForm({
               'client1HasPoaPersonalCare', 'client1SpouseIsPoaPersonalCare', 'client1PoaPersonalCareName',
               'client1PoaPersonalCarePhone', 'client1PoaPersonalCareEmail', 'client1PoaPersonalCareRelationship',
               'client1PoaPersonalCareIsCanadaResident', 'client1PoaPersonalCareCountry', 'client1PoaPersonalCareProvince',
-              'client1PoaPersonalCareCity', 'client1PoaPersonalCareHasDocCopy', 'client1HasLivingWill',
+              'client1PoaPersonalCareCity', 'client1PoaPersonalCareHasDocCopy',
+              'client1HasAlternatePoaPersonalCare', 'client1AlternatePoaPersonalCareCount',
+              'client1HasLivingWill',
               'client2HasPoaPersonalCare', 'client2SpouseIsPoaPersonalCare', 'client2PoaPersonalCareName',
               'client2PoaPersonalCarePhone', 'client2PoaPersonalCareEmail', 'client2PoaPersonalCareRelationship',
               'client2PoaPersonalCareCountry', 'client2PoaPersonalCareProvince', 'client2PoaPersonalCareCity',
-              'client2PoaPersonalCareHasDocCopy', 'client2HasLivingWill',
+              'client2PoaPersonalCareHasDocCopy',
+              'client2HasAlternatePoaPersonalCare', 'client2AlternatePoaPersonalCareCount',
+              'client2HasLivingWill',
             ]);
 
             // POA Property gate question keys (rendered via FormField)
@@ -13528,6 +13532,99 @@ export default function StepForm({
 
             const labelClass = 'block text-sm font-medium text-gray-300 mb-2';
             const inputClass = 'w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+
+            const renderContingentAttorneys = (prefix: 'client1' | 'client2', clientName: string) => {
+              const count = prefix === 'client1' ? client1AlternatePoaPersonalCareCount : client2AlternatePoaPersonalCareCount;
+              const data = prefix === 'client1' ? client1AlternatePoaPersonalCareData : client2AlternatePoaPersonalCareData;
+              const handleChange = prefix === 'client1' ? handleAlternatePoaPersonalCareChange : handleClient2AlternatePoaPersonalCareChange;
+              const hasAlternate = answers[`${prefix}HasAlternatePoaPersonalCare`] as string;
+
+              if (hasAlternate !== 'yes' || count === 0) return null;
+
+              return (
+                <div className="space-y-6 mt-6">
+                  <h4 className="text-base font-semibold text-white">Contingent Attorneys for Personal Care</h4>
+                  {Array.from({ length: count }).map((_, index) => (
+                    <div key={index} className="border border-gray-600 rounded-xl p-6 bg-gray-800 space-y-5">
+                      <div className="flex items-center gap-3 pb-3 border-b border-gray-600">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-bold shrink-0">
+                          {index + 1}
+                        </div>
+                        <h5 className="text-lg font-semibold text-white">{data[index]?.name?.trim() || `Contingent Attorney ${index + 1}`}</h5>
+                      </div>
+
+                      {/* Name */}
+                      <div>
+                        <label className={labelClass}>Attorney Name</label>
+                        <input type="text" value={data[index]?.name || ''} onChange={(e) => handleChange(index, 'name', e.target.value)} placeholder="Enter full name" className={inputClass} />
+                      </div>
+                      {/* Phone */}
+                      <div>
+                        <label className={labelClass}>Phone</label>
+                        <input type="tel" value={data[index]?.phone || ''} onChange={(e) => handleChange(index, 'phone', e.target.value)} placeholder="Enter phone number" className={inputClass} />
+                      </div>
+                      {/* Email */}
+                      <div>
+                        <label className={labelClass}>Email</label>
+                        <input type="email" value={data[index]?.email || ''} onChange={(e) => handleChange(index, 'email', e.target.value)} placeholder="Enter email address" className={inputClass} />
+                      </div>
+                      {/* Relationship */}
+                      <div>
+                        <label className={labelClass}>Relationship to {clientName}</label>
+                        <input type="text" value={data[index]?.relationship || ''} onChange={(e) => handleChange(index, 'relationship', e.target.value)} placeholder="e.g., Spouse, Son, Daughter, Friend" className={inputClass} />
+                      </div>
+                      {/* Canadian resident? */}
+                      <div>
+                        <label className={labelClass}>Canadian resident?</label>
+                        <div className="flex gap-4">
+                          {['yes', 'no', 'unknown'].map((val) => (
+                            <label key={val} className="flex items-center">
+                              <input type="radio" name={`cont-pc-canada-${prefix}-${index}`} value={val} checked={data[index]?.isCanadaResident === val} onChange={() => handleChange(index, 'isCanadaResident', val)} className="mr-2" />
+                              <span className="text-gray-300">{val === 'unknown' ? 'Unknown' : val === 'yes' ? 'Yes' : 'No'}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Country (if not Canadian resident) */}
+                      {data[index]?.isCanadaResident !== 'yes' && (
+                        <div>
+                          <label className={labelClass}>Country</label>
+                          <input type="text" value={data[index]?.country || ''} onChange={(e) => handleChange(index, 'country', e.target.value)} placeholder="Enter country" className={inputClass} />
+                        </div>
+                      )}
+                      {/* Province */}
+                      <div>
+                        <label className={labelClass}>Province</label>
+                        <input type="text" value={data[index]?.province || ''} onChange={(e) => handleChange(index, 'province', e.target.value)} placeholder="Enter province" className={inputClass} />
+                      </div>
+                      {/* City */}
+                      <div>
+                        <label className={labelClass}>City</label>
+                        <input type="text" value={data[index]?.city || ''} onChange={(e) => handleChange(index, 'city', e.target.value)} placeholder="Enter city" className={inputClass} />
+                      </div>
+                      {/* Has doc copy */}
+                      <div>
+                        <label className={labelClass}>Does {data[index]?.name?.trim() || `this attorney`} have a copy of your Power of Attorney for Personal Care document?</label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input type="radio" name={`cont-pc-doc-${prefix}-${index}`} value="yes_on_file" checked={data[index]?.hasDocCopy === 'yes_on_file'} onChange={() => handleChange(index, 'hasDocCopy', 'yes_on_file')} className="mr-2" />
+                            <span className="text-gray-300">Yes, they have a copy on file</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input type="radio" name={`cont-pc-doc-${prefix}-${index}`} value="no_can_access" checked={data[index]?.hasDocCopy === 'no_can_access'} onChange={() => handleChange(index, 'hasDocCopy', 'no_can_access')} className="mr-2" />
+                            <span className="text-gray-300">No, but they know where to access it</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input type="radio" name={`cont-pc-doc-${prefix}-${index}`} value="no_not_discussed" checked={data[index]?.hasDocCopy === 'no_not_discussed'} onChange={() => handleChange(index, 'hasDocCopy', 'no_not_discussed')} className="mr-2" />
+                            <span className="text-gray-300">No, this has not been discussed</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            };
 
             // --- Attorney data helpers ---
             const getAttorneys = (prefix: 'client1' | 'client2'): PoaPropertyAttorneyData[] => {
@@ -13911,10 +14008,12 @@ export default function StepForm({
               <>
                 <Subsection title={`${client1Name} — Power of Attorney for Personal Care`}>
                   {client1PersonalCare.map(renderQuestion)}
+                  {renderContingentAttorneys('client1', client1Name)}
                 </Subsection>
                 {hasSpouse && (
                   <Subsection title={`${client2Name} — Power of Attorney for Personal Care`}>
                     {client2PersonalCare.map(renderQuestion)}
+                    {renderContingentAttorneys('client2', client2Name)}
                   </Subsection>
                 )}
                 <Subsection title={`${client1Name} — Power of Attorney for Property`}>

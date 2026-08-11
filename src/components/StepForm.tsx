@@ -11,6 +11,7 @@ import CompanyOwedDetails, { CompanyOwedData } from './CompanyOwedDetails';
 import IntercompanyLoanDetails, { IntercompanyLoanData } from './IntercompanyLoanDetails';
 import RelatedPartyLoanDetails, { RelatedPartyLoanData } from './RelatedPartyLoanDetails';
 import CorporateFinancialReview from './CorporateFinancialReview';
+import PoaPropertyAttorneyDetails, { PoaPropertyAttorneyData } from './PoaPropertyAttorneyDetails';
 import TrustBeneficiariesSelector, { TrustBeneficiaryEntry } from './TrustBeneficiariesSelector';
 import Subsection from './Subsection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
@@ -795,6 +796,114 @@ export default function StepForm({
       });
     }
   }, [answers['client2HasPoaProperty']]);
+
+  useEffect(() => {
+    if (answers['client1HasPoaProperty'] !== 'yes') {
+      const keysToClear = [
+        'spouseIsPoaProperty',
+        'client1PoaPropertyAttorneysData',
+        'client1PoaPropertyAlternateAttorneysData',
+        'client1PoaPropertyAttorneysHowAct',
+        'client1PoaPropertyAttorneysHowActOther',
+        'client1PoaPropertyAttorneyNotes',
+        'client1HasAlternatePoaPropertyAttorney',
+        'client1PoaPropertyDocLocationKnown',
+        'client1PoaPropertyDocLocation',
+        'client1PoaPropertyDocYear',
+        'client1PoaPropertyDocJurisdiction',
+        'client1PoaPropertyDocCountry',
+        'client1PoaPropertyFinancialInstructions',
+        'client1PoaPropertyHasImmediateAttention',
+        'client1PoaPropertyImmediateAttentionDetails',
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasPoaProperty']]);
+
+  useEffect(() => {
+    if (answers['client2HasPoaProperty'] !== 'yes') {
+      const keysToClear = [
+        'client2SpouseIsPoaProperty',
+        'client2PoaPropertyAttorneysData',
+        'client2PoaPropertyAlternateAttorneysData',
+        'client2PoaPropertyAttorneysHowAct',
+        'client2PoaPropertyAttorneysHowActOther',
+        'client2PoaPropertyAttorneyNotes',
+        'client2HasAlternatePoaPropertyAttorney',
+        'client2PoaPropertyDocLocationKnown',
+        'client2PoaPropertyDocLocation',
+        'client2PoaPropertyDocYear',
+        'client2PoaPropertyDocJurisdiction',
+        'client2PoaPropertyDocCountry',
+        'client2PoaPropertyFinancialInstructions',
+        'client2PoaPropertyHasImmediateAttention',
+        'client2PoaPropertyImmediateAttentionDetails',
+      ];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasPoaProperty']]);
+
+  useEffect(() => {
+    if (answers['client1HasAlternatePoaPropertyAttorney'] !== 'yes') {
+      const keysToClear = ['client1PoaPropertyAlternateAttorneysData'];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client1HasAlternatePoaPropertyAttorney']]);
+
+  useEffect(() => {
+    if (answers['client2HasAlternatePoaPropertyAttorney'] !== 'yes') {
+      const keysToClear = ['client2PoaPropertyAlternateAttorneysData'];
+      keysToClear.forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
+    }
+  }, [answers['client2HasAlternatePoaPropertyAttorney']]);
+
+  useEffect(() => {
+    if (answers['client1PoaPropertyDocJurisdiction'] !== 'other') {
+      if (answers['client1PoaPropertyDocCountry'] !== undefined) {
+        onAnswerChange('client1PoaPropertyDocCountry', undefined);
+      }
+    }
+  }, [answers['client1PoaPropertyDocJurisdiction']]);
+
+  useEffect(() => {
+    if (answers['client2PoaPropertyDocJurisdiction'] !== 'other') {
+      if (answers['client2PoaPropertyDocCountry'] !== undefined) {
+        onAnswerChange('client2PoaPropertyDocCountry', undefined);
+      }
+    }
+  }, [answers['client2PoaPropertyDocJurisdiction']]);
+
+  useEffect(() => {
+    if (answers['client1PoaPropertyHasImmediateAttention'] !== 'yes') {
+      if (answers['client1PoaPropertyImmediateAttentionDetails'] !== undefined) {
+        onAnswerChange('client1PoaPropertyImmediateAttentionDetails', undefined);
+      }
+    }
+  }, [answers['client1PoaPropertyHasImmediateAttention']]);
+
+  useEffect(() => {
+    if (answers['client2PoaPropertyHasImmediateAttention'] !== 'yes') {
+      if (answers['client2PoaPropertyImmediateAttentionDetails'] !== undefined) {
+        onAnswerChange('client2PoaPropertyImmediateAttentionDetails', undefined);
+      }
+    }
+  }, [answers['client2PoaPropertyHasImmediateAttention']]);
 
   useEffect(() => {
     if (answers['client1HasAlternatePoaPersonalCare'] !== 'yes') {
@@ -13346,6 +13455,476 @@ export default function StepForm({
             return (
               <>
                 {step.questions.map(renderQuestion)}
+              </>
+            );
+          })()}
+
+          {step.id === 16 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
+            const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
+            const maritalStatus = basicAnswers['maritalStatus'] as string;
+            const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+
+            const allFormData = Object.fromEntries(
+              Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                Object.entries(stepAnswers)
+              )
+            );
+
+            const isVisible = (question: typeof step.questions[0]) => {
+              if (!question.condition) return true;
+              return question.condition(allFormData);
+            };
+
+            const renderQuestion = (question: typeof step.questions[0]) => {
+              if (!isVisible(question)) return null;
+              const displayLabel = typeof question.label === 'function'
+                ? question.label(allAnswers || new Map())
+                : question.label;
+              return (
+                <FormField
+                  key={question.key}
+                  question={{ ...question, label: displayLabel }}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                  answers={allAnswers}
+                />
+              );
+            };
+
+            // Personal Care question keys (rendered via FormField, preserving existing behavior)
+            const personalCareKeys = new Set([
+              'client1HasPoaPersonalCare', 'client1SpouseIsPoaPersonalCare', 'client1PoaPersonalCareName',
+              'client1PoaPersonalCarePhone', 'client1PoaPersonalCareEmail', 'client1PoaPersonalCareRelationship',
+              'client1PoaPersonalCareIsCanadaResident', 'client1PoaPersonalCareCountry', 'client1PoaPersonalCareProvince',
+              'client1PoaPersonalCareCity', 'client1PoaPersonalCareHasDocCopy', 'client1HasLivingWill',
+              'client2HasPoaPersonalCare', 'client2SpouseIsPoaPersonalCare', 'client2PoaPersonalCareName',
+              'client2PoaPersonalCarePhone', 'client2PoaPersonalCareEmail', 'client2PoaPersonalCareRelationship',
+              'client2PoaPersonalCareCountry', 'client2PoaPersonalCareProvince', 'client2PoaPersonalCareCity',
+              'client2PoaPersonalCareHasDocCopy', 'client2HasLivingWill',
+            ]);
+
+            // POA Property gate question keys (rendered via FormField)
+            const poaPropertyGateKeys = new Set([
+              'client1HasPoaProperty', 'spouseIsPoaProperty',
+              'client2HasPoaProperty', 'client2SpouseIsPoaProperty',
+            ]);
+
+            // Build predefined people list from all answers
+            const predefinedPeople: Array<{ name: string; phone?: string; city?: string }> = [];
+            const seenPeople = new Set<string>();
+            const addPerson = (name?: string, phone?: string, city?: string) => {
+              const trimmed = (name || '').trim();
+              if (!trimmed || seenPeople.has(trimmed.toLowerCase())) return;
+              seenPeople.add(trimmed.toLowerCase());
+              predefinedPeople.push({ name: trimmed, phone: (phone || '').trim() || undefined, city: (city || '').trim() || undefined });
+            };
+            addPerson(basicAnswers['fullName'] as string);
+            if (hasSpouse) addPerson(basicAnswers['spouseName'] as string, basicAnswers['spousePhone'] as string, basicAnswers['spouseCity'] as string);
+            ((allFormData['childrenData'] as Array<Record<string, string>>) || []).forEach(c => addPerson(c.name, c.phone, c.city));
+            ((allFormData['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || []).forEach(r => addPerson(r.name, r.phone, r.city));
+            ((allFormData['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || []).forEach(r => addPerson(r.name, r.phone, r.city));
+
+            const labelClass = 'block text-sm font-medium text-gray-300 mb-2';
+            const inputClass = 'w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+
+            // --- Attorney data helpers ---
+            const getAttorneys = (prefix: 'client1' | 'client2'): PoaPropertyAttorneyData[] => {
+              const data = answers[`${prefix}PoaPropertyAttorneysData`] as PoaPropertyAttorneyData[] | undefined;
+              return data || [];
+            };
+
+            const getAlternateAttorneys = (prefix: 'client1' | 'client2'): PoaPropertyAttorneyData[] => {
+              const data = answers[`${prefix}PoaPropertyAlternateAttorneysData`] as PoaPropertyAttorneyData[] | undefined;
+              return data || [];
+            };
+
+            const updateAttorneys = (prefix: 'client1' | 'client2', data: PoaPropertyAttorneyData[]) => {
+              onAnswerChange(`${prefix}PoaPropertyAttorneysData`, data.length > 0 ? data : undefined);
+            };
+
+            const updateAlternateAttorneys = (prefix: 'client1' | 'client2', data: PoaPropertyAttorneyData[]) => {
+              onAnswerChange(`${prefix}PoaPropertyAlternateAttorneysData`, data.length > 0 ? data : undefined);
+            };
+
+            const addAttorney = (prefix: 'client1' | 'client2') => {
+              const current = getAttorneys(prefix);
+              updateAttorneys(prefix, [...current, { id: `att-${prefix}-${Date.now()}-${current.length}` } as PoaPropertyAttorneyData]);
+            };
+
+            const addAlternateAttorney = (prefix: 'client1' | 'client2') => {
+              const current = getAlternateAttorneys(prefix);
+              updateAlternateAttorneys(prefix, [...current, { id: `alt-${prefix}-${Date.now()}-${current.length}` } as PoaPropertyAttorneyData]);
+            };
+
+            const removeAttorney = (prefix: 'client1' | 'client2', index: number) => {
+              const current = getAttorneys(prefix);
+              updateAttorneys(prefix, current.filter((_, i) => i !== index));
+            };
+
+            const removeAlternateAttorney = (prefix: 'client1' | 'client2', index: number) => {
+              const current = getAlternateAttorneys(prefix);
+              updateAlternateAttorneys(prefix, current.filter((_, i) => i !== index));
+            };
+
+            const handleAttorneyChange = (prefix: 'client1' | 'client2', index: number, field: keyof PoaPropertyAttorneyData, value: unknown) => {
+              const current = getAttorneys(prefix);
+              const updated = [...current];
+              updated[index] = { ...updated[index], [field]: value as string };
+              updateAttorneys(prefix, updated);
+            };
+
+            const handleAttorneyMultiChange = (prefix: 'client1' | 'client2', index: number, updates: Partial<PoaPropertyAttorneyData>) => {
+              const current = getAttorneys(prefix);
+              const updated = [...current];
+              updated[index] = { ...updated[index], ...updates };
+              updateAttorneys(prefix, updated);
+            };
+
+            const handleAlternateAttorneyChange = (prefix: 'client1' | 'client2', index: number, field: keyof PoaPropertyAttorneyData, value: unknown) => {
+              const current = getAlternateAttorneys(prefix);
+              const updated = [...current];
+              updated[index] = { ...updated[index], [field]: value as string };
+              updateAlternateAttorneys(prefix, updated);
+            };
+
+            const handleAlternateAttorneyMultiChange = (prefix: 'client1' | 'client2', index: number, updates: Partial<PoaPropertyAttorneyData>) => {
+              const current = getAlternateAttorneys(prefix);
+              const updated = [...current];
+              updated[index] = { ...updated[index], ...updates };
+              updateAlternateAttorneys(prefix, updated);
+            };
+
+            const PROVINCES = [
+              'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador',
+              'Northwest Territories', 'Nova Scotia', 'Nunavut', 'Ontario', 'Prince Edward Island',
+              'Quebec', 'Saskatchewan', 'Yukon',
+            ];
+
+            const renderPoaPropertySection = (prefix: 'client1' | 'client2', clientName: string, spouseName: string) => {
+              const hasPoa = answers[`${prefix}HasPoaProperty`] as string;
+              const gateQuestions = step.questions.filter(q =>
+                (prefix === 'client1' ? ['client1HasPoaProperty', 'spouseIsPoaProperty'] : ['client2HasPoaProperty', 'client2SpouseIsPoaProperty']).includes(q.key)
+              );
+              const attorneys = getAttorneys(prefix);
+              const alternateAttorneys = getAlternateAttorneys(prefix);
+              const hasAlternate = answers[`${prefix}HasAlternatePoaPropertyAttorney`] as string;
+              const howAct = answers[`${prefix}PoaPropertyAttorneysHowAct`] as string;
+              const docLocationKnown = answers[`${prefix}PoaPropertyDocLocationKnown`] as string;
+              const docJurisdiction = answers[`${prefix}PoaPropertyDocJurisdiction`] as string;
+              const hasImmediateAttention = answers[`${prefix}PoaPropertyHasImmediateAttention`] as string;
+
+              return (
+                <div className="space-y-6">
+                  {/* A. Gate questions */}
+                  {gateQuestions.map(renderQuestion)}
+
+                  {/* Hidden risk flag — no POA */}
+                  {hasPoa === 'no' && (
+                    <div className="p-4 bg-amber-900/30 border border-amber-700/50 rounded-lg">
+                      <p className="text-sm text-amber-300">
+                        No Power of Attorney for Property has been identified for {clientName}. This will be flagged in the Hidden Risks Report.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Review flag — not sure */}
+                  {hasPoa === 'not_sure' && (
+                    <div className="p-4 bg-blue-900/30 border border-blue-700/50 rounded-lg">
+                      <p className="text-sm text-blue-300">
+                        This will be flagged for review. You may want to confirm whether {clientName} has a Power of Attorney for Property.
+                      </p>
+                    </div>
+                  )}
+
+                  {hasPoa === 'yes' && (
+                    <>
+                      {/* B. Primary attorneys */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-base font-semibold text-white">Attorneys for Property</h4>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); addAttorney(prefix); }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-400 rounded-lg transition-colors hover:bg-blue-400/10"
+                          >
+                            <Plus size={16} /> Add Attorney
+                          </button>
+                        </div>
+                        {attorneys.length === 0 && (
+                          <p className="text-sm text-gray-400">No attorneys added yet. Click "Add Attorney" to add one.</p>
+                        )}
+                        {attorneys.map((attorney, index) => (
+                          <PoaPropertyAttorneyDetails
+                            key={attorney.id || index}
+                            index={index}
+                            data={attorney}
+                            clientName={clientName}
+                            variant="primary"
+                            predefinedPeople={predefinedPeople}
+                            onChange={(field, value) => handleAttorneyChange(prefix, index, field, value)}
+                            onMultiChange={(updates) => handleAttorneyMultiChange(prefix, index, updates)}
+                            onRemove={() => removeAttorney(prefix, index)}
+                            canRemove={attorneys.length > 1}
+                          />
+                        ))}
+                      </div>
+
+                      {/* C. Multiple attorneys */}
+                      {attorneys.length > 1 && (
+                        <div className="space-y-4">
+                          <div>
+                            <label className={labelClass}>How are your attorneys authorized to make decisions?</label>
+                            <div className="space-y-2">
+                              {[
+                                { value: 'together', label: 'They must act together' },
+                                { value: 'separately', label: 'They may act separately' },
+                                { value: 'mixed', label: 'Some decisions require them to act together' },
+                                { value: 'not_sure', label: "I'm not sure" },
+                                { value: 'other', label: 'Other' },
+                              ].map((opt) => (
+                                <label key={opt.value} className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`${prefix}-poa-property-how-act`}
+                                    value={opt.value}
+                                    checked={howAct === opt.value}
+                                    onChange={() => onAnswerChange(`${prefix}PoaPropertyAttorneysHowAct`, opt.value)}
+                                    className="mr-3"
+                                  />
+                                  <span className="text-gray-300">{opt.label}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                          {howAct === 'other' && (
+                            <div>
+                              <label className={labelClass}>Please explain</label>
+                              <input
+                                type="text"
+                                value={(answers[`${prefix}PoaPropertyAttorneysHowActOther`] as string) || ''}
+                                onChange={(e) => onAnswerChange(`${prefix}PoaPropertyAttorneysHowActOther`, e.target.value)}
+                                placeholder="Explain how they are authorized to act"
+                                className={inputClass}
+                              />
+                            </div>
+                          )}
+                          <div>
+                            <label className={labelClass}>Is there anything important about how your attorneys are expected to work together?</label>
+                            <textarea
+                              value={(answers[`${prefix}PoaPropertyAttorneyNotes`] as string) || ''}
+                              onChange={(e) => onAnswerChange(`${prefix}PoaPropertyAttorneyNotes`, e.target.value)}
+                              placeholder="Optional — share any details about how your attorneys should work together"
+                              rows={3}
+                              className={inputClass}
+                            />
+                            <p className="text-xs text-gray-500 mt-1">This is for informational purposes only and does not constitute legal advice.</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* D. Alternate attorneys */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className={labelClass}>Is anyone named to act if your primary attorney(s) cannot or will not act?</label>
+                          <div className="flex gap-4">
+                            {['yes', 'no', 'not_sure'].map((val) => (
+                              <label key={val} className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`${prefix}-poa-property-has-alt`}
+                                  value={val}
+                                  checked={hasAlternate === val}
+                                  onChange={() => onAnswerChange(`${prefix}HasAlternatePoaPropertyAttorney`, val)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">{val === 'not_sure' ? "I'm not sure" : val === 'yes' ? 'Yes' : 'No'}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        {hasAlternate === 'yes' && (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-base font-semibold text-white">Alternate Attorneys</h4>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); addAlternateAttorney(prefix); }}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-400 rounded-lg transition-colors hover:bg-blue-400/10"
+                              >
+                                <Plus size={16} /> Add Alternate
+                              </button>
+                            </div>
+                            {alternateAttorneys.length === 0 && (
+                              <p className="text-sm text-gray-400">No alternate attorneys added yet. Click "Add Alternate" to add one.</p>
+                            )}
+                            {alternateAttorneys.map((attorney, index) => (
+                              <PoaPropertyAttorneyDetails
+                                key={attorney.id || index}
+                                index={index}
+                                data={attorney}
+                                clientName={clientName}
+                                variant="alternate"
+                                predefinedPeople={predefinedPeople}
+                                onChange={(field, value) => handleAlternateAttorneyChange(prefix, index, field, value)}
+                                onMultiChange={(updates) => handleAlternateAttorneyMultiChange(prefix, index, updates)}
+                                onRemove={() => removeAlternateAttorney(prefix, index)}
+                                canRemove={alternateAttorneys.length > 1}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* F. Document location */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className={labelClass}>Do you know where the original Power of Attorney for Property document is located?</label>
+                          <div className="flex gap-4">
+                            {['yes', 'no', 'not_sure'].map((val) => (
+                              <label key={val} className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`${prefix}-poa-property-doc-loc-known`}
+                                  value={val}
+                                  checked={docLocationKnown === val}
+                                  onChange={() => onAnswerChange(`${prefix}PoaPropertyDocLocationKnown`, val)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">{val === 'not_sure' ? "I'm not sure" : val === 'yes' ? 'Yes' : 'No'}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        {docLocationKnown === 'yes' && (
+                          <div>
+                            <label className={labelClass}>Where is the original Power of Attorney for Property stored?</label>
+                            <input
+                              type="text"
+                              value={(answers[`${prefix}PoaPropertyDocLocation`] as string) || ''}
+                              onChange={(e) => onAnswerChange(`${prefix}PoaPropertyDocLocation`, e.target.value)}
+                              placeholder="e.g., Home safe, Lawyer's office, Bank safety deposit box"
+                              className={inputClass}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* G. Document details */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className={labelClass}>Approximately when was your Power of Attorney for Property signed?</label>
+                          <input
+                            type="text"
+                            value={(answers[`${prefix}PoaPropertyDocYear`] as string) || ''}
+                            onChange={(e) => onAnswerChange(`${prefix}PoaPropertyDocYear`, e.target.value)}
+                            placeholder="Year (e.g., 2020) — or 'I'm not sure'"
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Which province or territory is the document from?</label>
+                          <select
+                            value={docJurisdiction || ''}
+                            onChange={(e) => onAnswerChange(`${prefix}PoaPropertyDocJurisdiction`, e.target.value)}
+                            className={inputClass}
+                          >
+                            <option value="">Select province or territory</option>
+                            {PROVINCES.map((p) => (
+                              <option key={p} value={p}>{p}</option>
+                            ))}
+                            <option value="other">Other / Outside Canada</option>
+                          </select>
+                          <p className="text-xs text-gray-500 mt-1">This is informational only and does not provide a legal conclusion about validity.</p>
+                        </div>
+                        {docJurisdiction === 'other' && (
+                          <div>
+                            <label className={labelClass}>Jurisdiction / Country</label>
+                            <input
+                              type="text"
+                              value={(answers[`${prefix}PoaPropertyDocCountry`] as string) || ''}
+                              onChange={(e) => onAnswerChange(`${prefix}PoaPropertyDocCountry`, e.target.value)}
+                              placeholder="Enter jurisdiction or country"
+                              className={inputClass}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* H. Financial continuity instructions */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className={labelClass}>
+                            If your attorney ever needed to step in unexpectedly, is there anything about your financial affairs that you would especially want them to know?
+                          </label>
+                          <textarea
+                            value={(answers[`${prefix}PoaPropertyFinancialInstructions`] as string) || ''}
+                            onChange={(e) => onAnswerChange(`${prefix}PoaPropertyFinancialInstructions`, e.target.value)}
+                            placeholder="Consider important responsibilities, unusual arrangements, people they should contact, or anything that may not be obvious from your financial records. You do not need to repeat information you've already provided elsewhere in the questionnaire."
+                            rows={4}
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Are there any payments, financial responsibilities or arrangements that would need someone's immediate attention?</label>
+                          <div className="flex gap-4">
+                            {['yes', 'no', 'not_sure'].map((val) => (
+                              <label key={val} className="flex items-center">
+                                <input
+                                  type="radio"
+                                  name={`${prefix}-poa-property-immediate`}
+                                  value={val}
+                                  checked={hasImmediateAttention === val}
+                                  onChange={() => onAnswerChange(`${prefix}PoaPropertyHasImmediateAttention`, val)}
+                                  className="mr-2"
+                                />
+                                <span className="text-gray-300">{val === 'not_sure' ? "I'm not sure" : val === 'yes' ? 'Yes' : 'No'}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        {hasImmediateAttention === 'yes' && (
+                          <div>
+                            <label className={labelClass}>What would need attention?</label>
+                            <textarea
+                              value={(answers[`${prefix}PoaPropertyImmediateAttentionDetails`] as string) || ''}
+                              onChange={(e) => onAnswerChange(`${prefix}PoaPropertyImmediateAttentionDetails`, e.target.value)}
+                              placeholder="Describe what would need immediate attention. Do not re-enter mortgages, loans or other obligations already captured elsewhere — this is for practical instructions or things the structured questionnaire may not reveal."
+                              rows={3}
+                              className={inputClass}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            };
+
+            const personalCareQuestions = step.questions.filter(q => personalCareKeys.has(q.key));
+            const client1PersonalCare = personalCareQuestions.filter(q => !q.key.startsWith('client2'));
+            const client2PersonalCare = personalCareQuestions.filter(q => q.key.startsWith('client2'));
+
+            return (
+              <>
+                <Subsection title={`${client1Name} — Power of Attorney for Personal Care`}>
+                  {client1PersonalCare.map(renderQuestion)}
+                </Subsection>
+                {hasSpouse && (
+                  <Subsection title={`${client2Name} — Power of Attorney for Personal Care`}>
+                    {client2PersonalCare.map(renderQuestion)}
+                  </Subsection>
+                )}
+                <Subsection title={`${client1Name} — Power of Attorney for Property`}>
+                  {renderPoaPropertySection('client1', client1Name, client2Name)}
+                </Subsection>
+                {hasSpouse && (
+                  <Subsection title={`${client2Name} — Power of Attorney for Property`}>
+                    {renderPoaPropertySection('client2', client2Name, client1Name)}
+                  </Subsection>
+                )}
               </>
             );
           })()}

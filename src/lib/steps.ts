@@ -3570,36 +3570,32 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client1HasPoaProperty',
-        label: 'Do you have a Power of Attorney for Property?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['fullName'] as string) || 'Client 1';
+          return `${name}, do you currently have a Power of Attorney for Property?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
+          { value: 'not_sure', label: "I'm not sure" },
         ],
         required: true,
       },
       {
         key: 'spouseIsPoaProperty',
-        label: 'Is your spouse your Attorney for Property?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const spouseName = (answers.get(1)?.['spouseName'] as string) || 'your spouse';
+          return `Is ${spouseName} named as one of your attorneys for property?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
+          { value: 'not_sure', label: "I'm not sure" },
         ],
         required: false,
         condition: (formData: Record<string, string>) => formData.client1HasPoaProperty === 'yes' && (formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law'),
-      },
-      {
-        key: 'client1PoaPropertyHasDocCopy',
-        label: 'Do you have a copy of the Power of Attorney for Property document?',
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, I have a copy on file' },
-          { value: 'no_can_access', label: 'No, but I know where to access it' },
-          { value: 'no_not_discussed', label: 'No, this has not been discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client1HasPoaProperty === 'yes',
       },
       {
         key: 'client2HasPoaPersonalCare',
@@ -3707,54 +3703,31 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2HasPoaProperty',
-        label: 'Does your spouse have a Power of Attorney for Property?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const name = (answers.get(1)?.['spouseName'] as string) || 'Client 2';
+          return `${name}, do you currently have a Power of Attorney for Property?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
+          { value: 'not_sure', label: "I'm not sure" },
         ],
         required: false,
         condition: (formData: Record<string, string>) => formData.maritalStatus === 'married' || formData.maritalStatus === 'common_law',
       },
       {
         key: 'client2SpouseIsPoaProperty',
-        label: 'Is your spouse your Attorney for Property?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const spouseName = (answers.get(1)?.['fullName'] as string) || 'your spouse';
+          return `Is ${spouseName} named as one of your attorneys for property?`;
+        },
         type: 'radio',
         options: [
           { value: 'yes', label: 'Yes' },
           { value: 'no', label: 'No' },
+          { value: 'not_sure', label: "I'm not sure" },
         ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasPoaProperty === 'yes',
-      },
-      {
-        key: 'client2SpousePoaPropertyHasDocAccess',
-        label: 'Does your spouse have access to the Power of Attorney for Property document?',
-        type: 'radio',
-        options: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasPoaProperty === 'yes',
-      },
-      {
-        key: 'client2PoaPropertyHasDocCopy',
-        label: 'Does your spouse have a copy of the Power of Attorney for Property document?',
-        type: 'radio',
-        options: [
-          { value: 'yes_on_file', label: 'Yes, copy on file' },
-          { value: 'no_can_access', label: 'No, but can access it' },
-          { value: 'no_not_discussed', label: 'No, not discussed' },
-        ],
-        required: false,
-        condition: (formData: Record<string, string>) => formData.client2HasPoaProperty === 'yes',
-      },
-      {
-        key: 'client2PoaPropertyDocLocation',
-        label: 'Where is the Power of Attorney for Property document stored?',
-        type: 'text',
-        placeholder: 'Enter document location',
         required: false,
         condition: (formData: Record<string, string>) => formData.client2HasPoaProperty === 'yes',
       },

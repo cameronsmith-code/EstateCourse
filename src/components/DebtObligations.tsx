@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, ChevronRight, Home, Building2, Landmark, Shield, FileText, DollarSign, User, Phone, Mail } from 'lucide-react';
+import { Plus, Trash2, ChevronRight, Home, Building2, Landmark, Shield, FileText, DollarSign, User, Phone, Mail, CreditCard } from 'lucide-react';
+import CreditCardIntake from './CreditCardIntake';
 
 type AdditionalDebt = {
   id: string;
@@ -396,7 +397,15 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
 
   const additionalDebts = (answers['additionalDebtsData'] as AdditionalDebt[]) || [];
   const hasAdditionalDebtsAnswer = (answers['hasAdditionalDebts'] as string) || '';
+  const hasCreditCardsAnswer = (answers['hasCreditCards'] as string) || '';
   const reviewConfirmed = (answers['reviewConfirmed'] as string) || '';
+
+  const creditCards = (answers['creditCardsData'] as Array<Record<string, unknown>>) || [];
+
+  // Final review shows when additional debts are done AND credit cards are done
+  const additionalDebtsDone = hasAdditionalDebtsAnswer === 'no' || (additionalDebts.length === 0 && hasAdditionalDebtsAnswer === 'no');
+  const creditCardsDone = hasCreditCardsAnswer === 'no' || (creditCards.length === 0 && hasCreditCardsAnswer === 'no');
+  const showFinalReview = additionalDebtsDone && creditCardsDone && (hasDerivedObligations || additionalDebts.length > 0 || creditCards.length > 0);
 
   // UI state for the intake flow
   const [intakeActive, setIntakeActive] = useState(false);
@@ -986,8 +995,23 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
         </div>
       )}
 
+      {/* === CREDIT CARDS SECTION === */}
+      {additionalDebtsDone && (
+        <CreditCardIntake
+          answers={answers}
+          allAnswers={allAnswers}
+          onAnswerChange={onAnswerChange}
+          bankingOptions={bankingOptions}
+          client1Name={client1Name}
+          client2Name={client2Name}
+          hasSpouse={hasSpouse}
+          hasCreditCardsAnswer={hasCreditCardsAnswer}
+          onHasCreditCardsChange={(v) => onAnswerChange('hasCreditCards', v)}
+        />
+      )}
+
       {/* === FINAL REVIEW === */}
-      {hasAdditionalDebtsAnswer === 'no' && additionalDebts.length > 0 && (
+      {showFinalReview && (
         <div className="space-y-6">
           <div className="border-t border-gray-700 pt-6">
             <h3 className="text-xl font-semibold text-white mb-2">Review</h3>
@@ -1055,6 +1079,35 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
             ))}
           </div>
 
+          {/* Credit cards in review */}
+          {creditCards.length > 0 && (
+            <div className="space-y-3">
+              <SectionLabel icon={<CreditCard className="w-4 h-4" />} text="Credit Cards" />
+              {creditCards.map((card, i) => {
+                const cardData = card as Record<string, unknown>;
+                const title = (cardData['cardLabel'] as string) || (cardData['issuer'] as string) || 'Credit Card';
+                const subtitle = [cardData['issuer'] as string, cardData['lastFour'] ? `•••• ${cardData['lastFour']}` : ''].filter(Boolean).join(' ');
+                const balanceStatus = cardData['balanceStatus'] as string;
+                const balance = balanceStatus === 'paid_in_full' ? 'Paid in full' : balanceStatus === 'not_sure' ? 'Not sure' : (cardData['balance'] ? formatCurrency(cardData['balance'] as string) : '');
+                const responsible = cardData['responsibleParty'] as string;
+                const responsibleLabel = responsible === 'client1' ? client1Name : responsible === 'client2' ? client2Name : responsible === 'joint' ? `${client1Name} & ${client2Name}` : responsible === 'other' ? (cardData['responsiblePartyOtherName'] as string) || 'Other' : responsible?.startsWith('child_') ? (cardData['responsiblePartyOtherName'] as string) || 'Child' : '';
+                return (
+                  <DebtCard
+                    key={`rev-cc-${cardData['id'] || i}`}
+                    title={title}
+                    subtitle={subtitle}
+                    lender={cardData['issuer'] as string || ''}
+                    balance={balance}
+                    borrower={responsibleLabel}
+                    badge="Credit Card"
+                    badgeIcon={<CreditCard className="w-3 h-3" />}
+                    badgeColor="blue"
+                  />
+                );
+              })}
+            </div>
+          )}
+
           {/* Completeness check */}
           <div className={sectionCardClass}>
             <h3 className="text-lg font-semibold text-white">
@@ -1073,11 +1126,11 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
         </div>
       )}
 
-      {/* If no additional debts and answered no */}
-      {hasAdditionalDebtsAnswer === 'no' && additionalDebts.length === 0 && (
+      {/* If no additional debts and no credit cards */}
+      {additionalDebtsDone && creditCardsDone && additionalDebts.length === 0 && creditCards.length === 0 && !hasDerivedObligations && (
         <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6">
-          <p className="text-gray-300 text-sm">
-            No additional debts or obligations to add. {hasDerivedObligations ? 'The obligations shown above from your earlier answers will be included in your documents.' : 'You can come back to this section if your situation changes.'}
+          <p className="text-gray-400 text-sm">
+            No additional debts or credit cards to add. You can come back to this section if your situation changes.
           </p>
         </div>
       )}

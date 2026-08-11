@@ -14,6 +14,7 @@ import CorporateFinancialReview from './CorporateFinancialReview';
 import PoaPropertyAttorneyDetails, { PoaPropertyAttorneyData } from './PoaPropertyAttorneyDetails';
 import TrustBeneficiariesSelector, { TrustBeneficiaryEntry } from './TrustBeneficiariesSelector';
 import Subsection from './Subsection';
+import ChildPlanningSection, { PlanningPerson } from './ChildPlanningSection';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
 type StepFormProps = {
@@ -1757,6 +1758,32 @@ export default function StepForm({
   const numberOfChildren = allAnswers?.get(1)?.['numberOfChildren'];
   const childCount = numberOfChildren ? (numberOfChildren === '6+' ? 6 : parseInt(numberOfChildren as string)) : 0;
   const childrenData = (answers['childrenData'] as Array<Record<string, string>>) || Array(Math.max(0, childCount || 0)).fill(null).map(() => ({}));
+  const planningPersons = (answers['planningPersons'] as Array<PlanningPerson>) || [];
+
+  const handlePlanningPersonsChange = (persons: PlanningPerson[]) => {
+    onAnswerChange('planningPersons', persons);
+  };
+
+  const getChildClassification = (child: Record<string, string> | undefined): 'minor' | 'independent_adult' | 'adult_dependant' => {
+    if (!child?.dateOfBirth) return 'minor';
+    const step1 = allAnswers?.get(1) || {};
+    const province = ((step1['province'] as string) || '').toLowerCase();
+    const higherMajority = ['bc', 'british columbia', 'nova scotia', 'new brunswick', 'newfoundland', 'nl', 'ns', 'nb'];
+    const ageOfMajority = higherMajority.some(p => province.includes(p)) ? 19 : 18;
+    const birth = new Date(child.dateOfBirth);
+    const today = new Date();
+    const age = (today.getTime() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+    if (age < ageOfMajority) return 'minor';
+    const isDisabled = child.disabled === 'yes' || child.disabled === 'not_sure';
+    const isIndependent = child.independent === 'yes';
+    if (isIndependent && !isDisabled) return 'independent_adult';
+    return 'adult_dependant';
+  };
+
+  const minorIndices = childrenData
+    .map((c, i) => ({ c, i }))
+    .filter(({ c }) => getChildClassification(c) === 'minor')
+    .map(({ i }) => i);
 
   const client1NumberOfPreviousRelationships = allAnswers?.get(1)?.['client1NumberOfPreviousRelationships'];
   const client1PrevRelCount = client1NumberOfPreviousRelationships ? parseInt(client1NumberOfPreviousRelationships as string) : 0;
@@ -2181,6 +2208,43 @@ export default function StepForm({
     if (field === 'hasIEP' && value === 'no') {
       updated[index].individualEducationPlan = undefined;
       updated[index].iepDocumentLocation = undefined;
+    }
+
+    const clearGuardianFields = (obj: Record<string, string>) => {
+      obj.guardianConsidered = undefined;
+      obj.guardianSameAsSibling = undefined;
+      obj.guardianPersonId = undefined;
+      obj.guardianSpokenWith = undefined;
+      obj.guardianInWill = undefined;
+      obj.guardianNotes = undefined;
+      obj.guardianAppliesTo = undefined;
+      obj.alternateGuardianConsidered = undefined;
+      obj.alternateGuardianPersonId = undefined;
+      obj.alternateGuardianSpokenWith = undefined;
+      obj.alternateGuardianInWill = undefined;
+      obj.alternateGuardianNotes = undefined;
+    };
+
+    const clearSupportLeadFields = (obj: Record<string, string>) => {
+      obj.supportLeadConsidered = undefined;
+      obj.supportLeadPersonId = undefined;
+      obj.supportLeadSpokenWith = undefined;
+      obj.supportLeadNotes = undefined;
+    };
+
+    if (field === 'dateOfBirth' || field === 'independent' || field === 'disabled') {
+      const newClassification = getChildClassification(updated[index]);
+      const oldClassification = getChildClassification(childrenData[index]);
+      if (newClassification !== oldClassification) {
+        if (newClassification === 'independent_adult') {
+          clearGuardianFields(updated[index]);
+          clearSupportLeadFields(updated[index]);
+        } else if (newClassification === 'minor') {
+          clearSupportLeadFields(updated[index]);
+        } else if (newClassification === 'adult_dependant') {
+          clearGuardianFields(updated[index]);
+        }
+      }
     }
 
     onAnswerChange('childrenData', updated);
@@ -13110,6 +13174,20 @@ export default function StepForm({
                     )}
 
                   </div>
+
+                  <ChildPlanningSection
+                    childIndex={index}
+                    childData={childrenData[index] || {}}
+                    childrenData={childrenData}
+                    planningPersons={planningPersons}
+                    prefilledContacts={buildPrefilledContacts(index)}
+                    classification={getChildClassification(childrenData[index])}
+                    isDisabled={childrenData[index]?.disabled === 'yes' || childrenData[index]?.disabled === 'not_sure'}
+                    minorIndices={minorIndices}
+                    onChildChange={handleChildChange}
+                    onChildMultiChange={handleChildMultiChange}
+                    onPlanningPersonsChange={handlePlanningPersonsChange}
+                  />
                 </div>
               ))}
             </div>

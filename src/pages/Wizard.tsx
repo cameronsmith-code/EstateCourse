@@ -257,6 +257,7 @@ export default function Wizard() {
         onNext={handleNext}
         onPrevious={handlePrevious}
         onAnswerChange={(key, value) => updateAnswer(currentStepData.sectionId, key, value)}
+        onUpdateFootprint={(key, value) => updateAnswer('financialFootprint', key, value)}
         onClearCurrentStep={() => clearCurrentStepAnswers(currentStepData.sectionId, validCurrentStep)}
         currentStepNumber={validCurrentStep}
       />

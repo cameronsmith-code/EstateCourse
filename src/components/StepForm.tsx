@@ -27,6 +27,7 @@ type StepFormProps = {
   onNext: () => void;
   onPrevious: () => void;
   onAnswerChange: (key: string, value: unknown) => void;
+  onUpdateFootprint?: (key: string, value: unknown) => void;
   onClearCurrentStep: () => void;
   currentStepNumber: number;
 };
@@ -61,6 +62,7 @@ export default function StepForm({
   onNext,
   onPrevious,
   onAnswerChange,
+  onUpdateFootprint,
   onClearCurrentStep,
   currentStepNumber,
 }: StepFormProps) {
@@ -13498,6 +13500,7 @@ export default function StepForm({
               answers={answers}
               allAnswers={allAnswers}
               onAnswerChange={onAnswerChange}
+              onUpdateFootprint={onUpdateFootprint}
             />
           )}
 

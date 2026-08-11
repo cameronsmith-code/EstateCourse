@@ -18,6 +18,13 @@ type AdditionalDebt = {
   paymentFrequencyOther?: string;
   paymentSource?: string;
   paymentSourceOther?: string;
+  // Reference to a bank account from the financial footprint
+  paymentSourceBankRef?: string;
+  // New bank account entered via "Other" in Q7
+  newBankInstitution?: string;
+  newBankAccountType?: string;
+  newBankOwner?: string;
+  newBankAddedToFootprint?: boolean;
   isSecured?: string;
   securedByType?: string;
   securedByOther?: string;
@@ -67,6 +74,7 @@ type Props = {
   answers: Record<string, unknown>;
   allAnswers?: Map<string, Record<string, unknown>>;
   onAnswerChange: (key: string, value: unknown) => void;
+  onUpdateFootprint?: (key: string, value: unknown) => void;
 };
 
 const BORROWING_TYPE_LABELS: Record<string, string> = {
@@ -205,49 +213,134 @@ function deriveObligations(allAnswers?: Map<string, Record<string, unknown>>): D
   return result;
 }
 
-function getBankingOptions(allAnswers?: Map<string, Record<string, unknown>>): Array<{ value: string; label: string }> {
-  const options: Array<{ value: string; label: string }> = [];
-  if (!allAnswers) return options;
+type CategorizedBankingOptions = {
+  client1: Array<{ value: string; label: string; dataKey: string; index: number }>;
+  client2: Array<{ value: string; label: string; dataKey: string; index: number }>;
+  joint: Array<{ value: string; label: string; dataKey: string; index: number }>;
+  all: Array<{ value: string; label: string }>;
+};
+
+function getBankingOptions(allAnswers?: Map<string, Record<string, unknown>>): CategorizedBankingOptions {
+  const empty: CategorizedBankingOptions = { client1: [], client2: [], joint: [], all: [] };
+  if (!allAnswers) return empty;
 
   const aboutYou = allAnswers.get('aboutYou') || {};
   const client1Name = (aboutYou['fullName'] as string) || 'Client 1';
   const client2Name = (aboutYou['spouseName'] as string) || 'Client 2';
 
   const footprint = allAnswers.get('financialFootprint') || {};
+  const bankingStructure = (footprint['bankingStructure'] as string) || '';
+  const hasSpouse = (aboutYou['maritalStatus'] as string) === 'married' || (aboutYou['maritalStatus'] as string) === 'common_law';
 
-  // Non-registered banking institutions
-  const institutions = (footprint['institutions'] as Array<Record<string, unknown>>) || [];
-  institutions.forEach((inst, i) => {
-    const name = (inst['name'] as string) || (inst['institution'] as string) || '';
+  const result: CategorizedBankingOptions = { client1: [], client2: [], joint: [], all: [] };
+
+  const addInstitution = (
+    inst: Record<string, unknown>,
+    i: number,
+    dataKey: string,
+    category: 'client1' | 'client2' | 'joint',
+    ownerName: string,
+  ) => {
+    const name = (inst['name'] as string) || '';
     const acctType = (inst['accountType'] as string) || '';
-    if (name) {
-      const label = acctType ? `${name} — ${acctType}` : name;
-      options.push({ value: `inst_${i}`, label });
+    if (!name) return;
+    const label = acctType ? `${name} — ${acctType}` : name;
+    const value = `${dataKey}_${i}`;
+    result[category].push({ value, label, dataKey, index: i });
+    result.all.push({ value, label: `${ownerName} — ${label}` });
+  };
+
+  // Determine which institution data keys to read based on banking structure
+  if (!hasSpouse) {
+    // Single client — always client1InstitutionsData
+    const insts = (footprint['client1InstitutionsData'] as Array<Record<string, unknown>>) || [];
+    insts.forEach((inst, i) => addInstitution(inst, i, 'client1InstitutionsData', 'client1', client1Name));
+  } else {
+    if (bankingStructure === 'individual') {
+      const c1Insts = (footprint['client1InstitutionsData'] as Array<Record<string, unknown>>) || [];
+      c1Insts.forEach((inst, i) => addInstitution(inst, i, 'client1InstitutionsData', 'client1', client1Name));
+      const c2Insts = (footprint['client2InstitutionsData'] as Array<Record<string, unknown>>) || [];
+      c2Insts.forEach((inst, i) => addInstitution(inst, i, 'client2InstitutionsData', 'client2', client2Name));
+    } else if (bankingStructure === 'joint') {
+      const jointInsts = (footprint['jointInstitutionsData'] as Array<Record<string, unknown>>) || [];
+      jointInsts.forEach((inst, i) => addInstitution(inst, i, 'jointInstitutionsData', 'joint', `${client1Name} & ${client2Name}`));
+    } else if (bankingStructure === 'mixed') {
+      const jointInsts = (footprint['mixedJointInstitutionsData'] as Array<Record<string, unknown>>) || [];
+      jointInsts.forEach((inst, i) => addInstitution(inst, i, 'mixedJointInstitutionsData', 'joint', `${client1Name} & ${client2Name}`));
+      const c1Insts = (footprint['mixedClient1InstitutionsData'] as Array<Record<string, unknown>>) || [];
+      c1Insts.forEach((inst, i) => addInstitution(inst, i, 'mixedClient1InstitutionsData', 'client1', client1Name));
+      const c2Insts = (footprint['mixedClient2InstitutionsData'] as Array<Record<string, unknown>>) || [];
+      c2Insts.forEach((inst, i) => addInstitution(inst, i, 'mixedClient2InstitutionsData', 'client2', client2Name));
     }
-  });
+  }
 
-  // Registered accounts
-  const c1RegData = (footprint['client1RegisteredAccountData'] as Record<string, Array<Record<string, unknown>>>) || {};
-  Object.entries(c1RegData).forEach(([typeKey, insts]) => {
-    insts.forEach((inst, i) => {
-      const name = (inst['institution'] as string) || (inst['name'] as string) || '';
-      if (name) {
-        options.push({ value: `c1reg_${typeKey}_${i}`, label: `${client1Name} — ${name}` });
-      }
-    });
-  });
+  return result;
+}
 
-  const c2RegData = (footprint['client2RegisteredAccountData'] as Record<string, Array<Record<string, unknown>>>) || {};
-  Object.entries(c2RegData).forEach(([typeKey, insts]) => {
-    insts.forEach((inst, i) => {
-      const name = (inst['institution'] as string) || (inst['name'] as string) || '';
-      if (name) {
-        options.push({ value: `c2reg_${typeKey}_${i}`, label: `${client2Name} — ${name}` });
-      }
-    });
-  });
+// Backward-compatible flat list for CreditCardIntake
+function getFlatBankingOptions(categorized: CategorizedBankingOptions): Array<{ value: string; label: string }> {
+  return categorized.all;
+}
 
-  return options;
+// Retroactively add a new bank account to the financial footprint section
+function addNewBankToFootprint(
+  draft: AdditionalDebt,
+  onUpdateFootprint: (key: string, value: unknown) => void,
+  allAnswers?: Map<string, Record<string, unknown>>,
+  hasSpouse?: boolean,
+) {
+  const footprint = allAnswers?.get('financialFootprint') || {};
+  const bankingStructure = (footprint['bankingStructure'] as string) || '';
+
+  // Determine the correct data key and count key based on banking structure and owner
+  let dataKey: string;
+  let countKey: string;
+
+  if (!hasSpouse) {
+    dataKey = 'client1InstitutionsData';
+    countKey = 'client1BankCount';
+  } else if (bankingStructure === 'individual') {
+    if (draft.newBankOwner === 'client1') {
+      dataKey = 'client1InstitutionsData';
+      countKey = 'client1BankCount';
+    } else if (draft.newBankOwner === 'client2') {
+      dataKey = 'client2InstitutionsData';
+      countKey = 'client2BankCount';
+    } else {
+      // joint owner but structure is individual — treat as client1
+      dataKey = 'client1InstitutionsData';
+      countKey = 'client1BankCount';
+    }
+  } else if (bankingStructure === 'joint') {
+    dataKey = 'jointInstitutionsData';
+    countKey = 'jointBankCount';
+  } else if (bankingStructure === 'mixed') {
+    if (draft.newBankOwner === 'joint') {
+      dataKey = 'mixedJointInstitutionsData';
+      countKey = 'mixedJointBankCount';
+    } else if (draft.newBankOwner === 'client2') {
+      dataKey = 'mixedClient2InstitutionsData';
+      countKey = 'mixedClient2BankCount';
+    } else {
+      dataKey = 'mixedClient1InstitutionsData';
+      countKey = 'mixedClient1BankCount';
+    }
+  } else {
+    // No banking structure set yet — default to client1
+    dataKey = 'client1InstitutionsData';
+    countKey = 'client1BankCount';
+  }
+
+  // Get existing institutions array
+  const existing = (footprint[dataKey] as Array<Record<string, unknown>>) || [];
+  const newInstitution: Record<string, unknown> = {
+    name: draft.newBankInstitution,
+    accountType: draft.newBankAccountType || '',
+    accountOwners: [draft.newBankOwner],
+  };
+  const updated = [...existing, newInstitution];
+  onUpdateFootprint(dataKey, updated);
+  onUpdateFootprint(countKey, String(updated.length));
 }
 
 function YesNoCard({
@@ -397,7 +490,7 @@ const SECURED_BY_OPTIONS = [
   { value: 'other', label: 'Other' },
 ];
 
-export default function DebtObligations({ answers, allAnswers, onAnswerChange }: Props) {
+export default function DebtObligations({ answers, allAnswers, onAnswerChange, onUpdateFootprint }: Props) {
   const aboutYou = allAnswers?.get('aboutYou') || {};
   const client1Name = (aboutYou['fullName'] as string) || 'Client 1';
   const client2Name = (aboutYou['spouseName'] as string) || 'Client 2';
@@ -405,7 +498,8 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
   const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
 
   const derived = deriveObligations(allAnswers);
-  const bankingOptions = getBankingOptions(allAnswers);
+  const categorizedBanking = getBankingOptions(allAnswers);
+  const bankingOptions = getFlatBankingOptions(categorizedBanking);
   const hasDerivedObligations = derived.propertyDebts.length > 0 || derived.guarantees.length > 0;
 
   const additionalDebts = (answers['additionalDebtsData'] as AdditionalDebt[]) || [];
@@ -450,12 +544,17 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
   };
 
   const saveDraft = () => {
+    // If user entered a new bank account via "Other", retroactively add it to the financial footprint
+    if (draft.paymentSource === 'other' && draft.newBankInstitution?.trim() && draft.newBankOwner && onUpdateFootprint) {
+      addNewBankToFootprint(draft, onUpdateFootprint, allAnswers, hasSpouse);
+    }
+
     if (editingIndex !== null) {
       const updated = [...additionalDebts];
-      updated[editingIndex] = draft;
+      updated[editingIndex] = { ...draft, newBankAddedToFootprint: draft.paymentSource === 'other' && !!draft.newBankInstitution?.trim() };
       onAnswerChange('additionalDebtsData', updated);
     } else {
-      const updated = [...additionalDebts, draft];
+      const updated = [...additionalDebts, { ...draft, newBankAddedToFootprint: draft.paymentSource === 'other' && !!draft.newBankInstitution?.trim() }];
       onAnswerChange('additionalDebtsData', updated);
       onAnswerChange('hasAdditionalDebts', 'yes');
     }
@@ -682,52 +781,176 @@ export default function DebtObligations({ answers, allAnswers, onAnswerChange }:
       ),
       canProceed: () => true,
     },
-    // Q7: Payment account
+    // Q7: Payment account — categorized bank accounts from footprint + Other
     {
       title: 'Where is this payment usually made from?',
       subtitle: 'We\'ll use the banking information you\'ve already provided where possible.',
       render: () => {
-        const sourceOptions: Array<{ value: string; label: string }> = [];
-        if (bankingOptions.length > 0) {
-          bankingOptions.forEach((opt) => sourceOptions.push(opt));
-        }
-        sourceOptions.push({ value: 'client1_account', label: `${client1Name}'s account` });
-        if (hasSpouse) {
-          sourceOptions.push({ value: 'client2_account', label: `${client2Name}'s account` });
-          sourceOptions.push({ value: 'joint_account', label: 'Joint account' });
-        }
-        sourceOptions.push({ value: 'other', label: 'Other' });
-        sourceOptions.push({ value: 'not_sure', label: "I'm not sure" });
+        const hasC1 = categorizedBanking.client1.length > 0;
+        const hasC2 = categorizedBanking.client2.length > 0;
+        const hasJoint = categorizedBanking.joint.length > 0;
+        const hasAnyBanks = hasC1 || hasC2 || hasJoint;
+
+        const renderBankGroup = (
+          groupLabel: string,
+          opts: Array<{ value: string; label: string }>,
+        ) => (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider pt-2">{groupLabel}</p>
+            {opts.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  updateDraft('paymentSource', 'bank_account');
+                  updateDraft('paymentSourceBankRef', opt.value);
+                  updateDraft('paymentSourceOther', '');
+                }}
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium transition-all text-left w-full ${
+                  draft.paymentSource === 'bank_account' && draft.paymentSourceBankRef === opt.value
+                    ? 'bg-blue-600 border-blue-500 text-white'
+                    : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+                }`}
+              >
+                <Landmark className="w-4 h-4 flex-shrink-0 opacity-60" />
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        );
 
         return (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {sourceOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => updateDraft('paymentSource', opt.value)}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium transition-all text-left ${
-                    draft.paymentSource === opt.value
-                      ? 'bg-blue-600 border-blue-500 text-white'
-                      : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
-                  }`}
-                >
-                  <Landmark className="w-4 h-4 flex-shrink-0 opacity-60" />
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            {draft.paymentSource === 'other' && (
-              <div>
-                <label className={labelClass}>Please specify</label>
-                <input type="text" value={draft.paymentSourceOther || ''} onChange={(e) => updateDraft('paymentSourceOther', e.target.value)} placeholder="Describe where the payment comes from" className={inputClass} />
+            {hasAnyBanks ? (
+              <div className="space-y-1">
+                {hasC1 && renderBankGroup(`${client1Name}'s Accounts`, categorizedBanking.client1)}
+                {hasC2 && renderBankGroup(`${client2Name}'s Accounts`, categorizedBanking.client2)}
+                {hasJoint && renderBankGroup('Joint Accounts', categorizedBanking.joint)}
+              </div>
+            ) : (
+              <div className="bg-gray-800/50 border border-gray-700/50 rounded-lg p-4 text-center">
+                <p className="text-sm text-gray-400">No bank accounts were entered in the Financial Footprint section yet.</p>
               </div>
             )}
+
+            {/* Other — opens bank account intake */}
+            <div className="space-y-2 pt-2">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Other</p>
+              <button
+                type="button"
+                onClick={() => {
+                  updateDraft('paymentSource', 'other');
+                  updateDraft('paymentSourceBankRef', '');
+                }}
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium transition-all text-left w-full ${
+                  draft.paymentSource === 'other'
+                    ? 'bg-blue-600 border-blue-500 text-white'
+                    : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+                }`}
+              >
+                <Plus className="w-4 h-4 flex-shrink-0 opacity-60" />
+                Add a new bank account
+              </button>
+
+              {draft.paymentSource === 'other' && (
+                <div className="ml-4 pl-4 border-l-2 border-blue-500/40 space-y-4 pt-3">
+                  <div>
+                    <label className={labelClass}>Institution name</label>
+                    <p className="text-xs italic text-gray-400 mb-2">e.g., TD Bank, RBC, Scotiabank</p>
+                    <input
+                      type="text"
+                      value={draft.newBankInstitution || ''}
+                      onChange={(e) => updateDraft('newBankInstitution', e.target.value)}
+                      placeholder="Enter bank or financial institution name"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Account type</label>
+                    <p className="text-xs italic text-gray-400 mb-2">e.g., Checking, Savings, TFSA</p>
+                    <input
+                      type="text"
+                      value={draft.newBankAccountType || ''}
+                      onChange={(e) => updateDraft('newBankAccountType', e.target.value)}
+                      placeholder="Enter account type"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Account owner</label>
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => updateDraft('newBankOwner', 'client1')}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all text-left w-full ${
+                          draft.newBankOwner === 'client1'
+                            ? 'bg-blue-600 border-blue-500 text-white'
+                            : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+                        }`}
+                      >
+                        {client1Name}
+                      </button>
+                      {hasSpouse && (
+                        <button
+                          type="button"
+                          onClick={() => updateDraft('newBankOwner', 'client2')}
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all text-left w-full ${
+                            draft.newBankOwner === 'client2'
+                              ? 'bg-blue-600 border-blue-500 text-white'
+                              : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+                          }`}
+                        >
+                          {client2Name}
+                        </button>
+                      )}
+                      {hasSpouse && (
+                        <button
+                          type="button"
+                          onClick={() => updateDraft('newBankOwner', 'joint')}
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all text-left w-full ${
+                            draft.newBankOwner === 'joint'
+                              ? 'bg-blue-600 border-blue-500 text-white'
+                              : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+                          }`}
+                        >
+                          Joint Account
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400 italic">
+                    This account will be added to the Banking section of Your Financial Footprint automatically.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  updateDraft('paymentSource', 'not_sure');
+                  updateDraft('paymentSourceBankRef', '');
+                }}
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium transition-all text-left w-full ${
+                  draft.paymentSource === 'not_sure'
+                    ? 'bg-blue-600 border-blue-500 text-white'
+                    : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+                }`}
+              >
+                I'm not sure
+              </button>
+            </div>
           </div>
         );
       },
-      canProceed: () => true,
+      canProceed: () => {
+        if (!draft.paymentSource) return false;
+        if (draft.paymentSource === 'other') {
+          return !!draft.newBankInstitution?.trim() && !!draft.newBankOwner;
+        }
+        return true;
+      },
     },
     // Q8: Secured or unsecured
     {

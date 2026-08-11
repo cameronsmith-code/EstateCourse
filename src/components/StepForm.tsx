@@ -14028,6 +14028,57 @@ export default function StepForm({
             );
           })()}
 
+          {step.id === 17 && (() => {
+            const basicAnswers = allAnswers?.get(1) || {};
+            const client1Name = (basicAnswers['fullName'] as string) || 'Client 1';
+            const client2Name = (basicAnswers['spouseName'] as string) || 'Client 2';
+            const maritalStatus = basicAnswers['maritalStatus'] as string;
+            const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+
+            const allFormData = Object.fromEntries(
+              Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                Object.entries(stepAnswers)
+              )
+            );
+
+            const isVisible = (question: typeof step.questions[0]) => {
+              if (!question.condition) return true;
+              return question.condition(allFormData);
+            };
+
+            const renderQuestion = (question: typeof step.questions[0]) => {
+              if (!isVisible(question)) return null;
+              const displayLabel = typeof question.label === 'function'
+                ? question.label(allAnswers || new Map())
+                : question.label;
+              return (
+                <FormField
+                  key={question.key}
+                  question={{ ...question, label: displayLabel }}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                  answers={allAnswers}
+                />
+              );
+            };
+
+            const client1Questions = step.questions.filter(q => !q.key.startsWith('client2'));
+            const client2Questions = step.questions.filter(q => q.key.startsWith('client2'));
+
+            return (
+              <>
+                <Subsection title={`${client1Name} — Estate Trustee (Executor)`}>
+                  {client1Questions.map(renderQuestion)}
+                </Subsection>
+                {hasSpouse && (
+                  <Subsection title={`${client2Name} — Estate Trustee (Executor)`}>
+                    {client2Questions.map(renderQuestion)}
+                  </Subsection>
+                )}
+              </>
+            );
+          })()}
+
           {step.id === 14 && (() => {
             const renderQuestion = (question: typeof step.questions[0]) => {
               const displayLabel = typeof question.label === 'function'

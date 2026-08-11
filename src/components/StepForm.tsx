@@ -11461,6 +11461,9 @@ export default function StepForm({
                         handleChildChange(index, 'futureCareTeamSelection', next.join(','));
                       };
 
+                      const _step1ForLabels = allAnswers?.get(1) || {};
+                      const _client1Name = (_step1ForLabels['fullName'] as string) || 'Client 1';
+                      const _client2Name = (_step1ForLabels['spouseName'] as string) || 'Client 2';
                       const sourceLabels: Record<string, string> = {
                         parent1: 'Parent / Guardian 1',
                         parent2: 'Parent / Guardian 2',
@@ -11470,8 +11473,8 @@ export default function StepForm({
                         doctor: 'Doctor / Therapist / Support Worker',
                         other: 'Other',
                         otherparent: "Child's Other Parent",
-                        prevrel1: 'Former Partner (Client 1)',
-                        prevrel2: 'Former Partner (Client 2)',
+                        prevrel1: `Former Partner (${_client1Name})`,
+                        prevrel2: `Former Partner (${_client2Name})`,
                         et1: 'Estate Trustee (Client 1)',
                         et2: 'Estate Trustee (Client 2)',
                         poapc1: 'POA — Personal Care (Client 1)',

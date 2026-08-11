@@ -2052,34 +2052,54 @@ export default function StepForm({
     }
     updated[index][field] = value;
 
-    if (field === 'disabled' && value === 'no') {
-      updated[index].supportNeedTypes = undefined;
-      updated[index].supportNeedOther = undefined;
-      updated[index].disabilityTaxCredit = undefined;
-      updated[index].disabilityTaxCreditDocLocation = undefined;
-      updated[index].notSureSituation = undefined;
-      updated[index].notSureRelianceAreas = undefined;
-      updated[index].notSureFuture = undefined;
-      clearCareCoordFields(updated[index]);
-      updated[index].futureIndependenceLevel = undefined;
-      updated[index].futureFinancialHelp = undefined;
-      updated[index].futurePersonalHealthHelp = undefined;
-      clearFutureCareTeamFields(updated[index]);
+    if (field === 'disabled') {
+      const ind = updated[index].independent || '';
+      if (value === 'yes') {
+        updated[index].notSureSituation = undefined;
+        updated[index].notSureRelianceAreas = undefined;
+        updated[index].notSureFuture = undefined;
+      } else if (value === 'no') {
+        updated[index].notSureSituation = undefined;
+        updated[index].notSureRelianceAreas = undefined;
+        updated[index].notSureFuture = undefined;
+        if (ind !== 'no') {
+          updated[index].supportNeedTypes = undefined;
+          updated[index].supportNeedOther = undefined;
+          updated[index].disabilityTaxCredit = undefined;
+          updated[index].disabilityTaxCreditDocLocation = undefined;
+          clearCareCoordFields(updated[index]);
+          updated[index].futureIndependenceLevel = undefined;
+          updated[index].futureFinancialHelp = undefined;
+          updated[index].futurePersonalHealthHelp = undefined;
+          clearFutureCareTeamFields(updated[index]);
+        }
+      } else if (value === 'not_sure') {
+        if (ind !== 'no') {
+          updated[index].supportNeedTypes = undefined;
+          updated[index].supportNeedOther = undefined;
+          updated[index].disabilityTaxCredit = undefined;
+          updated[index].disabilityTaxCreditDocLocation = undefined;
+          clearCareCoordFields(updated[index]);
+          clearFutureCareTeamFields(updated[index]);
+        }
+      }
     }
 
-    if (field === 'disabled' && value === 'yes') {
-      updated[index].notSureSituation = undefined;
-      updated[index].notSureRelianceAreas = undefined;
-      updated[index].notSureFuture = undefined;
-    }
-
-    if (field === 'disabled' && value === 'not_sure') {
-      updated[index].supportNeedTypes = undefined;
-      updated[index].supportNeedOther = undefined;
-      updated[index].disabilityTaxCredit = undefined;
-      updated[index].disabilityTaxCreditDocLocation = undefined;
-      clearCareCoordFields(updated[index]);
-      clearFutureCareTeamFields(updated[index]);
+    if (field === 'independent' && value !== 'no') {
+      const dis = updated[index].disabled || '';
+      if (dis === 'no' || dis === 'not_sure') {
+        updated[index].supportNeedTypes = undefined;
+        updated[index].supportNeedOther = undefined;
+        updated[index].disabilityTaxCredit = undefined;
+        updated[index].disabilityTaxCreditDocLocation = undefined;
+        clearCareCoordFields(updated[index]);
+        if (dis === 'no') {
+          updated[index].futureIndependenceLevel = undefined;
+          updated[index].futureFinancialHelp = undefined;
+          updated[index].futurePersonalHealthHelp = undefined;
+          clearFutureCareTeamFields(updated[index]);
+        }
+      }
     }
 
     if (field === 'disabilityTaxCredit' && value !== 'yes' && value !== 'in-progress') {
@@ -10991,6 +11011,40 @@ export default function StepForm({
                       </div>
                     </div>
 
+                    <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
+                      <h4 className="text-base font-semibold text-blue-400">Financial Independence</h4>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Are they financially independent?
+                      </label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`independent-${index}`}
+                            value="yes"
+                            checked={childrenData[index]?.independent === 'yes'}
+                            onChange={(e) => handleChildChange(index, 'independent', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">Yes</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name={`independent-${index}`}
+                            value="no"
+                            checked={childrenData[index]?.independent === 'no'}
+                            onChange={(e) => handleChildChange(index, 'independent', e.target.value)}
+                            className="mr-2"
+                          />
+                          <span className="text-gray-300">No</span>
+                        </label>
+                      </div>
+                    </div>
+
                     {childrenData[index]?.disabled === 'not_sure' && (
                       <>
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
@@ -11089,7 +11143,7 @@ export default function StepForm({
                       </>
                     )}
 
-                    {childrenData[index]?.disabled === 'yes' && (
+                    {(childrenData[index]?.disabled === 'yes' || ((childrenData[index]?.disabled === 'no' || childrenData[index]?.disabled === 'not_sure') && childrenData[index]?.independent === 'no')) && (
                       <>
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                           <h4 className="text-base font-semibold text-blue-400">Future Support &amp; Independence</h4>
@@ -11346,7 +11400,7 @@ export default function StepForm({
                     </>
                     )}
 
-                    {childrenData[index]?.disabled !== 'no' && (
+                    {(childrenData[index]?.disabled === 'yes' || childrenData[index]?.disabled === 'not_sure' || (childrenData[index]?.disabled === 'no' && childrenData[index]?.independent === 'no')) && (
                     <>
                     <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                       <h4 className="text-base font-semibold text-blue-400">Looking Ahead to Adulthood</h4>
@@ -11770,40 +11824,6 @@ export default function StepForm({
                     </div>
                     </>
                     )}
-
-                    <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
-                      <h4 className="text-base font-semibold text-blue-400">Financial Independence</h4>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Are they financially independent?
-                      </label>
-                      <div className="flex gap-4">
-                        <label className="flex items-center">
-                          <input
-                            type="radio"
-                            name={`independent-${index}`}
-                            value="yes"
-                            checked={childrenData[index]?.independent === 'yes'}
-                            onChange={(e) => handleChildChange(index, 'independent', e.target.value)}
-                            className="mr-2"
-                          />
-                          <span className="text-gray-300">Yes</span>
-                        </label>
-                        <label className="flex items-center">
-                          <input
-                            type="radio"
-                            name={`independent-${index}`}
-                            value="no"
-                            checked={childrenData[index]?.independent === 'no'}
-                            onChange={(e) => handleChildChange(index, 'independent', e.target.value)}
-                            className="mr-2"
-                          />
-                          <span className="text-gray-300">No</span>
-                        </label>
-                      </div>
-                    </div>
 
 {childrenData[index]?.independent === 'no' && (
                       <>

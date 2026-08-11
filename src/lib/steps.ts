@@ -3548,11 +3548,17 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client1PoaPersonalCareHasDocCopy',
-        label: 'Do you have a copy of the Power of Attorney document?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const step1 = answers.get(1) || {};
+          const attorneyName = step1['spouseIsPoaPersonalCare'] === 'yes'
+            ? (step1['spouseName'] as string) || 'the named attorney'
+            : (step1['client1PoaPersonalCareName'] as string) || 'the named attorney';
+          return `Does ${attorneyName} have a copy of your Power of Attorney for Personal Care document?`;
+        },
         type: 'radio',
         options: [
-          { value: 'yes_on_file', label: 'Yes, I have a copy on file' },
-          { value: 'no_can_access', label: 'No, but I know where to access it' },
+          { value: 'yes_on_file', label: 'Yes, they have a copy on file' },
+          { value: 'no_can_access', label: 'No, but they know where to access it' },
           { value: 'no_not_discussed', label: 'No, this has not been discussed' },
         ],
         required: false,
@@ -3680,11 +3686,17 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
       },
       {
         key: 'client2PoaPersonalCareHasDocCopy',
-        label: 'Do you have a copy of the Power of Attorney document?',
+        label: (answers: Map<number, Record<string, unknown>>) => {
+          const step1 = answers.get(1) || {};
+          const attorneyName = step1['client2SpouseIsPoaPersonalCare'] === 'yes'
+            ? (step1['fullName'] as string) || 'the named attorney'
+            : (step1['client2PoaPersonalCareName'] as string) || 'the named attorney';
+          return `Does ${attorneyName} have a copy of your Power of Attorney for Personal Care document?`;
+        },
         type: 'radio',
         options: [
-          { value: 'yes_on_file', label: 'Yes, I have a copy on file' },
-          { value: 'no_can_access', label: 'No, but I know where to access it' },
+          { value: 'yes_on_file', label: 'Yes, they have a copy on file' },
+          { value: 'no_can_access', label: 'No, but they know where to access it' },
           { value: 'no_not_discussed', label: 'No, this has not been discussed' },
         ],
         required: false,

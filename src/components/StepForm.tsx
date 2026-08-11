@@ -2883,7 +2883,7 @@ export default function StepForm({
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">Does this person have a copy of your most recent Power of Attorney for Personal Care document? *</label>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Does this person have a copy of your Power of Attorney for Personal Care document? *</label>
                           <div className="space-y-2">
                             <label className="flex items-center">
                               <input
@@ -2893,7 +2893,7 @@ export default function StepForm({
                                 onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'hasDocCopy', e.target.value)}
                                 className="mr-2"
                               />
-                              <span className="text-white">Yes, on their files</span>
+                              <span className="text-white">Yes, they have a copy on file</span>
                             </label>
                             <label className="flex items-center">
                               <input
@@ -2903,7 +2903,7 @@ export default function StepForm({
                                 onChange={(e) => handleAlternatePoaPersonalCareChange(index, 'hasDocCopy', e.target.value)}
                                 className="mr-2"
                               />
-                              <span className="text-white">No, but they know how to access the document if/when necessary</span>
+                              <span className="text-white">No, but they know where to access it</span>
                             </label>
                             <label className="flex items-center">
                               <input
@@ -3044,7 +3044,7 @@ export default function StepForm({
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">Does this person have a copy of your most recent Power of Attorney for Personal Care document? *</label>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Does this person have a copy of your Power of Attorney for Personal Care document? *</label>
                           <div className="space-y-2">
                             <label className="flex items-center">
                               <input
@@ -3054,7 +3054,7 @@ export default function StepForm({
                                 onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'hasDocCopy', e.target.value)}
                                 className="mr-2"
                               />
-                              <span className="text-white">Yes, on their files</span>
+                              <span className="text-white">Yes, they have a copy on file</span>
                             </label>
                             <label className="flex items-center">
                               <input
@@ -3064,7 +3064,7 @@ export default function StepForm({
                                 onChange={(e) => handleClient2AlternatePoaPersonalCareChange(index, 'hasDocCopy', e.target.value)}
                                 className="mr-2"
                               />
-                              <span className="text-white">No, but they know how to access the document if/when necessary</span>
+                              <span className="text-white">No, but they know where to access it</span>
                             </label>
                             <label className="flex items-center">
                               <input

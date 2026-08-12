@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trash2 } from 'lucide-react';
 import {
   InvestmentAccount,
@@ -37,6 +37,11 @@ type Props = {
   advisorId?: string;
   institutions: Array<{ id: string; name: string }>;
   onAddInstitution?: (name: string) => string;
+  startSignal?: number;
+  presetType?: string;
+  hideAddButton?: boolean;
+  onSaved?: () => void;
+  onCancelled?: () => void;
 };
 
 type Draft = Partial<InvestmentAccount> & {
@@ -68,11 +73,25 @@ export default function InvestmentsIntake({
   advisorId,
   institutions,
   onAddInstitution,
+  startSignal,
+  presetType,
+  hideAddButton,
+  onSaved,
+  onCancelled,
 }: Props) {
   const [intakeActive, setIntakeActive] = useState(false);
   const [intakeStep, setIntakeStep] = useState(0);
   const [draft, setDraft] = useState<Draft>(emptyDraft());
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (startSignal && startSignal > 0) {
+      setDraft({ ...emptyDraft(), accountType: presetType || '' });
+      setEditingIndex(null);
+      setIntakeStep(presetType ? 1 : 0);
+      setIntakeActive(true);
+    }
+  }, [startSignal]);
 
   const updateDraft = (field: keyof Draft, value: unknown) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -97,6 +116,7 @@ export default function InvestmentsIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    onCancelled?.();
   };
 
   const saveDraft = () => {
@@ -137,6 +157,7 @@ export default function InvestmentsIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    onSaved?.();
   };
 
   const deleteAsset = (index: number) => {
@@ -229,7 +250,7 @@ export default function InvestmentsIntake({
           ))}
         </div>
       )}
-      <AddButton label="Add an investment or registered account" onClick={startNew} />
+      {!hideAddButton && <AddButton label="Add an investment or registered account" onClick={startNew} />}
     </div>
   );
 }
@@ -287,7 +308,7 @@ function buildQuestions(
   });
 
   // Q1b: Other account type
-  if (draft.accountType === 'other_registered' || draft.accountType === 'other_investment') {
+  if (draft.accountType === 'other_investment') {
     questions.push({
       title: 'What would you call this account type?',
       render: () => (

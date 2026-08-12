@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { OtherAssetRecord, generateAssetId } from '../lib/financialAssetTypes';
 import {
   inputClass,
@@ -17,6 +17,10 @@ type Props = {
   client1Name: string;
   client2Name: string;
   hasSpouse: boolean;
+  startSignal?: number;
+  hideAddButton?: boolean;
+  onSaved?: () => void;
+  onCancelled?: () => void;
 };
 
 type Draft = Partial<OtherAssetRecord> & {
@@ -39,11 +43,24 @@ export default function OtherAssetsIntake({
   client1Name,
   client2Name,
   hasSpouse,
+  startSignal,
+  hideAddButton,
+  onSaved,
+  onCancelled,
 }: Props) {
   const [intakeActive, setIntakeActive] = useState(false);
   const [intakeStep, setIntakeStep] = useState(0);
   const [draft, setDraft] = useState<Draft>(emptyDraft());
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (startSignal && startSignal > 0) {
+      setDraft(emptyDraft());
+      setEditingIndex(null);
+      setIntakeStep(0);
+      setIntakeActive(true);
+    }
+  }, [startSignal]);
 
   const updateDraft = (field: keyof Draft, value: unknown) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -68,6 +85,7 @@ export default function OtherAssetsIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    onCancelled?.();
   };
 
   const saveDraft = () => {
@@ -97,6 +115,7 @@ export default function OtherAssetsIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    onSaved?.();
   };
 
   const deleteAsset = (index: number) => {
@@ -147,7 +166,7 @@ export default function OtherAssetsIntake({
           ))}
         </div>
       )}
-      <AddButton label="Add another financial asset" onClick={startNew} />
+      {!hideAddButton && <AddButton label="Add another financial asset" onClick={startNew} />}
     </div>
   );
 }

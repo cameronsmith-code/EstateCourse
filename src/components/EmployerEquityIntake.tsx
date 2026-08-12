@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   EquityCompensation,
   generateAssetId,
@@ -23,6 +23,12 @@ type Props = {
   client2Name: string;
   hasSpouse: boolean;
   employers: Array<{ id: string; name: string }>;
+  startSignal?: number;
+  presetType?: string;
+  presetOwnerIds?: string[];
+  hideAddButton?: boolean;
+  onSaved?: () => void;
+  onCancelled?: () => void;
 };
 
 type Draft = Partial<EquityCompensation> & {
@@ -51,11 +57,28 @@ export default function EmployerEquityIntake({
   client2Name,
   hasSpouse,
   employers,
+  startSignal,
+  presetType,
+  presetOwnerIds,
+  hideAddButton,
+  onSaved,
+  onCancelled,
 }: Props) {
   const [intakeActive, setIntakeActive] = useState(false);
   const [intakeStep, setIntakeStep] = useState(0);
   const [draft, setDraft] = useState<Draft>(emptyDraft());
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (startSignal && startSignal > 0) {
+      const d = { ...emptyDraft(), awardType: presetType || '' };
+      if (presetOwnerIds) d.ownerIds = presetOwnerIds;
+      setDraft(d);
+      setEditingIndex(null);
+      setIntakeStep(presetOwnerIds ? (presetType ? 2 : 0) : (presetType ? 1 : 0));
+      setIntakeActive(true);
+    }
+  }, [startSignal]);
 
   const updateDraft = (field: keyof Draft, value: unknown) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -80,6 +103,7 @@ export default function EmployerEquityIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    onCancelled?.();
   };
 
   const saveDraft = () => {
@@ -119,6 +143,7 @@ export default function EmployerEquityIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    onSaved?.();
   };
 
   const deleteAsset = (index: number) => {
@@ -195,7 +220,7 @@ export default function EmployerEquityIntake({
           ))}
         </div>
       )}
-      <AddButton label="Add employer equity or compensation" onClick={startNew} />
+      {!hideAddButton && <AddButton label="Add employer equity or compensation" onClick={startNew} />}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   PensionRecord,
   generateAssetId,
@@ -26,6 +26,12 @@ type Props = {
   hasSpouse: boolean;
   knownIndividuals: Array<{ id: string; name: string; relationship: string }>;
   institutions: Array<{ id: string; name: string }>;
+  startSignal?: number;
+  presetType?: string;
+  presetOwnerIds?: string[];
+  hideAddButton?: boolean;
+  onSaved?: () => void;
+  onCancelled?: () => void;
 };
 
 type Draft = Partial<PensionRecord> & {
@@ -52,11 +58,28 @@ export default function PensionsIntake({
   client2Name,
   hasSpouse,
   knownIndividuals,
+  startSignal,
+  presetType,
+  presetOwnerIds,
+  hideAddButton,
+  onSaved,
+  onCancelled,
 }: Props) {
   const [intakeActive, setIntakeActive] = useState(false);
   const [intakeStep, setIntakeStep] = useState(0);
   const [draft, setDraft] = useState<Draft>(emptyDraft());
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (startSignal && startSignal > 0) {
+      const d = { ...emptyDraft(), pensionType: presetType || '' };
+      if (presetOwnerIds) d.ownerIds = presetOwnerIds;
+      setDraft(d);
+      setEditingIndex(null);
+      setIntakeStep(presetOwnerIds ? (presetType ? 2 : 0) : (presetType ? 1 : 0));
+      setIntakeActive(true);
+    }
+  }, [startSignal]);
 
   const updateDraft = (field: keyof Draft, value: unknown) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -81,6 +104,7 @@ export default function PensionsIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    onCancelled?.();
   };
 
   const saveDraft = () => {
@@ -123,6 +147,7 @@ export default function PensionsIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    onSaved?.();
   };
 
   const deleteAsset = (index: number) => {
@@ -206,7 +231,7 @@ export default function PensionsIntake({
           ))}
         </div>
       )}
-      <AddButton label="Add a pension or workplace retirement plan" onClick={startNew} />
+      {!hideAddButton && <AddButton label="Add a pension or workplace retirement plan" onClick={startNew} />}
     </div>
   );
 }

@@ -131,45 +131,45 @@ export function generateAssetId(prefix: string = 'fa'): string {
 }
 
 export const INVESTMENT_ACCOUNT_TYPES = [
-  { value: 'rrsp', label: 'RRSP' },
-  { value: 'rrif', label: 'RRIF' },
-  { value: 'tfsa', label: 'TFSA' },
-  { value: 'fhsa', label: 'FHSA' },
-  { value: 'non_registered', label: 'Non-registered investment account' },
-  { value: 'lira', label: 'Locked-in Retirement Account (LIRA / LIF / LRIF)' },
-  { value: 'resp', label: 'RESP' },
-  { value: 'gic', label: 'GIC / term deposit' },
-  { value: 'other_registered', label: 'Other registered account' },
-  { value: 'other_investment', label: 'Other investment account' },
+  { value: 'rrsp', label: 'RRSP', description: 'Registered Retirement Savings Plan' },
+  { value: 'rrif', label: 'RRIF', description: 'Registered Retirement Income Fund' },
+  { value: 'tfsa', label: 'TFSA', description: 'Tax-Free Savings Account' },
+  { value: 'fhsa', label: 'FHSA', description: 'First Home Savings Account' },
+  { value: 'non_registered', label: 'Non-Registered Investment', description: 'Individual or joint investment account' },
+  { value: 'lira', label: 'Locked-In Retirement Account', description: 'LIRA / LRSP / other locked-in retirement savings' },
+  { value: 'lif', label: 'LIF / Locked-In Income Account', description: 'Retirement income from locked-in savings' },
+  { value: 'resp', label: 'RESP', description: 'Registered Education Savings Plan' },
+  { value: 'gic', label: 'GIC / Term Deposit', description: 'Guaranteed investment certificate or term deposit' },
+  { value: 'other_investment', label: 'Other Investment', description: 'Any other investment account not listed above' },
 ];
 
 export const PENSION_TYPES = [
-  { value: 'db', label: 'Defined Benefit Pension' },
-  { value: 'dc', label: 'Defined Contribution Pension' },
-  { value: 'group_rrsp', label: 'Group RRSP' },
-  { value: 'dpsp', label: 'DPSP' },
-  { value: 'prpp', label: 'PRPP' },
-  { value: 'group_savings', label: 'Group / Employer savings plan' },
-  { value: 'ipp', label: 'IPP' },
-  { value: 'rca', label: 'RCA' },
-  { value: 'not_sure', label: "I'm not sure" },
-  { value: 'other', label: 'Other' },
+  { value: 'db', label: 'Defined Benefit Pension', description: "Provides a pension based on the plan's formula." },
+  { value: 'dc', label: 'Defined Contribution Pension', description: 'Retirement savings accumulated in an individual plan account.' },
+  { value: 'group_rrsp', label: 'Group RRSP', description: 'RRSP provided through an employer.' },
+  { value: 'dpsp', label: 'DPSP', description: 'Deferred Profit Sharing Plan.' },
+  { value: 'group_tfsa', label: 'Group TFSA', description: 'TFSA offered through an employer plan.' },
+  { value: 'prpp', label: 'PRPP', description: 'Pooled Registered Pension Plan.' },
+  { value: 'ipp', label: 'IPP', description: 'Individual Pension Plan.' },
+  { value: 'rca', label: 'RCA', description: 'Retirement Compensation Arrangement.' },
+  { value: 'other', label: 'Other Employer Retirement/Savings Plan', description: 'Any other workplace retirement or savings plan.' },
+  { value: 'not_sure', label: "I'm not sure", description: 'Not sure what kind of plan it is.' },
 ];
 
 export const EQUITY_AWARD_TYPES = [
-  { value: 'rsu', label: 'Restricted Share Units (RSUs)' },
-  { value: 'psu', label: 'Performance Share Units (PSUs)' },
-  { value: 'dsu', label: 'Deferred Share Units (DSUs)' },
-  { value: 'stock_option', label: 'Employee Stock Options' },
-  { value: 'espp', label: 'Employee Share Purchase Plan (ESPP)' },
-  { value: 'employer_shares', label: 'Employer shares' },
-  { value: 'deferred_comp', label: 'Deferred compensation' },
-  { value: 'other', label: 'Other' },
+  { value: 'rsu', label: 'Restricted Share Units (RSUs)', description: '' },
+  { value: 'psu', label: 'Performance Share Units (PSUs)', description: '' },
+  { value: 'dsu', label: 'Deferred Share Units (DSUs)', description: '' },
+  { value: 'stock_option', label: 'Stock Options', description: '' },
+  { value: 'espp', label: 'Employee Share Purchase Plan', description: '' },
+  { value: 'employer_shares', label: 'Employer Shares', description: '' },
+  { value: 'deferred_comp', label: 'Deferred Compensation', description: '' },
+  { value: 'other', label: 'Other', description: '' },
 ];
 
 export const JOINT_ELIGIBLE_ACCOUNT_TYPES = [
-  'rrsp', 'rrif', 'tfsa', 'fhsa', 'non_registered', 'gic',
-  'other_registered', 'other_investment',
+  'rrsp', 'rrif', 'tfsa', 'fhsa', 'non_registered', 'lif', 'gic',
+  'other_investment',
 ];
 
 export const RESP_BENEFICIARY_ACCOUNT_TYPES = ['resp'];

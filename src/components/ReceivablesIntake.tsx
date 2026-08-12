@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lock } from 'lucide-react';
 import {
   ReceivableRecord,
@@ -23,6 +23,10 @@ type Props = {
   client2Name: string;
   hasSpouse: boolean;
   derivedReceivables: Array<{ id: string; corporation: string; amount: string; owedTo: string }>;
+  startSignal?: number;
+  hideAddButton?: boolean;
+  onSaved?: () => void;
+  onCancelled?: () => void;
 };
 
 type Draft = Partial<ReceivableRecord> & {
@@ -46,11 +50,24 @@ export default function ReceivablesIntake({
   client2Name,
   hasSpouse,
   derivedReceivables,
+  startSignal,
+  hideAddButton,
+  onSaved,
+  onCancelled,
 }: Props) {
   const [intakeActive, setIntakeActive] = useState(false);
   const [intakeStep, setIntakeStep] = useState(0);
   const [draft, setDraft] = useState<Draft>(emptyDraft());
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (startSignal && startSignal > 0) {
+      setDraft(emptyDraft());
+      setEditingIndex(null);
+      setIntakeStep(0);
+      setIntakeActive(true);
+    }
+  }, [startSignal]);
 
   const updateDraft = (field: keyof Draft, value: unknown) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -75,6 +92,7 @@ export default function ReceivablesIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    onCancelled?.();
   };
 
   const saveDraft = () => {
@@ -107,6 +125,7 @@ export default function ReceivablesIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    onSaved?.();
   };
 
   const deleteAsset = (index: number) => {
@@ -179,7 +198,7 @@ export default function ReceivablesIntake({
           ))}
         </div>
       )}
-      <AddButton label="Add an amount owed to you" onClick={startNew} />
+      {!hideAddButton && <AddButton label="Add an amount owed to you" onClick={startNew} />}
     </div>
   );
 }

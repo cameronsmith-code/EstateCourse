@@ -14,6 +14,7 @@ import CorporateFinancialReview from './CorporateFinancialReview';
 import PoaPropertyAttorneyDetails, { PoaPropertyAttorneyData } from './PoaPropertyAttorneyDetails';
 import Subsection from './Subsection';
 import ChildPlanningSection, { PlanningPerson } from './ChildPlanningSection';
+import GuardianTransitionSection from './GuardianTransitionSection';
 import DebtObligations from './DebtObligations';
 import FinancialFootprintAssets from './FinancialFootprintAssets';
 import FamilyTrustSection from './FamilyTrustSection';
@@ -13066,6 +13067,19 @@ export default function StepForm({
                     onChildMultiChange={handleChildMultiChange}
                     onPlanningPersonsChange={handlePlanningPersonsChange}
                   />
+
+                  {getChildClassification(childrenData[index]) === 'minor' && childrenData[index]?.guardianPersonId && (
+                    <GuardianTransitionSection
+                      childIndex={index}
+                      childData={childrenData[index] || {}}
+                      childrenData={childrenData}
+                      planningPersons={planningPersons}
+                      minorIndices={minorIndices}
+                      isDisabled={childrenData[index]?.disabled === 'yes' || childrenData[index]?.disabled === 'not_sure'}
+                      onChildChange={handleChildChange}
+                      onChildMultiChange={handleChildMultiChange}
+                    />
+                  )}
                 </div>
               ))}
             </div>

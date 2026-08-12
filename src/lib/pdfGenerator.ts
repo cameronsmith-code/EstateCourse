@@ -3235,6 +3235,169 @@ export const generatePDF = (formData: FormData) => {
 
         yPosition += 6;
 
+        // Guardian Transition & Continuity Planning
+        const hasTransitionData = child.transitionMoveExpected || child.transitionSchoolChangeExpected ||
+          child.transitionHealthRecordLocation || child.transitionMedicationNotes ||
+          child.transitionSupportNotes || child.transitionEasierText ||
+          child.transitionNewSchoolNotes || child.transitionEducationRecordLocation ||
+          child.transitionProviderSelections || child.transitionSupportSelections ||
+          child.transitionActivitySelections || child.transitionPeopleSelections ||
+          child.transitionFirstDaysCount;
+
+        if (hasTransitionData) {
+          checkPageBreak(30);
+          addSubsectionHeader(`${nickname} Guardian Transition & Continuity:`);
+          yPosition += 2;
+
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+
+          // Move expectation
+          if (child.transitionMoveExpected) {
+            const moveLabels: Record<string, string> = {
+              yes_most_likely: 'Yes, most likely',
+              possibly: 'Possibly',
+              no_remain_current: 'No, we would ideally want them to remain in their current community',
+              not_decided: "We haven't decided",
+              not_sure: "I'm not sure",
+            };
+            checkPageBreak(8);
+            doc.text(`Move to guardian's community expected: ${moveLabels[child.transitionMoveExpected] || child.transitionMoveExpected}`, margin, yPosition);
+            yPosition += 6;
+          }
+
+          // School transition
+          if (child.transitionSchoolChangeExpected) {
+            const schoolLabels: Record<string, string> = {
+              yes_most_likely: 'Yes, most likely',
+              possibly: 'Possibly',
+              no_stay_current: 'No, we would hope they could stay at their current school',
+              not_sure: "I'm not sure",
+            };
+            checkPageBreak(8);
+            doc.text(`School change expected: ${schoolLabels[child.transitionSchoolChangeExpected] || child.transitionSchoolChangeExpected}`, margin, yPosition);
+            yPosition += 6;
+
+            if (child.attendingSchool === 'yes') {
+              checkPageBreak(8);
+              doc.text(`Current school: ${child.schoolName || 'Not specified'}${child.schoolAddress ? ', ' + child.schoolAddress : ''}`, margin, yPosition);
+              yPosition += 6;
+            }
+
+            if (child.transitionNewSchoolNotes) {
+              checkPageBreak(12);
+              const lines = doc.splitTextToSize(`What a new school should know: ${child.transitionNewSchoolNotes}`, fieldWidth);
+              lines.forEach((line: string) => {
+                checkPageBreak(6);
+                doc.text(line, margin, yPosition);
+                yPosition += 5;
+              });
+            }
+
+            if (child.transitionEducationRecordLocation) {
+              checkPageBreak(8);
+              doc.text(`Education records location: ${child.transitionEducationRecordLocation}`, margin, yPosition);
+              yPosition += 6;
+            }
+
+            if (child.transitionIEPImportance) {
+              const iepLabels: Record<string, string> = {
+                important_to_transfer: 'Important to transfer/discuss',
+                no_longer_applicable: 'No longer applicable',
+                not_sure: "I'm not sure",
+              };
+              checkPageBreak(8);
+              doc.text(`IEP transition: ${iepLabels[child.transitionIEPImportance] || child.transitionIEPImportance}`, margin, yPosition);
+              yPosition += 6;
+            }
+          }
+
+          // Healthcare transition
+          if (child.transitionProviderSelections) {
+            checkPageBreak(8);
+            doc.text(`Providers to contact for transition: ${child.transitionProviderSelections}`, margin, yPosition);
+            yPosition += 6;
+          }
+          if (child.transitionHealthRecordLocation) {
+            checkPageBreak(8);
+            doc.text(`Health records location: ${child.transitionHealthRecordLocation}`, margin, yPosition);
+            yPosition += 6;
+          }
+
+          // Medication
+          if (child.transitionMedicationNotes) {
+            checkPageBreak(12);
+            const lines = doc.splitTextToSize(`Medication transition notes: ${child.transitionMedicationNotes}`, fieldWidth);
+            lines.forEach((line: string) => {
+              checkPageBreak(6);
+              doc.text(line, margin, yPosition);
+              yPosition += 5;
+            });
+          }
+
+          // Support transition
+          if (child.transitionSupportSelections) {
+            checkPageBreak(8);
+            doc.text(`Important supports to re-establish: ${child.transitionSupportSelections}`, margin, yPosition);
+            yPosition += 6;
+          }
+          if (child.transitionSupportNotes) {
+            checkPageBreak(12);
+            const lines = doc.splitTextToSize(`Transition support notes: ${child.transitionSupportNotes}`, fieldWidth);
+            lines.forEach((line: string) => {
+              checkPageBreak(6);
+              doc.text(line, margin, yPosition);
+              yPosition += 5;
+            });
+          }
+
+          // Activities
+          if (child.transitionActivitySelections) {
+            checkPageBreak(8);
+            doc.text(`Activities to continue: ${child.transitionActivitySelections}`, margin, yPosition);
+            yPosition += 6;
+          }
+
+          // People to keep close
+          if (child.transitionPeopleSelections) {
+            checkPageBreak(8);
+            doc.text(`People to keep close: ${child.transitionPeopleSelections}`, margin, yPosition);
+            yPosition += 6;
+          }
+
+          // What would make it easier
+          if (child.transitionEasierText) {
+            checkPageBreak(12);
+            const lines = doc.splitTextToSize(`What would make the transition easier: ${child.transitionEasierText}`, fieldWidth);
+            lines.forEach((line: string) => {
+              checkPageBreak(6);
+              doc.text(line, margin, yPosition);
+              yPosition += 5;
+            });
+          }
+
+          // First few days
+          const firstDaysCount = parseInt(child.transitionFirstDaysCount || '0');
+          if (firstDaysCount > 0) {
+            checkPageBreak(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('If something happened tomorrow:', margin, yPosition);
+            yPosition += 6;
+            doc.setFont(undefined, 'normal');
+            for (let i = 0; i < firstDaysCount; i++) {
+              const item = child[`transitionFirstDays_${i}`];
+              if (item) {
+                checkPageBreak(6);
+                doc.text(`  ${i + 1}. ${item}`, margin, yPosition);
+                yPosition += 5;
+              }
+            }
+          }
+
+          yPosition += 6;
+        }
+
         const allFriends: Array<{ friendName: string; relationship: string; cityLocation: string; parentGuardianName: string; parentPhone: string; parentEmail: string; whyImportant: string; activitiesTogether: string; source: string }> = [];
 
         const mainFriendList: Array<{ friendName: string; relationship: string; cityLocation: string; parentGuardianName: string; parentPhone: string; parentEmail: string; whyImportant: string; activitiesTogether: string }> = JSON.parse(child.friendList || '[]');

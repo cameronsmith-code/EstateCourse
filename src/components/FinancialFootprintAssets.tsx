@@ -123,14 +123,12 @@ export default function FinancialFootprintAssets({
   // Derive advisor info from professional team
   const advisorInfo = useMemo(() => {
     const profTeam = allAnswers?.get('professionalTeam') || {};
-    const advisorData = (profTeam['financialAdvisorsData'] as Array<Record<string, string>>) || [];
-    if (advisorData.length > 0) {
-      const a = advisorData[0];
+    if (profTeam['fpHasAdvisor'] === 'yes') {
       return {
-        name: a.name || a.contactName || '',
-        firm: a.firm || a.companyName || '',
-        phone: a.phone || a.contactPhone || '',
-        email: a.email || a.contactEmail || '',
+        name: (profTeam['fpAdvisor1Name'] as string) || '',
+        firm: (profTeam['fpAdvisor1Firm'] as string) || '',
+        phone: (profTeam['fpAdvisor1Phone'] as string) || '',
+        email: (profTeam['fpAdvisor1Email'] as string) || '',
         id: `advisor_0`,
       };
     }

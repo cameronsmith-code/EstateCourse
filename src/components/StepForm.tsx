@@ -98,6 +98,28 @@ export default function StepForm({
     }
   }, [answers['fpHasAdvisor']]);
 
+  // Clear advisor-linked contacts from investment accounts when advisor is removed
+  useEffect(() => {
+    if (answers['fpHasAdvisor'] !== 'yes') {
+      const investments = answers['investmentAccountsData'] as Array<Record<string, unknown>> | undefined;
+      if (investments && investments.length > 0) {
+        const hasStaleAdvisor = investments.some(
+          (inv) => (inv?.contact as Record<string, unknown>)?.contactPersonId === 'advisor_0'
+        );
+        if (hasStaleAdvisor) {
+          const cleaned = investments.map((inv) => {
+            const contact = inv?.contact as Record<string, unknown> | undefined;
+            if (contact?.contactPersonId === 'advisor_0') {
+              return { ...inv, contact: {} };
+            }
+            return inv;
+          });
+          onAnswerChange('investmentAccountsData', cleaned);
+        }
+      }
+    }
+  }, [answers['fpHasAdvisor']]);
+
   // Auto-populate Cameron Smith CFP® details when checkbox is selected
   useEffect(() => {
     if (answers['fpAdvisor1IsCameronSmith'] === true) {

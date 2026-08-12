@@ -315,3 +315,93 @@ export function getKnownPeople(allAnswers: AnswersMap): Person[] {
 
   return people;
 }
+
+export function cleanStaleTrustReferences(allAnswers: AnswersMap): AnswersMap {
+  const trustSection = allAnswers.get('familyTrusts');
+  if (!trustSection) return allAnswers;
+
+  const trusts = trustSection['familyTrustsData'] as Array<Record<string, unknown>> | undefined;
+  if (!Array.isArray(trusts) || trusts.length === 0) return allAnswers;
+
+  const activePeople = new Set(getKnownPeople(allAnswers).map((p) => p.id));
+  const activeAdvisors = new Set(getProfessionalAdvisors(allAnswers).map((a) => a.id));
+
+  const corpData = allAnswers.get('corporations')?.['corporationsData'] as Array<Record<string, string>> | undefined;
+  const activeCorps = new Set((corpData || []).map((c, i) => `corp_${i}`));
+
+  const propData = allAnswers.get('realEstate')?.['propertiesData'] as Array<Record<string, unknown>> | undefined;
+  const activeProps = new Set((propData || []).map((p, i) => `prop_${i}`));
+  if (allAnswers.get('realEstate')?.['primaryHomeData']) {
+    activeProps.add('prop_primary');
+  }
+
+  let changed = false;
+  const cleanedTrusts = trusts.map((trust) => {
+    let trustChanged = false;
+
+    const cleanedTrustees = (trust['trustees'] as Array<Record<string, unknown>> | undefined)?.map((t) => {
+      if (t?.personId && t.personId !== 'client1' && t.personId !== 'client2' && !activePeople.has(t.personId as string)) {
+        trustChanged = true;
+        return { ...t, personId: undefined };
+      }
+      return t;
+    });
+    if (cleanedTrustees && cleanedTrustees.some((t, i) => t !== ((trust['trustees'] as Array<Record<string, unknown>>)[i]))) {
+      trustChanged = true;
+    }
+
+    const cleanedBeneficiaries = (trust['beneficiaries'] as Array<Record<string, unknown>> | undefined)?.map((b) => {
+      if (b?.personId && !activePeople.has(b.personId as string)) {
+        trustChanged = true;
+        return { ...b, personId: undefined };
+      }
+      return b;
+    });
+
+    const cleanedHoldings = (trust['assetHoldings'] as Array<Record<string, unknown>> | undefined)?.map((h) => {
+      if (h?.corporationId && !activeCorps.has(h.corporationId as string)) {
+        trustChanged = true;
+        return { ...h, corporationId: undefined };
+      }
+      if (h?.propertyId && !activeProps.has(h.propertyId as string)) {
+        trustChanged = true;
+        return { ...h, propertyId: undefined };
+      }
+      return h;
+    });
+
+    const accountant = trust['accountantAdvisor'] as Record<string, unknown> | undefined;
+    if (accountant?.advisorId && !activeAdvisors.has(accountant.advisorId as string)) {
+      trustChanged = true;
+    }
+    const cleanedAccountant = accountant?.advisorId && !activeAdvisors.has(accountant.advisorId as string)
+      ? { ...accountant, advisorId: undefined, isExisting: false }
+      : accountant;
+
+    const lawyer = trust['lawyerAdvisor'] as Record<string, unknown> | undefined;
+    const cleanedLawyer = lawyer?.advisorId && !activeAdvisors.has(lawyer.advisorId as string)
+      ? { ...lawyer, advisorId: undefined, isExisting: false }
+      : lawyer;
+
+    if (trustChanged) {
+      changed = true;
+      return {
+        ...trust,
+        trustees: cleanedTrustees || trust['trustees'],
+        beneficiaries: cleanedBeneficiaries || trust['beneficiaries'],
+        assetHoldings: cleanedHoldings || trust['assetHoldings'],
+        accountantAdvisor: cleanedAccountant,
+        lawyerAdvisor: cleanedLawyer,
+      };
+    }
+    return trust;
+  });
+
+  if (changed) {
+    const updated = new Map(allAnswers);
+    updated.set('familyTrusts', { ...trustSection, familyTrustsData: cleanedTrusts });
+    return updated;
+  }
+
+  return allAnswers;
+}

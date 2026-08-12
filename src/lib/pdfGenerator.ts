@@ -203,10 +203,38 @@ interface FormData {
   numberOfChildren?: string;
   childrenData?: ChildData[];
   hasFamilyTrust?: string;
+  familyTrustsData?: Array<{
+    id?: string;
+    legalName?: string;
+    establishmentDate?: { dateType?: string; exactDate?: string; year?: string };
+    trustDeedLocation?: { accessMethod?: string; accessMethodOther?: string; location?: string; locationOther?: string };
+    trustDeedMissing?: boolean;
+    trustDeedNoCopy?: boolean;
+    settlor?: { name?: string; relationshipToClient1?: string; relationshipToClient2?: string; status?: string };
+    trustees?: Array<{ id?: string; personId?: string; personName?: string; personType?: string; isClient?: boolean }>;
+    trusteeDecisionRule?: string;
+    trusteeDecisionRuleOther?: string;
+    trusteeContinuity?: Array<{ clientId?: string; knownSuccession?: string; successorTrusteeId?: string; successorTrusteeName?: string; successorTrusteeType?: string; successionDocLocation?: string; successionDocLocationOther?: string }>;
+    beneficiaries?: Array<{ id?: string; personId?: string; personName?: string; relationship?: string; entitlement?: string }>;
+    additionalBeneficiaryClasses?: string;
+    additionalBeneficiaryDescription?: string;
+    assetHoldings?: Array<{ id?: string; assetType?: string; corporationId?: string; corporationName?: string; shareClass?: string; ownershipPercentage?: string; votingShares?: string; propertyId?: string; propertyName?: string; description?: string }>;
+    hasDebts?: string;
+    debts?: Array<{ id?: string; lender?: string; loanType?: string; approximateBalance?: string; secured?: string; hasPersonalGuarantee?: string; guarantorName?: string }>;
+    hasReceivables?: string;
+    receivables?: Array<{ id?: string; borrower?: string; borrowerType?: string; amountOwingType?: string; approximateAmount?: string; notes?: string }>;
+    accountantAdvisor?: { advisorId?: string; advisorName?: string; advisorType?: string; isExisting?: boolean } | null;
+    lawyerAdvisor?: { advisorId?: string; advisorName?: string; advisorType?: string; isExisting?: boolean } | null;
+    taxRecords?: { documentLocation?: { accessMethod?: string; accessMethodOther?: string; location?: string; locationOther?: string } } | null;
+    twentyOneYearRule?: { confirmedByProfessional?: string; confirmedDate?: string; planningCompleted?: string; planningNotes?: string } | null;
+    trustDocuments?: Array<{ id?: string; docType?: string; documentLocation?: { accessMethod?: string; accessMethodOther?: string; location?: string; locationOther?: string }; notes?: string }>;
+    familyNotes?: string;
+    reviewFlags?: string[];
+  }>;
+  // Legacy fields kept for backward compatibility with saved data
   trustLegalName?: string;
   trustDeedLocation?: string;
   trustYearEstablished?: string;
-  trustBeneficiariesCount?: string;
   trustBeneficiariesData?: Array<{
     beneficiaryName?: string;
     relationshipToSettlor?: string;
@@ -214,24 +242,6 @@ interface FormData {
     phoneNumber?: string;
     emailAddress?: string;
   }>;
-  hasAdditionalFamilyTrust?: string;
-  trust2LegalName?: string;
-  trust2DeedLocation?: string;
-  trust2YearEstablished?: string;
-  trust2BeneficiariesCount?: string;
-  trust2BeneficiariesData?: Array<{ beneficiaryName?: string; relationshipToSettlor?: string; countryOfResidence?: string; phoneNumber?: string; emailAddress?: string; }>;
-  hasAdditionalFamilyTrust2?: string;
-  trust3LegalName?: string;
-  trust3DeedLocation?: string;
-  trust3YearEstablished?: string;
-  trust3BeneficiariesCount?: string;
-  trust3BeneficiariesData?: Array<{ beneficiaryName?: string; relationshipToSettlor?: string; countryOfResidence?: string; phoneNumber?: string; emailAddress?: string; }>;
-  hasAdditionalFamilyTrust3?: string;
-  trust4LegalName?: string;
-  trust4DeedLocation?: string;
-  trust4YearEstablished?: string;
-  trust4BeneficiariesCount?: string;
-  trust4BeneficiariesData?: Array<{ beneficiaryName?: string; relationshipToSettlor?: string; countryOfResidence?: string; phoneNumber?: string; emailAddress?: string; }>;
   hasSoleProprietorship?: string;
   soleProprietorshipCount?: string;
   client1SolePropsData?: SolePropData[];
@@ -3359,299 +3369,232 @@ export const generatePDF = (formData: FormData) => {
     yPosition = 12;
     addSectionHeader('Family Trust Information');
 
-    const trustInfoRows = [
-      { label: formData.trustLegalName ? `${formData.trustLegalName} - Legal Name:` : 'Trust 1 - Legal Name:', value: formData.trustLegalName || '' },
-      { label: 'Trust Deed Location:', value: formData.trustDeedLocation || '' },
-      { label: 'Year Established:', value: formData.trustYearEstablished || '' },
-      { label: 'Number of Beneficiaries:', value: (formData.trustBeneficiariesData?.length || 0).toString() },
-    ];
+    const trusts = formData.familyTrustsData || [];
+    const hasTrust = formData.hasFamilyTrust === 'yes';
 
-    const cellHeight = 8;
-    const labelWidth = fieldWidth * 0.35;
-    const valueWidth = fieldWidth * 0.65;
+    if (hasTrust && trusts.length > 0) {
+      trusts.forEach((trust, trustIdx) => {
+        if (trustIdx > 0) { addPage(); yPosition = 12; }
+        addSubsectionHeader(trust.legalName || `Family Trust ${trustIdx + 1}`);
 
-    trustInfoRows.forEach((row, index) => {
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'normal');
-      const labelLines = doc.splitTextToSize(row.label, labelWidth - 3);
-      const dynH = Math.max(cellHeight, labelLines.length * 5 + 3);
-      const rowY = yPosition;
+        const trustInfoRows = [
+          { label: 'Legal Name:', value: trust.legalName || '' },
+          { label: 'Establishment Date:', value: trust.establishmentDate?.dateType === 'exact' ? trust.establishmentDate.exactDate || '' : trust.establishmentDate?.dateType === 'year' ? trust.establishmentDate.year || '' : 'Unknown' },
+          { label: 'Trust Deed Location:', value: [trust.trustDeedLocation?.accessMethod, trust.trustDeedLocation?.location].filter(Boolean).join(', ') || (trust.trustDeedMissing ? 'Location unknown' : '') },
+          { label: 'Settlor:', value: [trust.settlor?.name, trust.settlor?.status ? `(${trust.settlor.status})` : ''].filter(Boolean).join(' ') },
+          { label: 'Trustee Decision Rule:', value: trust.trusteeDecisionRule === 'any_one' ? 'Any one trustee may act' : trust.trusteeDecisionRule === 'all_together' ? 'All trustees must act together' : trust.trusteeDecisionRule === 'majority' ? 'Majority of trustees' : trust.trusteeDecisionRule === 'other' ? trust.trusteeDecisionRuleOther || 'Other' : 'Not sure' },
+        ];
 
-      doc.setDrawColor(...colors.tableBorder);
-      doc.setLineWidth(0.3);
-      doc.setFillColor(255, 255, 255);
-      doc.rect(margin, rowY, labelWidth, dynH, 'FD');
-      doc.setFillColor(255, 255, 255);
-      doc.rect(margin + labelWidth, rowY, valueWidth, dynH, 'FD');
+        const cellHeight = 8;
+        const labelWidth = fieldWidth * 0.35;
+        const valueWidth = fieldWidth * 0.65;
 
-      doc.setTextColor(...colors.darkText);
-      doc.text(labelLines, margin + 1, rowY + 5);
+        trustInfoRows.forEach((row, index) => {
+          checkPageBreak(cellHeight + 2);
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          const labelLines = doc.splitTextToSize(row.label, labelWidth - 3);
+          const dynH = Math.max(cellHeight, labelLines.length * 5 + 3);
+          const rowY = yPosition;
 
-      const field = new doc.AcroFormTextField();
-      field.fieldName = `trust_${index}`;
-      field.Rect = [margin + labelWidth + 0.5, rowY + 0.5, valueWidth - 1, dynH - 1];
-      field.fontSize = 9;
-      field.textColor = colors.darkText;
-      field.borderStyle = 'none';
-      field.value = row.value;
-      doc.addField(field);
+          doc.setDrawColor(...colors.tableBorder);
+          doc.setLineWidth(0.3);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, rowY, labelWidth, dynH, 'FD');
+          doc.rect(margin + labelWidth, rowY, valueWidth, dynH, 'FD');
 
-      yPosition += cellHeight;
-    });
+          doc.setTextColor(...colors.darkText);
+          doc.text(labelLines, margin + 1, rowY + 5);
+          doc.text(row.value, margin + labelWidth + 2, rowY + 5);
 
-    yPosition += 8;
+          yPosition += dynH;
+        });
 
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...colors.darkText);
-    doc.text(formData.trustLegalName ? `${formData.trustLegalName} Beneficiaries:` : 'Trust Beneficiaries:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 6;
+        yPosition += 6;
 
-    const beneficiaryCount = formData.trustBeneficiariesData?.length || 0;
-    const beneCellHeight = 6;
-    const beneLabelWidth = fieldWidth * 0.35;
-    const beneValueWidth = fieldWidth * 0.65;
+        if (trust.trustees && trust.trustees.length > 0) {
+          checkPageBreak(20);
+          addSubsectionHeader('Trustees:');
+          trust.trustees.forEach((t: Record<string, unknown>) => {
+            checkPageBreak(8);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            doc.text(`• ${t.personName || ''}${t.isClient ? ' (Client)' : t.personType === 'entity' ? ' (Entity)' : ''}`, margin + 4, yPosition);
+            yPosition += 6;
+          });
+          yPosition += 4;
+        }
 
-    for (let i = 0; i < beneficiaryCount; i++) {
-      const beneficiary = formData.trustBeneficiariesData?.[i];
+        if (trust.trusteeContinuity && trust.trusteeContinuity.length > 0) {
+          checkPageBreak(20);
+          addSubsectionHeader('Trustee Continuity:');
+          trust.trusteeContinuity.forEach((c: Record<string, unknown>) => {
+            checkPageBreak(8);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            const clientLabel = c.clientId === 'client1' ? 'Client 1' : 'Client 2';
+            const successionLabel = c.knownSuccession === 'successor_identified' ? `Successor: ${c.successorTrusteeName || 'TBD'}` : c.knownSuccession === 'remaining_continue' ? 'Remaining trustees continue' : c.knownSuccession === 'other_process' ? 'Another process applies' : 'Not sure';
+            doc.text(`• ${clientLabel}: ${successionLabel}`, margin + 4, yPosition);
+            yPosition += 6;
+          });
+          yPosition += 4;
+        }
 
-      checkPageBreak(6 + 5 * beneCellHeight + 8);
+        if (trust.beneficiaries && trust.beneficiaries.length > 0) {
+          checkPageBreak(20);
+          addSubsectionHeader('Beneficiaries:');
+          trust.beneficiaries.forEach((b: Record<string, unknown>) => {
+            checkPageBreak(8);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            const entLabel = b.entitlement === 'income' ? ' (Income)' : b.entitlement === 'capital' ? ' (Capital)' : b.entitlement === 'income_and_capital' ? ' (Income & Capital)' : '';
+            doc.text(`• ${b.personName || ''}${b.relationship ? ` (${b.relationship})` : ''}${entLabel}`, margin + 4, yPosition);
+            yPosition += 6;
+          });
+          yPosition += 4;
+        }
 
-      // Beneficiary header
+        if (trust.additionalBeneficiaryClasses === 'yes' && trust.additionalBeneficiaryDescription) {
+          checkPageBreak(12);
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'italic');
+          doc.setTextColor(...colors.mediumGray);
+          const descLines = doc.splitTextToSize(`Additional beneficiary classes: ${trust.additionalBeneficiaryDescription}`, fieldWidth);
+          doc.text(descLines, margin, yPosition);
+          yPosition += descLines.length * 5 + 4;
+        }
+
+        if (trust.assetHoldings && trust.assetHoldings.length > 0) {
+          checkPageBreak(20);
+          addSubsectionHeader('Trust Assets:');
+          trust.assetHoldings.forEach((h: Record<string, unknown>) => {
+            checkPageBreak(8);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            const desc = h.corporationName ? `Shares in ${h.corporationName}${h.shareClass ? ` (${h.shareClass})` : ''}${h.ownershipPercentage ? ` — ${h.ownershipPercentage}` : ''}` : h.propertyName ? `Real estate: ${h.propertyName}` : h.description || h.assetType;
+            doc.text(`• ${desc}`, margin + 4, yPosition);
+            yPosition += 6;
+          });
+          yPosition += 4;
+        }
+
+        if (trust.debts && trust.debts.length > 0) {
+          checkPageBreak(20);
+          addSubsectionHeader('Trust Debts:');
+          trust.debts.forEach((d: Record<string, unknown>) => {
+            checkPageBreak(8);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            doc.text(`• ${d.lender || ''}: ${d.approximateBalance || 'Amount unknown'}${d.hasPersonalGuarantee === 'yes' ? ' (personally guaranteed)' : ''}`, margin + 4, yPosition);
+            yPosition += 6;
+          });
+          yPosition += 4;
+        }
+
+        if (trust.receivables && trust.receivables.length > 0) {
+          checkPageBreak(20);
+          addSubsectionHeader('Amounts Owing to Trust:');
+          trust.receivables.forEach((r: Record<string, unknown>) => {
+            checkPageBreak(8);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            doc.text(`• ${r.borrower || ''}: ${r.approximateAmount || 'Amount unknown'}`, margin + 4, yPosition);
+            yPosition += 6;
+          });
+          yPosition += 4;
+        }
+
+        if (trust.accountantAdvisor?.advisorName || trust.lawyerAdvisor?.advisorName) {
+          checkPageBreak(16);
+          addSubsectionHeader('Professional Advisors:');
+          if (trust.accountantAdvisor?.advisorName) {
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            doc.text(`Accountant: ${trust.accountantAdvisor.advisorName}`, margin + 4, yPosition);
+            yPosition += 6;
+          }
+          if (trust.lawyerAdvisor?.advisorName) {
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...colors.darkText);
+            doc.text(`Lawyer: ${trust.lawyerAdvisor.advisorName}`, margin + 4, yPosition);
+            yPosition += 6;
+          }
+          yPosition += 4;
+        }
+
+        if (trust.twentyOneYearRule) {
+          checkPageBreak(24);
+          addSubsectionHeader('21-Year Tax Planning:');
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          const estAnniversary = trust.establishmentDate?.dateType === 'year' && trust.establishmentDate?.year ? String(parseInt(trust.establishmentDate.year) + 21) : 'Unknown';
+          const confirmedDate = trust.twentyOneYearRule.confirmedDate;
+          doc.text(`Estimated anniversary: ${estAnniversary}`, margin + 4, yPosition);
+          yPosition += 6;
+          if (confirmedDate) {
+            doc.text(`Professionally confirmed date: ${confirmedDate}`, margin + 4, yPosition);
+            yPosition += 6;
+          }
+          doc.text(`Professional confirmation: ${trust.twentyOneYearRule.confirmedByProfessional}`, margin + 4, yPosition);
+          yPosition += 6;
+          doc.text(`Planning completed: ${trust.twentyOneYearRule.planningCompleted}`, margin + 4, yPosition);
+          yPosition += 8;
+        }
+
+        if (trust.reviewFlags && trust.reviewFlags.length > 0) {
+          checkPageBreak(20);
+          addSubsectionHeader('Review Flags:');
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'italic');
+          doc.setTextColor(...colors.mediumGray);
+          trust.reviewFlags.forEach((flag: string) => {
+            checkPageBreak(8);
+            const flagLines = doc.splitTextToSize(`⚠ ${flag}`, fieldWidth - 4);
+            doc.text(flagLines, margin + 2, yPosition);
+            yPosition += flagLines.length * 5 + 2;
+          });
+          yPosition += 4;
+        }
+
+        if (trust.familyNotes) {
+          checkPageBreak(16);
+          addSubsectionHeader('Family Notes:');
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'italic');
+          doc.setTextColor(...colors.darkText);
+          const noteLines = doc.splitTextToSize(trust.familyNotes, fieldWidth);
+          doc.text(noteLines, margin, yPosition);
+          yPosition += noteLines.length * 5 + 8;
+        }
+      });
+    } else if (hasTrust) {
       doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(...colors.darkText);
-      doc.text(`Beneficiary ${i + 1}:`, margin, yPosition);
-      yPosition += 6;
-
-      const beneFields = [
-        { label: 'Beneficiary Name:', value: beneficiary?.beneficiaryName || '', fieldName: 'name' },
-        { label: 'Relationship to Settlor:', value: beneficiary?.relationshipToSettlor || '', fieldName: 'relationship' },
-        { label: 'Country of Residence:', value: beneficiary?.countryOfResidence || '', fieldName: 'country' },
-        { label: 'Phone Number:', value: beneficiary?.phoneNumber || '', fieldName: 'phone' },
-        { label: 'Email Address:', value: beneficiary?.emailAddress || '', fieldName: 'email' },
-      ];
-
-      beneFields.forEach((field) => {
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'normal');
-        const labelLines = doc.splitTextToSize(field.label, beneLabelWidth - 3);
-        const dynH = Math.max(beneCellHeight, labelLines.length * 5 + 3);
-        const rowY = yPosition;
-
-        doc.setDrawColor(...colors.tableBorder);
-        doc.setLineWidth(0.3);
-        doc.setFillColor(255, 255, 255);
-        doc.rect(margin, rowY, beneLabelWidth, dynH, 'FD');
-        doc.setFillColor(255, 255, 255);
-        doc.rect(margin + beneLabelWidth, rowY, beneValueWidth, dynH, 'FD');
-
-        doc.setTextColor(...colors.darkText);
-        doc.text(labelLines, margin + 1, rowY + 4);
-
-        const inputField = new doc.AcroFormTextField();
-        inputField.fieldName = `trust_beneficiary_${i + 1}_${field.fieldName}`;
-        inputField.Rect = [margin + beneLabelWidth + 0.5, rowY + 0.5, beneValueWidth - 1, dynH - 1];
-        inputField.fontSize = 8;
-        inputField.textColor = colors.darkText;
-        inputField.borderStyle = 'none';
-        inputField.value = field.value;
-        doc.addField(inputField);
-
-        yPosition += dynH;
-      });
-
-      yPosition += 8;
-    }
-
-    yPosition += 8;
-
-    if (yPosition + 80 > pageHeight - margin) {
-      addPage();
-      yPosition = 12;
-    }
-
-    addSubsectionHeader('Trust and Professional Contracts:');
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
-    doc.text('For clients with Trusts, your Estate Trustee must know your \'Quarterback Team\' to manage transitions or wind-ups effectively.', margin, yPosition);
-    yPosition += 8;
-
-    const tpcRowHeight = 10;
-    const tpcHeaderHeight = 12;
-    const tpcCol1Width = fieldWidth * 0.25;
-    const tpcCol2Width = fieldWidth * 0.25;
-    const tpcCol3Width = fieldWidth * 0.25;
-    const tpcCol4Width = fieldWidth * 0.25;
-
-    const tpcHeaders = ['Professional:', 'Name:', 'Firm/Contact Info:', 'Role in the Estate:'];
-    const tpcRowLabels = ['Lawyer(s):', 'Accountant/Tax Prep(s):', 'Other:'];
-
-    let currentY = yPosition;
-    doc.setLineWidth(0.3);
-
-    tpcHeaders.forEach((header, colIdx) => {
-      const colWidths = [tpcCol1Width, tpcCol2Width, tpcCol3Width, tpcCol4Width];
-      const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-      doc.setDrawColor(...colors.tableBorder);
-      doc.setFillColor(250, 250, 250);
-      doc.rect(xPos, currentY, colWidths[colIdx], tpcHeaderHeight, 'FD');
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(0, 0, 0);
-      const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
-      const textY = currentY + (tpcHeaderHeight - lines.length * 2.5) / 2 + 2.5;
-      doc.text(lines, xPos + 1, textY);
-    });
-
-    currentY += tpcHeaderHeight;
-
-    tpcRowLabels.forEach((label, rowIdx) => {
-      const rowY = currentY;
-
-      doc.setDrawColor(...colors.tableBorder);
-      doc.setLineWidth(0.3);
-      doc.rect(margin, rowY, tpcCol1Width, tpcRowHeight);
-      doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(...colors.darkText);
-      doc.text(label, margin + 1, rowY + 6);
-
-      [tpcCol2Width, tpcCol3Width, tpcCol4Width].forEach((colWidth, colIdx) => {
-        const xPos = margin + [tpcCol1Width, tpcCol1Width + tpcCol2Width, tpcCol1Width + tpcCol2Width + tpcCol3Width][colIdx];
-        doc.setDrawColor(...colors.tableBorder);
-        doc.setLineWidth(0.3);
-        doc.rect(xPos, rowY, colWidth, tpcRowHeight);
-
-        const field = new doc.AcroFormTextField();
-        field.fieldName = `trust_professional_${rowIdx}_${colIdx + 1}`;
-        field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, tpcRowHeight - 1];
-        field.fontSize = 8;
-        field.textColor = colors.darkText;
-        field.borderStyle = 'none';
-        doc.addField(field);
-      });
-
-      currentY += tpcRowHeight;
-    });
-
-    yPosition = currentY + 12;
-
-    if (yPosition + 80 > pageHeight - margin) {
-      addPage();
-      yPosition = 12;
+      doc.text('Family Trust indicated but no trust details have been entered yet.', margin, yPosition);
+      yPosition += 12;
+    } else if (formData.hasFamilyTrust === 'not_sure') {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
+      doc.text('Client is uncertain whether a Family Trust exists. Review flag created.', margin, yPosition);
+      yPosition += 12;
+    } else {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(...colors.darkText);
+      doc.text('No Family Trusts.', margin, yPosition);
+      yPosition += 12;
     }
-
-    addSubsectionHeader('Trustee Information:');
-
-    const tiRowHeight = 10;
-    const tiHeaderHeight = 12;
-    const tiRowCount = 6;
-    const tiCol1Width = fieldWidth * 0.40;
-    const tiCol2Width = fieldWidth * 0.30;
-    const tiCol3Width = fieldWidth * 0.30;
-
-    const tiHeaders = ['Trustee Name:', 'Phone Number:', 'Email Address:'];
-
-    currentY = yPosition;
-    doc.setLineWidth(0.3);
-
-    tiHeaders.forEach((header, colIdx) => {
-      const colWidths = [tiCol1Width, tiCol2Width, tiCol3Width];
-      const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-      doc.setDrawColor(...colors.tableBorder);
-      doc.setFillColor(250, 250, 250);
-      doc.rect(xPos, currentY, colWidths[colIdx], tiHeaderHeight, 'FD');
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(0, 0, 0);
-      const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
-      const textY = currentY + (tiHeaderHeight - lines.length * 2.5) / 2 + 2.5;
-      doc.text(lines, xPos + 1, textY);
-    });
-
-    currentY += tiHeaderHeight;
-
-    for (let rowIdx = 0; rowIdx < tiRowCount; rowIdx++) {
-      const rowY = currentY;
-      [tiCol1Width, tiCol2Width, tiCol3Width].forEach((colWidth, colIdx) => {
-        const xPos = margin + [0, tiCol1Width, tiCol1Width + tiCol2Width][colIdx];
-        doc.setDrawColor(...colors.tableBorder);
-        doc.setLineWidth(0.3);
-        doc.rect(xPos, rowY, colWidth, tiRowHeight);
-
-        const field = new doc.AcroFormTextField();
-        field.fieldName = `trust_trustee_${rowIdx}_${colIdx}`;
-        field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, tiRowHeight - 1];
-        field.fontSize = 8;
-        field.textColor = colors.darkText;
-        field.borderStyle = 'none';
-        doc.addField(field);
-      });
-
-      currentY += tiRowHeight;
-    }
-
-    yPosition = currentY + 12;
-
-    if (yPosition + 100 > pageHeight - margin) {
-      addPage();
-      yPosition = 12;
-    }
-
-    addSubsectionHeader('Trust Contents:');
-
-    const tcRowHeight = 10;
-    const tcHeaderHeight = 12;
-    const tcRowCount = 8;
-    const tcCol1Width = fieldWidth * 0.25;
-    const tcCol2Width = fieldWidth * 0.25;
-    const tcCol3Width = fieldWidth * 0.25;
-    const tcCol4Width = fieldWidth * 0.25;
-
-    const tcHeaders = ['Asset Type:', 'Estimated Value:', 'Book Value/Cost Base:', 'Other Information:'];
-
-    currentY = yPosition;
-    doc.setLineWidth(0.3);
-
-    tcHeaders.forEach((header, colIdx) => {
-      const colWidths = [tcCol1Width, tcCol2Width, tcCol3Width, tcCol4Width];
-      const xPos = margin + colWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
-      doc.setDrawColor(...colors.tableBorder);
-      doc.setFillColor(250, 250, 250);
-      doc.rect(xPos, currentY, colWidths[colIdx], tcHeaderHeight, 'FD');
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(0, 0, 0);
-      const lines = doc.splitTextToSize(header, colWidths[colIdx] - 2);
-      const textY = currentY + (tcHeaderHeight - lines.length * 2.5) / 2 + 2.5;
-      doc.text(lines, xPos + 1, textY);
-    });
-
-    currentY += tcHeaderHeight;
-
-    for (let rowIdx = 0; rowIdx < tcRowCount; rowIdx++) {
-      const rowY = currentY;
-      [tcCol1Width, tcCol2Width, tcCol3Width, tcCol4Width].forEach((colWidth, colIdx) => {
-        const xPos = margin + [0, tcCol1Width, tcCol1Width + tcCol2Width, tcCol1Width + tcCol2Width + tcCol3Width][colIdx];
-        doc.setDrawColor(...colors.tableBorder);
-        doc.setLineWidth(0.3);
-        doc.rect(xPos, rowY, colWidth, tcRowHeight);
-
-        const field = new doc.AcroFormTextField();
-        field.fieldName = `trust_contents_${rowIdx}_${colIdx}`;
-        field.Rect = [xPos + 0.5, rowY + 0.5, colWidth - 1, tcRowHeight - 1];
-        field.fontSize = 8;
-        field.textColor = colors.darkText;
-        field.borderStyle = 'none';
-        doc.addField(field);
-      });
-
-      currentY += tcRowHeight;
-    }
-
-    yPosition = currentY + 8;
 
     // ── Helper to render an additional trust block ────────────────────────────
     const renderAdditionalTrust = (
@@ -5376,8 +5319,8 @@ export const generatePDF = (formData: FormData) => {
       }
       if (val.startsWith('trust_')) {
         const t = parseInt(val.replace('trust_', ''));
-        const trustKey = t === 1 ? 'trustLegalName' : `trust${t}LegalName`;
-        return (formData[trustKey as keyof typeof formData] as string) || val;
+        const trusts = formData.familyTrustsData || [];
+        return trusts[t - 1]?.legalName || val;
       }
       if (val.startsWith('c1prevrel_')) {
         const idx = parseInt(val.replace('c1prevrel_', ''));
@@ -5542,8 +5485,8 @@ export const generatePDF = (formData: FormData) => {
       }
       if (val.startsWith('trust_')) {
         const t = parseInt(val.replace('trust_', ''));
-        const trustKey = t === 1 ? 'trustLegalName' : `trust${t}LegalName`;
-        return (formData[trustKey as keyof typeof formData] as string) || val;
+        const trusts = formData.familyTrustsData || [];
+        return trusts[t - 1]?.legalName || val;
       }
       if (val.startsWith('c1prevrel_')) {
         const idx = parseInt(val.replace('c1prevrel_', ''));
@@ -5708,8 +5651,8 @@ export const generatePDF = (formData: FormData) => {
       }
       if (val.startsWith('trust_')) {
         const t = parseInt(val.replace('trust_', ''));
-        const trustKey = t === 1 ? 'trustLegalName' : `trust${t}LegalName`;
-        return (formData[trustKey as keyof typeof formData] as string) || val;
+        const trusts = formData.familyTrustsData || [];
+        return trusts[t - 1]?.legalName || val;
       }
       if (val.startsWith('c1prevrel_')) {
         const idx = parseInt(val.replace('c1prevrel_', ''));
@@ -5874,8 +5817,8 @@ export const generatePDF = (formData: FormData) => {
       }
       if (val.startsWith('trust_')) {
         const t = parseInt(val.replace('trust_', ''));
-        const trustKey = t === 1 ? 'trustLegalName' : `trust${t}LegalName`;
-        return (formData[trustKey as keyof typeof formData] as string) || val;
+        const trusts = formData.familyTrustsData || [];
+        return trusts[t - 1]?.legalName || val;
       }
       if (val.startsWith('c1prevrel_')) {
         const idx = parseInt(val.replace('c1prevrel_', ''));

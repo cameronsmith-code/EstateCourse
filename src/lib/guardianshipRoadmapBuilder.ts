@@ -128,9 +128,10 @@ function buildHouseholdLabel(people: PlanningPerson[]): { label: string; isHouse
   if (people.length === 1) return { label: people[0].name, isHousehold: false };
   const names = people.map(p => p.name).filter(Boolean);
   if (names.length <= 1) return { label: names[0] || '', isHousehold: false };
+  if (names.length === 2) return { label: `${names[0]} & ${names[1]}`, isHousehold: true };
   const last = names[names.length - 1];
   const rest = names.slice(0, -1);
-  return { label: `${rest.join(' & ')} ${last}`, isHousehold: true };
+  return { label: `${rest.join(', ')} & ${last}`, isHousehold: true };
 }
 
 function makeHouseholdId(personIds: string[]): string {
@@ -857,16 +858,16 @@ function buildFinancialResources(
   familyTrustsAnswers: Record<string, unknown>
 ): FinancialResourceSummary[] {
   const resources: FinancialResourceSummary[] = [];
-  const allChildIds = children.map(c => c.childId);
-  const allChildNames = children.map(c => c.nickname || c.name);
+  const minorChildIds = children.filter(c => c.status === 'minor').map(c => c.childId);
+  const minorChildNames = children.filter(c => c.status === 'minor').map(c => c.nickname || c.name);
 
   const c1HasLI = lifeInsuranceAnswers.client1HasLifeInsurance === 'yes';
   const c2HasLI = lifeInsuranceAnswers.client2HasLifeInsurance === 'yes';
   resources.push({
     type: 'life_insurance',
     exists: c1HasLI || c2HasLI,
-    childIds: allChildIds,
-    childNames: allChildNames,
+    childIds: minorChildIds,
+    childNames: minorChildNames,
     crossReference: 'See Family Financial Map for policy details',
   });
 
@@ -889,8 +890,8 @@ function buildFinancialResources(
         });
         childNames = matched.names.length > 0 ? matched.names : beneficiaryNames;
       } else {
-        childIds = allChildIds;
-        childNames = allChildNames;
+        childIds = minorChildIds;
+        childNames = minorChildNames;
       }
       resources.push({
         type: 'resp',
@@ -943,8 +944,8 @@ function buildFinancialResources(
   resources.push({
     type: 'trust',
     exists: trusts.length > 0,
-    childIds: allChildIds,
-    childNames: allChildNames,
+    childIds: minorChildIds,
+    childNames: minorChildNames,
     crossReference: 'See Family Trusts section for details',
   });
 

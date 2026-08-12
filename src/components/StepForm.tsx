@@ -18,6 +18,7 @@ import DebtObligations from './DebtObligations';
 import FinancialFootprintAssets from './FinancialFootprintAssets';
 import FamilyTrustSection from './FamilyTrustSection';
 import LegacyIntentSection from './LegacyIntentSection';
+import CurrentWillSection from './CurrentWillSection';
 import { getFinancialAdvisors } from '../lib/referentialIntegrity';
 import { getClientOwnedCorpNames } from '../lib/corporateOwnership';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
@@ -14053,6 +14054,45 @@ export default function StepForm({
               onAnswerChange={onAnswerChange}
             />
           )}
+
+          {step.sectionId === 'wills' && (() => {
+            const allFormData = Object.fromEntries(
+              Array.from(allAnswers?.entries() || []).flatMap(([_, stepAnswers]) =>
+                Object.entries(stepAnswers)
+              )
+            );
+            const renderBasicQuestion = (question: typeof step.questions[0]) => {
+              if (question.condition && !question.condition(allFormData)) return null;
+              const displayLabel = typeof question.label === 'function'
+                ? question.label(allAnswers || new Map())
+                : question.label;
+              return (
+                <FormField
+                  key={question.key}
+                  question={{ ...question, label: displayLabel }}
+                  value={answers[question.key]}
+                  onChange={(value) => onAnswerChange(question.key, value)}
+                  answers={allAnswers}
+                />
+              );
+            };
+            const basicQuestionKeys = new Set(step.questions.map(q => q.key));
+            const hasAnsweredHasWill = answers['client1HasWill'] !== undefined || answers['client2HasWill'] !== undefined;
+            return (
+              <>
+                <Subsection title="Will Document Basics">
+                  {step.questions.map(renderBasicQuestion)}
+                </Subsection>
+                {hasAnsweredHasWill && (
+                  <CurrentWillSection
+                    answers={answers}
+                    allAnswers={allAnswers || new Map()}
+                    onAnswerChange={onAnswerChange}
+                  />
+                )}
+              </>
+            );
+          })()}
 
           {step.sectionId === 'lifeInsurance' && (() => {
             const basicAnswers = allAnswers?.get('aboutYou') || {};

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { STEPS, migrateLegacyAnswers, QuestionnaireSectionId } from '../lib/steps';
-import { cleanStaleAdvisorReferences, cleanStaleTrustReferences, cleanStaleLegacyIntentReferences, cleanStaleCorporateConnections } from '../lib/referentialIntegrity';
+import { cleanStaleAdvisorReferences, cleanStaleTrustReferences, cleanStaleLegacyIntentReferences, cleanStaleCorporateConnections, cleanStaleCurrentWillReferences } from '../lib/referentialIntegrity';
 
 type Answer = Record<string, unknown>;
 
@@ -90,7 +90,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
 
       if (stored) {
         loadedQuestionnaire = JSON.parse(stored);
-        loadedAnswers = cleanStaleCorporateConnections(cleanStaleLegacyIntentReferences(cleanStaleTrustReferences(cleanStaleAdvisorReferences(loadAnswersFromStorage()))));
+        loadedAnswers = cleanStaleCurrentWillReferences(cleanStaleCorporateConnections(cleanStaleLegacyIntentReferences(cleanStaleTrustReferences(cleanStaleAdvisorReferences(loadAnswersFromStorage())))));
 
         setQuestionnaire(loadedQuestionnaire);
         setCurrentStep(loadedQuestionnaire.current_step);
@@ -127,7 +127,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
                     });
                   }
 
-                  const cleanedSynced = cleanStaleCorporateConnections(cleanStaleLegacyIntentReferences(cleanStaleTrustReferences(cleanStaleAdvisorReferences(syncedAnswers))));
+                  const cleanedSynced = cleanStaleCurrentWillReferences(cleanStaleCorporateConnections(cleanStaleLegacyIntentReferences(cleanStaleTrustReferences(cleanStaleAdvisorReferences(syncedAnswers)))));
                   setAnswers(cleanedSynced);
                   setQuestionnaire(dbQuestionnaire as Questionnaire);
                   setCurrentStep(dbQuestionnaire.current_step);

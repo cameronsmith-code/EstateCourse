@@ -633,3 +633,129 @@ export function cleanStaleCorporateConnections(
 
   return updated;
 }
+
+export function cleanStaleCurrentWillReferences(
+  allAnswers: AnswersMap
+): AnswersMap {
+  const willsSection = allAnswers.get('wills');
+  if (!willsSection) return allAnswers;
+
+  const cwData = willsSection['currentWillData'] as Record<string, unknown> | undefined;
+  if (!cwData || typeof cwData !== 'object') return allAnswers;
+
+  const activePeople = new Set(getKnownPeople(allAnswers).map((p) => p.id));
+
+  const corpData = allAnswers.get('corporations')?.['corporationsData'] as Array<Record<string, unknown>> | undefined;
+  const activeCorps = new Set((corpData || []).map((_, i) => `corp_${i}`));
+
+  const propData = allAnswers.get('realEstate')?.['propertiesData'] as Array<Record<string, unknown>> | undefined;
+  const activeProps = new Set((propData || []).map((_, i) => `prop_${i}`));
+  if (allAnswers.get('realEstate')?.['primaryHomeData']) {
+    activeProps.add('prop_primary');
+  }
+
+  const legacySection = allAnswers.get('legacyIntent') || {};
+  const legacyIntents = (legacySection['legacyIntentsData'] as Array<Record<string, unknown>>) || [];
+  const activeLegacyIntentIds = new Set(legacyIntents.map((li) => li['id'] as string).filter(Boolean));
+  const activeLegacyAssetIds = new Set(legacyIntents.map((li) => (li['asset'] as Record<string, unknown>)?.['assetId'] as string).filter(Boolean));
+
+  let changed = false;
+  const clients = (cwData['clients'] as Array<Record<string, unknown>>) || [];
+  const cleanedClients = clients.map((client) => {
+    let clientChanged = false;
+
+    const cleanedResidueRecipients = ((client['residueRecipients'] as string[]) || []).filter((id) => {
+      if (id.startsWith('other_')) return true;
+      if (!activePeople.has(id)) { clientChanged = true; return false; }
+      return true;
+    });
+    if (cleanedResidueRecipients.length !== ((client['residueRecipients'] as string[]) || []).length) {
+      clientChanged = true;
+    }
+
+    const cleanedUltimateRecipients = ((client['ultimateContingencyRecipients'] as string[]) || []).filter((id) => {
+      if (id.startsWith('other_')) return true;
+      if (!activePeople.has(id)) { clientChanged = true; return false; }
+      return true;
+    });
+    if (cleanedUltimateRecipients.length !== ((client['ultimateContingencyRecipients'] as string[]) || []).length) {
+      clientChanged = true;
+    }
+
+    if (client['trustTrusteePersonId'] && !activePeople.has(client['trustTrusteePersonId'] as string) && !(client['trustTrusteePersonId'] as string).startsWith('other_')) {
+      clientChanged = true;
+    }
+    const cleanedTrusteePersonId = client['trustTrusteePersonId'] && !activePeople.has(client['trustTrusteePersonId'] as string) && !(client['trustTrusteePersonId'] as string).startsWith('other_')
+      ? undefined : client['trustTrusteePersonId'];
+
+    const alignments = (client['alignments'] as Array<Record<string, unknown>>) || [];
+    const cleanedAlignments = alignments.filter((a) => {
+      const subjectType = a['subjectType'] as string;
+      const subjectId = a['subjectId'] as string;
+      const intentionSourceId = a['intentionSourceId'] as string | undefined;
+
+      if (subjectType === 'legacyAsset' && subjectId && !activeLegacyAssetIds.has(subjectId)) {
+        clientChanged = true;
+        return false;
+      }
+      if (intentionSourceId && !activeLegacyIntentIds.has(intentionSourceId)) {
+        clientChanged = true;
+        return false;
+      }
+      if (subjectType === 'business' && subjectId && subjectId.startsWith('corp_')) {
+        const baseId = subjectId.replace(/_flex$/, '');
+        if (!activeCorps.has(baseId)) {
+          clientChanged = true;
+          return false;
+        }
+      }
+      return true;
+    });
+    if (cleanedAlignments.length !== alignments.length) {
+      clientChanged = true;
+    }
+
+    const firstDeathExceptions = (client['firstDeathExceptions'] as Array<Record<string, unknown>>) || [];
+    const cleanedExceptions = firstDeathExceptions.filter((exc) => {
+      const assetId = exc['assetId'] as string | undefined;
+      if (assetId && !activeProps.has(assetId) && !assetId.startsWith('corp_') && !activeCorps.has(assetId)) {
+        return true;
+      }
+      return true;
+    });
+
+    const specificGifts = (client['specificGifts'] as Array<Record<string, unknown>>) || [];
+    const cleanedGifts = specificGifts.map((gift) => {
+      if (gift['recipientPersonId'] && !activePeople.has(gift['recipientPersonId'] as string) && !(gift['recipientPersonId'] as string).startsWith('other_')) {
+        clientChanged = true;
+        return { ...gift, recipientPersonId: undefined };
+      }
+      return gift;
+    });
+
+    if (clientChanged) {
+      changed = true;
+      return {
+        ...client,
+        residueRecipients: cleanedResidueRecipients,
+        ultimateContingencyRecipients: cleanedUltimateRecipients,
+        trustTrusteePersonId: cleanedTrusteePersonId,
+        alignments: cleanedAlignments,
+        firstDeathExceptions: cleanedExceptions,
+        specificGifts: cleanedGifts,
+      };
+    }
+    return client;
+  });
+
+  if (changed) {
+    const updated = new Map(allAnswers);
+    updated.set('wills', {
+      ...willsSection,
+      currentWillData: { ...cwData, clients: cleanedClients },
+    });
+    return updated;
+  }
+
+  return allAnswers;
+}

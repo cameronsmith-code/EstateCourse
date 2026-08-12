@@ -1,5 +1,7 @@
 export type ChildStatus = 'minor' | 'adult_dependant' | 'adult_independent';
 
+export type MoveStatus = 'likely' | 'possible' | 'unlikely' | 'undecided';
+
 export type PlanningPerson = {
   id: string;
   name: string;
@@ -11,18 +13,41 @@ export type PlanningPerson = {
   country: string;
 };
 
-export type GuardianContext = {
-  guardian?: PlanningPerson;
-  alternateGuardian?: PlanningPerson;
-  guardianSpokenWith: string;
-  guardianInWill: string;
-  guardianConsidered: string;
+export type GuardianAssignment = {
+  id: string;
+  guardianPersonIds: string[];
+  guardianPeople: PlanningPerson[];
+  alternatePersonIds: string[];
+  alternatePeople: PlanningPerson[];
+  childIds: string[];
+  childNames: string[];
+  spokenWith: string;
+  inWill: string;
+  considered: string;
+  notes?: string;
+  isHousehold: boolean;
+  householdLabel: string;
   guardianCommunity: string;
-  childCommunity: string;
-  moveExpected: string;
+  currentCommunity: string;
   isCrossBorder: boolean;
   isCrossProvince: boolean;
-  appliesToChildNames: string[];
+  moveStatus: MoveStatus;
+};
+
+export type AdultSiblingRole = {
+  adultSiblingChildId: string;
+  adultSiblingName: string;
+  role: string;
+  notResponsibleFor: string[];
+  forMinorChildIds: string[];
+  forMinorChildNames: string[];
+};
+
+export type ActivityEntry = {
+  name: string;
+  type: string;
+  importance: string;
+  frequency: string;
 };
 
 export type PersonalProfile = {
@@ -32,12 +57,7 @@ export type PersonalProfile = {
   socialChallenges?: string;
   behaviouralConsiderations?: string;
   importantRoutines?: string;
-  activities?: Array<{
-    name: string;
-    type: string;
-    importance: string;
-    frequency: string;
-  }>;
+  activities: ActivityEntry[];
   socialAdditionalNotes?: string;
   transitionEasier?: string;
   missedMost?: string;
@@ -52,6 +72,7 @@ export type EducationTransition = {
   hasIEP: boolean;
   iepDetails?: string;
   iepDocumentLocation?: string;
+  iepImportance?: string;
   schoolChangeExpected?: string;
   newSchoolNotes?: string;
   recordLocation?: string;
@@ -60,7 +81,23 @@ export type EducationTransition = {
   schoolFocusHelps?: string;
 };
 
+export type MedicationEntry = {
+  name: string;
+  treats: string;
+  prescribed: boolean;
+  prescribedBy?: string;
+  otherInfo?: string;
+};
+
+export type AllergyEntry = {
+  details: string;
+  severity: string;
+  medications?: string;
+  epipen?: string;
+};
+
 export type HealthcareProvider = {
+  id: string;
   name: string;
   role: string;
   category: string;
@@ -68,53 +105,65 @@ export type HealthcareProvider = {
   email?: string;
   city?: string;
   province?: string;
+  resolved: boolean;
 };
 
 export type HealthcareTransition = {
   providers: HealthcareProvider[];
+  selectedProviders: HealthcareProvider[];
   pharmacyName?: string;
-  medications?: string;
-  medicationList?: Array<{ name: string; dose: string; schedule: string }>;
-  allergies?: string;
-  allergyList?: Array<{ name: string; severity: string }>;
+  hasMedications: boolean;
+  medications: MedicationEntry[];
+  hasAllergies: boolean;
+  allergies: AllergyEntry[];
   medicalConditions?: string;
   carePlanWritten?: string;
   carePlanStored?: string;
-  providersToContact: string[];
+  providerSelectionsResolved: boolean;
   recordLocation?: string;
   medicationNotes?: string;
 };
 
 export type SupportTransitionRow = {
   supportType: string;
+  supportTypeLabel: string;
   currentProvider?: string;
-  purpose?: string;
-  ifChildMoves: string;
+  purpose: string;
+  transitionAction: string;
+  recordLocation?: string;
+  notes?: string;
 };
 
 export type ImportantConnection = {
+  id: string;
   name: string;
-  relationshipType: string;
+  relationshipTypes: string[];
   contexts: string[];
   whyItMatters: string;
   importance: string;
+  importanceLabel: string;
   contactName?: string;
   contactPhone?: string;
   contactEmail?: string;
   continuityIdeas: string[];
+  hasContactInfo: boolean;
   moveComplicates: boolean;
 };
 
 export type CommunityItem = {
+  id: string;
   type: string;
+  typeLabel: string;
   name: string;
   importanceNotes: string;
   continuityPreference: string;
 };
 
 export type TraditionItem = {
+  id: string;
   name: string;
   type: string;
+  typeLabel: string;
   participantTypes: string[];
   participantNotes: string;
   importanceNotes: string;
@@ -122,19 +171,36 @@ export type TraditionItem = {
 };
 
 export type PersonToKeepClose = {
+  id: string;
   name: string;
   relationship: string;
-  role: 'emotional' | 'formal';
-  notes?: string;
+  sourceType: 'minor_sibling' | 'adult_sibling' | 'planning_person' | 'parent' | 'important_adults';
+  phone?: string;
+  email?: string;
+  city?: string;
+  province?: string;
+  resolved: boolean;
 };
 
-export type InheritanceInfo = {
-  type?: string;
-  stages?: Array<{ age: string; fraction: string; description: string }>;
+export type InheritanceStage = {
+  age: string;
+  fraction: string;
+  description: string;
+};
+
+export type ClientInheritanceInfo = {
+  clientId: 'client1' | 'client2';
+  clientName: string;
+  inheritanceType?: string;
+  stages: InheritanceStage[];
   trusteeName?: string;
-  specialArrangement?: string;
-  knownTrustType?: string;
-  description?: string;
+  trusteePersonId?: string;
+  childSpecificArrangement?: {
+    hasDifferentArrangement: string;
+    specialArrangement?: string;
+    knownTrustType?: string;
+    description?: string;
+  };
 };
 
 export type AdultTransitionInfo = {
@@ -145,7 +211,9 @@ export type AdultTransitionInfo = {
   dtcDocLocation?: string;
   futureCaregiverName?: string;
   futureCaregiverResponsibility?: string;
-  reviewNeeded?: boolean;
+  reviewNeeded: boolean;
+  supportLocationDependent?: string;
+  supportLocationDependentDetails?: string;
 };
 
 export type GuardianshipChildProfile = {
@@ -159,10 +227,10 @@ export type GuardianshipChildProfile = {
   planningFocus: string;
   disabled: boolean;
   disabilityUncertain: boolean;
+  supportNeedTypes: string[];
   cityOfResidence?: string;
   provinceTerritory?: string;
   countryOfResidence?: string;
-  guardianContext?: GuardianContext;
   personalProfile: PersonalProfile;
   educationTransition?: EducationTransition;
   healthcareTransition?: HealthcareTransition;
@@ -171,18 +239,20 @@ export type GuardianshipChildProfile = {
   communities?: CommunityItem[];
   traditions?: TraditionItem[];
   peopleToKeepClose?: PersonToKeepClose[];
-  adultSiblingRole?: string;
-  adultSiblingNotResponsible?: string[];
-  inheritance?: InheritanceInfo;
+  adultSiblingRoles: AdultSiblingRole[];
+  inheritanceByClient: ClientInheritanceInfo[];
   adultTransition?: AdultTransitionInfo;
   firstDaysPriorities?: string[];
+  birthCertificateLocation?: string;
 };
 
 export type RoleAssignment = {
   responsibility: string;
+  childId?: string;
+  childName?: string;
   firstChoice?: string;
   backup?: string;
-  childIds?: string[];
+  isHousehold?: boolean;
 };
 
 export type FinancialResourceSummary = {
@@ -198,6 +268,7 @@ export type DocumentRegistryEntry = {
   exists: boolean;
   locationKnown: boolean;
   location?: string;
+  clientId?: 'client1' | 'client2';
   childId?: string;
 };
 
@@ -208,10 +279,13 @@ export type ReadinessCategory = {
 };
 
 export type ImmediateAction = {
+  id: string;
   action: string;
   priority: number;
-  childIds?: string[];
+  childIds: string[];
+  childNames: string[];
   conditional: boolean;
+  isParentWish: boolean;
 };
 
 export type GuardianshipRoadmapModel = {
@@ -219,18 +293,12 @@ export type GuardianshipRoadmapModel = {
     clientNames: string[];
     children: Array<{ id: string; name: string; nickname: string; status: ChildStatus }>;
     reportDate: Date;
-    provinceOfMajority: string;
+    provinceOfResidence: string;
     ageOfMajority: number;
   };
-  guardianPlan: {
-    primaryGuardian?: PlanningPerson;
-    alternateGuardian?: PlanningPerson;
-    guardianSpokenWith: string;
-    guardianInWill: string;
-    appliesToChildren: string[];
-    trusteePersonName?: string;
-  };
+  guardianAssignments: GuardianAssignment[];
   children: GuardianshipChildProfile[];
+  adultSiblingRoles: AdultSiblingRole[];
   roles: RoleAssignment[];
   financialResources: FinancialResourceSummary[];
   documents: DocumentRegistryEntry[];

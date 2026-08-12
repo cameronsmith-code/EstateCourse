@@ -2158,6 +2158,7 @@ export default function StepForm({
       updated[index].schoolPhone = undefined;
       updated[index].schoolAddress = undefined;
       updated[index].schoolWebsite = undefined;
+      updated[index].currentGrade = undefined;
       updated[index].schoolStrengths = undefined;
       updated[index].schoolExtraSupport = undefined;
       updated[index].schoolFocusHelps = undefined;
@@ -11959,6 +11960,23 @@ export default function StepForm({
                           </>
                         )}
 
+                        <div className="mt-2 pb-1 border-b border-gray-600 mb-2">
+                          <h5 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Pharmacy</h5>
+                        </div>
+
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Which pharmacy does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} use?
+                          </label>
+                          <input
+                            type="text"
+                            value={childrenData[index]?.pharmacyName || ''}
+                            onChange={(e) => handleChildChange(index, 'pharmacyName', e.target.value)}
+                            placeholder="Pharmacy name and location"
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                          />
+                        </div>
+
                         <div className="mt-6 pb-1 border-b border-gray-600 mb-2">
                           <h5 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Allergies</h5>
                         </div>
@@ -12239,6 +12257,18 @@ export default function StepForm({
                                   value={childrenData[index]?.schoolName || ''}
                                   onChange={(e) => handleChildChange(index, 'schoolName', e.target.value)}
                                   placeholder="Enter school name"
+                                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                  Current Grade / Year:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={childrenData[index]?.currentGrade || ''}
+                                  onChange={(e) => handleChildChange(index, 'currentGrade', e.target.value)}
+                                  placeholder="e.g., Grade 3, Year 2, Kindergarten"
                                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                 />
                               </div>
@@ -12986,6 +13016,19 @@ export default function StepForm({
                               </div>
                             );
                           })()}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              How does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} best communicate and like to be spoken to?
+                            </label>
+                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., responds well to direct explanations, needs time to process, prefers visual cues, responds to tone of voice</p>
+                            <textarea
+                              value={childrenData[index]?.communicationStyle || ''}
+                              onChange={(e) => handleChildChange(index, 'communicationStyle', e.target.value)}
+                              placeholder=""
+                              rows={3}
+                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                            />
+                          </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
                               How does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} typically express or manage difficult emotions?

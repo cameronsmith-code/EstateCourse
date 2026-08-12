@@ -546,6 +546,19 @@ export default function GuardianTransitionSection({
 
           <div className="mb-3">
             <label className={labelClass}>
+              Do you know where {childName}'s birth certificate is located?
+            </label>
+            <input
+              type="text"
+              value={childData.birthCertificateLocation || ''}
+              onChange={e => onChildChange(childIndex, 'birthCertificateLocation', e.target.value)}
+              placeholder="e.g., safe deposit box, filing cabinet, with the lawyer..."
+              className={inputClass}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className={labelClass}>
               Do you know where {childName}'s important health records or care information can be found?
             </label>
             <input

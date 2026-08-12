@@ -17,6 +17,7 @@ import ChildPlanningSection, { PlanningPerson } from './ChildPlanningSection';
 import DebtObligations from './DebtObligations';
 import FinancialFootprintAssets from './FinancialFootprintAssets';
 import FamilyTrustSection from './FamilyTrustSection';
+import LegacyIntentSection from './LegacyIntentSection';
 import { getFinancialAdvisors } from '../lib/referentialIntegrity';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
@@ -14041,32 +14042,13 @@ export default function StepForm({
             );
           })()}
 
-          {step.sectionId === 'legacyIntent' && (() => {
-            const renderQuestion = (question: typeof step.questions[0]) => {
-              const displayLabel = typeof question.label === 'function'
-                ? question.label(allAnswers || new Map())
-                : question.label;
-              return (
-                <FormField
-                  key={question.key}
-                  question={{ ...question, label: displayLabel }}
-                  value={answers[question.key]}
-                  onChange={(value) => onAnswerChange(question.key, value)}
-                  answers={allAnswers}
-                />
-              );
-            };
-
-            const realEstateQuestions = step.questions.filter(q => q.key === 'legacyIntentRealEstateAssets');
-
-            return (
-              <>
-                <Subsection title="Real Estate">
-                  {realEstateQuestions.map(renderQuestion)}
-                </Subsection>
-              </>
-            );
-          })()}
+          {step.sectionId === 'legacyIntent' && (
+            <LegacyIntentSection
+              answers={answers}
+              allAnswers={allAnswers || new Map()}
+              onAnswerChange={onAnswerChange}
+            />
+          )}
 
           {step.sectionId === 'lifeInsurance' && (() => {
             const basicAnswers = allAnswers?.get('aboutYou') || {};

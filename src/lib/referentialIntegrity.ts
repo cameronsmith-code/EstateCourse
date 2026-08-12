@@ -405,3 +405,103 @@ export function cleanStaleTrustReferences(allAnswers: AnswersMap): AnswersMap {
 
   return allAnswers;
 }
+
+export function cleanStaleLegacyIntentReferences(allAnswers: AnswersMap): AnswersMap {
+  const legacySection = allAnswers.get('legacyIntent');
+  if (!legacySection) return allAnswers;
+
+  const intents = legacySection['legacyIntentsData'] as Array<Record<string, unknown>> | undefined;
+  if (!Array.isArray(intents) || intents.length === 0) return allAnswers;
+
+  const activePeople = new Set(getKnownPeople(allAnswers).map((p) => p.id));
+  const activeAdvisors = new Set(getProfessionalAdvisors(allAnswers).map((a) => a.id));
+
+  const corpData = allAnswers.get('corporations')?.['corporationsData'] as Array<Record<string, unknown>> | undefined;
+  const activeCorps = new Set((corpData || []).map((_, i) => `corp_${i}`));
+
+  const propData = allAnswers.get('realEstate')?.['propertiesData'] as Array<Record<string, unknown>> | undefined;
+  const activeProps = new Set((propData || []).map((_, i) => `prop_${i}`));
+  if (allAnswers.get('realEstate')?.['primaryHomeData']) {
+    activeProps.add('prop_primary');
+  }
+
+  let changed = false;
+  const cleanedIntents = intents.map((record) => {
+    let recordChanged = false;
+    const asset = record['asset'] as Record<string, unknown> | undefined;
+    if (asset?.assetId && asset.assetSourceSectionId === 'corporations' && !activeCorps.has(asset.assetId as string)) {
+      recordChanged = true;
+    }
+    if (asset?.assetId && asset.assetSourceSectionId === 'realEstate' && !activeProps.has(asset.assetId as string)) {
+      recordChanged = true;
+    }
+
+    const cleanRecipientIds = (ids: unknown): string[] => {
+      if (!Array.isArray(ids)) return [];
+      return ids.filter((id) => typeof id === 'string' && (activePeople.has(id) || id.startsWith('other_')));
+    };
+
+    const cleanRecipients = (recipients: unknown): Array<Record<string, unknown>> => {
+      if (!Array.isArray(recipients)) return [];
+      return recipients.map((r) => {
+        if (r && typeof r === 'object') {
+          const rr = r as Record<string, unknown>;
+          if (rr.personId && !activePeople.has(rr.personId as string) && !((rr.personId as string).startsWith('other_'))) {
+            recordChanged = true;
+            return { ...rr, personId: undefined };
+          }
+        }
+        return r;
+      });
+    };
+
+    const scenarios = ['firstDeath', 'bothDeceased', 'noSurvivingDescendants'] as const;
+    const updatedScenarios: Record<string, unknown> = {};
+    for (const field of scenarios) {
+      const scenario = record[field] as Record<string, unknown> | undefined;
+      if (!scenario) continue;
+      const cleanedIds = cleanRecipientIds(scenario.recipientIds);
+      if (cleanedIds.length !== (scenario.recipientIds as string[] | undefined)?.length) recordChanged = true;
+      const cleanedRecipients = cleanRecipients(scenario.recipients);
+      updatedScenarios[field] = { ...scenario, recipientIds: cleanedIds, recipients: cleanedRecipients };
+    }
+
+    const stayFamilyIds = cleanRecipientIds(record.stayInFamilyRecipientIds);
+    if (stayFamilyIds.length !== (record.stayInFamilyRecipientIds as string[] | undefined)?.length) recordChanged = true;
+
+    const businessBranch = record.businessBranch as Record<string, unknown> | undefined;
+    let cleanedBranch: Record<string, unknown> | undefined;
+    if (businessBranch) {
+      const profIds = (businessBranch.professionalContactIds as string[]) || [];
+      const cleanedProfIds = profIds.filter((id) => activeAdvisors.has(id));
+      if (cleanedProfIds.length !== profIds.length) recordChanged = true;
+      const cleanedBranchRecipients = cleanRecipients(businessBranch.ownershipSuccessionRecipients);
+      const mgmtPersonId = businessBranch.managementSuccessionPersonId as string | undefined;
+      if (mgmtPersonId && !activePeople.has(mgmtPersonId) && !mgmtPersonId.startsWith('other_')) {
+        recordChanged = true;
+        cleanedBranch = { ...businessBranch, professionalContactIds: cleanedProfIds, ownershipSuccessionRecipients: cleanedBranchRecipients, managementSuccessionPersonId: undefined, managementSuccessionPersonName: undefined };
+      } else {
+        cleanedBranch = { ...businessBranch, professionalContactIds: cleanedProfIds, ownershipSuccessionRecipients: cleanedBranchRecipients };
+      }
+    }
+
+    if (recordChanged) {
+      changed = true;
+      return {
+        ...record,
+        ...updatedScenarios,
+        stayInFamilyRecipientIds: stayFamilyIds,
+        businessBranch: cleanedBranch || businessBranch,
+      };
+    }
+    return record;
+  });
+
+  if (changed) {
+    const updated = new Map(allAnswers);
+    updated.set('legacyIntent', { ...legacySection, legacyIntentsData: cleanedIntents });
+    return updated;
+  }
+
+  return allAnswers;
+}

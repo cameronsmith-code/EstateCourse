@@ -3398,6 +3398,236 @@ export const generatePDF = (formData: FormData) => {
           yPosition += 6;
         }
 
+        // Connections & Belonging
+        const belongingConnections: Array<{ displayName: string; connectionType: string; contexts: string[]; importance: string; relationshipNotes: string; contactName: string; contactPhone: string; contactEmail: string; continuityIdeas: string[] }> = JSON.parse(child.belongingConnections || '[]');
+        const belongingCommunities: Array<{ type: string; name: string; importanceNotes: string; continuityPreference: string }> = JSON.parse(child.belongingCommunities || '[]');
+        const belongingTraditions: Array<{ type: string; name: string; participantTypes: string[]; participantNotes: string; importanceNotes: string; continueIfPractical: string }> = JSON.parse(child.belongingTraditions || '[]');
+        const belongingFamilySelections = (child.belongingFamilySelections || '').split(',').filter(Boolean);
+        const belongingFamilyNotes = child.belongingFamilyNotes || '';
+        const belongingMissedMost = child.belongingMissedMost || '';
+        const belongingFeelConnected = child.belongingFeelConnected || '';
+
+        const hasBelongingData = belongingConnections.length > 0 || belongingCommunities.length > 0 || belongingTraditions.length > 0 || belongingFamilySelections.length > 0 || belongingMissedMost || belongingFeelConnected;
+
+        if (hasBelongingData) {
+          checkPageBreak(30);
+          addSubsectionHeader(`${nickname} People & Connections:`);
+          yPosition += 2;
+
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'italic');
+          doc.setTextColor(...colors.mediumGray);
+          const introLines = doc.splitTextToSize(`A new home does not have to mean leaving every part of ${nickname}'s old life behind. These are some of the relationships and connections the parents would especially hope remain part of ${nickname}'s life.`, fieldWidth);
+          introLines.forEach((line: string) => {
+            checkPageBreak(5);
+            doc.text(line, margin, yPosition);
+            yPosition += 5;
+          });
+          yPosition += 4;
+
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...colors.darkText);
+          doc.setFontSize(9);
+
+          // Important connections
+          belongingConnections.forEach((conn) => {
+            if (!conn.displayName) return;
+            checkPageBreak(20);
+            doc.setFont(undefined, 'bold');
+            doc.text(conn.displayName, margin, yPosition);
+            yPosition += 6;
+            doc.setFont(undefined, 'normal');
+
+            const typeLabels = (conn.connectionType || '').split(',').map((t: string) => {
+              const labels: Record<string, string> = {
+                best_friend: 'Best / very close friend', close_friend: 'Close friend', school_friend: 'School friend',
+                neighbourhood_friend: 'Neighbourhood friend', sports_friend: 'Sports / activity friend', camp_friend: 'Camp friend',
+                cousin: 'Cousin', family_friend: 'Family friend', trusted_adult: 'Trusted adult', coach_mentor: 'Coach / mentor', other: 'Other',
+              };
+              return labels[t] || t;
+            }).join(', ');
+            if (typeLabels) { checkPageBreak(5); doc.text(`Relationship: ${typeLabels}`, margin, yPosition); yPosition += 5; }
+
+            if (conn.contexts && conn.contexts.length > 0) {
+              const ctxLabels = conn.contexts.map((c: string) => {
+                const labels: Record<string, string> = {
+                  school: 'School', neighbourhood: 'Neighbourhood', sports: 'Hockey/Sports', camp: 'Camp',
+                  club_activity: 'Club/Activity', family_connection: 'Family connection', family_friends: 'Family friends',
+                  faith_community: 'Faith/Community group', other: 'Other',
+                };
+                return labels[c] || c;
+              }).join(' · ');
+              checkPageBreak(5); doc.text(`Connected through: ${ctxLabels}`, margin, yPosition); yPosition += 5;
+            }
+
+            if (conn.importance) {
+              const impLabels: Record<string, string> = {
+                especially_important: 'Especially important', important: 'Important',
+                nice_to_maintain: 'Nice to maintain if practical', not_sure: "I'm not sure",
+              };
+              checkPageBreak(5); doc.text(`Importance: ${impLabels[conn.importance] || conn.importance}`, margin, yPosition); yPosition += 5;
+            }
+
+            if (conn.relationshipNotes) {
+              const lines = doc.splitTextToSize(`Why this matters: ${conn.relationshipNotes}`, fieldWidth);
+              lines.forEach((line: string) => { checkPageBreak(5); doc.text(line, margin, yPosition); yPosition += 5; });
+            }
+
+            if (conn.continuityIdeas && conn.continuityIdeas.length > 0) {
+              const ideaLabels = conn.continuityIdeas.map((idea: string) => {
+                const labels: Record<string, string> = {
+                  playdates_visits: 'Playdates/visits', weekend_visits: 'Weekend visits', sleepovers: 'Sleepovers',
+                  camp_together: 'Camp together', shared_activity: 'Shared activity', birthdays_occasions: 'Birthdays/occasions',
+                  school_holiday_visits: 'School-holiday visits', video_calls: 'Video calls', gaming_online: 'Gaming/online',
+                  texting_messaging: 'Texting/messaging', contact_friend_parents: "Contact friend's parents",
+                  let_evolve: 'Let relationship evolve', other: 'Other', not_sure: "I'm not sure",
+                };
+                return labels[idea] || idea;
+              }).join(' · ');
+              const lines = doc.splitTextToSize(`Ways to stay connected: ${ideaLabels}`, fieldWidth);
+              lines.forEach((line: string) => { checkPageBreak(5); doc.text(line, margin, yPosition); yPosition += 5; });
+            }
+
+            if (conn.contactName || conn.contactPhone || conn.contactEmail) {
+              checkPageBreak(8);
+              doc.setFont(undefined, 'bold');
+              doc.text('Parent contact:', margin, yPosition);
+              yPosition += 5;
+              doc.setFont(undefined, 'normal');
+              if (conn.contactName) { checkPageBreak(5); doc.text(`  ${conn.contactName}`, margin, yPosition); yPosition += 5; }
+              if (conn.contactPhone) { checkPageBreak(5); doc.text(`  Phone: ${conn.contactPhone}`, margin, yPosition); yPosition += 5; }
+              if (conn.contactEmail) { checkPageBreak(5); doc.text(`  Email: ${conn.contactEmail}`, margin, yPosition); yPosition += 5; }
+            }
+
+            yPosition += 4;
+          });
+
+          // Communities
+          if (belongingCommunities.length > 0) {
+            checkPageBreak(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('Communities that matter:', margin, yPosition);
+            yPosition += 6;
+            doc.setFont(undefined, 'normal');
+            belongingCommunities.forEach((comm) => {
+              const commTypeLabels: Record<string, string> = {
+                school_group: 'School friend group', neighbourhood: 'Neighbourhood friends', sports_team: 'Sports team',
+                camp_community: 'Camp community', faith: 'Faith community', cultural: 'Cultural community',
+                club_activity: 'Club/Activity group', cousins_family: 'Cousins/Extended family', other: 'Other',
+              };
+              const label = comm.name || commTypeLabels[comm.type] || comm.type;
+              checkPageBreak(8);
+              doc.text(`  ${label}`, margin, yPosition);
+              yPosition += 5;
+              if (comm.importanceNotes) {
+                const lines = doc.splitTextToSize(`  ${comm.importanceNotes}`, fieldWidth - 4);
+                lines.forEach((line: string) => { checkPageBreak(5); doc.text(line, margin + 2, yPosition); yPosition += 5; });
+              }
+              if (comm.continuityPreference) {
+                const prefLabels: Record<string, string> = {
+                  yes_practical: 'Stay connected where practical', maybe: 'Maybe',
+                  no_preference: 'No particular preference', not_sure: "I'm not sure",
+                };
+                checkPageBreak(5);
+                doc.text(`  Parent wish: ${prefLabels[comm.continuityPreference] || comm.continuityPreference}`, margin, yPosition);
+                yPosition += 5;
+              }
+              yPosition += 3;
+            });
+          }
+
+          // Traditions
+          if (belongingTraditions.length > 0) {
+            checkPageBreak(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('Familiar traditions worth keeping:', margin, yPosition);
+            yPosition += 6;
+            doc.setFont(undefined, 'normal');
+            belongingTraditions.forEach((trad) => {
+              const tradTypeLabels: Record<string, string> = {
+                overnight_camp: 'Overnight camp', day_camp: 'Day camp', cottage_week: 'Annual cottage week',
+                camping_trip: 'Camping trip', tournament: 'Hockey tournament/Sports event', cousin_weekend: 'Cousin weekend',
+                birthday_tradition: 'Birthday tradition', holiday_gathering: 'Holiday gathering',
+                religious_cultural: 'Religious/Cultural event', other: 'Other',
+              };
+              const label = trad.name || tradTypeLabels[trad.type] || trad.type;
+              checkPageBreak(8);
+              doc.text(`  ${label}`, margin, yPosition);
+              yPosition += 5;
+              if (trad.participantTypes && trad.participantTypes.length > 0) {
+                const partLabels = trad.participantTypes.map((p: string) => {
+                  const labels: Record<string, string> = {
+                    sibling: 'Sibling', close_friend: 'Close friend', cousin: 'Cousin',
+                    grandparents: 'Grandparents', other_family: 'Other family',
+                    existing_connection: 'Existing connection', add_someone: 'Other',
+                  };
+                  return labels[p] || p;
+                }).join(', ');
+                checkPageBreak(5);
+                doc.text(`  Usually with: ${partLabels}${trad.participantNotes ? ` (${trad.participantNotes})` : ''}`, margin, yPosition);
+                yPosition += 5;
+              }
+              if (trad.importanceNotes) {
+                const lines = doc.splitTextToSize(`  ${trad.importanceNotes}`, fieldWidth - 4);
+                lines.forEach((line: string) => { checkPageBreak(5); doc.text(line, margin + 2, yPosition); yPosition += 5; });
+              }
+              if (trad.continueIfPractical) {
+                const contLabels: Record<string, string> = {
+                  yes: 'Yes, continue if practical', no: 'No', maybe: 'Maybe', not_sure: "I'm not sure",
+                };
+                checkPageBreak(5);
+                doc.text(`  Continue after move: ${contLabels[trad.continueIfPractical] || trad.continueIfPractical}`, margin, yPosition);
+                yPosition += 5;
+              }
+              yPosition += 3;
+            });
+          }
+
+          // Family connections
+          if (belongingFamilySelections.length > 0) {
+            checkPageBreak(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('People to Keep Close:', margin, yPosition);
+            yPosition += 6;
+            doc.setFont(undefined, 'normal');
+            belongingFamilySelections.forEach((sel) => {
+              checkPageBreak(5);
+              doc.text(`  ${sel}`, margin, yPosition);
+              yPosition += 5;
+            });
+            if (belongingFamilyNotes) {
+              const lines = doc.splitTextToSize(belongingFamilyNotes, fieldWidth);
+              lines.forEach((line: string) => { checkPageBreak(5); doc.text(line, margin, yPosition); yPosition += 5; });
+            }
+            yPosition += 3;
+          }
+
+          // Reflection questions
+          if (belongingMissedMost) {
+            checkPageBreak(12);
+            doc.setFont(undefined, 'bold');
+            doc.text(`What ${nickname} would miss most:`, margin, yPosition);
+            yPosition += 6;
+            doc.setFont(undefined, 'normal');
+            const lines = doc.splitTextToSize(belongingMissedMost, fieldWidth);
+            lines.forEach((line: string) => { checkPageBreak(5); doc.text(line, margin, yPosition); yPosition += 5; });
+            yPosition += 3;
+          }
+
+          if (belongingFeelConnected) {
+            checkPageBreak(12);
+            doc.setFont(undefined, 'bold');
+            doc.text(`What could help ${nickname} feel connected:`, margin, yPosition);
+            yPosition += 6;
+            doc.setFont(undefined, 'normal');
+            const lines = doc.splitTextToSize(belongingFeelConnected, fieldWidth);
+            lines.forEach((line: string) => { checkPageBreak(5); doc.text(line, margin, yPosition); yPosition += 5; });
+            yPosition += 3;
+          }
+
+          yPosition += 6;
+        }
+
         const allFriends: Array<{ friendName: string; relationship: string; cityLocation: string; parentGuardianName: string; parentPhone: string; parentEmail: string; whyImportant: string; activitiesTogether: string; source: string }> = [];
 
         const mainFriendList: Array<{ friendName: string; relationship: string; cityLocation: string; parentGuardianName: string; parentPhone: string; parentEmail: string; whyImportant: string; activitiesTogether: string }> = JSON.parse(child.friendList || '[]');

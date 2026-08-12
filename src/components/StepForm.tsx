@@ -15,6 +15,7 @@ import PoaPropertyAttorneyDetails, { PoaPropertyAttorneyData } from './PoaProper
 import Subsection from './Subsection';
 import ChildPlanningSection, { PlanningPerson } from './ChildPlanningSection';
 import GuardianTransitionSection from './GuardianTransitionSection';
+import ConnectionsBelongingSection from './ConnectionsBelongingSection';
 import DebtObligations from './DebtObligations';
 import FinancialFootprintAssets from './FinancialFootprintAssets';
 import FamilyTrustSection from './FamilyTrustSection';
@@ -13080,6 +13081,25 @@ export default function StepForm({
                       onChildMultiChange={handleChildMultiChange}
                     />
                   )}
+
+                  {(() => {
+                    const classification = getChildClassification(childrenData[index]);
+                    if (classification === 'independent_adult') return null;
+                    if (classification === 'minor' && !childrenData[index]?.guardianPersonId) return null;
+                    return (
+                      <ConnectionsBelongingSection
+                        childIndex={index}
+                        childData={childrenData[index] || {}}
+                        childrenData={childrenData}
+                        planningPersons={planningPersons}
+                        minorIndices={minorIndices}
+                        classification={classification}
+                        onChildChange={handleChildChange}
+                        onChildMultiChange={handleChildMultiChange}
+                        onPlanningPersonsChange={handlePlanningPersonsChange}
+                      />
+                    );
+                  })()}
                 </div>
               ))}
             </div>

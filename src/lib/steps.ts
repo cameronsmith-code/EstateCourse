@@ -1764,14 +1764,14 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
           return [{ value: 'client1', label: (answers.get('aboutYou')?.['fullName'] as string) || 'Client 1' }];
         },
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor2IsCameronSmith',
         label: 'Cameron Smith CFP®',
         type: 'checkbox',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor2Firm',
@@ -1779,7 +1779,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         type: 'text',
         placeholder: 'Enter firm name',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith && !formData.fpAdvisor2IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && !formData.fpAdvisor2IsCameronSmith,
       },
       {
         key: 'fpAdvisor2Name',
@@ -1787,7 +1787,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         type: 'text',
         placeholder: 'Enter advisor name',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith && !formData.fpAdvisor2IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && !formData.fpAdvisor2IsCameronSmith,
       },
       {
         key: 'fpAdvisor2Phone',
@@ -1795,7 +1795,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         type: 'text',
         placeholder: 'Enter phone number',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith && !formData.fpAdvisor2IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && !formData.fpAdvisor2IsCameronSmith,
       },
       {
         key: 'fpAdvisor2Email',
@@ -1803,7 +1803,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         type: 'email',
         placeholder: 'Enter email address',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith && !formData.fpAdvisor2IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && !formData.fpAdvisor2IsCameronSmith,
       },
       {
         key: 'fpAdvisor2Website',
@@ -1811,7 +1811,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         type: 'text',
         placeholder: 'Enter website URL',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith && !formData.fpAdvisor2IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes' && !formData.fpAdvisor2IsCameronSmith,
       },
       {
         key: 'fpAdvisor2Services',
@@ -1828,7 +1828,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
           { value: 'other', label: 'Other' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor2Duration',
@@ -1836,7 +1836,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         type: 'text',
         placeholder: 'e.g., 5 years',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor2RecordsLocation',
@@ -1844,7 +1844,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
         type: 'text',
         placeholder: '',
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor2IncludeInContactList',
@@ -1855,7 +1855,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
       },
       {
         key: 'fpAdvisor2HasAdditionalAdvisor',
@@ -1866,7 +1866,7 @@ Don't worry if you aren't sure about an amount or arrangement. Your accountant o
           { value: 'no', label: 'No' },
         ],
         required: false,
-        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && !!formData.fpAdvisor1IsCameronSmith,
+        condition: (formData: Record<string, string>) => formData.fpHasAdvisor === 'yes' && formData.fpHasAdditionalAdvisor === 'yes',
       },
       {
         key: 'acctHasAccountant',

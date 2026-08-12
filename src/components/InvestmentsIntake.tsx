@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Phone, Mail, Globe, CheckCircle2, UserPlus } from 'lucide-react';
 import {
   InvestmentAccount,
   BeneficiaryDesignation,
@@ -8,6 +8,7 @@ import {
   JOINT_ELIGIBLE_ACCOUNT_TYPES,
   DESIGNATION_TYPES,
 } from '../lib/financialAssetTypes';
+import type { ProfessionalAdvisor } from '../lib/referentialIntegrity';
 import {
   inputClass,
   labelClass,
@@ -30,13 +31,9 @@ type Props = {
   client2Name: string;
   hasSpouse: boolean;
   knownIndividuals: Array<{ id: string; name: string; relationship: string }>;
-  advisorName?: string;
-  advisorFirm?: string;
-  advisorPhone?: string;
-  advisorEmail?: string;
-  advisorId?: string;
+  financialAdvisors: ProfessionalAdvisor[];
   institutions: Array<{ id: string; name: string }>;
-  onAddInstitution?: (name: string) => string;
+  onAddInstitution?: (name: string) => string | undefined;
   startSignal?: number;
   presetType?: string;
   hideAddButton?: boolean;
@@ -59,6 +56,27 @@ function emptyDraft(): Draft {
   };
 }
 
+function sortAdvisorsByOwner(
+  advisors: ProfessionalAdvisor[],
+  ownerIds: string[]
+): ProfessionalAdvisor[] {
+  if (ownerIds.length === 0) return advisors;
+  const isClient1 = ownerIds.includes('client1') || ownerIds.includes('joint');
+  const isClient2 = ownerIds.includes('client2') || ownerIds.includes('joint');
+
+  return [...advisors].sort((a, b) => {
+    const aMatches = a.worksWith.some((w) =>
+      (isClient1 && w === 'client1') || (isClient2 && w === 'client2')
+    );
+    const bMatches = b.worksWith.some((w) =>
+      (isClient1 && w === 'client1') || (isClient2 && w === 'client2')
+    );
+    if (aMatches && !bMatches) return -1;
+    if (!aMatches && bMatches) return 1;
+    return 0;
+  });
+}
+
 export default function InvestmentsIntake({
   assets,
   onChange,
@@ -66,11 +84,7 @@ export default function InvestmentsIntake({
   client2Name,
   hasSpouse,
   knownIndividuals,
-  advisorName,
-  advisorFirm,
-  advisorPhone,
-  advisorEmail,
-  advisorId,
+  financialAdvisors,
   institutions,
   onAddInstitution,
   startSignal,
@@ -83,6 +97,7 @@ export default function InvestmentsIntake({
   const [intakeStep, setIntakeStep] = useState(0);
   const [draft, setDraft] = useState<Draft>(emptyDraft());
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [showOtherContactForm, setShowOtherContactForm] = useState(false);
 
   useEffect(() => {
     if (startSignal && startSignal > 0) {
@@ -102,6 +117,7 @@ export default function InvestmentsIntake({
     setEditingIndex(null);
     setIntakeStep(0);
     setIntakeActive(true);
+    setShowOtherContactForm(false);
   };
 
   const startEdit = (index: number) => {
@@ -109,6 +125,7 @@ export default function InvestmentsIntake({
     setEditingIndex(index);
     setIntakeStep(0);
     setIntakeActive(true);
+    setShowOtherContactForm(false);
   };
 
   const cancelIntake = () => {
@@ -116,10 +133,17 @@ export default function InvestmentsIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    setShowOtherContactForm(false);
     onCancelled?.();
   };
 
   const saveDraft = () => {
+    const contactToSave = showOtherContactForm
+      ? draft.contact
+      : draft.contact?.contactPersonId
+        ? { contactPersonId: draft.contact.contactPersonId }
+        : draft.contact;
+
     const cleanDraft: InvestmentAccount = {
       id: draft.id || generateAssetId('inv'),
       category: 'investmentAccount',
@@ -141,7 +165,7 @@ export default function InvestmentsIntake({
       respSubscriber: draft.respSubscriber,
       respBeneficiaryChildIds: draft.respBeneficiaryChildIds,
       respBeneficiaryNames: draft.respBeneficiaryNames,
-      contact: effectiveContact,
+      contact: contactToSave,
       documentLocation: draft.documentLocation,
       notes: draft.notes,
     };
@@ -157,6 +181,7 @@ export default function InvestmentsIntake({
     setDraft(emptyDraft());
     setIntakeStep(0);
     setEditingIndex(null);
+    setShowOtherContactForm(false);
     onSaved?.();
   };
 
@@ -178,7 +203,6 @@ export default function InvestmentsIntake({
   const isResp = draft.accountType === 'resp';
   const isJointEligible = JOINT_ELIGIBLE_ACCOUNT_TYPES.includes(draft.accountType || '');
 
-  // Build intake questions dynamically
   const questions = buildQuestions(
     draft,
     updateDraft,
@@ -189,12 +213,10 @@ export default function InvestmentsIntake({
     isJointEligible,
     knownIndividuals,
     institutions,
-    advisorName,
-    advisorFirm,
-    advisorPhone,
-    advisorEmail,
-    advisorId,
+    financialAdvisors,
     onAddInstitution,
+    showOtherContactForm,
+    setShowOtherContactForm,
   );
 
   const currentQuestion = questions[intakeStep];
@@ -233,21 +255,27 @@ export default function InvestmentsIntake({
     <div className="space-y-5">
       {assets.length > 0 && (
         <div className="space-y-3">
-          {assets.map((asset, i) => (
-            <SummaryCard
-              key={asset.id}
-              title={asset.friendlyLabel || `${accountTypeLabel(asset.accountType)}${asset.institutionName ? ` — ${asset.institutionName}` : ''}`}
-              subtitle={ownerLabel(asset.ownerIds)}
-              value={asset.valueUnknown ? 'Value unknown' : asset.approximateValue ? `Approximately ${asset.currency} ${asset.approximateValue}` : undefined}
-              details={[
-                ...(asset.accountType === 'resp' && asset.respBeneficiaryNames?.length ? [{ label: 'Beneficiary', value: asset.respBeneficiaryNames.join(', ') }] : []),
-                ...(asset.hasBeneficiary === 'yes' && asset.beneficiaries?.length ? [{ label: 'Designation', value: asset.beneficiaries.map((b) => b.personName || b.relationship || '').filter(Boolean).join(', ') }] : []),
-                ...(asset.lastFour ? [{ label: 'Last 4 digits', value: asset.lastFour }] : []),
-              ]}
-              onEdit={() => startEdit(i)}
-              onDelete={() => deleteAsset(i)}
-            />
-          ))}
+          {assets.map((asset, i) => {
+            const linkedAdvisor = financialAdvisors.find(
+              (a) => a.id === asset.contact?.contactPersonId
+            );
+            return (
+              <SummaryCard
+                key={asset.id}
+                title={asset.friendlyLabel || `${accountTypeLabel(asset.accountType)}${asset.institutionName ? ` — ${asset.institutionName}` : ''}`}
+                subtitle={ownerLabel(asset.ownerIds)}
+                value={asset.valueUnknown ? 'Value unknown' : asset.approximateValue ? `Approximately ${asset.currency} ${asset.approximateValue}` : undefined}
+                details={[
+                  ...(asset.accountType === 'resp' && asset.respBeneficiaryNames?.length ? [{ label: 'Beneficiary', value: asset.respBeneficiaryNames.join(', ') }] : []),
+                  ...(asset.hasBeneficiary === 'yes' && asset.beneficiaries?.length ? [{ label: 'Designation', value: asset.beneficiaries.map((b) => b.personName || b.relationship || '').filter(Boolean).join(', ') }] : []),
+                  ...(asset.lastFour ? [{ label: 'Last 4 digits', value: asset.lastFour }] : []),
+                  ...(linkedAdvisor ? [{ label: 'Advisor', value: `${linkedAdvisor.name}${linkedAdvisor.firm ? ` — ${linkedAdvisor.firm}` : ''}` }] : asset.contact?.contactPersonId ? [{ label: 'Advisor', value: 'No advisor currently linked' }] : []),
+                ]}
+                onEdit={() => startEdit(i)}
+                onDelete={() => deleteAsset(i)}
+              />
+            );
+          })}
         </div>
       )}
       {!hideAddButton && <AddButton label="Add an investment or registered account" onClick={startNew} />}
@@ -262,6 +290,71 @@ type Question = {
   canProceed: () => boolean;
 };
 
+function AdvisorCard({
+  advisor,
+  selected,
+  onClick,
+}: {
+  advisor: ProfessionalAdvisor;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`text-left p-4 rounded-xl border transition-all w-full ${
+        selected
+          ? 'border-blue-500 bg-blue-500/10 ring-1 ring-blue-500'
+          : 'border-gray-700 bg-gray-800 hover:border-gray-500 hover:bg-gray-750'
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-medium truncate">{advisor.name}</p>
+          {advisor.firm && (
+            <p className="text-sm text-gray-400 truncate">{advisor.firm}</p>
+          )}
+        </div>
+        {selected && <CheckCircle2 className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />}
+      </div>
+    </button>
+  );
+}
+
+function AdvisorDetail({ advisor }: { advisor: ProfessionalAdvisor }) {
+  return (
+    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 space-y-2">
+      <div className="flex items-center gap-2">
+        <p className="text-white font-medium">{advisor.name}</p>
+        {advisor.firm && (
+          <span className="text-sm text-gray-400">— {advisor.firm}</span>
+        )}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+        {advisor.phone && (
+          <div className="flex items-center gap-2 text-gray-300">
+            <Phone className="w-3.5 h-3.5 text-gray-500" />
+            {advisor.phone}
+          </div>
+        )}
+        {advisor.email && (
+          <div className="flex items-center gap-2 text-gray-300">
+            <Mail className="w-3.5 h-3.5 text-gray-500" />
+            {advisor.email}
+          </div>
+        )}
+        {advisor.website && (
+          <div className="flex items-center gap-2 text-gray-300">
+            <Globe className="w-3.5 h-3.5 text-gray-500" />
+            {advisor.website}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function buildQuestions(
   draft: Draft,
   updateDraft: (field: keyof Draft, value: unknown) => void,
@@ -272,12 +365,10 @@ function buildQuestions(
   isJointEligible: boolean,
   knownIndividuals: Array<{ id: string; name: string; relationship: string }>,
   institutions: Array<{ id: string; name: string }>,
-  advisorName?: string,
-  advisorFirm?: string,
-  advisorPhone?: string,
-  advisorEmail?: string,
-  advisorId?: string,
-  onAddInstitution?: (name: string) => string,
+  financialAdvisors: ProfessionalAdvisor[],
+  onAddInstitution: ((name: string) => string | undefined) | undefined,
+  showOtherContactForm: boolean,
+  setShowOtherContactForm: (v: boolean) => void,
 ): Question[] {
   const questions: Question[] = [];
 
@@ -343,7 +434,7 @@ function buildQuestions(
 
   // Q2: Ownership
   questions.push({
-    title: isResp ? 'Who owns this account?' : 'Who owns this account?',
+    title: 'Who owns this account?',
     subtitle: isJointEligible ? undefined : 'This account type is typically individually held.',
     render: () => (
       <OwnerSelector
@@ -672,77 +763,122 @@ function buildQuestions(
     canProceed: () => !!draft.managedBy,
   });
 
-  // Q8: Financial professional contact
-  const hasStaleAdvisorLink = draft.contact?.contactPersonId && !advisorId;
-  const effectiveContact = hasStaleAdvisorLink ? { ...draft.contact, contactPersonId: undefined, contactName: undefined, contactFirm: undefined, contactPhone: undefined, contactEmail: undefined } : draft.contact;
+  // Q8: Financial professional contact — multi-advisor selection
+  const sortedAdvisors = sortAdvisorsByOwner(financialAdvisors, draft.ownerIds || []);
+  const currentContactPersonId = draft.contact?.contactPersonId;
+  const linkedAdvisor = financialAdvisors.find((a) => a.id === currentContactPersonId);
+  const hasStaleLink = currentContactPersonId && !linkedAdvisor;
 
   questions.push({
-    title: 'Is there a financial professional someone could contact about this account?',
-    subtitle: advisorName ? `Your advisor from the Professional Team section: ${advisorName}` : undefined,
+    title: 'Who should someone contact about this account?',
+    subtitle: financialAdvisors.length > 0
+      ? 'Select the financial professional who manages this specific account.'
+      : 'No financial professionals have been entered in your Professional Team yet.',
     render: () => (
       <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-2.5">
-          {[
-            { value: 'yes_advisor', label: advisorName ? `Yes — ${advisorName}` : 'Yes' },
-            { value: 'no', label: 'No' },
-            { value: 'not_sure', label: "I'm not sure" },
-          ].map((opt) => (
-            <OptionButton
-              key={opt.value}
-              label={opt.label}
-              selected={effectiveContact?.contactPersonId === advisorId && !!advisorId || (opt.value === 'no' && !effectiveContact?.contactName)}
-              onClick={() => {
-                if (opt.value === 'yes_advisor') {
-                  updateDraft('contact', {
-                    contactPersonId: advisorId,
-                    contactName: advisorName,
-                    contactFirm: advisorFirm,
-                    contactPhone: advisorPhone,
-                    contactEmail: advisorEmail,
-                  });
-                } else {
-                  updateDraft('contact', { contactPersonId: undefined });
-                }
-              }}
-            />
-          ))}
-        </div>
-        {(!effectiveContact?.contactPersonId && !effectiveContact?.contactName) && (
-          <p className={subtleTextClass}>If yes, you can provide contact details on the next step.</p>
+        {hasStaleLink && (
+          <div className="bg-amber-900/30 border border-amber-700 rounded-lg p-3 text-sm text-amber-300">
+            The advisor previously linked to this account is no longer in your Professional Team. Please select a new advisor or choose another option below.
+          </div>
         )}
+
+        {sortedAdvisors.length > 0 && (
+          <div className="space-y-2.5">
+            {sortedAdvisors.map((advisor) => (
+              <div key={advisor.id}>
+                <AdvisorCard
+                  advisor={advisor}
+                  selected={currentContactPersonId === advisor.id}
+                  onClick={() => {
+                    setShowOtherContactForm(false);
+                    updateDraft('contact', { contactPersonId: advisor.id });
+                  }}
+                />
+                {currentContactPersonId === advisor.id && (
+                  <div className="mt-2">
+                    <AdvisorDetail advisor={advisor} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Other professional / custom contact */}
+        <button
+          type="button"
+          onClick={() => {
+            setShowOtherContactForm(true);
+            updateDraft('contact', { contactPersonId: undefined });
+          }}
+          className={`text-left p-4 rounded-xl border transition-all w-full ${
+            showOtherContactForm
+              ? 'border-blue-500 bg-blue-500/10 ring-1 ring-blue-500'
+              : 'border-gray-700 bg-gray-800 hover:border-gray-500'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <UserPlus className="w-5 h-5 text-gray-400" />
+            <span className="text-white font-medium">Someone else</span>
+          </div>
+        </button>
+
+        {showOtherContactForm && (
+          <div className="space-y-3 pl-2 border-l-2 border-gray-700">
+            <div>
+              <label className={labelClass}>Name</label>
+              <input type="text" value={draft.contact?.contactName || ''} onChange={(e) => updateDraft('contact', { ...draft.contact, contactName: e.target.value })} placeholder="Contact name" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Firm</label>
+              <input type="text" value={draft.contact?.contactFirm || ''} onChange={(e) => updateDraft('contact', { ...draft.contact, contactFirm: e.target.value })} placeholder="Firm or company" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Phone</label>
+              <input type="tel" value={draft.contact?.contactPhone || ''} onChange={(e) => updateDraft('contact', { ...draft.contact, contactPhone: e.target.value })} placeholder="Phone number" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Email</label>
+              <input type="email" value={draft.contact?.contactEmail || ''} onChange={(e) => updateDraft('contact', { ...draft.contact, contactEmail: e.target.value })} placeholder="Email address" className={inputClass} />
+            </div>
+          </div>
+        )}
+
+        {/* No one / not sure */}
+        <div className="grid grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={() => {
+              setShowOtherContactForm(false);
+              updateDraft('contact', { contactPersonId: undefined, contactName: undefined, contactFirm: undefined, contactPhone: undefined, contactEmail: undefined });
+            }}
+            className={`p-3 rounded-xl border transition-all text-center ${
+              !currentContactPersonId && !showOtherContactForm && !draft.contact?.contactName
+                ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-500'
+            }`}
+          >
+            No one
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowOtherContactForm(false);
+              updateDraft('contact', { contactPersonId: undefined, contactName: undefined, contactFirm: undefined, contactPhone: undefined, contactEmail: undefined });
+            }}
+            className={`p-3 rounded-xl border transition-all text-center ${
+              !currentContactPersonId && !showOtherContactForm && !draft.contact?.contactName
+                ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-500'
+            }`}
+          >
+            I'm not sure
+          </button>
+        </div>
       </div>
     ),
     canProceed: () => true,
   });
-
-  // Q8b: Contact details if yes but no advisor
-  if (!effectiveContact?.contactPersonId && effectiveContact?.contactPersonId !== advisorId) {
-    questions.push({
-      title: 'Contact details for this account (optional)',
-      subtitle: 'Someone stepping in may need to reach this person.',
-      render: () => (
-        <div className="space-y-3">
-          <div>
-            <label className={labelClass}>Name</label>
-            <input type="text" value={effectiveContact?.contactName || ''} onChange={(e) => updateDraft('contact', { ...effectiveContact, contactName: e.target.value })} placeholder="Contact name" className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Firm</label>
-            <input type="text" value={effectiveContact?.contactFirm || ''} onChange={(e) => updateDraft('contact', { ...effectiveContact, contactFirm: e.target.value })} placeholder="Firm or company" className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Phone</label>
-            <input type="tel" value={effectiveContact?.contactPhone || ''} onChange={(e) => updateDraft('contact', { ...effectiveContact, contactPhone: e.target.value })} placeholder="Phone number" className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Email</label>
-            <input type="email" value={effectiveContact?.contactEmail || ''} onChange={(e) => updateDraft('contact', { ...effectiveContact, contactEmail: e.target.value })} placeholder="Email address" className={inputClass} />
-          </div>
-        </div>
-      ),
-      canProceed: () => true,
-    });
-  }
 
   // Q9: Statements / documents
   questions.push({

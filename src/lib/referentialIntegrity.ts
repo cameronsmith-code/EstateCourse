@@ -7,6 +7,8 @@ export type ProfessionalAdvisor = {
   phone: string;
   email: string;
   website: string;
+  worksWith: string[];
+  services: string[];
   type: 'financial' | 'accountant' | 'lawyer' | 'insurance';
   active: boolean;
 };
@@ -24,34 +26,117 @@ export type Institution = {
 
 export type AnswersMap = Map<string, Record<string, unknown>>;
 
+let idCounter = 0;
+
+function generateStableId(): string {
+  idCounter += 1;
+  return `adv_${Date.now().toString(36)}_${idCounter}_${Math.random().toString(36).substr(2, 6)}`;
+}
+
+function ensureAdvisorId(
+  profTeam: Record<string, unknown>,
+  key: string
+): string {
+  const existing = profTeam[key] as string | undefined;
+  if (existing) return existing;
+  const newId = generateStableId();
+  return newId;
+}
+
+type AdditionalAdvisorRecord = {
+  id?: string;
+  name?: string;
+  firm?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  worksWith?: string[];
+  services?: string[];
+  isCameronSmith?: boolean;
+  duration?: string;
+  recordsLocation?: string;
+  includeInContactList?: string;
+  hasAdditional?: string;
+};
+
+function advisorFromFields(
+  id: string,
+  name: string,
+  firm: string,
+  phone: string,
+  email: string,
+  website: string,
+  worksWith: string[],
+  services: string[]
+): ProfessionalAdvisor {
+  return {
+    id,
+    name: name || '',
+    firm: firm || '',
+    phone: phone || '',
+    email: email || '',
+    website: website || '',
+    worksWith,
+    services,
+    type: 'financial',
+    active: true,
+  };
+}
+
 export function getProfessionalAdvisors(allAnswers: AnswersMap): ProfessionalAdvisor[] {
   const profTeam = allAnswers.get('professionalTeam') || {};
   const advisors: ProfessionalAdvisor[] = [];
 
   if (profTeam['fpHasAdvisor'] === 'yes') {
-    advisors.push({
-      id: 'advisor_0',
-      name: (profTeam['fpAdvisor1Name'] as string) || '',
-      firm: (profTeam['fpAdvisor1Firm'] as string) || '',
-      phone: (profTeam['fpAdvisor1Phone'] as string) || '',
-      email: (profTeam['fpAdvisor1Email'] as string) || '',
-      website: (profTeam['fpAdvisor1Website'] as string) || '',
-      type: 'financial',
-      active: true,
-    });
+    const id = ensureAdvisorId(profTeam, 'fpAdvisor1Id');
+    advisors.push(
+      advisorFromFields(
+        id,
+        (profTeam['fpAdvisor1Name'] as string) || '',
+        (profTeam['fpAdvisor1Firm'] as string) || '',
+        (profTeam['fpAdvisor1Phone'] as string) || '',
+        (profTeam['fpAdvisor1Email'] as string) || '',
+        (profTeam['fpAdvisor1Website'] as string) || '',
+        (profTeam['fpAdvisor1WorksWith'] as string[]) || [],
+        (profTeam['fpAdvisor1Services'] as string[]) || []
+      )
+    );
   }
 
   if (profTeam['fpHasAdditionalAdvisor'] === 'yes') {
-    advisors.push({
-      id: 'advisor_1',
-      name: (profTeam['fpAdvisor2Name'] as string) || '',
-      firm: (profTeam['fpAdvisor2Firm'] as string) || '',
-      phone: (profTeam['fpAdvisor2Phone'] as string) || '',
-      email: (profTeam['fpAdvisor2Email'] as string) || '',
-      website: (profTeam['fpAdvisor2Website'] as string) || '',
-      type: 'financial',
-      active: true,
-    });
+    const id = ensureAdvisorId(profTeam, 'fpAdvisor2Id');
+    advisors.push(
+      advisorFromFields(
+        id,
+        (profTeam['fpAdvisor2Name'] as string) || '',
+        (profTeam['fpAdvisor2Firm'] as string) || '',
+        (profTeam['fpAdvisor2Phone'] as string) || '',
+        (profTeam['fpAdvisor2Email'] as string) || '',
+        (profTeam['fpAdvisor2Website'] as string) || '',
+        (profTeam['fpAdvisor2WorksWith'] as string[]) || [],
+        (profTeam['fpAdvisor2Services'] as string[]) || []
+      )
+    );
+  }
+
+  const additionalData = profTeam['fpAdditionalAdvisorsData'] as AdditionalAdvisorRecord[] | undefined;
+  if (Array.isArray(additionalData)) {
+    for (const record of additionalData) {
+      if (!record.name && !record.firm && !record.isCameronSmith) continue;
+      const id = record.id || generateStableId();
+      advisors.push(
+        advisorFromFields(
+          id,
+          record.name || (record.isCameronSmith ? 'Cameron Smith' : ''),
+          record.firm || (record.isCameronSmith ? 'Clarify Wealth Ltd.' : ''),
+          record.phone || (record.isCameronSmith ? '647-448-5963' : ''),
+          record.email || (record.isCameronSmith ? 'cameron.smith@ipcsecurities.com' : ''),
+          record.website || (record.isCameronSmith ? 'www.clarifywealth.ca' : ''),
+          record.worksWith || [],
+          record.services || []
+        )
+      );
+    }
   }
 
   if (profTeam['acctHasAccountant'] === 'yes') {
@@ -62,6 +147,8 @@ export function getProfessionalAdvisors(allAnswers: AnswersMap): ProfessionalAdv
       phone: (profTeam['acctAdvisor1Phone'] as string) || '',
       email: (profTeam['acctAdvisor1Email'] as string) || '',
       website: '',
+      worksWith: (profTeam['acctAdvisor1WorksWith'] as string[]) || [],
+      services: (profTeam['acctAdvisor1Services'] as string[]) || [],
       type: 'accountant',
       active: true,
     });
@@ -75,6 +162,8 @@ export function getProfessionalAdvisors(allAnswers: AnswersMap): ProfessionalAdv
       phone: (profTeam['lawAdvisor1Phone'] as string) || '',
       email: (profTeam['lawAdvisor1Email'] as string) || '',
       website: '',
+      worksWith: (profTeam['lawAdvisor1WorksWith'] as string[]) || [],
+      services: (profTeam['lawAdvisor1Services'] as string[]) || [],
       type: 'lawyer',
       active: true,
     });
@@ -88,6 +177,8 @@ export function getProfessionalAdvisors(allAnswers: AnswersMap): ProfessionalAdv
       phone: (profTeam['insAdvisor1Phone'] as string) || '',
       email: (profTeam['insAdvisor1Email'] as string) || '',
       website: '',
+      worksWith: (profTeam['insAdvisor1WorksWith'] as string[]) || [],
+      services: (profTeam['insAdvisor1Services'] as string[]) || [],
       type: 'insurance',
       active: true,
     });
@@ -101,12 +192,18 @@ export function getProfessionalAdvisors(allAnswers: AnswersMap): ProfessionalAdv
       phone: (profTeam['insAdvisor2Phone'] as string) || '',
       email: (profTeam['insAdvisor2Email'] as string) || '',
       website: '',
+      worksWith: (profTeam['insAdvisor2WorksWith'] as string[]) || [],
+      services: (profTeam['insAdvisor2Services'] as string[]) || [],
       type: 'insurance',
       active: true,
     });
   }
 
   return advisors;
+}
+
+export function getFinancialAdvisors(allAnswers: AnswersMap): ProfessionalAdvisor[] {
+  return getProfessionalAdvisors(allAnswers).filter((a) => a.type === 'financial' && a.name);
 }
 
 export function resolveProfessionalReference(

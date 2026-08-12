@@ -17,6 +17,7 @@ import Subsection from './Subsection';
 import ChildPlanningSection, { PlanningPerson } from './ChildPlanningSection';
 import DebtObligations from './DebtObligations';
 import FinancialFootprintAssets from './FinancialFootprintAssets';
+import { getFinancialAdvisors } from '../lib/referentialIntegrity';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
 type StepFormProps = {
@@ -89,8 +90,8 @@ export default function StepForm({
 
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
-      ['fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1RecordsLocation', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional',
-       'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2RecordsLocation', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
+      ['fpAdvisor1Id', 'fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone', 'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services', 'fpAdvisor1Duration', 'fpAdvisor1RecordsLocation', 'fpAdvisor1DocLocation', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1WorksWith', 'fpHasAdditionalAdvisor', 'fpAdditionalAdvisorsData', 'fpAdditionalHasAdditional',
+       'fpAdvisor2Id', 'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone', 'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services', 'fpAdvisor2Duration', 'fpAdvisor2RecordsLocation', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2WorksWith', 'fpAdvisor2HasAdditionalAdvisor'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -98,26 +99,61 @@ export default function StepForm({
     }
   }, [answers['fpHasAdvisor']]);
 
-  // Clear advisor-linked contacts from financial footprint assets when advisor is removed
+  // Ensure advisor 1 has a stable ID persisted in Professional Team
+  useEffect(() => {
+    if (answers['fpHasAdvisor'] === 'yes' && !answers['fpAdvisor1Id']) {
+      const stableId = `adv_${Date.now().toString(36)}_a1_${Math.random().toString(36).substr(2, 6)}`;
+      onAnswerChange('fpAdvisor1Id', stableId);
+    }
+  }, [answers['fpHasAdvisor'], answers['fpAdvisor1Id']]);
+
+  // Ensure advisor 2 has a stable ID persisted in Professional Team
+  useEffect(() => {
+    if (answers['fpHasAdditionalAdvisor'] === 'yes' && !answers['fpAdvisor2Id']) {
+      const stableId = `adv_${Date.now().toString(36)}_a2_${Math.random().toString(36).substr(2, 6)}`;
+      onAnswerChange('fpAdvisor2Id', stableId);
+    }
+  }, [answers['fpHasAdditionalAdvisor'], answers['fpAdvisor2Id']]);
+
+  // Ensure each additional advisor record has a stable ID
+  useEffect(() => {
+    if (answers['fpHasAdvisor'] !== 'yes') return;
+    const additionalData = answers['fpAdditionalAdvisorsData'] as Array<Record<string, unknown>> | undefined;
+    if (!Array.isArray(additionalData) || additionalData.length === 0) return;
+    let changed = false;
+    const updated = additionalData.map((record) => {
+      if (!record.id) {
+        changed = true;
+        return {
+          ...record,
+          id: `adv_${Date.now().toString(36)}_x_${Math.random().toString(36).substr(2, 6)}`,
+        };
+      }
+      return record;
+    });
+    if (changed) {
+      onAnswerChange('fpAdditionalAdvisorsData', updated);
+    }
+  }, [answers['fpHasAdvisor'], answers['fpAdditionalAdvisorsData']]);
+
+  // Clear stale advisor references from financial footprint assets using registry-based cleanup
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
       const footprint = allAnswers?.get('financialFootprint') || {};
       const assetKeys = ['investmentAccountsData', 'pensionRecordsData', 'equityCompensationData', 'receivablesData', 'otherAssetsData'];
-      let anyChanged = false;
 
       for (const key of assetKeys) {
         const assets = footprint[key] as Array<Record<string, unknown>> | undefined;
         if (!Array.isArray(assets) || assets.length === 0) continue;
 
         const hasStale = assets.some(
-          (a) => (a?.contact as Record<string, unknown>)?.contactPersonId === 'advisor_0'
+          (a) => (a?.contact as Record<string, unknown>)?.contactPersonId
         );
         if (!hasStale) continue;
 
-        anyChanged = true;
         const cleaned = assets.map((a) => {
           const contact = a?.contact as Record<string, unknown> | undefined;
-          if (contact?.contactPersonId === 'advisor_0') {
+          if (contact?.contactPersonId) {
             return { ...a, contact: {} };
           }
           return a;
@@ -170,27 +206,8 @@ export default function StepForm({
       if (answers['fpAdditionalHasAdditional'] !== undefined) {
         onAnswerChange('fpAdditionalHasAdditional', undefined);
       }
-      // Clear stale advisor_1 references from financial footprint assets
-      const footprint = allAnswers?.get('financialFootprint') || {};
-      const assetKeys = ['investmentAccountsData', 'pensionRecordsData', 'equityCompensationData', 'receivablesData', 'otherAssetsData'];
-      for (const key of assetKeys) {
-        const assets = footprint[key] as Array<Record<string, unknown>> | undefined;
-        if (!Array.isArray(assets) || assets.length === 0) continue;
-        const hasStale = assets.some(
-          (a) => (a?.contact as Record<string, unknown>)?.contactPersonId === 'advisor_1'
-        );
-        if (!hasStale) continue;
-        const cleaned = assets.map((a) => {
-          const contact = a?.contact as Record<string, unknown> | undefined;
-          if (contact?.contactPersonId === 'advisor_1') {
-            return { ...a, contact: {} };
-          }
-          return a;
-        });
-        onUpdateFootprint?.(key, cleaned);
-      }
     }
-  }, [answers['fpHasAdditionalAdvisor'], allAnswers, onUpdateFootprint]);
+  }, [answers['fpHasAdditionalAdvisor']]);
 
   useEffect(() => {
     if (answers['acctHasAccountant'] !== 'yes') {
@@ -7028,10 +7045,10 @@ export default function StepForm({
             };
 
             const fpKeys = new Set([
-              'fpHasAdvisor', 'fpAdvisor1WorksWith', 'fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone',
+              'fpHasAdvisor', 'fpAdvisor1Id', 'fpAdvisor1WorksWith', 'fpAdvisor1IsCameronSmith', 'fpAdvisor1Firm', 'fpAdvisor1Name', 'fpAdvisor1Phone',
               'fpAdvisor1Email', 'fpAdvisor1Website', 'fpAdvisor1Services',
               'fpAdvisor1Duration', 'fpAdvisor1IncludeInContactList', 'fpAdvisor1RecordsLocation', 'fpHasAdditionalAdvisor',
-              'fpAdvisor2WorksWith', 'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone',
+              'fpAdvisor2Id', 'fpAdvisor2WorksWith', 'fpAdvisor2IsCameronSmith', 'fpAdvisor2Firm', 'fpAdvisor2Name', 'fpAdvisor2Phone',
               'fpAdvisor2Email', 'fpAdvisor2Website', 'fpAdvisor2Services',
               'fpAdvisor2Duration', 'fpAdvisor2RecordsLocation', 'fpAdvisor2IncludeInContactList', 'fpAdvisor2HasAdditionalAdvisor',
             ]);
@@ -9914,24 +9931,16 @@ export default function StepForm({
                                 website: 'www.clarifywealth.ca',
                               };
                               const renderAdvisorQuestion = () => {
-                                type AdvisorContact = { firm: string; name: string; phone: string; email: string; website: string };
-                                const advisorOptions: AdvisorContact[] = [];
-                                const seen = new Set<string>();
-                                const addAdvisor = (isCameron: unknown, name: unknown, firm: unknown, phone: unknown, email: unknown, website: unknown) => {
-                                  const c: AdvisorContact = isCameron
-                                    ? { ...CAMERON_SMITH_INFO }
-                                    : { name: (name as string) || '', firm: (firm as string) || '', phone: (phone as string) || '', email: (email as string) || '', website: (website as string) || '' };
-                                  if (!c.name || seen.has(c.name)) return;
-                                  seen.add(c.name);
-                                  advisorOptions.push(c);
-                                };
-                                addAdvisor(s7['fpAdvisor1IsCameronSmith'], s7['fpAdvisor1Name'], s7['fpAdvisor1Firm'], s7['fpAdvisor1Phone'], s7['fpAdvisor1Email'], s7['fpAdvisor1Website']);
-                                if (s7['fpAdvisor2HasAdditionalAdvisor'] === 'yes' || s7['fpHasAdditionalAdvisor'] === 'yes') {
-                                  addAdvisor(s7['fpAdvisor2IsCameronSmith'], s7['fpAdvisor2Name'], s7['fpAdvisor2Firm'], s7['fpAdvisor2Phone'], s7['fpAdvisor2Email'], s7['fpAdvisor2Website']);
-                                }
-                                ((s7['fpAdditionalAdvisorsData'] as Array<Record<string,unknown>>) || []).forEach(a => {
-                                  if (a) addAdvisor(a.isCameronSmith, a.name, a.firm, a.phone, a.email, a.website);
-                                });
+                                const registryAdvisors = getFinancialAdvisors(allAnswers || new Map());
+                                type AdvisorContact = { id: string; firm: string; name: string; phone: string; email: string; website: string };
+                                const advisorOptions: AdvisorContact[] = registryAdvisors.map(a => ({
+                                  id: a.id,
+                                  name: a.name,
+                                  firm: a.firm,
+                                  phone: a.phone,
+                                  email: a.email,
+                                  website: a.website,
+                                }));
 
                                 const dropdownVal = instLabel;
                                 const isOther = dropdownVal === '__other__';
@@ -10222,24 +10231,15 @@ export default function StepForm({
                                 website: 'www.clarifywealth.ca',
                               };
                               const renderAdvisorQuestion = (instIdx: number, inst: Record<string, unknown>) => {
+                                const registryAdvisors = getFinancialAdvisors(allAnswers || new Map());
                                 type AdvisorContact = { firm: string; name: string; phone: string; email: string; website: string };
-                                const advisorOptions: AdvisorContact[] = [];
-                                const seen = new Set<string>();
-                                const addAdvisor = (isCameron: unknown, name: unknown, firm: unknown, phone: unknown, email: unknown, website: unknown) => {
-                                  const c: AdvisorContact = isCameron
-                                    ? { ...CAMERON_SMITH_INFO }
-                                    : { name: (name as string) || '', firm: (firm as string) || '', phone: (phone as string) || '', email: (email as string) || '', website: (website as string) || '' };
-                                  if (!c.name || seen.has(c.name)) return;
-                                  seen.add(c.name);
-                                  advisorOptions.push(c);
-                                };
-                                addAdvisor(s7['fpAdvisor1IsCameronSmith'], s7['fpAdvisor1Name'], s7['fpAdvisor1Firm'], s7['fpAdvisor1Phone'], s7['fpAdvisor1Email'], s7['fpAdvisor1Website']);
-                                if (s7['fpAdvisor2HasAdditionalAdvisor'] === 'yes' || s7['fpHasAdditionalAdvisor'] === 'yes') {
-                                  addAdvisor(s7['fpAdvisor2IsCameronSmith'], s7['fpAdvisor2Name'], s7['fpAdvisor2Firm'], s7['fpAdvisor2Phone'], s7['fpAdvisor2Email'], s7['fpAdvisor2Website']);
-                                }
-                                ((s7['fpAdditionalAdvisorsData'] as Array<Record<string,unknown>>) || []).forEach(a => {
-                                  if (a) addAdvisor(a.isCameronSmith, a.name, a.firm, a.phone, a.email, a.website);
-                                });
+                                const advisorOptions: AdvisorContact[] = registryAdvisors.map(a => ({
+                                  name: a.name,
+                                  firm: a.firm,
+                                  phone: a.phone,
+                                  email: a.email,
+                                  website: a.website,
+                                }));
 
                                 const dropdownVal = (inst.institution as string) || '';
                                 const isOther = dropdownVal === '__other__';

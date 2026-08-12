@@ -28,6 +28,8 @@ import {
   type CurrentWillData,
   type ClientWillUnderstanding,
   type WillDocumentBasics,
+  type WillJurisdiction,
+  type WillJurisdictionType,
   type ClientUnderstanding,
   type FirstDeathUnderstanding,
   type FirstDeathException,
@@ -41,11 +43,20 @@ import {
   type OverallConfidence,
   type EstatePlanAlignment,
   type AlignmentSubjectType,
+  type ComplexityFactors,
+  type SimilarWillsDifferences,
   emptyClientWill,
   generatePlanningRiskFlags,
+  generatePlanningFlags,
   getUnderstandingLabel,
   getUnderstandingColor,
+  getFlagSeverityColor,
+  getFlagSeverityLabel,
 } from '../lib/currentWillTypes';
+import {
+  getCurrentLawyers,
+  type ProfessionalAdvisor,
+} from '../lib/referentialIntegrity';
 import {
   type LegacyIntentRecord,
   type LegacyPerson,
@@ -76,10 +87,40 @@ const FIRST_DEATH_OPTIONS = [
   { value: 'not_sure', label: "I'm not sure" },
 ];
 
-const MIRROR_OPTIONS = [
+const SIMILAR_WILLS_OPTIONS = [
+  { value: 'yes_similar', label: 'Yes, they\'re generally similar' },
+  { value: 'mostly_different', label: 'Mostly, with some differences' },
+  { value: 'no_quite_different', label: 'No, they\'re quite different' },
+  { value: 'not_sure', label: "I'm not sure" },
+];
+
+const SIMILAR_WILLS_DIFFERENCE_OPTIONS = [
+  { value: 'estate_trustees', label: 'Different Estate Trustees' },
+  { value: 'specific_gifts', label: 'Different specific gifts' },
+  { value: 'business_provisions', label: 'Different business provisions' },
+  { value: 'beneficiaries', label: 'Different beneficiaries' },
+  { value: 'legacy_asset_provisions', label: 'Different Legacy Asset provisions' },
+  { value: 'trusts', label: 'Different trusts' },
+  { value: 'other', label: 'Other' },
+  { value: 'not_sure', label: "I'm not sure" },
+];
+
+const CANADIAN_PROVINCES = [
+  'Ontario', 'Quebec', 'British Columbia', 'Alberta', 'Manitoba',
+  'Saskatchewan', 'Nova Scotia', 'New Brunswick',
+  'Newfoundland and Labrador', 'Prince Edward Island',
+  'Northwest Territories', 'Nunavut', 'Yukon',
+];
+
+const LAWYER_PREPARED_OPTIONS = [
   { value: 'yes', label: 'Yes' },
-  { value: 'mostly', label: 'Mostly' },
   { value: 'no', label: 'No' },
+  { value: 'not_sure', label: "I'm not sure" },
+];
+
+const JURISDICTION_TYPE_OPTIONS = [
+  { value: 'canada', label: 'Canada' },
+  { value: 'outside_canada', label: 'Outside Canada' },
   { value: 'not_sure', label: "I'm not sure" },
 ];
 
@@ -256,15 +297,63 @@ export default function CurrentWillSection({ answers, allAnswers, onAnswerChange
   const clientOwnedCorps = useMemo(() => getClientOwnedCorporations(allAnswers), [allAnswers]);
 
   const estateTrusteeAnswers = allAnswers.get('estateTrustees') || {};
-  const legacyIntentAnswers = allAnswers.get('legacyIntent') || {};
+  const allLawyers = useMemo(() => getCurrentLawyers(allAnswers), [allAnswers]);
 
-  const [activeView, setActiveView] = useState<'intro' | 'main' | 'summary'>('intro');
+  const handleAddLawyer = useCallback((record: Record<string, unknown>) => {
+    const willsSection = allAnswers.get('wills') || {};
+    const existing = (willsSection['willLawyersData'] as Array<Record<string, unknown>>) || [];
+    onAnswerChange('willLawyersData', [...existing, record]);
+  }, [allAnswers, onAnswerChange]);
+
+  const [activeView, setActiveView] = useState<'intro' | 'main' | 'summary' | 'transition'>('intro');
   const [activeClientId, setActiveClientId] = useState<'client1' | 'client2' | null>(null);
 
+  const clientResidenceProvince = (aboutYou['province'] as string) || undefined;
+
+  const complexityFactors = useMemo<ComplexityFactors>(() => {
+    const realEstate = allAnswers.get('realEstate') || {};
+    const primaryHome = realEstate['primaryHomeData'] as Record<string, string> | undefined;
+    const propertiesData = (realEstate['propertiesData'] as Array<Record<string, string>>) || [];
+    const additionalCount = parseInt((realEstate['additionalPropertiesCount'] as string) || '0', 10);
+    const totalProperties = (primaryHome ? 1 : 0) + (isNaN(additionalCount) ? 0 : additionalCount) + propertiesData.length;
+
+    const hasForeignProperty = (
+      (primaryHome?.country && primaryHome.country.toLowerCase() !== 'canada' && primaryHome.country.toLowerCase() !== 'ca') ||
+      propertiesData.some(p => p.country && p.country.toLowerCase() !== 'canada' && p.country.toLowerCase() !== 'ca')
+    ) || false;
+
+    const hasPrivateCorpOwnership = clientOwnedCorps.length > 0;
+
+    const hasMinor = minorChildren.length > 0;
+    const hasDependant = childrenData.some(c => c.classification === 'adult_dependant');
+    const hasDisabled = childrenData.some(c => c.disabled === 'yes' || c.disabled === 'not_sure');
+
+    const familyTrusts = allAnswers.get('familyTrusts')?.['familyTrustsData'] as Array<Record<string, unknown>> | undefined;
+    const hasSignificantTrust = (familyTrusts && familyTrusts.length > 0) || false;
+
+    const hasComplex = hasMinor || hasDependant || hasDisabled || hasPrivateCorpOwnership || totalProperties > 1 || hasForeignProperty || hasSignificantTrust;
+
+    return {
+      hasMinorChildren: hasMinor,
+      hasDependentAdult: hasDependant,
+      hasDisabledBeneficiary: hasDisabled,
+      hasPrivateCorpOwnership,
+      hasMultipleProperties: totalProperties > 1,
+      hasForeignProperty,
+      hasSignificantTrustPlanning: hasSignificantTrust,
+      hasComplexEstate: hasComplex,
+    };
+  }, [allAnswers, childrenData, minorChildren, clientOwnedCorps]);
+
   const updateData = useCallback((updated: CurrentWillData) => {
-    const withFlags = { ...updated, planningRiskFlags: generatePlanningRiskFlags(updated) };
+    const planningFlags = generatePlanningFlags(updated, { complexity: complexityFactors, clientResidenceProvince });
+    const withFlags = {
+      ...updated,
+      planningFlags,
+      planningRiskFlags: generatePlanningRiskFlags(updated, { complexity: complexityFactors, clientResidenceProvince }),
+    };
     onAnswerChange('currentWillData', withFlags);
-  }, [onAnswerChange]);
+  }, [onAnswerChange, complexityFactors, clientResidenceProvince]);
 
   const ensureClient = (clientId: 'client1' | 'client2'): ClientWillUnderstanding => {
     const existing = data.clients.find(c => c.clientId === clientId);
@@ -347,8 +436,42 @@ export default function CurrentWillSection({ answers, allAnswers, onAnswerChange
     );
   }
 
+  if (activeView === 'transition' && activeClientId) {
+    const nextClientName = activeClientId === 'client1' ? client2Name : client1Name;
+    const prevClientName = activeClientId === 'client1' ? client1Name : client2Name;
+    const isSimilar = data.similarWills === 'yes_similar';
+    return (
+      <div className="space-y-6">
+        <div className={sectionCardClass}>
+          <h2 className="text-2xl font-bold text-white mb-3">Next: {nextClientName}'s Will</h2>
+          <p className="text-sm text-gray-300 leading-relaxed">
+            We've finished capturing how {prevClientName} understands their current Will. Next, we'll look at {nextClientName}'s Will.
+          </p>
+          {isSimilar && (
+            <div className="mt-4 bg-blue-900/20 border border-blue-700/30 rounded-lg p-4">
+              <p className="text-xs text-blue-200/80 leading-relaxed">
+                Because you've told us your Wills are generally similar, we'll carry forward what you've already told us and only ask where {nextClientName}'s understanding may differ.
+              </p>
+            </div>
+          )}
+          <div className="mt-5">
+            <button
+              type="button"
+              onClick={() => { setActiveView('main'); }}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-500 transition-colors"
+            >
+              Continue to {nextClientName}'s Will
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (activeClientId) {
     const client = ensureClient(activeClientId);
+    const nextClientHasWill = activeClientId === 'client1' ? c2Will : false;
     return (
       <ClientWillFlow
         client={client}
@@ -368,17 +491,26 @@ export default function CurrentWillSection({ answers, allAnswers, onAnswerChange
         onUpdateDocBasics={(updates) => updateDocBasics(activeClientId, updates)}
         onUpdateAlignment={(subjectType, subjectId, subjectLabel, understanding, intentionSourceId, difference) =>
           updateAlignment(activeClientId, subjectType, subjectId, subjectLabel, understanding, intentionSourceId, difference)}
-        onBack={() => setActiveClientId(null)}
+        onBack={() => { setActiveClientId(null); setActiveView('main'); }}
         onDone={() => {
-          if (bothHaveWills && activeClientId === 'client1' && data.mirrorWills !== 'yes') {
+          if (bothHaveWills && activeClientId === 'client1') {
+            setActiveView('transition');
+            setActiveClientId('client2');
+          } else if (activeClientId === 'client1' && nextClientHasWill) {
+            setActiveView('transition');
             setActiveClientId('client2');
           } else {
             setActiveClientId(null);
             setActiveView('summary');
           }
         }}
-        mirrorWills={data.mirrorWills}
+        similarWills={data.similarWills}
         isSecondClient={bothHaveWills && activeClientId === 'client2'}
+        client1Name={client1Name}
+        client2Name={client2Name}
+        allLawyers={allLawyers}
+        onAddLawyer={handleAddLawyer}
+        clientResidenceProvince={clientResidenceProvince}
       />
     );
   }
@@ -405,17 +537,44 @@ export default function CurrentWillSection({ answers, allAnswers, onAnswerChange
 
       {bothHaveWills && (
         <div className={sectionCardClass}>
-          <SectionHeading label="Do you understand your Wills to generally follow the same plan?" icon={<Scale className="w-4 h-4" />} />
+          <SectionHeading label="Based on your understanding, do your Wills generally leave things in a similar way?" icon={<Scale className="w-4 h-4" />} />
+          <p className="text-xs text-gray-400 mt-2">For example, you may both leave most of your estate to each other first, then follow a similar plan for your children or other beneficiaries.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-            {MIRROR_OPTIONS.map(opt => (
+            {SIMILAR_WILLS_OPTIONS.map(opt => (
               <OptionButton
                 key={opt.value}
                 label={opt.label}
-                selected={data.mirrorWills === opt.value}
-                onClick={() => updateData({ ...data, mirrorWills: opt.value as CurrentWillData['mirrorWills'] })}
+                selected={data.similarWills === opt.value}
+                onClick={() => updateData({ ...data, similarWills: opt.value as CurrentWillData['similarWills'], similarWillsDifferences: opt.value === 'mostly_different' ? data.similarWillsDifferences : [] })}
               />
             ))}
           </div>
+
+          {data.similarWills === 'mostly_different' && (
+            <div className="mt-4 pt-4 border-t border-gray-700">
+              <label className={labelClass}>Where do you understand the main differences to be?</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                {SIMILAR_WILLS_DIFFERENCE_OPTIONS.map(opt => {
+                  const selected = (data.similarWillsDifferences || []).some(d => d.area === opt.value);
+                  return (
+                    <OptionButton
+                      key={opt.value}
+                      label={opt.label}
+                      selected={selected}
+                      onClick={() => {
+                        const current = data.similarWillsDifferences || [];
+                        if (selected) {
+                          updateData({ ...data, similarWillsDifferences: current.filter(d => d.area !== opt.value) });
+                        } else {
+                          updateData({ ...data, similarWillsDifferences: [...current, { id: genId('diff'), area: opt.value as SimilarWillsDifferences[0]['area'] }] });
+                        }
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -555,8 +714,13 @@ function ClientWillFlow({
   onUpdateAlignment,
   onBack,
   onDone,
-  mirrorWills,
-  isSecondClient,
+  similarWills: _similarWills,
+  isSecondClient: _isSecondClient,
+  client1Name: _client1Name,
+  client2Name: _client2Name,
+  allLawyers,
+  onAddLawyer,
+  clientResidenceProvince,
 }: {
   client: ClientWillUnderstanding;
   allAnswers: Map<string, Record<string, unknown>>;
@@ -576,8 +740,13 @@ function ClientWillFlow({
   onUpdateAlignment: (subjectType: AlignmentSubjectType, subjectId: string, subjectLabel: string, understanding: ClientUnderstanding, intentionSourceId?: string, difference?: unknown) => void;
   onBack: () => void;
   onDone: () => void;
-  mirrorWills?: string;
+  similarWills?: string;
   isSecondClient: boolean;
+  client1Name: string;
+  client2Name: string;
+  allLawyers: ProfessionalAdvisor[];
+  onAddLawyer: (record: Record<string, unknown>) => void;
+  clientResidenceProvince?: string;
 }) {
   const [section, setSection] = useState(0);
   const clientPrefix = client.clientId === 'client1' ? 'client1' : 'client2';
@@ -585,7 +754,7 @@ function ClientWillFlow({
 
   const willYear = (willsAnswers[`${clientPrefix}WillYear`] as string) || db.willYear;
   const willLocation = (willsAnswers[`${clientPrefix}WillLocation`] as string) || db.willLocation;
-  const willJurisdiction = (willsAnswers[`${clientPrefix}WillJurisdiction`] as string) || db.willJurisdiction;
+  const _willJurisdiction = (willsAnswers[`${clientPrefix}WillJurisdiction`] as string) || db.willJurisdiction;
   const hasSecondaryWill = (willsAnswers[`${clientPrefix}HasSecondaryWill`] as string) || db.hasSecondaryWill;
   const secondaryWillLocation = (willsAnswers[`${clientPrefix}SecondaryWillLocation`] as string) || db.secondaryWillLocation;
   const secondaryWillJurisdiction = (willsAnswers[`${clientPrefix}SecondaryWillJurisdiction`] as string) || db.secondaryWillJurisdiction;
@@ -662,13 +831,19 @@ function ClientWillFlow({
             clientName={client.clientName}
             willYear={willYear}
             willLocation={willLocation}
-            willJurisdiction={willJurisdiction}
+            willJurisdiction={_willJurisdiction}
+            willJurisdictionStructured={db.willJurisdictionStructured}
             hasSecondaryWill={hasSecondaryWill}
             secondaryWillLocation={secondaryWillLocation}
             secondaryWillJurisdiction={secondaryWillJurisdiction}
+            willPreparedByLawyer={db.willPreparedByLawyer}
+            willLawyerId={db.willLawyerId}
             hasMeaningfulChanges={db.hasMeaningfulChanges}
             meaningfulChangesDetails={db.meaningfulChangesDetails}
             onUpdate={onUpdateDocBasics}
+            allLawyers={allLawyers}
+            onAddLawyer={onAddLawyer}
+            clientResidenceProvince={clientResidenceProvince}
           />
         )}
 
@@ -817,27 +992,43 @@ function DocBasicsSection({
   willYear,
   willLocation,
   willJurisdiction,
+  willJurisdictionStructured,
   hasSecondaryWill,
   secondaryWillLocation,
   secondaryWillJurisdiction,
+  willPreparedByLawyer,
+  willLawyerId,
   hasMeaningfulChanges,
   meaningfulChangesDetails,
   onUpdate,
+  allLawyers,
+  onAddLawyer,
+  clientResidenceProvince,
 }: {
   clientName: string;
   willYear?: string;
   willLocation?: string;
   willJurisdiction?: string;
+  willJurisdictionStructured?: WillJurisdiction;
   hasSecondaryWill?: string;
   secondaryWillLocation?: string;
   secondaryWillJurisdiction?: string;
+  willPreparedByLawyer?: string;
+  willLawyerId?: string;
   hasMeaningfulChanges?: string;
   meaningfulChangesDetails?: string;
   onUpdate: (updates: Partial<WillDocumentBasics>) => void;
+  allLawyers: ProfessionalAdvisor[];
+  onAddLawyer: (record: Record<string, unknown>) => void;
+  clientResidenceProvince?: string;
 }) {
   const currentYear = new Date().getFullYear();
   const years: Array<{ value: string; label: string }> = [];
   for (let y = currentYear; y >= 1950; y--) years.push({ value: String(y), label: String(y) });
+  const [showNewLawyerForm, setShowNewLawyerForm] = useState(false);
+
+  const selectedLawyer = allLawyers.find(l => l.id === willLawyerId);
+  const jurType = willJurisdictionStructured?.type;
 
   return (
     <div className="space-y-5">
@@ -845,6 +1036,87 @@ function DocBasicsSection({
       <p className={subtleTextClass}>We've pulled in what you've already told us. Please confirm or fill in any gaps.</p>
 
       <div>
+        <label className={labelClass}>Was {clientName}'s current Will prepared by a lawyer?</label>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
+          {LAWYER_PREPARED_OPTIONS.map(opt => (
+            <OptionButton key={opt.value} label={opt.label} selected={willPreparedByLawyer === opt.value} onClick={() => onUpdate({ willPreparedByLawyer: opt.value as 'yes' | 'no' | 'not_sure', willLawyerId: opt.value !== 'yes' ? undefined : willLawyerId })} />
+          ))}
+        </div>
+      </div>
+
+      {willPreparedByLawyer === 'yes' && (
+        <div className="pt-3 border-t border-gray-700">
+          <label className={labelClass}>Who prepared {clientName}'s Will?</label>
+          <p className="text-xs text-gray-400 mb-3">Select from lawyers you've already told us about, or add someone new.</p>
+          <div className="space-y-2.5">
+            {allLawyers.map(lawyer => (
+              <button
+                key={lawyer.id}
+                type="button"
+                onClick={() => onUpdate({ willLawyerId: lawyer.id })}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-left w-full transition-all ${
+                  willLawyerId === lawyer.id
+                    ? 'bg-blue-600/20 border-blue-500 text-white'
+                    : 'bg-gray-800 border-gray-600 text-gray-200 hover:border-blue-500 hover:text-white'
+                }`}
+              >
+                <FileText className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="text-sm font-medium block">{lawyer.name || 'Unnamed lawyer'}</span>
+                  <span className="text-xs text-gray-400 block">{lawyer.firm}{lawyer.source === 'corporate' && lawyer.corpName ? ` — Corporate Lawyer for ${lawyer.corpName}` : ''}</span>
+                </div>
+                {willLawyerId === lawyer.id && <CheckCircle2 className="w-4 h-4 text-blue-400 flex-shrink-0" />}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => setShowNewLawyerForm(true)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-left w-full transition-all ${
+                showNewLawyerForm
+                  ? 'bg-gray-800 border-gray-600'
+                  : 'bg-gray-800 border-dashed border-gray-500 text-gray-300 hover:border-blue-500 hover:text-blue-400'
+              }`}
+            >
+              <Plus className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-medium">Someone else</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onUpdate({ willLawyerId: undefined })}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-left w-full transition-all ${
+                willLawyerId === undefined && !showNewLawyerForm && willPreparedByLawyer === 'yes'
+                  ? 'bg-gray-800 border-gray-600 text-gray-400'
+                  : 'bg-gray-800 border-gray-600 text-gray-300 hover:text-white'
+              }`}
+            >
+              <Info className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm">I'm not sure</span>
+            </button>
+          </div>
+
+          {showNewLawyerForm && (
+            <NewLawyerForm
+              onAdd={(record) => { onAddLawyer(record); onUpdate({ willLawyerId: record.id as string }); setShowNewLawyerForm(false); }}
+              onCancel={() => setShowNewLawyerForm(false)}
+            />
+          )}
+
+          {selectedLawyer && !showNewLawyerForm && (
+            <div className="mt-3 p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg">
+              <p className="text-xs text-blue-200/80 leading-relaxed">
+                <span className="font-medium">{selectedLawyer.name}</span>
+                {selectedLawyer.firm && <span> — {selectedLawyer.firm}</span>}
+                {selectedLawyer.phone && <span> — {selectedLawyer.phone}</span>}
+                {selectedLawyer.email && <span> — {selectedLawyer.email}</span>}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="pt-3 border-t border-gray-700">
         <label className={labelClass}>In what year was {clientName}'s Will prepared?</label>
         <select value={willYear || ''} onChange={e => onUpdate({ willYear: e.target.value })} className={inputClass}>
           <option value="">Select year</option>
@@ -858,9 +1130,43 @@ function DocBasicsSection({
       </div>
 
       <div>
-        <label className={labelClass}>In what jurisdiction was the Will prepared?</label>
-        <input type="text" value={willJurisdiction || ''} onChange={e => onUpdate({ willJurisdiction: e.target.value })} placeholder="e.g., Ontario, British Columbia" className={inputClass} />
+        <label className={labelClass}>Where was this Will prepared?</label>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
+          {JURISDICTION_TYPE_OPTIONS.map(opt => (
+            <OptionButton key={opt.value} label={opt.label} selected={jurType === opt.value} onClick={() => onUpdate({ willJurisdictionStructured: { type: opt.value as WillJurisdictionType } })} />
+          ))}
+        </div>
       </div>
+
+      {jurType === 'canada' && (
+        <div>
+          <label className={labelClass}>Province / territory</label>
+          <select
+            value={willJurisdictionStructured?.province || ''}
+            onChange={e => onUpdate({ willJurisdictionStructured: { type: 'canada', province: e.target.value } })}
+            className={inputClass}
+          >
+            <option value="">Select province or territory</option>
+            {CANADIAN_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+          {clientResidenceProvince && willJurisdictionStructured?.province && (
+            <JurisdictionComparison willProvince={willJurisdictionStructured.province} residenceProvince={clientResidenceProvince} />
+          )}
+        </div>
+      )}
+
+      {jurType === 'outside_canada' && (
+        <>
+          <div>
+            <label className={labelClass}>Country</label>
+            <input type="text" value={willJurisdictionStructured?.country || ''} onChange={e => onUpdate({ willJurisdictionStructured: { type: 'outside_canada', country: e.target.value } })} placeholder="e.g., United Kingdom, United States" className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>State / province / region (optional)</label>
+            <input type="text" value={willJurisdictionStructured?.region || ''} onChange={e => onUpdate({ willJurisdictionStructured: { type: 'outside_canada', country: willJurisdictionStructured?.country || '', region: e.target.value } })} placeholder="e.g., California, England" className={inputClass} />
+          </div>
+        </>
+      )}
 
       <div>
         <label className={labelClass}>Does {clientName} have a secondary Will (e.g., for private-company shares)?</label>
@@ -2049,6 +2355,19 @@ function SummaryScreen({
               {client.documentBasics.willLocation && (
                 <SummaryRow label="Location" value={client.documentBasics.willLocation} />
               )}
+              {client.documentBasics.willPreparedByLawyer && (
+                <SummaryRow label="Prepared by lawyer" value={LAWYER_PREPARED_OPTIONS.find(o => o.value === client.documentBasics.willPreparedByLawyer)?.label || client.documentBasics.willPreparedByLawyer} />
+              )}
+              {client.documentBasics.willJurisdictionStructured && (
+                <SummaryRow
+                  label="Will prepared in"
+                  value={client.documentBasics.willJurisdictionStructured.type === 'canada'
+                    ? client.documentBasics.willJurisdictionStructured.province || 'Canada'
+                    : client.documentBasics.willJurisdictionStructured.type === 'outside_canada'
+                      ? [client.documentBasics.willJurisdictionStructured.country, client.documentBasics.willJurisdictionStructured.region].filter(Boolean).join(', ')
+                      : 'Uncertain'}
+                />
+              )}
 
               {client.familiarity && (
                 <SummaryRow label="Familiarity" value={FAMILIARITY_OPTIONS.find(f => f.value === client.familiarity)?.label || client.familiarity} />
@@ -2102,7 +2421,30 @@ function SummaryScreen({
         </div>
       ))}
 
-      {data.planningRiskFlags.length > 0 && (
+      {(data.planningFlags?.length || 0) > 0 && (
+        <div className="bg-gray-900/80 border border-gray-600 rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-5 h-5 text-amber-400" />
+            <h3 className="text-sm font-semibold text-white">Planning Review Indicators</h3>
+          </div>
+          <div className="space-y-3">
+            {(data.planningFlags || []).map((flag, i) => (
+              <div key={i} className={`p-3 rounded-lg border ${getFlagSeverityColor(flag.severity)}`}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide">{getFlagSeverityLabel(flag.severity)}</span>
+                </div>
+                <p className="text-sm leading-relaxed">{flag.observation}</p>
+                {flag.context && <p className="text-xs mt-1 opacity-80 leading-relaxed">{flag.context}</p>}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mt-3">
+            These are planning indicators, not legal findings. They identify areas worth discussing with your estate-planning lawyer.
+          </p>
+        </div>
+      )}
+
+      {data.planningRiskFlags.length > 0 && !data.planningFlags && (
         <div className="bg-amber-900/20 border border-amber-700/30 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-5 h-5 text-amber-400" />
@@ -2139,6 +2481,68 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-start justify-between">
       <span className="text-sm text-gray-400 flex-shrink-0">{label}</span>
       <span className="text-sm text-white text-right ml-4">{value}</span>
+    </div>
+  );
+}
+
+function NewLawyerForm({
+  onAdd,
+  onCancel,
+}: {
+  onAdd: (record: Record<string, unknown>) => void;
+  onCancel: () => void;
+}) {
+  const [name, setName] = useState('');
+  const [firm, setFirm] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [website, setWebsite] = useState('');
+  const [city, setCity] = useState('');
+  const [province, setProvince] = useState('');
+  const [country, setCountry] = useState('');
+
+  const handleSubmit = () => {
+    if (!name.trim() && !firm.trim()) return;
+    const id = `willlaw_${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 8)}`;
+    onAdd({ id, name, firm, phone, email, website, city, province, country });
+  };
+
+  return (
+    <div className="mt-4 p-4 bg-gray-800 border border-gray-600 rounded-lg space-y-3">
+      <p className="text-sm font-medium text-white">Lawyer Contact Information</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Full name" className={inputClass} />
+        <input type="text" value={firm} onChange={e => setFirm(e.target.value)} placeholder="Law firm" className={inputClass} />
+        <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Phone" className={inputClass} />
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={inputClass} />
+        <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="City" className={inputClass} />
+        <input type="text" value={province} onChange={e => setProvince(e.target.value)} placeholder="Province / state" className={inputClass} />
+        <input type="text" value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" className={inputClass} />
+        <input type="text" value={website} onChange={e => setWebsite(e.target.value)} placeholder="Website (optional)" className={inputClass} />
+      </div>
+      <div className="flex gap-3">
+        <button type="button" onClick={handleSubmit} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition-colors">Add Lawyer</button>
+        <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-600 transition-colors">Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+function JurisdictionComparison({ willProvince, residenceProvince }: { willProvince: string; residenceProvince: string }) {
+  const normalize = (p: string) => p.trim().toLowerCase();
+  const same = normalize(willProvince) === normalize(residenceProvince);
+  if (same) {
+    return (
+      <div className="mt-2 flex items-center gap-2 text-xs text-emerald-400">
+        <CheckCircle2 className="w-3.5 h-3.5" />
+        This matches your current province of residence.
+      </div>
+    );
+  }
+  return (
+    <div className="mt-2 flex items-center gap-2 text-xs text-amber-400">
+      <AlertTriangle className="w-3.5 h-3.5" />
+      Your Will was prepared in {willProvince}, and you currently live in {residenceProvince}. Consider confirming with an estate lawyer in your current province that your Will continues to work as intended.
     </div>
   );
 }

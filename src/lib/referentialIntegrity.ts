@@ -13,6 +13,12 @@ export type ProfessionalAdvisor = {
   services: string[];
   type: 'financial' | 'accountant' | 'lawyer' | 'insurance';
   active: boolean;
+  city?: string;
+  province?: string;
+  country?: string;
+  source?: string;
+  corpName?: string;
+  title?: string;
 };
 
 export type Person = {
@@ -206,6 +212,129 @@ export function getProfessionalAdvisors(allAnswers: AnswersMap): ProfessionalAdv
 
 export function getFinancialAdvisors(allAnswers: AnswersMap): ProfessionalAdvisor[] {
   return getProfessionalAdvisors(allAnswers).filter((a) => a.type === 'financial' && a.name);
+}
+
+export type WillLawyerRecord = {
+  id: string;
+  name: string;
+  firm: string;
+  phone: string;
+  email: string;
+  website?: string;
+  city: string;
+  province: string;
+  country: string;
+  source: 'professionalTeam' | 'corporate' | 'willSection';
+  corpName?: string;
+  title?: string;
+};
+
+function deduplicateLawyers(lawyers: ProfessionalAdvisor[]): ProfessionalAdvisor[] {
+  const seen = new Map<string, ProfessionalAdvisor>();
+  for (const lawyer of lawyers) {
+    if (!lawyer.name && !lawyer.firm) continue;
+    if (seen.has(lawyer.id)) continue;
+    seen.set(lawyer.id, lawyer);
+  }
+  return Array.from(seen.values());
+}
+
+export function getCurrentLawyers(allAnswers: AnswersMap): ProfessionalAdvisor[] {
+  const advisors = getProfessionalAdvisors(allAnswers);
+  const profTeamLawyers = advisors.filter(a => a.type === 'lawyer' && a.active);
+
+  const corpData = allAnswers.get('corporations')?.['corporationsData'] as Array<Record<string, unknown>> | undefined;
+  const corpLawyers: ProfessionalAdvisor[] = [];
+  if (corpData) {
+    corpData.forEach((corp, corpIdx) => {
+      if (corp['lawHasLawyer'] !== 'yes') return;
+      const lawyers = corp['lawLawyers'] as Array<Record<string, unknown>> | undefined;
+      if (!lawyers) return;
+      lawyers.forEach((lawyer, lIdx) => {
+        const name = (lawyer['contactName'] as string) || '';
+        const firm = (lawyer['firmName'] as string) || '';
+        if (!name && !firm) return;
+        const id = `corplaw_${corpIdx}_${lIdx}`;
+        corpLawyers.push({
+          id,
+          name,
+          firm,
+          phone: (lawyer['phone'] as string) || '',
+          email: (lawyer['email'] as string) || '',
+          website: '',
+          worksWith: [],
+          services: (lawyer['responsibilities'] as string[]) || [],
+          type: 'lawyer',
+          active: true,
+          source: 'corporate',
+          corpName: (corp['legalName'] as string) || '',
+          title: (lawyer['title'] as string) || '',
+        });
+      });
+    });
+  }
+
+  const willSection = allAnswers.get('wills') || {};
+  const willLawyersData = willSection['willLawyersData'] as Array<Record<string, unknown>> | undefined;
+  const willLawyers: ProfessionalAdvisor[] = [];
+  if (willLawyersData) {
+    willLawyersData.forEach((lawyer) => {
+      const name = (lawyer['name'] as string) || '';
+      const firm = (lawyer['firm'] as string) || '';
+      if (!name && !firm) return;
+      const id = (lawyer['id'] as string) || generateStableId();
+      willLawyers.push({
+        id,
+        name,
+        firm,
+        phone: (lawyer['phone'] as string) || '',
+        email: (lawyer['email'] as string) || '',
+        website: (lawyer['website'] as string) || '',
+        worksWith: [],
+        services: [],
+        type: 'lawyer',
+        active: true,
+        city: (lawyer['city'] as string) || '',
+        province: (lawyer['province'] as string) || '',
+        country: (lawyer['country'] as string) || '',
+        source: 'willSection',
+      });
+    });
+  }
+
+  return deduplicateLawyers([...profTeamLawyers, ...corpLawyers, ...willLawyers]);
+}
+
+export function createWillLawyerRecord(
+  data: { name: string; firm: string; phone: string; email: string; website?: string; city: string; province: string; country: string }
+): { id: string; record: Record<string, unknown> } {
+  const id = generateStableId();
+  const record: Record<string, unknown> = {
+    id,
+    name: data.name,
+    firm: data.firm,
+    phone: data.phone,
+    email: data.email,
+    website: data.website || '',
+    city: data.city,
+    province: data.province,
+    country: data.country,
+  };
+  return { id, record };
+}
+
+export function addWillLawyerToRegistry(
+  allAnswers: AnswersMap,
+  record: Record<string, unknown>
+): AnswersMap {
+  const willsSection = allAnswers.get('wills') || {};
+  const existing = (willsSection['willLawyersData'] as Array<Record<string, unknown>>) || [];
+  const updated = new Map(allAnswers);
+  updated.set('wills', {
+    ...willsSection,
+    willLawyersData: [...existing, record],
+  });
+  return updated;
 }
 
 export function resolveProfessionalReference(
@@ -688,6 +817,14 @@ export function cleanStaleCurrentWillReferences(
     const cleanedTrusteePersonId = client['trustTrusteePersonId'] && !activePeople.has(client['trustTrusteePersonId'] as string) && !(client['trustTrusteePersonId'] as string).startsWith('other_')
       ? undefined : client['trustTrusteePersonId'];
 
+    const activeLawyerIds = new Set(getCurrentLawyers(allAnswers).map(l => l.id));
+    const docBasics = (client['documentBasics'] as Record<string, unknown>) || {};
+    let cleanedDocBasics = docBasics;
+    if (docBasics['willLawyerId'] && !activeLawyerIds.has(docBasics['willLawyerId'] as string)) {
+      clientChanged = true;
+      cleanedDocBasics = { ...docBasics, willLawyerId: undefined };
+    }
+
     const alignments = (client['alignments'] as Array<Record<string, unknown>>) || [];
     const cleanedAlignments = alignments.filter((a) => {
       const subjectType = a['subjectType'] as string;
@@ -740,6 +877,7 @@ export function cleanStaleCurrentWillReferences(
         residueRecipients: cleanedResidueRecipients,
         ultimateContingencyRecipients: cleanedUltimateRecipients,
         trustTrusteePersonId: cleanedTrusteePersonId,
+        documentBasics: cleanedDocBasics,
         alignments: cleanedAlignments,
         firstDeathExceptions: cleanedExceptions,
         specificGifts: cleanedGifts,

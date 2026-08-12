@@ -1,4 +1,4 @@
-import { ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 
 export const inputClass =
   'w-full px-4 py-2.5 bg-gray-700 border border-gray-600 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all';
@@ -200,9 +200,10 @@ export function SummaryCard({
             <button
               type="button"
               onClick={onEdit}
-              className="p-1.5 text-gray-400 hover:text-blue-400 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 px-3 py-2 rounded-lg transition-colors"
             >
-              <ChevronRight className="w-4 h-4" />
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
             </button>
           )}
           {onDelete && (

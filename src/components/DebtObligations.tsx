@@ -425,9 +425,10 @@ function DebtCard({
             <button
               type="button"
               onClick={onEdit}
-              className="p-2 text-gray-500 hover:text-blue-400 hover:bg-blue-900/20 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 px-3 py-2 rounded-lg transition-colors"
             >
-              <Pencil className="w-4 h-4" />
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
             </button>
           )}
           {onDelete && (

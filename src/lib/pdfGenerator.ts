@@ -6408,6 +6408,130 @@ You should explore this as an option with your legal and CFP® professionals bec
         (formData.client2HasWill === 'yes' && (c2WillJurisdiction || c2WillLocation) && hasSpouse)) {
       yPosition += 4;
     }
+
+    // Blended Family & Prior Relationship Considerations
+    const blendedWillData = formData.currentWillData as Record<string, unknown> | undefined;
+    const willClientsForBlended = (blendedWillData?.['clients'] as Array<Record<string, unknown>>) || [];
+    const allBlendedAnswers = willClientsForBlended.map(c => c['blendedFamilyAnswers'] as Record<string, unknown> | undefined).filter(Boolean);
+    const hasBlendedContent = allBlendedAnswers.length > 0 && allBlendedAnswers.some(a => Object.keys(a).length > 0);
+    const blendedFlags = (blendedWillData?.['blendedFamilyFlags'] as Array<Record<string, unknown>>) || [];
+
+    if (hasBlendedContent || blendedFlags.length > 0) {
+      checkPageBreak(30);
+      addSubsectionHeader('Blended Family & Prior Relationship Considerations');
+      checkPageBreak(20);
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+
+      for (const blendedAns of allBlendedAnswers) {
+        if (!blendedAns) continue;
+        const clientId = blendedAns['clientId'] as string || 'client1';
+        const clientDisplayName = clientId === 'client1' ? client1Name : client2Name;
+
+        if (blendedAns['client1FirstDeathPassToSpouse']) {
+          checkPageBreak(8);
+          doc.text(`${clientDisplayName}: First death estate passes to spouse — ${blendedAns['client1FirstDeathPassToSpouse']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['client2FirstDeathPassToSpouse']) {
+          checkPageBreak(8);
+          doc.text(`${clientDisplayName}: First death estate passes to spouse — ${blendedAns['client2FirstDeathPassToSpouse']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['client1ChildProtectionIntent']) {
+          checkPageBreak(8);
+          doc.text(`${clientDisplayName}: Child protection intent — ${blendedAns['client1ChildProtectionIntent']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['client2ChildProtectionIntent']) {
+          checkPageBreak(8);
+          doc.text(`${clientDisplayName}: Child protection intent — ${blendedAns['client2ChildProtectionIntent']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['client1ProtectionMechanism']) {
+          checkPageBreak(8);
+          doc.text(`${clientDisplayName}: Protection mechanism — ${blendedAns['client1ProtectionMechanism']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['client2ProtectionMechanism']) {
+          checkPageBreak(8);
+          doc.text(`${clientDisplayName}: Protection mechanism — ${blendedAns['client2ProtectionMechanism']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['survivorControlUnderstanding']) {
+          checkPageBreak(8);
+          doc.text(`Survivor control understanding — ${blendedAns['survivorControlUnderstanding']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['remarriageConcern']) {
+          checkPageBreak(8);
+          doc.text(`Remarriage concern — ${blendedAns['remarriageConcern']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['currentWillAlignment']) {
+          checkPageBreak(8);
+          doc.text(`Domestic agreement alignment — ${blendedAns['currentWillAlignment']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['supportObligationAlignment']) {
+          checkPageBreak(8);
+          doc.text(`Support obligation alignment — ${blendedAns['supportObligationAlignment']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['treatChildrenSameWay']) {
+          checkPageBreak(8);
+          doc.text(`Treat children same way — ${blendedAns['treatChildrenSameWay']}`, margin, yPosition);
+          yPosition += 6;
+        }
+        if (blendedAns['childrenTreatmentDifferences']) {
+          checkPageBreak(12);
+          const diffText = `Children treatment differences: ${blendedAns['childrenTreatmentDifferences']}`;
+          const diffLines = doc.splitTextToSize(diffText, fieldWidth);
+          diffLines.forEach((line: string) => {
+            checkPageBreak(6);
+            doc.text(line, margin, yPosition);
+            yPosition += 5;
+          });
+        }
+        if (blendedAns['mirrorWillRiskUnderstanding']) {
+          checkPageBreak(8);
+          doc.text(`Mirror will risk understanding — ${blendedAns['mirrorWillRiskUnderstanding']}`, margin, yPosition);
+          yPosition += 6;
+        }
+      }
+
+      if (blendedFlags.length > 0) {
+        yPosition += 4;
+        checkPageBreak(20);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text('Planning Review Items:', margin, yPosition);
+        yPosition += 6;
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(9);
+
+        for (const flag of blendedFlags) {
+          const severity = flag['severity'] as string;
+          const title = flag['title'] as string;
+          const observation = flag['observation'] as string;
+          const severityLabel = severity === 'red' ? 'HIGH PRIORITY' : severity === 'yellow' ? 'REVIEW RECOMMENDED' : 'INFORMATIONAL';
+
+          checkPageBreak(15);
+          doc.setFont(undefined, 'bold');
+          doc.text(`${severityLabel} — ${title}`, margin, yPosition);
+          yPosition += 5;
+          doc.setFont(undefined, 'normal');
+          const obsLines = doc.splitTextToSize(observation, fieldWidth);
+          obsLines.forEach((line: string) => {
+            checkPageBreak(6);
+            doc.text(line, margin, yPosition);
+            yPosition += 5;
+          });
+          yPosition += 3;
+        }
+      }
+    }
   }
 
   if (formData.client1HasPoaPersonalCare === 'yes') {

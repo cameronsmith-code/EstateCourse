@@ -870,6 +870,19 @@ export function cleanStaleCurrentWillReferences(
       return gift;
     });
 
+    const childArrangements = (client['childSpecificArrangements'] as Array<Record<string, unknown>>) || [];
+    const cleanedChildArrangements = childArrangements.filter((arr) => {
+      const childId = arr['childId'] as string;
+      if (childId && !activePeople.has(childId) && !childId.startsWith('other_')) {
+        clientChanged = true;
+        return false;
+      }
+      return true;
+    });
+    if (cleanedChildArrangements.length !== childArrangements.length) {
+      clientChanged = true;
+    }
+
     if (clientChanged) {
       changed = true;
       return {
@@ -881,6 +894,7 @@ export function cleanStaleCurrentWillReferences(
         alignments: cleanedAlignments,
         firstDeathExceptions: cleanedExceptions,
         specificGifts: cleanedGifts,
+        childSpecificArrangements: cleanedChildArrangements,
       };
     }
     return client;

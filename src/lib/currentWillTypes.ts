@@ -188,7 +188,10 @@ export type ClientWillUnderstanding = {
   wantsToDiscussWithLawyer?: string;
   alignments: EstatePlanAlignment[];
   similarToOtherClient?: 'yes' | 'no' | 'not_sure';
+  blendedFamilyAnswers?: BlendedFamilyAnswers;
 };
+
+import type { BlendedFamilyAnswers } from './blendedFamilyTypes';
 
 export type FlagSeverity = 'informational' | 'yellow' | 'red';
 
@@ -208,6 +211,7 @@ export type CurrentWillData = {
   reviewConfirmed?: 'yes' | 'needs_changes';
   planningRiskFlags: string[];
   planningFlags: PlanningFlag[];
+  blendedFamilyFlags?: PlanningFlag[];
 };
 
 export function generateCurrentWillId(): string {

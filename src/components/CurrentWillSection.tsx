@@ -68,6 +68,23 @@ import {
   getAvailableLegacyAssets,
 } from '../lib/legacyIntentTypes';
 import { getClientOwnedCorporations, getClientNames } from '../lib/corporateOwnership';
+import {
+  type BlendedFamilyAnswers,
+  type ChildProtectionIntent,
+  type ProtectionMechanism,
+  type SurvivorControlUnderstanding,
+  type DomesticAgreementAlignment,
+  type TreatChildrenSameWay,
+  type FirstDeathPassToSpouse,
+  type RemarriageConcern,
+  getFamilyComplexityProfile,
+  getSupportObligations,
+  getDomesticAgreements,
+  getChildParentage,
+  generateBlendedFamilyFlags,
+  getProtectionMechanismLabel,
+  getFirstDeathPassToSpouseLabel,
+} from '../lib/blendedFamilyTypes';
 
 type Props = {
   answers: Record<string, unknown>;
@@ -360,13 +377,22 @@ export default function CurrentWillSection({ answers, allAnswers, onAnswerChange
 
   const updateData = useCallback((updated: CurrentWillData) => {
     const planningFlags = generatePlanningFlags(updated, { complexity: complexityFactors, clientResidenceProvince });
+    const allBlendedAnswers = updated.clients.map(c => c.blendedFamilyAnswers).filter(Boolean) as BlendedFamilyAnswers[];
+    const firstBlendedAnswers = allBlendedAnswers[0];
+    const willFirstDeath: Record<'client1' | 'client2', string | undefined> = {
+      client1: updated.clients.find(c => c.clientId === 'client1')?.firstDeath,
+      client2: updated.clients.find(c => c.clientId === 'client2')?.firstDeath,
+    };
+    const blendedFlags = generateBlendedFamilyFlags(allAnswers, firstBlendedAnswers, willFirstDeath);
+    const allFlags = [...planningFlags, ...blendedFlags];
     const withFlags = {
       ...updated,
-      planningFlags,
+      planningFlags: allFlags,
+      blendedFamilyFlags: blendedFlags,
       planningRiskFlags: generatePlanningRiskFlags(updated, { complexity: complexityFactors, clientResidenceProvince }),
     };
     onAnswerChange('currentWillData', withFlags);
-  }, [onAnswerChange, complexityFactors, clientResidenceProvince]);
+  }, [onAnswerChange, complexityFactors, clientResidenceProvince, allAnswers]);
 
   const ensureClient = (clientId: 'client1' | 'client2'): ClientWillUnderstanding => {
     const existing = data.clients.find(c => c.clientId === clientId);
@@ -772,6 +798,9 @@ function ClientWillFlow({
   const clientPrefix = client.clientId === 'client1' ? 'client1' : 'client2';
   const db = client.documentBasics;
 
+  const client1Name = _client1Name;
+  const client2Name = _client2Name;
+
   const willYear = (willsAnswers[`${clientPrefix}WillYear`] as string) || db.willYear;
   const willLocation = (willsAnswers[`${clientPrefix}WillLocation`] as string) || db.willLocation;
   const _willJurisdiction = (willsAnswers[`${clientPrefix}WillJurisdiction`] as string) || db.willJurisdiction;
@@ -785,6 +814,7 @@ function ClientWillFlow({
     { label: 'First Death', icon: <Heart className="w-4 h-4" /> },
     { label: 'If Neither of You Is Living', icon: <Users className="w-4 h-4" /> },
     { label: 'Children & Trusts', icon: <Shield className="w-4 h-4" /> },
+    { label: 'Blended Family Planning', icon: <Users className="w-4 h-4" /> },
     { label: 'Specific & Charitable Gifts', icon: <Gift className="w-4 h-4" /> },
     { label: 'Legacy Intent Alignment', icon: <Scale className="w-4 h-4" /> },
     { label: 'Executor & Guardian', icon: <Users className="w-4 h-4" /> },
@@ -797,13 +827,19 @@ function ClientWillFlow({
   const hasLegacyIntents = legacyIntents.length > 0;
   const hasMinorChildren = minorChildren.length > 0;
 
+  const blendedFamilyProfile = useMemo(() => getFamilyComplexityProfile(allAnswers), [allAnswers]);
+  const blendedSupportObligations = useMemo(() => getSupportObligations(allAnswers), [allAnswers]);
+  const blendedDomesticAgreements = useMemo(() => getDomesticAgreements(allAnswers), [allAnswers]);
+  const blendedChildParentage = useMemo(() => getChildParentage(allAnswers), [allAnswers]);
+
   const visibleSections = sections.filter((_, i) => {
     if (i === 4) return hasChildren;
-    if (i === 7 && !hasMinorChildren) {
+    if (i === 5) return blendedFamilyProfile.needsBlendedFamilyWillReview;
+    if (i === 8 && !hasMinorChildren) {
       return estateTrusteeAnswers[`${clientPrefix}HasEstateTrustee`] === 'yes' || estateTrusteeAnswers[`${clientPrefix}HasAlternateEstateTrustee`] === 'yes';
     }
-    if (i === 7) return true;
-    if (i === 8) return hasClientOwnedCorps;
+    if (i === 8) return true;
+    if (i === 9) return hasClientOwnedCorps;
     return true;
   });
 
@@ -915,7 +951,24 @@ function ClientWillFlow({
           />
         )}
 
-        {currentSectionIndex === 5 && (
+        {currentSectionIndex === 5 && blendedFamilyProfile.needsBlendedFamilyWillReview && (
+          <BlendedFamilySection
+            clientName={client.clientName}
+            clientId={client.clientId}
+            client1Name={client1Name}
+            client2Name={client2Name}
+            hasSpouse={hasSpouse}
+            blendedFamilyProfile={blendedFamilyProfile}
+            supportObligations={blendedSupportObligations}
+            domesticAgreements={blendedDomesticAgreements}
+            childParentage={blendedChildParentage}
+            blendedAnswers={client.blendedFamilyAnswers}
+            firstDeath={client.firstDeath}
+            onUpdate={(updates) => onUpdate(updates)}
+          />
+        )}
+
+        {currentSectionIndex === 6 && (
           <GiftsSection
             clientName={client.clientName}
             specificGiftsHas={client.specificGiftsHas}
@@ -928,7 +981,7 @@ function ClientWillFlow({
           />
         )}
 
-        {currentSectionIndex === 6 && hasLegacyIntents && (
+        {currentSectionIndex === 7 && hasLegacyIntents && (
           <LegacyAlignmentSection
             clientName={client.clientName}
             legacyIntents={legacyIntents}
@@ -936,13 +989,13 @@ function ClientWillFlow({
             onUpdateAlignment={onUpdateAlignment}
           />
         )}
-        {currentSectionIndex === 6 && !hasLegacyIntents && (
+        {currentSectionIndex === 7 && !hasLegacyIntents && (
           <div className="text-center py-8">
             <p className="text-sm text-gray-400">No Legacy Intent records have been created yet. You can skip this section.</p>
           </div>
         )}
 
-        {currentSectionIndex === 7 && (
+        {currentSectionIndex === 8 && (
           <ExecutorGuardianSection
             client={client}
             estateTrusteeAnswers={estateTrusteeAnswers}
@@ -955,7 +1008,7 @@ function ClientWillFlow({
           />
         )}
 
-        {currentSectionIndex === 8 && hasClientOwnedCorps && (
+        {currentSectionIndex === 9 && hasClientOwnedCorps && (
           <BusinessOwnerSection
             clientName={client.clientName}
             clientOwnedCorps={clientOwnedCorps}
@@ -964,13 +1017,13 @@ function ClientWillFlow({
             onUpdateAlignment={onUpdateAlignment}
           />
         )}
-        {currentSectionIndex === 8 && !hasClientOwnedCorps && (
+        {currentSectionIndex === 9 && !hasClientOwnedCorps && (
           <div className="text-center py-8">
             <p className="text-sm text-gray-400">No client-owned corporations were identified. This section is not applicable.</p>
           </div>
         )}
 
-        {currentSectionIndex === 9 && (
+        {currentSectionIndex === 10 && (
           <UltimateContingencySection
             clientName={client.clientName}
             ultimateContingency={client.ultimateContingency}
@@ -981,7 +1034,7 @@ function ClientWillFlow({
           />
         )}
 
-        {currentSectionIndex === 10 && (
+        {currentSectionIndex === 11 && (
           <OtherAndConfidenceSection
             clientName={client.clientName}
             otherProvisions={client.otherProvisions}
@@ -2468,6 +2521,16 @@ function SummaryScreen({
                 <SummaryRow label="Distribution" value={client.trustStages.map(s => [s.fraction, s.age].filter(Boolean).join(' at ').trim()).join(', ')} />
               )}
 
+              {client.blendedFamilyAnswers?.client1ChildProtectionIntent && (
+                <SummaryRow label="Child protection intent (Client 1)" value={client.blendedFamilyAnswers.client1ChildProtectionIntent} />
+              )}
+              {client.blendedFamilyAnswers?.client2ChildProtectionIntent && (
+                <SummaryRow label="Child protection intent (Client 2)" value={client.blendedFamilyAnswers.client2ChildProtectionIntent} />
+              )}
+              {client.blendedFamilyAnswers?.survivorControlUnderstanding && (
+                <SummaryRow label="Survivor control understanding" value={client.blendedFamilyAnswers.survivorControlUnderstanding} />
+              )}
+
               {client.ultimateContingency && (
                 <SummaryRow label="Ultimate contingency" value={ULTIMATE_CONTINGENCY_OPTIONS.find(u => u.value === client.ultimateContingency)?.label || client.ultimateContingency} />
               )}
@@ -2618,6 +2681,285 @@ function JurisdictionComparison({ willProvince, residenceProvince }: { willProvi
     <div className="mt-2 flex items-center gap-2 text-xs text-amber-400">
       <AlertTriangle className="w-3.5 h-3.5" />
       Your Will was prepared in {willProvince}, and you currently live in {residenceProvince}. Consider confirming with an estate lawyer in your current province that your Will continues to work as intended.
+    </div>
+  );
+}
+
+const FIRST_DEATH_PASS_OPTIONS: Array<{ value: FirstDeathPassToSpouse; label: string }> = [
+  { value: 'yes_substantially_all', label: 'Yes, substantially all' },
+  { value: 'mostly_with_exceptions', label: 'Mostly, with some exceptions' },
+  { value: 'no', label: 'No' },
+  { value: 'not_sure', label: "I'm not sure" },
+];
+
+const CHILD_PROTECTION_INTENT_OPTIONS: Array<{ value: ChildProtectionIntent; label: string }> = [
+  { value: 'yes', label: 'Yes' },
+  { value: 'no', label: 'No' },
+  { value: 'not_necessarily', label: 'Not necessarily' },
+  { value: 'not_sure', label: "I'm not sure" },
+];
+
+const PROTECTION_MECHANISM_OPTIONS: Array<{ value: ProtectionMechanism; label: string }> = [
+  { value: 'direct_on_death', label: 'They receive something directly when the client dies' },
+  { value: 'assets_set_aside', label: 'Certain assets are set aside for them' },
+  { value: 'held_in_trust', label: 'Their inheritance is held in trust' },
+  { value: 'after_surviving_spouse', label: 'They inherit after the surviving spouse dies' },
+  { value: 'life_insurance', label: 'Life insurance is intended for them' },
+  { value: 'another_arrangement', label: 'Another arrangement' },
+  { value: 'not_sure', label: "I'm not sure" },
+];
+
+const SURVIVOR_CONTROL_OPTIONS: Array<{ value: SurvivorControlUnderstanding; label: string }> = [
+  { value: 'yes', label: 'Yes' },
+  { value: 'no', label: 'No' },
+  { value: 'not_sure', label: "I'm not sure" },
+  { value: 'not_discussed', label: "We haven't discussed this with our lawyer" },
+];
+
+const REMARRIAGE_OPTIONS: Array<{ value: RemarriageConcern; label: string }> = [
+  { value: 'yes', label: 'Yes' },
+  { value: 'no', label: 'No' },
+  { value: 'not_necessarily', label: 'Not necessarily' },
+  { value: 'not_considered', label: "We haven't considered this" },
+  { value: 'not_sure', label: "I'm not sure" },
+];
+
+const DOMESTIC_ALIGNMENT_OPTIONS: Array<{ value: DomesticAgreementAlignment; label: string }> = [
+  { value: 'yes', label: 'Yes' },
+  { value: 'no', label: 'No' },
+  { value: 'not_sure', label: "I'm not sure" },
+  { value: 'not_discussed', label: "We haven't discussed this with our lawyer" },
+];
+
+const TREAT_CHILDREN_OPTIONS: Array<{ value: TreatChildrenSameWay; label: string }> = [
+  { value: 'yes', label: 'Yes' },
+  { value: 'no', label: 'No' },
+  { value: 'mostly_with_differences', label: 'Mostly, with some differences' },
+  { value: 'not_sure', label: "I'm not sure" },
+];
+
+function BlendedFamilySection({
+  clientName,
+  clientId,
+  client1Name,
+  client2Name,
+  hasSpouse,
+  blendedFamilyProfile,
+  supportObligations,
+  domesticAgreements,
+  childParentage,
+  blendedAnswers,
+  firstDeath,
+  onUpdate,
+}: {
+  clientName: string;
+  clientId: 'client1' | 'client2';
+  client1Name: string;
+  client2Name: string;
+  hasSpouse: boolean;
+  blendedFamilyProfile: ReturnType<typeof getFamilyComplexityProfile>;
+  supportObligations: ReturnType<typeof getSupportObligations>;
+  domesticAgreements: ReturnType<typeof getDomesticAgreements>;
+  childParentage: ReturnType<typeof getChildParentage>;
+  blendedAnswers?: BlendedFamilyAnswers;
+  firstDeath?: string;
+  onUpdate: (updates: Partial<ClientWillUnderstanding>) => void;
+}) {
+  const updateBlended = (updates: Partial<BlendedFamilyAnswers>) => {
+    onUpdate({ blendedFamilyAnswers: { ...blendedAnswers, ...updates } });
+  };
+
+  const otherClientName = clientId === 'client1' ? client2Name : client1Name;
+  const hasPriorChildren = clientId === 'client1'
+    ? blendedFamilyProfile.hasChildrenFromPriorRelationship && childParentage.some(p => p.priorRelationshipClientId === 'client1')
+    : blendedFamilyProfile.hasChildrenFromPriorRelationship && childParentage.some(p => p.priorRelationshipClientId === 'client2');
+
+  const priorChildrenNames = childParentage
+    .filter(p => p.fromPriorRelationship && p.priorRelationshipClientId === clientId)
+    .map(p => p.childName);
+
+  const spouseFirstPlan = firstDeath === 'all_to_spouse' || firstDeath === 'mostly_to_spouse';
+
+  return (
+    <div className="space-y-6">
+      <SectionHeading label="Blended Family Planning" icon={<Users className="w-4 h-4" />} />
+
+      <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 space-y-2">
+        <p className="text-sm text-blue-100 leading-relaxed">
+          Because your family includes children from different relationships, there are a few additional questions that can help us understand how you want your estate to work and what you believe your current Will provides.
+        </p>
+        <p className="text-xs text-blue-200/60 leading-relaxed">
+          These questions are about your intentions and your understanding of your current plan. They are not a legal interpretation of your Will.
+        </p>
+      </div>
+
+      {supportObligations.length > 0 && (
+        <div className="pt-4 border-t border-gray-700 space-y-3">
+          <SectionHeading label="Support Obligations" icon={<Scale className="w-4 h-4" />} />
+          <p className="text-sm text-gray-300">
+            The following support obligations were identified from your earlier answers:
+          </p>
+          {supportObligations.map(obligation => (
+            <div key={obligation.id} className="p-3 bg-gray-800 border border-gray-600 rounded-lg">
+              <p className="text-sm text-white font-medium">
+                {obligation.type === 'spousal_support' ? 'Spousal Support' : 'Child Support'}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                {obligation.payerName} pays {obligation.recipientName}
+              </p>
+              {obligation.documentLocation && (
+                <p className="text-xs text-gray-500 mt-1">Document location: {obligation.documentLocation}</p>
+              )}
+            </div>
+          ))}
+          <div>
+            <label className={labelClass}>Do you believe your current estate plan takes this obligation into account?</label>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-2">
+              {DOMESTIC_ALIGNMENT_OPTIONS.map(opt => (
+                <OptionButton key={opt.value} label={opt.label} selected={blendedAnswers?.supportObligationAlignment === opt.value} onClick={() => updateBlended({ supportObligationAlignment: opt.value })} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {domesticAgreements.length > 0 && (
+        <div className="pt-4 border-t border-gray-700 space-y-3">
+          <SectionHeading label="Domestic Agreements" icon={<FileText className="w-4 h-4" />} />
+          <p className="text-sm text-gray-300">
+            Earlier, you told us that you have a domestic agreement.
+          </p>
+          {domesticAgreements.map(agreement => (
+            <div key={agreement.id} className="p-3 bg-gray-800 border border-gray-600 rounded-lg">
+              <p className="text-sm text-white font-medium">
+                {agreement.type === 'marriage_contract' ? 'Marriage Contract / Prenuptial Agreement' :
+                 agreement.type === 'separation' ? 'Separation Agreement' : 'Domestic Agreement'}
+              </p>
+              {agreement.documentLocation && (
+                <p className="text-xs text-gray-500 mt-1">Document location: {agreement.documentLocation}</p>
+              )}
+            </div>
+          ))}
+          <div>
+            <label className={labelClass}>Do you believe your current Will and estate plan are consistent with this agreement?</label>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-2">
+              {DOMESTIC_ALIGNMENT_OPTIONS.map(opt => (
+                <OptionButton key={opt.value} label={opt.label} selected={blendedAnswers?.currentWillAlignment === opt.value} onClick={() => updateBlended({ currentWillAlignment: opt.value })} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {hasPriorChildren && hasSpouse && (
+        <div className="pt-4 border-t border-gray-700 space-y-4">
+          <SectionHeading label={`${clientName}'s Children from a Previous Relationship`} icon={<Heart className="w-4 h-4" />} />
+          <p className="text-sm text-gray-300">
+            {priorChildrenNames.length > 0 ? `Your children from a previous relationship: ${priorChildrenNames.join(', ')}.` : 'You have children from a previous relationship.'}
+          </p>
+
+          <div>
+            <p className="text-sm text-gray-300 mb-2">
+              If {clientName} dies first, do you understand most or all of {clientName}'s estate to pass to {otherClientName}?
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              {FIRST_DEATH_PASS_OPTIONS.map(opt => (
+                <OptionButton key={opt.value} label={opt.label} selected={blendedAnswers?.[clientId === 'client1' ? 'client1FirstDeathPassToSpouse' : 'client2FirstDeathPassToSpouse'] === opt.value} onClick={() => updateBlended({ [clientId === 'client1' ? 'client1FirstDeathPassToSpouse' : 'client2FirstDeathPassToSpouse']: opt.value } as Partial<BlendedFamilyAnswers>)} />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-300 mb-2">
+              Is it important to {clientName} that some portion of {clientName}'s estate ultimately reaches {clientName}'s children from a previous relationship, regardless of which spouse dies first?
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              {CHILD_PROTECTION_INTENT_OPTIONS.map(opt => (
+                <OptionButton key={opt.value} label={opt.label} selected={blendedAnswers?.[clientId === 'client1' ? 'client1ChildProtectionIntent' : 'client2ChildProtectionIntent'] === opt.value} onClick={() => updateBlended({ [clientId === 'client1' ? 'client1ChildProtectionIntent' : 'client2ChildProtectionIntent']: opt.value } as Partial<BlendedFamilyAnswers>)} />
+              ))}
+            </div>
+          </div>
+
+          {(blendedAnswers?.[clientId === 'client1' ? 'client1ChildProtectionIntent' : 'client2ChildProtectionIntent'] === 'yes') && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-300 mb-2">
+                  How do you understand your current estate plan to protect that intention?
+                </p>
+                <div className="grid grid-cols-1 gap-3">
+                  {PROTECTION_MECHANISM_OPTIONS.map(opt => (
+                    <OptionButton key={opt.value} label={opt.label} selected={blendedAnswers?.[clientId === 'client1' ? 'client1ProtectionMechanism' : 'client2ProtectionMechanism'] === opt.value} onClick={() => updateBlended({ [clientId === 'client1' ? 'client1ProtectionMechanism' : 'client2ProtectionMechanism']: opt.value } as Partial<BlendedFamilyAnswers>)} />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-300 mb-2">
+                  After {clientName} dies, do you understand {otherClientName} to have the ability to change who ultimately receives the assets {otherClientName} inherits from {clientName}?
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  {SURVIVOR_CONTROL_OPTIONS.map(opt => (
+                    <OptionButton key={opt.value} label={opt.label} selected={blendedAnswers?.survivorControlUnderstanding === opt.value} onClick={() => updateBlended({ survivorControlUnderstanding: opt.value })} />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-300 mb-2">
+                  If {otherClientName} later remarried or entered a new long-term relationship, is it important that some assets remain protected for {clientName}'s children?
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                  {REMARRIAGE_OPTIONS.map(opt => (
+                    <OptionButton key={opt.value} label={opt.label} selected={blendedAnswers?.remarriageConcern === opt.value} onClick={() => updateBlended({ remarriageConcern: opt.value })} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {blendedFamilyProfile.hasBlendedFamily && blendedFamilyProfile.hasSharedChildren && blendedFamilyProfile.hasChildrenFromPriorRelationship && (
+        <div className="pt-4 border-t border-gray-700 space-y-3">
+          <SectionHeading label="Shared Children vs Prior-Relationship Children" icon={<Users className="w-4 h-4" />} />
+          <div>
+            <p className="text-sm text-gray-300 mb-2">
+              Do you want your children to be treated the same way regardless of which relationship they are from?
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              {TREAT_CHILDREN_OPTIONS.map(opt => (
+                <OptionButton key={opt.value} label={opt.label} selected={blendedAnswers?.treatChildrenSameWay === opt.value} onClick={() => updateBlended({ treatChildrenSameWay: opt.value })} />
+              ))}
+            </div>
+          </div>
+          {(blendedAnswers?.treatChildrenSameWay === 'no' || blendedAnswers?.treatChildrenSameWay === 'mostly_with_differences') && (
+            <div>
+              <label className={labelClass}>What differences are important to you?</label>
+              <textarea
+                value={blendedAnswers?.childrenTreatmentDifferences || ''}
+                onChange={e => updateBlended({ childrenTreatmentDifferences: e.target.value })}
+                placeholder="Describe the differences (e.g., different percentages, different assets, different trust arrangements, direct gift on first death, later inheritance, etc.)..."
+                className={inputClass}
+                rows={3}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {blendedFamilyProfile.hasBlendedFamily && (spouseFirstPlan || firstDeath === 'not_sure') && (
+        <div className="pt-4 border-t border-gray-700 space-y-3">
+          <SectionHeading label="Mirror Will Risk" icon={<AlertTriangle className="w-4 h-4" />} />
+          <p className="text-sm text-gray-300 mb-2">
+            Do you understand your current Wills to protect each person's intended inheritance for their own children, even if the surviving spouse later changes their Will?
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            {SURVIVOR_CONTROL_OPTIONS.map(opt => (
+              <OptionButton key={opt.value} label={opt.label} selected={blendedAnswers?.mirrorWillRiskUnderstanding === opt.value} onClick={() => updateBlended({ mirrorWillRiskUnderstanding: opt.value })} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

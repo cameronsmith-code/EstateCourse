@@ -244,3 +244,151 @@ export function getCorporationKeyPeople(corp: Record<string, unknown>): Array<{ 
   });
   return people;
 }
+
+// ─── Scenario-Based Recipient Eligibility ────────────────────────────────
+
+export type LegacyScenario = 'firstDeath' | 'bothDeceased' | 'noSurvivingDescendants';
+
+export type LegacyPerson = {
+  id: string;
+  name: string;
+  relationship: string;
+  isDescendant?: boolean;
+  isClient?: boolean;
+};
+
+export function getLegacyPeople(allAnswers: Map<string, Record<string, unknown>>): LegacyPerson[] {
+  const people: LegacyPerson[] = [];
+  const aboutYou = allAnswers.get('aboutYou') || {};
+
+  const client1Name = (aboutYou['fullName'] as string) || 'Client 1';
+  people.push({ id: 'client1', name: client1Name, relationship: 'Self', isClient: true });
+
+  const maritalStatus = aboutYou['maritalStatus'] as string;
+  if (maritalStatus === 'married' || maritalStatus === 'common_law') {
+    const client2Name = (aboutYou['spouseName'] as string) || 'Client 2';
+    people.push({ id: 'client2', name: client2Name, relationship: 'Spouse', isClient: true });
+  }
+
+  const childrenSection = allAnswers.get('children') || {};
+  const children = (childrenSection['childrenData'] as Array<Record<string, string>>) || [];
+  children.forEach((c, i) => {
+    if (c?.name) {
+      people.push({ id: `child_${i}`, name: c.name, relationship: 'Child', isDescendant: true });
+      const gcCount = parseInt(c.numberOfGrandchildren || '0', 10);
+      for (let g = 1; g <= gcCount; g++) {
+        const gcName = c[`grandchild${g}Name`];
+        if (gcName) {
+          people.push({ id: `child_${i}_grandchild_${g}`, name: gcName, relationship: 'Grandchild', isDescendant: true });
+        }
+      }
+    }
+  });
+
+  const prevRels = allAnswers.get('previousRelationships') || {};
+  const c1Rels = (prevRels['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+  c1Rels.forEach((r, i) => {
+    if (r?.name) people.push({ id: `c1prev_${i}`, name: r.name, relationship: 'Previous Partner' });
+  });
+  const c2Rels = (prevRels['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+  c2Rels.forEach((r, i) => {
+    if (r?.name) people.push({ id: `c2prev_${i}`, name: r.name, relationship: 'Previous Partner' });
+  });
+
+  return people;
+}
+
+export function getDescendantIds(allAnswers: Map<string, Record<string, unknown>>): Set<string> {
+  const descendants = new Set<string>();
+  const childrenSection = allAnswers.get('children') || {};
+  const children = (childrenSection['childrenData'] as Array<Record<string, string>>) || [];
+  children.forEach((c, i) => {
+    if (c?.name) {
+      descendants.add(`child_${i}`);
+      const gcCount = parseInt(c.numberOfGrandchildren || '0', 10);
+      for (let g = 1; g <= gcCount; g++) {
+        const gcName = c[`grandchild${g}Name`];
+        if (gcName) {
+          descendants.add(`child_${i}_grandchild_${g}`);
+        }
+      }
+    }
+  });
+  return descendants;
+}
+
+export function getExcludedPersonIdsForScenario(
+  scenario: LegacyScenario,
+  allAnswers: Map<string, Record<string, unknown>>,
+  deceasedClientId?: string,
+): Set<string> {
+  const excluded = new Set<string>();
+  const aboutYou = allAnswers.get('aboutYou') || {};
+  const maritalStatus = aboutYou['maritalStatus'] as string;
+  const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+
+  switch (scenario) {
+    case 'firstDeath':
+      if (deceasedClientId) {
+        excluded.add(deceasedClientId);
+      }
+      break;
+
+    case 'bothDeceased':
+      excluded.add('client1');
+      if (hasSpouse) excluded.add('client2');
+      break;
+
+    case 'noSurvivingDescendants':
+      excluded.add('client1');
+      if (hasSpouse) excluded.add('client2');
+      for (const id of getDescendantIds(allAnswers)) {
+        excluded.add(id);
+      }
+      break;
+  }
+
+  return excluded;
+}
+
+export function getEligibleRecipientsForScenario(
+  scenario: LegacyScenario,
+  allAnswers: Map<string, Record<string, unknown>>,
+  deceasedClientId?: string,
+): LegacyPerson[] {
+  const allPeople = getLegacyPeople(allAnswers);
+  const excluded = getExcludedPersonIdsForScenario(scenario, allAnswers, deceasedClientId);
+  return allPeople.filter((p) => !excluded.has(p.id));
+}
+
+export function filterValidRecipientIds(
+  recipientIds: string[],
+  scenario: LegacyScenario,
+  allAnswers: Map<string, Record<string, unknown>>,
+  deceasedClientId?: string,
+): string[] {
+  const excluded = getExcludedPersonIdsForScenario(scenario, allAnswers, deceasedClientId);
+  return recipientIds.filter((id) => !excluded.has(id) || id.startsWith('other_'));
+}
+
+export function filterValidRecipients(
+  recipients: RecipientRef[],
+  scenario: LegacyScenario,
+  allAnswers: Map<string, Record<string, unknown>>,
+  deceasedClientId?: string,
+): RecipientRef[] {
+  const excluded = getExcludedPersonIdsForScenario(scenario, allAnswers, deceasedClientId);
+  return recipients.filter((r) => {
+    if (!r.personId) return true;
+    if (r.personId.startsWith('other_')) return true;
+    return !excluded.has(r.personId);
+  });
+}
+
+export function getFirstDeathDeceasedClientId(
+  assetOwnership: 'joint' | 'client1' | 'client2' | 'other' | 'unknown' | undefined,
+): string | undefined {
+  if (assetOwnership === 'client1') return 'client1';
+  if (assetOwnership === 'client2') return 'client2';
+  return undefined;
+}

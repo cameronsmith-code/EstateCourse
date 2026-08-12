@@ -1,4 +1,5 @@
 import type { AnyFinancialAsset, ContactInfo } from './financialAssetTypes';
+import { getExcludedPersonIdsForScenario, getFirstDeathDeceasedClientId, type LegacyScenario } from './legacyIntentTypes';
 
 export type ProfessionalAdvisor = {
   id: string;
@@ -436,23 +437,30 @@ export function cleanStaleLegacyIntentReferences(allAnswers: AnswersMap): Answer
       recordChanged = true;
     }
 
-    const cleanRecipientIds = (ids: unknown): string[] => {
+    const cleanRecipientIdsForScenario = (ids: unknown, scenario: LegacyScenario, deceasedClientId?: string): string[] => {
       if (!Array.isArray(ids)) return [];
-      return ids.filter((id) => typeof id === 'string' && (activePeople.has(id) || id.startsWith('other_')));
+      const excluded = getExcludedPersonIdsForScenario(scenario, allAnswers, deceasedClientId);
+      return ids.filter((id) => {
+        if (typeof id !== 'string') return false;
+        if (id.startsWith('other_')) return true;
+        if (!activePeople.has(id)) return false;
+        if (excluded.has(id)) { recordChanged = true; return false; }
+        return true;
+      });
     };
 
-    const cleanRecipients = (recipients: unknown): Array<Record<string, unknown>> => {
+    const cleanRecipientsForScenario = (recipients: unknown, scenario: LegacyScenario, deceasedClientId?: string): Array<Record<string, unknown>> => {
       if (!Array.isArray(recipients)) return [];
-      return recipients.map((r) => {
-        if (r && typeof r === 'object') {
-          const rr = r as Record<string, unknown>;
-          if (rr.personId && !activePeople.has(rr.personId as string) && !((rr.personId as string).startsWith('other_'))) {
-            recordChanged = true;
-            return { ...rr, personId: undefined };
-          }
+      const excluded = getExcludedPersonIdsForScenario(scenario, allAnswers, deceasedClientId);
+      return recipients.filter((r) => {
+        if (!r || typeof r !== 'object') return false;
+        const rr = r as Record<string, unknown>;
+        if (rr.personId && !((rr.personId as string).startsWith('other_'))) {
+          if (!activePeople.has(rr.personId as string)) { recordChanged = true; return false; }
+          if (excluded.has(rr.personId as string)) { recordChanged = true; return false; }
         }
-        return r;
-      });
+        return true;
+      }) as Array<Record<string, unknown>>;
     };
 
     const scenarios = ['firstDeath', 'bothDeceased', 'noSurvivingDescendants'] as const;
@@ -460,14 +468,21 @@ export function cleanStaleLegacyIntentReferences(allAnswers: AnswersMap): Answer
     for (const field of scenarios) {
       const scenario = record[field] as Record<string, unknown> | undefined;
       if (!scenario) continue;
-      const cleanedIds = cleanRecipientIds(scenario.recipientIds);
-      if (cleanedIds.length !== (scenario.recipientIds as string[] | undefined)?.length) recordChanged = true;
-      const cleanedRecipients = cleanRecipients(scenario.recipients);
+      const deceasedClientId = field === 'firstDeath'
+        ? getFirstDeathDeceasedClientId(asset?.ownership as string | undefined)
+        : undefined;
+      const cleanedIds = cleanRecipientIdsForScenario(scenario.recipientIds, field, deceasedClientId);
+      const cleanedRecipients = cleanRecipientsForScenario(scenario.recipients, field, deceasedClientId);
       updatedScenarios[field] = { ...scenario, recipientIds: cleanedIds, recipients: cleanedRecipients };
     }
 
-    const stayFamilyIds = cleanRecipientIds(record.stayInFamilyRecipientIds);
-    if (stayFamilyIds.length !== (record.stayInFamilyRecipientIds as string[] | undefined)?.length) recordChanged = true;
+    const stayFamilyExcluded = getExcludedPersonIdsForScenario('bothDeceased', allAnswers);
+    const stayFamilyIds = (Array.isArray(record.stayInFamilyRecipientIds) ? record.stayInFamilyRecipientIds : []).filter((id: string) => {
+      if (id.startsWith('other_')) return true;
+      if (!activePeople.has(id)) return false;
+      if (stayFamilyExcluded.has(id)) { recordChanged = true; return false; }
+      return true;
+    });
 
     const businessBranch = record.businessBranch as Record<string, unknown> | undefined;
     let cleanedBranch: Record<string, unknown> | undefined;
@@ -475,7 +490,7 @@ export function cleanStaleLegacyIntentReferences(allAnswers: AnswersMap): Answer
       const profIds = (businessBranch.professionalContactIds as string[]) || [];
       const cleanedProfIds = profIds.filter((id) => activeAdvisors.has(id));
       if (cleanedProfIds.length !== profIds.length) recordChanged = true;
-      const cleanedBranchRecipients = cleanRecipients(businessBranch.ownershipSuccessionRecipients);
+      const cleanedBranchRecipients = cleanRecipientsForScenario(businessBranch.ownershipSuccessionRecipients, 'firstDeath', getFirstDeathDeceasedClientId(asset?.ownership as string | undefined));
       const mgmtPersonId = businessBranch.managementSuccessionPersonId as string | undefined;
       if (mgmtPersonId && !activePeople.has(mgmtPersonId) && !mgmtPersonId.startsWith('other_')) {
         recordChanged = true;

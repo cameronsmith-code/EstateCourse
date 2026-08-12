@@ -32,15 +32,21 @@ import {
   type RecipientRef,
   type BusinessOwnerBranch,
   type AvailableLegacyAsset,
+  type LegacyPerson,
+  type LegacyScenario,
   emptyLegacyIntent,
   generateReviewFlags,
   isIndivisibleAsset,
   getAvailableLegacyAssets,
   getCorporationShareholders,
   getCorporationKeyPeople,
+  getEligibleRecipientsForScenario,
+  getFirstDeathDeceasedClientId,
+  filterValidRecipientIds,
+  filterValidRecipients,
 } from '../lib/legacyIntentTypes';
-import type { ProfessionalAdvisor, Person } from '../lib/referentialIntegrity';
-import { getProfessionalAdvisors, getKnownPeople } from '../lib/referentialIntegrity';
+import type { ProfessionalAdvisor } from '../lib/referentialIntegrity';
+import { getProfessionalAdvisors } from '../lib/referentialIntegrity';
 
 type Props = {
   answers: Record<string, unknown>;
@@ -61,7 +67,44 @@ export default function LegacyIntentSection({ answers, allAnswers, onAnswerChang
     return childrenData.some((c) => c?.name?.trim());
   })();
 
-  const people = useMemo(() => getKnownPeople(allAnswers), [allAnswers]);
+  const people = useMemo(() => {
+    // Full people list — individual steps will filter by scenario
+    const aboutYou = allAnswers.get('aboutYou') || {};
+    const client1Name = (aboutYou['fullName'] as string) || 'Client 1';
+    const maritalStatus = aboutYou['maritalStatus'] as string;
+    const hasSpouse = maritalStatus === 'married' || maritalStatus === 'common_law';
+    const client2Name = (aboutYou['spouseName'] as string) || 'Client 2';
+    const allPeople: LegacyPerson[] = [
+      { id: 'client1', name: client1Name, relationship: 'Self', isClient: true },
+    ];
+    if (hasSpouse) {
+      allPeople.push({ id: 'client2', name: client2Name, relationship: 'Spouse', isClient: true });
+    }
+    const childrenSection = allAnswers.get('children') || {};
+    const children = (childrenSection['childrenData'] as Array<Record<string, string>>) || [];
+    children.forEach((c, i) => {
+      if (c?.name) {
+        allPeople.push({ id: `child_${i}`, name: c.name, relationship: 'Child', isDescendant: true });
+        const gcCount = parseInt(c.numberOfGrandchildren || '0', 10);
+        for (let g = 1; g <= gcCount; g++) {
+          const gcName = c[`grandchild${g}Name`];
+          if (gcName) {
+            allPeople.push({ id: `child_${i}_grandchild_${g}`, name: gcName, relationship: 'Grandchild', isDescendant: true });
+          }
+        }
+      }
+    });
+    const prevRels = allAnswers.get('previousRelationships') || {};
+    const c1Rels = (prevRels['client1PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+    c1Rels.forEach((r, i) => {
+      if (r?.name) allPeople.push({ id: `c1prev_${i}`, name: r.name, relationship: 'Previous Partner' });
+    });
+    const c2Rels = (prevRels['client2PreviousRelationshipsData'] as Array<Record<string, string>>) || [];
+    c2Rels.forEach((r, i) => {
+      if (r?.name) allPeople.push({ id: `c2prev_${i}`, name: r.name, relationship: 'Previous Partner' });
+    });
+    return allPeople;
+  }, [allAnswers]);
   const advisors = useMemo(() => getProfessionalAdvisors(allAnswers), [allAnswers]);
   const accountants = advisors.filter((a) => a.type === 'accountant' && a.name);
   const lawyers = advisors.filter((a) => a.type === 'lawyer' && a.name);
@@ -524,7 +567,7 @@ type EditorProps = {
   client2Name: string;
   hasSpouse: boolean;
   hasChildren: boolean;
-  people: Person[];
+  people: LegacyPerson[];
   accountants: ProfessionalAdvisor[];
   lawyers: ProfessionalAdvisor[];
   financialAdvisors: ProfessionalAdvisor[];
@@ -664,16 +707,16 @@ function LegacyIntentEditor({
 
       <div className={sectionCardClass}>
         {currentStep === 'first_death' && (
-          <FirstDeathStep record={record} onUpdate={updateSuccession} assetName={assetName} client1Name={client1Name} client2Name={client2Name} people={people} />
+          <FirstDeathStep record={record} onUpdate={updateSuccession} assetName={assetName} client1Name={client1Name} client2Name={client2Name} people={getEligibleRecipientsForScenario('firstDeath', allAnswers, getFirstDeathDeceasedClientId(record.asset.ownership))} />
         )}
         {currentStep === 'both_deceased' && (
-          <BothDeceasedStep record={record} onUpdate={updateSuccession} assetName={assetName} client1Name={client1Name} client2Name={client2Name} hasSpouse={hasSpouse} hasChildren={hasChildren} people={people} />
+          <BothDeceasedStep record={record} onUpdate={updateSuccession} assetName={assetName} client1Name={client1Name} client2Name={client2Name} hasSpouse={hasSpouse} hasChildren={hasChildren} people={getEligibleRecipientsForScenario('bothDeceased', allAnswers)} />
         )}
         {currentStep === 'no_descendants' && (
-          <NoDescendantsStep record={record} onUpdate={updateSuccession} assetName={assetName} client1Name={client1Name} client2Name={client2Name} hasSpouse={hasSpouse} people={people} />
+          <NoDescendantsStep record={record} onUpdate={updateSuccession} assetName={assetName} client1Name={client1Name} client2Name={client2Name} hasSpouse={hasSpouse} people={getEligibleRecipientsForScenario('noSurvivingDescendants', allAnswers)} />
         )}
         {currentStep === 'stay_in_family' && (
-          <StayInFamilyStep record={record} onUpdate={onUpdate} assetName={assetName} people={people} />
+          <StayInFamilyStep record={record} onUpdate={onUpdate} assetName={assetName} people={getEligibleRecipientsForScenario('bothDeceased', allAnswers)} />
         )}
         {currentStep === 'equalization' && (
           <EqualizationStep record={record} onUpdate={onUpdate} assetName={assetName} />
@@ -691,7 +734,7 @@ function LegacyIntentEditor({
             assetName={assetName}
             client1Name={client1Name}
             client2Name={client2Name}
-            people={people}
+            people={getEligibleRecipientsForScenario('firstDeath', allAnswers, getFirstDeathDeceasedClientId(record.asset.ownership))}
             accountants={accountants}
             lawyers={lawyers}
             financialAdvisors={financialAdvisors}
@@ -732,7 +775,7 @@ function PersonPicker({
   onAddOther,
   allowAddOther = true,
 }: {
-  people: Person[];
+  people: LegacyPerson[];
   selectedIds: string[];
   onToggle: (personId: string, name: string) => void;
   onAddOther?: (name: string) => void;
@@ -810,7 +853,7 @@ function FirstDeathStep({
   assetName: string;
   client1Name: string;
   client2Name: string;
-  people: Person[];
+  people: LegacyPerson[];
 }) {
   const intent = record.firstDeath || { outcome: '', recipientIds: [], recipients: [] };
   const ownership = record.asset.ownership;
@@ -894,7 +937,7 @@ function BothDeceasedStep({
   client2Name: string;
   hasSpouse: boolean;
   hasChildren: boolean;
-  people: Person[];
+  people: LegacyPerson[];
 }) {
   const intent = record.bothDeceased || { outcome: '', recipientIds: [], recipients: [] };
 
@@ -973,7 +1016,7 @@ function NoDescendantsStep({
   client1Name: string;
   client2Name: string;
   hasSpouse: boolean;
-  people: Person[];
+  people: LegacyPerson[];
 }) {
   const intent = record.noSurvivingDescendants || { outcome: '', recipientIds: [], recipients: [] };
 
@@ -1044,7 +1087,7 @@ function StayInFamilyStep({
   record: LegacyIntentRecord;
   onUpdate: (u: Partial<LegacyIntentRecord>) => void;
   assetName: string;
-  people: Person[];
+  people: LegacyPerson[];
 }) {
   const intent = record.stayInFamilyIntent;
   const recipientIds = record.stayInFamilyRecipientIds || [];
@@ -1219,7 +1262,7 @@ function BusinessBranchStep({
   assetName: string;
   client1Name: string;
   client2Name: string;
-  people: Person[];
+  people: LegacyPerson[];
   accountants: ProfessionalAdvisor[];
   lawyers: ProfessionalAdvisor[];
   financialAdvisors: ProfessionalAdvisor[];

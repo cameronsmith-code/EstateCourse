@@ -188,7 +188,7 @@ export default function StepForm({
 
   useEffect(() => {
     if (!answers['insHasAdvisor'] || answers['insHasAdvisor'] === 'na') {
-      ['insAdvisor1Firm', 'insAdvisor1Name', 'insAdvisor1Phone', 'insAdvisor1Email', 'insAdvisor1Services', 'insAdvisor1Duration', 'insAdvisor1DocLocation', 'insAdvisor1IncludeInContactList', 'insAdvisor1WorksWith', 'insHasAdditional', 'insAdditionalData', 'insAdditionalHasAdditional'].forEach(key => {
+      ['insAdvisor1Firm', 'insAdvisor1Name', 'insAdvisor1Phone', 'insAdvisor1Email', 'insAdvisor1Services', 'insAdvisor1Duration', 'insAdvisor1DocLocation', 'insAdvisor1IncludeInContactList', 'insAdvisor1WorksWith', 'insHasAdditional', 'insAdditionalData', 'insAdditionalHasAdditional', 'insAdvisor2Firm', 'insAdvisor2Name', 'insAdvisor2Phone', 'insAdvisor2Email', 'insAdvisor2Services', 'insAdvisor2Duration', 'insAdvisor2DocLocation', 'insAdvisor2IncludeInContactList', 'insAdvisor2WorksWith'].forEach(key => {
         if (answers[key] !== undefined) {
           onAnswerChange(key, undefined);
         }
@@ -204,6 +204,11 @@ export default function StepForm({
       if (answers['insAdditionalHasAdditional'] !== undefined) {
         onAnswerChange('insAdditionalHasAdditional', undefined);
       }
+      ['insAdvisor2Firm', 'insAdvisor2Name', 'insAdvisor2Phone', 'insAdvisor2Email', 'insAdvisor2Services', 'insAdvisor2Duration', 'insAdvisor2DocLocation', 'insAdvisor2IncludeInContactList', 'insAdvisor2WorksWith'].forEach(key => {
+        if (answers[key] !== undefined) {
+          onAnswerChange(key, undefined);
+        }
+      });
     }
   }, [answers['insHasAdditional']]);
 
@@ -7005,6 +7010,11 @@ export default function StepForm({
               'insAdvisor1Duration', 'insAdvisor1DocLocation', 'insAdvisor1IncludeInContactList',
               'insHasAdditional',
             ]);
+            const insAdvisor2Keys = new Set([
+              'insAdvisor2WorksWith', 'insAdvisor2Firm', 'insAdvisor2Name', 'insAdvisor2Phone',
+              'insAdvisor2Email', 'insAdvisor2Services', 'insAdvisor2Duration',
+              'insAdvisor2DocLocation', 'insAdvisor2IncludeInContactList',
+            ]);
             const fpHealthKeys = new Set([
               'fp_health_0_name', 'fp_health_0_clinic', 'fp_health_0_city', 'fp_health_0_phone', 'fp_health_0_has_additional',
               'fp_health_1_name', 'fp_health_1_clinic', 'fp_health_1_city', 'fp_health_1_phone', 'fp_health_1_has_additional',
@@ -7030,6 +7040,7 @@ export default function StepForm({
             const acctQuestions = step.questions.filter(q => acctKeys.has(q.key));
             const lawQuestions = step.questions.filter(q => lawKeys.has(q.key));
             const insQuestions = step.questions.filter(q => insKeys.has(q.key));
+            const insAdvisor2Questions = step.questions.filter(q => insAdvisor2Keys.has(q.key));
             const fpHealthQuestions = step.questions.filter(q => fpHealthKeys.has(q.key));
             const spHealthQuestions = step.questions.filter(q => spHealthKeys.has(q.key));
             const phHealthQuestions = step.questions.filter(q => phHealthKeys.has(q.key));
@@ -7630,6 +7641,28 @@ export default function StepForm({
                         </>
                       )}
                       {!showInsFields && fromFirm.map(renderQuestion)}
+                      {answers['insHasAdditional'] === 'yes' && insAdvisor2Questions.length > 0 && (
+                        <>
+                          <div className="flex items-center justify-between mt-6 mb-1">
+                            <h5 className="text-sm font-semibold text-blue-300">Second Insurance Advisor Information</h5>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                ['insAdvisor2Firm', 'insAdvisor2Name', 'insAdvisor2Phone', 'insAdvisor2Email', 'insAdvisor2Services', 'insAdvisor2Duration', 'insAdvisor2DocLocation', 'insAdvisor2IncludeInContactList', 'insAdvisor2WorksWith'].forEach(key => {
+                                  onAnswerChange(key, undefined);
+                                });
+                                onAnswerChange('insHasAdditional', 'no');
+                              }}
+                              className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-md transition-colors"
+                              aria-label="Remove second insurance advisor"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Remove</span>
+                            </button>
+                          </div>
+                          {insAdvisor2Questions.map(renderQuestion)}
+                        </>
+                      )}
                     </>
                   );
                 })()}

@@ -342,6 +342,15 @@ interface FormData {
   insAdvisor1DocLocation?: string;
   insAdvisor1IncludeInContactList?: string;
   insHasAdditional?: string;
+  insAdvisor2Firm?: string;
+  insAdvisor2Name?: string;
+  insAdvisor2Phone?: string;
+  insAdvisor2Email?: string;
+  insAdvisor2WorksWith?: string;
+  insAdvisor2Services?: string[];
+  insAdvisor2Duration?: string;
+  insAdvisor2DocLocation?: string;
+  insAdvisor2IncludeInContactList?: string;
   insAdditionalData?: Array<{
     firm?: string;
     name?: string;
@@ -9068,6 +9077,20 @@ You should explore this as an option with your legal and CFP® professionals bec
       docLocation: formData.insAdvisor1DocLocation,
       includeInContactList: formData.insAdvisor1IncludeInContactList,
     }, 'ins_adv1');
+
+    if (formData.insHasAdditional === 'yes' && formData.insAdvisor2Name) {
+      renderInsuranceSection('Insurance — Second Advisor:', {
+        firm: formData.insAdvisor2Firm,
+        name: formData.insAdvisor2Name,
+        phone: formData.insAdvisor2Phone,
+        email: formData.insAdvisor2Email,
+        worksWithClients: formData.insAdvisor2WorksWith,
+        services: formData.insAdvisor2Services,
+        duration: formData.insAdvisor2Duration,
+        docLocation: formData.insAdvisor2DocLocation,
+        includeInContactList: formData.insAdvisor2IncludeInContactList,
+      }, 'ins_adv2');
+    }
 
     const additionalInsurance = formData.insAdditionalData || [];
     additionalInsurance.forEach((ins, i) => {

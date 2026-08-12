@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { STEPS, migrateLegacyAnswers, QuestionnaireSectionId } from '../lib/steps';
+import { cleanStaleAdvisorReferences } from '../lib/referentialIntegrity';
 
 type Answer = Record<string, unknown>;
 
@@ -89,7 +90,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
 
       if (stored) {
         loadedQuestionnaire = JSON.parse(stored);
-        loadedAnswers = loadAnswersFromStorage();
+        loadedAnswers = cleanStaleAdvisorReferences(loadAnswersFromStorage());
 
         setQuestionnaire(loadedQuestionnaire);
         setCurrentStep(loadedQuestionnaire.current_step);
@@ -126,7 +127,8 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
                     });
                   }
 
-                  setAnswers(syncedAnswers);
+                  const cleanedSynced = cleanStaleAdvisorReferences(syncedAnswers);
+                  setAnswers(cleanedSynced);
                   setQuestionnaire(dbQuestionnaire as Questionnaire);
                   setCurrentStep(dbQuestionnaire.current_step);
                 }

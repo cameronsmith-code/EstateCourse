@@ -23,6 +23,7 @@ import {
   PENSION_TYPES,
   EQUITY_AWARD_TYPES,
 } from '../lib/financialAssetTypes';
+import { getProfessionalAdvisors, resolveProfessionalReference, type ProfessionalAdvisor } from '../lib/referentialIntegrity';
 import InvestmentsIntake from './InvestmentsIntake';
 import PensionsIntake from './PensionsIntake';
 import EmployerEquityIntake from './EmployerEquityIntake';
@@ -120,20 +121,20 @@ export default function FinancialFootprintAssets({
     return individuals;
   }, [allAnswers, client1Name, client2Name, hasSpouse]);
 
-  // Derive advisor info from professional team
+  // Derive advisor info from professional team via referential integrity registry
+  const advisorRegistry = useMemo(() => getProfessionalAdvisors(allAnswers || new Map()), [allAnswers]);
   const advisorInfo = useMemo(() => {
-    const profTeam = allAnswers?.get('professionalTeam') || {};
-    if (profTeam['fpHasAdvisor'] === 'yes') {
-      return {
-        name: (profTeam['fpAdvisor1Name'] as string) || '',
-        firm: (profTeam['fpAdvisor1Firm'] as string) || '',
-        phone: (profTeam['fpAdvisor1Phone'] as string) || '',
-        email: (profTeam['fpAdvisor1Email'] as string) || '',
-        id: `advisor_0`,
-      };
-    }
-    return {};
-  }, [allAnswers]);
+    const financialAdvisors = advisorRegistry.filter((a) => a.type === 'financial');
+    if (financialAdvisors.length === 0) return {};
+    const primary = financialAdvisors[0];
+    return {
+      name: primary.name,
+      firm: primary.firm,
+      phone: primary.phone,
+      email: primary.email,
+      id: primary.id,
+    };
+  }, [advisorRegistry]);
 
   // Derive institutions from banking data
   const institutions = useMemo(() => {

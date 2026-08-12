@@ -141,7 +141,7 @@ export default function InvestmentsIntake({
       respSubscriber: draft.respSubscriber,
       respBeneficiaryChildIds: draft.respBeneficiaryChildIds,
       respBeneficiaryNames: draft.respBeneficiaryNames,
-      contact: draft.contact,
+      contact: effectiveContact,
       documentLocation: draft.documentLocation,
       notes: draft.notes,
     };
@@ -673,6 +673,9 @@ function buildQuestions(
   });
 
   // Q8: Financial professional contact
+  const hasStaleAdvisorLink = draft.contact?.contactPersonId && !advisorId;
+  const effectiveContact = hasStaleAdvisorLink ? { ...draft.contact, contactPersonId: undefined, contactName: undefined, contactFirm: undefined, contactPhone: undefined, contactEmail: undefined } : draft.contact;
+
   questions.push({
     title: 'Is there a financial professional someone could contact about this account?',
     subtitle: advisorName ? `Your advisor from the Professional Team section: ${advisorName}` : undefined,
@@ -687,7 +690,7 @@ function buildQuestions(
             <OptionButton
               key={opt.value}
               label={opt.label}
-              selected={draft.contact?.contactPersonId === advisorId || (opt.value === 'no' && !draft.contact?.contactName)}
+              selected={effectiveContact?.contactPersonId === advisorId && !!advisorId || (opt.value === 'no' && !effectiveContact?.contactName)}
               onClick={() => {
                 if (opt.value === 'yes_advisor') {
                   updateDraft('contact', {
@@ -704,7 +707,7 @@ function buildQuestions(
             />
           ))}
         </div>
-        {(!draft.contact?.contactPersonId && !draft.contact?.contactName) && (
+        {(!effectiveContact?.contactPersonId && !effectiveContact?.contactName) && (
           <p className={subtleTextClass}>If yes, you can provide contact details on the next step.</p>
         )}
       </div>
@@ -713,7 +716,7 @@ function buildQuestions(
   });
 
   // Q8b: Contact details if yes but no advisor
-  if (!draft.contact?.contactPersonId && draft.contact?.contactPersonId !== advisorId) {
+  if (!effectiveContact?.contactPersonId && effectiveContact?.contactPersonId !== advisorId) {
     questions.push({
       title: 'Contact details for this account (optional)',
       subtitle: 'Someone stepping in may need to reach this person.',
@@ -721,19 +724,19 @@ function buildQuestions(
         <div className="space-y-3">
           <div>
             <label className={labelClass}>Name</label>
-            <input type="text" value={draft.contact?.contactName || ''} onChange={(e) => updateDraft('contact', { ...draft.contact, contactName: e.target.value })} placeholder="Contact name" className={inputClass} />
+            <input type="text" value={effectiveContact?.contactName || ''} onChange={(e) => updateDraft('contact', { ...effectiveContact, contactName: e.target.value })} placeholder="Contact name" className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Firm</label>
-            <input type="text" value={draft.contact?.contactFirm || ''} onChange={(e) => updateDraft('contact', { ...draft.contact, contactFirm: e.target.value })} placeholder="Firm or company" className={inputClass} />
+            <input type="text" value={effectiveContact?.contactFirm || ''} onChange={(e) => updateDraft('contact', { ...effectiveContact, contactFirm: e.target.value })} placeholder="Firm or company" className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Phone</label>
-            <input type="tel" value={draft.contact?.contactPhone || ''} onChange={(e) => updateDraft('contact', { ...draft.contact, contactPhone: e.target.value })} placeholder="Phone number" className={inputClass} />
+            <input type="tel" value={effectiveContact?.contactPhone || ''} onChange={(e) => updateDraft('contact', { ...effectiveContact, contactPhone: e.target.value })} placeholder="Phone number" className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Email</label>
-            <input type="email" value={draft.contact?.contactEmail || ''} onChange={(e) => updateDraft('contact', { ...draft.contact, contactEmail: e.target.value })} placeholder="Email address" className={inputClass} />
+            <input type="email" value={effectiveContact?.contactEmail || ''} onChange={(e) => updateDraft('contact', { ...effectiveContact, contactEmail: e.target.value })} placeholder="Email address" className={inputClass} />
           </div>
         </div>
       ),

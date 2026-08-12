@@ -98,27 +98,34 @@ export default function StepForm({
     }
   }, [answers['fpHasAdvisor']]);
 
-  // Clear advisor-linked contacts from investment accounts when advisor is removed
+  // Clear advisor-linked contacts from financial footprint assets when advisor is removed
   useEffect(() => {
     if (answers['fpHasAdvisor'] !== 'yes') {
-      const investments = answers['investmentAccountsData'] as Array<Record<string, unknown>> | undefined;
-      if (investments && investments.length > 0) {
-        const hasStaleAdvisor = investments.some(
-          (inv) => (inv?.contact as Record<string, unknown>)?.contactPersonId === 'advisor_0'
+      const footprint = allAnswers?.get('financialFootprint') || {};
+      const assetKeys = ['investmentAccountsData', 'pensionRecordsData', 'equityCompensationData', 'receivablesData', 'otherAssetsData'];
+      let anyChanged = false;
+
+      for (const key of assetKeys) {
+        const assets = footprint[key] as Array<Record<string, unknown>> | undefined;
+        if (!Array.isArray(assets) || assets.length === 0) continue;
+
+        const hasStale = assets.some(
+          (a) => (a?.contact as Record<string, unknown>)?.contactPersonId === 'advisor_0'
         );
-        if (hasStaleAdvisor) {
-          const cleaned = investments.map((inv) => {
-            const contact = inv?.contact as Record<string, unknown> | undefined;
-            if (contact?.contactPersonId === 'advisor_0') {
-              return { ...inv, contact: {} };
-            }
-            return inv;
-          });
-          onAnswerChange('investmentAccountsData', cleaned);
-        }
+        if (!hasStale) continue;
+
+        anyChanged = true;
+        const cleaned = assets.map((a) => {
+          const contact = a?.contact as Record<string, unknown> | undefined;
+          if (contact?.contactPersonId === 'advisor_0') {
+            return { ...a, contact: {} };
+          }
+          return a;
+        });
+        onUpdateFootprint?.(key, cleaned);
       }
     }
-  }, [answers['fpHasAdvisor']]);
+  }, [answers['fpHasAdvisor'], allAnswers, onUpdateFootprint]);
 
   // Auto-populate Cameron Smith CFP® details when checkbox is selected
   useEffect(() => {
@@ -163,8 +170,27 @@ export default function StepForm({
       if (answers['fpAdditionalHasAdditional'] !== undefined) {
         onAnswerChange('fpAdditionalHasAdditional', undefined);
       }
+      // Clear stale advisor_1 references from financial footprint assets
+      const footprint = allAnswers?.get('financialFootprint') || {};
+      const assetKeys = ['investmentAccountsData', 'pensionRecordsData', 'equityCompensationData', 'receivablesData', 'otherAssetsData'];
+      for (const key of assetKeys) {
+        const assets = footprint[key] as Array<Record<string, unknown>> | undefined;
+        if (!Array.isArray(assets) || assets.length === 0) continue;
+        const hasStale = assets.some(
+          (a) => (a?.contact as Record<string, unknown>)?.contactPersonId === 'advisor_1'
+        );
+        if (!hasStale) continue;
+        const cleaned = assets.map((a) => {
+          const contact = a?.contact as Record<string, unknown> | undefined;
+          if (contact?.contactPersonId === 'advisor_1') {
+            return { ...a, contact: {} };
+          }
+          return a;
+        });
+        onUpdateFootprint?.(key, cleaned);
+      }
     }
-  }, [answers['fpHasAdditionalAdvisor']]);
+  }, [answers['fpHasAdditionalAdvisor'], allAnswers, onUpdateFootprint]);
 
   useEffect(() => {
     if (answers['acctHasAccountant'] !== 'yes') {

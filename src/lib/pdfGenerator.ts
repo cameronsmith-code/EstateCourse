@@ -6169,27 +6169,54 @@ export const generatePDF = (formData: FormData) => {
     }
   } else if (formData.client1HasWill === 'yes' || formData.client2HasWill === 'yes') {
     const bothHaveWills = formData.client1HasWill === 'yes' && formData.client2HasWill === 'yes';
-    const sameLawyer = formData.willsSameLawyer === 'yes';
+
+    // Mapper: read from currentWillData (authoritative) with fallback to legacy flat fields
+    const currentWillData = formData.currentWillData as Record<string, unknown> | undefined;
+    const willClients = (currentWillData?.['clients'] as Array<Record<string, unknown>>) || [];
+    const findWillClient = (clientId: string) => willClients.find(c => c['clientId'] === clientId);
+    const c1WillClient = findWillClient('client1');
+    const c2WillClient = findWillClient('client2');
+    const getDocBasics = (client: Record<string, unknown> | undefined) => (client?.['documentBasics'] as Record<string, unknown> | undefined);
+    const c1DocBasics = getDocBasics(c1WillClient);
+    const c2DocBasics = getDocBasics(c2WillClient);
+
+    const c1WillYear = (c1DocBasics?.['willYear'] as string) || formData.client1WillYear || '';
+    const c1WillLocation = (c1DocBasics?.['willLocation'] as string) || formData.client1WillLocation || '';
+    const c1WillJurisdiction = (c1DocBasics?.['willJurisdiction'] as string) || formData.client1WillJurisdiction || '';
+    const c1HasSecondaryWill = (c1DocBasics?.['hasSecondaryWill'] as string) || formData.client1HasSecondaryWill || '';
+    const c1SecondaryWillLocation = (c1DocBasics?.['secondaryWillLocation'] as string) || formData.client1SecondaryWillLocation || '';
+    const c1SecondaryWillJurisdiction = (c1DocBasics?.['secondaryWillJurisdiction'] as string) || formData.client1SecondaryWillJurisdiction || '';
+    const c1HasMeaningfulChanges = (c1DocBasics?.['hasMeaningfulChanges'] as string) || formData.client1HasWillMeaningfulChanges || '';
+    const c1MeaningfulChangesDetails = (c1DocBasics?.['meaningfulChangesDetails'] as string) || formData.client1WillMeaningfulChangesDetails || '';
+
+    const c2WillYear = (c2DocBasics?.['willYear'] as string) || formData.client2WillYear || '';
+    const c2WillLocation = (c2DocBasics?.['willLocation'] as string) || formData.client2WillLocation || '';
+    const c2WillJurisdiction = (c2DocBasics?.['willJurisdiction'] as string) || formData.client2WillJurisdiction || '';
+    const c2HasSecondaryWill = (c2DocBasics?.['hasSecondaryWill'] as string) || formData.client2HasSecondaryWill || '';
+    const c2SecondaryWillLocation = (c2DocBasics?.['secondaryWillLocation'] as string) || formData.client2SecondaryWillLocation || '';
+    const c2SecondaryWillJurisdiction = (c2DocBasics?.['secondaryWillJurisdiction'] as string) || formData.client2SecondaryWillJurisdiction || '';
+    const c2HasMeaningfulChanges = (c2DocBasics?.['hasMeaningfulChanges'] as string) || formData.client2HasWillMeaningfulChanges || '';
+    const c2MeaningfulChangesDetails = (c2DocBasics?.['meaningfulChangesDetails'] as string) || formData.client2WillMeaningfulChangesDetails || '';
 
     if (formData.client1HasWill === 'yes') {
       addSubsectionHeader(`${client1Name} — Will`);
       checkPageBreak(25);
 
-      if (formData.client1WillYear) {
+      if (c1WillYear) {
         const currentYear = new Date().getFullYear();
-        const willYear = parseInt(formData.client1WillYear);
+        const willYear = parseInt(c1WillYear);
         const yearsOld = currentYear - willYear;
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
-        doc.text(`${client1Name} has a Will, created in ${formData.client1WillYear}.`, margin, yPosition);
+        doc.text(`${client1Name} has a Will, created in ${c1WillYear}.`, margin, yPosition);
         yPosition += 6;
 
         if (yearsOld >= 5) {
           checkPageBreak(40);
           doc.setFontSize(9);
           doc.setFont(undefined, 'normal');
-          const warningText = `${client1Name}, you indicated that your last Will was prepared in ${formData.client1WillYear}. There is no specific number of years after which a Will legally expires, but many sources emphasize that an out-of-date Will can sometimes be worse than having no Will at all. Most legal professionals and financial advisors recommend that a Will and estate plan should be professionally reviewed at least every three to five years. Reviewing your Will at these intervals ensures that the document remains valid, reflects your current intentions, and complies with any evolving tax or succession laws.`;
+          const warningText = `${client1Name}, you indicated that your last Will was prepared in ${c1WillYear}. There is no specific number of years after which a Will legally expires, but many sources emphasize that an out-of-date Will can sometimes be worse than having no Will at all. Most legal professionals and financial advisors recommend that a Will and estate plan should be professionally reviewed at least every three to five years. Reviewing your Will at these intervals ensures that the document remains valid, reflects your current intentions, and complies with any evolving tax or succession laws.`;
           const warningLines = doc.splitTextToSize(warningText, fieldWidth);
           warningLines.forEach((line: string) => {
             checkPageBreak(6);
@@ -6201,32 +6228,32 @@ export const generatePDF = (formData: FormData) => {
       }
     }
 
-    if (formData.client1HasWill === 'yes' && formData.client1WillLocation) {
+    if (formData.client1HasWill === 'yes' && c1WillLocation) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name}'s Will is located: ${formData.client1WillLocation}`, margin, yPosition);
+      doc.text(`${client1Name}'s Will is located: ${c1WillLocation}`, margin, yPosition);
       yPosition += 6;
     }
 
-    if (formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillLocation) {
+    if (c1HasSecondaryWill === 'yes' && c1SecondaryWillLocation) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name} has a secondary Will, and it is located: ${formData.client1SecondaryWillLocation}`, margin, yPosition);
+      doc.text(`${client1Name} has a secondary Will, and it is located: ${c1SecondaryWillLocation}`, margin, yPosition);
       yPosition += 6;
     }
 
-    if (formData.client1HasSecondaryWill === 'yes' && formData.client1SecondaryWillJurisdiction) {
+    if (c1HasSecondaryWill === 'yes' && c1SecondaryWillJurisdiction) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client1Name}'s secondary Will was prepared in ${formData.client1SecondaryWillJurisdiction}.`, margin, yPosition);
+      doc.text(`${client1Name}'s secondary Will was prepared in ${c1SecondaryWillJurisdiction}.`, margin, yPosition);
       yPosition += 6;
     }
 
-    if (formData.client1HasWill === 'yes' && formData.client1HasWillMeaningfulChanges === 'yes' && formData.client1WillMeaningfulChangesDetails) {
+    if (formData.client1HasWill === 'yes' && c1HasMeaningfulChanges === 'yes' && c1MeaningfulChangesDetails) {
       checkPageBreak(30);
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      const meaningfulChangesText = `${client1Name} indicated that they have had meaningful changes in their life. They indicated: ${formData.client1WillMeaningfulChangesDetails} Based on the major changes, it is recommended that they update their Will, so that these changes and ${client1Name}'s wishes are up to date.`;
+      const meaningfulChangesText = `${client1Name} indicated that they have had meaningful changes in their life. They indicated: ${c1MeaningfulChangesDetails} Based on the major changes, it is recommended that they update their Will, so that these changes and ${client1Name}'s wishes are up to date.`;
       const changesLines = doc.splitTextToSize(meaningfulChangesText, fieldWidth);
       changesLines.forEach((line: string) => {
         checkPageBreak(6);
@@ -6234,7 +6261,7 @@ export const generatePDF = (formData: FormData) => {
         yPosition += 5;
       });
       yPosition += 5;
-    } else if (formData.client1HasWill === 'yes' && formData.client1HasWillMeaningfulChanges === 'no') {
+    } else if (formData.client1HasWill === 'yes' && c1HasMeaningfulChanges === 'no') {
       checkPageBreak(20);
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
@@ -6248,50 +6275,47 @@ export const generatePDF = (formData: FormData) => {
       yPosition += 5;
     }
 
-    const hasDisabledChild = formData.childrenData && Array.isArray(formData.childrenData) &&
-      formData.childrenData.some((child: any) => child?.disabled === 'yes');
+    if (formData.client1HasWill === 'yes') {
+      const childArrangements = (c1WillClient?.['childSpecificArrangements'] as Array<Record<string, unknown>>) || [];
+      const hasHensonStyle = childArrangements.some(a => a['knownTypeName'] === 'henson_trust' && a['hasDifferentArrangement'] === 'yes');
+      const hasDisabledChild = formData.childrenData && Array.isArray(formData.childrenData) &&
+        formData.childrenData.some((child: any) => child?.disabled === 'yes');
 
-    if (formData.client1HasWill === 'yes' && hasDisabledChild) {
-      checkPageBreak(30);
+      if (hasDisabledChild || hasHensonStyle) {
+        checkPageBreak(30);
 
-      const disabledChild = formData.childrenData?.find((child: any) => child?.disabled === 'yes');
-      const disabledChildName = disabledChild?.name || 'their disabled child';
+        const disabledChild = formData.childrenData?.find((child: any) => child?.disabled === 'yes');
+        const disabledChildName = disabledChild?.name || 'their disabled child';
 
-      if (formData.client1HasHensonTrust === 'yes') {
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.text(`${client1Name} indicated that they have included an Absolute Discretionary Trust ("Henson Trust" in Ontario) in their Will.`, margin, yPosition);
-        yPosition += 6;
-      } else if (formData.client1HasHensonTrust === 'no') {
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.text(`${client1Name} indicated that they have not included an Absolute Discretionary Trust ("Henson Trust" in Ontario) in their Will.`, margin, yPosition);
-        yPosition += 6;
-      }
+        if (hasHensonStyle) {
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'normal');
+          doc.text(`${client1Name} indicated that they understand their Will to include a special arrangement (such as a Henson Trust) for ${disabledChildName}.`, margin, yPosition);
+          yPosition += 6;
 
-      if (formData.client1HasHensonTrust) {
-        checkPageBreak(100);
+          checkPageBreak(100);
 
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(11);
-        doc.text('Additional Reading - Absolute Discretionary Trusts ("Henson Trusts" in Ontario)', margin, yPosition);
-        yPosition += 8;
+          doc.setFont(undefined, 'bold');
+          doc.setFontSize(11);
+          doc.text('Additional Reading - Absolute Discretionary Trusts ("Henson Trusts" in Ontario)', margin, yPosition);
+          yPosition += 8;
 
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(9);
 
-        const hensonText = `A Henson Trust is a very important tool for families who have a child with a disability. It is what experts call an "absolute discretionary trust," which means the person you choose to manage the money (the trustee) has the final say on when and how much money is paid out. The big advantage of this structure is that the child does not legally own the assets and has no power to demand payments from the trust. This is key because most provincial government programs have strict limits on how much wealth a person can have before they lose their help; because the child doesn't "own" the trust money, it usually won't be counted against them, allowing them to keep their government disability benefits.
+          const hensonText = `A Henson Trust is a very important tool for families who have a child with a disability. It is what experts call an "absolute discretionary trust," which means the person you choose to manage the money (the trustee) has the final say on when and how much money is paid out. The big advantage of this structure is that the child does not legally own the assets and has no power to demand payments from the trust. This is key because most provincial government programs have strict limits on how much wealth a person can have before they lose their help; because the child doesn't "own" the trust money, it usually won't be counted against them, allowing them to keep their government disability benefits.
 
 You should explore this as an option with your legal and CFP® professionals because if you simply leave money to a disabled child in a normal way, it could actually hurt them financially. Without a trust, an outright inheritance could push them over the asset limit, causing them to be disqualified from their monthly support check and other essentials like dental care and prescription drug coverage. A Henson Trust protects these benefits while still allowing the child to use the trust money for things that improve their quality of life, such as home care attendants or specialized medical equipment. It is a reliable way to ensure your loved one has financial security and is well taken care of even after you are gone.`;
 
-        const hensonLines = doc.splitTextToSize(hensonText, fieldWidth);
-        hensonLines.forEach((line: string) => {
-          checkPageBreak(6);
-          doc.text(line, margin, yPosition);
-          yPosition += 5;
-        });
+          const hensonLines = doc.splitTextToSize(hensonText, fieldWidth);
+          hensonLines.forEach((line: string) => {
+            checkPageBreak(6);
+            doc.text(line, margin, yPosition);
+            yPosition += 5;
+          });
 
-        yPosition += 10;
+          yPosition += 10;
+        }
       }
     }
 
@@ -6299,21 +6323,21 @@ You should explore this as an option with your legal and CFP® professionals bec
       addSubsectionHeader(`${client2Name} — Will`);
       checkPageBreak(25);
 
-      if (formData.client2WillYear) {
+      if (c2WillYear) {
         const currentYear = new Date().getFullYear();
-        const willYear = parseInt(formData.client2WillYear);
+        const willYear = parseInt(c2WillYear);
         const yearsOld = currentYear - willYear;
 
         doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
-        doc.text(`${client2Name} has a Will, created in ${formData.client2WillYear}.`, margin, yPosition);
+        doc.text(`${client2Name} has a Will, created in ${c2WillYear}.`, margin, yPosition);
         yPosition += 6;
 
         if (yearsOld >= 5) {
           checkPageBreak(40);
           doc.setFontSize(9);
           doc.setFont(undefined, 'normal');
-          const warningText = `${client2Name}, you indicated that your last Will was prepared in ${formData.client2WillYear}. There is no specific number of years after which a Will legally expires, but many sources emphasize that an out-of-date Will can sometimes be worse than having no Will at all. Most legal professionals and financial advisors recommend that a Will and estate plan should be professionally reviewed at least every three to five years. Reviewing your Will at these intervals ensures that the document remains valid, reflects your current intentions, and complies with any evolving tax or succession laws.`;
+          const warningText = `${client2Name}, you indicated that your last Will was prepared in ${c2WillYear}. There is no specific number of years after which a Will legally expires, but many sources emphasize that an out-of-date Will can sometimes be worse than having no Will at all. Most legal professionals and financial advisors recommend that a Will and estate plan should be professionally reviewed at least every three to five years. Reviewing your Will at these intervals ensures that the document remains valid, reflects your current intentions, and complies with any evolving tax or succession laws.`;
           const warningLines = doc.splitTextToSize(warningText, fieldWidth);
           warningLines.forEach((line: string) => {
             checkPageBreak(6);
@@ -6324,51 +6348,41 @@ You should explore this as an option with your legal and CFP® professionals bec
         }
       }
 
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text(`In what jurisdiction was ${client2Name}'s Will prepared?`, margin, yPosition);
-      doc.setFont(undefined, 'normal');
-      yPosition += 2;
-
-      doc.rect(margin, yPosition, fieldWidth, 6);
-
-      const jurisdictionField2 = new doc.AcroFormTextField();
-      jurisdictionField2.fieldName = 'client2_will_jurisdiction';
-      jurisdictionField2.Rect = [margin, yPosition, fieldWidth, 6];
-      jurisdictionField2.fontSize = 9;
-      jurisdictionField2.textColor = colors.darkText;
-      jurisdictionField2.value = formData.client2WillJurisdiction || '';
-      jurisdictionField2.defaultValue = 'e.g., Ontario, British Columbia, etc.';
-      doc.addField(jurisdictionField2);
-      yPosition += 14;
+      if (c2WillJurisdiction) {
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${client2Name}'s Will was prepared in: ${c2WillJurisdiction}`, margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        yPosition += 6;
+      }
     }
 
-    if (formData.client2HasWill === 'yes' && formData.client2WillLocation && hasSpouse) {
+    if (formData.client2HasWill === 'yes' && c2WillLocation && hasSpouse) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name} has a Will, and it is located: ${formData.client2WillLocation}`, margin, yPosition);
+      doc.text(`${client2Name} has a Will, and it is located: ${c2WillLocation}`, margin, yPosition);
       yPosition += 6;
     }
 
-    if (formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillLocation && hasSpouse) {
+    if (c2HasSecondaryWill === 'yes' && c2SecondaryWillLocation && hasSpouse) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name} has a secondary Will, and it is located: ${formData.client2SecondaryWillLocation}`, margin, yPosition);
+      doc.text(`${client2Name} has a secondary Will, and it is located: ${c2SecondaryWillLocation}`, margin, yPosition);
       yPosition += 6;
     }
 
-    if (formData.client2HasSecondaryWill === 'yes' && formData.client2SecondaryWillJurisdiction && hasSpouse) {
+    if (c2HasSecondaryWill === 'yes' && c2SecondaryWillJurisdiction && hasSpouse) {
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`${client2Name}'s secondary Will was prepared in ${formData.client2SecondaryWillJurisdiction}.`, margin, yPosition);
+      doc.text(`${client2Name}'s secondary Will was prepared in ${c2SecondaryWillJurisdiction}.`, margin, yPosition);
       yPosition += 6;
     }
 
-    if (formData.client2HasWill === 'yes' && formData.client2HasWillMeaningfulChanges === 'yes' && formData.client2WillMeaningfulChangesDetails && hasSpouse) {
+    if (formData.client2HasWill === 'yes' && c2HasMeaningfulChanges === 'yes' && c2MeaningfulChangesDetails && hasSpouse) {
       checkPageBreak(30);
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      const meaningfulChangesText = `${client2Name} indicated that they have had meaningful changes in their life. They indicated: ${formData.client2WillMeaningfulChangesDetails} Based on the major changes, it is recommended that they update their Will, so that these changes and ${client2Name}'s wishes are up to date.`;
+      const meaningfulChangesText = `${client2Name} indicated that they have had meaningful changes in their life. They indicated: ${c2MeaningfulChangesDetails} Based on the major changes, it is recommended that they update their Will, so that these changes and ${client2Name}'s wishes are up to date.`;
       const changesLines = doc.splitTextToSize(meaningfulChangesText, fieldWidth);
       changesLines.forEach((line: string) => {
         checkPageBreak(6);
@@ -6376,7 +6390,7 @@ You should explore this as an option with your legal and CFP® professionals bec
         yPosition += 5;
       });
       yPosition += 5;
-    } else if (formData.client2HasWill === 'yes' && formData.client2HasWillMeaningfulChanges === 'no' && hasSpouse) {
+    } else if (formData.client2HasWill === 'yes' && c2HasMeaningfulChanges === 'no' && hasSpouse) {
       checkPageBreak(20);
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
@@ -6390,8 +6404,8 @@ You should explore this as an option with your legal and CFP® professionals bec
       yPosition += 5;
     }
 
-    if ((formData.client1HasWill === 'yes' && (formData.client1WillJurisdiction || formData.client1WillLocation)) ||
-        (formData.client2HasWill === 'yes' && (formData.client2WillJurisdiction || formData.client2WillLocation) && hasSpouse)) {
+    if ((formData.client1HasWill === 'yes' && (c1WillJurisdiction || c1WillLocation)) ||
+        (formData.client2HasWill === 'yes' && (c2WillJurisdiction || c2WillLocation) && hasSpouse)) {
       yPosition += 4;
     }
   }

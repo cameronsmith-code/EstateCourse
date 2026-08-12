@@ -36,6 +36,8 @@ import {
   type ResidueUnderstanding,
   type ChildPredeceaseUnderstanding,
   type InheritanceType,
+  type TrustKnownTypeName,
+  type SpecialArrangementType,
   type TrustStage,
   type SpecificGift,
   type CharitableGift,
@@ -51,7 +53,9 @@ import {
   getUnderstandingLabel,
   getUnderstandingColor,
   getFlagSeverityColor,
+  getInheritanceTypeLabel,
   getFlagSeverityLabel,
+  migrateLegacyWillFields,
 } from '../lib/currentWillTypes';
 import {
   getCurrentLawyers,
@@ -144,8 +148,10 @@ const CHILD_PREDECEASE_OPTIONS = [
 ];
 
 const INHERITANCE_OPTIONS = [
-  { value: 'outright', label: 'Paid outright' },
-  { value: 'held_in_trust', label: 'Held in trust' },
+  { value: 'outright', label: 'Paid to them outright' },
+  { value: 'held_until_age', label: 'Held and managed for them until a certain age' },
+  { value: 'released_gradually', label: 'Released gradually at different ages or stages' },
+  { value: 'held_longer_period', label: 'Held and managed for them for a longer period' },
   { value: 'different_arrangements', label: 'Different arrangements apply to different children' },
   { value: 'not_sure', label: "I'm not sure" },
 ];
@@ -200,15 +206,22 @@ const CHARITY_FORM_OPTIONS = [
   { value: 'other', label: 'Other' },
 ];
 
-const CHILD_ARRANGEMENT_OPTIONS = [
-  { value: 'discretionary_trust', label: 'Discretionary trust' },
-  { value: 'henson_style', label: 'Henson-style trust' },
-  { value: 'testamentary_trust', label: 'Another testamentary trust' },
+const SPECIAL_ARRANGEMENT_OPTIONS = [
+  { value: 'managed_ongoing', label: 'Money is managed for them on an ongoing basis' },
+  { value: 'trustee_discretion', label: 'The trustee has discretion over when and how much is paid' },
+  { value: 'held_for_lifetime', label: 'Inheritance is held for their lifetime' },
+  { value: 'different_distribution_ages', label: 'Different distribution ages apply' },
+  { value: 'another_special_arrangement', label: 'Another special arrangement' },
+  { value: 'not_sure', label: "I'm not sure" },
+];
+
+const TRUST_KNOWN_NAME_OPTIONS = [
+  { value: 'henson_trust', label: 'Henson Trust' },
+  { value: 'testamentary_trust', label: 'Testamentary trust' },
   { value: 'lifetime_trust', label: 'Lifetime trust' },
-  { value: 'different_ages', label: 'Different distribution ages' },
-  { value: 'different_trustees', label: 'Different trustees' },
+  { value: 'discretionary_trust', label: 'Another discretionary trust' },
   { value: 'other', label: 'Other' },
-  { value: 'not_sure_type', label: "I'm not sure what type" },
+  { value: 'not_sure', label: "I'm not sure" },
 ];
 
 function genId(prefix: string): string {
@@ -359,7 +372,14 @@ export default function CurrentWillSection({ answers, allAnswers, onAnswerChange
     const existing = data.clients.find(c => c.clientId === clientId);
     if (existing) return existing;
     const name = clientId === 'client1' ? client1Name : client2Name;
-    return emptyClientWill(clientId, name);
+    const fresh = emptyClientWill(clientId, name);
+    const migrated = migrateLegacyWillFields(willsAnswers, clientId, undefined);
+    if (migrated.documentBasics) {
+      const merged = { ...fresh, documentBasics: { ...fresh.documentBasics, ...migrated.documentBasics } };
+      updateData({ ...data, clients: [...data.clients, merged] });
+      return merged;
+    }
+    return fresh;
   };
 
   const updateClient = (clientId: 'client1' | 'client2', updates: Partial<ClientWillUnderstanding>) => {
@@ -1494,10 +1514,10 @@ function ChildrenTrustSection({
   onUpdate: (updates: Partial<ClientWillUnderstanding>) => void;
 }) {
   const childPeople = people.filter(p => p.isDescendant);
-  const disabledChildren = childrenData.filter((c, i) => {
-    const classification = c.classification as string;
-    return classification === 'adult_dependant' || c.isDisabled === 'yes';
-  });
+  const hasMinor = childrenData.some(c => c.classification === 'minor' || c.ageGroup === 'minor');
+  const hasDependant = childrenData.some(c => c.classification === 'adult_dependant');
+  const hasDisabled = childrenData.some(c => c.disabled === 'yes' || c.disabled === 'not_sure' || c.isDisabled === 'yes');
+  const showPerChildQuestion = hasMinor || hasDependant || hasDisabled || childrenData.length > 1;
 
   const addTrustStage = () => {
     onUpdate({ trustStages: [...trustStages, { id: genId('stage') }] });
@@ -1509,9 +1529,23 @@ function ChildrenTrustSection({
     onUpdate({ trustStages: trustStages.filter(s => s.id !== id) });
   };
 
+  const showStages = inheritanceType === 'held_until_age' || inheritanceType === 'released_gradually';
+  const showTrustee = inheritanceType === 'held_until_age' || inheritanceType === 'released_gradually' || inheritanceType === 'held_longer_period';
+
+  const updateChildArrangement = (childId: string, childName: string, updates: Partial<NonNullable<ClientWillUnderstanding['childSpecificArrangements']>[number]>) => {
+    const current = [...(childSpecificArrangements || [])];
+    const idx = current.findIndex(a => a.childId === childId);
+    if (idx >= 0) {
+      current[idx] = { ...current[idx], ...updates };
+    } else {
+      current.push({ childId, childName, hasDifferentArrangement: 'not_sure', ...updates });
+    }
+    onUpdate({ childSpecificArrangements: current });
+  };
+
   return (
     <div className="space-y-6">
-      <SectionHeading label="Children & Trusts" icon={<Shield className="w-4 h-4" />} />
+      <SectionHeading label="Children & Inheritance" icon={<Shield className="w-4 h-4" />} />
 
       <div>
         <p className="text-sm text-gray-300 mb-3">
@@ -1525,26 +1559,29 @@ function ChildrenTrustSection({
       </div>
 
       <div className="pt-4 border-t border-gray-700">
-        <p className="text-sm text-gray-300 mb-3">
-          Do you understand {clientName}'s Will to allow children to receive their inheritance immediately, or is it held for them
-          until certain ages or stages?
+        <p className="text-sm text-gray-300 mb-2">
+          Based on your understanding of {clientName}'s Will, would your children's inheritance be paid to them right away, or would someone manage it for them for a period of time?
         </p>
-        <div className="grid grid-cols-1 gap-3">
+        <p className={subtleTextClass}>
+          A Will can direct that an inheritance be managed by a trustee instead of being paid out all at once. For example, a child might receive part at age 25, another portion at 30, and the balance at 35.
+        </p>
+        <div className="grid grid-cols-1 gap-3 mt-3">
           {INHERITANCE_OPTIONS.map(opt => (
             <OptionButton key={opt.value} label={opt.label} selected={inheritanceType === opt.value} onClick={() => onUpdate({ inheritanceType: opt.value as InheritanceType })} />
           ))}
         </div>
       </div>
 
-      {inheritanceType === 'held_in_trust' && (
+      {showStages && (
         <div className="pt-4 border-t border-gray-700 space-y-4">
           <div>
-            <label className={labelClass}>At what age or stages do you understand them to receive control of their inheritance?</label>
+            <label className={labelClass}>How do you understand the inheritance to be released?</label>
+            <p className={subtleTextClass}>Add each stage you understand to apply. You don't need to know exact percentages.</p>
             <div className="space-y-2 mt-2">
               {trustStages.map(stage => (
                 <div key={stage.id} className="flex items-center gap-2">
-                  <input type="text" value={stage.age || ''} onChange={e => updateTrustStage(stage.id, { age: e.target.value })} placeholder="e.g., 25" className={`${inputClass} w-24`} />
-                  <input type="text" value={stage.fraction || ''} onChange={e => updateTrustStage(stage.id, { fraction: e.target.value })} placeholder="e.g., 1/3" className={`${inputClass} w-24`} />
+                  <input type="text" value={stage.age || ''} onChange={e => updateTrustStage(stage.id, { age: e.target.value })} placeholder="Age / stage" className={`${inputClass} w-28`} />
+                  <input type="text" value={stage.fraction || ''} onChange={e => updateTrustStage(stage.id, { fraction: e.target.value })} placeholder="Portion (e.g., 1/3)" className={`${inputClass} w-28`} />
                   <input type="text" value={stage.description || ''} onChange={e => updateTrustStage(stage.id, { description: e.target.value })} placeholder="Description (optional)" className={`${inputClass} flex-1`} />
                   <button type="button" onClick={() => removeTrustStage(stage.id)} className="text-gray-500 hover:text-red-400 transition-colors">
                     <Trash2 className="w-4 h-4" />
@@ -1556,85 +1593,123 @@ function ChildrenTrustSection({
               <Plus className="w-4 h-4" /> Add stage
             </button>
           </div>
-
-          <div>
-            <label className={labelClass}>Who do you understand would manage the inheritance while it is held in trust?</label>
-            <select value={trustTrusteePersonId || ''} onChange={e => {
-              const personId = e.target.value;
-              const person = people.find(p => p.id === personId);
-              onUpdate({ trustTrusteePersonId: personId, trustTrusteeName: person?.name });
-            }} className={inputClass}>
-              <option value="">Select person</option>
-              {people.map(p => <option key={p.id} value={p.id}>{p.name} ({p.relationship})</option>)}
-              <option value="other">Other</option>
-            </select>
-            <p className={subtleTextClass}>This may or may not be the same person as the Estate Trustee or guardian.</p>
-          </div>
         </div>
       )}
 
-      {disabledChildren.length > 0 && (
+      {showTrustee && (
+        <div className="pt-4 border-t border-gray-700">
+          <label className={labelClass}>Who do you understand would manage the inheritance until it is paid out?</label>
+          <p className={subtleTextClass}>
+            This person is often called the trustee. They manage the money according to the instructions in the Will until the beneficiary is entitled to receive it.
+          </p>
+          <select value={trustTrusteePersonId || ''} onChange={e => {
+            const personId = e.target.value;
+            const person = people.find(p => p.id === personId);
+            onUpdate({ trustTrusteePersonId: personId, trustTrusteeName: person?.name });
+          }} className={`${inputClass} mt-2`}>
+            <option value="">Select person</option>
+            {people.map(p => <option key={p.id} value={p.id}>{p.name} ({p.relationship})</option>)}
+            <option value="other">Other</option>
+          </select>
+          <p className={subtleTextClass}>This may or may not be the same person as the Estate Trustee or guardian.</p>
+        </div>
+      )}
+
+      {inheritanceType && inheritanceType !== 'not_sure' && (
+        <div className="pt-4 border-t border-gray-700 bg-blue-900/10 border border-blue-700/20 rounded-lg p-3">
+          <p className="text-xs text-blue-200/70 leading-relaxed">
+            A testamentary trust is simply a trust created through a Will after someone dies. Instead of a beneficiary receiving an inheritance all at once, a trustee can manage the money and distribute it according to the instructions in the Will. For example, parents might choose to have a child's inheritance managed until age 25, then release portions at ages 25, 30 and 35 rather than paying everything immediately.
+          </p>
+        </div>
+      )}
+
+      {showPerChildQuestion && (
         <div className="pt-4 border-t border-gray-700 space-y-4">
           <p className="text-sm text-gray-300">
-            Do you understand {clientName}'s Will to contain a different inheritance or trust arrangement for any of the following?
+            Do you understand {clientName}'s Will to use a different inheritance arrangement for any child or beneficiary?
           </p>
-          {disabledChildren.map((child, i) => {
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {YES_NO_UNSURE.map(opt => (
+              <OptionButton key={opt.value} label={opt.label} selected={inheritanceType === 'different_arrangements' && opt.value === 'yes'} onClick={() => onUpdate({ inheritanceType: opt.value === 'yes' ? 'different_arrangements' : inheritanceType })} />
+            ))}
+          </div>
+
+          {inheritanceType === 'different_arrangements' && childrenData.map((child, i) => {
             const childName = child.nickname || child.name || `Child ${i + 1}`;
-            const childId = `child_${childrenData.indexOf(child)}`;
+            const childId = `child_${i}`;
             const existing = childSpecificArrangements?.find(a => a.childId === childId);
+            const isDisabledChild = child.classification === 'adult_dependant' || child.disabled === 'yes' || child.disabled === 'not_sure' || child.isDisabled === 'yes';
             return (
               <div key={childId} className="p-4 bg-gray-800 border border-gray-600 rounded-lg space-y-3">
                 <p className="text-sm font-medium text-white">{childName}</p>
+
+                {isDisabledChild && (
+                  <p className="text-xs text-amber-300/70">
+                    Do you understand {clientName}'s Will to include a special arrangement for managing {childName}'s inheritance?
+                  </p>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {YES_NO_UNSURE.map(opt => (
                     <OptionButton key={opt.value} label={opt.label} selected={existing?.hasDifferentArrangement === opt.value} onClick={() => {
-                      const updated = [...(childSpecificArrangements || [])];
-                      const idx = updated.findIndex(a => a.childId === childId);
-                      const entry = { childId, childName, hasDifferentArrangement: opt.value as 'yes' | 'no' | 'not_sure' };
-                      if (idx >= 0) updated[idx] = entry; else updated.push(entry);
-                      onUpdate({ childSpecificArrangements: updated });
+                      updateChildArrangement(childId, childName, { hasDifferentArrangement: opt.value as 'yes' | 'no' | 'not_sure' });
                     }} />
                   ))}
                 </div>
+
                 {existing?.hasDifferentArrangement === 'yes' && (
                   <>
                     <div>
-                      <label className={labelClass}>What type of arrangement?</label>
+                      <label className={labelClass}>How do you understand it to work?</label>
                       <select
-                        value={existing.arrangementType || ''}
-                        onChange={e => {
-                          const updated = [...(childSpecificArrangements || [])];
-                          const idx = updated.findIndex(a => a.childId === childId);
-                          if (idx >= 0) updated[idx] = { ...updated[idx], arrangementType: e.target.value as typeof existing.arrangementType };
-                          onUpdate({ childSpecificArrangements: updated });
-                        }}
+                        value={existing.specialArrangement || ''}
+                        onChange={e => updateChildArrangement(childId, childName, { specialArrangement: e.target.value as SpecialArrangementType })}
                         className={inputClass}
                       >
-                        <option value="">Select type</option>
-                        {CHILD_ARRANGEMENT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        <option value="">Select arrangement</option>
+                        {SPECIAL_ARRANGEMENT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
                     </div>
+
+                    <div>
+                      <label className={labelClass}>Do you know what this type of trust or arrangement is called?</label>
+                      <p className={subtleTextClass}>This is optional — you don't need to know the legal term.</p>
+                      <select
+                        value={existing.knownTypeName || ''}
+                        onChange={e => updateChildArrangement(childId, childName, { knownTypeName: e.target.value as TrustKnownTypeName })}
+                        className={`${inputClass} mt-1`}
+                      >
+                        <option value="">Select if known</option>
+                        {TRUST_KNOWN_NAME_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select>
+                    </div>
+
                     <div>
                       <label className={labelClass}>Description (optional)</label>
                       <textarea
                         value={existing.description || ''}
-                        onChange={e => {
-                          const updated = [...(childSpecificArrangements || [])];
-                          const idx = updated.findIndex(a => a.childId === childId);
-                          if (idx >= 0) updated[idx] = { ...updated[idx], description: e.target.value };
-                          onUpdate({ childSpecificArrangements: updated });
-                        }}
+                        onChange={e => updateChildArrangement(childId, childName, { description: e.target.value })}
                         placeholder="Describe what you understand at a high level..."
                         className={inputClass}
                         rows={2}
                       />
                     </div>
-                    <div className="bg-amber-900/20 border border-amber-700/30 rounded-lg p-3">
-                      <p className="text-xs text-amber-200/80 leading-relaxed">
-                        Selecting an option here records your understanding only. It does not mean the trust legally qualifies as
-                        any particular type. Your lawyer can confirm.
-                      </p>
-                    </div>
+
+                    {existing.knownTypeName === 'henson_trust' && (
+                      <div className="bg-amber-900/20 border border-amber-700/30 rounded-lg p-3">
+                        <p className="text-xs text-amber-200/80 leading-relaxed">
+                          A Henson Trust (also called an absolute discretionary trust) is a type of trust sometimes used in estate planning for a beneficiary who receives government disability benefits. The trustee has full discretion over whether and when to distribute funds. This can help preserve the beneficiary's eligibility for certain government support programs. Recording this here does not mean the trust legally qualifies as a Henson Trust — your lawyer can confirm.
+                        </p>
+                      </div>
+                    )}
+
+                    {existing.knownTypeName && existing.knownTypeName !== 'not_sure' && existing.knownTypeName !== 'other' && (
+                      <div className="bg-amber-900/10 border border-amber-700/20 rounded-lg p-3">
+                        <p className="text-xs text-amber-200/60 leading-relaxed">
+                          Selecting a label here records your understanding only. It does not mean the arrangement legally qualifies as any particular type. Your lawyer can confirm.
+                        </p>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -2386,10 +2461,10 @@ function SummaryScreen({
               )}
 
               {client.inheritanceType && (
-                <SummaryRow label="Children's inheritance" value={INHERITANCE_OPTIONS.find(i => i.value === client.inheritanceType)?.label || client.inheritanceType} />
+                <SummaryRow label="Children's inheritance" value={getInheritanceTypeLabel(client.inheritanceType)} />
               )}
 
-              {client.inheritanceType === 'held_in_trust' && client.trustStages && client.trustStages.length > 0 && (
+              {(client.inheritanceType === 'held_until_age' || client.inheritanceType === 'released_gradually') && client.trustStages && client.trustStages.length > 0 && (
                 <SummaryRow label="Distribution" value={client.trustStages.map(s => [s.fraction, s.age].filter(Boolean).join(' at ').trim()).join(', ')} />
               )}
 

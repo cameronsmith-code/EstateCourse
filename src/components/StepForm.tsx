@@ -419,17 +419,7 @@ export default function StepForm({
   useEffect(() => {
     if (answers['client1HasWill'] === 'no') {
       const keysToClear = [
-        'client1WillYear',
-        'client1WillPreparedInCanada',
-        'client1WillCountry',
-        'client1WillProvince',
-        'client1WillStorageLocation',
-        'client1HasDigitalWillCopy',
-        'client1DigitalWillLocation',
         'client1HasSecondaryWill',
-        'client1SecondaryWillSameTimeAndJurisdiction',
-        'client1SecondaryWillJurisdiction',
-        'client1SecondaryWillDate',
         'client1HasHensonTrust'
       ];
       keysToClear.forEach(key => {
@@ -443,17 +433,7 @@ export default function StepForm({
   useEffect(() => {
     if (answers['client2HasWill'] === 'no') {
       const keysToClear = [
-        'client2WillYear',
-        'client2WillPreparedInCanada',
-        'client2WillCountry',
-        'client2WillProvince',
-        'client2WillStorageLocation',
-        'client2HasDigitalWillCopy',
-        'client2DigitalWillLocation',
-        'client2HasSecondaryWill',
-        'client2SecondaryWillSameTimeAndJurisdiction',
-        'client2SecondaryWillJurisdiction',
-        'client2SecondaryWillDate'
+        'client2HasSecondaryWill'
       ];
       keysToClear.forEach(key => {
         if (answers[key] !== undefined) {
@@ -502,34 +482,6 @@ export default function StepForm({
       }
     }
   }, [answers['client2HasDigitalWillCopy']]);
-
-  useEffect(() => {
-    if (answers['client1SecondaryWillSameTimeAndJurisdiction'] === 'yes') {
-      const keysToClear = [
-        'client1SecondaryWillJurisdiction',
-        'client1SecondaryWillDate'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client1SecondaryWillSameTimeAndJurisdiction']]);
-
-  useEffect(() => {
-    if (answers['client2SecondaryWillSameTimeAndJurisdiction'] === 'yes') {
-      const keysToClear = [
-        'client2SecondaryWillJurisdiction',
-        'client2SecondaryWillDate'
-      ];
-      keysToClear.forEach(key => {
-        if (answers[key] !== undefined) {
-          onAnswerChange(key, undefined);
-        }
-      });
-    }
-  }, [answers['client2SecondaryWillSameTimeAndJurisdiction']]);
 
   useEffect(() => {
     if (answers['client1HasFuneralArrangements'] === 'no') {

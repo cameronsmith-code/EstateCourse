@@ -61,8 +61,26 @@ export type ChildPredeceaseUnderstanding =
 
 export type InheritanceType =
   | 'outright'
-  | 'held_in_trust'
+  | 'held_until_age'
+  | 'released_gradually'
+  | 'held_longer_period'
   | 'different_arrangements'
+  | 'not_sure';
+
+export type TrustKnownTypeName =
+  | 'henson_trust'
+  | 'testamentary_trust'
+  | 'lifetime_trust'
+  | 'discretionary_trust'
+  | 'other'
+  | 'not_sure';
+
+export type SpecialArrangementType =
+  | 'managed_ongoing'
+  | 'trustee_discretion'
+  | 'held_for_lifetime'
+  | 'different_distribution_ages'
+  | 'another_special_arrangement'
   | 'not_sure';
 
 export type TrustStage = {
@@ -155,7 +173,8 @@ export type ClientWillUnderstanding = {
     childId: string;
     childName: string;
     hasDifferentArrangement: 'yes' | 'no' | 'not_sure';
-    arrangementType?: 'discretionary_trust' | 'henson_style' | 'testamentary_trust' | 'lifetime_trust' | 'different_ages' | 'different_trustees' | 'other' | 'not_sure_type';
+    specialArrangement?: SpecialArrangementType;
+    knownTypeName?: TrustKnownTypeName;
     description?: string;
   }>;
   specificGifts?: SpecificGift[];
@@ -468,7 +487,7 @@ export function generatePlanningFlags(
       });
     }
 
-    if (client.inheritanceType === 'held_in_trust' && (!client.trustStages || client.trustStages.length === 0)) {
+    if ((client.inheritanceType === 'held_until_age' || client.inheritanceType === 'released_gradually' || client.inheritanceType === 'held_longer_period') && (!client.trustStages || client.trustStages.length === 0) && client.inheritanceType !== 'held_longer_period') {
       flags.push({
         ruleId: 'WILL-TRUST-STAGES-01',
         severity: 'yellow',
@@ -581,5 +600,43 @@ export function getFlagSeverityLabel(severity: FlagSeverity): string {
       return 'Review Recommended';
     case 'informational':
       return 'Informational';
+  }
+}
+
+export function migrateLegacyWillFields(
+  willsAnswers: Record<string, unknown>,
+  clientId: 'client1' | 'client2',
+  existing: ClientWillUnderstanding | undefined,
+): Partial<ClientWillUnderstanding> {
+  if (existing?.documentBasics?.willYear || existing?.documentBasics?.willLocation) {
+    return {};
+  }
+  const prefix = clientId;
+  const legacyYear = willsAnswers[`${prefix}WillYear`] as string | undefined;
+  const legacyLocation = willsAnswers[`${prefix}WillLocation`] as string | undefined;
+  const legacyJurisdiction = willsAnswers[`${prefix}WillJurisdiction`] as string | undefined;
+  const legacyMeaningfulChanges = willsAnswers[`${prefix}HasWillMeaningfulChanges`] as string | undefined;
+  const legacyMeanfulDetails = willsAnswers[`${prefix}WillMeaningfulChangesDetails`] as string | undefined;
+
+  const docBasics: Partial<WillDocumentBasics> = {};
+  if (legacyYear) docBasics.willYear = legacyYear;
+  if (legacyLocation) docBasics.willLocation = legacyLocation;
+  if (legacyJurisdiction) docBasics.willJurisdiction = legacyJurisdiction;
+  if (legacyMeaningfulChanges) docBasics.hasMeaningfulChanges = legacyMeaningfulChanges as 'yes' | 'no';
+  if (legacyMeanfulDetails) docBasics.meaningfulChangesDetails = legacyMeanfulDetails;
+
+  if (Object.keys(docBasics).length === 0) return {};
+  return { documentBasics: { ...(existing?.documentBasics || emptyClientWill(clientId, '').documentBasics), ...docBasics } };
+}
+
+export function getInheritanceTypeLabel(type: InheritanceType | undefined): string {
+  if (!type) return '';
+  switch (type) {
+    case 'outright': return 'Paid to them outright';
+    case 'held_until_age': return 'Held and managed until a certain age';
+    case 'released_gradually': return 'Released gradually at different ages or stages';
+    case 'held_longer_period': return 'Held and managed for a longer period';
+    case 'different_arrangements': return 'Different arrangements for different children';
+    case 'not_sure': return "I'm not sure";
   }
 }

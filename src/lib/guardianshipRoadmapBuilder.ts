@@ -5,6 +5,7 @@ import type {
   MoveStatus,
   PlanningPerson,
   GuardianAssignment,
+  GuardianHousehold,
   AdultSiblingRole,
   ActivityEntry,
   PersonalProfile,
@@ -14,6 +15,7 @@ import type {
   MedicationEntry,
   AllergyEntry,
   SupportTransitionRow,
+  SupportProvider,
   ImportantConnection,
   CommunityItem,
   TraditionItem,
@@ -22,6 +24,8 @@ import type {
   AdultTransitionInfo,
   RoleAssignment,
   FinancialResourceSummary,
+  EstateTrusteeInfo,
+  EstateTrusteePerson,
   DocumentRegistryEntry,
   ReadinessCategory,
   ImmediateAction,
@@ -127,6 +131,31 @@ function buildHouseholdLabel(people: PlanningPerson[]): { label: string; isHouse
   const last = names[names.length - 1];
   const rest = names.slice(0, -1);
   return { label: `${rest.join(' & ')} ${last}`, isHousehold: true };
+}
+
+function makeHouseholdId(personIds: string[]): string {
+  return `hh_${personIds.slice().sort().join('_')}`;
+}
+
+function buildGuardianHousehold(
+  personIds: string[],
+  planningPersons: PlanningPerson[]
+): GuardianHousehold {
+  const people = personIds
+    .map(id => findPerson(planningPersons, id))
+    .filter((p): p is PlanningPerson => !!p);
+  const label = buildHouseholdLabel(people);
+  const first = people[0];
+  return {
+    id: makeHouseholdId(personIds),
+    guardianPersonIds: personIds,
+    guardianPeople: people,
+    displayName: label.label,
+    city: first?.city,
+    province: first?.province,
+    country: first?.country,
+    isJoint: label.isHousehold,
+  };
 }
 
 const ACTIVITY_IMPORTANCE_MAP: Record<string, string> = {
@@ -277,31 +306,36 @@ function buildHealthcareTransition(
   };
 }
 
-const SUPPORT_TYPE_RULES: Record<string, { label: string; purpose: string; action: string }> = {
+const SUPPORT_TYPE_RULES: Record<string, { label: string; purpose: string; action: string; providerCategory?: string }> = {
   cognitive_developmental: {
     label: 'Cognitive or developmental',
     purpose: 'Developmental assessment and cognitive supports',
     action: 'Transfer developmental/medical records and request referral or transition support for a local specialist.',
+    providerCategory: 'doctor',
   },
   physical: {
     label: 'Physical disability',
     purpose: 'Mobility and physical therapy supports',
     action: 'Share current therapy goals and help establish a local physiotherapy or physical support provider.',
+    providerCategory: 'doctor',
   },
   medical_condition: {
     label: 'Medical condition',
     purpose: 'Ongoing medical care and condition management',
     action: 'Transfer medical records and request referral to a local specialist or family physician for continuity of care.',
+    providerCategory: 'doctor',
   },
   mental_health: {
     label: 'Mental health',
     purpose: 'Counselling and mental health supports',
     action: 'Share current treatment context and help connect with a local counsellor or mental health provider.',
+    providerCategory: 'other',
   },
   learning: {
     label: 'Learning disability',
     purpose: 'Educational accommodations and learning supports',
     action: 'Provide the current IEP and related records to the new school. Share learning assessments.',
+    providerCategory: 'school',
   },
   complex_care: {
     label: 'Complex care',
@@ -325,9 +359,21 @@ const SUPPORT_TYPE_RULES: Record<string, { label: string; purpose: string; actio
   },
 };
 
+function findSupportProvider(
+  supportTypeId: string,
+  allProviders: HealthcareProvider[]
+): SupportProvider {
+  const rules = SUPPORT_TYPE_RULES[supportTypeId];
+  if (!rules?.providerCategory) return undefined;
+  const provider = allProviders.find(p => p.category === rules.providerCategory && p.name);
+  if (!provider) return undefined;
+  return { name: provider.name, role: provider.role };
+}
+
 function buildSupportTransition(
   child: ChildRecord,
-  _moveStatus: MoveStatus
+  _moveStatus: MoveStatus,
+  allProviders: HealthcareProvider[]
 ): SupportTransitionRow[] | undefined {
   if (child.disabled !== 'yes' && child.disabled !== 'not_sure') return undefined;
 
@@ -344,7 +390,7 @@ function buildSupportTransition(
     return {
       supportType: id,
       supportTypeLabel: rules.label,
-      currentProvider: undefined,
+      currentProvider: findSupportProvider(id, allProviders),
       purpose: rules.purpose,
       transitionAction: rules.action,
       recordLocation,
@@ -558,7 +604,8 @@ function buildAdultSiblingRoles(
 
 function buildInheritance(
   childIndex: number,
-  willsAnswers: Record<string, unknown>
+  willsAnswers: Record<string, unknown>,
+  clientNames: string[]
 ): ClientInheritanceInfo[] {
   const currentWillData = willsAnswers.currentWillData as Record<string, unknown> | undefined;
   const clients = (currentWillData?.clients as Array<Record<string, unknown>>) || [];
@@ -566,7 +613,7 @@ function buildInheritance(
 
   for (const client of clients) {
     const clientId = client.clientId as 'client1' | 'client2';
-    const clientName = String(client.clientName || clientId === 'client1' ? 'Client 1' : 'Client 2');
+    const clientName = String(client.clientName || (clientId === 'client1' ? clientNames[0] : clientNames[1]) || clientId);
 
     const arrangements = (client.childSpecificArrangements as Array<Record<string, unknown>>) || [];
     const match = arrangements.find(a => {
@@ -639,8 +686,9 @@ function buildGuardianAssignments(
   childrenData: ChildRecord[],
   childProfiles: GuardianshipChildProfile[],
   planningPersons: PlanningPerson[]
-): GuardianAssignment[] {
+): { assignments: GuardianAssignment[]; households: GuardianHousehold[] } {
   const assignments: GuardianAssignment[] = [];
+  const householdsMap = new Map<string, GuardianHousehold>();
   const processed = new Set<number>();
 
   for (let i = 0; i < childrenData.length; i++) {
@@ -649,14 +697,26 @@ function buildGuardianAssignments(
 
     const child = childrenData[i];
     const guardianId = child.guardianPersonId;
+    const guardian2Id = child.guardianPersonId2;
     const alternateId = child.alternateGuardianPersonId;
     if (!guardianId) continue;
 
-    const guardian = findPerson(planningPersons, guardianId);
-    const alternate = findPerson(planningPersons, alternateId);
+    const guardianPersonIds = [guardianId];
+    if (guardian2Id && guardian2Id !== guardianId) {
+      guardianPersonIds.push(guardian2Id);
+    }
 
-    const guardianPeople = guardian ? [guardian] : [];
+    const household = buildGuardianHousehold(guardianPersonIds, planningPersons);
+    householdsMap.set(household.id, household);
+
+    const alternate = findPerson(planningPersons, alternateId);
     const alternatePeople = alternate ? [alternate] : [];
+    let alternateHouseholdId: string | undefined;
+    if (alternate) {
+      const altHousehold = buildGuardianHousehold([alternateId!], planningPersons);
+      householdsMap.set(altHousehold.id, altHousehold);
+      alternateHouseholdId = altHousehold.id;
+    }
 
     const appliesTo = (child.guardianAppliesTo || '')
       .split(',').filter(Boolean).map(s => parseInt(s, 10));
@@ -683,9 +743,6 @@ function buildGuardianAssignments(
       childNames.push(childProfiles[idx].nickname || childProfiles[idx].name);
     }
 
-    const guardianCommunity = guardian
-      ? buildCommunityString(guardian.city, guardian.province, guardian.country)
-      : '';
     const firstChild = childProfiles[childIndices[0]];
     const currentCommunity = buildCommunityString(
       firstChild.cityOfResidence,
@@ -693,14 +750,16 @@ function buildGuardianAssignments(
       firstChild.countryOfResidence
     );
 
-    const guardianLabel = buildHouseholdLabel(guardianPeople);
+    const guardianLabel = buildHouseholdLabel(household.guardianPeople);
 
     assignments.push({
       id: `ga_${i}`,
-      guardianPersonIds: guardianPeople.map(p => p.id),
-      guardianPeople,
+      guardianPersonIds: household.guardianPersonIds,
+      guardianPeople: household.guardianPeople,
+      householdId: household.id,
       alternatePersonIds: alternatePeople.map(p => p.id),
       alternatePeople,
+      alternateHouseholdId,
       childIds,
       childNames,
       spokenWith: child.guardianSpokenWith || '',
@@ -709,19 +768,19 @@ function buildGuardianAssignments(
       notes: child.guardianNotes,
       isHousehold: guardianLabel.isHousehold,
       householdLabel: guardianLabel.label,
-      guardianCommunity,
+      guardianCommunity: household.city ? buildCommunityString(household.city, household.province, household.country) : '',
       currentCommunity,
-      isCrossBorder: guardian
-        ? isCrossBorder(firstChild.countryOfResidence || '', guardian.country)
+      isCrossBorder: household.guardianPeople.length > 0
+        ? isCrossBorder(firstChild.countryOfResidence || '', household.country || '')
         : false,
-      isCrossProvince: guardian
-        ? isCrossProvince(firstChild.provinceTerritory || '', firstChild.countryOfResidence || '', guardian.province, guardian.country)
+      isCrossProvince: household.guardianPeople.length > 0
+        ? isCrossProvince(firstChild.provinceTerritory || '', firstChild.countryOfResidence || '', household.province || '', household.country || '')
         : false,
       moveStatus: parseMoveStatus(child.transitionMoveExpected),
     });
   }
 
-  return assignments;
+  return { assignments, households: Array.from(householdsMap.values()) };
 }
 
 function buildRoles(
@@ -772,6 +831,25 @@ function buildRoles(
   return roles.filter(r => r.firstChoice || r.backup);
 }
 
+function matchChildNamesToIds(
+  names: string[],
+  children: GuardianshipChildProfile[]
+): { ids: string[]; names: string[] } {
+  const ids: string[] = [];
+  const matchedNames: string[] = [];
+  for (const name of names) {
+    const child = children.find(c =>
+      c.name === name || c.nickname === name ||
+      `${c.name} ${c.nickname}`.includes(name)
+    );
+    if (child) {
+      ids.push(child.childId);
+      matchedNames.push(child.nickname || child.name);
+    }
+  }
+  return { ids, names: matchedNames };
+}
+
 function buildFinancialResources(
   children: GuardianshipChildProfile[],
   lifeInsuranceAnswers: Record<string, unknown>,
@@ -779,48 +857,167 @@ function buildFinancialResources(
   familyTrustsAnswers: Record<string, unknown>
 ): FinancialResourceSummary[] {
   const resources: FinancialResourceSummary[] = [];
-  const childIds = children.map(c => c.childId);
+  const allChildIds = children.map(c => c.childId);
+  const allChildNames = children.map(c => c.nickname || c.name);
 
   const c1HasLI = lifeInsuranceAnswers.client1HasLifeInsurance === 'yes';
   const c2HasLI = lifeInsuranceAnswers.client2HasLifeInsurance === 'yes';
   resources.push({
     type: 'life_insurance',
     exists: c1HasLI || c2HasLI,
-    childIds,
+    childIds: allChildIds,
+    childNames: allChildNames,
     crossReference: 'See Family Financial Map for policy details',
   });
 
   const investments = (financialFootprintAnswers.investmentsData as Array<Record<string, unknown>>) || [];
-  const respAccounts = investments.filter(a => String(a.accountType || '').toLowerCase().includes('resp'));
-  resources.push({
-    type: 'resp',
-    exists: respAccounts.length > 0,
-    childIds,
-    crossReference: 'See Family Financial Map for account details',
-  });
+  const respAccounts = investments.filter(a => String(a.accountType || '').toLowerCase() === 'resp');
+  if (respAccounts.length > 0) {
+    for (const acct of respAccounts) {
+      const beneficiaryChildIds = (acct.respBeneficiaryChildIds as string[]) || [];
+      const beneficiaryNames = (acct.respBeneficiaryNames as string[]) || [];
+      let childIds: string[] = [];
+      let childNames: string[] = [];
+      if (beneficiaryChildIds.length > 0) {
+        const matched = matchChildNamesToIds(
+          beneficiaryNames.length > 0 ? beneficiaryNames : beneficiaryChildIds,
+          children
+        );
+        childIds = matched.ids.length > 0 ? matched.ids : beneficiaryChildIds.map(id => {
+          const idx = parseInt(id.replace('child_', ''), 10);
+          return children[idx]?.childId || id;
+        });
+        childNames = matched.names.length > 0 ? matched.names : beneficiaryNames;
+      } else {
+        childIds = allChildIds;
+        childNames = allChildNames;
+      }
+      resources.push({
+        type: 'resp',
+        exists: true,
+        childIds,
+        childNames,
+        name: String(acct.institution || acct.accountName || ''),
+        institution: String(acct.institution || ''),
+        crossReference: 'See Family Financial Map for account details',
+      });
+    }
+  } else {
+    resources.push({
+      type: 'resp',
+      exists: false,
+      childIds: [],
+      childNames: [],
+      crossReference: 'See Family Financial Map for account details',
+    });
+  }
 
-  const rdspAccounts = investments.filter(a => String(a.accountType || '').toLowerCase().includes('rdsp'));
-  resources.push({
-    type: 'rdsp',
-    exists: rdspAccounts.length > 0,
-    childIds: children.filter(c => c.disabled).map(c => c.childId),
-    crossReference: 'See Family Financial Map for account details',
-  });
+  const rdspAccounts = investments.filter(a => String(a.accountType || '').toLowerCase() === 'rdsp');
+  if (rdspAccounts.length > 0) {
+    for (const acct of rdspAccounts) {
+      const selectedKnown = (acct.selectedKnownBeneficiaries as string[]) || [];
+      const customBeneficiaries = (acct.customBeneficiaries as string[]) || [];
+      const allBeneficiaryNames = [...selectedKnown, ...customBeneficiaries].filter(Boolean);
+      const matched = matchChildNamesToIds(allBeneficiaryNames, children);
+      resources.push({
+        type: 'rdsp',
+        exists: true,
+        childIds: matched.ids,
+        childNames: matched.names,
+        name: String(acct.institution || acct.accountName || ''),
+        institution: String(acct.institution || ''),
+        crossReference: 'See Family Financial Map for account details',
+      });
+    }
+  } else {
+    resources.push({
+      type: 'rdsp',
+      exists: false,
+      childIds: [],
+      childNames: [],
+      crossReference: 'See Family Financial Map for account details',
+    });
+  }
 
   const trusts = (familyTrustsAnswers.familyTrustsData as Array<Record<string, unknown>>) || [];
   resources.push({
     type: 'trust',
     exists: trusts.length > 0,
-    childIds,
+    childIds: allChildIds,
+    childNames: allChildNames,
     crossReference: 'See Family Trusts section for details',
   });
 
   return resources;
 }
 
+function buildEstateTrustees(
+  estateTrusteesAnswers: Record<string, unknown>,
+  clientNames: string[]
+): EstateTrusteeInfo[] {
+  const results: EstateTrusteeInfo[] = [];
+  const prefixes = ['client1', 'client2'] as const;
+
+  for (let ci = 0; ci < prefixes.length; ci++) {
+    const prefix = prefixes[ci];
+    const hasTrustee = estateTrusteesAnswers[`${prefix}HasEstateTrustee`] === 'yes';
+    if (!hasTrustee) continue;
+
+    const clientName = clientNames[ci] || (prefix === 'client1' ? 'Client 1' : 'Client 2');
+    const trusteeName = String(estateTrusteesAnswers[`${prefix}EstateTrusteeName`] || '');
+    const spouseIsTrustee = estateTrusteesAnswers[`${prefix}SpouseIsEstateTrustee`] === 'yes';
+
+    let primaryName = trusteeName;
+    if (spouseIsTrustee && !trusteeName) {
+      primaryName = clientNames[ci === 0 ? 1 : 0] || '';
+    }
+
+    const primary: EstateTrusteePerson | undefined = primaryName ? {
+      name: primaryName,
+      phone: String(estateTrusteesAnswers[`${prefix}EstateTrusteePhone`] || '') || undefined,
+      email: String(estateTrusteesAnswers[`${prefix}EstateTrusteeEmail`] || '') || undefined,
+      relationship: String(estateTrusteesAnswers[`${prefix}EstateTrusteeRelationship`] || '') || undefined,
+      city: String(estateTrusteesAnswers[`${prefix}EstateTrusteeCity`] || '') || undefined,
+      province: String(estateTrusteesAnswers[`${prefix}EstateTrusteeProvince`] || '') || undefined,
+      country: String(estateTrusteesAnswers[`${prefix}EstateTrusteeCountry`] || '') || undefined,
+      isCanadaResident: String(estateTrusteesAnswers[`${prefix}EstateTrusteeIsCanadaResident`] || '') || undefined,
+    } : undefined;
+
+    const alternates: EstateTrusteePerson[] = [];
+    const hasAlternate = estateTrusteesAnswers[`${prefix}HasAlternateEstateTrustee`] === 'yes';
+    if (hasAlternate) {
+      const altCount = parseInt(String(estateTrusteesAnswers[`${prefix}EstateTrusteeCount`] || '1'), 10);
+      for (let ai = 1; ai <= altCount; ai++) {
+        const altName = String(estateTrusteesAnswers[`${prefix}AlternateEstateTrustee${ai}Name`] || '');
+        if (altName) {
+          alternates.push({
+            name: altName,
+            phone: String(estateTrusteesAnswers[`${prefix}AlternateEstateTrustee${ai}Phone`] || '') || undefined,
+            email: String(estateTrusteesAnswers[`${prefix}AlternateEstateTrustee${ai}Email`] || '') || undefined,
+            relationship: String(estateTrusteesAnswers[`${prefix}AlternateEstateTrustee${ai}Relationship`] || '') || undefined,
+          });
+        }
+      }
+    }
+
+    if (primary || alternates.length > 0) {
+      results.push({
+        clientId: prefix,
+        clientName,
+        hasEstateTrustee: true,
+        primaryTrustee: primary,
+        alternateTrustees: alternates,
+      });
+    }
+  }
+
+  return results;
+}
+
 function buildDocuments(
   children: GuardianshipChildProfile[],
-  willsAnswers: Record<string, unknown>
+  willsAnswers: Record<string, unknown>,
+  clientNames: string[]
 ): DocumentRegistryEntry[] {
   const docs: DocumentRegistryEntry[] = [];
 
@@ -832,11 +1029,11 @@ function buildDocuments(
     const db = (client.documentBasics as Record<string, unknown>) || {};
     const hasWill = db.hasWill === 'yes';
     const willLocation = db.willLocation as string | undefined;
-    const clientLabel = clientId === 'client1' ? 'Client 1' : 'Client 2';
+    const clientName = clientId === 'client1' ? (clientNames[0] || 'Client 1') : (clientNames[1] || 'Client 2');
 
     docs.push({
       type: 'will',
-      label: `${clientLabel}'s Last Will and Testament`,
+      label: `${clientName}'s Will`,
       exists: hasWill,
       locationKnown: !!willLocation,
       location: willLocation,
@@ -847,7 +1044,7 @@ function buildDocuments(
       const secLocation = db.secondaryWillLocation as string | undefined;
       docs.push({
         type: 'secondary_will',
-        label: `${clientLabel}'s Secondary Will`,
+        label: `${clientName}'s Secondary Will`,
         exists: true,
         locationKnown: !!secLocation,
         location: secLocation,
@@ -956,7 +1153,7 @@ function buildReadiness(
         thingsWorthConfirming.push(`Confirm whether ${name}'s guardian is named in the Will`);
       }
       if (assignment.inWill === 'no_will') {
-        thingsStillToDo.push(`No Will in place — guardianship appointment for ${name} may not be legally effective`);
+        thingsStillToDo.push(`No Will identified — the intended guardian appointment for ${name} should be reviewed with an estate lawyer`);
       }
       if (!assignment.alternatePeople.length) {
         thingsStillToDo.push(`No alternate guardian identified for ${name}`);
@@ -1023,7 +1220,7 @@ function buildReadiness(
   }
 
   if (!hasAnyWill) {
-    thingsStillToDo.push('No Will in place — guardianship appointments may not be legally effective');
+    thingsStillToDo.push('No Will identified — guardian intentions are documented in the Kit, but no Will has been identified containing the appointment. This should be reviewed with an estate lawyer.');
   }
 
   return { decisionsMade, thingsWorthConfirming, thingsStillToDo };
@@ -1034,7 +1231,8 @@ function buildImmediateActions(
   guardianAssignments: GuardianAssignment[],
   adultSiblingRoles: AdultSiblingRole[],
   willsAnswers: Record<string, unknown>,
-  estateTrusteesAnswers: Record<string, unknown>
+  estateTrustees: EstateTrusteeInfo[],
+  clientNames: string[]
 ): ImmediateAction[] {
   const actions: ImmediateAction[] = [];
   const seen = new Set<string>();
@@ -1101,9 +1299,21 @@ function buildImmediateActions(
   const currentWillData = willsAnswers.currentWillData as Record<string, unknown> | undefined;
   const clients = (currentWillData?.clients as Array<Record<string, unknown>>) || [];
   const hasWill = clients.some(c => (c.documentBasics as Record<string, unknown>)?.hasWill === 'yes');
-  const etName = estateTrusteesAnswers.client1EstateTrusteeName as string | undefined;
-  if (hasWill && etName) {
-    addAction('estate_trustee', `Locate Wills and contact Estate Trustee ${etName}`, 5, [], []);
+
+  if (hasWill && estateTrustees.length > 0) {
+    const allTrusteeNames = estateTrustees
+      .map(et => et.primaryTrustee?.name)
+      .filter(Boolean);
+    const uniqueNames = Array.from(new Set(allTrusteeNames));
+    const clientLabel = clientNames.length > 1 ? clientNames.join(' and ') : clientNames[0] || '';
+    if (uniqueNames.length === 1) {
+      addAction('estate_trustee', `Locate ${clientLabel}'s Wills and contact ${uniqueNames[0]}, their Estate Trustee`, 5, [], []);
+    } else if (uniqueNames.length > 1) {
+      const parts = estateTrustees.map(et =>
+        `${et.primaryTrustee?.name} (${et.clientName}'s Estate Trustee)`
+      );
+      addAction('estate_trustee', `Locate Wills and contact Estate Trustees: ${parts.join('; ')}`, 5, [], []);
+    }
   }
 
   const recordActions: Array<{ childId: string; childName: string; parts: string[] }> = [];
@@ -1221,7 +1431,7 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
       personalProfile: buildPersonalProfile(child),
       educationTransition: buildEducationTransition(child),
       healthcareTransition: buildHealthcareTransition(child, allProviders),
-      supportTransition: buildSupportTransition(child, moveStatus),
+      supportTransition: buildSupportTransition(child, moveStatus, allProviders),
       importantConnections: buildImportantConnections(child, moveLikely),
       communities: buildCommunities(child),
       traditions: buildTraditions(child),
@@ -1232,14 +1442,15 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
         index
       ),
       adultSiblingRoles: [],
-      inheritanceByClient: buildInheritance(index, willsAnswers),
+      inheritanceByClient: buildInheritance(index, willsAnswers, clientNames),
       adultTransition: buildAdultTransition(child),
       firstDaysPriorities: buildFirstDaysPriorities(child),
       birthCertificateLocation: child.birthCertificateLocation,
     };
   });
 
-  const guardianAssignments = buildGuardianAssignments(childrenData, childProfiles, planningPersons);
+  const { assignments: guardianAssignments, households: guardianHouseholds } =
+    buildGuardianAssignments(childrenData, childProfiles, planningPersons);
   const adultSiblingRoles = buildAdultSiblingRoles(childrenData, childProfiles, ageOfMajority);
 
   for (const child of childProfiles) {
@@ -1252,10 +1463,11 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
   const financialResources = buildFinancialResources(
     childProfiles, lifeInsuranceAnswers, financialFootprintAnswers, familyTrustsAnswers
   );
-  const documents = buildDocuments(childProfiles, willsAnswers);
+  const estateTrustees = buildEstateTrustees(estateTrusteesAnswers, clientNames);
+  const documents = buildDocuments(childProfiles, willsAnswers, clientNames);
   const readiness = buildReadiness(childProfiles, guardianAssignments, willsAnswers);
   const immediateActions = buildImmediateActions(
-    childProfiles, guardianAssignments, adultSiblingRoles, willsAnswers, estateTrusteesAnswers
+    childProfiles, guardianAssignments, adultSiblingRoles, willsAnswers, estateTrustees, clientNames
   );
 
   return {
@@ -1271,11 +1483,13 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
       provinceOfResidence: province,
       ageOfMajority,
     },
+    guardianHouseholds,
     guardianAssignments,
     children: childProfiles,
     adultSiblingRoles,
     roles,
     financialResources,
+    estateTrustees,
     documents,
     readiness,
     immediateActions,
@@ -1284,6 +1498,3 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
       .map(r => ({ section: r.type, description: r.crossReference })),
   };
 }
-
-
-export { buildGuardianshipRoadmap }

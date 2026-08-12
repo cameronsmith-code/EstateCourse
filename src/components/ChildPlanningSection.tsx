@@ -241,6 +241,10 @@ export default function ChildPlanningSection({
     const showQuestions = considered === 'yes' || considered === 'some_ideas';
     const guardianId = childData.guardianPersonId;
     const guardianName = personName(planningPersons, guardianId) || 'this guardian';
+    const guardian2Id = childData.guardianPersonId2;
+    const guardian2Name = personName(planningPersons, guardian2Id) || 'this person';
+    const hasJointGuardian = !!(guardianId && guardian2Id && guardian2Id !== guardianId);
+    const jointLabel = hasJointGuardian ? `${guardianName} and ${guardian2Name}` : guardianName;
     const showSameGuardianQ = showQuestions && uniqueGuardians.length > 0;
     const sameGuardianAnswer = childData.guardianSameAsSibling;
     const showPersonSelector = showQuestions && (!showSameGuardianQ || sameGuardianAnswer === 'no' || sameGuardianAnswer === 'not_sure');
@@ -261,6 +265,7 @@ export default function ChildPlanningSection({
         onChildChange(childIndex, 'guardianAppliesTo', next.join(','));
         onChildMultiChange(siblingIndex, {
           guardianPersonId: '',
+          guardianPersonId2: '',
           guardianConsidered: '',
           guardianSameAsSibling: '',
           guardianSpokenWith: '',
@@ -271,6 +276,7 @@ export default function ChildPlanningSection({
         onChildChange(childIndex, 'guardianAppliesTo', next.join(','));
         onChildMultiChange(siblingIndex, {
           guardianPersonId: guardianId || '',
+          guardianPersonId2: guardian2Id || '',
           guardianConsidered: 'yes',
           guardianSameAsSibling: 'yes',
         });
@@ -293,6 +299,7 @@ export default function ChildPlanningSection({
                       guardianConsidered: val,
                       guardianSameAsSibling: '',
                       guardianPersonId: '',
+                      guardianPersonId2: '',
                       guardianSpokenWith: '',
                       guardianInWill: '',
                       guardianNotes: '',
@@ -334,17 +341,20 @@ export default function ChildPlanningSection({
                         onChildMultiChange(childIndex, {
                           guardianSameAsSibling: val,
                           guardianPersonId: '',
+                          guardianPersonId2: '',
                         });
                       } else {
                         onChildMultiChange(childIndex, {
                           guardianSameAsSibling: val,
                           guardianPersonId: targetGuardian.guardianId,
+                          guardianPersonId2: '',
                         });
                       }
                     } else {
                       onChildMultiChange(childIndex, {
                         guardianSameAsSibling: val,
                         guardianPersonId: '',
+                        guardianPersonId2: '',
                       });
                     }
                   }} className="mr-1" />
@@ -379,11 +389,20 @@ export default function ChildPlanningSection({
           </div>
         )}
 
+        {showPersonSelector && guardianId && getPerson(guardianId) && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Is there a second person who would act together with {guardianName} as {childName}'s guardian? (Optional)
+            </label>
+            {renderPersonSelector(guardian2Id, 'guardianPersonId2', 'Select a second person...')}
+          </div>
+        )}
+
         {guardianId && getPerson(guardianId) && (
           <>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Have you spoken with {guardianName} about taking on this responsibility?
+                Have you spoken with {jointLabel} about taking on this responsibility?
               </label>
               <div className="flex flex-col gap-2">
                 {SPOKEN_OPTIONS.map(({ value, label }) => (
@@ -397,7 +416,7 @@ export default function ChildPlanningSection({
 
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                To your knowledge, is {guardianName} currently named as guardian for {childName} in your Will?
+                To your knowledge, is {jointLabel} currently named as guardian for {childName} in your Will?
               </label>
               <div className="flex flex-col gap-2">
                 {WILL_OPTIONS.map(({ value, label }) => (
@@ -412,7 +431,7 @@ export default function ChildPlanningSection({
             {otherMinorChildren.length > 0 && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Would you ideally want {guardianName} to act as guardian for any of your other minor children as well?
+                  Would you ideally want {jointLabel} to act as guardian for any of your other minor children as well?
                 </label>
                 <div className="flex flex-col gap-2">
                   {otherMinorChildren.map(i => {
@@ -436,7 +455,7 @@ export default function ChildPlanningSection({
 
             <div className="mt-6">
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Have you considered an alternate guardian for {childName} in case {guardianName} is unable to take on the role?
+                Have you considered an alternate guardian for {childName} in case {jointLabel} is unable to take on the role?
               </label>
               <div className="flex flex-col gap-2">
                 {CONSIDERED_OPTIONS.map(({ value, label }) => (

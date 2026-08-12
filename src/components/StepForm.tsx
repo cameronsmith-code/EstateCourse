@@ -2188,6 +2188,7 @@ export default function StepForm({
       obj.guardianConsidered = undefined;
       obj.guardianSameAsSibling = undefined;
       obj.guardianPersonId = undefined;
+      obj.guardianPersonId2 = undefined;
       obj.guardianSpokenWith = undefined;
       obj.guardianInWill = undefined;
       obj.guardianNotes = undefined;

@@ -12,6 +12,7 @@ const RAW_ID_PATTERNS = [
   /^adult_sib_\d+$/,
   /^sibling_\d+$/,
   /^pp_/,
+  /^child_\d+$/,
 ];
 
 function looksLikeRawId(value: string): boolean {
@@ -64,6 +65,9 @@ export function validateGuardianshipRoadmap(model: GuardianshipRoadmapModel): Va
       if (looksLikeRawId(support.supportTypeLabel)) {
         findings.push({ level: 'error', message: `Raw ID in supportTypeLabel for ${child.nickname || child.name}`, childId: child.childId });
       }
+      if (support.currentProvider && looksLikeRawId(support.currentProvider.name)) {
+        findings.push({ level: 'error', message: `Raw ID in support provider name for ${child.nickname || child.name}`, childId: child.childId });
+      }
     }
   }
 
@@ -77,6 +81,32 @@ export function validateGuardianshipRoadmap(model: GuardianshipRoadmapModel): Va
       if (!assignment.alternatePeople.find(p => p.id === id)) {
         findings.push({ level: 'error', message: `Alternate guardian assignment references nonexistent person ID ${id}` });
       }
+    }
+  }
+
+  for (const household of model.guardianHouseholds) {
+    for (const id of household.guardianPersonIds) {
+      if (!household.guardianPeople.find(p => p.id === id)) {
+        findings.push({ level: 'error', message: `Guardian household ${household.id} references nonexistent person ID ${id}` });
+      }
+    }
+  }
+
+  for (const et of model.estateTrustees) {
+    if (et.hasEstateTrustee && !et.primaryTrustee?.name) {
+      findings.push({ level: 'warning', message: `Estate Trustee for ${et.clientName} marked as having a trustee but no name resolved` });
+    }
+  }
+
+  for (const doc of model.documents) {
+    if (looksLikeRawId(doc.label)) {
+      findings.push({ level: 'error', message: `Raw ID in document label: ${doc.label}` });
+    }
+  }
+
+  for (const action of model.immediateActions) {
+    if (looksLikeRawId(action.action)) {
+      findings.push({ level: 'error', message: `Raw ID in immediate action: ${action.action}` });
     }
   }
 
@@ -95,6 +125,17 @@ export function validateGuardianshipRoadmap(model: GuardianshipRoadmapModel): Va
       findings.push({ level: 'warning', message: `Duplicate document record: ${doc.label}` });
     }
     docKeys.add(key);
+  }
+
+  for (const fr of model.financialResources) {
+    if (fr.type === 'rdsp' && fr.exists) {
+      for (const childId of fr.childIds) {
+        const child = model.children.find(c => c.childId === childId);
+        if (child && !child.disabled && !child.disabilityUncertain) {
+          findings.push({ level: 'warning', message: `RDSP attached to ${child.nickname || child.name} who is not flagged as having a disability` });
+        }
+      }
+    }
   }
 
   return findings;

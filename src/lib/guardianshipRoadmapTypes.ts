@@ -13,12 +13,25 @@ export type PlanningPerson = {
   country: string;
 };
 
+export type GuardianHousehold = {
+  id: string;
+  guardianPersonIds: string[];
+  guardianPeople: PlanningPerson[];
+  displayName: string;
+  city?: string;
+  province?: string;
+  country?: string;
+  isJoint: boolean;
+};
+
 export type GuardianAssignment = {
   id: string;
   guardianPersonIds: string[];
   guardianPeople: PlanningPerson[];
+  householdId: string;
   alternatePersonIds: string[];
   alternatePeople: PlanningPerson[];
+  alternateHouseholdId?: string;
   childIds: string[];
   childNames: string[];
   spokenWith: string;
@@ -124,10 +137,15 @@ export type HealthcareTransition = {
   medicationNotes?: string;
 };
 
+export type SupportProvider = {
+  name: string;
+  role: string;
+} | undefined;
+
 export type SupportTransitionRow = {
   supportType: string;
   supportTypeLabel: string;
-  currentProvider?: string;
+  currentProvider: SupportProvider;
   purpose: string;
   transitionAction: string;
   recordLocation?: string;
@@ -259,7 +277,29 @@ export type FinancialResourceSummary = {
   type: 'life_insurance' | 'resp' | 'rdsp' | 'trust';
   exists: boolean;
   childIds: string[];
+  childNames: string[];
+  name?: string;
+  institution?: string;
   crossReference: string;
+};
+
+export type EstateTrusteePerson = {
+  name: string;
+  phone?: string;
+  email?: string;
+  relationship?: string;
+  city?: string;
+  province?: string;
+  country?: string;
+  isCanadaResident?: string;
+};
+
+export type EstateTrusteeInfo = {
+  clientId: 'client1' | 'client2';
+  clientName: string;
+  hasEstateTrustee: boolean;
+  primaryTrustee?: EstateTrusteePerson;
+  alternateTrustees: EstateTrusteePerson[];
 };
 
 export type DocumentRegistryEntry = {
@@ -296,11 +336,13 @@ export type GuardianshipRoadmapModel = {
     provinceOfResidence: string;
     ageOfMajority: number;
   };
+  guardianHouseholds: GuardianHousehold[];
   guardianAssignments: GuardianAssignment[];
   children: GuardianshipChildProfile[];
   adultSiblingRoles: AdultSiblingRole[];
   roles: RoleAssignment[];
   financialResources: FinancialResourceSummary[];
+  estateTrustees: EstateTrusteeInfo[];
   documents: DocumentRegistryEntry[];
   readiness: ReadinessCategory;
   immediateActions: ImmediateAction[];

@@ -1,5 +1,6 @@
 import type { AnyFinancialAsset, ContactInfo } from './financialAssetTypes';
 import { getExcludedPersonIdsForScenario, getFirstDeathDeceasedClientId, type LegacyScenario } from './legacyIntentTypes';
+import { getClientNames, getClientOwnedCorpNames, getCorporationsData } from './corporateOwnership';
 
 export type ProfessionalAdvisor = {
   id: string;
@@ -519,4 +520,116 @@ export function cleanStaleLegacyIntentReferences(allAnswers: AnswersMap): Answer
   }
 
   return allAnswers;
+}
+
+export function cleanStaleCorporateConnections(
+  allAnswers: Map<string, Record<string, unknown>>
+): Map<string, Record<string, unknown>> {
+  const clientNames = getClientNames(allAnswers);
+  const validCorpNames = new Set(
+    getClientOwnedCorpNames(allAnswers, clientNames).map((n) => n.toLowerCase())
+  );
+
+  if (validCorpNames.size > 0) {
+    return allAnswers;
+  }
+
+  const cfcSection = allAnswers.get('corporateFinancialConnections');
+  if (!cfcSection || Object.keys(cfcSection).length === 0) {
+    return allAnswers;
+  }
+
+  const allCorpNames = new Set(
+    getCorporationsData(allAnswers)
+      .map((c) => ((c['legalName'] as string) || '').trim().toLowerCase())
+      .filter(Boolean)
+  );
+
+  const updated = new Map(allAnswers);
+  const updatedCfc: Record<string, unknown> = {};
+  let changed = false;
+
+  for (const [key, value] of Object.entries(cfcSection)) {
+    if (key === 'cfcReviewConfirmed') {
+      updatedCfc[key] = value;
+      continue;
+    }
+
+    if (key === 'personalGuaranteesData' && Array.isArray(value)) {
+      const filtered = (value as Array<Record<string, unknown>>).filter((entry) => {
+        const corpName = ((entry['selectedCompany'] as string) || '').trim().toLowerCase();
+        return corpName === '' || validCorpNames.has(corpName);
+      });
+      if (filtered.length === 0) { changed = true; continue; }
+      if (filtered.length !== value.length) { changed = true; updatedCfc[key] = filtered; continue; }
+      updatedCfc[key] = value;
+      continue;
+    }
+
+    if (key === 'shareholderLoansData' && Array.isArray(value)) {
+      const filtered = (value as Array<Record<string, unknown>>).filter((entry) => {
+        const corpName = ((entry['selectedCompany'] as string) || '').trim().toLowerCase();
+        return corpName === '' || validCorpNames.has(corpName);
+      });
+      if (filtered.length === 0) { changed = true; continue; }
+      if (filtered.length !== value.length) { changed = true; updatedCfc[key] = filtered; continue; }
+      updatedCfc[key] = value;
+      continue;
+    }
+
+    if (key === 'companyOwedData' && Array.isArray(value)) {
+      const filtered = (value as Array<Record<string, unknown>>).filter((entry) => {
+        const corpName = ((entry['selectedCompany'] as string) || '').trim().toLowerCase();
+        return corpName === '' || validCorpNames.has(corpName);
+      });
+      if (filtered.length === 0) { changed = true; continue; }
+      if (filtered.length !== value.length) { changed = true; updatedCfc[key] = filtered; continue; }
+      updatedCfc[key] = value;
+      continue;
+    }
+
+    if (key === 'intercompanyLoansData' && Array.isArray(value)) {
+      const filtered = (value as Array<Record<string, unknown>>).filter((entry) => {
+        const corp1 = ((entry['lenderCompany'] as string) || '').trim().toLowerCase();
+        const corp2 = ((entry['borrowerCompany'] as string) || '').trim().toLowerCase();
+        const corp1Valid = corp1 === '' || allCorpNames.has(corp1);
+        const corp2Valid = corp2 === '' || allCorpNames.has(corp2);
+        return corp1Valid && corp2Valid;
+      });
+      if (filtered.length === 0) { changed = true; continue; }
+      if (filtered.length !== value.length) { changed = true; updatedCfc[key] = filtered; continue; }
+      updatedCfc[key] = value;
+      continue;
+    }
+
+    if (key === 'relatedPartyLoansData' && Array.isArray(value)) {
+      const allCorpsArray = getCorporationsData(allAnswers)
+        .map((c) => ((c['legalName'] as string) || '').trim())
+        .filter(Boolean);
+      const filtered = (value as Array<Record<string, unknown>>).filter((entry) => {
+        const direction = ((entry['direction'] as string) || '');
+        const match = direction.match(/^(?:company_owes_other_|other_owes_company_)(\d+)$/);
+        if (!match) return true;
+        const corpIdx = parseInt(match[1], 10);
+        if (corpIdx < 0 || corpIdx >= allCorpsArray.length) return false;
+        return allCorpNames.has(allCorpsArray[corpIdx].toLowerCase());
+      });
+      if (filtered.length === 0) { changed = true; continue; }
+      if (filtered.length !== value.length) { changed = true; updatedCfc[key] = filtered; continue; }
+      updatedCfc[key] = value;
+      continue;
+    }
+
+    changed = true;
+  }
+
+  if (changed) {
+    if (Object.keys(updatedCfc).length > 0) {
+      updated.set('corporateFinancialConnections', updatedCfc);
+    } else {
+      updated.delete('corporateFinancialConnections');
+    }
+  }
+
+  return updated;
 }

@@ -19,6 +19,7 @@ import FinancialFootprintAssets from './FinancialFootprintAssets';
 import FamilyTrustSection from './FamilyTrustSection';
 import LegacyIntentSection from './LegacyIntentSection';
 import { getFinancialAdvisors } from '../lib/referentialIntegrity';
+import { getClientOwnedCorpNames } from '../lib/corporateOwnership';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
 type StepFormProps = {
@@ -6057,7 +6058,10 @@ export default function StepForm({
             const hasSpouse = step1?.['maritalStatus'] === 'married' || step1?.['maritalStatus'] === 'common_law';
             const client2Name = step1?.['spouseName'] || 'Client 2';
             const step6 = allAnswers?.get('corporations') as Record<string, unknown> | undefined;
-            const corporations = ((step6?.['corporationsData'] as Array<Record<string, string>>) || []).map((c) => ({ legalName: c.legalName || '' })).filter((c) => c.legalName.trim());
+            const allCorps = ((step6?.['corporationsData'] as Array<Record<string, string>>) || []).map((c) => ({ legalName: c.legalName || '' })).filter((c) => c.legalName.trim());
+            const clientOwnedCorpNames = new Set(getClientOwnedCorpNames(allAnswers || new Map()).map((n) => n.toLowerCase()));
+            const corporations = allCorps.filter((c) => clientOwnedCorpNames.has(c.legalName.toLowerCase()));
+            const allCorporations = allCorps;
 
             const gateQuestion = step.questions[0];
             const displayLabel = typeof gateQuestion.label === 'function'
@@ -6523,7 +6527,7 @@ export default function StepForm({
                               key={idx}
                               index={idx}
                               data={entry}
-                              corporations={corporations}
+                              corporations={allCorporations}
                               onChange={(field, value) => handleIcChange(idx, field, value)}
                               onMultiChange={(updates) => handleIcMultiChange(idx, updates)}
                               onRemove={() => {
@@ -6612,7 +6616,7 @@ export default function StepForm({
                   );
                 })()}
 
-                {corporations.length >= 1 && (() => {
+                {allCorporations.length >= 1 && (() => {
                   const rplQuestion = step.questions[4];
                   if (!rplQuestion) return null;
                   const rplDisplayLabel = typeof rplQuestion.label === 'function'
@@ -6659,7 +6663,7 @@ export default function StepForm({
                               key={idx}
                               index={idx}
                               data={entry}
-                              corporations={corporations}
+                              corporations={allCorporations}
                               onChange={(field, value) => handleRplChange(idx, field, value)}
                               onMultiChange={(updates) => handleRplMultiChange(idx, updates)}
                               onRemove={() => {

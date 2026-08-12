@@ -5,6 +5,7 @@ import { STEPS, Step } from '../lib/steps';
 import StepForm from '../components/StepForm';
 import ProgressBar from '../components/ProgressBar';
 import { FileText, Loader2, Trash2 } from 'lucide-react';
+import { hasClientShareOwnership } from '../lib/corporateOwnership';
 
 export default function Wizard() {
   const navigate = useNavigate();
@@ -39,8 +40,7 @@ export default function Wizard() {
       return hasChildren === 'yes';
     }
     if (step.sectionId === 'corporateFinancialConnections') {
-      const corpAnswers = answers.get('corporations') || {};
-      return corpAnswers['ownsCorporation'] === 'yes';
+      return hasClientShareOwnership(answers);
     }
     return true;
   };

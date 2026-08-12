@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, ChevronRight, Home, Building2, Landmark, Shield, FileText, DollarSign, User, Phone, Mail, CreditCard, Pencil } from 'lucide-react';
 import CreditCardIntake from './CreditCardIntake';
+import { getClientOwnedCorpNames } from '../lib/corporateOwnership';
 
 type AdditionalDebt = {
   id: string;
@@ -173,7 +174,10 @@ function deriveObligations(allAnswers?: Map<string, Record<string, unknown>>): D
   // Corporate financial connections — personal guarantees
   const corpConnections = allAnswers.get('corporateFinancialConnections') || {};
   const guarantees = (corpConnections['personalGuaranteesData'] as Array<Record<string, unknown>>) || [];
+  const validCorpNames = new Set(getClientOwnedCorpNames(allAnswers).map((n) => n.toLowerCase()));
   guarantees.forEach((g) => {
+    const corpName = ((g['selectedCompany'] as string) || '').trim().toLowerCase();
+    if (corpName && validCorpNames.size > 0 && !validCorpNames.has(corpName)) return;
     const guarantors = (g['guarantors'] as string[]) || [];
     const otherGuarantors = g['otherGuarantors'] as Array<{ name?: string }> | undefined;
     const guarantorNames: string[] = [];

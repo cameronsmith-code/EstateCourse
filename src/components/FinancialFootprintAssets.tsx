@@ -24,6 +24,7 @@ import {
   EQUITY_AWARD_TYPES,
 } from '../lib/financialAssetTypes';
 import { getFinancialAdvisors } from '../lib/referentialIntegrity';
+import { getClientOwnedCorpNames } from '../lib/corporateOwnership';
 import InvestmentsIntake from './InvestmentsIntake';
 import PensionsIntake from './PensionsIntake';
 import EmployerEquityIntake from './EmployerEquityIntake';
@@ -163,7 +164,13 @@ export default function FinancialFootprintAssets({
   const derivedReceivables = useMemo(() => {
     const corpConn = allAnswers?.get('corporateFinancialConnections') || {};
     const slData = (corpConn['shareholderLoansData'] as Array<Record<string, unknown>>) || [];
-    return slData.map((sl, i) => {
+    const validCorpNames = new Set(getClientOwnedCorpNames(allAnswers || new Map()).map((n) => n.toLowerCase()));
+    return slData
+      .filter((sl) => {
+        const corpName = ((sl['selectedCompany'] as string) || '').trim().toLowerCase();
+        return corpName === '' || validCorpNames.size === 0 || validCorpNames.has(corpName);
+      })
+      .map((sl, i) => {
       const owedTo = sl['owedTo'] === 'client2' ? client2Name : client1Name;
       return {
         id: `sl_${i}`,

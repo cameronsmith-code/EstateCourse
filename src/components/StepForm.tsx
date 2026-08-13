@@ -1845,6 +1845,10 @@ export default function StepForm({
     const step14 = allAnswers?.get('legacyIntent') || {};
     const hasSpouse = step1['maritalStatus'] === 'married' || step1['maritalStatus'] === 'common_law';
 
+    // Parents/clients are NOT guardian candidates — the "if you were no longer
+    // able to provide care" scenario logically excludes them. They are still
+    // added as general contacts for non-guardian purposes (care coordinators,
+    // transition people, etc.) but filtered out when building guardian options.
     const po = child.parentsOption || '';
     if (po === 'both' || po === 'parent1' || po === 'client1-other') {
       addContact({ id: 'parent1', name: step1['fullName'] as string || '', phone: step1['phone'] as string || '', email: step1['email'] as string || '', city: step1['city'] as string || '', province: step1['province'] as string || '', source: 'parent1' });
@@ -2045,6 +2049,12 @@ export default function StepForm({
       }
     });
     onAnswerChange('childrenData', updated);
+  };
+
+  const childDisplayName = (index: number, data = childrenData): string => {
+    const child = data[index];
+    const name = child?.nickname || child?.name;
+    return name || `Child ${index + 1} (details to come)`;
   };
 
   const handleChildChange = (index: number, field: string, value: string) => {
@@ -10897,6 +10907,17 @@ export default function StepForm({
                                       ? `${childrenData[index][`grandchild${gcIndex + 1}Name`]}'s other parent's name:`
                                       : `Grandchild ${gcIndex + 1}'s other parent's name:`}
                                   </label>
+                                  {childrenData[index]?.spouseName && (
+                                    <div className="mb-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleChildChange(index, `grandchild${gcIndex + 1}OtherParent`, childrenData[index]!.spouseName!)}
+                                        className="text-xs text-blue-400 hover:text-blue-300 underline"
+                                      >
+                                        Use {childrenData[index]?.nickname || childrenData[index]?.name || 'this child'}'s partner: {childrenData[index]?.spouseName}
+                                      </button>
+                                    </div>
+                                  )}
                                   <input
                                     type="text"
                                     value={childrenData[index]?.[`grandchild${gcIndex + 1}OtherParent`] || ''}
@@ -11969,8 +11990,11 @@ export default function StepForm({
 
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Which pharmacy does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} use?
+                            Which pharmacy does {childDisplayName(index)} use?
                           </label>
+                          <p className="text-xs italic text-gray-400 mt-1 mb-2">
+                            This will be included in the Guardianship Roadmap. You can add full pharmacy contact details to your Professional Team later.
+                          </p>
                           <input
                             type="text"
                             value={childrenData[index]?.pharmacyName || ''}
@@ -12043,7 +12067,7 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      What is {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} allergic to?
+                                      What is {childDisplayName(index)} allergic to?
                                     </label>
                                     <input
                                       type="text"
@@ -12125,7 +12149,7 @@ export default function StepForm({
 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                      Does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} have any additional allergies?
+                                      Does {childDisplayName(index)} have any additional allergies?
                                     </label>
                                     <div className="flex gap-4">
                                       <label className="flex items-center">
@@ -12171,7 +12195,7 @@ export default function StepForm({
 
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Are there any additional medical related information that a guardian should be aware of with respect to {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}?
+                            Are there any additional medical related information that a guardian should be aware of with respect to {childDisplayName(index)}?
                           </label>
                           <div className="flex gap-4">
                             <label className="flex items-center">
@@ -12221,7 +12245,7 @@ export default function StepForm({
 
                           <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Is {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} attending school?
+                              Is {childDisplayName(index)} attending school?
                             </label>
                             <div className="flex gap-4">
                               <label className="flex items-center">
@@ -12313,7 +12337,7 @@ export default function StepForm({
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  What subjects does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} naturally enjoy or succeed in?
+                                  What subjects does {childDisplayName(index)} naturally enjoy or succeed in?
                                 </label>
                                 <textarea
                                   value={childrenData[index]?.schoolStrengths || ''}
@@ -12337,7 +12361,7 @@ export default function StepForm({
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  What helps {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} stay focused?
+                                  What helps {childDisplayName(index)} stay focused?
                                 </label>
                                 <textarea
                                   value={childrenData[index]?.schoolFocusHelps || ''}
@@ -12483,7 +12507,7 @@ export default function StepForm({
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                                  If {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} is having a difficult day at school, what strategies work best to calm or support them?
+                                  If {childDisplayName(index)} is having a difficult day at school, what strategies work best to calm or support them?
                                 </label>
                                 <textarea
                                   value={childrenData[index]?.schoolCalmingStrategies || ''}
@@ -12511,7 +12535,7 @@ export default function StepForm({
                           {childrenData[index]?.attendingSchool === 'no' && (
                             <div className="mb-4">
                               <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Is there any additional information regarding {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} and education?
+                                Is there any additional information regarding {childDisplayName(index)} and education?
                               </label>
                               <div className="flex gap-4">
                                 <label className="flex items-center">
@@ -12559,191 +12583,69 @@ export default function StepForm({
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                           <h4 className="text-base font-semibold text-blue-400">Social Snapshot</h4>
                         </div>
-                        <p className="text-sm text-gray-400 mb-4 mt-2">
-                          This section helps a guardian preserve the child's relationships, routines, and emotional stability during a period of major life disruption.
+                        <p className="text-sm text-gray-400 mb-4 mt-2 leading-relaxed">
+                          Friends can be an important part of what makes {childDisplayName(index)}'s life feel familiar. If {childDisplayName(index)} ever had to move to live with a guardian, they could be leaving behind their school, neighbourhood and many of the people they see every day. Knowing which friendships matter most can help a future guardian make an intentional effort to keep those relationships alive — through visits, play dates, camps, calls, activities or simply staying connected.
                         </p>
-                        <div className="mt-2 space-y-4 mb-4">
-                          {(() => {
-                            type FriendEntry = {
-                              friendName: string;
-                              relationship: string;
-                              cityLocation: string;
-                              parentGuardianName: string;
-                              parentPhone: string;
-                              parentEmail: string;
-                              whyImportant: string;
-                              activitiesTogether: string;
-                              hasAdditional: string;
-                            };
-                            const friendList = JSON.parse(childrenData[index]?.friendList || '[]') as FriendEntry[];
-                            if (friendList.length === 0) {
-                              friendList.push({ friendName: '', relationship: '', cityLocation: '', parentGuardianName: '', parentPhone: '', parentEmail: '', whyImportant: '', activitiesTogether: '', hasAdditional: '' });
-                            }
-                            const handleFriendChange = (friendIndex: number, field: keyof FriendEntry, value: string) => {
-                              const updated = [...friendList];
-                              if (!updated[friendIndex]) {
-                                updated[friendIndex] = { friendName: '', relationship: '', cityLocation: '', parentGuardianName: '', parentPhone: '', parentEmail: '', whyImportant: '', activitiesTogether: '', hasAdditional: '' };
-                              }
-                              updated[friendIndex][field] = value;
-                              if (field === 'hasAdditional' && value === 'yes' && friendIndex === friendList.length - 1) {
-                                updated.push({ friendName: '', relationship: '', cityLocation: '', parentGuardianName: '', parentPhone: '', parentEmail: '', whyImportant: '', activitiesTogether: '', hasAdditional: '' });
-                              }
-                              if (field === 'hasAdditional' && value === 'no') {
-                                const trimmed = updated.slice(0, friendIndex + 1);
-                                trimmed[friendIndex] = { ...trimmed[friendIndex], hasAdditional: 'no' };
-                                handleChildChange(index, 'friendList', JSON.stringify(trimmed));
-                                return;
-                              }
-                              handleChildChange(index, 'friendList', JSON.stringify(updated));
-                            };
-                            const childName = childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`;
-                            return friendList.map((friend, friendIndex) => (
-                              <div key={friendIndex} className="bg-gray-750 border border-gray-600 rounded-lg p-4 space-y-4">
-                                {friendIndex > 0 && (
-                                  <div className="pb-2 border-b border-gray-600 mb-2">
-                                    <span className="text-sm font-semibold text-gray-300">Friend / Key Relationship #{friendIndex + 1}</span>
-                                  </div>
-                                )}
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Friend's Name:</label>
-                                  <input
-                                    type="text"
-                                    value={friend.friendName}
-                                    onChange={(e) => handleFriendChange(friendIndex, 'friendName', e.target.value)}
-                                    placeholder="Enter friend's name"
-                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Relationship:</label>
-                                  <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., best friend, teammate, neighbor, cousin</p>
-                                  <input
-                                    type="text"
-                                    value={friend.relationship}
-                                    onChange={(e) => handleFriendChange(friendIndex, 'relationship', e.target.value)}
-                                    placeholder=""
-                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">City / Location:</label>
-                                  <input
-                                    type="text"
-                                    value={friend.cityLocation}
-                                    onChange={(e) => handleFriendChange(friendIndex, 'cityLocation', e.target.value)}
-                                    placeholder="City or general location"
-                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Parent / Guardian Name:</label>
-                                  <input
-                                    type="text"
-                                    value={friend.parentGuardianName}
-                                    onChange={(e) => handleFriendChange(friendIndex, 'parentGuardianName', e.target.value)}
-                                    placeholder="Enter parent or guardian name"
-                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Parent Phone Number:</label>
-                                  <input
-                                    type="text"
-                                    value={friend.parentPhone}
-                                    onChange={(e) => handleFriendChange(friendIndex, 'parentPhone', e.target.value)}
-                                    placeholder="Enter parent phone number"
-                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Parent Email:</label>
-                                  <input
-                                    type="text"
-                                    value={friend.parentEmail}
-                                    onChange={(e) => handleFriendChange(friendIndex, 'parentEmail', e.target.value)}
-                                    placeholder="Enter parent email address"
-                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Why is this relationship important to {childName}?</label>
-                                  <textarea
-                                    value={friend.whyImportant}
-                                    onChange={(e) => handleFriendChange(friendIndex, 'whyImportant', e.target.value)}
-                                    placeholder="Describe why this relationship matters"
-                                    rows={3}
-                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">What clubs, activities, camps, etc. do they do together?</label>
-                                  <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., soccer team, art camp, chess club</p>
-                                  <textarea
-                                    value={friend.activitiesTogether}
-                                    onChange={(e) => handleFriendChange(friendIndex, 'activitiesTogether', e.target.value)}
-                                    placeholder=""
-                                    rows={3}
-                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Are there any additional friends and key relationships that the guardian should know about?
-                                  </label>
-                                  <div className="flex gap-4">
-                                    <label className="flex items-center">
-                                      <input
-                                        type="radio"
-                                        name={`friendHasAdditional-${index}-${friendIndex}`}
-                                        value="yes"
-                                        checked={friend.hasAdditional === 'yes'}
-                                        onChange={(e) => handleFriendChange(friendIndex, 'hasAdditional', e.target.value)}
-                                        className="mr-2"
-                                      />
-                                      <span className="text-gray-300">Yes</span>
-                                    </label>
-                                    <label className="flex items-center">
-                                      <input
-                                        type="radio"
-                                        name={`friendHasAdditional-${index}-${friendIndex}`}
-                                        value="no"
-                                        checked={friend.hasAdditional === 'no'}
-                                        onChange={(e) => handleFriendChange(friendIndex, 'hasAdditional', e.target.value)}
-                                        className="mr-2"
-                                      />
-                                      <span className="text-gray-300">No</span>
-                                    </label>
-                                  </div>
-                                </div>
-                              </div>
-                            ));
-                          })()}
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Are there any important adults outside the immediate family who play a meaningful role in {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s life?
+
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Are there any friendships in {childDisplayName(index)}'s life that you would especially hope a future guardian helps them maintain?
+                          </label>
+                          <div className="flex gap-4">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`hasFriendships-${index}`}
+                                value="yes"
+                                checked={childrenData[index]?.hasImportantFriendships === 'yes'}
+                                onChange={(e) => handleChildChange(index, 'hasImportantFriendships', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-gray-300">Yes</span>
                             </label>
-                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., coaches, mentors, extended family</p>
-                            <textarea
-                              value={childrenData[index]?.importantAdults || ''}
-                              onChange={(e) => handleChildChange(index, 'importantAdults', e.target.value)}
-                              placeholder=""
-                              rows={3}
-                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                              What daily or weekly routines are most important to {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s sense of stability?
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                name={`hasFriendships-${index}`}
+                                value="no"
+                                checked={childrenData[index]?.hasImportantFriendships === 'no'}
+                                onChange={(e) => handleChildChange(index, 'hasImportantFriendships', e.target.value)}
+                                className="mr-2"
+                              />
+                              <span className="text-gray-300">No</span>
                             </label>
-                            <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., bedtime rituals, meals, weekend traditions, after-school habits, Friday movie nights, annual camping trip</p>
-                            <textarea
-                              value={childrenData[index]?.importantRoutines || ''}
-                              onChange={(e) => handleChildChange(index, 'importantRoutines', e.target.value)}
-                              placeholder=""
-                              rows={3}
-                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
-                            />
                           </div>
+                        </div>
+
+                        {childrenData[index]?.hasImportantFriendships === 'yes' && (
+                          <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-3 mb-4">
+                            <p className="text-sm text-blue-100 leading-relaxed">
+                              You can add {childDisplayName(index)}'s important friends in the Connections &amp; Belonging section below, where you can also note which activities they share, why each friendship matters, and how a guardian could help keep the relationship going.
+                            </p>
+                          </div>
+                        )}
+
+                        {childrenData[index]?.hasImportantFriendships === 'no' && (
+                          <div className="bg-gray-700/30 border border-gray-600 rounded-lg p-3 mb-4">
+                            <p className="text-sm text-gray-400 leading-relaxed">
+                              That's completely fine. Not every child has friendships that need to be specifically documented, and a guardian will get to know {childDisplayName(index)}'s social world naturally over time.
+                            </p>
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            What daily or weekly routines are most important to {childDisplayName(index)}'s sense of stability?
+                          </label>
+                          <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., bedtime rituals, meals, weekend traditions, after-school habits, Friday movie nights, annual camping trip</p>
+                          <textarea
+                            value={childrenData[index]?.importantRoutines || ''}
+                            onChange={(e) => handleChildChange(index, 'importantRoutines', e.target.value)}
+                            placeholder=""
+                            rows={3}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                          />
+                        </div>
                           {(() => {
                             type ActivityFriendEntry = {
                               friendName: string;
@@ -12770,8 +12672,8 @@ export default function StepForm({
                             if (activityList.length === 0) {
                               activityList.push({ activityName: '', activityType: '', importanceLevel: '', frequency: '', hasSharedFriends: '', sharedFriendIds: [], otherFriends: [], hasAdditional: '' });
                             }
-                            const existingFriends = JSON.parse(childrenData[index]?.friendList || '[]') as Array<{ friendName: string }>;
-                            const childName = childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`;
+                            const existingFriends = JSON.parse(childrenData[index]?.belongingConnections || '[]') as Array<{ displayName: string }>;
+                            const childName = childDisplayName(index);
 
                             const handleActivityChange = (ai: number, field: keyof ActivityEntry, value: string | string[]) => {
                               const updated = [...activityList];
@@ -12908,15 +12810,15 @@ export default function StepForm({
                                       <div className="space-y-3 pl-4 border-l border-gray-600">
                                         <label className="block text-sm font-medium text-gray-300 mb-2">Select friends who participate:</label>
                                         <div className="space-y-2">
-                                          {existingFriends.filter(f => f.friendName).map((f, fi) => (
+                                          {existingFriends.filter(f => f.displayName).map((f, fi) => (
                                             <label key={fi} className="flex items-center cursor-pointer">
                                               <input
                                                 type="checkbox"
-                                                checked={(activity.sharedFriendIds || []).includes(f.friendName)}
-                                                onChange={() => toggleSharedFriend(ai, f.friendName)}
+                                                checked={(activity.sharedFriendIds || []).includes(f.displayName)}
+                                                onChange={() => toggleSharedFriend(ai, f.displayName)}
                                                 className="mr-2"
                                               />
-                                              <span className="text-gray-300">{f.friendName}</span>
+                                              <span className="text-gray-300">{f.displayName}</span>
                                             </label>
                                           ))}
                                           <label className="flex items-center cursor-pointer">
@@ -13021,7 +12923,7 @@ export default function StepForm({
                           })()}
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              How does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} best communicate and like to be spoken to?
+                              How does {childDisplayName(index)} best communicate and like to be spoken to?
                             </label>
                             <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., responds well to direct explanations, needs time to process, prefers visual cues, responds to tone of voice</p>
                             <textarea
@@ -13034,7 +12936,7 @@ export default function StepForm({
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              How does {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} typically express or manage difficult emotions?
+                              How does {childDisplayName(index)} typically express or manage difficult emotions?
                             </label>
                             <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., withdraws, talks it out, physical activity, art, needs space</p>
                             <textarea
@@ -13047,7 +12949,7 @@ export default function StepForm({
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              What comforts {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`} when they are upset, scared, or overwhelmed?
+                              What comforts {childDisplayName(index)} when they are upset, scared, or overwhelmed?
                             </label>
                             <p className="text-xs italic text-gray-400 mt-1 mb-2">e.g., specific people, objects, activities, words of reassurance</p>
                             <textarea
@@ -13073,7 +12975,7 @@ export default function StepForm({
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Additional notes about {childrenData[index]?.nickname || childrenData[index]?.name || `Child ${index + 1}`}'s social and emotional world:
+                              Additional notes about {childDisplayName(index)}'s social and emotional world:
                             </label>
                             <textarea
                               value={childrenData[index]?.socialAdditionalNotes || ''}
@@ -13083,7 +12985,6 @@ export default function StepForm({
                               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                             />
                           </div>
-                        </div>
 
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
                           <h4 className="text-base font-semibold text-blue-400">Digital Identity and Access</h4>

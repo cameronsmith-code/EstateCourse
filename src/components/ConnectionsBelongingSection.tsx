@@ -240,7 +240,7 @@ export default function ConnectionsBelongingSection({
   onChildMultiChange,
   onPlanningPersonsChange,
 }: Props) {
-  const childName = childData.nickname || childData.name || `Child ${childIndex + 1}`;
+  const childName = childData.nickname || childData.name || `Child ${childIndex + 1} (details to come)`;
   const data = loadBelongingData(childData);
 
   // Whether to show this section at all

@@ -35,11 +35,12 @@ const HOUSEHOLD_MOVE_OPTIONS = [
 ];
 
 const ADULT_SIBLING_ROLE_OPTIONS = [
-  { value: 'regular_sibling', label: 'Regular sibling relationship' },
+  { value: 'regular_sibling', label: 'Maintain regular contact and a close sibling relationship' },
   { value: 'emotional_support', label: 'Important emotional support' },
-  { value: 'family_discussions', label: 'Participate in major family discussions' },
-  { value: 'traditions', label: 'Help maintain family traditions/history' },
-  { value: 'advocate', label: 'Advocate/support where appropriate' },
+  { value: 'family_traditions', label: 'Help preserve family traditions and history' },
+  { value: 'family_discussions', label: 'Participate in important family conversations' },
+  { value: 'advocate', label: 'Advocate for sibling where appropriate' },
+  { value: 'extended_family', label: 'Help maintain extended-family relationships' },
   { value: 'other', label: 'Other' },
 ];
 
@@ -76,7 +77,7 @@ export default function GuardianTransitionSection({
   onChildChange,
   onChildMultiChange,
 }: Props) {
-  const childName = childData.nickname || childData.name || `Child ${childIndex + 1}`;
+  const childName = childData.nickname || childData.name || `Child ${childIndex + 1} (details to come)`;
   const guardianId = childData.guardianPersonId;
   const guardianPerson = planningPersons.find(p => p.id === guardianId);
   const guardianName = personName(planningPersons, guardianId) || 'the guardian';
@@ -171,7 +172,7 @@ export default function GuardianTransitionSection({
   minorIndices.forEach(i => {
     if (i === childIndex) return;
     const sib = childrenData[i];
-    const sibName = sib?.nickname || sib?.name || `Child ${i + 1}`;
+    const sibName = sib?.nickname || sib?.name || `Child ${i + 1} (details to come)`;
     importantPeopleOptions.push({ id: `sibling_${i}`, name: sibName, relationship: 'Sibling' });
   });
   // Adult independent children
@@ -179,14 +180,30 @@ export default function GuardianTransitionSection({
   allChildren.forEach((c, i) => {
     if (minorIndices.includes(i)) return;
     if (c.independent === 'yes') {
-      const name = c.nickname || c.name || `Child ${i + 1}`;
+      const name = c.nickname || c.name || `Child ${i + 1} (details to come)`;
       importantPeopleOptions.push({ id: `adult_sib_${i}`, name, relationship: 'Adult sibling' });
     }
   });
-  // Important adults from child data
+  // Important adults from legacy child data (read-only compatibility)
   if (childData.importantAdults) {
     importantPeopleOptions.push({ id: 'important_adults', name: childData.importantAdults, relationship: 'Important adult(s)' });
   }
+  // Friends and trusted adults from belongingConnections (authoritative source)
+  try {
+    const connections = JSON.parse(childData.belongingConnections || '[]') as Array<{ id: string; displayName: string; connectionType: string }>;
+    connections.forEach(c => {
+      if (c.displayName) {
+        const rel = c.connectionType === 'friend' ? 'Friend'
+          : c.connectionType === 'trusted_adult' ? 'Trusted adult'
+          : c.connectionType === 'sibling' ? 'Sibling'
+          : c.connectionType === 'grandparent' ? 'Grandparent'
+          : c.connectionType === 'cousin' ? 'Cousin'
+          : c.connectionType === 'other_family' ? 'Family'
+          : 'Important person';
+        importantPeopleOptions.push({ id: c.id || `conn_${c.displayName}`, name: c.displayName, relationship: rel });
+      }
+    });
+  } catch { /* ignore parse errors */ }
   // Grandparents from planning persons
   planningPersons.forEach(p => {
     if (p.id === guardianId || p.id === childData.alternateGuardianPersonId) return;
@@ -582,7 +599,30 @@ export default function GuardianTransitionSection({
 
           <div className="p-3 bg-gray-700/50 border border-gray-600 rounded-lg mb-3">
             <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Current medications</p>
-            <p className="text-sm text-white">{childData.medicationList}</p>
+            {(() => {
+              try {
+                const meds = JSON.parse(childData.medicationList || '[]') as Array<{ name: string; treats: string; prescription: string; prescribedBy: string; otherInfo: string }>;
+                const valid = meds.filter(m => m.name || m.treats || m.prescribedBy || m.otherInfo);
+    if (valid.length === 0) {
+      return <p className="text-sm text-gray-400 italic">No medications listed.</p>;
+    }
+    return (
+      <div className="space-y-2">
+        {valid.map((m, i) => (
+          <div key={i} className="bg-gray-700 border border-gray-600 rounded-lg p-3">
+            <p className="text-sm font-medium text-white">{m.name || 'Unnamed medication'}</p>
+            {m.treats && <p className="text-xs text-gray-300 mt-1"><span className="text-gray-400">Used for:</span> {m.treats}</p>}
+            {m.prescription && <p className="text-xs text-gray-300 mt-1"><span className="text-gray-400">Prescription:</span> {m.prescription === 'yes' ? 'Yes' : 'No'}</p>}
+            {m.prescribedBy && <p className="text-xs text-gray-300 mt-1"><span className="text-gray-400">Prescribed by:</span> {m.prescribedBy}</p>}
+            {m.otherInfo && <p className="text-xs text-gray-300 mt-1"><span className="text-gray-400">Instructions / Notes:</span> {m.otherInfo}</p>}
+          </div>
+        ))}
+      </div>
+    );
+              } catch {
+                return <p className="text-sm text-gray-400 italic">No medications listed.</p>;
+              }
+            })()}
           </div>
 
           <div>
@@ -762,8 +802,14 @@ export default function GuardianTransitionSection({
           </h6>
 
           {adultIndependentSiblings.map(({ child: sib, index: sibIdx }) => {
-            const sibName = sib.nickname || sib.name || `Child ${sibIdx + 1}`;
-            const roleValue = childData[`transitionAdultSiblingRole_${sibIdx}`] || '';
+            const sibName = sib.nickname || sib.name || `Child ${sibIdx + 1} (details to come)`;
+            const roleValues = (childData[`transitionAdultSiblingRole_${sibIdx}`] || '').split(',').filter(Boolean);
+            const toggleRole = (opt: string) => {
+              const next = roleValues.includes(opt)
+                ? roleValues.filter(v => v !== opt)
+                : [...roleValues, opt];
+              onChildChange(childIndex, `transitionAdultSiblingRole_${sibIdx}`, next.join(','));
+            };
             const notResponsible = (childData[`transitionAdultSiblingNotResponsible_${sibIdx}`] || '').split(',').filter(Boolean);
             const toggleNotResponsible = (opt: string) => {
               const next = notResponsible.includes(opt)
@@ -773,17 +819,15 @@ export default function GuardianTransitionSection({
             };
             return (
               <div key={sibIdx} className="mb-4">
-                <p className="text-sm text-gray-300 mb-2">What role would you hope {sibName} continues to have in {childName}'s life?</p>
+                <p className="text-sm text-gray-300 mb-2">What role(s) would you hope {sibName} continues to have in {childName}'s life? Select all that apply.</p>
                 <div className="flex flex-col gap-2 mb-3">
                   {ADULT_SIBLING_ROLE_OPTIONS.map(opt => (
                     <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
                       <input
-                        type="radio"
-                        name={`transitionAdultSiblingRole-${childIndex}-${sibIdx}`}
-                        value={opt.value}
-                        checked={roleValue === opt.value}
-                        onChange={e => onChildChange(childIndex, `transitionAdultSiblingRole_${sibIdx}`, e.target.value)}
-                        className="mr-1"
+                        type="checkbox"
+                        checked={roleValues.includes(opt.value)}
+                        onChange={() => toggleRole(opt.value)}
+                        className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500"
                       />
                       <span className="text-gray-300 text-sm">{opt.label}</span>
                     </label>

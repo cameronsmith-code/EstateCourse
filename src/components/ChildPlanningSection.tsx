@@ -180,13 +180,19 @@ export default function ChildPlanningSection({
     );
   };
 
+  const PARENT_SOURCES = new Set(['parent1', 'parent2', 'otherparent']);
+
   const renderPersonSelector = (
     selectedPersonId: string | undefined,
     fieldName: string,
-    placeholderLabel: string
+    placeholderLabel: string,
+    excludeParents = false
   ) => {
     const person = getPerson(selectedPersonId);
     const hasSelection = !!person;
+    const selectableContacts = excludeParents
+      ? prefilledContacts.filter(c => !PARENT_SOURCES.has(c.source))
+      : prefilledContacts;
 
     const handleSelect = (value: string) => {
       if (value === '') {
@@ -222,9 +228,9 @@ export default function ChildPlanningSection({
               ))}
             </optgroup>
           )}
-          {prefilledContacts.length > 0 && (
+          {selectableContacts.length > 0 && (
             <optgroup label="People from elsewhere in your questionnaire">
-              {prefilledContacts.map(c => (
+              {selectableContacts.map(c => (
                 <option key={c.id} value={`contact_${c.id}`}>{c.name || SOURCE_LABELS[c.source] || c.id} ({SOURCE_LABELS[c.source] || 'Contact'})</option>
               ))}
             </optgroup>
@@ -385,7 +391,7 @@ export default function ChildPlanningSection({
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Who would you ideally want to act as {childName}'s guardian?
             </label>
-            {renderPersonSelector(guardianId, 'guardianPersonId', 'Select a person...')}
+            {renderPersonSelector(guardianId, 'guardianPersonId', 'Select a person...', true)}
           </div>
         )}
 
@@ -394,7 +400,7 @@ export default function ChildPlanningSection({
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Is there a second person who would act together with {guardianName} as {childName}'s guardian? (Optional)
             </label>
-            {renderPersonSelector(guardian2Id, 'guardianPersonId2', 'Select a second person...')}
+            {renderPersonSelector(guardian2Id, 'guardianPersonId2', 'Select a second person...', true)}
           </div>
         )}
 
@@ -486,7 +492,7 @@ export default function ChildPlanningSection({
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Who would you ideally want to act as {childName}'s alternate guardian?
                   </label>
-                  {renderPersonSelector(alternateId, 'alternateGuardianPersonId', 'Select a person...')}
+                  {renderPersonSelector(alternateId, 'alternateGuardianPersonId', 'Select a person...', true)}
                 </div>
 
                 {alternateId && getPerson(alternateId) && (

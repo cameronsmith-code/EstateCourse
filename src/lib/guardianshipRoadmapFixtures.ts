@@ -432,20 +432,42 @@ function fixtureH_SampleRoadmapFamily(): AnswersMap {
       planningPersons: [
         { id: 'pp_1', name: 'Michael Morrison', relationship: "Uncle (Daniel's brother)", phone: '905-555-1000', email: 'michael.m@email.com', city: 'Oakville', province: 'ON', country: 'Canada' },
         { id: 'pp_2', name: 'Jennifer Morrison', relationship: "Aunt (Michael's wife)", phone: '905-555-1001', email: 'jennifer.m@email.com', city: 'Oakville', province: 'ON', country: 'Canada' },
-        { id: 'pp_3', name: 'Laura Chen', relationship: 'Family friend', phone: '416-555-2000', city: 'Mississauga', province: 'ON', country: 'Canada' },
+        { id: 'pp_3', name: 'Laura Chen', relationship: 'Trustee (family friend)', phone: '416-555-2000', email: 'laura.c@email.com', city: 'Toronto', province: 'ON', country: 'Canada' },
+        { id: 'pp_4', name: 'David Morrison', relationship: 'Brother (Attorney for Property)', phone: '416-555-3000', email: 'david.m@email.com', city: 'Toronto', province: 'ON', country: 'Canada' },
       ],
+      fundingPhilosophyData: {
+        overallApproach: 'shareIncrementalCosts',
+        everydayExpenseApproach: 'no_detailed_reimbursement',
+        meaningfulExpenseApproach: 'resources_help_cover',
+        majorHouseholdExpenseApproach: 'if_reasonably_necessary',
+        housingPreference: 'considerIfNecessary',
+        vehiclePreference: 'potentially',
+        workReductionPreference: 'potentially',
+        householdHelpPreference: 'yes',
+        sharedHouseholdBenefitPhilosophy: 'discuss_major_first',
+        recordKeepingPreference: 'track_meaningful',
+        decisionMakingApproach: 'collaborative',
+        guardianJudgmentWeight: 'significant_weight',
+        discussionRequiredFor: 'private_school,larger_vehicle,larger_home,significant_healthcare',
+        hasDiscussionThreshold: 'no',
+        disagreementApproach: 'talk_it_through,bring_in_professional',
+        escalationPersonIds: 'law1,fp1',
+        firstEscalationPersonId: 'law1',
+        parentMessageToGuardian: 'We chose you because we trust you, not because we expect you to finance our children\'s lives.',
+        parentMessageAboutWorkingTogether: 'We chose you for different reasons and trust you both. Please don\'t let different responsibilities turn you into opposing sides.',
+      },
     }],
     ['wills', { currentWillData: { clients: [
       { clientId: 'client1', clientName: 'Daniel', documentBasics: { hasWill: 'yes', willLocation: 'Home safe' },
         inheritanceType: 'held_until_age',
         trustStages: [{ age: '25', fraction: '50%', description: 'Half at 25' }, { age: '30', fraction: '100%', description: 'Full at 30' }],
-        trustTrusteeName: 'Michael Morrison',
+        trustTrusteeName: 'Laura Chen', trustTrusteePersonId: 'pp_3',
         childSpecificArrangements: [
           { childId: 'child_2', childName: 'Sophie', hasDifferentArrangement: 'yes', specialArrangement: 'held_for_lifetime', knownTrustType: 'discretionary_trust', description: 'Disability-sensitive discretionary trust arrangement to protect government benefits' },
         ],
       },
       { clientId: 'client2', clientName: 'Sarah', documentBasics: { hasWill: 'yes', willLocation: 'Home safe' },
-        inheritanceType: 'held_until_age', trustTrusteeName: 'Michael Morrison',
+        inheritanceType: 'held_until_age', trustTrusteeName: 'Laura Chen', trustTrusteePersonId: 'pp_3',
       },
     ]}}],
     ['estateTrustees', {
@@ -454,11 +476,62 @@ function fixtureH_SampleRoadmapFamily(): AnswersMap {
       client2HasEstateTrustee: 'yes', client2EstateTrusteeName: 'David Morrison',
       client2EstateTrusteePhone: '416-555-3000', client2EstateTrusteeRelationship: 'Brother-in-law',
     }],
+    ['professionalTeam', {
+      fpHasAdvisor: 'yes', fpAdvisor1Name: 'Jane Financial', fpAdvisor1Firm: 'Wealth Co', fpAdvisor1IsCameronSmith: false,
+      lawHasLawyer: 'yes', lawAdvisor1Name: 'Robert Legal', lawAdvisor1Firm: 'Legal Associates',
+    }],
+    ['powersOfAttorney', {
+      poaPropertyData: [
+        { attorneyPersonId: 'pp_4', attorneyName: 'David Morrison', attorneyRelationship: 'Brother' },
+      ],
+    }],
     ['lifeInsurance', { client1HasLifeInsurance: 'yes', client2HasLifeInsurance: 'yes' }],
     ['financialFootprint', { investmentsData: [
       { accountType: 'RESP', institution: 'RBC', respBeneficiaryChildIds: ['child_1', 'child_2'], respBeneficiaryNames: ['Jack', 'Sophie'] },
       { accountType: 'RDSP', institution: 'RBC', selectedKnownBeneficiaries: ['Sophie'] },
     ]}],
+    ['familyTrusts', {}],
+  ]);
+}
+
+function fixtureI_IncompleteFamily(): AnswersMap {
+  return makeAnswers([
+    ['aboutYou', {
+      fullName: 'Daniel Thompson', spouseName: 'Sarah Thompson',
+      maritalStatus: 'married', province: 'ON',
+    }],
+    ['children', {
+      childrenData: [
+        { name: 'Jack', nickname: 'Jack', dateOfBirth: '2016-03-20', disabled: 'no', independent: 'no',
+          guardianPersonId: 'pp_1', guardianConsidered: 'yes',
+          guardianSpokenWith: 'not_sure', guardianInWill: 'not_sure',
+          transitionMoveExpected: 'yes_most_likely',
+          attendingSchool: 'yes', schoolName: 'Maple Grove PS',
+          hasIEP: 'yes', individualEducationPlan: 'Reading support and accommodations',
+          belongingConnections: JSON.stringify([
+            { id: 'conn_1', displayName: 'Ben', connectionType: 'best_friend', contexts: ['school'],
+              importance: 'especially_important', relationshipNotes: 'Best friend',
+              continuityIdeas: ['playdates_visits'],
+            },
+          ]),
+        },
+      ],
+      planningPersons: [
+        { id: 'pp_1', name: 'Michael Morrison', relationship: 'Uncle', city: 'Oakville', province: 'ON', country: 'Canada' },
+      ],
+      fundingPhilosophyData: {
+        housingPreference: 'stronglySupport',
+        housingStructureDiscussed: 'not_sure',
+      },
+    }],
+    ['wills', { currentWillData: { clients: [
+      { clientId: 'client1', clientName: 'Daniel', documentBasics: { hasWill: 'yes', willLocation: 'Home' },
+        inheritanceType: 'held_until_age', trustTrusteeName: 'Laura Chen',
+      },
+    ]}}],
+    ['estateTrustees', { client1HasEstateTrustee: 'yes', client1EstateTrusteeName: 'David Morrison' }],
+    ['lifeInsurance', {}],
+    ['financialFootprint', {}],
     ['familyTrusts', {}],
   ]);
 }
@@ -474,6 +547,7 @@ export function runAllFixtures(): void {
   const f = runFixture('F. Cross-Province Guardian (ON -> BC)', fixtureF_CrossProvince());
   const g = runFixture('G. Same Primary / Different Alternates', fixtureG_SamePrimaryDifferentAlternates());
   const h = runFixture('H. Sample Roadmap Family (Morrison family)', fixtureH_SampleRoadmapFamily());
+  const i = runFixture('I. Incomplete Family (limitations testing)', fixtureI_IncompleteFamily());
 
   console.log('\n=== Summary ===');
   console.log(`A: ${a.guardianAssignments.length} assignments, ${a.roles.length} roles`);
@@ -491,6 +565,10 @@ export function runAllFixtures(): void {
   console.log(`H: adultSiblingRoles=${h.adultSiblingRoles.length}, Emma role=${h.adultSiblingRoles[0]?.role}, notResponsible=${h.adultSiblingRoles[0]?.notResponsibleFor.join(',')}`);
   console.log(`H: documents=${h.documents.length}, immediateActions=${h.immediateActions.length}`);
   console.log(`H: parent wishes=${h.immediateActions.filter(a => a.isParentWish).length}`);
+  console.log(`H: fundingPhilosophy=${h.fundingPhilosophy ? 'present' : 'absent'}, coordination=${h.careFundingCoordination?.length || 0}`);
+  console.log(`H: reviewItems=${h.reviewItems?.length || 0}, limitations=${h.limitations ? 'present' : 'absent'}`);
+  console.log(`I: reviewItems=${i.reviewItems?.length || 0}, incompleteItems=${i.limitations?.incompleteItems.length || 0}, professionalReviewItems=${i.limitations?.professionalReviewItems.length || 0}`);
+  console.log(`I: fundingPhilosophy=${i.fundingPhilosophy ? 'present' : 'absent'}, coordinationNeeded=${i.careFundingCoordination?.some(c => c.coordinationNeeded) || false}`);
 
   console.log('\nAll fixtures completed.');
 }

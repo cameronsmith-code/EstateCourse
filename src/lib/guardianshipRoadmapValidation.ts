@@ -153,5 +153,74 @@ export function validateGuardianshipRoadmap(model: GuardianshipRoadmapModel): Va
     }
   }
 
+  // Check for coordination scenarios missing financial decision-makers
+  if (model.careFundingCoordination) {
+    for (const coord of model.careFundingCoordination) {
+      if (coord.financialDecisionMakers.length === 0 && coord.caregiverPersonIds.length > 0) {
+        findings.push({ level: 'warning', message: `Coordination scenario ${coord.scenario} for children ${coord.childIds.join(', ')} has no financial decision-maker identified` });
+      }
+    }
+  }
+
+  // Check for duplicate review items
+  if (model.reviewItems) {
+    const reviewIds = new Set<string>();
+    for (const item of model.reviewItems) {
+      if (reviewIds.has(item.id)) {
+        findings.push({ level: 'warning', message: `Duplicate review item: ${item.id}` });
+      }
+      reviewIds.add(item.id);
+    }
+
+    // Check for professional-review items without a limitation reason
+    for (const item of model.reviewItems) {
+      if (item.importance === 'professionalReview' && !item.evidence.limitationReason) {
+        findings.push({ level: 'warning', message: `Professional review item ${item.id} has no limitation reason` });
+      }
+    }
+  }
+
+  // Check for raw internal IDs leaking into display-facing fields
+  if (model.fundingPhilosophy) {
+    const fp = model.fundingPhilosophy;
+    const displayFields = [
+      fp.parentMessageToGuardian,
+      fp.parentMessageToFinancialDecisionMaker,
+      fp.parentMessageAboutWorkingTogether,
+      fp.guardianOwnChildrenFairnessNotes,
+      fp.guardianJudgmentNotes,
+      fp.workReductionNotes,
+    ];
+    for (const field of displayFields) {
+      if (field && looksLikeRawId(field)) {
+        findings.push({ level: 'error', message: `Raw ID in funding philosophy display field: ${field.substring(0, 50)}` });
+      }
+    }
+  }
+
+  // Check for parent preference accidentally represented as confirmed legal fact
+  if (model.reviewItems) {
+    for (const item of model.reviewItems) {
+      if (item.evidence.evidenceType === 'confirmedClientFact' && item.importance === 'professionalReview') {
+        findings.push({ level: 'error', message: `Review item ${item.id} marked as confirmedClientFact but tagged for professional review` });
+      }
+    }
+  }
+
+  // Check for contradictory guardian assignments (same child in multiple non-overlapping assignments)
+  const childToAssignments = new Map<string, string[]>();
+  for (const assignment of model.guardianAssignments) {
+    for (const childId of assignment.childIds) {
+      const existing = childToAssignments.get(childId) || [];
+      existing.push(assignment.id);
+      childToAssignments.set(childId, existing);
+    }
+  }
+  for (const [childId, assignmentIds] of childToAssignments) {
+    if (assignmentIds.length > 1) {
+      findings.push({ level: 'warning', message: `Child ${childId} appears in ${assignmentIds.length} guardian assignments: ${assignmentIds.join(', ')}` });
+    }
+  }
+
   return findings;
 }

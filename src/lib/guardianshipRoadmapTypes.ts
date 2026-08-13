@@ -341,7 +341,13 @@ export type FinancialDecisionMakerRole =
   | 'estateTrustee'
   | 'inheritanceTrustee';
 
+export type CoordinationScenario =
+  | 'parentalIncapacity'
+  | 'afterDeath'
+  | 'ongoingInheritance';
+
 export type CareFundingCoordination = {
+  scenario: CoordinationScenario;
   childIds: string[];
   caregiverPersonIds: string[];
   financialDecisionMakers: {
@@ -391,6 +397,13 @@ export type FundingReviewItem = {
   severity: 'reviewRecommended' | 'informational';
 };
 
+export type GuardianshipLimitations = {
+  incompleteItems: import('./outputConfidenceTypes').ClarifyReviewItem[];
+  professionalReviewItems: import('./outputConfidenceTypes').ClarifyReviewItem[];
+  conflicts: import('./outputConfidenceTypes').ClarifyReviewItem[];
+  unresolvedReferences: import('./outputConfidenceTypes').ClarifyReviewItem[];
+};
+
 export type GuardianshipRoadmapModel = {
   family: {
     clientNames: string[];
@@ -412,5 +425,7 @@ export type GuardianshipRoadmapModel = {
   fundingPhilosophy?: ChildCareFundingPhilosophy;
   careFundingCoordination?: CareFundingCoordination[];
   fundingReviewItems?: FundingReviewItem[];
+  limitations?: GuardianshipLimitations;
+  reviewItems?: import('./outputConfidenceTypes').ClarifyReviewItem[];
   crossReferences: Array<{ section: string; description: string }>;
 };

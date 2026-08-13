@@ -75,6 +75,13 @@ export default function Completion() {
           Thank you for completing the questionnaire. Your fillable PDF is ready to download.
         </p>
 
+        <div className="bg-gray-700 border border-gray-600 rounded-lg p-4 mb-6 text-left">
+          <p className="text-sm text-gray-400">
+            The Guardianship Roadmap is being rebuilt with a new interpretation engine.
+            It is not included in this PDF yet. All other sections are available.
+          </p>
+        </div>
+
         <div className="bg-blue-900 border border-blue-700 rounded-lg p-6 mb-8">
           <h2 className="text-lg font-semibold text-blue-300 mb-3">What's Next?</h2>
           <ul className="text-left space-y-2 text-blue-200">

@@ -1,13 +1,13 @@
 /**
- * Guardianship Audience Composer — Core Architecture
+ * Guardianship Audience Composer
  *
  * Turns a GuardianshipNarrativeModel into audience-specific document plans.
  *
  * ONE TRUTH, MULTIPLE USEFUL VIEWS.
  *
  * The Composer:
- *   - selects relevant blocks via relevance routing
- *   - orders and groups them into sections
+ *   - selects relevant blocks via relevance routing + rule-level filtering
+ *   - orders and groups them into audience-specific sections
  *   - omits irrelevant material (dynamic omission)
  *   - controls repetition (full explanation once + cross-reference elsewhere)
  *   - preserves evidence, limitations, and parent voice on every block
@@ -27,12 +27,13 @@ import type {
   GuardianshipChildNarrative,
   GuardianshipAudience,
   NarrativeImportance,
-  NarrativeSourceType,
   ImmediateActionNarrative,
   QuickReferenceItem,
-  ReadinessNarrative,
 } from './guardianshipNarrativeTypes';
-import type { ClarifyReviewItem, OutputEvidence, NarrativeLimitation, NextAction, VerificationType, LimitationImportance } from './outputConfidenceTypes';
+import type {
+  ClarifyReviewItem,
+  VerificationType,
+} from './outputConfidenceTypes';
 
 // ─── Audience Document Contract ──────────────────────────────────────────────
 
@@ -65,21 +66,20 @@ export interface GuardianshipAudienceDocument {
 
 // ─── Section Blueprint ────────────────────────────────────────────────────────
 //
-// A blueprint declares what a section *should* contain. The composer
-// resolves each blueprint against the filtered narrative and omits
-// sections that end up empty (dynamic omission).
+// A blueprint declares what a section should contain. The composer resolves
+// each blueprint against the filtered narrative and omits sections that end
+// up empty (dynamic omission).
 
-interface SectionBlueprint {
-  id: string;
-  heading: string;
-  purpose?: string;
-  priority: NarrativeImportance;
-  /** Which narrative areas to pull blocks from, in order. */
-  sources: SectionSource[];
-  /** Optional: only include blocks matching these child IDs. */
-  childIds?: string[];
-  collapsibleInUI?: boolean;
-}
+type ChildSubsection =
+  | 'introduction'
+  | 'education'
+  | 'healthcare'
+  | 'supportTransition'
+  | 'peopleAndConnections'
+  | 'activities'
+  | 'communitiesAndTraditions'
+  | 'inheritance'
+  | 'adultTransition';
 
 type SectionSource =
   | { area: 'familyContext' }
@@ -90,43 +90,52 @@ type SectionSource =
   | { area: 'coordination' }
   | { area: 'documents' }
   | { area: 'readiness'; subsection: 'decisionsMade' | 'thingsWorthConfirming' | 'thingsStillToDo' }
-  | { area: 'children'; subsection?: keyof Pick<GuardianshipChildNarrative, 'introduction' | 'education' | 'healthcare' | 'supportTransition' | 'peopleAndConnections' | 'activities' | 'communitiesAndTraditions' | 'inheritance' | 'adultTransition'> }
+  | { area: 'children'; subsection?: ChildSubsection; perChild?: boolean }
   | { area: 'immediateActions' };
 
+interface SectionBlueprint {
+  id: string;
+  heading: string;
+  purpose?: string;
+  priority: NarrativeImportance;
+  sources: SectionSource[];
+  /** Only include blocks whose ruleId is in this list (when present). */
+  includeRules?: string[];
+  /** Exclude blocks whose ruleId is in this list. */
+  excludeRules?: string[];
+  /** Only include blocks whose type is in this list. */
+  includeTypes?: NarrativeBlock['type'][];
+  /** Exclude blocks whose type is in this list. */
+  excludeTypes?: NarrativeBlock['type'][];
+  /** Cap the number of immediate actions (only for immediateActions source). */
+  maxActions?: number;
+  childIds?: string[];
+  collapsibleInUI?: boolean;
+}
+
 // ─── Relevance Routing ────────────────────────────────────────────────────────
-//
-// Audience tags are the starting point but not sufficient. The router also
-// considers block type, importance, evidence type, limitations, and
-// professional-review routing to make a final relevance decision.
 
 /**
  * Determine whether a narrative block is relevant to a given audience.
  *
  * Routing considers:
  *   1. Explicit audience tags (if present, they are authoritative)
- *   2. Block type + importance (readiness items route differently)
- *   3. Evidence type (professional-review items route to the relevant professional)
- *   4. Limitation metadata (limitations with a reviewerType route to that reviewer)
- *   5. Privacy / need-to-know (emotional/personal content not sent to professionals
- *      unless it has a professional-review limitation)
+ *   2. Block type + importance
+ *   3. Evidence type / limitation reviewer routing
+ *   4. Privacy / need-to-know
  */
 export function isNarrativeRelevantToAudience(
   block: NarrativeBlock,
   audience: GuardianshipAudience
 ): boolean {
-  // 1. If the block has explicit audience tags, respect them.
   if (block.audiences && block.audiences.length > 0) {
     return block.audiences.includes(audience);
   }
 
-  // 2. Blocks without audience tags default to client + guardian only.
-  //    Professionals only receive untagged blocks if they carry a
-  //    professional-review limitation or evidence type.
   if (audience === 'client' || audience === 'guardian') {
     return true;
   }
 
-  // 3. For professionals, check whether the block has professional-review routing.
   if (audience === 'estateLawyer') {
     return hasProfessionalReviewRouting(block, 'estateLawyer', 'lawyer');
   }
@@ -135,8 +144,6 @@ export function isNarrativeRelevantToAudience(
     return hasProfessionalReviewRouting(block, 'accountant');
   }
 
-  // 4. Trustee audiences: receive blocks about inheritance, documents, and
-  //    financial resources even without explicit tags.
   if (audience === 'estateTrustee' || audience === 'inheritanceTrustee' || audience === 'attorneyForProperty') {
     return block.type === 'crossReference'
       || block.sourceType === 'professionalReview'
@@ -150,22 +157,12 @@ function hasProfessionalReviewRouting(
   block: NarrativeBlock,
   ...reviewerTypes: VerificationType[]
 ): boolean {
-  // Check limitation reviewerType
   if (block.limitation?.reviewerType && reviewerTypes.includes(block.limitation.reviewerType)) {
     return true;
   }
-
-  // Check evidence verificationType
   if (block.evidence?.verificationType && reviewerTypes.includes(block.evidence.verificationType)) {
     return true;
   }
-
-  // professionalReview source type alone is not sufficient — it must also
-  // have a reviewer routing (limitation.reviewerType or evidence.verificationType)
-  // matching one of the requested reviewer types. Otherwise the block is
-  // a generic professional-review item that goes to the client only.
-
-  // Check nextAction for reviewer hints
   if (block.nextAction?.description) {
     const desc = block.nextAction.description.toLowerCase();
     if (reviewerTypes.includes('estateLawyer') || reviewerTypes.includes('lawyer')) {
@@ -175,22 +172,14 @@ function hasProfessionalReviewRouting(
       if (desc.includes('accountant') || desc.includes('tax') || desc.includes('financial')) return true;
     }
   }
-
   return false;
 }
 
 // ─── Repetition Control ───────────────────────────────────────────────────────
-//
-// The composer tracks which blocks have already been fully explained.
-// Subsequent sections receive a cross-reference instead of repeating the
-// full content.
 
 interface RepetitionTracker {
-  /** Block IDs that have been fully rendered. */
   explained: Set<string>;
-  /** Rule IDs that have been fully explained, keyed by section id. */
   explainedRulesBySection: Map<string, Set<string>>;
-  /** The current section being resolved. */
   currentSectionId: string | null;
 }
 
@@ -198,12 +187,6 @@ function createRepetitionTracker(): RepetitionTracker {
   return { explained: new Set(), explainedRulesBySection: new Map(), currentSectionId: null };
 }
 
-/**
- * If a block's rule has already been fully explained in a DIFFERENT section,
- * return a compact cross-reference block instead of the full original.
- * Blocks within the same section are never collapsed (e.g. multiple children
- * with the same SCHOOL-01 rule should all show in full).
- */
 function applyRepetitionControl(
   block: NarrativeBlock,
   tracker: RepetitionTracker
@@ -213,7 +196,6 @@ function applyRepetitionControl(
     && block.importance !== 'primary'
     && block.type !== 'parentVoice'
   ) {
-    // Check if this rule was explained in a DIFFERENT section
     let explainedElsewhere = false;
     for (const [sectionId, rules] of tracker.explainedRulesBySection) {
       if (sectionId !== tracker.currentSectionId && rules.has(block.ruleId)) {
@@ -235,7 +217,6 @@ function applyRepetitionControl(
     }
   }
 
-  // Mark as explained if it's a primary or important block
   if (block.importance === 'primary' || block.importance === 'important') {
     tracker.explained.add(block.id);
     if (tracker.currentSectionId) {
@@ -252,14 +233,8 @@ function applyRepetitionControl(
 }
 
 // ─── Block Integrity Preservation ─────────────────────────────────────────────
-//
-// Every composed block must retain its evidence, limitation, nextAction,
-// and source metadata. The composer never strips these fields.
 
 function preserveBlockIntegrity(block: NarrativeBlock): NarrativeBlock {
-  // Ensure evidence, limitation, and nextAction are never dropped.
-  // This is a passthrough — the function exists to make the contract explicit
-  // and to serve as a hook if future transformations need to preserve metadata.
   return {
     ...block,
     evidence: block.evidence,
@@ -270,10 +245,20 @@ function preserveBlockIntegrity(block: NarrativeBlock): NarrativeBlock {
   };
 }
 
+// ─── Blueprint Filtering ──────────────────────────────────────────────────────
+
+function passesBlueprintFilters(
+  block: NarrativeBlock,
+  blueprint: SectionBlueprint
+): boolean {
+  if (blueprint.includeRules && !blueprint.includeRules.includes(block.ruleId)) return false;
+  if (blueprint.excludeRules && blueprint.excludeRules.includes(block.ruleId)) return false;
+  if (blueprint.includeTypes && !blueprint.includeTypes.includes(block.type)) return false;
+  if (blueprint.excludeTypes && blueprint.excludeTypes.includes(block.type)) return false;
+  return true;
+}
+
 // ─── Dynamic Omission ─────────────────────────────────────────────────────────
-//
-// If resolving a section blueprint produces zero blocks, the section is
-// omitted entirely. No empty headings.
 
 function resolveSection(
   blueprint: SectionBlueprint,
@@ -285,9 +270,10 @@ function resolveSection(
   const blocks: NarrativeBlock[] = [];
 
   for (const source of blueprint.sources) {
-    const sourceBlocks = extractBlocks(narrative, source);
+    const sourceBlocks = extractBlocks(narrative, source, blueprint);
     for (const block of sourceBlocks) {
       if (!isNarrativeRelevantToAudience(block, audience)) continue;
+      if (!passesBlueprintFilters(block, blueprint)) continue;
       if (blueprint.childIds && block.childIds) {
         if (!block.childIds.some(id => blueprint.childIds!.includes(id))) continue;
       }
@@ -311,7 +297,8 @@ function resolveSection(
 
 function extractBlocks(
   narrative: GuardianshipNarrativeModel,
-  source: SectionSource
+  source: SectionSource,
+  blueprint: SectionBlueprint
 ): NarrativeBlock[] {
   switch (source.area) {
     case 'familyContext':
@@ -331,26 +318,14 @@ function extractBlocks(
     case 'readiness':
       return narrative.readiness[source.subsection];
     case 'immediateActions':
-      // Immediate actions are not NarrativeBlock[] — they're ImmediateActionNarrative[].
-      // We don't convert them here; sections using this source are handled specially
-      // in the composer. Return empty so the blueprint resolver skips them.
       return [];
     case 'children': {
       if (!source.subsection) {
-        // Flatten all child subsections
-        return narrative.children.flatMap(c =>
-          [
-            ...(c.introduction || []),
-            ...(c.education || []),
-            ...(c.healthcare || []),
-            ...(c.supportTransition || []),
-            ...(c.peopleAndConnections || []),
-            ...(c.activities || []),
-            ...(c.communitiesAndTraditions || []),
-            ...(c.inheritance || []),
-            ...(c.adultTransition || []),
-          ]
-        );
+        return narrative.children.flatMap(c => flattenChild(c));
+      }
+      if (source.perChild) {
+        // Return all blocks from the specified subsection across all children
+        return narrative.children.flatMap(c => c[source.subsection!] || []);
       }
       return narrative.children.flatMap(c => c[source.subsection!] || []);
     }
@@ -359,17 +334,26 @@ function extractBlocks(
   }
 }
 
+function flattenChild(child: GuardianshipChildNarrative): NarrativeBlock[] {
+  return [
+    ...(child.introduction || []),
+    ...(child.education || []),
+    ...(child.healthcare || []),
+    ...(child.supportTransition || []),
+    ...(child.peopleAndConnections || []),
+    ...(child.activities || []),
+    ...(child.communitiesAndTraditions || []),
+    ...(child.inheritance || []),
+    ...(child.adultTransition || []),
+  ];
+}
+
 // ─── Quick Reference Filtering ────────────────────────────────────────────────
 
 function filterQuickReference(
   items: QuickReferenceItem[],
   audience: GuardianshipAudience
 ): QuickReferenceItem[] {
-  // All audiences get role and document items.
-  // Client gets everything.
-  // Guardian gets person + document + role (not financial details).
-  // Lawyer gets document + role.
-  // Accountant gets financial + document + role.
   switch (audience) {
     case 'client':
       return items;
@@ -393,7 +377,6 @@ function filterReviewItems(
   if (!items || items.length === 0) return undefined;
 
   return items.filter(item => {
-    // Route based on verificationType
     if (audience === 'estateLawyer') {
       return item.verificationType === 'estateLawyer'
         || item.verificationType === 'lawyer'
@@ -405,7 +388,6 @@ function filterReviewItems(
         || item.evidence.limitationReason === 'taxInterpretationRequired'
         || item.evidence.verificationType === 'accountant';
     }
-    // Client and guardian see all review items
     return true;
   });
 }
@@ -418,11 +400,576 @@ function filterLimitations(
   return filterReviewItems(limitations, audience);
 }
 
-// ─── Section Blueprint Registry ───────────────────────────────────────────────
+// ─── Immediate Actions Section Builder ────────────────────────────────────────
+
+function buildImmediateActionsSection(
+  actions: ImmediateActionNarrative[],
+  audience: GuardianshipAudience,
+  maxActions?: number
+): GuardianshipAudienceSection | null {
+  let relevant: ImmediateActionNarrative[];
+
+  if (audience === 'client' || audience === 'guardian') {
+    relevant = actions;
+  } else {
+    relevant = actions.filter(a => {
+      const text = `${a.heading} ${a.body}`.toLowerCase();
+      if (audience === 'estateLawyer') return text.includes('lawyer') || text.includes('legal') || text.includes('estate') || text.includes('will');
+      if (audience === 'accountant') return text.includes('accountant') || text.includes('tax') || text.includes('financial');
+      return false;
+    });
+  }
+
+  if (maxActions !== undefined && maxActions > 0) {
+    relevant = relevant.slice(0, maxActions);
+  }
+
+  if (relevant.length === 0) return null;
+
+  const blocks: NarrativeBlock[] = relevant.map(a => ({
+    id: a.id,
+    ruleId: a.ruleId,
+    type: 'action' as const,
+    heading: a.heading,
+    body: a.body,
+    importance: (a.priority <= 3 ? 'primary' : a.priority <= 6 ? 'important' : 'supporting') as NarrativeImportance,
+    sourceType: a.isParentWish ? 'parentPreference' as const : 'derived' as const,
+  }));
+
+  return {
+    id: 'immediate-actions',
+    heading: 'If Something Happened Tomorrow',
+    purpose: 'The first steps, in priority order',
+    priority: 'primary',
+    blocks,
+  };
+}
+
+// ─── Child Section Grouping ───────────────────────────────────────────────────
 //
-// The generic blueprint set covers the common narrative areas. Future
-// audience-specific strategies will extend or override these. For now,
-// this provides the architecture and a sensible default ordering.
+// For sections that pull from child subsections with perChild=true, we need
+// to group blocks by child and create sub-sections within the main section.
+
+interface ChildGroup {
+  childId: string;
+  childName: string;
+  subsections: { heading: string; blocks: NarrativeBlock[] }[];
+}
+
+function groupChildBlocksByChild(
+  narrative: GuardianshipNarrativeModel,
+  subsection: ChildSubsection,
+  heading: string
+): ChildGroup[] {
+  return narrative.children
+    .map(child => {
+      const blocks = child[subsection] || [];
+      if (blocks.length === 0) return null;
+      return {
+        childId: child.childId,
+        childName: child.childName,
+        subsections: [{ heading, blocks }],
+      };
+    })
+    .filter((g): g is ChildGroup => g !== null);
+}
+
+// ─── Audience Strategies ──────────────────────────────────────────────────────
+
+interface AudienceStrategy {
+  title: string;
+  purpose: string;
+  blueprints: SectionBlueprint[];
+  /** Which readiness subsections to include as separate sections. */
+  readinessMode?: 'full' | 'split' | 'lawyer' | 'accountant' | 'none';
+  /** Max immediate actions. */
+  maxActions?: number;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CLIENT STRATEGY
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const clientStrategy: AudienceStrategy = {
+  title: 'Guardianship Planning Summary',
+  purpose: 'A complete picture of your plan and what still deserves your attention.',
+  blueprints: [
+    // 1. Your Family & Guardianship Plan
+    {
+      id: 'family-and-plan',
+      heading: 'Your Family & Guardianship Plan',
+      priority: 'primary',
+      sources: [
+        { area: 'familyContext' },
+        { area: 'guardianPlan' },
+      ],
+    },
+    // 2. If the Children Had to Move
+    {
+      id: 'move-transition',
+      heading: 'If the Children Had to Move',
+      purpose: 'What would change and what should be preserved',
+      priority: 'important',
+      sources: [
+        { area: 'guardianPlan' },
+        { area: 'children', subsection: 'education' },
+        { area: 'children', subsection: 'supportTransition' },
+      ],
+      includeRules: ['MOVE-01', 'MOVE-03', 'SCHOOL-01', 'SCHOOL-02', 'SUPPORT-01', 'SUPPORT-02'],
+      excludeTypes: ['parentVoice'],
+      collapsibleInUI: true,
+    },
+    // 3. What You Want Preserved
+    {
+      id: 'preserve',
+      heading: 'What You Want Preserved',
+      purpose: 'The people, communities, and traditions that matter to your children',
+      priority: 'important',
+      sources: [
+        { area: 'children', subsection: 'peopleAndConnections' },
+        { area: 'children', subsection: 'communitiesAndTraditions' },
+        { area: 'children', subsection: 'activities' },
+      ],
+      includeRules: ['CONNECTION-01', 'CONNECTION-02', 'COMMUNITY-01', 'TRADITION-01', 'ACTIVITY-01', 'ACTIVITY-02'],
+      excludeTypes: ['crossReference'],
+      collapsibleInUI: true,
+    },
+    // 4. How You Want the Financial Side to Work
+    {
+      id: 'funding',
+      heading: 'How You Want the Financial Side to Work',
+      priority: 'important',
+      sources: [{ area: 'fundingPhilosophy' }],
+    },
+    // 5. How the People You've Chosen Should Work Together
+    {
+      id: 'coordination',
+      heading: 'How the People You\'ve Chosen Should Work Together',
+      priority: 'important',
+      sources: [{ area: 'coordination' }],
+    },
+    // 6. Children's Inheritance & Longer-Term Planning
+    {
+      id: 'inheritance',
+      heading: 'Children\'s Inheritance & Longer-Term Planning',
+      priority: 'important',
+      sources: [
+        { area: 'children', subsection: 'inheritance' },
+        { area: 'children', subsection: 'adultTransition' },
+      ],
+      includeRules: ['INHERITANCE-01', 'INHERITANCE-02', 'INHERITANCE-03', 'INHERITANCE-04', 'ADULT-TRANSITION-01', 'ADULT-TRANSITION-02'],
+    },
+    // 7. Decisions You've Made
+    {
+      id: 'decisions',
+      heading: 'Decisions You\'ve Made',
+      priority: 'supporting',
+      sources: [{ area: 'readiness', subsection: 'decisionsMade' }],
+    },
+    // 8. Things Worth Confirming
+    {
+      id: 'worth-confirming',
+      heading: 'Things Worth Confirming',
+      priority: 'important',
+      sources: [{ area: 'readiness', subsection: 'thingsWorthConfirming' }],
+    },
+    // 9. Professional Review (inline — not a separate section for client)
+    // handled via reviewItems/limitations on the document
+    // 10. Your Next Steps
+    {
+      id: 'next-steps',
+      heading: 'Your Next Steps',
+      priority: 'primary',
+      sources: [{ area: 'readiness', subsection: 'thingsStillToDo' }],
+    },
+  ],
+  maxActions: 5,
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GUARDIAN STRATEGY
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const guardianStrategy: AudienceStrategy = {
+  title: 'Guardianship Roadmap',
+  purpose: 'What you need to know, who to call, and how the parents want you to approach this.',
+  blueprints: [
+    // 1. Start Here
+    {
+      id: 'start-here',
+      heading: 'Start Here',
+      purpose: 'The essentials, right at the top',
+      priority: 'primary',
+      sources: [
+        { area: 'familyContext' },
+        { area: 'guardianPlan' },
+      ],
+      includeRules: ['GUARDIAN-01', 'GUARDIAN-02', 'GUARDIAN-03', 'GUARDIAN-04'],
+    },
+    // 2. A Note from the Parents
+    {
+      id: 'parent-voice',
+      heading: 'A Note from the Parents',
+      priority: 'primary',
+      sources: [
+        { area: 'guardianPlan' },
+        { area: 'fundingPhilosophy' },
+        { area: 'coordination' },
+      ],
+      includeTypes: ['parentVoice'],
+    },
+    // 3. Family at a Glance
+    {
+      id: 'family-glance',
+      heading: 'Family at a Glance',
+      priority: 'primary',
+      sources: [
+        { area: 'children', subsection: 'introduction' },
+      ],
+      includeRules: ['GUARDIAN-01'],
+    },
+    // 4. Guardian Plan
+    {
+      id: 'guardian-plan',
+      heading: 'Guardian Plan',
+      purpose: 'Who cares for whom, expected move, and backup',
+      priority: 'primary',
+      sources: [
+        { area: 'guardianPlan' },
+      ],
+      excludeRules: ['GUARDIAN-01'],
+    },
+    // 5. Child-Specific Sections
+    {
+      id: 'child-details',
+      heading: 'About Each Child',
+      purpose: 'Everything you would need to know about each child',
+      priority: 'primary',
+      sources: [
+        { area: 'children', subsection: 'introduction' },
+        { area: 'children', subsection: 'education' },
+        { area: 'children', subsection: 'healthcare' },
+        { area: 'children', subsection: 'supportTransition' },
+        { area: 'children', subsection: 'peopleAndConnections' },
+        { area: 'children', subsection: 'communitiesAndTraditions' },
+        { area: 'children', subsection: 'activities' },
+        { area: 'children', subsection: 'inheritance' },
+        { area: 'children', subsection: 'adultTransition' },
+      ],
+      excludeRules: ['GUARDIAN-01'],
+      collapsibleInUI: true,
+    },
+    // 6. Adult Sibling Role
+    {
+      id: 'adult-sibling',
+      heading: 'Adult Sibling Role',
+      purpose: 'Where relevant, an older sibling is a sister or brother — not a replacement parent',
+      priority: 'important',
+      sources: [{ area: 'familyRoles' }],
+      includeRules: ['SIBLING-01', 'SIBLING-02'],
+    },
+    // 7. Caring for Them Shouldn't Mean Carrying the Cost Alone
+    {
+      id: 'funding',
+      heading: 'Caring for Them Shouldn\'t Mean Carrying the Cost Alone',
+      purpose: 'How the parents want resources to be used',
+      priority: 'important',
+      sources: [{ area: 'fundingPhilosophy' }],
+      excludeTypes: ['parentVoice'],
+    },
+    // 8. Working Together for the Children
+    {
+      id: 'coordination',
+      heading: 'Working Together for the Children',
+      purpose: 'When the guardian and financial decision-maker are different people',
+      priority: 'important',
+      sources: [{ area: 'coordination' }],
+      excludeTypes: ['parentVoice'],
+    },
+    // 9. Who Does What?
+    {
+      id: 'who-does-what',
+      heading: 'Who Does What?',
+      priority: 'supporting',
+      sources: [{ area: 'familyRoles' }],
+      includeRules: ['ROLE-01'],
+    },
+    // 10. Important Documents
+    {
+      id: 'documents',
+      heading: 'Important Documents',
+      priority: 'supporting',
+      sources: [{ area: 'documents' }],
+    },
+    // 11. If Something Happened Tomorrow
+    // handled via immediate actions builder
+  ],
+  maxActions: 8,
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ESTATE LAWYER STRATEGY
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const estateLawyerStrategy: AudienceStrategy = {
+  title: 'Guardianship & Estate Planning Brief',
+  purpose: 'What these clients want their legal plan to accomplish, and what should be reviewed.',
+  blueprints: [
+    // 1. Family Context
+    {
+      id: 'family-context',
+      heading: 'Family Context',
+      priority: 'primary',
+      sources: [{ area: 'familyContext' }],
+    },
+    // 2. Intended Guardian Appointments
+    {
+      id: 'guardian-appointments',
+      heading: 'Intended Guardian Appointments',
+      purpose: 'Primary, alternate, applicable children, household, conversations',
+      priority: 'primary',
+      sources: [{ area: 'guardianPlan' }],
+      includeRules: ['GUARDIAN-01', 'GUARDIAN-02', 'GUARDIAN-03', 'GUARDIAN-04', 'GUARDIAN-05'],
+    },
+    // 3. Current Will Understanding
+    {
+      id: 'will-understanding',
+      heading: 'Current Will Understanding',
+      purpose: 'Who clients believe is named, mismatches, uncertainty',
+      priority: 'primary',
+      sources: [{ area: 'guardianPlan' }],
+      includeRules: ['GUARDIAN-03', 'GUARDIAN-05'],
+    },
+    // 4. Child Inheritance Intentions
+    {
+      id: 'inheritance',
+      heading: 'Child Inheritance Intentions',
+      purpose: 'Outright vs managed, staged distributions, trustees, disability-sensitive planning',
+      priority: 'primary',
+      sources: [
+        { area: 'children', subsection: 'inheritance' },
+        { area: 'children', subsection: 'adultTransition' },
+      ],
+      includeRules: ['INHERITANCE-01', 'INHERITANCE-02', 'INHERITANCE-03', 'INHERITANCE-04', 'ADULT-TRANSITION-01', 'ADULT-TRANSITION-02'],
+    },
+    // 5. Guardian Household Funding Intentions
+    {
+      id: 'funding',
+      heading: 'Guardian Household Funding Intentions',
+      purpose: 'Material preferences that may require trust flexibility',
+      priority: 'important',
+      sources: [{ area: 'fundingPhilosophy' }],
+      excludeTypes: ['parentVoice'],
+    },
+    // 6. Role Separation & Coordination
+    {
+      id: 'coordination',
+      heading: 'Role Separation & Coordination',
+      purpose: 'Guardian, Attorney, Estate Trustee, inheritance trustee',
+      priority: 'important',
+      sources: [{ area: 'coordination' }],
+      excludeTypes: ['parentVoice'],
+    },
+    // 7. Legal Review Items (readiness things worth confirming + reviewItems)
+    {
+      id: 'legal-review',
+      heading: 'Legal Review Items',
+      purpose: 'What clients want/understand, why it matters, what the Kit cannot confirm',
+      priority: 'primary',
+      sources: [{ area: 'readiness', subsection: 'thingsWorthConfirming' }],
+    },
+    // 8. Relevant Documents
+    {
+      id: 'documents',
+      heading: 'Relevant Documents',
+      priority: 'supporting',
+      sources: [{ area: 'documents' }],
+    },
+  ],
+  maxActions: 3,
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ACCOUNTANT STRATEGY
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const accountantStrategy: AudienceStrategy = {
+  title: 'Guardianship Financial Coordination Brief',
+  purpose: 'Financial or tax structures that may affect implementation.',
+  blueprints: [
+    // 1. Relevant Family Context
+    {
+      id: 'family-context',
+      heading: 'Relevant Family Context',
+      priority: 'primary',
+      sources: [{ area: 'familyContext' }],
+    },
+    // 2. Financial Resources for Children
+    {
+      id: 'financial-resources',
+      heading: 'Financial Resources for Children',
+      purpose: 'RESP, RDSP, trusts, insurance, other funds',
+      priority: 'primary',
+      sources: [{ area: 'financialResources' }],
+    },
+    // 3. Disability / Government Program Context
+    {
+      id: 'disability-context',
+      heading: 'Disability / Government Program Context',
+      purpose: 'DTC, RDSP, long-term support where relevant',
+      priority: 'important',
+      sources: [
+        { area: 'children', subsection: 'adultTransition' },
+      ],
+      includeRules: ['ADULT-TRANSITION-02'],
+    },
+    // 4. Guardian Household Funding Intentions
+    {
+      id: 'funding',
+      heading: 'Guardian Household Funding Intentions',
+      purpose: 'Materially financial items only',
+      priority: 'important',
+      sources: [{ area: 'fundingPhilosophy' }],
+      excludeTypes: ['parentVoice'],
+      includeRules: ['FUNDING-01', 'FUNDING-04', 'FUNDING-05', 'FUNDING-06', 'FUNDING-07', 'FUNDING-08', 'FUNDING-09', 'FUNDING-10', 'FUNDING-11'],
+    },
+    // 5. Trust / Distribution Context
+    {
+      id: 'trust-context',
+      heading: 'Trust / Distribution Context',
+      purpose: 'Trust existence, inheritance trustee, staged distributions, disability-sensitive structure',
+      priority: 'important',
+      sources: [
+        { area: 'children', subsection: 'inheritance' },
+      ],
+      includeRules: ['INHERITANCE-01', 'INHERITANCE-02', 'INHERITANCE-03', 'INHERITANCE-04'],
+    },
+    // 6. Accounting / Tax Review Items
+    {
+      id: 'tax-review',
+      heading: 'Accounting / Tax Review Items',
+      priority: 'primary',
+      sources: [{ area: 'readiness', subsection: 'thingsWorthConfirming' }],
+    },
+    // 7. Relevant Cross-References (financial resources cross-refs)
+    {
+      id: 'cross-refs',
+      heading: 'Relevant Cross-References',
+      purpose: 'Family Financial Map, trusts, corporate structure, Will review',
+      priority: 'supporting',
+      sources: [
+        { area: 'financialResources' },
+        { area: 'documents' },
+      ],
+      includeTypes: ['crossReference'],
+    },
+  ],
+  maxActions: 0,
+};
+
+// ─── Strategy Registry ────────────────────────────────────────────────────────
+
+const strategies: Partial<Record<GuardianshipAudience, AudienceStrategy>> = {
+  client: clientStrategy,
+  guardian: guardianStrategy,
+  estateLawyer: estateLawyerStrategy,
+  accountant: accountantStrategy,
+};
+
+// ─── Main Composer ────────────────────────────────────────────────────────────
+
+export interface ComposeOptions {
+  clientNames?: string[];
+  reportDate?: Date;
+  reviewItems?: ClarifyReviewItem[];
+  limitations?: ClarifyReviewItem[];
+}
+
+/**
+ * Compose a GuardianshipAudienceDocument from the narrative model.
+ *
+ * For the four primary audiences (client, guardian, estateLawyer, accountant),
+ * audience-specific blueprints control section ordering, content selection,
+ * and emphasis. For other audiences (trustees, attorneyForProperty), a
+ * default blueprint set is used.
+ */
+export function composeGuardianshipForAudience(
+  narrativeModel: GuardianshipNarrativeModel,
+  audience: GuardianshipAudience,
+  options?: ComposeOptions
+): GuardianshipAudienceDocument {
+  const strategy = strategies[audience];
+  const blueprints = strategy?.blueprints || DEFAULT_BLUEPRINTS;
+  const tracker = createRepetitionTracker();
+
+  const sections: GuardianshipAudienceSection[] = [];
+  for (const blueprint of blueprints) {
+    const section = resolveSection(blueprint, narrativeModel, audience, tracker);
+    if (section) sections.push(section);
+  }
+
+  // Immediate actions
+  if (narrativeModel.immediateActions.length > 0) {
+    const maxActions = strategy?.maxActions;
+    if (maxActions !== 0) {
+      const actionsSection = buildImmediateActionsSection(
+        narrativeModel.immediateActions,
+        audience,
+        maxActions
+      );
+      if (actionsSection) sections.push(actionsSection);
+    }
+  }
+
+  // Quick reference
+  const quickRef = filterQuickReference(narrativeModel.quickReference, audience);
+  const filteredQuickRef = quickRef.length > 0 ? quickRef : undefined;
+
+  // Review items and limitations
+  const reviewItems = filterReviewItems(options?.reviewItems, audience);
+  const limitations = filterLimitations(options?.limitations, audience);
+
+  // Metadata
+  const metadata: AudienceDocumentMetadata = {
+    familyName: options?.clientNames?.join(' & '),
+    generatedAt: (options?.reportDate || new Date()).toISOString(),
+    sourceModelVersion: 'guardianship-v1',
+  };
+
+  // Title and purpose
+  const titleMap: Record<GuardianshipAudience, string> = {
+    client: 'Guardianship Planning Summary',
+    guardian: 'Guardianship Roadmap',
+    estateLawyer: 'Guardianship & Estate Planning Brief',
+    accountant: 'Guardianship Financial Coordination Brief',
+    estateTrustee: 'Guardianship Roadmap — Trustee Review',
+    inheritanceTrustee: 'Guardianship Roadmap — Trustee Review',
+    attorneyForProperty: 'Guardianship Roadmap — Attorney Review',
+  };
+
+  const purposeMap: Record<GuardianshipAudience, string> = {
+    client: 'A complete picture of your plan and what still deserves your attention.',
+    guardian: 'What you need to know, who to call, and how the parents want you to approach this.',
+    estateLawyer: 'What these clients want their legal plan to accomplish, and what should be reviewed.',
+    accountant: 'Financial or tax structures that may affect implementation.',
+    estateTrustee: 'Your responsibilities and the context you need to carry them out.',
+    inheritanceTrustee: 'Your responsibilities and the context you need to carry them out.',
+    attorneyForProperty: 'Your responsibilities and the context you need to carry them out.',
+  };
+
+  return {
+    audience,
+    title: titleMap[audience],
+    purpose: purposeMap[audience],
+    sections,
+    quickReference: filteredQuickRef,
+    reviewItems,
+    limitations,
+    metadata,
+  };
+}
+
+// ─── Default Blueprints (for trustee/attorney audiences) ──────────────────────
 
 const DEFAULT_BLUEPRINTS: SectionBlueprint[] = [
   {
@@ -485,141 +1032,7 @@ const DEFAULT_BLUEPRINTS: SectionBlueprint[] = [
   },
 ];
 
-// ─── Main Composer ────────────────────────────────────────────────────────────
+// ─── Public Exports ───────────────────────────────────────────────────────────
 
-export interface ComposeOptions {
-  clientNames?: string[];
-  reportDate?: Date;
-  /** Override the default blueprint set with audience-specific blueprints. */
-  blueprints?: SectionBlueprint[];
-  /** Additional review items from the roadmap model. */
-  reviewItems?: ClarifyReviewItem[];
-  /** Additional limitations from the roadmap model. */
-  limitations?: ClarifyReviewItem[];
-}
-
-/**
- * Compose a GuardianshipAudienceDocument from the narrative model.
- *
- * This is the core architecture. Audience-specific section ordering,
- * emphasis, and omission will be implemented in the next task by
- * providing audience-specific blueprints.
- */
-export function composeGuardianshipForAudience(
-  narrativeModel: GuardianshipNarrativeModel,
-  audience: GuardianshipAudience,
-  options?: ComposeOptions
-): GuardianshipAudienceDocument {
-  const blueprints = options?.blueprints || DEFAULT_BLUEPRINTS;
-  const tracker = createRepetitionTracker();
-
-  const sections: GuardianshipAudienceSection[] = [];
-  for (const blueprint of blueprints) {
-    const section = resolveSection(blueprint, narrativeModel, audience, tracker);
-    if (section) sections.push(section);
-  }
-
-  // Immediate actions: convert to a section if any exist and are relevant
-  if (narrativeModel.immediateActions.length > 0) {
-    const actionsSection = buildImmediateActionsSection(narrativeModel.immediateActions, audience);
-    if (actionsSection) sections.push(actionsSection);
-  }
-
-  // Quick reference
-  const quickRef = filterQuickReference(narrativeModel.quickReference, audience);
-  const filteredQuickRef = quickRef.length > 0 ? quickRef : undefined;
-
-  // Review items and limitations
-  const reviewItems = filterReviewItems(options?.reviewItems, audience);
-  const limitations = filterLimitations(options?.limitations, audience);
-
-  // Metadata
-  const metadata: AudienceDocumentMetadata = {
-    familyName: options?.clientNames?.join(' & '),
-    generatedAt: (options?.reportDate || new Date()).toISOString(),
-    sourceModelVersion: 'guardianship-v1',
-  };
-
-  // Title and purpose are placeholder defaults for the architecture.
-  // Audience-specific titles will be set in the next task.
-  const titleMap: Record<GuardianshipAudience, string> = {
-    client: 'Your Guardianship Roadmap',
-    guardian: 'Guardianship Roadmap',
-    estateLawyer: 'Guardianship Roadmap — Professional Review',
-    accountant: 'Guardianship Roadmap — Professional Review',
-    estateTrustee: 'Guardianship Roadmap — Trustee Review',
-    inheritanceTrustee: 'Guardianship Roadmap — Trustee Review',
-    attorneyForProperty: 'Guardianship Roadmap — Attorney Review',
-  };
-
-  const purposeMap: Record<GuardianshipAudience, string> = {
-    client: 'A complete picture of your plan and what remains to be done.',
-    guardian: 'What you need to know, who to call, and how the parents want you to approach this.',
-    estateLawyer: 'Professional review of the guardianship plan, trust structures, and legal readiness.',
-    accountant: 'Financial resources, funding approach, and tax-related considerations.',
-    estateTrustee: 'Your responsibilities and the context you need to carry them out.',
-    inheritanceTrustee: 'Your responsibilities and the context you need to carry them out.',
-    attorneyForProperty: 'Your responsibilities and the context you need to carry them out.',
-  };
-
-  return {
-    audience,
-    title: titleMap[audience],
-    purpose: purposeMap[audience],
-    sections,
-    quickReference: filteredQuickRef,
-    reviewItems,
-    limitations,
-    metadata,
-  };
-}
-
-// ─── Immediate Actions Section Builder ────────────────────────────────────────
-
-function buildImmediateActionsSection(
-  actions: ImmediateActionNarrative[],
-  audience: GuardianshipAudience
-): GuardianshipAudienceSection | null {
-  // Immediate actions are relevant to client and guardian.
-  // For professionals, only include if they involve a professional next step.
-  let relevant: ImmediateActionNarrative[];
-
-  if (audience === 'client' || audience === 'guardian') {
-    relevant = actions;
-  } else {
-    // For professionals, only include actions that reference them
-    relevant = actions.filter(a => {
-      const text = `${a.heading} ${a.body}`.toLowerCase();
-      if (audience === 'estateLawyer') return text.includes('lawyer') || text.includes('legal') || text.includes('estate');
-      if (audience === 'accountant') return text.includes('accountant') || text.includes('tax') || text.includes('financial');
-      return false;
-    });
-  }
-
-  if (relevant.length === 0) return null;
-
-  // Convert ImmediateActionNarrative to NarrativeBlock for the section
-  const blocks: NarrativeBlock[] = relevant.map(a => ({
-    id: a.id,
-    ruleId: a.ruleId,
-    type: 'action',
-    heading: a.heading,
-    body: a.body,
-    childIds: a.childNames.length > 0 ? undefined : undefined, // childNames are text, not IDs
-    importance: a.priority <= 3 ? 'primary' : a.priority <= 6 ? 'important' : 'supporting',
-    sourceType: a.isParentWish ? 'parentPreference' : 'derived',
-  }));
-
-  return {
-    id: 'immediate-actions',
-    heading: 'If Something Happened Tomorrow',
-    purpose: 'The first steps, in priority order',
-    priority: 'primary',
-    blocks,
-  };
-}
-
-// ─── Public Exports for Future Audience Strategies ────────────────────────────
-
-export type { SectionBlueprint, SectionSource };
+export type { SectionBlueprint, SectionSource, ChildSubsection };
 export { DEFAULT_BLUEPRINTS };

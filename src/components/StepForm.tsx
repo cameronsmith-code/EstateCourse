@@ -16,6 +16,7 @@ import Subsection from './Subsection';
 import ChildPlanningSection, { PlanningPerson } from './ChildPlanningSection';
 import GuardianTransitionSection from './GuardianTransitionSection';
 import ConnectionsBelongingSection from './ConnectionsBelongingSection';
+import GuardianFundingSection from './GuardianFundingSection';
 import DebtObligations from './DebtObligations';
 import FinancialFootprintAssets from './FinancialFootprintAssets';
 import FamilyTrustSection from './FamilyTrustSection';
@@ -13147,6 +13148,117 @@ export default function StepForm({
                 </div>
               ))}
             </div>
+            );
+          })()}
+
+          {/* Guardian Funding Philosophy — shown once after all children, only when there are minor children with guardians */}
+          {step.sectionId === 'children' && (() => {
+            const childrenData = (answers['childrenData'] as Array<Record<string, string>>) || [];
+            const planningPersons = (answers['planningPersons'] as Array<Record<string, string>>) || [];
+            const minorIndices = childrenData
+              .map((c, i) => ({ c, i }))
+              .filter(({ c }) => {
+                if (c.disabled === 'yes' || c.disabled === 'not_sure') return c.independent !== 'yes';
+                if (c.independent === 'yes') return false;
+                return true;
+              })
+              .map(({ i }) => i);
+
+            if (minorIndices.length === 0) return null;
+
+            const hasGuardian = minorIndices.some(i => childrenData[i]?.guardianPersonId);
+            if (!hasGuardian) return null;
+
+            const fundingData = (answers['fundingPhilosophyData'] as Record<string, unknown>) || {};
+
+            const handleFundingChange = (field: string, value: string) => {
+              const updated = { ...fundingData, [field]: value };
+              if (value === '') delete updated[field];
+              onAnswerChange('fundingPhilosophyData', updated);
+            };
+
+            const guardianPersonIds: string[] = [];
+            for (const i of minorIndices) {
+              const gid = childrenData[i]?.guardianPersonId;
+              if (gid && !guardianPersonIds.includes(gid)) guardianPersonIds.push(gid);
+              const gid2 = childrenData[i]?.guardianPersonId2;
+              if (gid2 && !guardianPersonIds.includes(gid2)) guardianPersonIds.push(gid2);
+            }
+
+            const allAns = allAnswers || new Map();
+            const aboutYou = allAns.get('aboutYou') || {};
+            void aboutYou;
+            const minorChildNames = minorIndices.map(i => childrenData[i]?.nickname || childrenData[i]?.name || `Child ${i + 1}`);
+
+            const childActivityNames: string[] = [];
+            for (const i of minorIndices) {
+              const activities = childrenData[i]?.activityList;
+              if (activities) {
+                try {
+                  const parsed = JSON.parse(activities);
+                  if (Array.isArray(parsed)) {
+                    for (const a of parsed) {
+                      if (a?.activityName && !childActivityNames.includes(a.activityName)) {
+                        childActivityNames.push(a.activityName);
+                      }
+                    }
+                  }
+                } catch { /* ignore */ }
+              }
+            }
+
+            const professionalContacts: { id: string; name: string; role: string }[] = [];
+            const profTeam = allAns.get('professionalTeam') || {};
+            if (profTeam.fpHasAdvisor === 'yes' && !profTeam.fpAdvisor1IsCameronSmith) {
+              const name = String(profTeam.fpAdvisor1Name || '');
+              if (name) professionalContacts.push({ id: 'fp1', name, role: 'Financial Planner' });
+            }
+            if (profTeam.fpHasAdditionalAdvisor === 'yes' && profTeam.fpAdvisor2Name) {
+              professionalContacts.push({ id: 'fp2', name: String(profTeam.fpAdvisor2Name), role: 'Financial Planner' });
+            }
+            if (profTeam.acctHasAccountant === 'yes' && profTeam.acctAdvisor1Name) {
+              professionalContacts.push({ id: 'acct1', name: String(profTeam.acctAdvisor1Name), role: 'Accountant' });
+            }
+            if (profTeam.lawHasLawyer === 'yes' && profTeam.lawAdvisor1Name) {
+              professionalContacts.push({ id: 'law1', name: String(profTeam.lawAdvisor1Name), role: 'Lawyer' });
+            }
+
+            const estateTrustees = allAns.get('estateTrustees') || {};
+            const wills = allAns.get('wills') || {};
+            const willClients = ((wills.currentWillData as Record<string, unknown>)?.clients as Array<Record<string, unknown>>) || [];
+
+            const fdmLabels: { role: string; name: string }[] = [];
+            if (estateTrustees.client1HasEstateTrustee === 'yes' && estateTrustees.client1EstateTrusteeName) {
+              fdmLabels.push({ role: 'Estate Trustee', name: String(estateTrustees.client1EstateTrusteeName) });
+            }
+            if (estateTrustees.client2HasEstateTrustee === 'yes' && estateTrustees.client2EstateTrusteeName) {
+              fdmLabels.push({ role: 'Estate Trustee', name: String(estateTrustees.client2EstateTrusteeName) });
+            }
+            for (const client of willClients) {
+              if (client.trustTrusteeName) {
+                fdmLabels.push({ role: 'Inheritance Trustee', name: String(client.trustTrusteeName) });
+              }
+            }
+            const powersOfAttorney = allAns.get('powersOfAttorney') || {};
+            const poaPropData = (powersOfAttorney.poaPropertyData as Array<Record<string, unknown>>) || [];
+            for (const atty of poaPropData) {
+              if (atty.attorneyName) fdmLabels.push({ role: 'Attorney for Property', name: String(atty.attorneyName) });
+            }
+
+            const fdmPersonIds = fdmLabels.map(f => `fdm_${f.name.replace(/\s+/g, '_').toLowerCase()}`);
+            const guardianIdSet = new Set(guardianPersonIds);
+            const coordinationNeeded = fdmPersonIds.length > 0 && !fdmPersonIds.some(id => guardianIdSet.has(id));
+
+            return (
+              <GuardianFundingSection
+                fundingData={fundingData}
+                onFundingChange={handleFundingChange}
+                financialDecisionMakerLabels={fdmLabels}
+                coordinationNeeded={coordinationNeeded}
+                childActivityNames={childActivityNames}
+                professionalContacts={professionalContacts}
+                minorChildNames={minorChildNames}
+              />
             );
           })()}
 

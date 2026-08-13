@@ -316,6 +316,7 @@ export type ReadinessCategory = {
   decisionsMade: string[];
   thingsWorthConfirming: string[];
   thingsStillToDo: string[];
+  fundingReviewItems?: FundingReviewItem[];
 };
 
 export type ImmediateAction = {
@@ -326,6 +327,68 @@ export type ImmediateAction = {
   childNames: string[];
   conditional: boolean;
   isParentWish: boolean;
+};
+
+export type FundingOverallApproach =
+  | 'majorExpensesOnly'
+  | 'shareIncrementalCosts'
+  | 'generousHouseholdSupport'
+  | 'custom'
+  | 'unsure';
+
+export type FinancialDecisionMakerRole =
+  | 'attorneyForProperty'
+  | 'estateTrustee'
+  | 'inheritanceTrustee';
+
+export type CareFundingCoordination = {
+  childIds: string[];
+  caregiverPersonIds: string[];
+  financialDecisionMakers: {
+    role: FinancialDecisionMakerRole;
+    personIds: string[];
+  }[];
+  samePeople: boolean;
+  coordinationNeeded: boolean;
+};
+
+export type ChildCareFundingPhilosophy = {
+  overallApproach?: FundingOverallApproach;
+  everydayExpenseApproach?: string;
+  meaningfulExpenseApproach?: string;
+  majorHouseholdExpenseApproach?: string;
+  housingPreference?: string;
+  housingStructureDiscussed?: string;
+  vehiclePreference?: string;
+  vehicleNotes?: string;
+  workReductionPreference?: string;
+  workReductionNotes?: string;
+  householdHelpPreference?: string;
+  importantLifestyleSupportIds?: string[];
+  sharedHouseholdBenefitPhilosophy?: string;
+  guardianOwnChildrenFairnessNotes?: string;
+  recordKeepingPreference?: string;
+  decisionMakingApproach?: string;
+  guardianJudgmentWeight?: string;
+  guardianJudgmentNotes?: string;
+  guardianShouldUnderstand?: string[];
+  financialDecisionMakerShouldUnderstand?: string[];
+  discussionRequiredFor?: string[];
+  hasDiscussionThreshold?: string;
+  discussionThresholdAmount?: number;
+  disagreementApproach?: string[];
+  escalationPersonIds?: string[];
+  firstEscalationPersonId?: string;
+  parentMessageToGuardian?: string;
+  parentMessageToFinancialDecisionMaker?: string;
+  parentMessageAboutWorkingTogether?: string;
+};
+
+export type FundingReviewItem = {
+  id: string;
+  category: 'housing' | 'workReduction' | 'broadSupport' | 'coordination' | 'documentation';
+  description: string;
+  severity: 'reviewRecommended' | 'informational';
 };
 
 export type GuardianshipRoadmapModel = {
@@ -346,5 +409,8 @@ export type GuardianshipRoadmapModel = {
   documents: DocumentRegistryEntry[];
   readiness: ReadinessCategory;
   immediateActions: ImmediateAction[];
+  fundingPhilosophy?: ChildCareFundingPhilosophy;
+  careFundingCoordination?: CareFundingCoordination[];
+  fundingReviewItems?: FundingReviewItem[];
   crossReferences: Array<{ section: string; description: string }>;
 };

@@ -29,6 +29,10 @@ import type {
   DocumentRegistryEntry,
   ReadinessCategory,
   ImmediateAction,
+  ChildCareFundingPhilosophy,
+  CareFundingCoordination,
+  FundingReviewItem,
+  FinancialDecisionMakerRole,
 } from './guardianshipRoadmapTypes';
 import { getAgeOfMajority, getProvinceName, normalizeProvinceCode } from './jurisdiction';
 
@@ -1381,6 +1385,228 @@ function buildImmediateActions(
   return actions.sort((a, b) => a.priority - b.priority);
 }
 
+function buildCareFundingCoordination(
+  guardianAssignments: GuardianAssignment[],
+  childProfiles: GuardianshipChildProfile[],
+  estateTrustees: EstateTrusteeInfo[],
+  willsAnswers: Record<string, unknown>,
+  powersOfAttorneyAnswers: Record<string, unknown>
+): CareFundingCoordination[] {
+  const coordinations: CareFundingCoordination[] = [];
+  const minorChildIds = childProfiles.filter(c => c.status === 'minor').map(c => c.childId);
+
+  if (minorChildIds.length === 0) return coordinations;
+
+  const currentWillData = willsAnswers.currentWillData as Record<string, unknown> | undefined;
+  const willClients = (currentWillData?.clients as Array<Record<string, unknown>>) || [];
+
+  const financialDecisionMakers: { role: FinancialDecisionMakerRole; personIds: string[] }[] = [];
+
+  const attorneyPersonIds: string[] = [];
+  const poaData = powersOfAttorneyAnswers.poaPropertyData as Array<Record<string, unknown>> | undefined;
+  if (poaData) {
+    for (const attorney of poaData) {
+      const id = String(attorney.attorneyPersonId || attorney.id || '');
+      if (id) attorneyPersonIds.push(id);
+    }
+  }
+  if (attorneyPersonIds.length > 0) {
+    financialDecisionMakers.push({ role: 'attorneyForProperty', personIds: attorneyPersonIds });
+  }
+
+  const estateTrusteePersonIds: string[] = [];
+  for (const et of estateTrustees) {
+    if (et.primaryTrustee?.name) {
+      const will = willClients.find(c => c.clientId === et.clientId);
+      const personId = String(will?.trustTrusteePersonId || `et_${et.clientId}`);
+      estateTrusteePersonIds.push(personId);
+    }
+  }
+  if (estateTrusteePersonIds.length > 0) {
+    financialDecisionMakers.push({ role: 'estateTrustee', personIds: estateTrusteePersonIds });
+  }
+
+  const inheritanceTrusteePersonIds: string[] = [];
+  for (const child of childProfiles) {
+    for (const record of child.inheritanceByClient) {
+      if (record.trusteePersonId) {
+        if (!inheritanceTrusteePersonIds.includes(record.trusteePersonId)) {
+          inheritanceTrusteePersonIds.push(record.trusteePersonId);
+        }
+      } else if (record.trusteeName) {
+        const syntheticId = `trustee_${record.trusteeName.replace(/\s+/g, '_').toLowerCase()}`;
+        if (!inheritanceTrusteePersonIds.includes(syntheticId)) {
+          inheritanceTrusteePersonIds.push(syntheticId);
+        }
+      }
+    }
+  }
+  if (inheritanceTrusteePersonIds.length > 0) {
+    financialDecisionMakers.push({ role: 'inheritanceTrustee', personIds: inheritanceTrusteePersonIds });
+  }
+
+  const allFinancialPersonIds = new Set(financialDecisionMakers.flatMap(fdm => fdm.personIds));
+
+  for (const assignment of guardianAssignments) {
+    const guardianIds = assignment.guardianPersonIds;
+    const overlap = guardianIds.some(id => allFinancialPersonIds.has(id));
+    coordinations.push({
+      childIds: assignment.childIds,
+      caregiverPersonIds: guardianIds,
+      financialDecisionMakers,
+      samePeople: overlap && guardianIds.every(id => allFinancialPersonIds.has(id)),
+      coordinationNeeded: !overlap,
+    });
+  }
+
+  return coordinations;
+}
+
+function buildFundingPhilosophy(
+  childrenAnswers: Record<string, unknown>
+): ChildCareFundingPhilosophy | undefined {
+  const raw = childrenAnswers.fundingPhilosophyData as Record<string, unknown> | undefined;
+  if (!raw) return undefined;
+
+  const philosophy: ChildCareFundingPhilosophy = {};
+
+  if (raw.overallApproach) philosophy.overallApproach = raw.overallApproach as ChildCareFundingPhilosophy['overallApproach'];
+  if (raw.everydayExpenseApproach) philosophy.everydayExpenseApproach = String(raw.everydayExpenseApproach);
+  if (raw.meaningfulExpenseApproach) philosophy.meaningfulExpenseApproach = String(raw.meaningfulExpenseApproach);
+  if (raw.majorHouseholdExpenseApproach) philosophy.majorHouseholdExpenseApproach = String(raw.majorHouseholdExpenseApproach);
+  if (raw.housingPreference) philosophy.housingPreference = String(raw.housingPreference);
+  if (raw.housingStructureDiscussed) philosophy.housingStructureDiscussed = String(raw.housingStructureDiscussed);
+  if (raw.vehiclePreference) philosophy.vehiclePreference = String(raw.vehiclePreference);
+  if (raw.vehicleNotes) philosophy.vehicleNotes = String(raw.vehicleNotes);
+  if (raw.workReductionPreference) philosophy.workReductionPreference = String(raw.workReductionPreference);
+  if (raw.workReductionNotes) philosophy.workReductionNotes = String(raw.workReductionNotes);
+  if (raw.householdHelpPreference) philosophy.householdHelpPreference = String(raw.householdHelpPreference);
+  if (raw.importantLifestyleSupportIds) {
+    const ids = raw.importantLifestyleSupportIds;
+    philosophy.importantLifestyleSupportIds = typeof ids === 'string' ? ids.split(',').filter(Boolean) : Array.isArray(ids) ? ids.map(String) : undefined;
+  }
+  if (raw.sharedHouseholdBenefitPhilosophy) philosophy.sharedHouseholdBenefitPhilosophy = String(raw.sharedHouseholdBenefitPhilosophy);
+  if (raw.guardianOwnChildrenFairnessNotes) philosophy.guardianOwnChildrenFairnessNotes = String(raw.guardianOwnChildrenFairnessNotes);
+  if (raw.recordKeepingPreference) philosophy.recordKeepingPreference = String(raw.recordKeepingPreference);
+  if (raw.decisionMakingApproach) philosophy.decisionMakingApproach = String(raw.decisionMakingApproach);
+  if (raw.guardianJudgmentWeight) philosophy.guardianJudgmentWeight = String(raw.guardianJudgmentWeight);
+  if (raw.guardianJudgmentNotes) philosophy.guardianJudgmentNotes = String(raw.guardianJudgmentNotes);
+  if (raw.guardianShouldUnderstand) {
+    const items = raw.guardianShouldUnderstand;
+    philosophy.guardianShouldUnderstand = typeof items === 'string' ? items.split(',').filter(Boolean) : Array.isArray(items) ? items.map(String) : undefined;
+  }
+  if (raw.financialDecisionMakerShouldUnderstand) {
+    const items = raw.financialDecisionMakerShouldUnderstand;
+    philosophy.financialDecisionMakerShouldUnderstand = typeof items === 'string' ? items.split(',').filter(Boolean) : Array.isArray(items) ? items.map(String) : undefined;
+  }
+  if (raw.discussionRequiredFor) {
+    const items = raw.discussionRequiredFor;
+    philosophy.discussionRequiredFor = typeof items === 'string' ? items.split(',').filter(Boolean) : Array.isArray(items) ? items.map(String) : undefined;
+  }
+  if (raw.hasDiscussionThreshold) philosophy.hasDiscussionThreshold = String(raw.hasDiscussionThreshold);
+  if (raw.discussionThresholdAmount) philosophy.discussionThresholdAmount = Number(raw.discussionThresholdAmount);
+  if (raw.disagreementApproach) {
+    const items = raw.disagreementApproach;
+    philosophy.disagreementApproach = typeof items === 'string' ? items.split(',').filter(Boolean) : Array.isArray(items) ? items.map(String) : undefined;
+  }
+  if (raw.escalationPersonIds) {
+    const ids = raw.escalationPersonIds;
+    philosophy.escalationPersonIds = typeof ids === 'string' ? ids.split(',').filter(Boolean) : Array.isArray(ids) ? ids.map(String) : undefined;
+  }
+  if (raw.firstEscalationPersonId) philosophy.firstEscalationPersonId = String(raw.firstEscalationPersonId);
+  if (raw.parentMessageToGuardian) philosophy.parentMessageToGuardian = String(raw.parentMessageToGuardian);
+  if (raw.parentMessageToFinancialDecisionMaker) philosophy.parentMessageToFinancialDecisionMaker = String(raw.parentMessageToFinancialDecisionMaker);
+  if (raw.parentMessageAboutWorkingTogether) philosophy.parentMessageAboutWorkingTogether = String(raw.parentMessageAboutWorkingTogether);
+
+  const hasAny = Object.values(philosophy).some(v =>
+    v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0)
+  );
+  return hasAny ? philosophy : undefined;
+}
+
+function buildFundingReviewItems(
+  philosophy: ChildCareFundingPhilosophy | undefined,
+  coordination: CareFundingCoordination[],
+  willsAnswers: Record<string, unknown>
+): FundingReviewItem[] {
+  const items: FundingReviewItem[] = [];
+  if (!philosophy) {
+    if (coordination.some(c => c.coordinationNeeded)) {
+      items.push({
+        id: 'funding_coordination_gap',
+        category: 'coordination',
+        description: 'Guardian and financial decision-maker are different people but no funding or decision-making philosophy has been expressed. Consider documenting how they should work together.',
+        severity: 'reviewRecommended',
+      });
+    }
+    return items;
+  }
+
+  const currentWillData = willsAnswers.currentWillData as Record<string, unknown> | undefined;
+  const willClients = (currentWillData?.clients as Array<Record<string, unknown>>) || [];
+  const trustPowersKnown = willClients.some(c =>
+    (c.trustPowers || c.trustFlexibility) && c.trustPowers !== 'not_sure' && c.trustPowers !== undefined
+  );
+
+  if (philosophy.housingPreference === 'stronglySupport' &&
+      (!philosophy.housingStructureDiscussed || philosophy.housingStructureDiscussed === 'no')) {
+    items.push({
+      id: 'funding_housing_undocumented',
+      category: 'housing',
+      description: 'Parents strongly support using resources for a larger home but have not discussed how the contribution should be structured or documented. Consider reviewing with an estate lawyer.',
+      severity: 'reviewRecommended',
+    });
+  }
+
+  if (philosophy.workReductionPreference === 'yes' && !trustPowersKnown) {
+    items.push({
+      id: 'funding_work_reduction_unknown',
+      category: 'workReduction',
+      description: 'Parents want resources to help offset a guardian\'s reduction in work, but it is not known whether the current estate plan allows this flexibility. Consider reviewing with an estate lawyer.',
+      severity: 'reviewRecommended',
+    });
+  }
+
+  if (philosophy.overallApproach === 'generousHouseholdSupport' && !trustPowersKnown) {
+    items.push({
+      id: 'funding_broad_support_unknown',
+      category: 'broadSupport',
+      description: 'Parents want resources used generously to support the guardian household, but the flexibility of the current trust powers is unclear. Consider reviewing with an estate lawyer.',
+      severity: 'reviewRecommended',
+    });
+  }
+
+  if (philosophy.housingPreference === 'stronglySupport' && !trustPowersKnown) {
+    items.push({
+      id: 'funding_housing_unknown_flexibility',
+      category: 'housing',
+      description: 'Parents support using estate or trust resources for a larger home but it is not known whether the Will or trust allows this. Consider reviewing with an estate lawyer.',
+      severity: 'reviewRecommended',
+    });
+  }
+
+  if (philosophy.recordKeepingPreference === 'detailedAccounting' ||
+      philosophy.recordKeepingPreference === 'trusteeApproval') {
+    items.push({
+      id: 'funding_detailed_tracking',
+      category: 'documentation',
+      description: 'Parents prefer detailed accounting or trustee approval for larger expenses. This is a planning preference, not a risk.',
+      severity: 'informational',
+    });
+  }
+
+  if (coordination.some(c => c.coordinationNeeded) && !philosophy.decisionMakingApproach) {
+    items.push({
+      id: 'funding_no_decision_approach',
+      category: 'coordination',
+      description: 'Guardian and financial decision-maker are different people but no decision-making approach has been documented.',
+      severity: 'reviewRecommended',
+    });
+  }
+
+  return items;
+}
+
 export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRoadmapModel {
   const aboutYou = allAnswers.get('aboutYou') || {};
   const childrenAnswers = allAnswers.get('children') || {};
@@ -1466,7 +1692,14 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
   );
   const estateTrustees = buildEstateTrustees(estateTrusteesAnswers, clientNames);
   const documents = buildDocuments(childProfiles, willsAnswers, clientNames);
+  const fundingPhilosophy = buildFundingPhilosophy(childrenAnswers);
+  const powersOfAttorneyAnswers = allAnswers.get('powersOfAttorney') || {};
+  const careFundingCoordination = buildCareFundingCoordination(
+    guardianAssignments, childProfiles, estateTrustees, willsAnswers, powersOfAttorneyAnswers
+  );
+  const fundingReviewItems = buildFundingReviewItems(fundingPhilosophy, careFundingCoordination, willsAnswers);
   const readiness = buildReadiness(childProfiles, guardianAssignments, willsAnswers);
+  readiness.fundingReviewItems = fundingReviewItems;
   const immediateActions = buildImmediateActions(
     childProfiles, guardianAssignments, adultSiblingRoles, willsAnswers, estateTrustees, clientNames
   );
@@ -1494,6 +1727,9 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
     documents,
     readiness,
     immediateActions,
+    fundingPhilosophy,
+    careFundingCoordination,
+    fundingReviewItems,
     crossReferences: financialResources
       .filter(r => r.exists)
       .map(r => ({ section: r.type, description: r.crossReference })),

@@ -138,5 +138,20 @@ export function validateGuardianshipRoadmap(model: GuardianshipRoadmapModel): Va
     }
   }
 
+  if (model.fundingReviewItems) {
+    for (const item of model.fundingReviewItems) {
+      if (item.severity === 'reviewRecommended') {
+        findings.push({ level: 'warning', message: `Funding review: ${item.description}` });
+      }
+    }
+  }
+
+  if (model.careFundingCoordination && model.fundingPhilosophy) {
+    const needsCoordination = model.careFundingCoordination.some(c => c.coordinationNeeded);
+    if (needsCoordination && !model.fundingPhilosophy.decisionMakingApproach) {
+      findings.push({ level: 'warning', message: 'Guardian and financial decision-maker are different people but no decision-making approach has been documented' });
+    }
+  }
+
   return findings;
 }

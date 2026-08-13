@@ -35,6 +35,9 @@ export interface NarrativeBlock {
   personIds?: string[];
   importance: NarrativeImportance;
   sourceType: NarrativeSourceType;
+  evidence?: import('./outputConfidenceTypes').OutputEvidence;
+  limitation?: import('./outputConfidenceTypes').NarrativeLimitation;
+  nextAction?: import('./outputConfidenceTypes').NextAction;
 }
 
 export interface QuickReferenceItem {

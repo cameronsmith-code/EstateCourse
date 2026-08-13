@@ -32,12 +32,11 @@ import type {
   ChildCareFundingPhilosophy,
   CareFundingCoordination,
   FundingReviewItem,
-  FinancialDecisionMakerRole,
-  CoordinationScenario,
 } from './guardianshipRoadmapTypes';
 import { getAgeOfMajority, getProvinceName, normalizeProvinceCode } from './jurisdiction';
 import { getProfessionalAdvisors } from './referentialIntegrity';
 import { buildGuardianshipLimitations, buildAllReviewItems } from './guardianshipReviewItemBuilder';
+import { getCareFundingCoordinationContext, buildScenarioCoordinations } from './guardianshipRoleResolution';
 
 type AnswersMap = Map<string, Record<string, unknown>>;
 type ChildRecord = Record<string, string | undefined>;
@@ -961,7 +960,8 @@ function buildFinancialResources(
 
 function buildEstateTrustees(
   estateTrusteesAnswers: Record<string, unknown>,
-  clientNames: string[]
+  clientNames: string[],
+  planningPersons: PlanningPerson[]
 ): EstateTrusteeInfo[] {
   const results: EstateTrusteeInfo[] = [];
   const prefixes = ['client1', 'client2'] as const;
@@ -982,6 +982,8 @@ function buildEstateTrustees(
 
     const primary: EstateTrusteePerson | undefined = primaryName ? {
       name: primaryName,
+      personId: String(estateTrusteesAnswers[`${prefix}EstateTrusteePersonId`] || '') || undefined
+        || planningPersons.find(p => p.name.toLowerCase() === primaryName.toLowerCase())?.id,
       phone: String(estateTrusteesAnswers[`${prefix}EstateTrusteePhone`] || '') || undefined,
       email: String(estateTrusteesAnswers[`${prefix}EstateTrusteeEmail`] || '') || undefined,
       relationship: String(estateTrusteesAnswers[`${prefix}EstateTrusteeRelationship`] || '') || undefined,
@@ -1389,115 +1391,38 @@ function buildImmediateActions(
 }
 
 function buildCareFundingCoordination(
+  allAnswers: AnswersMap,
   guardianAssignments: GuardianAssignment[],
   childProfiles: GuardianshipChildProfile[],
   estateTrustees: EstateTrusteeInfo[],
   willsAnswers: Record<string, unknown>,
-  powersOfAttorneyAnswers: Record<string, unknown>
+  planningPersons: PlanningPerson[],
+  fundingPhilosophy: ChildCareFundingPhilosophy | undefined
 ): CareFundingCoordination[] {
-  const coordinations: CareFundingCoordination[] = [];
   const minorChildIds = childProfiles.filter(c => c.status === 'minor').map(c => c.childId);
+  if (minorChildIds.length === 0) return [];
 
-  if (minorChildIds.length === 0) return coordinations;
+  const ctx = getCareFundingCoordinationContext(
+    allAnswers,
+    guardianAssignments,
+    childProfiles,
+    estateTrustees,
+    willsAnswers,
+    planningPersons,
+    fundingPhilosophy
+  );
 
-  const currentWillData = willsAnswers.currentWillData as Record<string, unknown> | undefined;
-  const willClients = (currentWillData?.clients as Array<Record<string, unknown>>) || [];
+  const scenarioCoords = buildScenarioCoordinations(guardianAssignments, ctx);
 
-  const attorneyPersonIds: string[] = [];
-  const poaData = powersOfAttorneyAnswers.poaPropertyData as Array<Record<string, unknown>> | undefined;
-  if (poaData) {
-    for (const attorney of poaData) {
-      const id = String(attorney.attorneyPersonId || attorney.id || '');
-      if (id) attorneyPersonIds.push(id);
-    }
-  }
-
-  const estateTrusteePersonIds: string[] = [];
-  for (const et of estateTrustees) {
-    if (et.primaryTrustee?.name) {
-      const will = willClients.find(c => c.clientId === et.clientId);
-      const personId = String(will?.trustTrusteePersonId || `et_${et.clientId}`);
-      estateTrusteePersonIds.push(personId);
-    }
-  }
-
-  const inheritanceTrusteePersonIds: string[] = [];
-  for (const child of childProfiles) {
-    for (const record of child.inheritanceByClient) {
-      if (record.trusteePersonId) {
-        if (!inheritanceTrusteePersonIds.includes(record.trusteePersonId)) {
-          inheritanceTrusteePersonIds.push(record.trusteePersonId);
-        }
-      } else if (record.trusteeName) {
-        const syntheticId = `trustee_${record.trusteeName.replace(/\s+/g, '_').toLowerCase()}`;
-        if (!inheritanceTrusteePersonIds.includes(syntheticId)) {
-          inheritanceTrusteePersonIds.push(syntheticId);
-        }
-      }
-    }
-  }
-
-  const attorneySet = new Set(attorneyPersonIds);
-  const estateSet = new Set(estateTrusteePersonIds);
-  const inheritanceSet = new Set(inheritanceTrusteePersonIds);
-  const allFinancialSet = new Set([...attorneyPersonIds, ...estateTrusteePersonIds, ...inheritanceTrusteePersonIds]);
-
-  const scenarios: Array<{
-    scenario: CoordinationScenario;
-    fdmIds: string[];
-    fdmRole: FinancialDecisionMakerRole;
-    fdmSet: Set<string>;
-  }> = [
-    { scenario: 'parentalIncapacity', fdmIds: attorneyPersonIds, fdmRole: 'attorneyForProperty', fdmSet: attorneySet },
-    { scenario: 'afterDeath', fdmIds: estateTrusteePersonIds, fdmRole: 'estateTrustee', fdmSet: estateSet },
-    { scenario: 'ongoingInheritance', fdmIds: inheritanceTrusteePersonIds, fdmRole: 'inheritanceTrustee', fdmSet: inheritanceSet },
-  ];
-
-  for (const assignment of guardianAssignments) {
-    const guardianIds = assignment.guardianPersonIds;
-
-    for (const { scenario, fdmIds, fdmRole, fdmSet } of scenarios) {
-      if (fdmIds.length === 0) continue;
-
-      const financialDecisionMakers = [{ role: fdmRole, personIds: fdmIds }];
-      const overlap = guardianIds.some(id => fdmSet.has(id));
-      const samePeople = overlap && guardianIds.every(id => fdmSet.has(id));
-      const coordinationNeeded = !overlap;
-
-      coordinations.push({
-        scenario,
-        childIds: assignment.childIds,
-        caregiverPersonIds: guardianIds,
-        financialDecisionMakers,
-        samePeople,
-        coordinationNeeded,
-      });
-    }
-
-    // Also add a combined entry using all financial decision-makers for backward compatibility
-    const overlapAll = guardianIds.some(id => allFinancialSet.has(id));
-    coordinations.push({
-      scenario: 'afterDeath',
-      childIds: assignment.childIds,
-      caregiverPersonIds: guardianIds,
-      financialDecisionMakers: [
-        ...(attorneyPersonIds.length > 0 ? [{ role: 'attorneyForProperty' as const, personIds: attorneyPersonIds }] : []),
-        ...(estateTrusteePersonIds.length > 0 ? [{ role: 'estateTrustee' as const, personIds: estateTrusteePersonIds }] : []),
-        ...(inheritanceTrusteePersonIds.length > 0 ? [{ role: 'inheritanceTrustee' as const, personIds: inheritanceTrusteePersonIds }] : []),
-      ],
-      samePeople: overlapAll && guardianIds.every(id => allFinancialSet.has(id)),
-      coordinationNeeded: !overlapAll,
-    });
-  }
-
-  // Deduplicate by scenario+childIds+caregiverPersonIds+fdmRole
-  const seen = new Set<string>();
-  return coordinations.filter(c => {
-    const key = `${c.scenario}|${c.childIds.join(',')}|${c.caregiverPersonIds.join(',')}|${c.financialDecisionMakers.map(f => f.role).join(',')}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  return scenarioCoords.map(sc => ({
+    scenario: sc.scenario,
+    childIds: sc.childIds,
+    caregiverPersonIds: sc.caregiverPersonIds,
+    financialDecisionMakers: sc.financialDecisionMakers,
+    samePeople: sc.samePeople,
+    coordinationNeeded: sc.coordinationNeeded,
+    identityConfidence: sc.identityConfidence,
+  }));
 }
 
 function buildFundingPhilosophy(
@@ -1728,12 +1653,11 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
   const financialResources = buildFinancialResources(
     childProfiles, lifeInsuranceAnswers, financialFootprintAnswers, familyTrustsAnswers
   );
-  const estateTrustees = buildEstateTrustees(estateTrusteesAnswers, clientNames);
+  const estateTrustees = buildEstateTrustees(estateTrusteesAnswers, clientNames, planningPersons);
   const documents = buildDocuments(childProfiles, willsAnswers, clientNames);
   const fundingPhilosophy = buildFundingPhilosophy(childrenAnswers);
-  const powersOfAttorneyAnswers = allAnswers.get('powersOfAttorney') || {};
   const careFundingCoordination = buildCareFundingCoordination(
-    guardianAssignments, childProfiles, estateTrustees, willsAnswers, powersOfAttorneyAnswers
+    allAnswers, guardianAssignments, childProfiles, estateTrustees, willsAnswers, planningPersons, fundingPhilosophy
   );
   const fundingReviewItems = buildFundingReviewItems(fundingPhilosophy, careFundingCoordination, willsAnswers);
   const readiness = buildReadiness(childProfiles, guardianAssignments, willsAnswers);

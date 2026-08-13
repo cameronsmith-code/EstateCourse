@@ -24,6 +24,31 @@ export type NarrativeSourceType =
   | 'derived'
   | 'professionalReview';
 
+export type GuardianshipAudience =
+  | 'client'
+  | 'guardian'
+  | 'estateTrustee'
+  | 'inheritanceTrustee'
+  | 'attorneyForProperty'
+  | 'estateLawyer'
+  | 'accountant';
+
+export const ALL_AUDIENCES: GuardianshipAudience[] = [
+  'client',
+  'guardian',
+  'estateTrustee',
+  'inheritanceTrustee',
+  'attorneyForProperty',
+  'estateLawyer',
+  'accountant',
+];
+
+export const CLIENT_PLANNING_AUDIENCES: GuardianshipAudience[] = ['client'];
+export const GUARDIAN_AUDIENCES: GuardianshipAudience[] = ['guardian', 'client'];
+export const LAWYER_AUDIENCES: GuardianshipAudience[] = ['estateLawyer', 'client'];
+export const ACCOUNTANT_AUDIENCES: GuardianshipAudience[] = ['accountant', 'client'];
+export const TRUSTEE_AUDIENCES: GuardianshipAudience[] = ['estateTrustee', 'inheritanceTrustee', 'attorneyForProperty', 'client'];
+
 export interface NarrativeBlock {
   id: string;
   ruleId: string;
@@ -35,6 +60,7 @@ export interface NarrativeBlock {
   personIds?: string[];
   importance: NarrativeImportance;
   sourceType: NarrativeSourceType;
+  audiences?: GuardianshipAudience[];
   evidence?: import('./outputConfidenceTypes').OutputEvidence;
   limitation?: import('./outputConfidenceTypes').NarrativeLimitation;
   nextAction?: import('./outputConfidenceTypes').NextAction;
@@ -86,6 +112,8 @@ export interface GuardianshipNarrativeModel {
   children: GuardianshipChildNarrative[];
   familyRoles: NarrativeBlock[];
   financialResources: NarrativeBlock[];
+  fundingPhilosophy: NarrativeBlock[];
+  coordination: NarrativeBlock[];
   documents: NarrativeBlock[];
   readiness: ReadinessNarrative;
   immediateActions: ImmediateActionNarrative[];

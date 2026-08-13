@@ -154,6 +154,24 @@ export function renderNarrativeAsText(narrative: GuardianshipNarrativeModel): st
     lines.push(renderBlocks(narrative.financialResources));
   }
 
+  // Funding Philosophy
+  if (narrative.fundingPhilosophy && narrative.fundingPhilosophy.length > 0) {
+    lines.push('========================================================');
+    lines.push('# FUNDING PHILOSOPHY');
+    lines.push('========================================================');
+    lines.push('');
+    lines.push(renderBlocks(narrative.fundingPhilosophy));
+  }
+
+  // Coordination
+  if (narrative.coordination && narrative.coordination.length > 0) {
+    lines.push('========================================================');
+    lines.push('# COORDINATION');
+    lines.push('========================================================');
+    lines.push('');
+    lines.push(renderBlocks(narrative.coordination));
+  }
+
   // Documents
   if (narrative.documents.length > 0) {
     lines.push('========================================================');
@@ -256,6 +274,12 @@ export function renderNarrativeAsHtml(narrative: GuardianshipNarrativeModel): st
   }
   if (narrative.financialResources.length) {
     sections.push('<section id="financial-resources"><h2>Financial Resources</h2>' + blocksToHtml(narrative.financialResources) + '</section>');
+  }
+  if (narrative.fundingPhilosophy && narrative.fundingPhilosophy.length) {
+    sections.push('<section id="funding-philosophy"><h2>Funding Philosophy</h2>' + blocksToHtml(narrative.fundingPhilosophy) + '</section>');
+  }
+  if (narrative.coordination && narrative.coordination.length) {
+    sections.push('<section id="coordination"><h2>Coordination</h2>' + blocksToHtml(narrative.coordination) + '</section>');
   }
   if (narrative.documents.length) {
     sections.push('<section id="documents"><h2>Documents</h2>' + blocksToHtml(narrative.documents) + '</section>');

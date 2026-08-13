@@ -451,8 +451,8 @@ function fixtureH_SampleRoadmapFamily(): AnswersMap {
         discussionRequiredFor: 'private_school,larger_vehicle,larger_home,significant_healthcare',
         hasDiscussionThreshold: 'no',
         disagreementApproach: 'talk_it_through,bring_in_professional',
-        escalationPersonIds: 'law1,fp1',
-        firstEscalationPersonId: 'law1',
+        escalationPersonIds: 'law_1,fp_1',
+        firstEscalationPersonId: 'law_1',
         parentMessageToGuardian: 'We chose you because we trust you, not because we expect you to finance our children\'s lives.',
         parentMessageAboutWorkingTogether: 'We chose you for different reasons and trust you both. Please don\'t let different responsibilities turn you into opposing sides.',
       },
@@ -477,8 +477,8 @@ function fixtureH_SampleRoadmapFamily(): AnswersMap {
       client2EstateTrusteePhone: '416-555-3000', client2EstateTrusteeRelationship: 'Brother-in-law',
     }],
     ['professionalTeam', {
-      fpHasAdvisor: 'yes', fpAdvisor1Name: 'Jane Financial', fpAdvisor1Firm: 'Wealth Co', fpAdvisor1IsCameronSmith: false,
-      lawHasLawyer: 'yes', lawAdvisor1Name: 'Robert Legal', lawAdvisor1Firm: 'Legal Associates',
+      fpHasAdvisor: 'yes', fpAdvisor1Id: 'fp_1', fpAdvisor1Name: 'Jane Financial', fpAdvisor1Firm: 'Wealth Co', fpAdvisor1IsCameronSmith: false,
+      lawHasLawyer: 'yes', lawAdvisor1Id: 'law_1', lawAdvisor1Name: 'Robert Legal', lawAdvisor1Firm: 'Legal Associates',
     }],
     ['powersOfAttorney', {
       poaPropertyData: [

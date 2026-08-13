@@ -163,8 +163,9 @@ export function getProfessionalAdvisors(allAnswers: AnswersMap): ProfessionalAdv
   }
 
   if (profTeam['lawHasLawyer'] === 'yes') {
+    const id = ensureAdvisorId(profTeam, 'lawAdvisor1Id');
     advisors.push({
-      id: 'law_0',
+      id,
       name: (profTeam['lawAdvisor1Name'] as string) || '',
       firm: (profTeam['lawAdvisor1Firm'] as string) || '',
       phone: (profTeam['lawAdvisor1Phone'] as string) || '',

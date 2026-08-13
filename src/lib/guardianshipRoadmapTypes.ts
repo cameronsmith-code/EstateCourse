@@ -285,6 +285,7 @@ export type FinancialResourceSummary = {
 
 export type EstateTrusteePerson = {
   name: string;
+  personId?: string;
   phone?: string;
   email?: string;
   relationship?: string;
@@ -356,6 +357,7 @@ export type CareFundingCoordination = {
   }[];
   samePeople: boolean;
   coordinationNeeded: boolean;
+  identityConfidence?: 'high' | 'low';
 };
 
 export type ChildCareFundingPhilosophy = {
@@ -403,6 +405,12 @@ export type GuardianshipLimitations = {
   conflicts: import('./outputConfidenceTypes').ClarifyReviewItem[];
   unresolvedReferences: import('./outputConfidenceTypes').ClarifyReviewItem[];
 };
+
+// V1 FROZEN — Guardianship data foundation is frozen as of this build.
+// Changes to intake questions or the GuardianshipRoadmapModel require a
+// material output problem: misleading output, missing essential info,
+// referential-integrity problem, or unrepresentable professional-review item.
+// "We could ask another useful question" is NOT sufficient reason to modify.
 
 export type GuardianshipRoadmapModel = {
   family: {

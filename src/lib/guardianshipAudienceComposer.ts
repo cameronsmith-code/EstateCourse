@@ -43,6 +43,17 @@ export interface AudienceDocumentMetadata {
   sourceModelVersion?: string;
 }
 
+export interface ChildSubsectionGroup {
+  heading: string;
+  blocks: NarrativeBlock[];
+}
+
+export interface ChildSection {
+  childId: string;
+  childName: string;
+  subsections: ChildSubsectionGroup[];
+}
+
 export interface GuardianshipAudienceSection {
   id: string;
   heading: string;
@@ -50,6 +61,7 @@ export interface GuardianshipAudienceSection {
   priority: NarrativeImportance;
   blocks: NarrativeBlock[];
   childIds?: string[];
+  childSections?: ChildSection[];
   collapsibleInUI?: boolean;
 }
 
@@ -111,6 +123,8 @@ interface SectionBlueprint {
   maxActions?: number;
   childIds?: string[];
   collapsibleInUI?: boolean;
+  /** When true, produce per-child sub-sections instead of a flat block list. */
+  perChild?: boolean;
 }
 
 // ─── Relevance Routing ────────────────────────────────────────────────────────
@@ -267,6 +281,11 @@ function resolveSection(
   tracker: RepetitionTracker
 ): GuardianshipAudienceSection | null {
   tracker.currentSectionId = blueprint.id;
+
+  if (blueprint.perChild) {
+    return resolvePerChildSection(blueprint, narrative, audience, tracker);
+  }
+
   const blocks: NarrativeBlock[] = [];
 
   for (const source of blueprint.sources) {
@@ -291,6 +310,81 @@ function resolveSection(
     priority: blueprint.priority,
     blocks,
     childIds: blueprint.childIds,
+    collapsibleInUI: blueprint.collapsibleInUI,
+  };
+}
+
+const CHILD_SUBSECTION_HEADINGS: Record<ChildSubsection, string> = {
+  introduction: 'Who {childName} Is',
+  education: 'Education & School Transition',
+  healthcare: 'Healthcare & Care Transition',
+  supportTransition: 'Transition of Supports',
+  peopleAndConnections: 'People & Connections',
+  activities: 'Activities',
+  communitiesAndTraditions: 'Communities / Activities / Traditions',
+  inheritance: 'Inheritance',
+  adultTransition: 'Looking Ahead',
+};
+
+function resolvePerChildSection(
+  blueprint: SectionBlueprint,
+  narrative: GuardianshipNarrativeModel,
+  audience: GuardianshipAudience,
+  tracker: RepetitionTracker
+): GuardianshipAudienceSection | null {
+  const childSections: ChildSection[] = [];
+  const allBlocks: NarrativeBlock[] = [];
+
+  const subsectionOrder: ChildSubsection[] = blueprint.sources
+    .map(s => s.area === 'children' ? s.subsection : undefined)
+    .filter((s): s is ChildSubsection => s !== undefined);
+
+  for (const child of narrative.children) {
+    const subsections: ChildSubsectionGroup[] = [];
+
+    for (const subsection of subsectionOrder) {
+      const rawBlocks = child[subsection] || [];
+      const filtered = rawBlocks
+        .filter(b => isNarrativeRelevantToAudience(b, audience))
+        .filter(b => passesBlueprintFilters(b, blueprint))
+        .filter(b => {
+          if (blueprint.childIds && b.childIds) {
+            return b.childIds.some(id => blueprint.childIds!.includes(id));
+          }
+          return true;
+        });
+
+      if (filtered.length === 0) continue;
+
+      const processed = filtered.map(b => {
+        const controlled = applyRepetitionControl(b, tracker);
+        return preserveBlockIntegrity(controlled);
+      });
+
+      const headingTemplate = CHILD_SUBSECTION_HEADINGS[subsection];
+      const heading = headingTemplate.replace('{childName}', child.childName);
+      subsections.push({ heading, blocks: processed });
+      allBlocks.push(...processed);
+    }
+
+    if (subsections.length > 0) {
+      childSections.push({
+        childId: child.childId,
+        childName: child.childName,
+        subsections,
+      });
+    }
+  }
+
+  if (childSections.length === 0) return null;
+
+  return {
+    id: blueprint.id,
+    heading: blueprint.heading,
+    purpose: blueprint.purpose,
+    priority: blueprint.priority,
+    blocks: allBlocks,
+    childSections,
     collapsibleInUI: blueprint.collapsibleInUI,
   };
 }
@@ -639,7 +733,7 @@ const guardianStrategy: AudienceStrategy = {
       ],
       excludeRules: ['GUARDIAN-01'],
     },
-    // 5. Child-Specific Sections
+    // 5. Child-Specific Sections (per-child hierarchy)
     {
       id: 'child-details',
       heading: 'About Each Child',
@@ -657,6 +751,7 @@ const guardianStrategy: AudienceStrategy = {
         { area: 'children', subsection: 'adultTransition' },
       ],
       excludeRules: ['GUARDIAN-01'],
+      perChild: true,
       collapsibleInUI: true,
     },
     // 6. Adult Sibling Role

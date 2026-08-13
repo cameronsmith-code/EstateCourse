@@ -22,7 +22,8 @@ import FinancialFootprintAssets from './FinancialFootprintAssets';
 import FamilyTrustSection from './FamilyTrustSection';
 import LegacyIntentSection from './LegacyIntentSection';
 import CurrentWillSection from './CurrentWillSection';
-import { getFinancialAdvisors } from '../lib/referentialIntegrity';
+import { getFinancialAdvisors, getProfessionalAdvisors } from '../lib/referentialIntegrity';
+import { areSamePeople } from '../lib/guardianshipRoleResolution';
 import { getClientOwnedCorpNames } from '../lib/corporateOwnership';
 import { ChevronLeft, ChevronRight, Check, Trash2, Info, X, Plus } from 'lucide-react';
 
@@ -13207,21 +13208,18 @@ export default function StepForm({
               }
             }
 
-            const professionalContacts: { id: string; name: string; role: string }[] = [];
-            const profTeam = allAns.get('professionalTeam') || {};
-            if (profTeam.fpHasAdvisor === 'yes' && !profTeam.fpAdvisor1IsCameronSmith) {
-              const name = String(profTeam.fpAdvisor1Name || '');
-              if (name) professionalContacts.push({ id: 'fp1', name, role: 'Financial Planner' });
-            }
-            if (profTeam.fpHasAdditionalAdvisor === 'yes' && profTeam.fpAdvisor2Name) {
-              professionalContacts.push({ id: 'fp2', name: String(profTeam.fpAdvisor2Name), role: 'Financial Planner' });
-            }
-            if (profTeam.acctHasAccountant === 'yes' && profTeam.acctAdvisor1Name) {
-              professionalContacts.push({ id: 'acct1', name: String(profTeam.acctAdvisor1Name), role: 'Accountant' });
-            }
-            if (profTeam.lawHasLawyer === 'yes' && profTeam.lawAdvisor1Name) {
-              professionalContacts.push({ id: 'law1', name: String(profTeam.lawAdvisor1Name), role: 'Lawyer' });
-            }
+            const profAdvisors = getProfessionalAdvisors(allAns);
+            const professionalContacts: { id: string; name: string; role: string }[] = profAdvisors
+              .filter(a => a.active && a.name)
+              .map(a => ({
+                id: a.id,
+                name: a.name,
+                role: a.type === 'financial' ? 'Financial Planner'
+                   : a.type === 'accountant' ? 'Accountant'
+                   : a.type === 'lawyer' ? 'Lawyer'
+                   : a.type === 'insurance' ? 'Insurance Advisor'
+                   : 'Advisor',
+              }));
 
             const estateTrustees = allAns.get('estateTrustees') || {};
             const wills = allAns.get('wills') || {};
@@ -13245,9 +13243,23 @@ export default function StepForm({
               if (atty.attorneyName) fdmLabels.push({ role: 'Attorney for Property', name: String(atty.attorneyName) });
             }
 
-            const fdmPersonIds = fdmLabels.map(f => `fdm_${f.name.replace(/\s+/g, '_').toLowerCase()}`);
-            const guardianIdSet = new Set(guardianPersonIds);
-            const coordinationNeeded = fdmPersonIds.length > 0 && !fdmPersonIds.some(id => guardianIdSet.has(id));
+            const fundingPlanningPersons = (allAns.get('children')?.planningPersons as Array<{ id: string; name: string }>) || [];
+            const fdmPersonIds = fdmLabels
+              .map(f => {
+                const pp = fundingPlanningPersons.find(p => p.name.toLowerCase() === f.name.toLowerCase());
+                return pp?.id || `unresolved_${f.name.toLowerCase().replace(/\s+/g, '_')}`;
+              });
+            const fdmUnresolvedNames = fdmLabels
+              .filter(f => !fundingPlanningPersons.some(p => p.name.toLowerCase() === f.name.toLowerCase()))
+              .map(f => f.name);
+
+            const coordinationCheck = areSamePeople(
+              guardianPersonIds,
+              [...new Set(fdmPersonIds)],
+              [],
+              fdmUnresolvedNames
+            );
+            const coordinationNeeded = fdmPersonIds.length > 0 && !coordinationCheck.same;
 
             return (
               <GuardianFundingSection

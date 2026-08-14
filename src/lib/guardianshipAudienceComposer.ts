@@ -102,6 +102,10 @@ type SectionSource =
   | { area: 'fundingPhilosophy' }
   | { area: 'coordination' }
   | { area: 'documents' }
+  | { area: 'guardianTrust' }
+  | { area: 'familyFairness' }
+  | { area: 'guardianDiscretion' }
+  | { area: 'conversationPrompts' }
   | { area: 'readiness'; subsection: 'decisionsMade' | 'thingsWorthConfirming' | 'thingsStillToDo' }
   | { area: 'children'; subsection?: ChildSubsection; perChild?: boolean }
   | { area: 'immediateActions' };
@@ -558,6 +562,14 @@ function extractBlocks(
       return narrative.coordination;
     case 'documents':
       return narrative.documents;
+    case 'guardianTrust':
+      return narrative.guardianTrust;
+    case 'familyFairness':
+      return narrative.familyFairness;
+    case 'guardianDiscretion':
+      return narrative.guardianDiscretion;
+    case 'conversationPrompts':
+      return narrative.conversationPrompts;
     case 'readiness':
       return narrative.readiness[source.subsection];
     case 'immediateActions':
@@ -1003,6 +1015,14 @@ const guardianStrategy: AudienceStrategy = {
       customBuilder: 'atAGlance',
       collapsibleInUI: true,
     },
+    // 1c. Why We Chose You — parent voice, early in the document
+    {
+      id: 'why-we-chose-you',
+      heading: 'Why We Chose You',
+      purpose: 'A message from the parents to the Guardian',
+      priority: 'primary',
+      sources: [{ area: 'guardianTrust' }],
+    },
     // 2. A Note from the Parents
     {
       id: 'parent-voice',
@@ -1014,6 +1034,7 @@ const guardianStrategy: AudienceStrategy = {
         { area: 'coordination' },
       ],
       includeTypes: ['parentVoice'],
+      excludeRules: ['GUARDIAN-TRUST-01', 'GUARDIAN-TRUST-02', 'GUARDIAN-TRUST-03'],
     },
     // 3. Family at a Glance
     {
@@ -1076,6 +1097,23 @@ const guardianStrategy: AudienceStrategy = {
       sources: [{ area: 'fundingPhilosophy' }],
       excludeTypes: ['parentVoice'],
     },
+    // 7b. Becoming Part of Your Family — fairness & belonging
+    {
+      id: 'family-fairness',
+      heading: 'Becoming Part of Your Family',
+      purpose: 'How the parents thought about differences in resources and opportunities',
+      priority: 'important',
+      sources: [{ area: 'familyFairness' }],
+      excludeTypes: ['parentVoice'],
+    },
+    // 7c. What We Trust You to Decide — discretion guidance
+    {
+      id: 'what-we-trust',
+      heading: 'What We Trust You to Decide',
+      purpose: 'Where the parents want the Guardian to feel free to use their own judgment',
+      priority: 'primary',
+      sources: [{ area: 'guardianDiscretion' }],
+    },
     // 8. Working Together for the Children
     {
       id: 'coordination',
@@ -1093,6 +1131,15 @@ const guardianStrategy: AudienceStrategy = {
       sources: [{ area: 'familyRoles' }],
       includeRules: ['ROLE-01'],
       excludeTypes: ['parentVoice'],
+    },
+    // 9b. Questions to Talk Through Together
+    {
+      id: 'conversation-prompts',
+      heading: 'Questions to Talk Through Together',
+      purpose: 'Conversation prompts for the planning discussion — not warnings or legal advice',
+      priority: 'supporting',
+      sources: [{ area: 'conversationPrompts' }],
+      collapsibleInUI: true,
     },
     // 10. Important Documents
     {

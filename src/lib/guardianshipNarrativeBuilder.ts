@@ -382,6 +382,134 @@ function buildEducationBlocks(child: GuardianshipChildProfile, ctx: NarrativeCon
     }));
   }
 
+  // EDUCATION-02: Current educational setting interpretation
+  if (et.settingType && et.settingType !== 'not_attending') {
+    const SETTING_LABELS: Record<string, string> = {
+      public: 'a public school',
+      catholic: 'a Catholic or other publicly funded school',
+      private: 'a private school',
+      specialized_therapeutic: 'a specialized or therapeutic school or program',
+      homeschool: 'a homeschool arrangement',
+      other: et.settingTypeDetails || 'another type of educational setting',
+    };
+    const settingLabel = SETTING_LABELS[et.settingType] || et.settingType;
+
+    blocks.push(makeBlock('EDUCATION-02', 'context', 'important', 'knownFact', {
+      heading: 'Current Educational Setting',
+      body: `${name} currently attends ${settingLabel}.`,
+      childIds: [child.childId],
+      audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+    }));
+
+    // Setting reasons
+    const REASON_LABELS: Record<string, string> = {
+      academic_preference: 'academic preference',
+      learns_better: `${name} learns better in this environment`,
+      disability_support: 'disability or additional support needs',
+      specialized_programming: 'specialized programming',
+      smaller_class: 'smaller class size or additional individual attention',
+      religious_cultural: 'religious or cultural reasons',
+      social_continuity: 'social or community continuity',
+      family_preference: 'family preference',
+      location_practical: 'location or practical reasons',
+    };
+    const reasons = (et.settingReasons || []).filter(r => r !== 'other');
+    if (reasons.length > 0) {
+      const reasonLabels = reasons.map(r => REASON_LABELS[r] || r.replace(/_/g, ' '));
+      const reasonList = reasonLabels.length === 1 ? reasonLabels[0] : reasonLabels.length === 2 ? `${reasonLabels[0]} and ${reasonLabels[1]}` : `${reasonLabels.slice(0, -1).join(', ')}, and ${reasonLabels[reasonLabels.length - 1]}`;
+      const isDisability = reasons.includes('disability_support');
+
+      if (isDisability) {
+        blocks.push(makeBlock('EDUCATION-02', 'context', 'important', 'parentPreference', {
+          body: `${parentLabel} chose this setting for ${name} because of ${reasonList}. ${parentLabel} consider this setting to be part of the support ${name} receives, rather than simply a schooling preference.`,
+          childIds: [child.childId],
+          audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+        }));
+      } else {
+        blocks.push(makeBlock('EDUCATION-02', 'context', 'important', 'parentPreference', {
+          body: `${parentLabel} chose this setting for ${name} because of ${reasonList}.`,
+          childIds: [child.childId],
+          audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+        }));
+      }
+    }
+
+    if (et.settingReasonsOther && !isLowInformationText(et.settingReasonsOther)) {
+      blocks.push(makeBlock('EDUCATION-02', 'parentVoice', 'supporting', 'parentPreference', {
+        body: et.settingReasonsOther,
+        childIds: [child.childId],
+        audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+      }));
+    }
+
+    if (et.settingReasonsNotes && !isLowInformationText(et.settingReasonsNotes)) {
+      blocks.push(makeBlock('EDUCATION-02', 'parentVoice', 'important', 'parentPreference', {
+        heading: 'In Their Own Words',
+        body: et.settingReasonsNotes,
+        childIds: [child.childId],
+        audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+      }));
+    }
+  }
+
+  // EDUCATION-03: Need vs preference — continuation importance
+  if (et.educationImportance) {
+    const IMPORTANCE_BODIES: Record<string, string> = {
+      essential_support: `${parentLabel} consider this setting, or an equivalent level of support, important to ${name}'s disability, health, learning or wellbeing. If circumstances allow, preserving an equivalent level of educational support would be important to them. They recognize that the specific school, program or location may change over time. Their priority is the level of support ${name} receives, not necessarily the name of the institution.`,
+      strong_preference: `${parentLabel} would very much like this type of education to continue, but recognize circumstances could change. They would want ${name}'s existing educational opportunity preserved where resources allow.`,
+      preference_with_flexibility: `${parentLabel} value this arrangement, but would want the Guardian to consider what makes sense for their family and for ${name} at that time.`,
+      no_strong_preference: `${parentLabel} trust the Guardian to decide what educational environment makes the most sense for ${name}.`,
+      unsure: `${parentLabel} have not fully decided how strongly they feel about this. It may be worth discussing.`,
+    };
+    const body = IMPORTANCE_BODIES[et.educationImportance];
+    if (body) {
+      blocks.push(makeBlock('EDUCATION-03', 'context', 'important', 'parentPreference', {
+        heading: 'How Important Is This Setting?',
+        body,
+        childIds: [child.childId],
+        audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+      }));
+    }
+
+    if (et.educationImportanceDetails && et.educationImportance === 'other' && !isLowInformationText(et.educationImportanceDetails)) {
+      blocks.push(makeBlock('EDUCATION-03', 'parentVoice', 'important', 'parentPreference', {
+        body: et.educationImportanceDetails,
+        childIds: [child.childId],
+        audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+      }));
+    }
+  }
+
+  // EDUCATION-04: Education-specific fairness
+  const ef = child.educationFairness;
+  if (ef && ef.principles && ef.principles.length > 0) {
+    const FAIRNESS_BODIES: Record<string, string> = {
+      preserve_if_need_based: `If the difference is important to ${name}'s disability, learning, health or wellbeing, ${parentLabel} would want that support prioritized where reasonably possible.`,
+      preserve_if_resources_allow: `${parentLabel} would like ${name}'s existing educational opportunity preserved where resources allow.`,
+      balance_with_guardian_family: `${parentLabel} would want the Guardian to consider how the arrangement affects all of the children and the household.`,
+      guardian_discretion: `${parentLabel} trust the Guardian to make the decision that makes the most sense at the time.`,
+      guardian_trustee_discussion: `${parentLabel} would want the Guardian and Trustee to discuss a significant schooling decision together.`,
+    };
+    const fairnessBodies = (ef.principles.filter(p => p !== 'other')).map(p => FAIRNESS_BODIES[p]).filter(Boolean);
+    if (fairnessBodies.length > 0) {
+      blocks.push(makeBlock('EDUCATION-04', 'context', 'important', 'parentPreference', {
+        heading: 'If Schooling Is Materially Different',
+        body: `If ${name}'s schooling were materially different from the schooling available to the Guardian's own children, ${parentLabel} would want that considered. ${fairnessBodies.join(' ')}`,
+        childIds: [child.childId],
+        audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES, ...TRUSTEE_AUDIENCES],
+      }));
+    }
+
+    if (ef.principlesOther && !isLowInformationText(ef.principlesOther)) {
+      blocks.push(makeBlock('EDUCATION-04', 'parentVoice', 'important', 'parentPreference', {
+        heading: 'In Their Own Words',
+        body: ef.principlesOther,
+        childIds: [child.childId],
+        audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+      }));
+    }
+  }
+
   return blocks;
 }
 
@@ -934,6 +1062,19 @@ function buildFutureEducationBlocks(child: GuardianshipChildProfile, ctx: Narrat
   const name = child.nickname || child.name;
   const { parentLabel } = ctx;
 
+  // Use new aspirations field if available, fall back to educationPath
+  const ASPIRATION_LABELS: Record<string, string> = {
+    university: 'university',
+    college: 'college',
+    trade_apprenticeship: 'a trade or apprenticeship',
+    professional_training: 'other professional or post-secondary training',
+    employment_focused: 'an employment or work-focused path',
+    adapted_education: 'education or training adapted to their abilities and support needs',
+    whatever_suits: 'whatever path suits them best',
+    too_early_unsure: 'it is too early to say',
+    other: 'another path',
+  };
+
   const PATH_LABELS: Record<string, string> = {
     university: 'university',
     college: 'college',
@@ -945,50 +1086,75 @@ function buildFutureEducationBlocks(child: GuardianshipChildProfile, ctx: Narrat
     other: 'another path',
   };
 
-  const paths = (fe.educationPath || []).map(p => PATH_LABELS[p] || p);
-  if (fe.educationPathOther && !isLowInformationText(fe.educationPathOther)) {
+  // Prefer new aspirations, fall back to legacy educationPath
+  const aspirationSource = fe.aspirations || fe.educationPath || [];
+  const labelMap = fe.aspirations ? ASPIRATION_LABELS : PATH_LABELS;
+  const otherText = fe.aspirations ? fe.aspirationsOther : fe.educationPathOther;
+
+  const paths = aspirationSource.map(p => labelMap[p] || p.replace(/_/g, ' '));
+  if (otherText && !isLowInformationText(otherText)) {
     const idx = paths.indexOf('another path');
-    if (idx >= 0) paths[idx] = fe.educationPathOther;
+    if (idx >= 0) paths[idx] = otherText;
   }
 
   if (paths.length > 0) {
     const pathList = paths.length === 1 ? paths[0] : paths.length === 2 ? `${paths[0]} or ${paths[1]}` : `${paths.slice(0, -1).join(', ')}, or ${paths[paths.length - 1]}`;
+    const hasWhatever = aspirationSource.includes('whatever_suits') || aspirationSource.includes('support_whatever');
+    const body = hasWhatever
+      ? `When ${parentLabel} think about ${name} becoming an adult, they want to support ${name} in pursuing ${pathList}. They do not assume one particular path is superior to another.`
+      : `When ${parentLabel} think about ${name} becoming an adult, they currently hope or expect ${name} to pursue ${pathList}.`;
     blocks.push(makeBlock('EDUCATION-01', 'context', 'important', 'parentPreference', {
       heading: 'Looking Ahead',
-      body: `When ${parentLabel} think about ${name} becoming an adult, they currently hope or expect ${name} to pursue ${pathList}.`,
-      childIds: [child.childId],
-      audiences: [...GUARDIAN_AUDIENCES, ...TRUSTEE_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
-    }));
-  }
-
-  const FINANCIAL_LABELS: Record<string, string> = {
-    yes: 'Yes',
-    likely: 'Likely',
-    unsure: 'Unsure',
-    no_specific_expectation: 'No specific expectation',
-    other: 'Other',
-  };
-
-  if (fe.financialSupportExpectation) {
-    const label = FINANCIAL_LABELS[fe.financialSupportExpectation] || fe.financialSupportExpectation;
-    const body = label === 'Yes'
-      ? `${parentLabel} currently expect to financially support ${name} through post-secondary education or training.`
-      : label === 'Likely'
-        ? `${parentLabel} would likely support ${name} financially through post-secondary education or training.`
-        : label === 'Unsure'
-          ? `${parentLabel} are unsure whether they will be able to financially support ${name} through post-secondary education or training.`
-          : `${parentLabel} do not have a specific expectation about financially supporting ${name} through post-secondary education or training.`;
-    blocks.push(makeBlock('EDUCATION-01', 'context', 'supporting', 'parentPreference', {
       body,
       childIds: [child.childId],
       audiences: [...GUARDIAN_AUDIENCES, ...TRUSTEE_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
     }));
   }
 
-  if (fe.notesForGuardian && !isLowInformationText(fe.notesForGuardian)) {
+  // Financial support expectation — prefer new field, fall back to legacy
+  const expectation = fe.supportExpectation || fe.financialSupportExpectation;
+  const expectationDetails = fe.supportExpectationDetails;
+  const FINANCIAL_LABELS: Record<string, string> = {
+    yes: 'Yes',
+    likely: 'Likely',
+    unsure: 'Unsure',
+    no_specific_expectation: 'No specific expectation',
+    not_applicable: 'Not applicable',
+    other: 'Other',
+  };
+
+  if (expectation) {
+    const label = FINANCIAL_LABELS[expectation] || expectation;
+    const body = label === 'Yes'
+      ? `${parentLabel} currently expect to financially support ${name} through post-secondary education, training or their transition into independence.`
+      : label === 'Likely'
+        ? `${parentLabel} would likely support ${name} financially through post-secondary education, training or their transition into independence.`
+        : label === 'Unsure'
+          ? `${parentLabel} are unsure whether they will be able to financially support ${name} through post-secondary education, training or their transition into independence.`
+          : label === 'Not applicable'
+            ? `${parentLabel} do not consider this applicable to ${name}'s situation.`
+            : `${parentLabel} do not have a specific expectation about financially supporting ${name} through post-secondary education, training or their transition into independence.`;
+    blocks.push(makeBlock('EDUCATION-01', 'context', 'supporting', 'parentPreference', {
+      body,
+      childIds: [child.childId],
+      audiences: [...GUARDIAN_AUDIENCES, ...TRUSTEE_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+    }));
+
+    if (expectation === 'other' && expectationDetails && !isLowInformationText(expectationDetails)) {
+      blocks.push(makeBlock('EDUCATION-01', 'parentVoice', 'supporting', 'parentPreference', {
+        body: expectationDetails,
+        childIds: [child.childId],
+        audiences: [...GUARDIAN_AUDIENCES, ...TRUSTEE_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+      }));
+    }
+  }
+
+  // Parent notes — prefer new aspirationNotes, fall back to notesForGuardian
+  const notes = fe.aspirationNotes || fe.notesForGuardian;
+  if (notes && !isLowInformationText(notes)) {
     blocks.push(makeBlock('EDUCATION-01', 'parentVoice', 'important', 'parentPreference', {
       heading: 'In Their Own Words',
-      body: fe.notesForGuardian,
+      body: notes,
       childIds: [child.childId],
       audiences: [...GUARDIAN_AUDIENCES, ...TRUSTEE_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
     }));
@@ -1853,6 +2019,240 @@ export function getNarrativeForAudience(
   };
 }
 
+// ─── Guardian Trust: Why We Chose You / Trust Message / If Needed ─────────────
+
+function buildGuardianTrustNarrative(ctx: NarrativeContext): NarrativeBlock[] {
+  const { model, parentLabel } = ctx;
+  const trust = model.guardianTrust;
+  if (!trust) return [];
+  if (!trust.selectionReason && !trust.trustMessage && !trust.ifNeededMessage) return [];
+
+  const blocks: NarrativeBlock[] = [];
+  const assignment = model.guardianAssignments[0];
+  const guardianName = assignment ? guardianLabel(assignment) : 'the Guardian';
+
+  // WHY WE CHOSE YOU — selection reason
+  if (trust.selectionReason && !isLowInformationText(trust.selectionReason)) {
+    blocks.push(makeBlock('GUARDIAN-TRUST-01', 'intro', 'primary', 'parentPreference', {
+      heading: 'Why We Chose You',
+      body: `${parentLabel} chose ${guardianName} for reasons that matter deeply to them.`,
+      audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+    }));
+    blocks.push(makeBlock('GUARDIAN-TRUST-01', 'parentVoice', 'primary', 'parentPreference', {
+      heading: 'In Their Own Words',
+      body: trust.selectionReason,
+      audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+    }));
+  }
+
+  // Trust message — what the trust means
+  if (trust.trustMessage && !isLowInformationText(trust.trustMessage)) {
+    blocks.push(makeBlock('GUARDIAN-TRUST-02', 'parentVoice', 'primary', 'parentPreference', {
+      heading: 'What This Trust Means to Us',
+      body: trust.trustMessage,
+      audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+    }));
+  }
+
+  // If needed message — for the day they might have to step in
+  if (trust.ifNeededMessage && !isLowInformationText(trust.ifNeededMessage)) {
+    blocks.push(makeBlock('GUARDIAN-TRUST-03', 'parentVoice', 'primary', 'parentPreference', {
+      heading: 'If This Day Ever Comes',
+      body: trust.ifNeededMessage,
+      audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+    }));
+  }
+
+  return blocks;
+}
+
+// ─── Family Fairness: Life in the Guardian Household ──────────────────────────
+
+const FAMILY_FAIRNESS_LABELS: Record<string, string> = {
+  preserve_important_opportunities: 'preserving important existing opportunities for their children where resources allow',
+  prioritize_need_based: 'giving particular priority to expenses connected to disability, health, education, learning or wellbeing',
+  consider_whole_household: 'considering how significant differences could affect all of the children living in the household',
+  guardian_flexibility: 'giving the Guardian meaningful flexibility to adapt their wishes to the realities of their family',
+  shared_household_benefit_reasonable: 'being comfortable with some spending that also benefits the Guardian\'s family when it helps the household function well',
+  childrens_resources_for_them: 'generally preferring resources intended for their children to remain primarily for their benefit',
+  discuss_significant_differences: 'discussing significant differences rather than treating their wishes as rigid instructions',
+};
+
+function buildFamilyFairnessNarrative(ctx: NarrativeContext): NarrativeBlock[] {
+  const { model, parentLabel } = ctx;
+  const ff = model.familyFairness;
+  if (!ff) return [];
+  const principles = ff.principles || [];
+  if (principles.length === 0 && !ff.details) return [];
+
+  const blocks: NarrativeBlock[] = [];
+  const assignment = model.guardianAssignments[0];
+  const guardianName = assignment ? guardianLabel(assignment) : 'the Guardian';
+  const childNames = model.children.filter(c => c.status === 'minor').map(c => c.nickname || c.name);
+  const childLabel = childNames.length === 1 ? childNames[0] : childNames.join(' and ');
+
+  blocks.push(makeBlock('FAIRNESS-01', 'context', 'primary', 'parentPreference', {
+    heading: 'Becoming Part of Your Family',
+    body: `${childLabel} ${childNames.length === 1 ? 'would not simply be living in another house —' : 'would not simply be living in another house —'} ${childNames.length === 1 ? 'they' : 'they'} would be joining another family. ${parentLabel} have thought about how differences in resources or opportunities could affect everyone in the household.`,
+    audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+  }));
+
+  if (principles.length > 0) {
+    const labels = principles
+      .filter(p => p !== 'other')
+      .map(p => FAMILY_FAIRNESS_LABELS[p] || p.replace(/_/g, ' '));
+
+    if (labels.length > 0) {
+      const list = labels.length === 1
+        ? labels[0]
+        : labels.length === 2
+          ? `${labels[0]} and ${labels[1]}`
+          : `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
+
+      blocks.push(makeBlock('FAIRNESS-01', 'context', 'important', 'parentPreference', {
+        body: `${parentLabel} would want ${guardianName} and the Trustee to approach these situations by: ${list}.`,
+        audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES, ...TRUSTEE_AUDIENCES],
+      }));
+    }
+
+    if (ff.principlesOther && !isLowInformationText(ff.principlesOther)) {
+      blocks.push(makeBlock('FAIRNESS-01', 'parentVoice', 'important', 'parentPreference', {
+        heading: 'In Their Own Words',
+        body: ff.principlesOther,
+        audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+      }));
+    }
+  }
+
+  if (ff.details && !isLowInformationText(ff.details)) {
+    blocks.push(makeBlock('FAIRNESS-01', 'parentVoice', 'important', 'parentPreference', {
+      heading: 'In Their Own Words',
+      body: ff.details,
+      audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+    }));
+  }
+
+  // Professional review: Guardian/Trustee discussion boundary
+  if (principles.includes('discuss_significant_differences')) {
+    blocks.push(makeBlock('FAIRNESS-01', 'readiness', 'supporting', 'professionalReview', {
+      body: 'Where financial decisions are involved, the Guardian should discuss significant funding decisions with the Trustee. The Roadmap expresses parental wishes — it does not grant spending authority. Legal authority depends on the Will, trust terms, and applicable law.',
+      audiences: [...GUARDIAN_AUDIENCES, ...TRUSTEE_AUDIENCES, ...LAWYER_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+    }));
+  }
+
+  return blocks;
+}
+
+// ─── Guardian Discretion: What We Trust You to Decide ─────────────────────────
+
+function buildGuardianDiscretionNarrative(ctx: NarrativeContext): NarrativeBlock[] {
+  const { model, parentLabel } = ctx;
+  const disc = model.guardianDiscretion;
+  if (!disc) return [];
+  if (!disc.trustedDecisions && !disc.especiallyImportantWishes) return [];
+
+  const blocks: NarrativeBlock[] = [];
+  const assignment = model.guardianAssignments[0];
+  const guardianName = assignment ? guardianLabel(assignment) : 'the Guardian';
+
+  blocks.push(makeBlock('DISCRETION-01', 'context', 'primary', 'parentPreference', {
+    heading: 'What We Trust You to Decide',
+    body: `No Roadmap prepared today can anticipate the circumstances ${guardianName} may face years from now. The wishes throughout this document matter, but ${parentLabel} have also identified areas where they want ${guardianName} to feel trusted to use their own judgment.`,
+    audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+  }));
+
+  if (disc.trustedDecisions && !isLowInformationText(disc.trustedDecisions)) {
+    blocks.push(makeBlock('DISCRETION-01', 'parentVoice', 'primary', 'parentPreference', {
+      heading: 'In Their Own Words',
+      body: disc.trustedDecisions,
+      audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+    }));
+  }
+
+  if (disc.especiallyImportantWishes && !isLowInformationText(disc.especiallyImportantWishes)) {
+    blocks.push(makeBlock('DISCRETION-02', 'parentVoice', 'important', 'parentPreference', {
+      heading: 'What Matters Most to Us',
+      body: disc.especiallyImportantWishes,
+      audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+    }));
+  }
+
+  return blocks;
+}
+
+// ─── Conversation Prompts: Questions to Talk Through Together ─────────────────
+
+function buildConversationPrompts(ctx: NarrativeContext): NarrativeBlock[] {
+  const { model, parentLabel } = ctx;
+  const blocks: NarrativeBlock[] = [];
+  const prompts: string[] = [];
+
+  const assignment = model.guardianAssignments[0];
+  const guardianName = assignment ? guardianLabel(assignment) : 'the Guardian';
+
+  for (const child of model.children.filter(c => c.status === 'minor')) {
+    const name = child.nickname || child.name;
+    const et = child.educationTransition;
+    const ef = child.educationFairness;
+
+    // Private school + flexibility/fairness
+    if (et?.settingType === 'private' && (et.educationImportance === 'strong_preference' || et.educationImportance === 'preference_with_flexibility')) {
+      prompts.push(`How would everyone want to approach ${name}'s schooling if ${name}'s current private school no longer fit comfortably with life in ${guardianName}'s household?`);
+    }
+
+    // Specialized school + disability
+    if (et?.settingType === 'specialized_therapeutic' && et.settingReasons?.includes('disability_support')) {
+      prompts.push(`What parts of ${name}'s current educational support would ${parentLabel} consider most important to preserve if the specific school or program had to change?`);
+    }
+
+    // Education fairness — Guardian/Trustee discussion
+    if (ef?.principles?.includes('guardian_trustee_discussion')) {
+      prompts.push(`How should ${guardianName} and the Trustee approach significant schooling decisions for ${name} together?`);
+    }
+
+    // Important friendships + likely move
+    const moveLikely = assignment?.moveStatus === 'likely' || assignment?.moveStatus === 'possible';
+    const importantConns = (child.importantConnections || []).filter(c => c.importance === 'especially_important' && c.name);
+    if (moveLikely && importantConns.length > 0) {
+      prompts.push(`What would realistically help ${name} maintain ${importantConns.length === 1 ? `the relationship with ${importantConns[0].name}` : 'close relationships with important people'} after a move?`);
+    }
+  }
+
+  // Adult sibling role
+  if (model.adultSiblingRoles.length > 0) {
+    for (const role of model.adultSiblingRoles) {
+      prompts.push(`What role does everyone realistically expect ${role.adultSiblingName} to play in the younger children's lives?`);
+      break; // One prompt for siblings
+    }
+  }
+
+  // Guardian/Trustee + household expenses
+  const ff = model.familyFairness;
+  if (ff?.principles?.includes('discuss_significant_differences')) {
+    const childNames = model.children.filter(c => c.status === 'minor').map(c => c.nickname || c.name);
+    const childLabel = childNames.length > 0 ? childNames.join(' and ') : 'the children';
+    prompts.push(`How should ${guardianName} and the Trustee approach larger household expenses if caring for ${childLabel} required changes to the home or work arrangements?`);
+  }
+
+  if (prompts.length === 0) return [];
+
+  // Keep to 3-6 high-value questions
+  const selected = prompts.slice(0, 6);
+
+  blocks.push(makeBlock('CONVERSATION-01', 'context', 'important', 'derived', {
+    heading: 'Questions to Talk Through Together',
+    body: `These questions are conversation prompts — not warnings or legal advice. They are generated from ${parentLabel}'s actual family circumstances and are meant to help everyone think through important topics while ${parentLabel} are still available to discuss them.`,
+    audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+  }));
+
+  blocks.push(makeBlock('CONVERSATION-01', 'summary', 'important', 'derived', {
+    bullets: selected,
+    audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
+  }));
+
+  return blocks;
+}
+
 export function buildGuardianshipNarrative(model: GuardianshipRoadmapModel): GuardianshipNarrativeModel {
   blockCounter = 0;
 
@@ -1874,6 +2274,10 @@ export function buildGuardianshipNarrative(model: GuardianshipRoadmapModel): Gua
 
   const fundingPhilosophy = buildFundingPhilosophyNarrative(ctx);
   const coordination = buildCoordinationNarrative(ctx);
+  const guardianTrust = buildGuardianTrustNarrative(ctx);
+  const familyFairness = buildFamilyFairnessNarrative(ctx);
+  const guardianDiscretion = buildGuardianDiscretionNarrative(ctx);
+  const conversationPrompts = buildConversationPrompts(ctx);
 
   return {
     familyContext,
@@ -1884,6 +2288,10 @@ export function buildGuardianshipNarrative(model: GuardianshipRoadmapModel): Gua
     fundingPhilosophy,
     coordination,
     documents,
+    guardianTrust,
+    familyFairness,
+    guardianDiscretion,
+    conversationPrompts,
     readiness,
     immediateActions,
     quickReference,

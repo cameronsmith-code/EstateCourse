@@ -116,6 +116,10 @@ export interface GuardianshipNarrativeModel {
   fundingPhilosophy: NarrativeBlock[];
   coordination: NarrativeBlock[];
   documents: NarrativeBlock[];
+  guardianTrust: NarrativeBlock[];
+  familyFairness: NarrativeBlock[];
+  guardianDiscretion: NarrativeBlock[];
+  conversationPrompts: NarrativeBlock[];
   readiness: ReadinessNarrative;
   immediateActions: ImmediateActionNarrative[];
   quickReference: QuickReferenceItem[];

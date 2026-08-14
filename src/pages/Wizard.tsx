@@ -18,8 +18,8 @@ export default function Wizard() {
     error,
     initQuestionnaire,
     updateAnswer,
-    nextStep,
-    previousStep,
+    saveAnswers,
+    goToStep,
     completeQuestionnaire,
     clearAllAnswers,
     clearCurrentStepAnswers,
@@ -53,15 +53,16 @@ export default function Wizard() {
     if (!loading && currentStep > 1) {
       const stepData = STEPS.find(s => s.id === currentStep);
       if (stepData && !isStepVisible(stepData)) {
-        const nextVisible = getNextVisibleStep(currentStep - 1);
-        if (nextVisible !== null && nextVisible !== currentStep) {
-          for (let i = 0; i < nextVisible - currentStep; i++) {
-            nextStep();
-          }
+        const prevVisible = getPreviousVisibleStep(currentStep);
+        const nextVisible = getNextVisibleStep(currentStep);
+        if (prevVisible !== null) {
+          goToStep(prevVisible);
+        } else if (nextVisible !== null) {
+          goToStep(nextVisible);
         }
       }
     }
-  }, [currentStep, loading]);
+  }, [currentStep, loading, goToStep]);
 
   useEffect(() => {
     STEPS.forEach(step => {
@@ -120,23 +121,19 @@ export default function Wizard() {
     if (nextVisible === null) {
       await completeQuestionnaire();
       navigate('/completion');
-    } else if (nextVisible === validCurrentStep + 1) {
-      await nextStep();
     } else {
-      for (let i = validCurrentStep + 1; i <= nextVisible; i++) {
-        await nextStep();
+      const currentStepData = STEPS.find(s => s.id === validCurrentStep);
+      if (currentStepData) {
+        await saveAnswers(currentStepData.sectionId);
       }
+      goToStep(nextVisible);
     }
   };
 
   const handlePrevious = () => {
     const prevVisible = getPreviousVisibleStep(validCurrentStep);
-
     if (prevVisible !== null) {
-      const stepsToGoBack = validCurrentStep - prevVisible;
-      for (let i = 0; i < stepsToGoBack; i++) {
-        previousStep();
-      }
+      goToStep(prevVisible);
     }
   };
 
@@ -149,16 +146,12 @@ export default function Wizard() {
     if (targetStepId === validCurrentStep) return;
 
     if (targetStepId > validCurrentStep) {
-      const stepsToAdvance = targetStepId - validCurrentStep;
-      for (let i = 0; i < stepsToAdvance; i++) {
-        await nextStep();
-      }
-    } else {
-      const stepsToGoBack = validCurrentStep - targetStepId;
-      for (let i = 0; i < stepsToGoBack; i++) {
-        previousStep();
+      const currentStepData = STEPS.find(s => s.id === validCurrentStep);
+      if (currentStepData) {
+        await saveAnswers(currentStepData.sectionId);
       }
     }
+    goToStep(targetStepId);
   };
 
   if (loading && !questionnaire) {

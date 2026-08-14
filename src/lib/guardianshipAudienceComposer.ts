@@ -975,7 +975,7 @@ const strategies: Partial<Record<GuardianshipAudience, AudienceStrategy>> = {
 
 export interface ComposeOptions {
   clientNames?: string[];
-  reportDate?: Date;
+  reportDate?: Date | string;
   reviewItems?: ClarifyReviewItem[];
   limitations?: ClarifyReviewItem[];
 }

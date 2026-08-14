@@ -25,6 +25,7 @@ type QuestionnaireContextType = {
   saveAnswers: (sectionId: string) => Promise<void>;
   nextStep: () => Promise<void>;
   previousStep: () => void;
+  goToStep: (targetStep: number) => void;
   completeQuestionnaire: () => Promise<void>;
   clearAllAnswers: () => Promise<void>;
   clearCurrentStepAnswers: (sectionId: string, stepNumber: number) => Promise<void>;
@@ -338,6 +339,34 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     }
   }, [questionnaire, currentStep]);
 
+  const goToStep = useCallback((targetStep: number) => {
+    if (!questionnaire) return;
+
+    const clamped = Math.min(Math.max(1, targetStep), STEPS.length);
+    setCurrentStep(clamped);
+
+    const updated = {
+      ...questionnaire,
+      current_step: clamped,
+      updated_at: new Date().toISOString(),
+    };
+    setQuestionnaire(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+    if (supabase) {
+      supabase
+        .from('questionnaires')
+        .update({ current_step: clamped, updated_at: new Date().toISOString() })
+        .eq('id', questionnaire.id)
+        .then(
+          () => {},
+          (err) => {
+            console.warn('Failed to update questionnaire step in database:', err);
+          }
+        );
+    }
+  }, [questionnaire]);
+
   const completeQuestionnaire = useCallback(async () => {
     if (!questionnaire) return;
 
@@ -457,6 +486,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
         saveAnswers,
         nextStep,
         previousStep,
+        goToStep,
         completeQuestionnaire,
         clearAllAnswers,
         clearCurrentStepAnswers,

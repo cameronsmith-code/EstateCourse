@@ -1027,7 +1027,7 @@ export function composeGuardianshipForAudience(
   // Metadata
   const metadata: AudienceDocumentMetadata = {
     familyName: options?.clientNames?.join(' & '),
-    generatedAt: (options?.reportDate || new Date()).toISOString(),
+    generatedAt: typeof (options?.reportDate) === 'string' ? options.reportDate : (options?.reportDate || new Date()).toISOString(),
     sourceModelVersion: 'guardianship-v1',
   };
 

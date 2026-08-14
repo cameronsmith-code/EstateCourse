@@ -1,0 +1,366 @@
+/**
+ * Guardian Roadmap Document Builder
+ *
+ * Converts a GuardianshipAudienceDocument (the content source of truth)
+ * into a ClarifyDocument (the neutral layout model that the PDF/HTML
+ * renderers consume).
+ *
+ * This layer does NOT create planning conclusions.  It maps composed
+ * narrative blocks into typed visual components, applying:
+ *   - evidence tags
+ *   - child-specific grouping
+ *   - empty-section suppression
+ *   - pagination hints
+ *   - callouts for limitations
+ */
+
+import type {
+  GuardianshipAudienceDocument,
+  GuardianshipAudienceSection,
+  ChildSection,
+  ChildSubsectionGroup,
+} from './guardianshipAudienceComposer';
+import type {
+  NarrativeBlock,
+} from './guardianshipNarrativeTypes';
+import type {
+  ClarifyDocument,
+  ClarifySection,
+  ClarifyBlock,
+  ClarifyBlockType,
+  ClarifyCard,
+  ClarifyTableRow,
+  EvidenceTag,
+  ClarifyCoverInfo,
+  ClarifyQuickRefEntry,
+  ClarifyLimitationEntry,
+} from './clarifyDocumentTypes';
+import { EVIDENCE_TAG_LABELS } from './clarifyDocumentTypes';
+
+// ─── Evidence mapping ──────────────────────────────────────────────────────────
+
+function mapEvidenceTag(block: NarrativeBlock): EvidenceTag | undefined {
+  if (block.sourceType === 'parentPreference') return 'parentWish';
+  if (block.sourceType === 'parentUnderstanding') return 'clientUnderstanding';
+  if (block.limitation) {
+    if (block.limitation.importance === 'professionalReview' || block.limitation.importance === 'highPriorityReview') {
+      return 'professionalReview';
+    }
+    return 'worthConfirming';
+  }
+  if (block.evidence?.evidenceType === 'incompleteInformation') return 'missingInfo';
+  if (block.evidence?.evidenceType === 'derivedInterpretation') return 'worthConfirming';
+  return undefined;
+}
+
+// ─── Block converters ──────────────────────────────────────────────────────────
+
+let blockCounter = 0;
+function nextId(prefix: string): string {
+  blockCounter += 1;
+  return `${prefix}_${blockCounter}`;
+}
+
+function narrativeToBlocks(blocks: NarrativeBlock[], sectionId: string): ClarifyBlock[] {
+  const result: ClarifyBlock[] = [];
+
+  for (const block of blocks) {
+    const evidenceTag = mapEvidenceTag(block);
+    const evidenceLabel = evidenceTag ? EVIDENCE_TAG_LABELS[evidenceTag] : undefined;
+
+    if (block.type === 'crossReference') {
+      // Skip cross-reference blocks — they are structural noise in the rendered PDF
+      continue;
+    }
+
+    if (block.heading) {
+      result.push({
+        id: nextId(sectionId),
+        type: 'subheading',
+        text: block.heading,
+        evidenceTag,
+        evidenceLabel,
+        keepWithNext: true,
+      });
+    }
+
+    if (block.body) {
+      result.push({
+        id: nextId(sectionId),
+        type: 'body',
+        text: block.body,
+        evidenceTag,
+        evidenceLabel,
+      });
+    }
+
+    if (block.bullets && block.bullets.length > 0) {
+      result.push({
+        id: nextId(sectionId),
+        type: 'bullets',
+        items: block.bullets,
+        evidenceTag,
+        evidenceLabel,
+      });
+    }
+
+    // If a limitation exists and has a message, render as a callout
+    if (block.limitation?.message && block.limitation.importance !== 'informational') {
+      result.push({
+        id: nextId(sectionId),
+        type: 'callout',
+        text: block.limitation.message,
+        evidenceTag: evidenceTag || 'worthConfirming',
+        evidenceLabel: evidenceLabel || EVIDENCE_TAG_LABELS.worthConfirming,
+      });
+    }
+  }
+
+  return result;
+}
+
+function childSubsectionToBlocks(sub: ChildSubsectionGroup, sectionId: string): ClarifyBlock[] {
+  const blocks = narrativeToBlocks(sub.blocks, sectionId);
+  if (blocks.length === 0) return [];
+
+  // Prepend a subheading for this subsection if the first block isn't already one
+  const result: ClarifyBlock[] = [];
+  if (blocks[0].type !== 'subheading') {
+    result.push({
+      id: nextId(sectionId),
+      type: 'subheading',
+      text: sub.heading,
+      keepWithNext: true,
+    });
+  } else {
+    // Replace the first subheading with the subsection heading
+    blocks[0].text = sub.heading;
+  }
+  result.push(...blocks);
+  return result;
+}
+
+function childSectionToBlocks(childSec: ChildSection, sectionId: string): ClarifyBlock[] {
+  const result: ClarifyBlock[] = [];
+
+  // Child name as a heading
+  result.push({
+    id: nextId(sectionId),
+    type: 'heading',
+    text: childSec.childName,
+    keepWithNext: true,
+    pageBreakBefore: result.length > 0, // each child starts on a new page (except first handled by caller)
+  });
+
+  for (const sub of childSec.subsections) {
+    const subBlocks = childSubsectionToBlocks(sub, sectionId);
+    result.push(...subBlocks);
+  }
+
+  return result;
+}
+
+// ─── Immediate Actions to Action List ──────────────────────────────────────────
+
+function actionsToBlocks(blocks: NarrativeBlock[], sectionId: string): ClarifyBlock[] {
+  const result: ClarifyBlock[] = [];
+  for (const block of blocks) {
+    const tag = mapEvidenceTag(block);
+    const label = tag ? EVIDENCE_TAG_LABELS[tag] : undefined;
+    if (block.heading || block.body) {
+      result.push({
+        id: nextId(sectionId),
+        type: 'actionList',
+        title: block.heading,
+        text: block.body,
+        evidenceTag: tag,
+        evidenceLabel: label,
+      });
+    }
+  }
+  return result;
+}
+
+// ─── Quick Reference to Table ──────────────────────────────────────────────────
+
+function quickRefToBlocks(
+  items: ClarifyQuickRefEntry[],
+  sectionId: string
+): ClarifyBlock[] {
+  if (items.length === 0) return [];
+  return [
+    {
+      id: nextId(sectionId),
+      type: 'quickRef',
+      items: items.map(i => `${i.label}: ${i.value}`),
+    },
+  ];
+}
+
+// ─── Limitations ───────────────────────────────────────────────────────────────
+
+function limitationsToBlocks(
+  limitations: ClarifyLimitationEntry[],
+  sectionId: string
+): ClarifyBlock[] {
+  const result: ClarifyBlock[] = [];
+  for (const lim of limitations) {
+    result.push({
+      id: nextId(sectionId),
+      type: 'limitation',
+      title: lim.title,
+      text: lim.body,
+    });
+  }
+  return result;
+}
+
+// ─── Role Table ────────────────────────────────────────────────────────────────
+
+function isRoleTableSection(section: GuardianshipAudienceSection): boolean {
+  return section.id === 'who-does-what';
+}
+
+function blocksToRoleTable(blocks: NarrativeBlock[], sectionId: string): ClarifyBlock[] {
+  const rows: ClarifyTableRow[] = [];
+  for (const b of blocks) {
+    if (b.type === 'summary' && b.bullets) {
+      for (const bullet of b.bullets) {
+        rows.push({ role: bullet, person: '', responsibility: '' });
+      }
+    }
+    if (b.body && b.type === 'context') {
+      // Try to parse role info from the body
+      rows.push({ role: b.heading || '', person: b.body, responsibility: '' });
+    }
+  }
+  if (rows.length === 0) {
+    // Fallback: just render as body text
+    return narrativeToBlocks(blocks, sectionId);
+  }
+  return [
+    {
+      id: nextId(sectionId),
+      type: 'roleTable',
+      rows,
+    },
+  ];
+}
+
+// ─── Section converter ─────────────────────────────────────────────────────────
+
+function sectionToClarifySection(
+  section: GuardianshipAudienceSection,
+  isFirstContentSection: boolean,
+): ClarifySection | null {
+  const blocks: ClarifyBlock[] = [];
+
+  if (section.id === 'immediate-actions') {
+    blocks.push(...actionsToBlocks(section.blocks, section.id));
+  } else if (isRoleTableSection(section)) {
+    blocks.push(...blocksToRoleTable(section.blocks, section.id));
+  } else if (section.childSections && section.childSections.length > 0) {
+    for (let i = 0; i < section.childSections.length; i++) {
+      const childBlocks = childSectionToBlocks(section.childSections[i], section.id);
+      // Don't force page break before the first child if this is the first content section
+      if (i === 0 && childBlocks[0]) {
+        childBlocks[0].pageBreakBefore = false;
+      }
+      blocks.push(...childBlocks);
+    }
+  } else {
+    blocks.push(...narrativeToBlocks(section.blocks, section.id));
+  }
+
+  if (blocks.length === 0) return null;
+
+  return {
+    id: section.id,
+    heading: section.heading,
+    purpose: section.purpose,
+    blocks,
+    collapsible: section.collapsibleInUI,
+  };
+}
+
+// ─── Cover Page ────────────────────────────────────────────────────────────────
+
+function buildCover(doc: GuardianshipAudienceDocument): ClarifyCoverInfo {
+  const familyName = doc.metadata?.familyName || 'Your Family';
+  const childNames: string[] = [];
+
+  // Extract child names from child sections
+  for (const section of doc.sections) {
+    if (section.childSections) {
+      for (const cs of section.childSections) {
+        if (!childNames.includes(cs.childName)) {
+          childNames.push(cs.childName);
+        }
+      }
+    }
+  }
+
+  return {
+    familyName,
+    childNames,
+    preparedDate: doc.metadata?.generatedAt || new Date().toISOString().split('T')[0],
+    subtitle: 'A practical guide for the people you would trust to care for your children.',
+  };
+}
+
+// ─── Main Builder ──────────────────────────────────────────────────────────────
+
+export function buildGuardianClarifyDocument(
+  doc: GuardianshipAudienceDocument
+): ClarifyDocument {
+  blockCounter = 0;
+
+  const cover = buildCover(doc);
+  const clarifySections: ClarifySection[] = [];
+  let firstContent = true;
+
+  for (const section of doc.sections) {
+    const clarifySection = sectionToClarifySection(section, firstContent);
+    if (clarifySection) {
+      clarifySections.push(clarifySection);
+      firstContent = false;
+    }
+  }
+
+  // Build Quick Reference section
+  const quickRef: ClarifyQuickRefEntry[] = (doc.quickReference || []).map(item => ({
+    label: item.label,
+    value: item.value,
+    category: item.category,
+  }));
+
+  // Build Limitations section
+  const limitations: ClarifyLimitationEntry[] = (doc.limitations || []).map(item => ({
+    title: item.title,
+    body: item.whatWeKnow + (item.whatWeCannotConfirm ? ` ${item.whatWeCannotConfirm}` : ''),
+    importance: item.importance,
+  }));
+
+  // Add closing limitations section if there are any
+  if (limitations.length > 0) {
+    clarifySections.push({
+      id: 'limitations',
+      heading: 'Important Limitations',
+      blocks: limitationsToBlocks(limitations, 'limitations'),
+    });
+  }
+
+  return {
+    title: doc.title,
+    subtitle: doc.purpose,
+    cover,
+    sections: clarifySections,
+    quickReference: quickRef.length > 0 ? quickRef : undefined,
+    limitations: limitations.length > 0 ? limitations : undefined,
+    metadata: {
+      audience: doc.audience,
+      generatedAt: doc.metadata?.generatedAt || new Date().toISOString(),
+      familyName: cover.familyName,
+    },
+  };
+}

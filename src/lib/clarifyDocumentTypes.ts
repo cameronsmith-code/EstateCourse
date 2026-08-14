@@ -22,6 +22,7 @@ export type ClarifyBlockType =
   | 'actionList'
   | 'quickRef'
   | 'limitation'
+  | 'parentVoice'
   | 'divider'
   | 'spacer'
   | 'pageBreak'

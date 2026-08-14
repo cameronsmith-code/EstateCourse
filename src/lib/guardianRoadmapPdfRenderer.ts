@@ -64,58 +64,73 @@ interface RenderState {
   page: number;
   familyName: string;
   reportDate: string;
-  logoDataUrl: string | null;
+  headerImgUrl: string | null;
+  footerImgUrl: string | null;
 }
 
-function createState(familyName: string, reportDate: string, logoDataUrl: string | null): RenderState {
+function createState(familyName: string, reportDate: string, headerImgUrl: string | null, footerImgUrl: string | null): RenderState {
   const pdf = new jsPDF({ unit: 'pt', format: 'letter' });
   pdf.setFont('helvetica', 'normal');
-  return { pdf, y: MARGIN_T, page: 1, familyName, reportDate, logoDataUrl };
+  return { pdf, y: MARGIN_T, page: 1, familyName, reportDate, headerImgUrl, footerImgUrl };
 }
 
 // ─── Page management ───────────────────────────────────────────────────────────
 
-function headerFooter(state: RenderState): void {
-  const { pdf, page, familyName, logoDataUrl } = state;
+// Header image: 1103x165 px → at 468pt wide = ~70pt tall
+const HEADER_IMG_W = 468;
+const HEADER_IMG_H = 70;
+// Footer image: 1103x156 px → at 468pt wide = ~66pt tall
+const FOOTER_IMG_W = 468;
+const FOOTER_IMG_H = 66;
 
-  // Header: logo on left, document title on right
-  if (logoDataUrl) {
+function headerFooter(state: RenderState): void {
+  const { pdf, page, headerImgUrl, footerImgUrl } = state;
+
+  // Header: Clarify Wealth brand image at proper proportions
+  if (headerImgUrl) {
     try {
-      pdf.addImage(logoDataUrl, 'PNG', MARGIN_L, MARGIN_T - 28, 80, 16);
+      pdf.addImage(headerImgUrl, 'PNG', MARGIN_L, MARGIN_T - HEADER_IMG_H - 6, HEADER_IMG_W, HEADER_IMG_H);
     } catch {
-      pdf.setFontSize(8);
+      pdf.setFontSize(9);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(...BRAND.navy);
       pdf.text('CLARIFY WEALTH', MARGIN_L, MARGIN_T - 18);
     }
   } else {
-    pdf.setFontSize(8);
+    pdf.setFontSize(9);
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(...BRAND.navy);
     pdf.text('CLARIFY WEALTH', MARGIN_L, MARGIN_T - 18);
   }
 
-  pdf.setFontSize(8);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(...BRAND.lightSlate);
-  pdf.text('Guardianship Roadmap', PAGE_W - MARGIN_R, MARGIN_T - 18, { align: 'right' });
-
   // Header gold line
   pdf.setDrawColor(...BRAND.gold);
   pdf.setLineWidth(0.75);
-  pdf.line(MARGIN_L, MARGIN_T - 10, PAGE_W - MARGIN_R, MARGIN_T - 10);
+  pdf.line(MARGIN_L, MARGIN_T - 4, PAGE_W - MARGIN_R, MARGIN_T - 4);
 
-  // Footer line
-  pdf.setDrawColor(...BRAND.border);
-  pdf.setLineWidth(0.5);
-  pdf.line(MARGIN_L, PAGE_H - MARGIN_B + 8, PAGE_W - MARGIN_R, PAGE_H - MARGIN_B + 8);
+  // Footer: Clarify Wealth branded footer image
+  if (footerImgUrl) {
+    try {
+      pdf.addImage(footerImgUrl, 'PNG', MARGIN_L, PAGE_H - MARGIN_B - FOOTER_IMG_H + 18, FOOTER_IMG_W, FOOTER_IMG_H);
+    } catch {
+      // Fallback footer
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(...BRAND.lightSlate);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`${state.familyName} — Guardianship Roadmap`, MARGIN_L, PAGE_H - MARGIN_B + 20);
+    }
+  } else {
+    pdf.setFontSize(7.5);
+    pdf.setTextColor(...BRAND.lightSlate);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`${state.familyName} — Guardianship Roadmap`, MARGIN_L, PAGE_H - MARGIN_B + 20);
+  }
 
-  // Footer text
-  pdf.setFontSize(7.5);
-  pdf.setTextColor(...BRAND.lightSlate);
+  // Page number (always rendered on top of footer image)
+  pdf.setFontSize(8);
+  pdf.setTextColor(...BRAND.navy);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(`${familyName} — Guardianship Roadmap`, MARGIN_L, PAGE_H - MARGIN_B + 20);
-  pdf.text(String(page), PAGE_W - MARGIN_R, PAGE_H - MARGIN_B + 20, { align: 'right' });
+  pdf.text(String(page), PAGE_W - MARGIN_R, PAGE_H - MARGIN_B + 12, { align: 'right' });
 }
 
 function newPage(state: RenderState): void {
@@ -435,6 +450,7 @@ function renderBlock(state: RenderState, block: ClarifyBlock): void {
     case 'actionList': renderActionList(state, block); break;
     case 'quickRef': renderQuickRef(state, block); break;
     case 'limitation': renderLimitation(state, block); break;
+    case 'parentVoice': renderParentVoice(state, block); break;
     case 'pageBreak': newPage(state); break;
     default: break;
   }
@@ -458,42 +474,40 @@ function renderSection(state: RenderState, section: ClarifySection): void {
   }
 
   for (const block of section.blocks) {
-    // Handle parent voice specially
-    if (block.evidenceTag === undefined && block.type === 'callout' && block.evidenceLabel === 'Parent Voice') {
-      renderParentVoice(state, block);
-    } else {
-      renderBlock(state, block);
-    }
+    renderBlock(state, block);
   }
 }
 
 // ─── Cover page ────────────────────────────────────────────────────────────────
 
 function renderCover(state: RenderState, doc: ClarifyDocument): void {
-  const { pdf, logoDataUrl } = state;
+  const { pdf, headerImgUrl } = state;
   const cover = doc.cover;
 
-  // Logo centered
-  if (logoDataUrl) {
+  // Clarify Wealth brand image centered on cover, at proper proportions
+  // Header image is 1103x165 → at 300pt wide = ~45pt tall
+  const coverImgW = 300;
+  const coverImgH = 45;
+  if (headerImgUrl) {
     try {
-      pdf.addImage(logoDataUrl, 'PNG', PAGE_W / 2 - 60, 160, 120, 24);
+      pdf.addImage(headerImgUrl, 'PNG', PAGE_W / 2 - coverImgW / 2, 140, coverImgW, coverImgH);
     } catch {
-      pdf.setFontSize(12);
+      pdf.setFontSize(16);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(...BRAND.navy);
-      pdf.text('CLARIFY WEALTH', PAGE_W / 2, 180, { align: 'center' });
+      pdf.text('CLARIFY WEALTH', PAGE_W / 2, 170, { align: 'center' });
     }
   } else {
-    pdf.setFontSize(12);
+    pdf.setFontSize(16);
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(...BRAND.navy);
-    pdf.text('CLARIFY WEALTH', PAGE_W / 2, 180, { align: 'center' });
+    pdf.text('CLARIFY WEALTH', PAGE_W / 2, 170, { align: 'center' });
   }
 
   // Gold line
   pdf.setDrawColor(...BRAND.gold);
   pdf.setLineWidth(1.5);
-  pdf.line(PAGE_W / 2 - 60, 200, PAGE_W / 2 + 60, 200);
+  pdf.line(PAGE_W / 2 - 80, 200, PAGE_W / 2 + 80, 200);
 
   // Title
   pdf.setFontSize(34);
@@ -575,36 +589,47 @@ function renderQuickReference(state: RenderState, doc: ClarifyDocument): void {
   });
 }
 
-// ─── Logo loading ──────────────────────────────────────────────────────────────
+// ─── Brand image loading ─────────────────────────────────────────────────────
 
-let cachedLogoDataUrl: string | null | undefined;
+let cachedHeaderImg: string | null | undefined;
+let cachedFooterImg: string | null | undefined;
 
-async function loadLogoDataUrl(): Promise<string | null> {
-  if (cachedLogoDataUrl !== undefined) return cachedLogoDataUrl;
+async function loadImageDataUrl(url: string): Promise<string | null> {
   try {
-    const response = await fetch('/branding/word/media/image1.png');
-    if (!response.ok) {
-      cachedLogoDataUrl = null;
-      return null;
-    }
+    const response = await fetch(url);
+    if (!response.ok) return null;
     const blob = await response.blob();
-    cachedLogoDataUrl = await new Promise<string>((resolve, reject) => {
+    return await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
-    return cachedLogoDataUrl;
   } catch {
-    cachedLogoDataUrl = null;
     return null;
   }
 }
 
+async function loadHeaderImg(): Promise<string | null> {
+  if (cachedHeaderImg !== undefined) return cachedHeaderImg;
+  cachedHeaderImg = await loadImageDataUrl('/branding/word/media/image1.png');
+  return cachedHeaderImg;
+}
+
+async function loadFooterImg(): Promise<string | null> {
+  if (cachedFooterImg !== undefined) return cachedFooterImg;
+  cachedFooterImg = await loadImageDataUrl('/branding/word/media/image2.png');
+  return cachedFooterImg;
+}
+
 // ─── Main renderer ─────────────────────────────────────────────────────────────
 
-export function renderGuardianRoadmapPdf(doc: ClarifyDocument, logoDataUrl?: string | null): jsPDF {
-  const state = createState(doc.cover.familyName, doc.cover.preparedDate, logoDataUrl ?? null);
+export function renderGuardianRoadmapPdf(
+  doc: ClarifyDocument,
+  headerImgUrl?: string | null,
+  footerImgUrl?: string | null,
+): jsPDF {
+  const state = createState(doc.cover.familyName, doc.cover.preparedDate, headerImgUrl ?? null, footerImgUrl ?? null);
 
   // Cover page (page 1, no header/footer)
   renderCover(state, doc);
@@ -624,7 +649,7 @@ export function renderGuardianRoadmapPdf(doc: ClarifyDocument, logoDataUrl?: str
 }
 
 export async function generateGuardianRoadmapPdf(doc: ClarifyDocument): Promise<Blob> {
-  const logo = await loadLogoDataUrl();
-  const pdf = renderGuardianRoadmapPdf(doc, logo);
+  const [header, footer] = await Promise.all([loadHeaderImg(), loadFooterImg()]);
+  const pdf = renderGuardianRoadmapPdf(doc, header, footer);
   return pdf.output('blob');
 }

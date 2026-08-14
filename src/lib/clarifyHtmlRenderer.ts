@@ -45,7 +45,6 @@ function evidenceTagHtml(tag?: EvidenceTag, label?: string): string {
 
 function renderBlock(block: ClarifyBlock): string {
   const tag = evidenceTagHtml(block.evidenceTag, block.evidenceLabel);
-  const isParentVoice = block.evidenceLabel === 'Parent Voice' && !block.evidenceTag;
 
   switch (block.type) {
     case 'heading':
@@ -65,14 +64,15 @@ function renderBlock(block: ClarifyBlock): string {
       return `<ul class="bullet-list">${(block.items || []).map(i => `<li>${esc(i)}</li>`).join('')}</ul>`;
 
     case 'callout': {
-      if (isParentVoice) {
-        return `<div class="parent-voice"><span class="parent-voice-tag">${block.heading ? esc(block.heading) : 'In Their Own Words'}</span><p>${esc(block.text || '')}</p></div>`;
-      }
       if (!block.evidenceTag || !DISPLAYED_EVIDENCE_TAGS.has(block.evidenceTag)) {
         return `<p class="body-text">${esc(block.text || '')}</p>`;
       }
       const c = TAG_COLORS[block.evidenceTag];
       return `<div class="callout" style="background:${c.bg};border-color:${c.border}"><span class="callout-tag" style="color:${c.text}">${esc(block.evidenceLabel || '')}</span><p>${esc(block.text || '')}</p></div>`;
+    }
+
+    case 'parentVoice': {
+      return `<div class="parent-voice"><span class="parent-voice-tag">${block.heading ? esc(block.heading) : 'In Their Own Words'}</span><p>${esc(block.text || '')}</p></div>`;
     }
 
     case 'card':

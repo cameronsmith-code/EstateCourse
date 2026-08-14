@@ -367,6 +367,26 @@ function resolvePerChildSection(
       allBlocks.push(...processed);
     }
 
+    // Semantic deduplication: if both 'activities' and 'communitiesAndTraditions'
+    // subsections exist, merge them into one subsection and remove duplicate
+    // activity names.
+    const activitiesIdx = subsections.findIndex(s => s.heading === 'Activities');
+    const communitiesIdx = subsections.findIndex(s => s.heading === 'Communities / Activities / Traditions');
+    if (activitiesIdx >= 0 && communitiesIdx >= 0) {
+      const seenHeadings = new Set<string>(
+        subsections[communitiesIdx].blocks
+          .map(b => b.heading)
+          .filter((h): h is string => !!h)
+      );
+      const dedupedActivityBlocks = subsections[activitiesIdx].blocks.filter(b => {
+        if (b.heading && seenHeadings.has(b.heading)) return false;
+        if (b.heading) seenHeadings.add(b.heading);
+        return true;
+      });
+      subsections[communitiesIdx].blocks.push(...dedupedActivityBlocks);
+      subsections.splice(activitiesIdx, 1);
+    }
+
     if (subsections.length > 0) {
       childSections.push({
         childId: child.childId,
@@ -688,10 +708,10 @@ const guardianStrategy: AudienceStrategy = {
   title: 'Guardianship Roadmap',
   purpose: 'What you need to know, who to call, and how the parents want you to approach this.',
   blueprints: [
-    // 1. Start Here
+    // 1. Who Would Step In
     {
       id: 'start-here',
-      heading: 'Start Here',
+      heading: 'Who Would Step In',
       purpose: 'The essentials, right at the top',
       priority: 'primary',
       sources: [
@@ -737,7 +757,7 @@ const guardianStrategy: AudienceStrategy = {
     {
       id: 'child-details',
       heading: 'About Each Child',
-      purpose: 'Everything you would need to know about each child',
+      purpose: 'Important things their parents would want a future Guardian to know',
       priority: 'primary',
       sources: [
         { area: 'children', subsection: 'introduction' },

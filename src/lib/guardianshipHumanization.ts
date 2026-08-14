@@ -33,18 +33,20 @@ export function interpretContinuityParagraph(
   ideas: string[],
   childName: string,
   personName: string,
-  parentLabel: string
+  parentLabel: string,
+  guardianName?: string
 ): string {
   if (ideas.length === 0) return '';
+  const helper = guardianName || 'a future guardian';
   const humanized = humanizeContinuityIdeas(ideas);
   if (humanized.length === 1) {
-    return `${parentLabel} would hope ${personName} helps preserve that connection through ${humanized[0]}.`;
+    return `${parentLabel} would hope ${helper} helps preserve that connection through ${humanized[0]}.`;
   }
   if (humanized.length === 2) {
-    return `${parentLabel} would hope ${personName} makes a deliberate effort to keep ${childName} connected to ${personName} through ${humanized[0]} and ${humanized[1]}.`;
+    return `${parentLabel} would hope ${helper} makes a deliberate effort to keep ${personName} in ${childName}'s life through ${humanized[0]} and ${humanized[1]}.`;
   }
   const last = humanized.pop()!;
-  return `${parentLabel} would hope ${personName} helps keep ${childName} in ${childName}'s life through ${humanized.join(', ')}, and ${last}.`;
+  return `${parentLabel} would hope ${helper} makes a deliberate effort to keep ${personName} in ${childName}'s life through ${humanized.join(', ')}, and ${last}.`;
 }
 
 // ─── Connection relationship types ────────────────────────────────────────────
@@ -132,6 +134,68 @@ const RECORD_KEEPING_LABELS: Record<string, string> = {
 
 export function humanizeRecordKeeping(preference: string): string {
   return RECORD_KEEPING_LABELS[preference] || humanizeSnakeCase(preference);
+}
+
+// ─── Funding everyday expense approach ────────────────────────────────────────
+
+const EVERYDAY_EXPENSE_LABELS: Record<string, string> = {
+  no_detailed_reimbursement: 'They do not expect everyday family life to become an exercise in tracking every small household expense.',
+  reasonable_shared_okay: 'They are comfortable with reasonable expenses that may benefit the whole household where those costs help the family function well.',
+  separate_tracking: 'They would prefer child-specific expenses to be tracked separately from general household costs.',
+};
+
+export function humanizeEverydayExpenseApproach(value: string): string {
+  return EVERYDAY_EXPENSE_LABELS[value] || (value && !isLowInformationText(value) ? value : '');
+}
+
+// ─── Funding meaningful expense approach ──────────────────────────────────────
+
+const MEANINGFUL_EXPENSE_LABELS: Record<string, string> = {
+  resources_help_cover: 'They would want the resources they have left behind to help cover meaningful child-specific expenses — things like education, activities, and healthcare.',
+  guardian_judgment: 'They would trust the guardian to use reasonable judgment about which child-specific expenses are meaningful.',
+  trustee_decides: 'They would want the trustee to determine which expenses are covered based on the child\'s needs.',
+};
+
+export function humanizeMeaningfulExpenseApproach(value: string): string {
+  return MEANINGFUL_EXPENSE_LABELS[value] || (value && !isLowInformationText(value) ? value : '');
+}
+
+// ─── Funding major household expense approach ─────────────────────────────────
+
+const MAJOR_HOUSEHOLD_LABELS: Record<string, string> = {
+  strongly_want_considered: 'They would strongly want these kinds of major adjustments to be considered and supported where the estate plan allows.',
+  open_to_it: 'They would be open to supporting major adjustments if they become necessary.',
+  not_anticipated: 'They did not specifically anticipate major household adjustments, but the overall funding philosophy still applies.',
+};
+
+export function humanizeMajorHouseholdApproach(value: string): string {
+  return MAJOR_HOUSEHOLD_LABELS[value] || (value && !isLowInformationText(value) ? value : '');
+}
+
+// ─── Funding shared household benefit ─────────────────────────────────────────
+
+const SHARED_BENEFIT_LABELS: Record<string, string> = {
+  reasonable_shared_okay: 'They are comfortable with reasonable expenses that may benefit the whole household where those costs help the family function well.',
+  separate_only: 'They would prefer resources to be used specifically for the children rather than for general household expenses.',
+  generous_shared: 'They would want resources to generously support the whole guardian household, recognizing that the children benefit from a stable home.',
+};
+
+export function humanizeSharedBenefitPhilosophy(value: string): string {
+  return SHARED_BENEFIT_LABELS[value] || (value && !isLowInformationText(value) ? value : '');
+}
+
+// ─── Funding overall approach ─────────────────────────────────────────────────
+
+const OVERALL_APPROACH_LABELS: Record<string, string> = {
+  majorExpensesOnly: 'help cover the major costs that come with expanding a household',
+  shareIncrementalCosts: 'help cover the incremental costs of adding the children to the guardian household',
+  generousHouseholdSupport: 'help make that transition easier — not simply pay the children\'s individual expenses',
+  custom: 'help support the guardian household in the way the parents have described',
+  unsure: 'help support the guardian household, though the parents were still working out the details',
+};
+
+export function humanizeOverallApproach(value: string): string {
+  return OVERALL_APPROACH_LABELS[value] || '';
 }
 
 // ─── Adult sibling role ───────────────────────────────────────────────────────
@@ -234,38 +298,108 @@ export interface QaFinding {
   sample: string;
 }
 
+// Known enum values that must never appear in human-facing text
+const KNOWN_ENUM_VALUES = [
+  'playdates_visits', 'weekend_visits', 'sleepovers', 'shared_activity',
+  'camp_together', 'birthdays_occasions', 'video_calls', 'gaming_online',
+  'contact_friend_parents', 'regular_sibling', 'club_activity',
+  'keep_simple', 'detailed_tracking', 'trustee_manages',
+  'no_detailed_reimbursement', 'resources_help_cover', 'strongly_want_considered',
+  'reasonable_shared_okay', 'separate_tracking', 'guardian_judgment',
+  'trustee_decides', 'not_anticipated', 'separate_only', 'generous_shared',
+  'career_sacrifice', 'emotional_support', 'family_discussions',
+  'practical_help', 'financial_support', 'primary_caregiver',
+  'managing_finances', 'providing_housing', 'medical_decisions',
+  'best_friend', 'camp_friend', 'family_member', 'extended_family',
+  'community_program', 'family_gatherings', 'close_friend',
+  'community_group', 'discretionary_trust', 'bare_trust', 'family_trust',
+  'alter_ego_trust', 'spousal_trust', 'testamentary_trust',
+  'disabled_person_trust', 'fully_independent', 'mostly_independent',
+  'needs_significant_support', 'not_sure',
+];
+
+// Words that are fine as parts of normal English but also match _ pattern
+const SNAKE_CASE_ALLOWLIST = new Set([
+  'ad_hoc', 'per_se', 'ex_gratia', 'pro_rata',
+]);
+
+function findEmbeddedEnums(text: string): string[] {
+  const found: string[] = [];
+  // Match any snake_case token of 2+ segments
+  const matches = text.match(/[a-z]+_[a-z_]+/g);
+  if (matches) {
+    for (const m of matches) {
+      if (SNAKE_CASE_ALLOWLIST.has(m)) continue;
+      // If it's a known enum value, it's always blocking
+      if (KNOWN_ENUM_VALUES.includes(m)) {
+        found.push(m);
+      }
+      // If it's a 2+ segment snake_case that appears to be an enum (not normal English)
+      else if (m.length < 40 && !m.includes(' ')) {
+        found.push(m);
+      }
+    }
+  }
+  return found;
+}
+
 export function sanitizeClarifyDocument(doc: {
-  sections: { id: string; heading: string; blocks: { type: string; text?: string; title?: string; items?: string[]; heading?: string }[] }[];
+  sections: { id: string; heading: string; blocks: { type: string; text?: string; title?: string; items?: string[]; heading?: string; rows?: { role: string; person: string; responsibility: string; whenToContact?: string }[] }[] }[];
   quickReference?: { label: string; value: string }[];
 }): QaFinding[] {
   const findings: QaFinding[] = [];
+
   const checkText = (text: string | undefined, path: string) => {
     if (!text) return;
-    if (SNAKE_CASE_PATTERN.test(text) && text.length < 60) {
-      // Short strings with snake_case are suspicious
-      if (/[a-z]+_[a-z]+/.test(text) && !text.includes(' ')) {
-        findings.push({
-          severity: 'blocking',
-          path,
-          issue: 'Raw enum value detected',
-          sample: text,
-        });
-      }
+
+    // Check for embedded enum values (even inside longer sentences)
+    const embeddedEnums = findEmbeddedEnums(text);
+    for (const e of embeddedEnums) {
+      findings.push({
+        severity: 'blocking',
+        path,
+        issue: 'Raw enum value detected in text',
+        sample: e,
+      });
     }
-    if (JSON_PATTERN.test(text)) {
+
+    // Check for serialized JSON
+    if (JSON_PATTERN.test(text) || text.includes('[{') || text.includes('"name":')) {
       findings.push({
         severity: 'blocking',
         path,
         issue: 'Serialized JSON detected',
-        sample: text.substring(0, 50),
+        sample: text.substring(0, 80),
       });
     }
-    if (RAW_ID_PATTERN.test(text) && text.length < 20) {
+
+    // Check for internal IDs
+    if (/\b(pp_|conn_|nb_|child_|et_|fdm_)/.test(text)) {
+      findings.push({
+        severity: 'blocking',
+        path,
+        issue: 'Internal ID prefix detected',
+        sample: text.substring(0, 80),
+      });
+    }
+
+    // Check for raw boolean strings
+    if (/\btrue\b|\bfalse\b/.test(text) && text.length < 20) {
       findings.push({
         severity: 'warning',
         path,
-        issue: 'Internal ID detected',
+        issue: 'Raw boolean value detected',
         sample: text,
+      });
+    }
+
+    // Check for undefined/null
+    if (/\bundefined\b|\bnull\b|\bNaN\b|\[object Object\]/.test(text)) {
+      findings.push({
+        severity: 'blocking',
+        path,
+        issue: 'Implementation value detected',
+        sample: text.substring(0, 80),
       });
     }
   };
@@ -281,14 +415,27 @@ export function sanitizeClarifyDocument(doc: {
           checkText(item, `${section.id}.${block.type}.items`);
         }
       }
+      if (block.rows) {
+        for (const row of block.rows) {
+          checkText(row.role, `${section.id}.${block.type}.rows.role`);
+          checkText(row.person, `${section.id}.${block.type}.rows.person`);
+          checkText(row.responsibility, `${section.id}.${block.type}.rows.responsibility`);
+          checkText(row.whenToContact, `${section.id}.${block.type}.rows.whenToContact`);
+        }
+      }
     }
   }
 
   if (doc.quickReference) {
     for (const qr of doc.quickReference) {
       checkText(qr.value, `quickRef.${qr.label}`);
+      checkText(qr.label, `quickRef.${qr.label}.label`);
     }
   }
 
   return findings;
+}
+
+export function hasBlockingFindings(findings: QaFinding[]): boolean {
+  return findings.some(f => f.severity === 'blocking');
 }

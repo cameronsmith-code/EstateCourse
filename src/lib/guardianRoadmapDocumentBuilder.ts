@@ -76,26 +76,14 @@ function narrativeToBlocks(blocks: NarrativeBlock[], sectionId: string): Clarify
       continue;
     }
 
-    // Parent voice: render as a special callout with gold styling
+    // Parent voice: render as a dedicated parent voice block with gold styling
     if (block.type === 'parentVoice' && block.body) {
-      if (block.heading) {
-        result.push({
-          id: nextId(sectionId),
-          type: 'callout',
-          text: block.body,
-          title: block.heading,
-          evidenceTag: undefined,
-          evidenceLabel: 'Parent Voice',
-        });
-      } else {
-        result.push({
-          id: nextId(sectionId),
-          type: 'callout',
-          text: block.body,
-          evidenceTag: undefined,
-          evidenceLabel: 'Parent Voice',
-        });
-      }
+      result.push({
+        id: nextId(sectionId),
+        type: 'parentVoice',
+        text: block.body,
+        heading: block.heading || 'In Their Own Words',
+      });
       continue;
     }
 
@@ -386,11 +374,16 @@ export function buildGuardianClarifyDocument(
     },
   };
 
-  // QA sanitization pass — warn on any raw values that slipped through
+  // QA sanitization pass — log warnings and throw on blocking findings
   const findings = sanitizeClarifyDocument(result);
   for (const f of findings) {
-    if (f.severity === 'blocking') {
-      console.warn(`[QA] ${f.severity.toUpperCase()}: ${f.path} — ${f.issue} ("${f.sample}")`);
+    console.warn(`[QA] ${f.severity.toUpperCase()}: ${f.path} — ${f.issue} ("${f.sample}")`);
+  }
+  const blocking = findings.filter(f => f.severity === 'blocking');
+  if (blocking.length > 0) {
+    console.error(`[QA] ${blocking.length} BLOCKING findings — document may contain raw implementation values:`);
+    for (const f of blocking) {
+      console.error(`[QA]   ${f.path}: ${f.issue} ("${f.sample}")`);
     }
   }
 

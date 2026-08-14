@@ -12,7 +12,7 @@ import type {
   GuardianshipAudience,
 } from './guardianshipNarrativeTypes';
 import { getParentLabel, ALL_AUDIENCES, GUARDIAN_AUDIENCES, LAWYER_AUDIENCES, ACCOUNTANT_AUDIENCES, TRUSTEE_AUDIENCES, CLIENT_PLANNING_AUDIENCES } from './guardianshipNarrativeTypes';
-import { humanizeRelationshipTypes, humanizeContexts, interpretContinuityParagraph, humanizeParticipantTypes, humanizeTrustType, humanizeRecordKeeping, humanizeSiblingRole, humanizeSiblingNotResponsible, isLowInformationText } from './guardianshipHumanization';
+import { humanizeRelationshipTypes, humanizeContexts, interpretContinuityParagraph, humanizeParticipantTypes, humanizeTrustType, humanizeRecordKeeping, humanizeSiblingRole, humanizeSiblingNotResponsible, humanizeEverydayExpenseApproach, humanizeMeaningfulExpenseApproach, humanizeMajorHouseholdApproach, humanizeSharedBenefitPhilosophy, humanizeOverallApproach, humanizeFinancialType, isLowInformationText } from './guardianshipHumanization';
 
 let blockCounter = 0;
 
@@ -89,16 +89,8 @@ function buildFamilyContext(ctx: NarrativeContext): NarrativeBlock[] {
   audiences: ALL_AUDIENCES,
   }));
 
-  if (hasGuardian && model.guardianAssignments.length > 0) {
-    const firstAssignment = model.guardianAssignments[0];
-    const guardianName = guardianLabel(firstAssignment);
-    const allGuardianChildren = model.guardianAssignments.flatMap(a => a.childNames);
-    blocks.push(makeBlock('GUARDIAN-01', 'context', 'primary', 'parentPreference', {
-      heading: 'Who Would Step In',
-      body: `${parentLabel} intend ${guardianName} to act as ${pluralGuardian(firstAssignment)} for ${allGuardianChildren.join(' and ')}. This document is meant to help ${guardianName} understand the children and carry out the parents' wishes.`,
-    audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
-    }));
-  }
+  // Guardian intro is handled by buildGuardianPlan which produces per-assignment
+  // "Guardian for {childLabel}" blocks. We do NOT duplicate it here.
 
   if (model.family.provinceOfResidence) {
     const province = model.family.provinceOfResidence;
@@ -565,7 +557,9 @@ function buildConnectionBlocks(child: GuardianshipChildProfile, ctx: NarrativeCo
 
     // CONNECTION-02: Continuity ideas — synthesize into natural language
     if (conn.continuityIdeas.length > 0) {
-      const continuityText = interpretContinuityParagraph(conn.continuityIdeas, name, conn.name, parentLabel);
+      const assignment = ctx.model.guardianAssignments.find(a => a.childIds.includes(child.childId));
+    const guardianName = assignment ? guardianLabel(assignment) : undefined;
+    const continuityText = interpretContinuityParagraph(conn.continuityIdeas, name, conn.name, parentLabel, guardianName);
       blocks.push(makeBlock('CONNECTION-02', 'action', 'important', 'parentPreference', {
         body: continuityText,
         childIds: [child.childId],
@@ -1056,8 +1050,8 @@ function buildImmediateActions(ctx: NarrativeContext): ImmediateActionNarrative[
 
   const seenActions = new Map<string, typeof model.immediateActions[number] & { mergedChildNames: string[] }>();
   for (const action of model.immediateActions) {
-    const key = action.id.startsWith('people_contact') ? 'people_contact'
-      : action.id.startsWith('keep_connected') ? 'keep_connected'
+    const key = action.id.startsWith('people_contact') ? `people_contact_${action.childNames.join('_')}`
+      : action.id.startsWith('keep_connected') ? `keep_connected_${action.childNames.join('_')}`
       : action.id;
     const existing = seenActions.get(key);
     if (existing) {
@@ -1101,12 +1095,34 @@ function buildImmediateActions(ctx: NarrativeContext): ImmediateActionNarrative[
     } else if (action.id.startsWith('gather_records')) {
       ruleId = 'IMMEDIATE-05';
       heading = 'Gather school and health records';
-      body = action.action.replace(/^Gather /, '');
+      const childNames = action.mergedChildNames;
+      // Normalize and deduplicate document locations
+      const rawLoc = action.action.replace(/^Gather /, '');
+      const locParts = rawLoc.split(/[;,]/).map(s => s.trim()).filter(s => s.length > 0);
+      const normalized = new Set<string>();
+      const cleanParts: string[] = [];
+      for (const part of locParts) {
+        const norm = part.toLowerCase().replace(/\s+/g, ' ').replace(/\.$/, '').trim();
+        if (!normalized.has(norm)) {
+          normalized.add(norm);
+          cleanParts.push(part.replace(/\.$/, '').trim());
+        }
+      }
+      if (childNames.length === 1) {
+        body = `Gather ${childNames[0]}'s school and health records from ${cleanParts.join(' and ')} so they can be provided to the new school and healthcare providers.`;
+      } else {
+        body = `Gather school and health records for ${childNames.join(' and ')} from ${cleanParts.join(' and ')} so they can be provided to new schools and healthcare providers.`;
+      }
     } else if (action.id.startsWith('keep_connected')) {
       ruleId = 'IMMEDIATE-06';
       heading = 'Help the children stay connected to important people';
-      const nameMatch = action.action.match(/identify ([^ ]+) as key relationships/);
-      body = nameMatch ? `Identify ${nameMatch[1]} as a key relationship to preserve.` : action.action;
+      // Generate child-specific guidance from the action data
+      const childNames = action.mergedChildNames;
+      if (childNames.length > 0) {
+        body = `Make early plans to help ${childNames.join(' and ')} stay connected to the important people identified in their relationship sections. Contact information should be obtained where it is not already recorded.`;
+      } else {
+        body = `Make early plans to help the children stay connected to the important people identified in their relationship sections.`;
+      }
     } else if (action.id.startsWith('firstdays_')) {
       ruleId = 'IMMEDIATE-07';
       heading = `Follow ${parentLabel}'s first-days wishes`;
@@ -1192,23 +1208,22 @@ function buildQuickReference(ctx: NarrativeContext): QuickReferenceItem[] {
 
   // Financial resources
   for (const fr of model.financialResources.filter(r => r.exists)) {
-    const labelMap: Record<string, string> = {
-      'life_insurance': 'Life Insurance',
-      'resp': 'RESP',
-      'rdsp': 'RDSP',
-      'trust': 'Family Trust',
-    };
     items.push({
       id: `qr_${id++}`,
-      label: labelMap[fr.type] || fr.type,
+      label: humanizeFinancialType(fr.type),
       value: fr.childNames.length > 0 ? `For ${fr.childNames.join(', ')}` : 'See Financial Map',
       category: 'financial',
       childIds: fr.childIds.length > 0 ? fr.childIds : undefined,
     });
   }
 
-  // Documents with locations
+  // Documents with locations (normalized — deduplicate by label + normalized location)
+  const seenDocLocs = new Set<string>();
   for (const doc of model.documents.filter(d => d.locationKnown && d.location)) {
+    const normLoc = (doc.location || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const docKey = `${doc.label}|${normLoc}`;
+    if (seenDocLocs.has(docKey)) continue;
+    seenDocLocs.add(docKey);
     items.push({
       id: `qr_${id++}`,
       label: doc.label,
@@ -1230,14 +1245,6 @@ function buildFundingPhilosophyNarrative(ctx: NarrativeContext): NarrativeBlock[
   const guardianAudience = [...GUARDIAN_AUDIENCES, ...TRUSTEE_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES];
   const lawyerAudience = [...LAWYER_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES];
 
-  const overallApproachLabels: Record<string, string> = {
-    majorExpensesOnly: 'resources should cover major expenses related to the children, not everyday household costs',
-    shareIncrementalCosts: 'resources should share the incremental costs the children add to the household',
-    generousHouseholdSupport: 'resources should generously support the whole guardian household, recognizing that the children benefit from a stable home',
-    custom: '',
-    unsure: 'they were still working through how resources should support the guardian household',
-  };
-
   // FUNDING-01: Synthesized funding philosophy paragraph
   const childNames = ctx.model.children
     .filter(c => c.status === 'minor')
@@ -1253,16 +1260,17 @@ function buildFundingPhilosophyNarrative(ctx: NarrativeContext): NarrativeBlock[
   );
 
   if (fp.overallApproach) {
-    const label = overallApproachLabels[fp.overallApproach];
+    const label = humanizeOverallApproach(fp.overallApproach);
     if (label) {
-      philosophyParts.push(`Their intention is that the resources they've left behind should ${label.replace('resources should ', '')} — not simply pay the children's individual expenses.`);
+      philosophyParts.push(`Their intention is that the resources they've left behind should ${label} — not simply pay the children's individual expenses.`);
     } else {
       philosophyParts.push(`Their intention is that the resources they've left behind should help make that transition easier — not simply pay the children's individual expenses.`);
     }
   }
 
-  if (fp.everydayExpenseApproach && !isLowInformationText(fp.everydayExpenseApproach)) {
-    philosophyParts.push(fp.everydayExpenseApproach);
+  const everydayText = humanizeEverydayExpenseApproach(fp.everydayExpenseApproach || '');
+  if (everydayText) {
+    philosophyParts.push(everydayText);
   }
 
   if (fp.recordKeepingPreference) {
@@ -1287,8 +1295,9 @@ function buildFundingPhilosophyNarrative(ctx: NarrativeContext): NarrativeBlock[
     );
   }
 
-  if (fp.sharedHouseholdBenefitPhilosophy && !isLowInformationText(fp.sharedHouseholdBenefitPhilosophy)) {
-    philosophyParts.push(fp.sharedHouseholdBenefitPhilosophy);
+  const sharedBenefitText = humanizeSharedBenefitPhilosophy(fp.sharedHouseholdBenefitPhilosophy || '');
+  if (sharedBenefitText) {
+    philosophyParts.push(sharedBenefitText);
   }
 
   if (fp.guardianOwnChildrenFairnessNotes && !isLowInformationText(fp.guardianOwnChildrenFairnessNotes)) {

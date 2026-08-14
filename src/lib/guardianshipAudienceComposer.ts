@@ -461,6 +461,7 @@ function flattenChild(child: GuardianshipChildNarrative): NarrativeBlock[] {
     ...(child.communitiesAndTraditions || []),
     ...(child.inheritance || []),
     ...(child.adultTransition || []),
+    ...(child.futureEducation || []),
   ];
 }
 

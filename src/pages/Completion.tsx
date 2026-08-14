@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CheckCircle, Download, Home, FileText, Eye } from 'lucide-react';
+import { CheckCircle, Download, Home, FileText, Eye, Loader2 } from 'lucide-react';
 import { generatePDF } from '../lib/pdfGenerator';
 import { useEffect, useState, useMemo } from 'react';
 import { useQuestionnaire } from '../context/QuestionnaireContext';
@@ -14,7 +14,13 @@ export default function Completion() {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [showGuardianPreview, setShowGuardianPreview] = useState(false);
-  const { answers } = useQuestionnaire();
+  const { answers, initQuestionnaire, loading } = useQuestionnaire();
+
+  useEffect(() => {
+    initQuestionnaire();
+  }, [initQuestionnaire]);
+
+  const hasLoadedAnswers = answers.size > 0 && !!(answers.get('aboutYou')?.fullName);
 
   useEffect(() => {
     const aboutYou = answers.get('aboutYou') || {};
@@ -68,6 +74,7 @@ export default function Completion() {
 
   // Build the Guardian Roadmap document from questionnaire answers
   const guardianClarifyDoc = useMemo(() => {
+    if (!hasLoadedAnswers) return null;
     try {
       const model = buildGuardianshipRoadmap(answers);
       const narrative = buildGuardianshipNarrative(model);
@@ -81,12 +88,32 @@ export default function Completion() {
         clientNames,
         reportDate,
       });
-      return buildGuardianClarifyDocument(guardianDoc);
+      const clarifyDoc = buildGuardianClarifyDocument(guardianDoc);
+
+      // QA: block empty-rich-data mismatch
+      // If the questionnaire has named clients and children but the document
+      // falls back to "Your Family" or has almost no sections, refuse to emit it.
+      const hasNamedClient = clientNames.length > 0;
+      const childrenAnswers = answers.get('children') || {};
+      const childrenData = (childrenAnswers.childrenData as unknown[]) || [];
+      const hasNamedChildren = childrenData.length > 0;
+      const coverUsesFallback = clarifyDoc.cover.familyName === 'Your Family';
+      const hasMinimalSections = clarifyDoc.sections.length < 3;
+      if (hasNamedClient && hasNamedChildren && (coverUsesFallback || hasMinimalSections)) {
+        console.error(
+          '[QA] BLOCKING: Questionnaire has named client(s) and children but Guardian document is near-empty. ' +
+          `familyName="${clarifyDoc.cover.familyName}", sections=${clarifyDoc.sections.length}. ` +
+          'Refusing to generate a misleading near-empty PDF.'
+        );
+        return null;
+      }
+
+      return clarifyDoc;
     } catch (err) {
       console.warn('Guardian Roadmap build failed:', err);
       return null;
     }
-  }, [answers]);
+  }, [answers, hasLoadedAnswers]);
 
   const handleDownloadPDF = () => {
     generatePDF(formData as Parameters<typeof generatePDF>[0]);
@@ -126,6 +153,18 @@ export default function Completion() {
   }, [guardianClarifyDoc]);
 
   const hasGuardianData = guardianClarifyDoc !== null;
+  const showLoadingSpinner = loading && !hasLoadedAnswers;
+
+  if (showLoadingSpinner) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-400 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading your questionnaire data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto">

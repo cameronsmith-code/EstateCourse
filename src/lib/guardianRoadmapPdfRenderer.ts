@@ -1,10 +1,11 @@
 /**
- * Clarify Wealth — Guardian Roadmap PDF Renderer
+ * Clarify Wealth — Guardian Roadmap PDF Renderer V2
  *
  * Renders a ClarifyDocument to a jsPDF document using native text,
- * branded headers/footers, and the Clarify Wealth visual system.
+ * the Clarify Wealth brand system, selective evidence display,
+ * and proper pagination.
  *
- * The renderer only lays out content.  It does not interpret, infer,
+ * The renderer only lays out content. It does not interpret, infer,
  * or create planning conclusions.
  */
 
@@ -15,14 +16,13 @@ import type {
   ClarifyBlock,
   EvidenceTag,
 } from './clarifyDocumentTypes';
-import { EVIDENCE_TAG_LABELS } from './clarifyDocumentTypes';
 
 // ─── Brand palette ─────────────────────────────────────────────────────────────
 
 const BRAND = {
-  navy: [15, 58, 94] as [number, number, number],       // #0f3a5e
-  gold: [197, 165, 114] as [number, number, number],     // #c5a572
-  slate: [51, 65, 85] as [number, number, number],       // #334155
+  navy: [15, 58, 94] as [number, number, number],
+  gold: [197, 165, 114] as [number, number, number],
+  slate: [51, 65, 85] as [number, number, number],
   lightSlate: [100, 116, 139] as [number, number, number],
   paleBg: [248, 250, 252] as [number, number, number],
   border: [226, 232, 240] as [number, number, number],
@@ -37,14 +37,23 @@ const TAG_COLORS: Record<EvidenceTag, [number, number, number]> = {
   missingInfo: [100, 116, 139],
 };
 
+// Evidence tags that should be DISPLAYED in the Guardian Roadmap.
+// parentWish and clientUnderstanding are suppressed — they describe
+// ordinary content that doesn't need a visual label.
+const DISPLAYED_EVIDENCE_TAGS: Set<EvidenceTag> = new Set([
+  'worthConfirming',
+  'professionalReview',
+  'missingInfo',
+]);
+
 // ─── Layout constants ──────────────────────────────────────────────────────────
 
-const PAGE_W = 612;  // 8.5in at 72dpi
-const PAGE_H = 792;  // 11in
-const MARGIN_L = 60;
-const MARGIN_R = 60;
-const MARGIN_T = 72;
-const MARGIN_B = 60;
+const PAGE_W = 612;
+const PAGE_H = 792;
+const MARGIN_L = 72;
+const MARGIN_R = 72;
+const MARGIN_T = 80;
+const MARGIN_B = 64;
 const CONTENT_W = PAGE_W - MARGIN_L - MARGIN_R;
 
 // ─── PDF state ─────────────────────────────────────────────────────────────────
@@ -55,44 +64,58 @@ interface RenderState {
   page: number;
   familyName: string;
   reportDate: string;
+  logoDataUrl: string | null;
 }
 
-function createState(familyName: string, reportDate: string): RenderState {
+function createState(familyName: string, reportDate: string, logoDataUrl: string | null): RenderState {
   const pdf = new jsPDF({ unit: 'pt', format: 'letter' });
   pdf.setFont('helvetica', 'normal');
-  return { pdf, y: MARGIN_T, page: 1, familyName, reportDate };
+  return { pdf, y: MARGIN_T, page: 1, familyName, reportDate, logoDataUrl };
 }
 
 // ─── Page management ───────────────────────────────────────────────────────────
 
 function headerFooter(state: RenderState): void {
-  const { pdf, page, familyName } = state;
+  const { pdf, page, familyName, logoDataUrl } = state;
+
+  // Header: logo on left, document title on right
+  if (logoDataUrl) {
+    try {
+      pdf.addImage(logoDataUrl, 'PNG', MARGIN_L, MARGIN_T - 28, 80, 16);
+    } catch {
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(...BRAND.navy);
+      pdf.text('CLARIFY WEALTH', MARGIN_L, MARGIN_T - 18);
+    }
+  } else {
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(...BRAND.navy);
+    pdf.text('CLARIFY WEALTH', MARGIN_L, MARGIN_T - 18);
+  }
+
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(...BRAND.lightSlate);
+  pdf.text('Guardianship Roadmap', PAGE_W - MARGIN_R, MARGIN_T - 18, { align: 'right' });
+
+  // Header gold line
+  pdf.setDrawColor(...BRAND.gold);
+  pdf.setLineWidth(0.75);
+  pdf.line(MARGIN_L, MARGIN_T - 10, PAGE_W - MARGIN_R, MARGIN_T - 10);
+
   // Footer line
   pdf.setDrawColor(...BRAND.border);
   pdf.setLineWidth(0.5);
-  pdf.line(MARGIN_L, PAGE_H - MARGIN_B + 10, PAGE_W - MARGIN_R, PAGE_H - MARGIN_B + 10);
+  pdf.line(MARGIN_L, PAGE_H - MARGIN_B + 8, PAGE_W - MARGIN_R, PAGE_H - MARGIN_B + 8);
 
   // Footer text
-  pdf.setFontSize(8);
+  pdf.setFontSize(7.5);
   pdf.setTextColor(...BRAND.lightSlate);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('Clarify Wealth', MARGIN_L, PAGE_H - MARGIN_B + 22);
-  pdf.text(`${familyName} — Guardianship Roadmap`, PAGE_W / 2, PAGE_H - MARGIN_B + 22, { align: 'center' });
-  pdf.text(String(page), PAGE_W - MARGIN_R, PAGE_H - MARGIN_B + 22, { align: 'right' });
-
-  // Header (interior pages only, page > 1)
-  if (page > 1) {
-    pdf.setDrawColor(...BRAND.gold);
-    pdf.setLineWidth(1);
-    pdf.line(MARGIN_L, MARGIN_T - 18, MARGIN_L + 40, MARGIN_T - 18);
-    pdf.setFontSize(8);
-    pdf.setTextColor(...BRAND.navy);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('CLARIFY WEALTH', MARGIN_L, MARGIN_T - 22);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(...BRAND.lightSlate);
-    pdf.text('Guardianship Roadmap', PAGE_W - MARGIN_R, MARGIN_T - 22, { align: 'right' });
-  }
+  pdf.text(`${familyName} — Guardianship Roadmap`, MARGIN_L, PAGE_H - MARGIN_B + 20);
+  pdf.text(String(page), PAGE_W - MARGIN_R, PAGE_H - MARGIN_B + 20, { align: 'right' });
 }
 
 function newPage(state: RenderState): void {
@@ -116,9 +139,10 @@ function wrappedText(
   fontSize: number,
   fontStyle: 'normal' | 'bold' | 'italic' = 'normal',
   color: [number, number, number] = BRAND.slate,
-  lineGap: number = 1.4,
+  lineGap: number = 1.45,
   maxWidth: number = CONTENT_W,
-): number {
+  x: number = MARGIN_L,
+): void {
   const { pdf } = state;
   pdf.setFontSize(fontSize);
   pdf.setFont('helvetica', fontStyle);
@@ -128,25 +152,14 @@ function wrappedText(
 
   for (const line of lines) {
     ensureSpace(state, lineHeight);
-    pdf.text(line, MARGIN_L, state.y);
+    pdf.text(line, x, state.y);
     state.y += lineHeight;
   }
-  return state.y;
 }
 
-function evidenceTagInline(state: RenderState, tag?: EvidenceTag, label?: string): void {
-  if (!tag || !label) return;
-  const { pdf } = state;
-  const tagColor = TAG_COLORS[tag];
-  const tagText = `  ${label}`;
-  pdf.setFontSize(7);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(...tagColor);
-  // Draw tag right after current text position
-  ensureSpace(state, 12);
-  pdf.text(tagText, MARGIN_L, state.y - 2);
-  pdf.setTextColor(...BRAND.slate);
-  pdf.setFont('helvetica', 'normal');
+function shouldShowEvidence(block: ClarifyBlock): boolean {
+  if (!block.evidenceTag) return false;
+  return DISPLAYED_EVIDENCE_TAGS.has(block.evidenceTag);
 }
 
 // ─── Block renderers ───────────────────────────────────────────────────────────
@@ -155,27 +168,29 @@ function renderHeading(state: RenderState, block: ClarifyBlock): void {
   if (block.pageBreakBefore) {
     newPage(state);
   }
-  state.y += 8;
-  wrappedText(state, block.text || '', 15, 'bold', BRAND.navy, 1.3);
-  state.y += 4;
+  state.y += 16;
+  ensureSpace(state, 50);
+  wrappedText(state, block.text || '', 20, 'bold', BRAND.navy, 1.15);
+  if (block.subtitle) {
+    state.y += 2;
+    wrappedText(state, block.subtitle, 10, 'italic', BRAND.lightSlate, 1.3);
+  }
+  state.pdf.setDrawColor(...BRAND.gold);
+  state.pdf.setLineWidth(1.5);
+  state.pdf.line(MARGIN_L, state.y, MARGIN_L + 50, state.y);
+  state.y += 12;
 }
 
 function renderSubheading(state: RenderState, block: ClarifyBlock): void {
-  if (state.y > MARGIN_T + 10) state.y += 6;
-  ensureSpace(state, 30);
-  wrappedText(state, block.text || '', 12, 'bold', BRAND.slate, 1.3);
-  if (block.evidenceTag && block.evidenceLabel) {
-    evidenceTagInline(state, block.evidenceTag, block.evidenceLabel);
-  }
-  state.y += 2;
+  if (state.y > MARGIN_T + 10) state.y += 8;
+  ensureSpace(state, 24);
+  wrappedText(state, block.text || '', 11.5, 'bold', BRAND.slate, 1.3);
+  state.y += 4;
 }
 
 function renderBody(state: RenderState, block: ClarifyBlock): void {
   wrappedText(state, block.text || '', 10.5, 'normal', BRAND.slate, 1.5);
-  if (block.evidenceTag && block.evidenceLabel) {
-    evidenceTagInline(state, block.evidenceTag, block.evidenceLabel);
-  }
-  state.y += 4;
+  state.y += 5;
 }
 
 function renderBullets(state: RenderState, block: ClarifyBlock): void {
@@ -188,53 +203,56 @@ function renderBullets(state: RenderState, block: ClarifyBlock): void {
     const lines = pdf.splitTextToSize(item, CONTENT_W - 20) as string[];
     const lineHeight = 10.5 * 1.5;
     ensureSpace(state, lineHeight * lines.length);
+    pdf.setTextColor(...BRAND.gold);
     pdf.text('\u2022', MARGIN_L + 4, state.y);
+    pdf.setTextColor(...BRAND.slate);
     for (let i = 0; i < lines.length; i++) {
       if (i > 0) ensureSpace(state, lineHeight);
       pdf.text(lines[i], MARGIN_L + 16, state.y);
       state.y += lineHeight;
     }
   }
-  state.y += 4;
+  state.y += 5;
 }
 
 function renderCallout(state: RenderState, block: ClarifyBlock): void {
+  if (!shouldShowEvidence(block)) {
+    // Still render the text, just without the callout box
+    renderBody(state, block);
+    return;
+  }
+
   const { pdf } = state;
   const tagColor = block.evidenceTag ? TAG_COLORS[block.evidenceTag] : BRAND.lightSlate;
   const bgColor: [number, number, number] = [252, 250, 245];
 
-  // Measure
-  const lines = pdf.splitTextToSize(block.text || '', CONTENT_W - 32) as string[];
-  const boxH = 16 + lines.length * 13 + 8;
+  const lines = pdf.splitTextToSize(block.text || '', CONTENT_W - 36) as string[];
+  const boxH = 20 + lines.length * 13 + 8;
 
-  ensureSpace(state, boxH + 6);
+  ensureSpace(state, boxH + 8);
 
-  // Draw box
   pdf.setFillColor(...bgColor);
   pdf.setDrawColor(...BRAND.border);
   pdf.setLineWidth(0.5);
   pdf.rect(MARGIN_L, state.y, CONTENT_W, boxH, 'S');
-  // Left accent
   pdf.setFillColor(...tagColor);
   pdf.rect(MARGIN_L, state.y, 3, boxH, 'F');
 
-  // Tag
   pdf.setFontSize(7);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(...tagColor);
-  pdf.text((block.evidenceLabel || '').toUpperCase(), MARGIN_L + 10, state.y + 12);
+  pdf.text((block.evidenceLabel || '').toUpperCase(), MARGIN_L + 12, state.y + 13);
 
-  // Body
-  pdf.setFontSize(9.5);
+  pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(...BRAND.slate);
-  let ty = state.y + 24;
+  let ty = state.y + 26;
   for (const line of lines) {
-    pdf.text(line, MARGIN_L + 10, ty);
+    pdf.text(line, MARGIN_L + 12, ty);
     ty += 13;
   }
 
-  state.y += boxH + 6;
+  state.y += boxH + 8;
 }
 
 function renderRoleTable(state: RenderState, block: ClarifyBlock): void {
@@ -242,10 +260,9 @@ function renderRoleTable(state: RenderState, block: ClarifyBlock): void {
   const rows = block.rows || [];
   if (rows.length === 0) return;
 
-  const colWidths = [100, 110, 160, 120];
+  const colWidths = [110, 100, 160, 98];
   const headers = ['Role', 'Person', 'What They Handle', 'When to Contact'];
 
-  // Header row
   pdf.setFillColor(...BRAND.paleBg);
   pdf.rect(MARGIN_L, state.y, CONTENT_W, 20, 'F');
   pdf.setFontSize(8);
@@ -258,7 +275,6 @@ function renderRoleTable(state: RenderState, block: ClarifyBlock): void {
   }
   state.y += 20;
 
-  // Data rows
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(9);
   pdf.setTextColor(...BRAND.slate);
@@ -268,10 +284,9 @@ function renderRoleTable(state: RenderState, block: ClarifyBlock): void {
       const lines = pdf.splitTextToSize(c, colWidths[i] - 8) as string[];
       return lines.length;
     }));
-    const rowH = Math.max(16, maxLines * 12 + 4);
+    const rowH = Math.max(18, maxLines * 12 + 6);
     ensureSpace(state, rowH);
 
-    // Bottom border
     pdf.setDrawColor(...BRAND.border);
     pdf.setLineWidth(0.3);
     pdf.line(MARGIN_L, state.y + rowH, MARGIN_L + CONTENT_W, state.y + rowH);
@@ -280,23 +295,22 @@ function renderRoleTable(state: RenderState, block: ClarifyBlock): void {
     for (let i = 0; i < cells.length; i++) {
       const lines = pdf.splitTextToSize(cells[i], colWidths[i] - 8) as string[];
       for (let j = 0; j < lines.length; j++) {
-        pdf.text(lines[j], x, state.y + 12 + j * 12);
+        pdf.text(lines[j], x, state.y + 13 + j * 12);
       }
       x += colWidths[i];
     }
     state.y += rowH;
   }
-  state.y += 6;
+  state.y += 8;
 }
 
 function renderActionList(state: RenderState, block: ClarifyBlock): void {
   const { pdf } = state;
-  const lines = pdf.splitTextToSize(block.text || '', CONTENT_W - 32) as string[];
-  const boxH = 14 + lines.length * 13 + 6;
+  const lines = pdf.splitTextToSize(block.text || '', CONTENT_W - 36) as string[];
+  const boxH = 16 + lines.length * 13 + 8;
 
-  ensureSpace(state, boxH + 4);
+  ensureSpace(state, boxH + 6);
 
-  // Left accent
   pdf.setFillColor(...BRAND.gold);
   pdf.rect(MARGIN_L, state.y, 3, boxH, 'F');
   pdf.setFillColor(255, 251, 245);
@@ -306,19 +320,19 @@ function renderActionList(state: RenderState, block: ClarifyBlock): void {
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(...BRAND.navy);
   if (block.title) {
-    pdf.text(block.title, MARGIN_L + 10, state.y + 13);
+    pdf.text(block.title, MARGIN_L + 12, state.y + 14);
   }
 
   pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(9.5);
+  pdf.setFontSize(10);
   pdf.setTextColor(...BRAND.slate);
-  let ty = state.y + (block.title ? 24 : 12);
+  let ty = state.y + (block.title ? 26 : 14);
   for (const line of lines) {
-    pdf.text(line, MARGIN_L + 10, ty);
+    pdf.text(line, MARGIN_L + 12, ty);
     ty += 13;
   }
 
-  state.y += boxH + 4;
+  state.y += boxH + 6;
 }
 
 function renderQuickRef(state: RenderState, block: ClarifyBlock): void {
@@ -329,23 +343,22 @@ function renderQuickRef(state: RenderState, block: ClarifyBlock): void {
 
   for (const item of items) {
     const lines = pdf.splitTextToSize(item, CONTENT_W) as string[];
-    ensureSpace(state, 14);
+    ensureSpace(state, 16);
     pdf.text(lines[0], MARGIN_L, state.y);
-    state.y += 14;
-    // Bottom border
+    state.y += 15;
     pdf.setDrawColor(...BRAND.border);
     pdf.setLineWidth(0.3);
     pdf.line(MARGIN_L, state.y - 4, MARGIN_L + CONTENT_W, state.y - 4);
   }
-  state.y += 4;
+  state.y += 6;
 }
 
 function renderLimitation(state: RenderState, block: ClarifyBlock): void {
   const { pdf } = state;
-  const lines = pdf.splitTextToSize(block.text || '', CONTENT_W - 28) as string[];
-  const boxH = 16 + lines.length * 12 + 6;
+  const lines = pdf.splitTextToSize(block.text || '', CONTENT_W - 32) as string[];
+  const boxH = 18 + lines.length * 12 + 8;
 
-  ensureSpace(state, boxH + 4);
+  ensureSpace(state, boxH + 6);
 
   pdf.setFillColor(...BRAND.paleBg);
   pdf.setDrawColor(...BRAND.border);
@@ -354,23 +367,59 @@ function renderLimitation(state: RenderState, block: ClarifyBlock): void {
   pdf.setFillColor(...BRAND.lightSlate);
   pdf.rect(MARGIN_L, state.y, 3, boxH, 'F');
 
-  pdf.setFontSize(9);
+  pdf.setFontSize(9.5);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(...BRAND.slate);
   if (block.title) {
-    pdf.text(block.title, MARGIN_L + 10, state.y + 13);
+    pdf.text(block.title, MARGIN_L + 12, state.y + 14);
   }
 
   pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFontSize(9.5);
   pdf.setTextColor(...BRAND.lightSlate);
-  let ty = state.y + (block.title ? 23 : 13);
+  let ty = state.y + (block.title ? 25 : 15);
   for (const line of lines) {
-    pdf.text(line, MARGIN_L + 10, ty);
+    pdf.text(line, MARGIN_L + 12, ty);
     ty += 12;
   }
 
-  state.y += boxH + 4;
+  state.y += boxH + 6;
+}
+
+// ─── Parent voice block ────────────────────────────────────────────────────────
+
+function renderParentVoice(state: RenderState, block: ClarifyBlock): void {
+  const { pdf } = state;
+  const lines = pdf.splitTextToSize(block.text || '', CONTENT_W - 36) as string[];
+  const boxH = 24 + lines.length * 13 + 10;
+
+  ensureSpace(state, boxH + 8);
+
+  // Warm background, left gold accent
+  pdf.setFillColor(253, 249, 240);
+  pdf.setDrawColor(...BRAND.gold);
+  pdf.setLineWidth(0.75);
+  pdf.rect(MARGIN_L, state.y, CONTENT_W, boxH, 'S');
+  pdf.setFillColor(...BRAND.gold);
+  pdf.rect(MARGIN_L, state.y, 3, boxH, 'F');
+
+  if (block.heading) {
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(...BRAND.gold);
+    pdf.text(block.heading.toUpperCase(), MARGIN_L + 12, state.y + 14);
+  }
+
+  pdf.setFontSize(10.5);
+  pdf.setFont('helvetica', 'italic');
+  pdf.setTextColor(...BRAND.slate);
+  let ty = state.y + (block.heading ? 28 : 16);
+  for (const line of lines) {
+    pdf.text(line, MARGIN_L + 12, ty);
+    ty += 13;
+  }
+
+  state.y += boxH + 8;
 }
 
 // ─── Block dispatcher ──────────────────────────────────────────────────────────
@@ -394,45 +443,60 @@ function renderBlock(state: RenderState, block: ClarifyBlock): void {
 // ─── Section renderer ──────────────────────────────────────────────────────────
 
 function renderSection(state: RenderState, section: ClarifySection): void {
-  // Section heading
-  if (state.y > MARGIN_T + 20) state.y += 10;
-  ensureSpace(state, 30);
-  wrappedText(state, section.heading, 15, 'bold', BRAND.navy, 1.3);
-  // Gold underline
+  if (state.y > MARGIN_T + 20) state.y += 14;
+  ensureSpace(state, 40);
+
+  wrappedText(state, section.heading, 15, 'bold', BRAND.navy, 1.25);
   state.pdf.setDrawColor(...BRAND.gold);
   state.pdf.setLineWidth(1.5);
-  state.pdf.line(MARGIN_L, state.y - 2, MARGIN_L + 45, state.y - 2);
-  state.y += 6;
+  state.pdf.line(MARGIN_L, state.y - 2, MARGIN_L + 50, state.y - 2);
+  state.y += 8;
 
   if (section.purpose) {
-    wrappedText(state, section.purpose, 9, 'italic', BRAND.lightSlate, 1.3);
-    state.y += 4;
+    wrappedText(state, section.purpose, 9.5, 'italic', BRAND.lightSlate, 1.35);
+    state.y += 6;
   }
 
   for (const block of section.blocks) {
-    renderBlock(state, block);
+    // Handle parent voice specially
+    if (block.evidenceTag === undefined && block.type === 'callout' && block.evidenceLabel === 'Parent Voice') {
+      renderParentVoice(state, block);
+    } else {
+      renderBlock(state, block);
+    }
   }
 }
 
 // ─── Cover page ────────────────────────────────────────────────────────────────
 
 function renderCover(state: RenderState, doc: ClarifyDocument): void {
-  const { pdf } = state;
+  const { pdf, logoDataUrl } = state;
   const cover = doc.cover;
 
-  // Brand text
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(...BRAND.navy);
-  pdf.text('CLARIFY WEALTH', PAGE_W / 2, 180, { align: 'center' });
+  // Logo centered
+  if (logoDataUrl) {
+    try {
+      pdf.addImage(logoDataUrl, 'PNG', PAGE_W / 2 - 60, 160, 120, 24);
+    } catch {
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(...BRAND.navy);
+      pdf.text('CLARIFY WEALTH', PAGE_W / 2, 180, { align: 'center' });
+    }
+  } else {
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(...BRAND.navy);
+    pdf.text('CLARIFY WEALTH', PAGE_W / 2, 180, { align: 'center' });
+  }
 
   // Gold line
   pdf.setDrawColor(...BRAND.gold);
   pdf.setLineWidth(1.5);
-  pdf.line(PAGE_W / 2 - 60, 195, PAGE_W / 2 + 60, 195);
+  pdf.line(PAGE_W / 2 - 60, 200, PAGE_W / 2 + 60, 200);
 
   // Title
-  pdf.setFontSize(36);
+  pdf.setFontSize(34);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(...BRAND.navy);
   pdf.text('Guardianship Roadmap', PAGE_W / 2, 260, { align: 'center' });
@@ -441,7 +505,7 @@ function renderCover(state: RenderState, doc: ClarifyDocument): void {
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'italic');
   pdf.setTextColor(...BRAND.lightSlate);
-  const subLines = pdf.splitTextToSize(cover.subtitle, 360) as string[];
+  const subLines = pdf.splitTextToSize(cover.subtitle, 380) as string[];
   let sy = 290;
   for (const line of subLines) {
     pdf.text(line, PAGE_W / 2, sy, { align: 'center' });
@@ -469,19 +533,20 @@ function renderCover(state: RenderState, doc: ClarifyDocument): void {
     my += 42;
   }
 
-  // No header/footer on cover
-  state.page = 1;
+  // No header/footer on cover — page stays at 1
 }
 
-// ─── Intro page ────────────────────────────────────────────────────────────────
+// ─── Intro / About This Roadmap ────────────────────────────────────────────────
 
 function renderIntro(state: RenderState): void {
+  // Start on page 2 (first interior page)
   newPage(state);
-  wrappedText(state, 'Start Here', 18, 'bold', BRAND.navy, 1.3);
+
+  wrappedText(state, 'About This Roadmap', 16, 'bold', BRAND.navy, 1.25);
   state.pdf.setDrawColor(...BRAND.gold);
   state.pdf.setLineWidth(1.5);
-  state.pdf.line(MARGIN_L, state.y - 2, MARGIN_L + 45, state.y - 2);
-  state.y += 16;
+  state.pdf.line(MARGIN_L, state.y - 2, MARGIN_L + 50, state.y - 2);
+  state.y += 14;
 
   const introTexts = [
     'This Guardianship Roadmap was prepared from information provided by the parents through the Will Companion Kit. It reflects their wishes, planning intentions, and the information available when the Roadmap was prepared.',
@@ -491,7 +556,7 @@ function renderIntro(state: RenderState): void {
 
   for (const text of introTexts) {
     wrappedText(state, text, 10.5, 'normal', BRAND.slate, 1.55);
-    state.y += 6;
+    state.y += 8;
   }
 }
 
@@ -510,19 +575,44 @@ function renderQuickReference(state: RenderState, doc: ClarifyDocument): void {
   });
 }
 
+// ─── Logo loading ──────────────────────────────────────────────────────────────
+
+let cachedLogoDataUrl: string | null | undefined;
+
+async function loadLogoDataUrl(): Promise<string | null> {
+  if (cachedLogoDataUrl !== undefined) return cachedLogoDataUrl;
+  try {
+    const response = await fetch('/branding/word/media/image1.png');
+    if (!response.ok) {
+      cachedLogoDataUrl = null;
+      return null;
+    }
+    const blob = await response.blob();
+    cachedLogoDataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    return cachedLogoDataUrl;
+  } catch {
+    cachedLogoDataUrl = null;
+    return null;
+  }
+}
+
 // ─── Main renderer ─────────────────────────────────────────────────────────────
 
-export function renderGuardianRoadmapPdf(doc: ClarifyDocument): jsPDF {
-  const state = createState(doc.cover.familyName, doc.cover.preparedDate);
+export function renderGuardianRoadmapPdf(doc: ClarifyDocument, logoDataUrl?: string | null): jsPDF {
+  const state = createState(doc.cover.familyName, doc.cover.preparedDate, logoDataUrl ?? null);
 
-  // Cover page (no header/footer)
+  // Cover page (page 1, no header/footer)
   renderCover(state, doc);
 
-  // Start interior pages
-  newPage(state);
+  // Page 2: About This Roadmap (NOT a separate blank page)
   renderIntro(state);
 
-  // Render all sections
+  // Render all content sections
   for (const section of doc.sections) {
     renderSection(state, section);
   }
@@ -533,7 +623,8 @@ export function renderGuardianRoadmapPdf(doc: ClarifyDocument): jsPDF {
   return state.pdf;
 }
 
-export function generateGuardianRoadmapPdf(doc: ClarifyDocument): Blob {
-  const pdf = renderGuardianRoadmapPdf(doc);
+export async function generateGuardianRoadmapPdf(doc: ClarifyDocument): Promise<Blob> {
+  const logo = await loadLogoDataUrl();
+  const pdf = renderGuardianRoadmapPdf(doc, logo);
   return pdf.output('blob');
 }

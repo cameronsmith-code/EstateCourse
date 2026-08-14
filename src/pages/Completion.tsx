@@ -12,6 +12,7 @@ import { generateGuardianRoadmapPdf } from '../lib/guardianRoadmapPdfRenderer';
 
 export default function Completion() {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [showGuardianPreview, setShowGuardianPreview] = useState(false);
   const { answers } = useQuestionnaire();
 
@@ -91,17 +92,24 @@ export default function Completion() {
     generatePDF(formData as Parameters<typeof generatePDF>[0]);
   };
 
-  const handleDownloadGuardianRoadmap = () => {
-    if (!guardianClarifyDoc) return;
-    const blob = generateGuardianRoadmapPdf(guardianClarifyDoc);
-    const url = URL.createObjectURL(blob);
-    const a = window.document.createElement('a');
-    a.href = url;
-    a.download = 'Guardianship-Roadmap.pdf';
-    window.document.body.appendChild(a);
-    a.click();
-    window.document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleDownloadGuardianRoadmap = async () => {
+    if (!guardianClarifyDoc || isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
+    try {
+      const blob = await generateGuardianRoadmapPdf(guardianClarifyDoc);
+      const url = URL.createObjectURL(blob);
+      const a = window.document.createElement('a');
+      a.href = url;
+      a.download = 'Guardianship-Roadmap.pdf';
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Guardian Roadmap PDF generation failed:', err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   const handlePreviewGuardian = () => {
@@ -150,7 +158,7 @@ export default function Completion() {
                 className="flex items-center justify-center px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-500 transition-colors text-sm"
               >
                 <Download className="w-4 h-4 mr-2" />
-                Download Guardianship Roadmap
+                {isGeneratingPdf ? 'Generating...' : 'Download Guardianship Roadmap'}
               </button>
               <button
                 onClick={handlePreviewGuardian}
@@ -220,7 +228,7 @@ export default function Completion() {
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition-colors"
                 >
                   <Download className="w-4 h-4" />
-                  Download PDF
+                  {isGeneratingPdf ? 'Generating...' : 'Download PDF'}
                 </button>
                 <button
                   onClick={handleClosePreview}

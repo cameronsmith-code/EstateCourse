@@ -40,6 +40,7 @@ export interface ClarifyBlock {
   type: ClarifyBlockType;
   text?: string;
   title?: string;
+  heading?: string;
   subtitle?: string;
   items?: string[];
   rows?: ClarifyTableRow[];

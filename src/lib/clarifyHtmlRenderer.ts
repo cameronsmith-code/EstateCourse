@@ -30,18 +30,30 @@ function esc(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+const DISPLAYED_EVIDENCE_TAGS: Set<EvidenceTag> = new Set([
+  'worthConfirming',
+  'professionalReview',
+  'missingInfo',
+]);
+
 function evidenceTagHtml(tag?: EvidenceTag, label?: string): string {
   if (!tag || !label) return '';
+  if (!DISPLAYED_EVIDENCE_TAGS.has(tag)) return '';
   const c = TAG_COLORS[tag];
   return `<span class="ev-tag" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${esc(label)}</span>`;
 }
 
 function renderBlock(block: ClarifyBlock): string {
   const tag = evidenceTagHtml(block.evidenceTag, block.evidenceLabel);
+  const isParentVoice = block.evidenceLabel === 'Parent Voice' && !block.evidenceTag;
 
   switch (block.type) {
     case 'heading':
-      return `<h2 class="child-heading" ${block.pageBreakBefore ? 'style="page-break-before:always"' : ''}>${esc(block.text || '')}</h2>`;
+      return `<div class="child-divider" ${block.pageBreakBefore ? 'style="page-break-before:always"' : ''}>
+        <h2 class="child-heading">${esc(block.text || '')}</h2>
+        ${block.subtitle ? `<p class="child-subtitle">${esc(block.subtitle)}</p>` : ''}
+        <div class="child-gold-line"></div>
+      </div>`;
 
     case 'subheading':
       return `<h3 class="sub-heading"${block.keepWithNext ? ' style="page-break-after:avoid"' : ''}>${esc(block.text || '')} ${tag}</h3>`;
@@ -53,7 +65,13 @@ function renderBlock(block: ClarifyBlock): string {
       return `<ul class="bullet-list">${(block.items || []).map(i => `<li>${esc(i)}</li>`).join('')}</ul>`;
 
     case 'callout': {
-      const c = block.evidenceTag ? TAG_COLORS[block.evidenceTag] : TAG_COLORS.worthConfirming;
+      if (isParentVoice) {
+        return `<div class="parent-voice"><span class="parent-voice-tag">${block.heading ? esc(block.heading) : 'In Their Own Words'}</span><p>${esc(block.text || '')}</p></div>`;
+      }
+      if (!block.evidenceTag || !DISPLAYED_EVIDENCE_TAGS.has(block.evidenceTag)) {
+        return `<p class="body-text">${esc(block.text || '')}</p>`;
+      }
+      const c = TAG_COLORS[block.evidenceTag];
       return `<div class="callout" style="background:${c.bg};border-color:${c.border}"><span class="callout-tag" style="color:${c.text}">${esc(block.evidenceLabel || '')}</span><p>${esc(block.text || '')}</p></div>`;
     }
 
@@ -126,7 +144,8 @@ function renderCover(doc: ClarifyDocument): string {
 
 function renderIntroPage(): string {
   return `<section class="intro-page">
-    <h2 class="intro-heading">Start Here</h2>
+    <h2 class="intro-heading">About This Roadmap</h2>
+    <div class="intro-gold-line"></div>
     <p class="intro-body">
       This Guardianship Roadmap was prepared from information provided by the parents through
       the Will Companion Kit. It reflects their wishes, planning intentions, and the information
@@ -264,11 +283,27 @@ export function renderClarifyDocumentHtml(doc: ClarifyDocument): string {
     margin-bottom: 16px;
   }
   .child-heading {
-    font-size: 15pt;
+    font-size: 20pt;
     color: #0f3a5e;
-    margin-top: 24px;
-    margin-bottom: 12px;
+    margin-top: 0;
+    margin-bottom: 4px;
     page-break-after: avoid;
+  }
+  .child-subtitle {
+    font-size: 11pt;
+    color: #64748b;
+    font-style: italic;
+    margin-bottom: 8px;
+  }
+  .child-gold-line {
+    width: 50px;
+    height: 2px;
+    background: #c5a572;
+    margin-bottom: 16px;
+  }
+  .child-divider {
+    margin-top: 20px;
+    page-break-inside: avoid;
   }
   .sub-heading {
     font-size: 12pt;
@@ -388,6 +423,37 @@ export function renderClarifyDocumentHtml(doc: ClarifyDocument): string {
   .limitation-box p {
     font-size: 10pt;
     color: #64748b;
+  }
+  .intro-gold-line {
+    width: 50px;
+    height: 2px;
+    background: #c5a572;
+    margin-bottom: 16px;
+  }
+  /* Parent voice */
+  .parent-voice {
+    background: #fdf9f0;
+    border: 1px solid #c5a572;
+    border-left: 3px solid #c5a572;
+    padding: 16px 20px;
+    margin: 14px 0;
+    page-break-inside: avoid;
+    border-radius: 0 4px 4px 0;
+  }
+  .parent-voice-tag {
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #c5a572;
+    display: block;
+    margin-bottom: 6px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .parent-voice p {
+    font-size: 11pt;
+    color: #334155;
+    font-style: italic;
   }
   /* Print */
   @media print {

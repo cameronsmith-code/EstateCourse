@@ -12,6 +12,7 @@ import type {
   GuardianshipAudience,
 } from './guardianshipNarrativeTypes';
 import { getParentLabel, ALL_AUDIENCES, GUARDIAN_AUDIENCES, LAWYER_AUDIENCES, ACCOUNTANT_AUDIENCES, TRUSTEE_AUDIENCES, CLIENT_PLANNING_AUDIENCES } from './guardianshipNarrativeTypes';
+import { humanizeRelationshipTypes, humanizeContexts, interpretContinuityParagraph, humanizeParticipantTypes, humanizeTrustType, humanizeRecordKeeping, humanizeSiblingRole, humanizeSiblingNotResponsible, isLowInformationText } from './guardianshipHumanization';
 
 let blockCounter = 0;
 
@@ -536,14 +537,14 @@ function buildConnectionBlocks(child: GuardianshipChildProfile, ctx: NarrativeCo
   }
 
   for (const conn of importantConnections) {
-    const relationshipLabel = conn.relationshipTypes.length > 0 ? conn.relationshipTypes.join(', ') : 'an important person';
+    const relationshipLabel = humanizeRelationshipTypes(conn.relationshipTypes);
     const importancePrefix = conn.importance === 'especially_important'
-      ? `${conn.name} is especially important to ${name}.`
-      : `${conn.name} is important to ${name}.`;
+      ? `${conn.name} is an especially important person in ${name}'s life.`
+      : `${conn.name} is an important person in ${name}'s life.`;
 
     let body = `${importancePrefix} ${conn.name} is ${relationshipLabel}.`;
     if (conn.contexts.length > 0) {
-      body += ` They share a connection through ${conn.contexts.join(' and ')}.`;
+      body += ` They share a connection through ${humanizeContexts(conn.contexts)}.`;
     }
 
     blocks.push(makeBlock('CONNECTION-01', 'context', 'important', 'parentPreference', {
@@ -562,11 +563,11 @@ function buildConnectionBlocks(child: GuardianshipChildProfile, ctx: NarrativeCo
       }));
     }
 
-    // CONNECTION-02: Continuity ideas
+    // CONNECTION-02: Continuity ideas — synthesize into natural language
     if (conn.continuityIdeas.length > 0) {
+      const continuityText = interpretContinuityParagraph(conn.continuityIdeas, name, conn.name, parentLabel);
       blocks.push(makeBlock('CONNECTION-02', 'action', 'important', 'parentPreference', {
-        body: `${parentLabel}'s ideas for keeping ${name} and ${conn.name} connected:`,
-        bullets: conn.continuityIdeas,
+        body: continuityText,
         childIds: [child.childId],
       audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
       }));
@@ -672,7 +673,7 @@ function buildCommunitiesAndTraditionsBlocks(child: GuardianshipChildProfile): N
 
   for (const tradition of traditions.filter(t => t.name)) {
     const participantLabel = tradition.participantTypes.length > 0
-      ? tradition.participantTypes.join(', ')
+      ? humanizeParticipantTypes(tradition.participantTypes)
       : 'family';
     blocks.push(makeBlock('TRADITION-01', 'context', 'supporting', 'parentPreference', {
       heading: tradition.typeLabel,
@@ -754,7 +755,7 @@ function buildInheritanceBlocks(child: GuardianshipChildProfile, ctx: NarrativeC
     if (arr?.hasDifferentArrangement === 'yes') {
       let body = `${parentLabel} believe ${name}'s inheritance from ${clientName} is intended to be managed through a special trust arrangement designed around ${name}'s longer-term needs.`;
       if (arr.knownTrustType) {
-        body += ` They believe this is structured as a ${arr.knownTrustType}.`;
+        body += ` They believe this is structured as ${humanizeTrustType(arr.knownTrustType)}.`;
       }
       if (arr.description) {
         body += ` ${arr.description}`;
@@ -906,32 +907,20 @@ function buildFamilyRoles(ctx: NarrativeContext): NarrativeBlock[] {
   for (const siblingRole of model.adultSiblingRoles) {
     blocks.push(makeBlock('SIBLING-01', 'context', 'primary', 'parentPreference', {
       heading: `${siblingRole.adultSiblingName} — a sister, not a replacement parent`,
-      body: `${siblingRole.adultSiblingName} is ${siblingRole.adultSiblingName === model.children.find(c => c.childId === siblingRole.adultSiblingChildId)?.nickname ? 'an adult sibling' : 'an adult family member'} who matters to the younger children. ${parentLabel} see ${siblingRole.adultSiblingName} as a sister${siblingRole.forMinorChildNames.length > 0 ? ` to ${siblingRole.forMinorChildNames.join(' and ')}` : ''}, not as a replacement parent.`,
+      body: `${siblingRole.adultSiblingName} is an adult sibling who matters to the younger children. ${parentLabel} see ${siblingRole.adultSiblingName} as a sister${siblingRole.forMinorChildNames.length > 0 ? ` to ${siblingRole.forMinorChildNames.join(' and ')}` : ''}, not as a replacement parent.`,
     audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
     }));
 
     // SIBLING-02: Role and limits
     if (siblingRole.role) {
-      const roleMap: Record<string, string> = {
-        'emotional_support': 'providing emotional support and sibling connection',
-        'family_discussions': 'being part of family discussions',
-        'practical_help': 'helping with practical matters from time to time',
-        'other': siblingRole.role,
-      };
       blocks.push(makeBlock('SIBLING-02', 'context', 'important', 'parentPreference', {
-        body: `${parentLabel} would hope ${siblingRole.adultSiblingName} can help by ${roleMap[siblingRole.role] || siblingRole.role}.`,
+        body: `${parentLabel} would hope ${siblingRole.adultSiblingName} can help by ${humanizeSiblingRole(siblingRole.role)}.`,
       audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
       }));
     }
 
     if (siblingRole.notResponsibleFor.length > 0) {
-      const notRespMap: Record<string, string> = {
-        'primary_caregiver': 'becoming the primary caregiver',
-        'managing_finances': "managing the children's finances",
-        'providing_housing': 'providing housing',
-        'medical_decisions': 'making medical decisions',
-      };
-      const items = siblingRole.notResponsibleFor.map(r => notRespMap[r] || r);
+      const items = humanizeSiblingNotResponsible(siblingRole.notResponsibleFor);
       blocks.push(makeBlock('SIBLING-02', 'context', 'important', 'parentPreference', {
         body: `${parentLabel} specifically do not expect ${siblingRole.adultSiblingName} to be responsible for:`,
         bullets: items,
@@ -1240,7 +1229,6 @@ function buildFundingPhilosophyNarrative(ctx: NarrativeContext): NarrativeBlock[
   const blocks: NarrativeBlock[] = [];
   const guardianAudience = [...GUARDIAN_AUDIENCES, ...TRUSTEE_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES];
   const lawyerAudience = [...LAWYER_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES];
-  const accountantAudience = [...ACCOUNTANT_AUDIENCES, ...TRUSTEE_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES];
 
   const overallApproachLabels: Record<string, string> = {
     majorExpensesOnly: 'resources should cover major expenses related to the children, not everyday household costs',
@@ -1250,136 +1238,79 @@ function buildFundingPhilosophyNarrative(ctx: NarrativeContext): NarrativeBlock[
     unsure: 'they were still working through how resources should support the guardian household',
   };
 
-  // FUNDING-01: Overall philosophy
+  // FUNDING-01: Synthesized funding philosophy paragraph
+  const childNames = ctx.model.children
+    .filter(c => c.status === 'minor')
+    .map(c => c.nickname || c.name);
+  const childLabel = childNames.length === 0
+    ? 'the children'
+    : childNames.length === 1 ? childNames[0] : childNames.join(' and ');
+
+  const philosophyParts: string[] = [];
+
+  philosophyParts.push(
+    `${parentLabel} recognize that welcoming ${childLabel} into another household would affect more than the children. It could change the Guardian family's home, routines, work, childcare needs and finances.`
+  );
+
   if (fp.overallApproach) {
-    const label = overallApproachLabels[fp.overallApproach] || '';
-    const body = label
-      ? `${parentLabel} wanted ${label}.`
-      : `${parentLabel} wanted resources to be available to support the guardian household.`;
-    blocks.push(makeBlock('FUNDING-01', 'context', 'primary', 'parentPreference', {
-      heading: 'How Parents Thought About Financial Support',
-      body,
-      audiences: guardianAudience,
-    }));
-  }
-
-  // FUNDING-02: Everyday household costs
-  if (fp.everydayExpenseApproach) {
-    blocks.push(makeBlock('FUNDING-02', 'context', 'important', 'parentPreference', {
-      heading: 'Everyday Household Costs',
-      body: fp.everydayExpenseApproach,
-      audiences: guardianAudience,
-    }));
-  }
-
-  // FUNDING-03: Child-specific costs
-  if (fp.meaningfulExpenseApproach) {
-    blocks.push(makeBlock('FUNDING-03', 'context', 'important', 'parentPreference', {
-      heading: 'Meaningful Child-Specific Costs',
-      body: fp.meaningfulExpenseApproach,
-      audiences: guardianAudience,
-    }));
-  }
-
-  // FUNDING-04: Major household changes
-  if (fp.majorHouseholdExpenseApproach) {
-    blocks.push(makeBlock('FUNDING-04', 'context', 'important', 'parentPreference', {
-      heading: 'Major Household Changes',
-      body: fp.majorHouseholdExpenseApproach,
-      audiences: guardianAudience,
-    }));
-  }
-
-  // FUNDING-05: Housing support
-  if (fp.housingPreference) {
-    const wantsHousing = fp.housingPreference === 'yes' || fp.housingPreference === 'open_to_it';
-    const body = wantsHousing
-      ? `${parentLabel} would want resources available to help the guardian household adapt its living situation if taking in the children made that necessary.`
-      : `${parentLabel} did not specifically anticipate supporting a larger home, but the overall funding philosophy still applies.`;
-
-    blocks.push(makeBlock('FUNDING-05', 'context', 'important', 'parentPreference', {
-      heading: 'Housing Support',
-      body,
-      audiences: [...guardianAudience, ...LAWYER_AUDIENCES],
-    }));
-
-    if (wantsHousing) {
-      blocks.push(makeBlock('FUNDING-05', 'limitation', 'important', 'professionalReview', {
-        body: 'Whether trust or estate resources can be used for housing depends on the legal authority granted. Worth confirming with an estate lawyer.',
-        audiences: lawyerAudience,
-      }));
+    const label = overallApproachLabels[fp.overallApproach];
+    if (label) {
+      philosophyParts.push(`Their intention is that the resources they've left behind should ${label.replace('resources should ', '')} — not simply pay the children's individual expenses.`);
+    } else {
+      philosophyParts.push(`Their intention is that the resources they've left behind should help make that transition easier — not simply pay the children's individual expenses.`);
     }
   }
 
-  // FUNDING-06: Vehicle support
-  if (fp.vehiclePreference) {
-    const wantsVehicle = fp.vehiclePreference === 'yes' || fp.vehiclePreference === 'open_to_it';
-    const vehicleBody = fp.vehicleNotes || (wantsVehicle
-      ? `${parentLabel} would consider supporting a larger vehicle if needed.`
-      : `${parentLabel} did not specifically anticipate vehicle support.`);
-    blocks.push(makeBlock('FUNDING-06', 'context', 'supporting', 'parentPreference', {
-      heading: 'Vehicle Support',
-      body: vehicleBody,
-      audiences: guardianAudience,
-    }));
+  if (fp.everydayExpenseApproach && !isLowInformationText(fp.everydayExpenseApproach)) {
+    philosophyParts.push(fp.everydayExpenseApproach);
   }
 
-  // FUNDING-07: Guardian reducing work
-  if (fp.workReductionPreference) {
-    const wantsWorkReduction = fp.workReductionPreference === 'yes' || fp.workReductionPreference === 'open_to_it';
-    const workBody = fp.workReductionNotes || (wantsWorkReduction
-      ? `${parentLabel} recognized that taking in the children might require reducing work hours. They would want resources to help offset that lost income.`
-      : `${parentLabel} did not specifically anticipate lost-income support.`);
-    blocks.push(makeBlock('FUNDING-07', 'context', 'important', 'parentPreference', {
-      heading: 'Guardian Reducing Work',
-      body: workBody,
-      audiences: [...guardianAudience, ...ACCOUNTANT_AUDIENCES],
-    }));
-  }
-
-  // FUNDING-08: Childcare / household help
-  if (fp.householdHelpPreference) {
-    const wantsHelp = fp.householdHelpPreference === 'yes' || fp.householdHelpPreference === 'open_to_it';
-    blocks.push(makeBlock('FUNDING-08', 'context', 'supporting', 'parentPreference', {
-      heading: 'Childcare or Household Help',
-      body: wantsHelp
-        ? `${parentLabel} would support hiring childcare or household help if it would ease the transition.`
-        : `${parentLabel} did not specifically anticipate household help.`,
-      audiences: guardianAudience,
-    }));
-  }
-
-  // FUNDING-09: Shared household benefit
-  if (fp.sharedHouseholdBenefitPhilosophy) {
-    blocks.push(makeBlock('FUNDING-09', 'context', 'important', 'parentPreference', {
-      heading: 'Expenses That Benefit the Whole Household',
-      body: fp.sharedHouseholdBenefitPhilosophy,
-      audiences: [...guardianAudience, ...ACCOUNTANT_AUDIENCES],
-    }));
-  }
-
-  // FUNDING-10: Fairness within guardian household
-  if (fp.guardianOwnChildrenFairnessNotes) {
-    blocks.push(makeBlock('FUNDING-10', 'context', 'important', 'parentPreference', {
-      heading: 'Fairness Within the Guardian Household',
-      body: fp.guardianOwnChildrenFairnessNotes,
-      audiences: guardianAudience,
-    }));
-  }
-
-  // FUNDING-11: Record-keeping philosophy
   if (fp.recordKeepingPreference) {
-    blocks.push(makeBlock('FUNDING-11', 'context', 'important', 'parentPreference', {
-      heading: 'Record-Keeping Philosophy',
-      body: fp.recordKeepingPreference,
-      audiences: [...guardianAudience, ...ACCOUNTANT_AUDIENCES, ...TRUSTEE_AUDIENCES],
-    }));
+    philosophyParts.push(humanizeRecordKeeping(fp.recordKeepingPreference));
   }
 
-  // FUNDING-12: Parent message about financial support
-  if (fp.parentMessageToGuardian) {
+  const wantsHousing = fp.housingPreference === 'yes' || fp.housingPreference === 'open_to_it';
+  const wantsVehicle = fp.vehiclePreference === 'yes' || fp.vehiclePreference === 'open_to_it';
+  const wantsWorkReduction = fp.workReductionPreference === 'yes' || fp.workReductionPreference === 'open_to_it';
+  const wantsHelp = fp.householdHelpPreference === 'yes' || fp.householdHelpPreference === 'open_to_it';
+  const anyMajorSupport = wantsHousing || wantsVehicle || wantsWorkReduction || wantsHelp;
+
+  if (anyMajorSupport) {
+    const majorParts: string[] = [];
+    if (wantsHousing) majorParts.push('a larger home');
+    if (wantsVehicle) majorParts.push('a larger vehicle');
+    if (wantsHelp) majorParts.push('childcare or household help');
+    if (wantsWorkReduction) majorParts.push('reduced work hours');
+    const majorList = majorParts.length === 1 ? majorParts[0] : majorParts.length === 2 ? `${majorParts[0]} or ${majorParts[1]}` : `${majorParts.slice(0, -1).join(', ')}, or ${majorParts[majorParts.length - 1]}`;
+    philosophyParts.push(
+      `For larger changes, their thinking is similarly pragmatic. If caring for ${childLabel} required ${majorList}, they would want available resources to help where the estate plan allows.`
+    );
+  }
+
+  if (fp.sharedHouseholdBenefitPhilosophy && !isLowInformationText(fp.sharedHouseholdBenefitPhilosophy)) {
+    philosophyParts.push(fp.sharedHouseholdBenefitPhilosophy);
+  }
+
+  if (fp.guardianOwnChildrenFairnessNotes && !isLowInformationText(fp.guardianOwnChildrenFairnessNotes)) {
+    philosophyParts.push(fp.guardianOwnChildrenFairnessNotes);
+  }
+
+  blocks.push(makeBlock('FUNDING-01', 'context', 'primary', 'parentPreference', {
+    heading: 'What This Means in Practice',
+    body: philosophyParts.join(' '),
+    audiences: guardianAudience,
+  }));
+
+  // Legal humility limitation
+  blocks.push(makeBlock('FUNDING-01', 'readiness', 'important', 'professionalReview', {
+    body: 'These are the parents\' funding intentions. Whether trust or estate resources can be used for these purposes depends on the legal authority granted to the trustee. Worth confirming with the estate lawyer.',
+    audiences: lawyerAudience,
+  }));
+
+  // FUNDING-12: Parent voice — In Their Own Words
+  if (fp.parentMessageToGuardian && !isLowInformationText(fp.parentMessageToGuardian)) {
     blocks.push(makeBlock('FUNDING-12', 'parentVoice', 'primary', 'parentPreference', {
-      heading: 'A Message From the Parents About Financial Support',
+      heading: 'In Their Own Words',
       body: fp.parentMessageToGuardian,
       audiences: [...GUARDIAN_AUDIENCES, ...CLIENT_PLANNING_AUDIENCES],
     }));
@@ -1476,12 +1407,19 @@ function buildCoordinationNarrative(ctx: NarrativeContext): NarrativeBlock[] {
 
     // COORDINATION-08: Professional escalation
     if (fp?.escalationPersonIds && fp.escalationPersonIds.length > 0) {
-      const escalationNames = fp.escalationPersonIds.join(', ');
-      blocks.push(makeBlock('COORDINATION-08', 'context', 'important', 'parentPreference', {
-        heading: 'Who to Involve If They Cannot Resolve Something',
-        body: `${parentLabel} suggested involving: ${escalationNames}.`,
-        audiences: [...guardianAudience, ...trusteeAudience, ...LAWYER_AUDIENCES],
-      }));
+      const escalationPersons = fp.escalationPersonIds
+        .map(pid => ctx.model.guardianAssignments
+          .flatMap(a => a.guardianPeople)
+          .find(p => p.id === pid))
+        .filter((p): p is NonNullable<typeof p> => !!p);
+      const escalationNames = escalationPersons.map(p => p.name).join(' and ');
+      if (escalationNames) {
+        blocks.push(makeBlock('COORDINATION-08', 'context', 'important', 'parentPreference', {
+          heading: 'Who to Involve If They Cannot Resolve Something',
+          body: `${parentLabel} suggested involving: ${escalationNames}.`,
+          audiences: [...guardianAudience, ...trusteeAudience, ...LAWYER_AUDIENCES],
+        }));
+      }
     }
 
     // COORDINATION-09: Parent message to guardian
@@ -1514,7 +1452,7 @@ function buildCoordinationNarrative(ctx: NarrativeContext): NarrativeBlock[] {
 
   // Identity confidence limitation
   if (coords.some(c => c.identityConfidence === 'low')) {
-    blocks.push(makeBlock('COORDINATION-01', 'limitation', 'important', 'professionalReview', {
+    blocks.push(makeBlock('COORDINATION-01', 'readiness', 'important', 'professionalReview', {
       body: 'Some role comparisons could not be made with full confidence because identity references were not fully resolved. Worth confirming which roles the same person holds.',
       audiences: lawyerAudience,
     }));

@@ -27,8 +27,6 @@ import type {
   ClarifyDocument,
   ClarifySection,
   ClarifyBlock,
-  ClarifyBlockType,
-  ClarifyCard,
   ClarifyTableRow,
   EvidenceTag,
   ClarifyCoverInfo,
@@ -36,6 +34,7 @@ import type {
   ClarifyLimitationEntry,
 } from './clarifyDocumentTypes';
 import { EVIDENCE_TAG_LABELS } from './clarifyDocumentTypes';
+import { sanitizeClarifyDocument, isLowInformationText } from './guardianshipHumanization';
 
 // ─── Evidence mapping ──────────────────────────────────────────────────────────
 
@@ -69,7 +68,39 @@ function narrativeToBlocks(blocks: NarrativeBlock[], sectionId: string): Clarify
     const evidenceLabel = evidenceTag ? EVIDENCE_TAG_LABELS[evidenceTag] : undefined;
 
     if (block.type === 'crossReference') {
-      // Skip cross-reference blocks — they are structural noise in the rendered PDF
+      continue;
+    }
+
+    // Skip blocks with low-information parent text that would create noise
+    if (block.type === 'parentVoice' && block.body && isLowInformationText(block.body)) {
+      continue;
+    }
+
+    // Parent voice: render as a special callout with gold styling
+    if (block.type === 'parentVoice' && block.body) {
+      if (block.heading) {
+        result.push({
+          id: nextId(sectionId),
+          type: 'callout',
+          text: block.body,
+          title: block.heading,
+          evidenceTag: undefined,
+          evidenceLabel: 'Parent Voice',
+        });
+      } else {
+        result.push({
+          id: nextId(sectionId),
+          type: 'callout',
+          text: block.body,
+          evidenceTag: undefined,
+          evidenceLabel: 'Parent Voice',
+        });
+      }
+      continue;
+    }
+
+    // Skip blocks whose heading duplicates the intro section
+    if (block.heading === 'About This Roadmap') {
       continue;
     }
 
@@ -143,14 +174,19 @@ function childSubsectionToBlocks(sub: ChildSubsectionGroup, sectionId: string): 
 function childSectionToBlocks(childSec: ChildSection, sectionId: string): ClarifyBlock[] {
   const result: ClarifyBlock[] = [];
 
-  // Child name as a heading
+  // Child name as a heading + divider subtitle
   result.push({
     id: nextId(sectionId),
     type: 'heading',
     text: childSec.childName,
+    subtitle: 'What a future Guardian should know',
     keepWithNext: true,
-    pageBreakBefore: result.length > 0, // each child starts on a new page (except first handled by caller)
+    pageBreakBefore: result.length > 0,
   });
+
+  if (childSec.subsections.length === 0 || childSec.subsections.every(s => s.blocks.length === 0)) {
+    return result;
+  }
 
   for (const sub of childSec.subsections) {
     const subBlocks = childSubsectionToBlocks(sub, sectionId);
@@ -182,20 +218,6 @@ function actionsToBlocks(blocks: NarrativeBlock[], sectionId: string): ClarifyBl
 }
 
 // ─── Quick Reference to Table ──────────────────────────────────────────────────
-
-function quickRefToBlocks(
-  items: ClarifyQuickRefEntry[],
-  sectionId: string
-): ClarifyBlock[] {
-  if (items.length === 0) return [];
-  return [
-    {
-      id: nextId(sectionId),
-      type: 'quickRef',
-      items: items.map(i => `${i.label}: ${i.value}`),
-    },
-  ];
-}
 
 // ─── Limitations ───────────────────────────────────────────────────────────────
 
@@ -251,7 +273,7 @@ function blocksToRoleTable(blocks: NarrativeBlock[], sectionId: string): Clarify
 
 function sectionToClarifySection(
   section: GuardianshipAudienceSection,
-  isFirstContentSection: boolean,
+  _isFirstContentSection: boolean,
 ): ClarifySection | null {
   const blocks: ClarifyBlock[] = [];
 
@@ -350,7 +372,7 @@ export function buildGuardianClarifyDocument(
     });
   }
 
-  return {
+  const result: ClarifyDocument = {
     title: doc.title,
     subtitle: doc.purpose,
     cover,
@@ -363,4 +385,14 @@ export function buildGuardianClarifyDocument(
       familyName: cover.familyName,
     },
   };
+
+  // QA sanitization pass — warn on any raw values that slipped through
+  const findings = sanitizeClarifyDocument(result);
+  for (const f of findings) {
+    if (f.severity === 'blocking') {
+      console.warn(`[QA] ${f.severity.toUpperCase()}: ${f.path} — ${f.issue} ("${f.sample}")`);
+    }
+  }
+
+  return result;
 }

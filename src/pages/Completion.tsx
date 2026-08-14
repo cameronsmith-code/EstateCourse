@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CheckCircle, Download, Home, FileText, Eye, Loader2 } from 'lucide-react';
+import { CheckCircle, Download, Home, FileText, Eye, Loader2, Heart, GraduationCap, Users, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
 import { generatePDF } from '../lib/pdfGenerator';
 import { useEffect, useState, useMemo } from 'react';
 import { useQuestionnaire } from '../context/QuestionnaireContext';
@@ -9,11 +9,14 @@ import { composeGuardianshipForAudience } from '../lib/guardianshipAudienceCompo
 import { buildGuardianClarifyDocument } from '../lib/guardianRoadmapDocumentBuilder';
 import { renderClarifyDocumentHtml } from '../lib/clarifyHtmlRenderer';
 import { generateGuardianRoadmapPdf } from '../lib/guardianRoadmapPdfRenderer';
+import type { GuardianshipRoadmapModel } from '../lib/guardianshipRoadmapTypes';
 
 export default function Completion() {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [showGuardianPreview, setShowGuardianPreview] = useState(false);
+  const [guardianModel, setGuardianModel] = useState<GuardianshipRoadmapModel | null>(null);
+  const [expandedReview, setExpandedReview] = useState<string | null>(null);
   const { answers, initQuestionnaire, loading } = useQuestionnaire();
 
   useEffect(() => {
@@ -77,6 +80,7 @@ export default function Completion() {
     if (!hasLoadedAnswers) return null;
     try {
       const model = buildGuardianshipRoadmap(answers);
+      setGuardianModel(model);
       const narrative = buildGuardianshipNarrative(model);
       const aboutYou = answers.get('aboutYou') || {};
       const client1Name = (aboutYou.fullName as string) || '';
@@ -179,6 +183,144 @@ export default function Completion() {
         <p className="text-xl text-gray-300 mb-8">
           Thank you for completing the questionnaire. Your documents are ready to download.
         </p>
+
+        {/* Guardian Roadmap review summary */}
+        {guardianModel && hasGuardianData && (
+          <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-5 mb-6 text-left">
+            <h3 className="text-sm font-semibold text-gray-300 mb-4">Guardianship Roadmap — Review Summary</h3>
+
+            {/* Why We Chose [Guardian] */}
+            {guardianModel.guardianTrust && (guardianModel.guardianTrust.selectionReason || guardianModel.guardianTrust.trustMessage || guardianModel.guardianTrust.ifNeededMessage) && (
+              <div className="mb-3">
+                <button
+                  onClick={() => setExpandedReview(expandedReview === 'whyChose' ? null : 'whyChose')}
+                  className="flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200 w-full text-left"
+                >
+                  <Heart size={16} />
+                  <span>Why We Chose {guardianModel.guardianAssignments[0]?.householdLabel || 'the Guardian'}</span>
+                  {expandedReview === 'whyChose' ? <ChevronUp size={14} className="ml-auto" /> : <ChevronDown size={14} className="ml-auto" />}
+                </button>
+                {expandedReview === 'whyChose' && (
+                  <div className="mt-2 ml-6 space-y-2">
+                    {guardianModel.guardianTrust.selectionReason && (
+                      <div>
+                        <p className="text-xs text-gray-500">Why we chose them</p>
+                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{guardianModel.guardianTrust.selectionReason}</p>
+                      </div>
+                    )}
+                    {guardianModel.guardianTrust.trustMessage && (
+                      <div>
+                        <p className="text-xs text-gray-500">What the trust means</p>
+                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{guardianModel.guardianTrust.trustMessage}</p>
+                      </div>
+                    )}
+                    {guardianModel.guardianTrust.ifNeededMessage && (
+                      <div>
+                        <p className="text-xs text-gray-500">If they ever had to step in</p>
+                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{guardianModel.guardianTrust.ifNeededMessage}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Education & Looking Ahead */}
+            {guardianModel.children.some(c => c.educationTransition?.settingType || c.futureEducation?.aspirations?.length) && (
+              <div className="mb-3">
+                <button
+                  onClick={() => setExpandedReview(expandedReview === 'education' ? null : 'education')}
+                  className="flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200 w-full text-left"
+                >
+                  <GraduationCap size={16} />
+                  <span>Education & Looking Ahead</span>
+                  {expandedReview === 'education' ? <ChevronUp size={14} className="ml-auto" /> : <ChevronDown size={14} className="ml-auto" />}
+                </button>
+                {expandedReview === 'education' && (
+                  <div className="mt-2 ml-6 space-y-3">
+                    {guardianModel.children.filter(c => c.status === 'minor' || c.status === 'adult_dependant').map(child => (
+                      <div key={child.childId}>
+                        <p className="text-xs text-gray-500">{child.nickname || child.name}</p>
+                        {child.educationTransition?.settingType && (
+                          <p className="text-sm text-gray-300">Current setting: {child.educationTransition.settingType.replace(/_/g, ' ')}</p>
+                        )}
+                        {child.educationTransition?.educationImportance && (
+                          <p className="text-sm text-gray-400">Importance: {child.educationTransition.educationImportance.replace(/_/g, ' ')}</p>
+                        )}
+                        {child.futureEducation?.aspirations && child.futureEducation.aspirations.length > 0 && (
+                          <p className="text-sm text-gray-300">Future hopes: {child.futureEducation.aspirations.map(a => a.replace(/_/g, ' ')).join(', ')}</p>
+                        )}
+                        {child.futureEducation?.supportExpectation && (
+                          <p className="text-sm text-gray-400">Financial support: {child.futureEducation.supportExpectation.replace(/_/g, ' ')}</p>
+                        )}
+                        {child.educationFairness?.principles && child.educationFairness.principles.length > 0 && (
+                          <p className="text-sm text-gray-400">Education fairness: {child.educationFairness.principles.map(p => p.replace(/_/g, ' ')).join(', ')}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Life in the Guardian Household */}
+            {guardianModel.familyFairness && (guardianModel.familyFairness.principles?.length || guardianModel.familyFairness.details) && (
+              <div className="mb-3">
+                <button
+                  onClick={() => setExpandedReview(expandedReview === 'fairness' ? null : 'fairness')}
+                  className="flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200 w-full text-left"
+                >
+                  <Users size={16} />
+                  <span>Life in the Guardian Household</span>
+                  {expandedReview === 'fairness' ? <ChevronUp size={14} className="ml-auto" /> : <ChevronDown size={14} className="ml-auto" />}
+                </button>
+                {expandedReview === 'fairness' && (
+                  <div className="mt-2 ml-6 space-y-2">
+                    {guardianModel.familyFairness.principles && guardianModel.familyFairness.principles.length > 0 && (
+                      <p className="text-sm text-gray-300">{guardianModel.familyFairness.principles.map(p => p.replace(/_/g, ' ')).join(', ')}</p>
+                    )}
+                    {guardianModel.familyFairness.principlesOther && (
+                      <p className="text-sm text-gray-400">Other: {guardianModel.familyFairness.principlesOther}</p>
+                    )}
+                    {guardianModel.familyFairness.details && (
+                      <p className="text-sm text-gray-300 whitespace-pre-wrap">{guardianModel.familyFairness.details}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* What We Trust [Guardian] to Decide */}
+            {guardianModel.guardianDiscretion && (guardianModel.guardianDiscretion.trustedDecisions || guardianModel.guardianDiscretion.especiallyImportantWishes) && (
+              <div className="mb-3">
+                <button
+                  onClick={() => setExpandedReview(expandedReview === 'trust' ? null : 'trust')}
+                  className="flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200 w-full text-left"
+                >
+                  <Lightbulb size={16} />
+                  <span>What We Trust {guardianModel.guardianAssignments[0]?.householdLabel || 'the Guardian'} to Decide</span>
+                  {expandedReview === 'trust' ? <ChevronUp size={14} className="ml-auto" /> : <ChevronDown size={14} className="ml-auto" />}
+                </button>
+                {expandedReview === 'trust' && (
+                  <div className="mt-2 ml-6 space-y-2">
+                    {guardianModel.guardianDiscretion.trustedDecisions && (
+                      <div>
+                        <p className="text-xs text-gray-500">Trusted decisions</p>
+                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{guardianModel.guardianDiscretion.trustedDecisions}</p>
+                      </div>
+                    )}
+                    {guardianModel.guardianDiscretion.especiallyImportantWishes && (
+                      <div>
+                        <p className="text-xs text-gray-500">Especially important wishes</p>
+                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{guardianModel.guardianDiscretion.especiallyImportantWishes}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Guardian Roadmap section */}
         {hasGuardianData && (

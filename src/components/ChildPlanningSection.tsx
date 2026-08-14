@@ -1,4 +1,4 @@
-import { Plus, X, ShieldCheck, Heart, GraduationCap } from 'lucide-react';
+import { Plus, X, ShieldCheck, Heart, GraduationCap, Users, Lightbulb } from 'lucide-react';
 
 export type PlanningPerson = {
   id: string;
@@ -638,6 +638,78 @@ export default function ChildPlanningSection({
     );
   };
 
+  const renderWhyWeChoseYou = () => {
+    const guardianId = childData.guardianPersonId;
+    const guardianPerson = getPerson(guardianId);
+    if (!guardianId || !guardianPerson) return null;
+    const guardianFirstName = (guardianPerson.name || 'the guardian').split(' ')[0];
+
+    return (
+      <div className="mt-6 pt-4 border-t border-gray-600">
+        <div className="pb-2 border-b border-gray-500 mb-3">
+          <h5 className="text-base font-semibold text-blue-400 flex items-center gap-2">
+            <Heart size={18} />
+            Why We Chose {guardianFirstName}
+          </h5>
+        </div>
+
+        <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-3 mb-4">
+          <p className="text-sm text-blue-100 leading-relaxed">
+            These questions are a chance to reflect on why you trust {guardianFirstName} with your children. You don't have to answer all of them — just whatever feels right.
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Why have you chosen {guardianFirstName} to care for {childName}?
+          </label>
+          <p className="text-xs text-gray-500 mb-2">
+            This can be about the kind of person they are, their relationship with your children, the values you share, the family they've created, the way they make your children feel, or simply what gives you confidence that your children would be safe and loved with them.
+          </p>
+          <textarea
+            value={childData.guardianWhyChose || ''}
+            onChange={e => onChildChange(childIndex, 'guardianWhyChose', e.target.value)}
+            placeholder="Share whatever feels important to say..."
+            rows={4}
+            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            What would you want {guardianFirstName} to understand about the trust you are placing in them?
+          </label>
+          <p className="text-xs text-gray-500 mb-2">
+            You don't need to make this formal. Imagine sitting across from them and explaining why you trust them with the people who matter most to you.
+          </p>
+          <textarea
+            value={childData.guardianTrustMessage || ''}
+            onChange={e => onChildChange(childIndex, 'guardianTrustMessage', e.target.value)}
+            placeholder="Share whatever feels right..."
+            rows={4}
+            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            If {guardianFirstName} ever actually had to step into this role, is there anything you would want them to hear directly from you?
+          </label>
+          <p className="text-xs text-gray-500 mb-2">
+            This could be reassurance, gratitude, permission to make decisions differently than you would have, or simply something you would want them to remember on a very difficult day.
+          </p>
+          <textarea
+            value={childData.guardianIfNeededMessage || ''}
+            onChange={e => onChildChange(childIndex, 'guardianIfNeededMessage', e.target.value)}
+            placeholder="Share whatever feels right..."
+            rows={4}
+            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+        </div>
+      </div>
+    );
+  };
+
   const EDUCATION_PATH_OPTIONS = [
     { value: 'university', label: 'University' },
     { value: 'college', label: 'College' },
@@ -654,6 +726,48 @@ export default function ChildPlanningSection({
     { value: 'likely', label: 'Likely' },
     { value: 'unsure', label: 'Unsure' },
     { value: 'no_specific_expectation', label: 'No specific expectation' },
+    { value: 'not_applicable', label: 'Not applicable' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  const SETTING_TYPE_OPTIONS = [
+    { value: 'public', label: 'Public school' },
+    { value: 'catholic', label: 'Catholic / other publicly funded school' },
+    { value: 'private', label: 'Private school' },
+    { value: 'specialized_therapeutic', label: 'Specialized / therapeutic school or program' },
+    { value: 'homeschool', label: 'Homeschool' },
+    { value: 'other', label: 'Other' },
+    { value: 'not_attending', label: 'Not currently attending school / not applicable' },
+  ];
+
+  const SETTING_REASON_OPTIONS = [
+    { value: 'academic_preference', label: 'Academic preference' },
+    { value: 'learns_better', label: `${childName} learns better in this environment` },
+    { value: 'disability_support', label: 'Disability or additional support needs' },
+    { value: 'specialized_programming', label: 'Specialized programming' },
+    { value: 'smaller_class', label: 'Smaller class size / additional individual attention' },
+    { value: 'religious_cultural', label: 'Religious or cultural reasons' },
+    { value: 'social_continuity', label: 'Social / community continuity' },
+    { value: 'family_preference', label: 'Family preference' },
+    { value: 'location_practical', label: 'Location / practical reasons' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  const EDUCATION_IMPORTANCE_OPTIONS = [
+    { value: 'essential_support', label: `Essential support — "We consider this setting, or an equivalent level of support, important to ${childName}'s disability, health, learning or wellbeing."` },
+    { value: 'strong_preference', label: `Strong preference — "We would very much like this type of education to continue, but recognize circumstances could change."` },
+    { value: 'preference_with_flexibility', label: `Preference with flexibility — "We value this arrangement, but would want the Guardian to consider what makes sense for their family and for ${childName} at that time."` },
+    { value: 'no_strong_preference', label: `No strong preference — "We trust the Guardian to decide what educational environment makes the most sense."` },
+    { value: 'unsure', label: `Unsure / worth discussing — "We have not fully decided how strongly we feel about this."` },
+    { value: 'other', label: 'Other' },
+  ];
+
+  const EDUCATION_FAIRNESS_OPTIONS = [
+    { value: 'preserve_if_need_based', label: `Preserve if need-based — "If the difference is important to ${childName}'s disability, learning, health or wellbeing, we would want that support prioritized where reasonably possible."` },
+    { value: 'preserve_if_resources_allow', label: `Preserve if resources allow — "We would like ${childName}'s existing educational opportunity preserved where resources allow."` },
+    { value: 'balance_with_guardian_family', label: `Balance with guardian family — "We would want the Guardian to consider how the arrangement affects all of the children and the household."` },
+    { value: 'guardian_discretion', label: `Guardian discretion — "We trust the Guardian to make the decision that makes the most sense at the time."` },
+    { value: 'guardian_trustee_discussion', label: `Guardian + Trustee discussion — "We would want the Guardian and Trustee to discuss a significant schooling decision together."` },
     { value: 'other', label: 'Other' },
   ];
 
@@ -662,10 +776,41 @@ export default function ChildPlanningSection({
     const showPathOther = paths.includes('other');
     const showFinancialOther = childData.futureEducationFinancialSupport === 'other';
 
+    const settingType = childData.educationSettingType;
+    const showSettingOther = settingType === 'other';
+    const showSettingQuestions = settingType && settingType !== 'not_attending';
+
+    const settingReasons = (childData.educationSettingReasons || '').split(',').filter(Boolean);
+    const showSettingReasonsOther = settingReasons.includes('other');
+
+    const importance = childData.educationImportance;
+    const showImportanceOther = importance === 'other';
+
+    // Education fairness: trigger when private, specialized, strong/essential preference
+    const triggersFairness = settingType === 'private' || settingType === 'specialized_therapeutic' ||
+      importance === 'essential_support' || importance === 'strong_preference';
+
+    const fairnessPrinciples = (childData.educationFairnessPrinciples || '').split(',').filter(Boolean);
+    const showFairnessOther = fairnessPrinciples.includes('other');
+
     const togglePath = (value: string) => {
       const next = paths.includes(value) ? paths.filter(v => v !== value) : [...paths, value];
       const fields: Record<string, string> = { futureEducationPaths: next.join(',') };
       if (!next.includes('other')) fields.futureEducationPathsOther = '';
+      onChildMultiChange(childIndex, fields);
+    };
+
+    const toggleSettingReason = (value: string) => {
+      const next = settingReasons.includes(value) ? settingReasons.filter(v => v !== value) : [...settingReasons, value];
+      const fields: Record<string, string> = { educationSettingReasons: next.join(',') };
+      if (!next.includes('other')) fields.educationSettingReasonsOther = '';
+      onChildMultiChange(childIndex, fields);
+    };
+
+    const toggleFairness = (value: string) => {
+      const next = fairnessPrinciples.includes(value) ? fairnessPrinciples.filter(v => v !== value) : [...fairnessPrinciples, value];
+      const fields: Record<string, string> = { educationFairnessPrinciples: next.join(',') };
+      if (!next.includes('other')) fields.educationFairnessPrinciplesOther = '';
       onChildMultiChange(childIndex, fields);
     };
 
@@ -674,54 +819,270 @@ export default function ChildPlanningSection({
         <div className="pb-2 border-b border-gray-500 mb-3">
           <h5 className="text-base font-semibold text-blue-400 flex items-center gap-2">
             <GraduationCap size={18} />
-            Looking Ahead: Education & Post-Secondary
+            Education & Looking Ahead
           </h5>
         </div>
 
+        {/* Current education environment */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            When you think about {childName} becoming an adult, what do you currently hope or expect for their education or training?
+            What type of school or educational setting does {childName} currently attend?
           </label>
           <div className="flex flex-col gap-2">
-            {EDUCATION_PATH_OPTIONS.map(({ value, label }) => (
+            {SETTING_TYPE_OPTIONS.map(({ value, label }) => (
               <label key={value} className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={paths.includes(value)} onChange={() => togglePath(value)} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500" />
-                <span className="text-gray-300 text-sm">{label}</span>
-              </label>
-            ))}
-          </div>
-          {showPathOther && (
-            <input type="text" value={childData.futureEducationPathsOther || ''} onChange={e => onChildChange(childIndex, 'futureEducationPathsOther', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
-          )}
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Do you currently expect to financially support {childName} through post-secondary education or training?
-          </label>
-          <div className="flex flex-col gap-2">
-            {FINANCIAL_SUPPORT_OPTIONS.map(({ value, label }) => (
-              <label key={value} className="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name={`futureEducationFinancialSupport-${childIndex}`} value={value} checked={childData.futureEducationFinancialSupport === value} onChange={e => {
+                <input type="radio" name={`educationSettingType-${childIndex}`} value={value} checked={settingType === value} onChange={e => {
                   const val = e.target.value;
-                  const fields: Record<string, string> = { futureEducationFinancialSupport: val };
-                  if (val !== 'other') fields.futureEducationFinancialSupportOther = '';
+                  const fields: Record<string, string> = { educationSettingType: val };
+                  if (val !== 'other') fields.educationSettingTypeDetails = '';
+                  if (val === 'not_attending') {
+                    fields.educationSettingReasons = '';
+                    fields.educationSettingReasonsOther = '';
+                    fields.educationImportance = '';
+                    fields.educationImportanceDetails = '';
+                    fields.educationFairnessPrinciples = '';
+                    fields.educationFairnessPrinciplesOther = '';
+                    fields.educationFairnessDetails = '';
+                  }
                   onChildMultiChange(childIndex, fields);
                 }} className="mr-1" />
                 <span className="text-gray-300 text-sm">{label}</span>
               </label>
             ))}
           </div>
-          {showFinancialOther && (
-            <input type="text" value={childData.futureEducationFinancialSupportOther || ''} onChange={e => onChildChange(childIndex, 'futureEducationFinancialSupportOther', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+          {showSettingOther && (
+            <input type="text" value={childData.educationSettingTypeDetails || ''} onChange={e => onChildChange(childIndex, 'educationSettingTypeDetails', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
           )}
+        </div>
+
+        {/* Why this setting */}
+        {showSettingQuestions && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Why did you choose this educational setting for {childName}? (Select all that apply)
+            </label>
+            <div className="flex flex-col gap-2">
+              {SETTING_REASON_OPTIONS.map(({ value, label }) => (
+                <label key={value} className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={settingReasons.includes(value)} onChange={() => toggleSettingReason(value)} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500" />
+                  <span className="text-gray-300 text-sm">{label}</span>
+                </label>
+              ))}
+            </div>
+            {showSettingReasonsOther && (
+              <input type="text" value={childData.educationSettingReasonsOther || ''} onChange={e => onChildChange(childIndex, 'educationSettingReasonsOther', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+            )}
+            <textarea value={childData.educationSettingReasonsNotes || ''} onChange={e => onChildChange(childIndex, 'educationSettingReasonsNotes', e.target.value)} placeholder="Anything else you would want a future Guardian to understand about why this setting matters? (Optional)" rows={3} className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+          </div>
+        )}
+
+        {/* Need vs preference */}
+        {showSettingQuestions && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              How would you describe the importance of {childName}'s current educational setting?
+            </label>
+            <div className="flex flex-col gap-2">
+              {EDUCATION_IMPORTANCE_OPTIONS.map(({ value, label }) => (
+                <label key={value} className="flex items-start gap-2 cursor-pointer">
+                  <input type="radio" name={`educationImportance-${childIndex}`} value={value} checked={importance === value} onChange={e => {
+                    const val = e.target.value;
+                    const fields: Record<string, string> = { educationImportance: val };
+                    if (val !== 'other') fields.educationImportanceDetails = '';
+                    onChildMultiChange(childIndex, fields);
+                  }} className="mr-1 mt-0.5" />
+                  <span className="text-gray-300 text-sm">{label}</span>
+                </label>
+              ))}
+            </div>
+            {showImportanceOther && (
+              <input type="text" value={childData.educationImportanceDetails || ''} onChange={e => onChildChange(childIndex, 'educationImportanceDetails', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+            )}
+          </div>
+        )}
+
+        {/* Education-specific fairness */}
+        {triggersFairness && (
+          <div className="mb-4">
+            <div className="bg-amber-900/20 border border-amber-700/30 rounded-lg p-3 mb-3">
+              <p className="text-sm text-amber-100 leading-relaxed">
+                If {childName}'s schooling were materially different from the schooling available to the Guardian's own children, how would you want that considered?
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              {EDUCATION_FAIRNESS_OPTIONS.map(({ value, label }) => (
+                <label key={value} className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={fairnessPrinciples.includes(value)} onChange={() => toggleFairness(value)} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500 mt-0.5" />
+                  <span className="text-gray-300 text-sm">{label}</span>
+                </label>
+              ))}
+            </div>
+            {showFairnessOther && (
+              <input type="text" value={childData.educationFairnessPrinciplesOther || ''} onChange={e => onChildChange(childIndex, 'educationFairnessPrinciplesOther', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+            )}
+          </div>
+        )}
+
+        {/* Future education aspirations */}
+        <div className="mt-6 pt-4 border-t border-gray-600">
+          <h6 className="text-sm font-semibold text-gray-300 mb-3">Looking Ahead: Future Education & Training</h6>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              When you think about {childName} becoming an adult, what do you currently hope or expect for their education or training?
+            </label>
+            <div className="flex flex-col gap-2">
+              {EDUCATION_PATH_OPTIONS.map(({ value, label }) => (
+                <label key={value} className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={paths.includes(value)} onChange={() => togglePath(value)} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500" />
+                  <span className="text-gray-300 text-sm">{label}</span>
+                </label>
+              ))}
+            </div>
+            {showPathOther && (
+              <input type="text" value={childData.futureEducationPathsOther || ''} onChange={e => onChildChange(childIndex, 'futureEducationPathsOther', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Do you currently expect to financially support {childName} through post-secondary education, training or their transition into independence?
+            </label>
+            <div className="flex flex-col gap-2">
+              {FINANCIAL_SUPPORT_OPTIONS.map(({ value, label }) => (
+                <label key={value} className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name={`futureEducationFinancialSupport-${childIndex}`} value={value} checked={childData.futureEducationFinancialSupport === value} onChange={e => {
+                    const val = e.target.value;
+                    const fields: Record<string, string> = { futureEducationFinancialSupport: val };
+                    if (val !== 'other') fields.futureEducationFinancialSupportOther = '';
+                    onChildMultiChange(childIndex, fields);
+                  }} className="mr-1" />
+                  <span className="text-gray-300 text-sm">{label}</span>
+                </label>
+              ))}
+            </div>
+            {showFinancialOther && (
+              <input type="text" value={childData.futureEducationFinancialSupportOther || ''} onChange={e => onChildChange(childIndex, 'futureEducationFinancialSupportOther', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Is there anything you would want a future Guardian to understand about your hopes for {childName}'s education, training or path into adulthood? (Optional)
+            </label>
+            <textarea value={childData.futureEducationNotes || ''} onChange={e => onChildChange(childIndex, 'futureEducationNotes', e.target.value)} placeholder="Any thoughts about education or training goals..." rows={3} className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const FAMILY_FAIRNESS_OPTIONS = [
+    { value: 'preserve_important_opportunities', label: 'Preserve important opportunities — "Where resources allow, we would like important existing opportunities for our children to continue."' },
+    { value: 'prioritize_need_based', label: 'Prioritize need-based supports — "We would give particular priority to expenses connected to disability, health, education, learning or wellbeing."' },
+    { value: 'consider_whole_household', label: 'Consider the whole household — "We would want the Guardian and Trustee to consider how significant differences could affect all of the children living in the household."' },
+    { value: 'guardian_flexibility', label: 'Guardian flexibility — "We want the Guardian to have meaningful flexibility to adapt our wishes to the realities of their family."' },
+    { value: 'shared_household_benefit_reasonable', label: 'Shared-household benefit can be reasonable — "Where our resources and estate plan allow, we would be comfortable with some spending that also benefits the Guardian\'s family when it helps the household function well."' },
+    { value: 'childrens_resources_for_them', label: 'Our children\'s resources should remain primarily for them — "We would generally prefer resources intended for our children to remain primarily for their benefit."' },
+    { value: 'discuss_significant_differences', label: 'Discuss significant differences — "We would want the Guardian and Trustee to discuss significant differences rather than treating our wishes as rigid instructions."' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  const renderFamilyFairnessAndTrust = () => {
+    const guardianId = childData.guardianPersonId;
+    const guardianPerson = getPerson(guardianId);
+    if (!guardianId || !guardianPerson) return null;
+    const guardianFirstName = (guardianPerson.name || 'the guardian').split(' ')[0];
+
+    const fairnessPrinciples = (childData.familyFairnessPrinciples || '').split(',').filter(Boolean);
+    const showFairnessOther = fairnessPrinciples.includes('other');
+
+    const toggleFairness = (value: string) => {
+      const next = fairnessPrinciples.includes(value) ? fairnessPrinciples.filter(v => v !== value) : [...fairnessPrinciples, value];
+      const fields: Record<string, string> = { familyFairnessPrinciples: next.join(',') };
+      if (!next.includes('other')) fields.familyFairnessPrinciplesOther = '';
+      onChildMultiChange(childIndex, fields);
+    };
+
+    return (
+      <div className="mt-6 pt-4 border-t border-gray-600">
+        <div className="pb-2 border-b border-gray-500 mb-3">
+          <h5 className="text-base font-semibold text-blue-400 flex items-center gap-2">
+            <Users size={18} />
+            Life in the Guardian Household
+          </h5>
+        </div>
+
+        <div className="bg-amber-900/20 border border-amber-700/30 rounded-lg p-3 mb-4">
+          <p className="text-sm text-amber-100 leading-relaxed">
+            Sometimes preserving opportunities for one child can affect the household they would be joining. For example, your child may attend a private or specialized school, participate in expensive activities, or have supports that the Guardian's own children do not. There may be very good reasons to preserve those opportunities — particularly where they support a child's disability, health, learning or stability. At the same time, differences can affect how children experience fairness, belonging and family life. There isn't one right answer. The goal is to help your future Guardian and Trustee understand how you would want them to think about these situations.
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            If differences in resources or opportunities ever became significant within the Guardian's household, how would you want your Guardian and Trustee to think about them? (Select all that apply)
+          </label>
+          <div className="flex flex-col gap-2">
+            {FAMILY_FAIRNESS_OPTIONS.map(({ value, label }) => (
+              <label key={value} className="flex items-start gap-2 cursor-pointer">
+                <input type="checkbox" checked={fairnessPrinciples.includes(value)} onChange={() => toggleFairness(value)} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500 mt-0.5" />
+                <span className="text-gray-300 text-sm">{label}</span>
+              </label>
+            ))}
+          </div>
+          {showFairnessOther && (
+            <input type="text" value={childData.familyFairnessPrinciplesOther || ''} onChange={e => onChildChange(childIndex, 'familyFairnessPrinciplesOther', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderWhatWeTrust = () => {
+    const guardianId = childData.guardianPersonId;
+    const guardianPerson = getPerson(guardianId);
+    if (!guardianId || !guardianPerson) return null;
+    const guardianFirstName = (guardianPerson.name || 'the guardian').split(' ')[0];
+
+    return (
+      <div className="mt-6 pt-4 border-t border-gray-600">
+        <div className="pb-2 border-b border-gray-500 mb-3">
+          <h5 className="text-base font-semibold text-blue-400 flex items-center gap-2">
+            <Lightbulb size={18} />
+            What We Trust {guardianFirstName} to Decide
+          </h5>
+        </div>
+
+        <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-3 mb-4">
+          <p className="text-sm text-blue-100 leading-relaxed">
+            No plan can anticipate every circumstance. These questions are about the areas where you have preferences, but would not want {guardianFirstName} to feel they had failed you simply because circumstances required a different choice.
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            What decisions would you want {guardianFirstName} to feel trusted to make using their own judgment?
+          </label>
+          <textarea
+            value={childData.guardianTrustedDecisions || ''}
+            onChange={e => onChildChange(childIndex, 'guardianTrustedDecisions', e.target.value)}
+            placeholder="Think about the areas where you have preferences, but would not want to create rigid instructions..."
+            rows={4}
+            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Is there anything you would want a future Guardian or Trustee to understand about your hopes for {childName}'s education or training? (Optional)
+            Are there any wishes you've expressed in this Roadmap that you would consider especially important to preserve where reasonably possible?
           </label>
-          <textarea value={childData.futureEducationNotes || ''} onChange={e => onChildChange(childIndex, 'futureEducationNotes', e.target.value)} placeholder="Any thoughts about education or training goals..." rows={3} className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+          <textarea
+            value={childData.guardianEspeciallyImportantWishes || ''}
+            onChange={e => onChildChange(childIndex, 'guardianEspeciallyImportantWishes', e.target.value)}
+            placeholder="Share the wishes that matter most to you..."
+            rows={4}
+            className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+          />
         </div>
       </div>
     );
@@ -746,8 +1107,11 @@ export default function ChildPlanningSection({
       </div>
 
       {classification === 'minor' && renderGuardianPlanning()}
+      {classification === 'minor' && renderWhyWeChoseYou()}
       {classification === 'adult_dependant' && renderFutureSupportPlanning()}
       {(classification === 'minor' || classification === 'adult_dependant') && renderFutureEducation()}
+      {classification === 'minor' && renderFamilyFairnessAndTrust()}
+      {classification === 'minor' && renderWhatWeTrust()}
     </>
   );
 }

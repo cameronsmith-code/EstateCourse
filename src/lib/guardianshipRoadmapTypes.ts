@@ -77,6 +77,35 @@ export type PersonalProfile = {
   feelConnected?: string;
 };
 
+export type EducationSettingType =
+  | 'public'
+  | 'catholic'
+  | 'private'
+  | 'specialized_therapeutic'
+  | 'homeschool'
+  | 'other'
+  | 'not_attending';
+
+export type EducationSettingReason =
+  | 'academic_preference'
+  | 'learns_better'
+  | 'disability_support'
+  | 'specialized_programming'
+  | 'smaller_class'
+  | 'religious_cultural'
+  | 'social_continuity'
+  | 'family_preference'
+  | 'location_practical'
+  | 'other';
+
+export type EducationImportance =
+  | 'essential_support'
+  | 'strong_preference'
+  | 'preference_with_flexibility'
+  | 'no_strong_preference'
+  | 'unsure'
+  | 'other';
+
 export type EducationTransition = {
   schoolName?: string;
   schoolPhone?: string;
@@ -92,6 +121,14 @@ export type EducationTransition = {
   learningStyleNotes?: string;
   schoolExtraSupport?: string;
   schoolFocusHelps?: string;
+  // V4.3 additions
+  settingType?: EducationSettingType;
+  settingTypeDetails?: string;
+  settingReasons?: EducationSettingReason[];
+  settingReasonsOther?: string;
+  settingReasonsNotes?: string;
+  educationImportance?: EducationImportance;
+  educationImportanceDetails?: string;
 };
 
 export type MedicationEntry = {
@@ -234,11 +271,36 @@ export type AdultTransitionInfo = {
   supportLocationDependentDetails?: string;
 };
 
+export type FutureEducationPath =
+  | 'university'
+  | 'college'
+  | 'trade_apprenticeship'
+  | 'professional_training'
+  | 'employment_focused'
+  | 'adapted_education'
+  | 'whatever_suits'
+  | 'too_early_unsure'
+  | 'other';
+
+export type FinancialSupportExpectation =
+  | 'yes'
+  | 'likely'
+  | 'unsure'
+  | 'no_specific_expectation'
+  | 'not_applicable'
+  | 'other';
+
 export type FutureEducationInfo = {
   educationPath?: string[];
   educationPathOther?: string;
   financialSupportExpectation?: string;
   notesForGuardian?: string;
+  // V4.3 additions
+  aspirations?: FutureEducationPath[];
+  aspirationsOther?: string;
+  aspirationNotes?: string;
+  supportExpectation?: FinancialSupportExpectation;
+  supportExpectationDetails?: string;
 };
 
 export type GuardianshipChildProfile = {
@@ -268,6 +330,7 @@ export type GuardianshipChildProfile = {
   inheritanceByClient: ClientInheritanceInfo[];
   adultTransition?: AdultTransitionInfo;
   futureEducation?: FutureEducationInfo;
+  educationFairness?: EducationFairnessInfo;
   firstDaysPriorities?: string[];
   birthCertificateLocation?: string;
 };
@@ -400,6 +463,47 @@ export type ChildCareFundingPhilosophy = {
   parentMessageAboutWorkingTogether?: string;
 };
 
+export type FamilyFairnessPrinciple =
+  | 'preserve_important_opportunities'
+  | 'prioritize_need_based'
+  | 'consider_whole_household'
+  | 'guardian_flexibility'
+  | 'shared_household_benefit_reasonable'
+  | 'childrens_resources_for_them'
+  | 'discuss_significant_differences'
+  | 'other';
+
+export type EducationFairnessPrinciple =
+  | 'preserve_if_need_based'
+  | 'preserve_if_resources_allow'
+  | 'balance_with_guardian_family'
+  | 'guardian_discretion'
+  | 'guardian_trustee_discussion'
+  | 'other';
+
+export type GuardianTrustInfo = {
+  selectionReason?: string;
+  trustMessage?: string;
+  ifNeededMessage?: string;
+};
+
+export type GuardianDiscretionInfo = {
+  trustedDecisions?: string;
+  especiallyImportantWishes?: string;
+};
+
+export type FamilyFairnessInfo = {
+  principles?: FamilyFairnessPrinciple[];
+  principlesOther?: string;
+  details?: string;
+};
+
+export type EducationFairnessInfo = {
+  principles?: EducationFairnessPrinciple[];
+  principlesOther?: string;
+  details?: string;
+};
+
 export type FundingReviewItem = {
   id: string;
   category: 'housing' | 'workReduction' | 'broadSupport' | 'coordination' | 'documentation';
@@ -441,6 +545,9 @@ export type GuardianshipRoadmapModel = {
   fundingPhilosophy?: ChildCareFundingPhilosophy;
   careFundingCoordination?: CareFundingCoordination[];
   fundingReviewItems?: FundingReviewItem[];
+  guardianTrust?: GuardianTrustInfo;
+  guardianDiscretion?: GuardianDiscretionInfo;
+  familyFairness?: FamilyFairnessInfo;
   limitations?: GuardianshipLimitations;
   reviewItems?: import('./outputConfidenceTypes').ClarifyReviewItem[];
   crossReferences: Array<{ section: string; description: string }>;

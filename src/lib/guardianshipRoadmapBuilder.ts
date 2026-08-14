@@ -33,6 +33,10 @@ import type {
   ChildCareFundingPhilosophy,
   CareFundingCoordination,
   FundingReviewItem,
+  GuardianTrustInfo,
+  GuardianDiscretionInfo,
+  FamilyFairnessInfo,
+  EducationFairnessInfo,
 } from './guardianshipRoadmapTypes';
 import { getAgeOfMajority, getProvinceName, normalizeProvinceCode } from './jurisdiction';
 import { getProfessionalAdvisors } from './referentialIntegrity';
@@ -202,6 +206,8 @@ function buildPersonalProfile(child: ChildRecord): PersonalProfile {
 
 function buildEducationTransition(child: ChildRecord): EducationTransition | undefined {
   if (!child.attendingSchool || child.attendingSchool === 'no') return undefined;
+  const settingReasons = (child.educationSettingReasons || '')
+    .split(',').map(s => s.trim()).filter(s => s.length > 0);
   return {
     schoolName: child.schoolName,
     schoolPhone: child.schoolPhone,
@@ -217,6 +223,13 @@ function buildEducationTransition(child: ChildRecord): EducationTransition | und
     learningStyleNotes: child.learningStyleNotes,
     schoolExtraSupport: child.schoolExtraSupport,
     schoolFocusHelps: child.schoolFocusHelps,
+    settingType: child.educationSettingType as EducationTransition['settingType'],
+    settingTypeDetails: child.educationSettingTypeDetails,
+    settingReasons: settingReasons as EducationTransition['settingReasons'],
+    settingReasonsOther: child.educationSettingReasonsOther,
+    settingReasonsNotes: child.educationSettingReasonsNotes,
+    educationImportance: child.educationImportance as EducationTransition['educationImportance'],
+    educationImportanceDetails: child.educationImportanceDetails,
   };
 }
 
@@ -706,6 +719,55 @@ function buildFutureEducation(child: ChildRecord): FutureEducationInfo | undefin
     educationPathOther: other,
     financialSupportExpectation: expectation,
     notesForGuardian: notes,
+    aspirations: paths as FutureEducationInfo['aspirations'],
+    aspirationsOther: other,
+    aspirationNotes: notes,
+    supportExpectation: expectation as FutureEducationInfo['supportExpectation'],
+    supportExpectationDetails: child.futureEducationFinancialSupportOther,
+  };
+}
+
+function buildEducationFairness(child: ChildRecord): EducationFairnessInfo | undefined {
+  const principles = (child.educationFairnessPrinciples || '')
+    .split(',').map(s => s.trim()).filter(s => s.length > 0);
+  const other = child.educationFairnessPrinciplesOther;
+  const details = child.educationFairnessDetails;
+  if (principles.length === 0 && !other && !details) return undefined;
+  return {
+    principles: principles as EducationFairnessInfo['principles'],
+    principlesOther: other,
+    details,
+  };
+}
+
+function buildGuardianTrustInfo(childrenData: ChildRecord[]): GuardianTrustInfo | undefined {
+  const firstChild = childrenData.find(c => c.guardianWhyChose || c.guardianTrustMessage || c.guardianIfNeededMessage);
+  if (!firstChild) return undefined;
+  return {
+    selectionReason: firstChild.guardianWhyChose,
+    trustMessage: firstChild.guardianTrustMessage,
+    ifNeededMessage: firstChild.guardianIfNeededMessage,
+  };
+}
+
+function buildGuardianDiscretionInfo(childrenData: ChildRecord[]): GuardianDiscretionInfo | undefined {
+  const firstChild = childrenData.find(c => c.guardianTrustedDecisions || c.guardianEspeciallyImportantWishes);
+  if (!firstChild) return undefined;
+  return {
+    trustedDecisions: firstChild.guardianTrustedDecisions,
+    especiallyImportantWishes: firstChild.guardianEspeciallyImportantWishes,
+  };
+}
+
+function buildFamilyFairnessInfo(childrenData: ChildRecord[]): FamilyFairnessInfo | undefined {
+  const firstChild = childrenData.find(c => c.familyFairnessPrinciples || c.familyFairnessPrinciplesOther || c.familyFairnessDetails);
+  if (!firstChild) return undefined;
+  const principles = (firstChild.familyFairnessPrinciples || '')
+    .split(',').map(s => s.trim()).filter(s => s.length > 0);
+  return {
+    principles: principles as FamilyFairnessInfo['principles'],
+    principlesOther: firstChild.familyFairnessPrinciplesOther,
+    details: firstChild.familyFairnessDetails,
   };
 }
 
@@ -1660,6 +1722,7 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
       inheritanceByClient: buildInheritance(index, willsAnswers, clientNames),
       adultTransition: buildAdultTransition(child),
       futureEducation: buildFutureEducation(child),
+      educationFairness: buildEducationFairness(child),
       firstDaysPriorities: buildFirstDaysPriorities(child),
       birthCertificateLocation: child.birthCertificateLocation,
     };
@@ -1722,6 +1785,9 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
     fundingPhilosophy,
     careFundingCoordination,
     fundingReviewItems,
+    guardianTrust: buildGuardianTrustInfo(childrenData),
+    guardianDiscretion: buildGuardianDiscretionInfo(childrenData),
+    familyFairness: buildFamilyFairnessInfo(childrenData),
     crossReferences: financialResources
       .filter(r => r.exists)
       .map(r => ({ section: r.type, description: r.crossReference })),

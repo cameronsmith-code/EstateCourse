@@ -234,6 +234,13 @@ export type AdultTransitionInfo = {
   supportLocationDependentDetails?: string;
 };
 
+export type FutureEducationInfo = {
+  educationPath?: string[];
+  educationPathOther?: string;
+  financialSupportExpectation?: string;
+  notesForGuardian?: string;
+};
+
 export type GuardianshipChildProfile = {
   childId: string;
   index: number;
@@ -260,6 +267,7 @@ export type GuardianshipChildProfile = {
   adultSiblingRoles: AdultSiblingRole[];
   inheritanceByClient: ClientInheritanceInfo[];
   adultTransition?: AdultTransitionInfo;
+  futureEducation?: FutureEducationInfo;
   firstDaysPriorities?: string[];
   birthCertificateLocation?: string;
 };

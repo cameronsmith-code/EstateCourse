@@ -22,6 +22,7 @@ import type {
   PersonToKeepClose,
   ClientInheritanceInfo,
   AdultTransitionInfo,
+  FutureEducationInfo,
   RoleAssignment,
   FinancialResourceSummary,
   EstateTrusteeInfo,
@@ -687,6 +688,25 @@ function buildFirstDaysPriorities(child: ChildRecord): string[] | undefined {
     if (val) items.push(val);
   }
   return items.length > 0 ? items : undefined;
+}
+
+function buildFutureEducation(child: ChildRecord): FutureEducationInfo | undefined {
+  const paths = (child.futureEducationPaths || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+  const other = child.futureEducationPathsOther;
+  const expectation = child.futureEducationFinancialSupport;
+  const notes = child.futureEducationNotes;
+
+  if (paths.length === 0 && !other && !expectation && !notes) return undefined;
+
+  return {
+    educationPath: paths,
+    educationPathOther: other,
+    financialSupportExpectation: expectation,
+    notesForGuardian: notes,
+  };
 }
 
 function buildGuardianAssignments(
@@ -1634,6 +1654,7 @@ export function buildGuardianshipRoadmap(allAnswers: AnswersMap): GuardianshipRo
       adultSiblingRoles: [],
       inheritanceByClient: buildInheritance(index, willsAnswers, clientNames),
       adultTransition: buildAdultTransition(child),
+      futureEducation: buildFutureEducation(child),
       firstDaysPriorities: buildFirstDaysPriorities(child),
       birthCertificateLocation: child.birthCertificateLocation,
     };

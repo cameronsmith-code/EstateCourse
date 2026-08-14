@@ -1,4 +1,4 @@
-import { Plus, X, ShieldCheck, Heart } from 'lucide-react';
+import { Plus, X, ShieldCheck, Heart, GraduationCap } from 'lucide-react';
 
 export type PlanningPerson = {
   id: string;
@@ -638,6 +638,95 @@ export default function ChildPlanningSection({
     );
   };
 
+  const EDUCATION_PATH_OPTIONS = [
+    { value: 'university', label: 'University' },
+    { value: 'college', label: 'College' },
+    { value: 'trade_apprenticeship', label: 'Trade / apprenticeship' },
+    { value: 'other_post_secondary', label: 'Other post-secondary or professional training' },
+    { value: 'employment', label: 'Employment / work-focused path' },
+    { value: 'support_whatever', label: 'We want to support whatever path suits them' },
+    { value: 'too_early_unsure', label: 'Too early / unsure' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  const FINANCIAL_SUPPORT_OPTIONS = [
+    { value: 'yes', label: 'Yes' },
+    { value: 'likely', label: 'Likely' },
+    { value: 'unsure', label: 'Unsure' },
+    { value: 'no_specific_expectation', label: 'No specific expectation' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  const renderFutureEducation = () => {
+    const paths = (childData.futureEducationPaths || '').split(',').filter(Boolean);
+    const showPathOther = paths.includes('other');
+    const showFinancialOther = childData.futureEducationFinancialSupport === 'other';
+
+    const togglePath = (value: string) => {
+      const next = paths.includes(value) ? paths.filter(v => v !== value) : [...paths, value];
+      const fields: Record<string, string> = { futureEducationPaths: next.join(',') };
+      if (!next.includes('other')) fields.futureEducationPathsOther = '';
+      onChildMultiChange(childIndex, fields);
+    };
+
+    return (
+      <div className="mt-6 pt-4 border-t border-gray-600">
+        <div className="pb-2 border-b border-gray-500 mb-3">
+          <h5 className="text-base font-semibold text-blue-400 flex items-center gap-2">
+            <GraduationCap size={18} />
+            Looking Ahead: Education & Post-Secondary
+          </h5>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            When you think about {childName} becoming an adult, what do you currently hope or expect for their education or training?
+          </label>
+          <div className="flex flex-col gap-2">
+            {EDUCATION_PATH_OPTIONS.map(({ value, label }) => (
+              <label key={value} className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={paths.includes(value)} onChange={() => togglePath(value)} className="w-4 h-4 rounded border-gray-500 bg-gray-600 text-blue-500 focus:ring-blue-500" />
+                <span className="text-gray-300 text-sm">{label}</span>
+              </label>
+            ))}
+          </div>
+          {showPathOther && (
+            <input type="text" value={childData.futureEducationPathsOther || ''} onChange={e => onChildChange(childIndex, 'futureEducationPathsOther', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+          )}
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Do you currently expect to financially support {childName} through post-secondary education or training?
+          </label>
+          <div className="flex flex-col gap-2">
+            {FINANCIAL_SUPPORT_OPTIONS.map(({ value, label }) => (
+              <label key={value} className="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name={`futureEducationFinancialSupport-${childIndex}`} value={value} checked={childData.futureEducationFinancialSupport === value} onChange={e => {
+                  const val = e.target.value;
+                  const fields: Record<string, string> = { futureEducationFinancialSupport: val };
+                  if (val !== 'other') fields.futureEducationFinancialSupportOther = '';
+                  onChildMultiChange(childIndex, fields);
+                }} className="mr-1" />
+                <span className="text-gray-300 text-sm">{label}</span>
+              </label>
+            ))}
+          </div>
+          {showFinancialOther && (
+            <input type="text" value={childData.futureEducationFinancialSupportOther || ''} onChange={e => onChildChange(childIndex, 'futureEducationFinancialSupportOther', e.target.value)} placeholder="Please describe..." className="mt-2 w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Is there anything you would want a future Guardian or Trustee to understand about your hopes for {childName}'s education or training? (Optional)
+          </label>
+          <textarea value={childData.futureEducationNotes || ''} onChange={e => onChildChange(childIndex, 'futureEducationNotes', e.target.value)} placeholder="Any thoughts about education or training goals..." rows={3} className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" />
+        </div>
+      </div>
+    );
+  };
+
   const subHeading = classification === 'minor' ? 'Guardian Planning' : 'Future Support Planning';
   const SubIcon = classification === 'minor' ? ShieldCheck : Heart;
 
@@ -658,6 +747,7 @@ export default function ChildPlanningSection({
 
       {classification === 'minor' && renderGuardianPlanning()}
       {classification === 'adult_dependant' && renderFutureSupportPlanning()}
+      {(classification === 'minor' || classification === 'adult_dependant') && renderFutureEducation()}
     </>
   );
 }

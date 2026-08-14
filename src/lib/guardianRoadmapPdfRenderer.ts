@@ -552,20 +552,30 @@ function renderCover(state: RenderState, doc: ClarifyDocument): void {
 
 // ─── Intro / About This Roadmap ────────────────────────────────────────────────
 
-function renderIntro(state: RenderState): void {
+function renderIntro(state: RenderState, doc: ClarifyDocument): void {
   // Start on page 2 (first interior page)
   newPage(state);
 
+  // Section heading with generous spacing to prevent rule collision
+  state.y += 8;
   wrappedText(state, 'About This Roadmap', 16, 'bold', BRAND.navy, 1.25);
+  state.y += 6;
+  // Gold rule positioned safely below the heading baseline
   state.pdf.setDrawColor(...BRAND.gold);
   state.pdf.setLineWidth(1.5);
-  state.pdf.line(MARGIN_L, state.y - 2, MARGIN_L + 50, state.y - 2);
-  state.y += 14;
+  state.pdf.line(MARGIN_L, state.y, MARGIN_L + 50, state.y);
+  state.y += 16;
+
+  const familyName = doc.cover.familyName || 'the parents';
+  const childNames = doc.cover.childNames.length > 0
+    ? doc.cover.childNames
+    : ['the children'];
 
   const introTexts = [
-    'This Guardianship Roadmap was prepared from information provided by the parents through the Will Companion Kit. It reflects their wishes, planning intentions, and the information available when the Roadmap was prepared.',
-    'It does not independently verify legal documents, legal authority, tax treatment, medical information, or account values. Important decisions should be confirmed with the appropriate lawyer, accountant, financial planner, or healthcare professional.',
-    'This document is intended to help a guardian understand the family\'s planning intentions and practical information — so they can focus on the children, not on figuring out what the parents would have wanted.',
+    `If you are reading this because you have had to step into ${childNames.length === 1 ? `${childNames[0]}'s` : 'the children\'s'} life, ${familyName} recognize that their world may have changed profoundly — and yours may have too.`,
+    `${familyName} know that caring for ${childNames.length === 1 ? childNames[0] : 'their children'} could affect far more than the children themselves. It could change your home, your routines, your work, your finances and the lives of the people in your family.`,
+    `No planning document can anticipate every circumstance or provide every answer. This Roadmap is intended to give you an organized starting point: what ${familyName} wanted you to know about ${childNames.length === 1 ? childNames[0] : 'their children'}, the people and routines that matter to them, the plans they have made, and the practical information that may help you find your footing.`,
+    `Some legal, financial, medical and practical matters will still need to be confirmed with the appropriate professionals.`,
   ];
 
   for (const text of introTexts) {
@@ -635,7 +645,7 @@ export function renderGuardianRoadmapPdf(
   renderCover(state, doc);
 
   // Page 2: About This Roadmap (NOT a separate blank page)
-  renderIntro(state);
+  renderIntro(state, doc);
 
   // Render all content sections
   for (const section of doc.sections) {

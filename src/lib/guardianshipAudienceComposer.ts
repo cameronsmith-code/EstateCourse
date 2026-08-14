@@ -91,7 +91,8 @@ type ChildSubsection =
   | 'activities'
   | 'communitiesAndTraditions'
   | 'inheritance'
-  | 'adultTransition';
+  | 'adultTransition'
+  | 'futureEducation';
 
 type SectionSource =
   | { area: 'familyContext' }
@@ -324,6 +325,7 @@ const CHILD_SUBSECTION_HEADINGS: Record<ChildSubsection, string> = {
   communitiesAndTraditions: 'Communities / Activities / Traditions',
   inheritance: 'Inheritance',
   adultTransition: 'Looking Ahead',
+  futureEducation: 'Looking Ahead: Education',
 };
 
 function resolvePerChildSection(
@@ -525,6 +527,15 @@ function buildImmediateActionsSection(
 
   if (audience === 'client' || audience === 'guardian') {
     relevant = actions;
+    if (audience === 'guardian') {
+      // Guardian actions only — exclude executor/POA duties
+      const executorKeywords = ['estate trustee', 'inventory', 'probate', 'cancel credit', 'notify bank', 'file tax', 'settle debt', 'investment decision', 'administer'];
+      relevant = actions.filter(a => {
+        const text = `${a.heading} ${a.body}`.toLowerCase();
+        if (executorKeywords.some(kw => text.includes(kw))) return false;
+        return true;
+      });
+    }
   } else {
     relevant = actions.filter(a => {
       const text = `${a.heading} ${a.body}`.toLowerCase();
@@ -552,8 +563,8 @@ function buildImmediateActionsSection(
 
   return {
     id: 'immediate-actions',
-    heading: 'If Something Happened Tomorrow',
-    purpose: 'The first steps, in priority order',
+    heading: 'If You Ever Need to Step In',
+    purpose: 'A starting point — not a list of everything that needs to happen at once',
     priority: 'primary',
     blocks,
   };
@@ -720,6 +731,23 @@ const guardianStrategy: AudienceStrategy = {
       ],
       includeRules: ['GUARDIAN-01', 'GUARDIAN-02', 'GUARDIAN-03', 'GUARDIAN-04'],
     },
+    // 1b. Roadmap at a Glance
+    {
+      id: 'at-a-glance',
+      heading: 'Roadmap at a Glance',
+      purpose: 'A quick orientation before the detail begins',
+      priority: 'primary',
+      sources: [
+        { area: 'guardianPlan' },
+        { area: 'familyRoles' },
+        { area: 'children', subsection: 'introduction' },
+        { area: 'children', subsection: 'healthcare' },
+        { area: 'documents' },
+      ],
+      includeRules: ['GUARDIAN-01', 'GUARDIAN-04', 'SIBLING-01', 'HEALTH-01'],
+      includeTypes: ['context', 'crossReference'],
+      collapsibleInUI: true,
+    },
     // 2. A Note from the Parents
     {
       id: 'parent-voice',
@@ -769,6 +797,7 @@ const guardianStrategy: AudienceStrategy = {
         { area: 'children', subsection: 'activities' },
         { area: 'children', subsection: 'inheritance' },
         { area: 'children', subsection: 'adultTransition' },
+        { area: 'children', subsection: 'futureEducation' },
       ],
       excludeRules: ['GUARDIAN-01'],
       perChild: true,
@@ -778,7 +807,7 @@ const guardianStrategy: AudienceStrategy = {
     {
       id: 'adult-sibling',
       heading: 'Adult Sibling Role',
-      purpose: 'Where relevant, an older sibling is a sister or brother — not a replacement parent',
+      purpose: 'Where relevant, an older sibling is a sibling — not a replacement parent',
       priority: 'important',
       sources: [{ area: 'familyRoles' }],
       includeRules: ['SIBLING-01', 'SIBLING-02'],
@@ -808,6 +837,7 @@ const guardianStrategy: AudienceStrategy = {
       priority: 'supporting',
       sources: [{ area: 'familyRoles' }],
       includeRules: ['ROLE-01'],
+      excludeTypes: ['parentVoice'],
     },
     // 10. Important Documents
     {

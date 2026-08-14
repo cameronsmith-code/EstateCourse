@@ -189,7 +189,7 @@ export function humanizeSharedBenefitPhilosophy(value: string): string {
 const OVERALL_APPROACH_LABELS: Record<string, string> = {
   majorExpensesOnly: 'help cover the major costs that come with expanding a household',
   shareIncrementalCosts: 'help cover the incremental costs of adding the children to the guardian household',
-  generousHouseholdSupport: 'help make that transition easier — not simply pay the children\'s individual expenses',
+  generousHouseholdSupport: 'help make that transition easier for the whole household',
   custom: 'help support the guardian household in the way the parents have described',
   unsure: 'help support the guardian household, though the parents were still working out the details',
 };
@@ -205,6 +205,7 @@ const SIBLING_ROLE_LABELS: Record<string, string> = {
   family_discussions: 'being part of family discussions about the children',
   practical_help: 'helping with practical day-to-day things',
   financial_support: 'contributing financially where possible',
+  regular_sibling: 'remaining a regular and meaningful presence in the younger children\'s lives',
   other: 'being there in whatever way feels right',
 };
 
@@ -402,6 +403,39 @@ export function sanitizeClarifyDocument(doc: {
         sample: text.substring(0, 80),
       });
     }
+
+    // Check for bad display fallbacks
+    if (findBadFallbacks(text)) {
+      findings.push({
+        severity: 'blocking',
+        path,
+        issue: 'Bad display fallback detected',
+        sample: text.substring(0, 80),
+      });
+    }
+
+    // Check for duplicate clauses (only in longer text blocks)
+    if (text.length > 100) {
+      const dupes = findDuplicateClauses(text);
+      if (dupes.length > 0) {
+        findings.push({
+          severity: 'warning',
+          path,
+          issue: 'Duplicate clause detected',
+          sample: dupes[0].substring(0, 80),
+        });
+      }
+    }
+
+    // Check for duplicate punctuation
+    if (/\.\s*\./.test(text) || /\?\s*\?/.test(text) || /!\s*!/.test(text)) {
+      findings.push({
+        severity: 'warning',
+        path,
+        issue: 'Duplicate punctuation detected',
+        sample: text.substring(0, 80),
+      });
+    }
   };
 
   for (const section of doc.sections) {
@@ -438,4 +472,104 @@ export function sanitizeClarifyDocument(doc: {
 
 export function hasBlockingFindings(findings: QaFinding[]): boolean {
   return findings.some(f => f.severity === 'blocking');
+}
+
+// ─── Document location normalization ──────────────────────────────────────────
+
+export function normalizeLocation(loc: string): string {
+  return loc
+    .toLowerCase()
+    .replace(/^(our|the|my|their)\s+/, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\.$/, '')
+    .trim();
+}
+
+// ─── Punctuation normalization ────────────────────────────────────────────────
+
+export function normalizePunctuation(text: string): string {
+  if (!text) return text;
+  return text
+    .replace(/\.\s*\.\s*\./g, '.')
+    .replace(/\.\s*\./g, '.')
+    .replace(/\.\s*\./g, '.')
+    .replace(/\s+\./g, '.')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+,/g, ',')
+    .replace(/,{2,}/g, ',')
+    .replace(/\s+;/g, ';')
+    .trim();
+}
+
+// ─── Activity frequency humanization ──────────────────────────────────────────
+
+const FREQUENCY_LABELS: Record<string, string> = {
+  weekly: 'each week',
+  twice_per_week: 'twice each week',
+  twice_weekly: 'twice each week',
+  biweekly: 'every two weeks',
+  monthly: 'each month',
+  daily: 'every day',
+  weekdays: 'on weekdays',
+  weekends: 'on weekends',
+  saturdays: 'on Saturdays',
+  sundays: 'on Sundays',
+  mondays: 'on Mondays',
+  fridays: 'on Fridays',
+  occasionally: 'occasionally',
+  seasonally: 'in season',
+  yearly: 'each year',
+  annually: 'each year',
+};
+
+export function humanizeFrequency(frequency: string): string {
+  if (!frequency) return '';
+  const lower = frequency.toLowerCase().trim();
+  const label = FREQUENCY_LABELS[lower];
+  if (label) return label;
+  if (/once\s+a\s+week/i.test(frequency)) return 'each week';
+  if (/once\s+a\s+month/i.test(frequency)) return 'each month';
+  if (/every\s+other\s+week/i.test(frequency)) return 'every two weeks';
+  return frequency.toLowerCase().replace(/^\w/, c => c.toUpperCase());
+}
+
+// ─── Duplicate clause detection ───────────────────────────────────────────────
+
+const BAD_FALLBACK_PATTERNS = [
+  /:\s*other\s*$/i,
+  /by\s+Regular sibling\s*\.?$/i,
+  /:\s*Club activity\s*$/i,
+  /:\s*Existing connection\s*$/i,
+  /Future caregiver consideration:\s*other\s*$/i,
+];
+
+export function findBadFallbacks(text: string): boolean {
+  return BAD_FALLBACK_PATTERNS.some(p => p.test(text));
+}
+
+export function findDuplicateClauses(text: string): string[] {
+  const duplicates: string[] = [];
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const seen = new Set<string>();
+  for (const s of sentences) {
+    const norm = s.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+    if (norm.split(/\s+/).length >= 6) {
+      if (seen.has(norm)) {
+        duplicates.push(s.substring(0, 80));
+      }
+      seen.add(norm);
+    }
+  }
+  const words = text.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/);
+  for (let len = 8; len <= 12; len++) {
+    for (let i = 0; i + len * 2 <= words.length; i++) {
+      const phrase = words.slice(i, i + len).join(' ');
+      if (phrase.length < 30) continue;
+      const rest = words.slice(i + len).join(' ');
+      if (rest.includes(phrase)) {
+        duplicates.push(phrase);
+      }
+    }
+  }
+  return Array.from(new Set(duplicates));
 }

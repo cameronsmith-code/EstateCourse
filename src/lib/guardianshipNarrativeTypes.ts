@@ -104,6 +104,7 @@ export interface GuardianshipChildNarrative {
   activities?: NarrativeBlock[];
   inheritance?: NarrativeBlock[];
   adultTransition?: NarrativeBlock[];
+  futureEducation?: NarrativeBlock[];
 }
 
 export interface GuardianshipNarrativeModel {

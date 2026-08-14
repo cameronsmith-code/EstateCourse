@@ -112,20 +112,15 @@ interface SectionBlueprint {
   purpose?: string;
   priority: NarrativeImportance;
   sources: SectionSource[];
-  /** Only include blocks whose ruleId is in this list (when present). */
   includeRules?: string[];
-  /** Exclude blocks whose ruleId is in this list. */
   excludeRules?: string[];
-  /** Only include blocks whose type is in this list. */
   includeTypes?: NarrativeBlock['type'][];
-  /** Exclude blocks whose type is in this list. */
   excludeTypes?: NarrativeBlock['type'][];
-  /** Cap the number of immediate actions (only for immediateActions source). */
   maxActions?: number;
   childIds?: string[];
   collapsibleInUI?: boolean;
-  /** When true, produce per-child sub-sections instead of a flat block list. */
   perChild?: boolean;
+  customBuilder?: 'atAGlance' | 'timeHorizonActions';
 }
 
 // ─── Relevance Routing ────────────────────────────────────────────────────────
@@ -273,15 +268,147 @@ function passesBlueprintFilters(
   return true;
 }
 
+// ─── Custom Section Builders ──────────────────────────────────────────────────
+
+function buildAtAGlanceSection(
+  blueprint: SectionBlueprint,
+  narrative: GuardianshipNarrativeModel,
+  audience: GuardianshipAudience,
+  tracker: RepetitionTracker,
+  roadmapModel?: unknown
+): GuardianshipAudienceSection | null {
+  const blocks: NarrativeBlock[] = [];
+  const rm = roadmapModel as {
+    children: { childId: string; name: string; nickname: string; status: string; age?: number; planningFocus?: string }[];
+    guardianAssignments: { childIds: string[]; childNames: string[]; guardianPeople: { name: string }[]; alternatePeople: { name: string }[]; moveStatus?: string; guardianCommunity?: string }[];
+    readiness: { thingsWorthConfirming: string[] };
+  } | undefined;
+
+  if (!rm) return null;
+
+  // 1. Children summary — all children with concise status
+  for (const child of rm.children) {
+    const displayName = child.nickname || child.name;
+    const ageStr = child.age !== undefined ? ` — age ${child.age}` : '';
+    let statusLine = '';
+    if (child.status === 'minor') {
+      const hasSupport = child.planningFocus && child.planningFocus !== 'Minor';
+      statusLine = hasSupport ? `Minor child with additional ongoing support needs.` : 'Minor child.';
+    } else if (child.status === 'adult_independent') {
+      statusLine = 'Financially independent adult child.';
+    } else {
+      statusLine = 'Adult child.';
+    }
+    blocks.push({
+      id: `ataglance_child_${child.childId}`,
+      ruleId: 'GUARDIAN-01',
+      type: 'context',
+      importance: 'primary',
+      sourceType: 'knownFact',
+      heading: `${displayName}${ageStr}`,
+      body: statusLine,
+    });
+  }
+
+  // 2. Guardian summary — concise, no narrative repetition
+  for (const assignment of rm.guardianAssignments) {
+    const childLabel = assignment.childNames.length > 1
+      ? assignment.childNames.join(' and ')
+      : assignment.childNames[0];
+    const guardianName = assignment.guardianPeople.map(p => p.name).join(' and ');
+    blocks.push({
+      id: `ataglance_guardian_${assignment.childIds.join('_')}`,
+      ruleId: 'GUARDIAN-01',
+      type: 'context',
+      importance: 'primary',
+      sourceType: 'parentPreference',
+      heading: 'Intended Guardian',
+      body: `${guardianName} — for ${childLabel}.`,
+    });
+    if (assignment.alternatePeople.length > 0) {
+      blocks.push({
+        id: `ataglance_alt_${assignment.childIds.join('_')}`,
+        ruleId: 'GUARDIAN-04',
+        type: 'context',
+        importance: 'important',
+        sourceType: 'parentPreference',
+        heading: 'Alternate Guardian',
+        body: assignment.alternatePeople.map(p => p.name).join(' and '),
+      });
+    }
+    if (assignment.moveStatus === 'likely' || assignment.moveStatus === 'possible') {
+      blocks.push({
+        id: `ataglance_move_${assignment.childIds.join('_')}`,
+        ruleId: 'MOVE-01',
+        type: 'context',
+        importance: 'important',
+        sourceType: 'derived',
+        heading: 'Likely Move',
+        body: assignment.guardianCommunity || 'To the guardian\'s community.',
+      });
+    }
+  }
+
+  // 3. Additional support needs flag
+  const childrenWithSupport = rm.children.filter(c => c.status === 'minor' && c.planningFocus && c.planningFocus !== 'Minor');
+  if (childrenWithSupport.length > 0) {
+    blocks.push({
+      id: 'ataglance_support',
+      ruleId: 'HEALTH-01',
+      type: 'context',
+      importance: 'important',
+      sourceType: 'knownFact',
+      heading: 'Additional Support Needs',
+      body: `${childrenWithSupport.map(c => c.nickname || c.name).join(' and ')} ${childrenWithSupport.length === 1 ? 'has' : 'have'} additional ongoing support needs. See the child-specific sections for detail.`,
+    });
+  }
+
+  // 4. Things worth confirming (concise, material items only)
+  const confirmations = (rm.readiness?.thingsWorthConfirming || []).slice(0, 3);
+  if (confirmations.length > 0) {
+    blocks.push({
+      id: 'ataglance_confirm',
+      ruleId: 'READINESS-02',
+      type: 'readiness',
+      importance: 'important',
+      sourceType: 'professionalReview',
+      heading: 'Things Worth Confirming',
+      bullets: confirmations,
+    });
+  }
+
+  if (blocks.length === 0) return null;
+
+  // Apply repetition control
+  const processedBlocks = blocks.map(b => {
+    const controlled = applyRepetitionControl(b, tracker);
+    return preserveBlockIntegrity(controlled);
+  });
+
+  return {
+    id: blueprint.id,
+    heading: blueprint.heading,
+    purpose: blueprint.purpose,
+    priority: blueprint.priority,
+    blocks: processedBlocks,
+    collapsibleInUI: blueprint.collapsibleInUI,
+  };
+}
+
 // ─── Dynamic Omission ─────────────────────────────────────────────────────────
 
 function resolveSection(
   blueprint: SectionBlueprint,
   narrative: GuardianshipNarrativeModel,
   audience: GuardianshipAudience,
-  tracker: RepetitionTracker
+  tracker: RepetitionTracker,
+  roadmapModel?: unknown
 ): GuardianshipAudienceSection | null {
   tracker.currentSectionId = blueprint.id;
+
+  if (blueprint.customBuilder === 'atAGlance') {
+    return buildAtAGlanceSection(blueprint, narrative, audience, tracker, roadmapModel);
+  }
 
   if (blueprint.perChild) {
     return resolvePerChildSection(blueprint, narrative, audience, tracker);
@@ -552,6 +679,11 @@ function buildImmediateActionsSection(
 
   if (relevant.length === 0) return null;
 
+  // For guardian audience, organize into time horizons
+  if (audience === 'guardian') {
+    return buildTimeHorizonActionsSection(relevant);
+  }
+
   const blocks: NarrativeBlock[] = relevant.map(a => ({
     id: a.id,
     ruleId: a.ruleId,
@@ -561,6 +693,131 @@ function buildImmediateActionsSection(
     importance: (a.priority <= 3 ? 'primary' : a.priority <= 6 ? 'important' : 'supporting') as NarrativeImportance,
     sourceType: a.isParentWish ? 'parentPreference' as const : 'derived' as const,
   }));
+
+  return {
+    id: 'immediate-actions',
+    heading: 'If You Ever Need to Step In',
+    purpose: 'A starting point — not a list of everything that needs to happen at once',
+    priority: 'primary',
+    blocks,
+  };
+}
+
+function classifyActionTimeHorizon(action: ImmediateActionNarrative): 'rightAway' | 'soon' | 'settling' {
+  const text = `${action.heading} ${action.body}`.toLowerCase();
+  // Right away: immediate guardian concerns
+  if (
+    text.includes('guardian') && (text.includes('contact') || text.includes('reach out')) ||
+    text.includes('be with the children') ||
+    text.includes('medication') ||
+    text.includes('urgent health') ||
+    text.includes('keep minor siblings together') ||
+    text.includes('familiar trusted adult') ||
+    text.includes('avoid unnecessary') ||
+    text.includes('first-days') ||
+    text.includes('first days')
+  ) {
+    return 'rightAway';
+  }
+  // Soon: school, healthcare, records, relationships, trustee
+  if (
+    text.includes('school') && (text.includes('contact') || text.includes('records')) ||
+    text.includes('healthcare provider') ||
+    text.includes('records') ||
+    text.includes('friend') && text.includes('contact') ||
+    text.includes('important people') ||
+    text.includes('stay connected') ||
+    text.includes('important relationship') ||
+    text.includes('routine') ||
+    text.includes('estate trustee') && text.includes('connect') ||
+    text.includes('inheritance trustee') && text.includes('connect')
+  ) {
+    return 'soon';
+  }
+  // Once things begin to settle: longer-term
+  return 'settling';
+}
+
+function buildTimeHorizonActionsSection(
+  relevant: ImmediateActionNarrative[]
+): GuardianshipAudienceSection {
+  const rightAway = relevant.filter(a => classifyActionTimeHorizon(a) === 'rightAway');
+  const soon = relevant.filter(a => classifyActionTimeHorizon(a) === 'soon');
+  const settling = relevant.filter(a => classifyActionTimeHorizon(a) === 'settling');
+
+  const blocks: NarrativeBlock[] = [];
+
+  if (rightAway.length > 0) {
+    blocks.push({
+      id: 'th_right_away',
+      ruleId: 'IMMEDIATE-01',
+      type: 'action',
+      importance: 'primary',
+      sourceType: 'derived',
+      heading: 'Right Away',
+      body: '',
+    });
+    for (const a of rightAway) {
+      blocks.push({
+        id: a.id,
+        ruleId: a.ruleId,
+        type: 'action',
+        importance: 'primary',
+        sourceType: a.isParentWish ? 'parentPreference' : 'derived',
+        heading: a.heading,
+        body: a.body,
+        childNames: a.childNames,
+      });
+    }
+  }
+
+  if (soon.length > 0) {
+    blocks.push({
+      id: 'th_soon',
+      ruleId: 'IMMEDIATE-01',
+      type: 'action',
+      importance: 'important',
+      sourceType: 'derived',
+      heading: 'Soon',
+      body: '',
+    });
+    for (const a of soon) {
+      blocks.push({
+        id: a.id,
+        ruleId: a.ruleId,
+        type: 'action',
+        importance: 'important',
+        sourceType: a.isParentWish ? 'parentPreference' : 'derived',
+        heading: a.heading,
+        body: a.body,
+        childNames: a.childNames,
+      });
+    }
+  }
+
+  if (settling.length > 0) {
+    blocks.push({
+      id: 'th_settling',
+      ruleId: 'IMMEDIATE-01',
+      type: 'action',
+      importance: 'supporting',
+      sourceType: 'derived',
+      heading: 'Once Things Begin to Settle',
+      body: '',
+    });
+    for (const a of settling) {
+      blocks.push({
+        id: a.id,
+        ruleId: a.ruleId,
+        type: 'action',
+        importance: 'supporting',
+        sourceType: a.isParentWish ? 'parentPreference' : 'derived',
+        heading: a.heading,
+        body: a.body,
+        childNames: a.childNames,
+      });
+    }
+  }
 
   return {
     id: 'immediate-actions',
@@ -732,21 +989,18 @@ const guardianStrategy: AudienceStrategy = {
       ],
       includeRules: ['GUARDIAN-01', 'GUARDIAN-02', 'GUARDIAN-03', 'GUARDIAN-04'],
     },
-    // 1b. Roadmap at a Glance
+    // 1b. Roadmap at a Glance — orientation dashboard, not a second narrative
     {
       id: 'at-a-glance',
       heading: 'Roadmap at a Glance',
       purpose: 'A quick orientation before the detail begins',
       priority: 'primary',
       sources: [
-        { area: 'guardianPlan' },
-        { area: 'familyRoles' },
-        { area: 'children', subsection: 'introduction' },
-        { area: 'children', subsection: 'healthcare' },
-        { area: 'documents' },
+        { area: 'familyContext' },
       ],
-      includeRules: ['GUARDIAN-01', 'GUARDIAN-04', 'SIBLING-01', 'HEALTH-01'],
-      includeTypes: ['context', 'crossReference'],
+      includeRules: ['GUARDIAN-01'],
+      includeTypes: ['intro', 'context'],
+      customBuilder: 'atAGlance',
       collapsibleInUI: true,
     },
     // 2. A Note from the Parents
@@ -808,7 +1062,7 @@ const guardianStrategy: AudienceStrategy = {
     {
       id: 'adult-sibling',
       heading: 'Adult Sibling Role',
-      purpose: 'Where relevant, an older sibling is a sibling — not a replacement parent',
+      purpose: 'An important family relationship — not an automatic parenting responsibility',
       priority: 'important',
       sources: [{ area: 'familyRoles' }],
       includeRules: ['SIBLING-01', 'SIBLING-02'],
@@ -1029,6 +1283,7 @@ export interface ComposeOptions {
   reportDate?: Date | string;
   reviewItems?: ClarifyReviewItem[];
   limitations?: ClarifyReviewItem[];
+  roadmapModel?: unknown;
 }
 
 /**
@@ -1050,7 +1305,7 @@ export function composeGuardianshipForAudience(
 
   const sections: GuardianshipAudienceSection[] = [];
   for (const blueprint of blueprints) {
-    const section = resolveSection(blueprint, narrativeModel, audience, tracker);
+    const section = resolveSection(blueprint, narrativeModel, audience, tracker, options?.roadmapModel);
     if (section) sections.push(section);
   }
 

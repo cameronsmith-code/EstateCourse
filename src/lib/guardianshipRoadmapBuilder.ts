@@ -445,7 +445,7 @@ function buildImportantConnections(child: ChildRecord, moveLikely: boolean): Imp
     return {
       id: String(c.id || ''),
       name: String(c.displayName || ''),
-      relationshipTypes: types.map(t => RELATIONSHIP_LABELS[t] || t),
+      relationshipTypes: types,
       contexts: Array.isArray(c.contexts) ? c.contexts.map(String) : [],
       whyItMatters: String(c.relationshipNotes || ''),
       importance: String(c.importance || ''),
@@ -1313,7 +1313,12 @@ function buildImmediateActions(
   }
 
   for (const child of minorChildren) {
-    const people = (child.peopleToKeepClose || []).filter(p => p.resolved && p.name);
+    // Only include non-sibling people — siblings are handled by sibling_contact actions
+    const people = (child.peopleToKeepClose || []).filter(p =>
+      p.resolved && p.name &&
+      p.sourceType !== 'minor_sibling' &&
+      p.sourceType !== 'adult_sibling'
+    );
     if (people.length > 0) {
       const names = people.map(p => p.name).join(', ');
       addAction(

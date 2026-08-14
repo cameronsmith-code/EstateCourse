@@ -4,10 +4,6 @@
  * Centralized interpretation of guardianship structured values into
  * natural language.  No raw enum value, snake_case key, or internal ID
  * should ever reach human-facing output.
- *
- * These functions are used by the Narrative Builder and the Document
- * Builder — NOT by the renderers.  The renderers consume only
- * pre-humanized ClarifyDocument content.
  */
 
 // ─── Relationship continuity types ────────────────────────────────────────────
@@ -76,6 +72,12 @@ export function humanizeRelationshipTypes(types: string[]): string {
   return `${labels.join(', ')}, and ${last}`;
 }
 
+// ─── Display-text values to filter out (not enums, but labels that carry no human meaning) ──
+
+const FILTER_DISPLAY_VALUES = new Set([
+  'Existing connection', 'Club activity', 'Other', 'other',
+]);
+
 // ─── Connection contexts ──────────────────────────────────────────────────────
 
 const CONTEXT_LABELS: Record<string, string> = {
@@ -89,11 +91,21 @@ const CONTEXT_LABELS: Record<string, string> = {
   online: 'online communities',
   daycare: 'daycare',
   extended_family: 'extended family connections',
+  club_activity: 'a club or activity group',
+  existing_connection: '',
 };
 
 export function humanizeContexts(contexts: string[]): string {
   if (contexts.length === 0) return 'shared experiences';
-  const labels = contexts.map(c => CONTEXT_LABELS[c] || humanizeSnakeCase(c));
+  const labels = contexts
+    .map(c => {
+      if (FILTER_DISPLAY_VALUES.has(c)) return '';
+      const label = CONTEXT_LABELS[c];
+      if (label !== undefined) return label;
+      return humanizeSnakeCase(c);
+    })
+    .filter(l => l.length > 0);
+  if (labels.length === 0) return 'shared experiences';
   if (labels.length === 1) return labels[0];
   if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
   const last = labels.pop()!;
@@ -113,11 +125,20 @@ const PARTICIPANT_LABELS: Record<string, string> = {
   coach: 'coaches',
   neighbour: 'neighbours',
   community_group: 'community groups',
+  existing_connection: '',
 };
 
 export function humanizeParticipantTypes(types: string[]): string {
   if (types.length === 0) return 'family and friends';
-  const labels = types.map(t => PARTICIPANT_LABELS[t] || humanizeSnakeCase(t));
+  const labels = types
+    .map(t => {
+      if (FILTER_DISPLAY_VALUES.has(t)) return '';
+      const label = PARTICIPANT_LABELS[t];
+      if (label !== undefined) return label;
+      return humanizeSnakeCase(t);
+    })
+    .filter(l => l.length > 0);
+  if (labels.length === 0) return 'family and friends';
   if (labels.length === 1) return labels[0];
   if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
   const last = labels.pop()!;
@@ -316,27 +337,22 @@ const KNOWN_ENUM_VALUES = [
   'community_group', 'discretionary_trust', 'bare_trust', 'family_trust',
   'alter_ego_trust', 'spousal_trust', 'testamentary_trust',
   'disabled_person_trust', 'fully_independent', 'mostly_independent',
-  'needs_significant_support', 'not_sure',
+  'needs_significant_support', 'not_sure', 'existing_connection',
 ];
 
-// Words that are fine as parts of normal English but also match _ pattern
 const SNAKE_CASE_ALLOWLIST = new Set([
   'ad_hoc', 'per_se', 'ex_gratia', 'pro_rata',
 ]);
 
 function findEmbeddedEnums(text: string): string[] {
   const found: string[] = [];
-  // Match any snake_case token of 2+ segments
   const matches = text.match(/[a-z]+_[a-z_]+/g);
   if (matches) {
     for (const m of matches) {
       if (SNAKE_CASE_ALLOWLIST.has(m)) continue;
-      // If it's a known enum value, it's always blocking
       if (KNOWN_ENUM_VALUES.includes(m)) {
         found.push(m);
-      }
-      // If it's a 2+ segment snake_case that appears to be an enum (not normal English)
-      else if (m.length < 40 && !m.includes(' ')) {
+      } else if (m.length < 40 && !m.includes(' ')) {
         found.push(m);
       }
     }
@@ -353,88 +369,40 @@ export function sanitizeClarifyDocument(doc: {
   const checkText = (text: string | undefined, path: string) => {
     if (!text) return;
 
-    // Check for embedded enum values (even inside longer sentences)
     const embeddedEnums = findEmbeddedEnums(text);
     for (const e of embeddedEnums) {
-      findings.push({
-        severity: 'blocking',
-        path,
-        issue: 'Raw enum value detected in text',
-        sample: e,
-      });
+      findings.push({ severity: 'blocking', path, issue: 'Raw enum value detected in text', sample: e });
     }
 
-    // Check for serialized JSON
     if (JSON_PATTERN.test(text) || text.includes('[{') || text.includes('"name":')) {
-      findings.push({
-        severity: 'blocking',
-        path,
-        issue: 'Serialized JSON detected',
-        sample: text.substring(0, 80),
-      });
+      findings.push({ severity: 'blocking', path, issue: 'Serialized JSON detected', sample: text.substring(0, 80) });
     }
 
-    // Check for internal IDs
     if (/\b(pp_|conn_|nb_|child_|et_|fdm_)/.test(text)) {
-      findings.push({
-        severity: 'blocking',
-        path,
-        issue: 'Internal ID prefix detected',
-        sample: text.substring(0, 80),
-      });
+      findings.push({ severity: 'blocking', path, issue: 'Internal ID prefix detected', sample: text.substring(0, 80) });
     }
 
-    // Check for raw boolean strings
     if (/\btrue\b|\bfalse\b/.test(text) && text.length < 20) {
-      findings.push({
-        severity: 'warning',
-        path,
-        issue: 'Raw boolean value detected',
-        sample: text,
-      });
+      findings.push({ severity: 'warning', path, issue: 'Raw boolean value detected', sample: text });
     }
 
-    // Check for undefined/null
     if (/\bundefined\b|\bnull\b|\bNaN\b|\[object Object\]/.test(text)) {
-      findings.push({
-        severity: 'blocking',
-        path,
-        issue: 'Implementation value detected',
-        sample: text.substring(0, 80),
-      });
+      findings.push({ severity: 'blocking', path, issue: 'Implementation value detected', sample: text.substring(0, 80) });
     }
 
-    // Check for bad display fallbacks
     if (findBadFallbacks(text)) {
-      findings.push({
-        severity: 'blocking',
-        path,
-        issue: 'Bad display fallback detected',
-        sample: text.substring(0, 80),
-      });
+      findings.push({ severity: 'blocking', path, issue: 'Bad display fallback detected', sample: text.substring(0, 80) });
     }
 
-    // Check for duplicate clauses (only in longer text blocks)
     if (text.length > 100) {
       const dupes = findDuplicateClauses(text);
       if (dupes.length > 0) {
-        findings.push({
-          severity: 'warning',
-          path,
-          issue: 'Duplicate clause detected',
-          sample: dupes[0].substring(0, 80),
-        });
+        findings.push({ severity: 'warning', path, issue: 'Duplicate clause detected', sample: dupes[0].substring(0, 80) });
       }
     }
 
-    // Check for duplicate punctuation
     if (/\.\s*\./.test(text) || /\?\s*\?/.test(text) || /!\s*!/.test(text)) {
-      findings.push({
-        severity: 'warning',
-        path,
-        issue: 'Duplicate punctuation detected',
-        sample: text.substring(0, 80),
-      });
+      findings.push({ severity: 'warning', path, issue: 'Duplicate punctuation detected', sample: text.substring(0, 80) });
     }
   };
 
@@ -505,6 +473,7 @@ export function normalizePunctuation(text: string): string {
 
 const FREQUENCY_LABELS: Record<string, string> = {
   weekly: 'each week',
+  'twice per week': 'twice each week',
   twice_per_week: 'twice each week',
   twice_weekly: 'twice each week',
   biweekly: 'every two weeks',
@@ -524,13 +493,18 @@ const FREQUENCY_LABELS: Record<string, string> = {
 
 export function humanizeFrequency(frequency: string): string {
   if (!frequency) return '';
-  const lower = frequency.toLowerCase().trim();
+  const lower = frequency.toLowerCase().trim().replace(/[.,;]+$/, '').trim();
   const label = FREQUENCY_LABELS[lower];
   if (label) return label;
   if (/once\s+a\s+week/i.test(frequency)) return 'each week';
   if (/once\s+a\s+month/i.test(frequency)) return 'each month';
   if (/every\s+other\s+week/i.test(frequency)) return 'every two weeks';
-  return frequency.toLowerCase().replace(/^\w/, c => c.toUpperCase());
+  if (/twice\s+a\s+week/i.test(frequency)) return 'twice each week';
+  if (/twice\s+per\s+week/i.test(frequency)) return 'twice each week';
+  if (/^[a-z_]+$/i.test(lower) || /^[A-Z][a-z]+ [A-Z][a-z]+$/.test(frequency)) {
+    return '';
+  }
+  return lower;
 }
 
 // ─── Duplicate clause detection ───────────────────────────────────────────────

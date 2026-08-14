@@ -87,6 +87,7 @@ export default function Completion() {
       const guardianDoc = composeGuardianshipForAudience(narrative, 'guardian', {
         clientNames,
         reportDate,
+        roadmapModel: model,
       });
       const clarifyDoc = buildGuardianClarifyDocument(guardianDoc);
 

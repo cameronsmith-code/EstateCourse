@@ -562,8 +562,23 @@ function buildConnectionBlocks(child: GuardianshipChildProfile, ctx: NarrativeCo
       ? `${conn.name} is an especially important person in ${name}'s life.`
       : `${conn.name} is an important person in ${name}'s life.`;
 
-    let body = `${importancePrefix} ${conn.name} is ${relationshipLabel}.`;
-    if (conn.contexts.length > 0) {
+    // Compose relationship + context into natural prose
+    let body = importancePrefix;
+    if (conn.relationshipTypes.length > 0 && conn.contexts.length > 0) {
+      // Natural: "Don is one of Linda's closest friends, and they also attend camp together."
+      const isBestFriend = conn.relationshipTypes.includes('best_friend');
+      const isFriend = conn.relationshipTypes.includes('friend') || isBestFriend;
+      if (isBestFriend && conn.contexts.includes('camp')) {
+        body += ` ${conn.name} is one of ${name}'s closest friends, and they also attend camp together.`;
+      } else if (isFriend && conn.contexts.length > 0) {
+        const ctxLabel = humanizeContexts(conn.contexts);
+        body += ` ${conn.name} is ${relationshipLabel}, and they share a connection through ${ctxLabel}.`;
+      } else {
+        body += ` ${conn.name} is ${relationshipLabel}, and they share a connection through ${humanizeContexts(conn.contexts)}.`;
+      }
+    } else if (conn.relationshipTypes.length > 0) {
+      body += ` ${conn.name} is ${relationshipLabel}.`;
+    } else if (conn.contexts.length > 0) {
       body += ` They share a connection through ${humanizeContexts(conn.contexts)}.`;
     }
 
@@ -618,25 +633,56 @@ function buildConnectionBlocks(child: GuardianshipChildProfile, ctx: NarrativeCo
   return blocks;
 }
 
+function normalizeActivityName(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, ' ').replace(/[^a-z0-9 ]/g, '').trim();
+}
+
+function buildActivityFreqClause(name: string, activityName: string, frequency: string): string {
+  const freqStr = frequency ? humanizeFrequency(frequency) : '';
+  const lowerName = activityName.toLowerCase();
+  const startsWithVerb = /^(playing|doing|going|attending|participating|taking|swimming|skiing|dancing|singing|running|reading|drawing|painting|coding|gaming)/.test(lowerName);
+  const verbActivity = startsWithVerb ? activityName : `participates in ${activityName}`;
+  if (freqStr) {
+    return `${name} ${verbActivity} ${freqStr}, and it is`;
+  }
+  return `${activityName} is`;
+}
+
 function buildActivitiesBlocks(child: GuardianshipChildProfile, ctx: NarrativeContext): NarrativeBlock[] {
   const activities = child.personalProfile?.activities;
   if (!activities || activities.length === 0) return [];
 
-  const blocks_list: NarrativeBlock[] = [];
   const name = child.nickname || child.name;
   const { parentLabel } = ctx;
   const assignment = ctx.model.guardianAssignments.find(a => a.childIds.includes(child.childId));
   const moveLikely = assignment?.moveStatus === 'likely' || assignment?.moveStatus === 'possible';
 
-  const critical = activities.filter(a => a.importance === 'Critical' && a.name);
-  const important = activities.filter(a => a.importance === 'Important' && a.name);
-  const allNamed = activities.filter(a => a.name);
+  // Deduplicate activities by normalized name (same child + same activity identity)
+  const seen = new Map<string, { name: string; importance: string; frequency: string }>();
+  for (const a of activities.filter(a => a.name)) {
+    const key = normalizeActivityName(a.name);
+    const existing = seen.get(key);
+    if (existing) {
+      // Merge: keep highest importance, combine frequency info
+      if (a.importance === 'Critical' || (a.importance === 'Important' && existing.importance !== 'Critical')) {
+        existing.importance = a.importance;
+      }
+      if (a.frequency && !existing.frequency) existing.frequency = a.frequency;
+    } else {
+      seen.set(key, { name: a.name, importance: a.importance || '', frequency: a.frequency || '' });
+    }
+  }
+  const deduped = Array.from(seen.values());
+  if (deduped.length === 0) return [];
 
-  if (allNamed.length === 0) return [];
+  const critical = deduped.filter(a => a.importance === 'Critical');
+  const important = deduped.filter(a => a.importance === 'Important');
+  const niceToHave = deduped.filter(a => a.importance !== 'Critical' && a.importance !== 'Important');
+
+  const blocks_list: NarrativeBlock[] = [];
 
   for (const activity of critical) {
-    const freqStr = activity.frequency ? humanizeFrequency(activity.frequency) : '';
-    const freqClause = freqStr ? `${name} participates in ${activity.name} ${freqStr}, and it is` : `${activity.name} is`;
+    const freqClause = buildActivityFreqClause(name, activity.name, activity.frequency);
     blocks_list.push(makeBlock('ACTIVITY-02', 'context', 'primary', 'parentPreference', {
       heading: activity.name,
       body: `${freqClause} a critical part of ${name}'s routine. ${parentLabel} would hope ${name} can continue this in ${moveLikely ? 'the new community' : 'daily life'} while staying connected with ${moveLikely ? 'former teammates and coaches where practical' : 'existing connections where practical'}.`,
@@ -646,8 +692,7 @@ function buildActivitiesBlocks(child: GuardianshipChildProfile, ctx: NarrativeCo
   }
 
   for (const activity of important) {
-    const freqStr = activity.frequency ? humanizeFrequency(activity.frequency) : '';
-    const freqClause = freqStr ? `${name} participates in ${activity.name} ${freqStr}, and it is` : `${activity.name} is`;
+    const freqClause = buildActivityFreqClause(name, activity.name, activity.frequency);
     blocks_list.push(makeBlock('ACTIVITY-01', 'context', 'supporting', 'parentPreference', {
       heading: activity.name,
       body: `${freqClause} an important part of ${name}'s life. Maintaining this activity, or finding something similar near ${moveLikely ? 'the new home' : 'home'}, may help give ${name} a sense of familiarity and continuity.`,
@@ -656,7 +701,6 @@ function buildActivitiesBlocks(child: GuardianshipChildProfile, ctx: NarrativeCo
     }));
   }
 
-  const niceToHave = allNamed.filter(a => a.importance !== 'Critical' && a.importance !== 'Important');
   if (niceToHave.length > 0) {
     blocks_list.push(makeBlock('ACTIVITY-01', 'context', 'supporting', 'parentPreference', {
       body: `Other activities: ${niceToHave.map(a => a.name).join(', ')}.`,
@@ -838,7 +882,7 @@ function buildAdultTransitionBlocks(child: GuardianshipChildProfile, ctx: Narrat
     if (helpMap[at.futureFinancialHelp]) bullets.push(helpMap[at.futureFinancialHelp]);
   }
   if (at.futurePersonalHealthHelp === 'yes') bullets.push(`${name} may need help with personal care and health decisions`);
-  if (at.futureCaregiverName && !isLowInformationText(at.futureCaregiverName)) bullets.push(`${name}'s future caregiver may be: ${at.futureCaregiverName}`);
+  if (at.futureCaregiverName && !isLowInformationText(at.futureCaregiverName) && at.futureCaregiverName.toLowerCase() !== 'other') bullets.push(`${name}'s future caregiver may be: ${at.futureCaregiverName}`);
 
   if (bullets.length > 0) {
     blocks.push(makeBlock('ADULT-TRANSITION-01', 'context', 'important', 'parentPreference', {
@@ -1218,10 +1262,18 @@ function buildImmediateActions(ctx: NarrativeContext): ImmediateActionNarrative[
       const normalized = new Set<string>();
       const cleanParts: string[] = [];
       for (const part of locParts) {
-        const norm = part.toLowerCase().replace(/\s+/g, ' ').replace(/\.$/, '').trim();
+        // Normalize: lowercase, collapse whitespace, strip leading determiners, strip trailing punctuation
+        const norm = part
+          .toLowerCase()
+          .replace(/\s+/g, ' ')
+          .replace(/^(our|the)\s+/i, '')
+          .replace(/\.$/, '')
+          .trim();
         if (!normalized.has(norm)) {
           normalized.add(norm);
-          cleanParts.push(part.replace(/\.$/, '').trim());
+          // Clean up the display version: strip leading "our "/"the " and trailing period
+          const displayPart = part.replace(/^(our|the)\s+/i, '').replace(/\.$/, '').trim();
+          cleanParts.push(displayPart.charAt(0).toUpperCase() + displayPart.slice(1));
         }
       }
       if (childNames.length === 1) {
@@ -1336,7 +1388,11 @@ function buildQuickReference(ctx: NarrativeContext): QuickReferenceItem[] {
   // Documents with locations (normalized — deduplicate by label + normalized location)
   const seenDocLocs = new Set<string>();
   for (const doc of model.documents.filter(d => d.locationKnown && d.location)) {
-    const normLoc = (doc.location || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const normLoc = (doc.location || '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .replace(/^(our|the)\s+/i, '')
+      .trim();
     const docKey = `${doc.label}|${normLoc}`;
     if (seenDocLocs.has(docKey)) continue;
     seenDocLocs.add(docKey);
@@ -1388,6 +1444,115 @@ function buildQuickReference(ctx: NarrativeContext): QuickReferenceItem[] {
         category: 'person',
         childIds: [child.childId],
       });
+    }
+  }
+
+  // Pharmacy info from children
+  for (const child of model.children) {
+    const ht = child.healthcareTransition;
+    if (ht?.pharmacyName) {
+      items.push({
+        id: `qr_${id++}`,
+        label: `Pharmacy (${child.nickname || child.name})`,
+        value: ht.pharmacyName,
+        category: 'person',
+        childIds: [child.childId],
+      });
+    }
+  }
+
+  // Medical records location
+  for (const child of model.children) {
+    const ht = child.healthcareTransition;
+    if (ht?.recordLocation) {
+      items.push({
+        id: `qr_${id++}`,
+        label: `Medical records location (${child.nickname || child.name})`,
+        value: ht.recordLocation,
+        category: 'document',
+        childIds: [child.childId],
+      });
+    }
+  }
+
+  // Support providers (therapists, support workers)
+  for (const child of model.children) {
+    if (child.supportTransition) {
+      for (const sr of child.supportTransition) {
+        if (sr.currentProvider?.name) {
+          items.push({
+            id: `qr_${id++}`,
+            label: `${sr.currentProvider.role || sr.supportTypeLabel || 'Support provider'} (${child.nickname || child.name})`,
+            value: sr.currentProvider.name,
+            category: 'person',
+            childIds: [child.childId],
+          });
+        }
+      }
+    }
+  }
+
+  // DTC document location
+  for (const child of model.children) {
+    const at = child.adultTransition;
+    if (at?.dtcStatus === 'yes' && at.dtcDocLocation) {
+      items.push({
+        id: `qr_${id++}`,
+        label: `DTC documentation (${child.nickname || child.name})`,
+        value: at.dtcDocLocation,
+        category: 'document',
+        childIds: [child.childId],
+      });
+    }
+  }
+
+  // IEP / support records location
+  for (const child of model.children) {
+    const et = child.educationTransition;
+    if (et?.iepDocumentLocation) {
+      items.push({
+        id: `qr_${id++}`,
+        label: `IEP/support records location (${child.nickname || child.name})`,
+        value: et.iepDocumentLocation,
+        category: 'document',
+        childIds: [child.childId],
+      });
+    }
+  }
+
+  // Education records location
+  for (const child of model.children) {
+    const et = child.educationTransition;
+    if (et?.recordLocation) {
+      items.push({
+        id: `qr_${id++}`,
+        label: `Education records location (${child.nickname || child.name})`,
+        value: et.recordLocation,
+        category: 'document',
+        childIds: [child.childId],
+      });
+    }
+  }
+
+  // Important connections with contact info
+  for (const child of model.children) {
+    if (child.importantConnections) {
+      for (const conn of child.importantConnections) {
+        if (!conn.hasContactInfo) continue;
+        const contactParts: string[] = [];
+        if (conn.contactName) contactParts.push(conn.contactName);
+        if (conn.contactPhone) contactParts.push(conn.contactPhone);
+        if (conn.contactEmail) contactParts.push(conn.contactEmail);
+        if (contactParts.length > 0) {
+          items.push({
+            id: `qr_${id++}`,
+            label: `${conn.name} (${child.nickname || child.name})`,
+            value: contactParts.join(' — '),
+            category: 'person',
+            childIds: [child.childId],
+          });
+        }
+      }
     }
   }
 

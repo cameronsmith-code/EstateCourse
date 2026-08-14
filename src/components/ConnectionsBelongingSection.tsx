@@ -431,7 +431,7 @@ export default function ConnectionsBelongingSection({
       <div className="mb-6">
         <h6 className="text-sm font-semibold text-blue-300 flex items-center gap-2 mb-3">
           <Users size={16} />
-          The people who make {childName}'s world feel familiar
+          Important Relationships
         </h6>
 
         <label className={labelClass}>

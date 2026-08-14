@@ -11984,26 +11984,6 @@ export default function StepForm({
                           </>
                         )}
 
-                        <div className="mt-2 pb-1 border-b border-gray-600 mb-2">
-                          <h5 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Pharmacy</h5>
-                        </div>
-
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Which pharmacy does {childDisplayName(index)} use?
-                          </label>
-                          <p className="text-xs italic text-gray-400 mt-1 mb-2">
-                            This will be included in the Guardianship Roadmap. You can add full pharmacy contact details to your Professional Team later.
-                          </p>
-                          <input
-                            type="text"
-                            value={childrenData[index]?.pharmacyName || ''}
-                            onChange={(e) => handleChildChange(index, 'pharmacyName', e.target.value)}
-                            placeholder="Pharmacy name and location"
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                          />
-                        </div>
-
                         <div className="mt-6 pb-1 border-b border-gray-600 mb-2">
                           <h5 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Allergies</h5>
                         </div>
@@ -12581,57 +12561,8 @@ export default function StepForm({
                         </div>
 
                         <div className="mt-6 pb-2 border-b border-gray-500 mb-2">
-                          <h4 className="text-base font-semibold text-blue-400">Social Snapshot</h4>
+                          <h4 className="text-base font-semibold text-blue-400">Routines &amp; Activities</h4>
                         </div>
-                        <p className="text-sm text-gray-400 mb-4 mt-2 leading-relaxed">
-                          Friends can be an important part of what makes {childDisplayName(index)}'s life feel familiar. If {childDisplayName(index)} ever had to move to live with a guardian, they could be leaving behind their school, neighbourhood and many of the people they see every day. Knowing which friendships matter most can help a future guardian make an intentional effort to keep those relationships alive — through visits, play dates, camps, calls, activities or simply staying connected.
-                        </p>
-
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Are there any friendships in {childDisplayName(index)}'s life that you would especially hope a future guardian helps them maintain?
-                          </label>
-                          <div className="flex gap-4">
-                            <label className="flex items-center">
-                              <input
-                                type="radio"
-                                name={`hasFriendships-${index}`}
-                                value="yes"
-                                checked={childrenData[index]?.hasImportantFriendships === 'yes'}
-                                onChange={(e) => handleChildChange(index, 'hasImportantFriendships', e.target.value)}
-                                className="mr-2"
-                              />
-                              <span className="text-gray-300">Yes</span>
-                            </label>
-                            <label className="flex items-center">
-                              <input
-                                type="radio"
-                                name={`hasFriendships-${index}`}
-                                value="no"
-                                checked={childrenData[index]?.hasImportantFriendships === 'no'}
-                                onChange={(e) => handleChildChange(index, 'hasImportantFriendships', e.target.value)}
-                                className="mr-2"
-                              />
-                              <span className="text-gray-300">No</span>
-                            </label>
-                          </div>
-                        </div>
-
-                        {childrenData[index]?.hasImportantFriendships === 'yes' && (
-                          <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-3 mb-4">
-                            <p className="text-sm text-blue-100 leading-relaxed">
-                              You can add {childDisplayName(index)}'s important friends in the Connections &amp; Belonging section below, where you can also note which activities they share, why each friendship matters, and how a guardian could help keep the relationship going.
-                            </p>
-                          </div>
-                        )}
-
-                        {childrenData[index]?.hasImportantFriendships === 'no' && (
-                          <div className="bg-gray-700/30 border border-gray-600 rounded-lg p-3 mb-4">
-                            <p className="text-sm text-gray-400 leading-relaxed">
-                              That's completely fine. Not every child has friendships that need to be specifically documented, and a guardian will get to know {childDisplayName(index)}'s social world naturally over time.
-                            </p>
-                          </div>
-                        )}
 
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
